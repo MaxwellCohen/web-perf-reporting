@@ -85,3 +85,5 @@ export const cruxReportSchema = z.object({
 })
 
 export type CruxReport = z.infer<typeof cruxReportSchema>;
+
+export const urlSchema = z.string().url();
