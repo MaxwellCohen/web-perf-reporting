@@ -1,101 +1,123 @@
-import Image from "next/image";
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { RedYellowGreenChart } from "./_components/RedYellowGreenChart";
+import { CruxDate, cruxReportSchema } from "./lib/scema";
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+const pageSpeedURL = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed'
+const makePageSpeedURL = (testURL: string) => {
+  console.log(process.env.PAGESPEED_INSIGHTS_API);
+  return `${pageSpeedURL}?url=${encodeURIComponent(testURL)}&key=${process.env.PAGESPEED_INSIGHTS_API}`
+}
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+const requestPageSpeedData = async (testURL: string) => {
+  try {
+
+    const response = await fetch(makePageSpeedURL(testURL))
+    if (!response.ok) {
+      return null;
+    }
+    const data = await response.json()
+    return data
+  } catch (error) {
+    return null
+  }
+}
+
+type formFactor = 'PHONE' | 'TABLET' | 'DESKTOP'
+const getCurrentCruxData = async (testURL: string, formFactor : formFactor) => {
+  try {
+
+    const request = await fetch(`https://content-chromeuxreport.googleapis.com/v1/records:queryRecord?alt=json&key=${process.env.PAGESPEED_INSIGHTS_API}`, {
+      "body": JSON.stringify({ "origin": testURL, "formFactor": formFactor }),
+      "method": "POST"
+    });
+    if (!request.ok) {
+      return null;
+    }
+    const data = await request.json();
+    return cruxReportSchema.safeParse(data);
+  } catch (error) {
+    return null;
+  }
+}
+
+
+const formatDate = (data?: CruxDate) => {
+  if (!data) {
+    return ""
+  }
+  const date = new Date(data.year, data.month - 1, data.day);
+  return date.toLocaleDateString()
+}
+
+export default async function Home({searchParams}: {searchParams: Promise<{ [key: string]: string | string[] | undefined }>}) {
+  const params = await searchParams;
+  console.log(params); 
+  const url = "https://www.clearchoice.com"
+   return (
+    <div>
+      <h1 className="text-center mx-auto text-xl font-extrabold">Web Performance Report</h1>
+      <form className="mx-auto max-w-[80ch] flex gap-3" >
+        <Input className="min-w-[60]" type="text" placeholder="url" />
+        <Button>Submit</Button>
+
+      </form>
+      <ChartsSection url={url} formFactor="PHONE" />
+      <ChartsSection url={url} formFactor="TABLET" />
+      <ChartsSection url={url} formFactor="DESKTOP" />
+     
     </div>
   );
 }
+
+
+
+async function  ChartsSection({url, formFactor}: {url: string, formFactor: formFactor}) {
+  const data = await getCurrentCruxData(url, formFactor);
+  const date = `${formatDate(data?.data?.record?.collectionPeriod?.firstDate)} to ${formatDate(data?.data?.record?.collectionPeriod?.lastDate)}`
+
+
+  return(
+    <details>
+        <summary>Performance Report for {url} on {formFactor.toLowerCase()}</summary>
+
+  {data?.success ? <div className="grid grid-cols-3 mt-2 gap-2">
+    <RedYellowGreenChart
+      title="Cumulative Layout Shift"
+      dateRage={date}
+      histogramData={data.data.record.metrics.cumulative_layout_shift.histogram}
+      percentiles={data.data.record.metrics.cumulative_layout_shift.percentiles}
+    />
+    <RedYellowGreenChart
+      title="Experimental Time to First Byte"
+      dateRage={date}
+      histogramData={data.data.record.metrics.experimental_time_to_first_byte.histogram}
+      percentiles={data.data.record.metrics.experimental_time_to_first_byte.percentiles}
+    />
+    <RedYellowGreenChart
+      title="Interaction to Next Paint"
+      dateRage={date}
+      histogramData={data.data.record.metrics.interaction_to_next_paint.histogram}
+      percentiles={data.data.record.metrics.interaction_to_next_paint.percentiles}
+    />
+    <RedYellowGreenChart
+      title="Largest Contentful Paint"
+      dateRage={date}
+      histogramData={data.data.record.metrics.largest_contentful_paint.histogram}
+      percentiles={data.data.record.metrics.largest_contentful_paint.percentiles}
+    />
+    <RedYellowGreenChart
+      title="Round Trip Time"
+      dateRage={date}
+      histogramData={data.data.record.metrics.round_trip_time.histogram}
+      percentiles={data.data.record.metrics.round_trip_time.percentiles}
+    />
+    <RedYellowGreenChart
+      title="First Contentful Paint"
+      dateRage={date}
+      histogramData={data.data.record.metrics.first_contentful_paint.histogram}
+      percentiles={data.data.record.metrics.first_contentful_paint.percentiles}
+    />
+  </div> : <div>{JSON.stringify(data?.error)}</div>})
+  </details>)
+} 
