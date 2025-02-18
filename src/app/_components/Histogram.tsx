@@ -86,7 +86,7 @@ const MakeChartData = (data?: CruxHistogram | CruxHistoryHistogramTimeseries) =>
   }
 }
 
-export function RedYellowGreenChart({ title, dateRage, histogramData, percentiles }: { title: string, dateRage: string, histogramData: CruxHistogram | CruxHistoryHistogramTimeseries, percentiles?: CruxPercentile | CruxHistoryPercentilesTimeseries }) {
+export function CurrentPerformanceChart({ title, dateRage, histogramData, percentiles }: { title: string, dateRage: string, histogramData: CruxHistogram | CruxHistoryHistogramTimeseries, percentiles?: CruxPercentile | CruxHistoryPercentilesTimeseries }) {
   const { chartData, chartConfig, extraInfo } = useMemo(() => MakeChartData(histogramData), [histogramData]);
   if (!chartData.length) {
     return null;

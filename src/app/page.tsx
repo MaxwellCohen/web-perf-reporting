@@ -1,8 +1,8 @@
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { RedYellowGreenChart } from "./_components/Histogram";
+import { CurrentPerformanceChart } from "./_components/Histogram";
 import * as Sentry from "@sentry/nextjs";
-import { CruxDate, cruxHistogramSchema, CruxHistoryReport, cruxReportSchema, urlSchema } from "./lib/scema";
+import {  CruxHistoryReport, cruxReportSchema, urlSchema } from "./lib/scema";
 import { AccordionItem, Accordion, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { formatDate } from "@/lib/utils";
 import { HistoricalChart } from "./_components/HistoricalChart";
@@ -172,37 +172,37 @@ async function CurrentPerformanceCharts({ url, formFactor }: { url: string, form
       <AccordionTrigger>Latest Performance Report For {formatFormFactor(formFactor)} Devices</AccordionTrigger>
       <AccordionContent>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-2 gap-2">
-          <RedYellowGreenChart
+          <CurrentPerformanceChart
             title="Cumulative Layout Shift"
             dateRage={date}
             histogramData={metrics.cumulative_layout_shift.histogram}
             percentiles={metrics.cumulative_layout_shift.percentiles}
           />
-          <RedYellowGreenChart
+          <CurrentPerformanceChart
             title="Experimental Time to First Byte"
             dateRage={date}
             histogramData={metrics.experimental_time_to_first_byte.histogram}
             percentiles={metrics.experimental_time_to_first_byte.percentiles}
           />
-          <RedYellowGreenChart
+          <CurrentPerformanceChart
             title="Interaction to Next Paint"
             dateRage={date}
             histogramData={metrics.interaction_to_next_paint.histogram}
             percentiles={metrics.interaction_to_next_paint.percentiles}
           />
-          <RedYellowGreenChart
+          <CurrentPerformanceChart
             title="Largest Contentful Paint"
             dateRage={date}
             histogramData={metrics.largest_contentful_paint.histogram}
             percentiles={metrics.largest_contentful_paint.percentiles}
           />
-          <RedYellowGreenChart
+          <CurrentPerformanceChart
             title="Round Trip Time"
             dateRage={date}
             histogramData={metrics.round_trip_time.histogram}
             percentiles={metrics.round_trip_time.percentiles}
           />
-          <RedYellowGreenChart
+          <CurrentPerformanceChart
             title="First Contentful Paint"
             dateRage={date}
             histogramData={metrics.first_contentful_paint.histogram}
