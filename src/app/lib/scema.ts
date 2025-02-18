@@ -1,3 +1,4 @@
+import exp from "constants";
 import { z } from "zod"
 
 export const cruxHistogramSchema = z.array(
@@ -105,6 +106,14 @@ export const CruxHistoryPercentilesTimeseries = z.object({
 
 export type CruxHistoryPercentilesTimeseries = z.infer<typeof CruxHistoryPercentilesTimeseries>;
 
+export const CruxHistoryReportCollectionPeriods = z.array(
+  z.object({
+    firstDate: cruxDateSchema,
+    lastDate: cruxDateSchema
+  })
+)
+
+export type CruxHistoryReportCollectionPeriods = z.infer<typeof CruxHistoryReportCollectionPeriods>;
 
 export const CruxHistoryReport = z.object({
   record: z.object({
@@ -168,11 +177,8 @@ export const CruxHistoryReport = z.object({
         })
       }).optional()
     }),
-    collectionPeriods: z.array(
-      z.object({
-        firstDate: cruxDateSchema,
-        lastDate: cruxDateSchema
-      })
-    )
+    collectionPeriods: CruxHistoryReportCollectionPeriods
   })
 })
+
+export type CruxHistoryReport = z.infer<typeof CruxHistoryReport>;

@@ -4,6 +4,8 @@ import { RedYellowGreenChart } from "./_components/RedYellowGreenChart";
 import * as Sentry from "@sentry/nextjs";
 import { CruxDate, cruxHistogramSchema, CruxHistoryReport, cruxReportSchema, urlSchema } from "./lib/scema";
 import { AccordionItem, Accordion, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { formatDate } from "@/lib/utils";
+import { HistoricalChart } from "./_components/HistoricalChart";
 
 const pageSpeedURL = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed'
 const makePageSpeedURL = (testURL: string) => {
@@ -60,13 +62,6 @@ const getHistoricalCruxData = async (testURL: string, formFactor: formFactor) =>
     return null;
   }
 }
-const formatDate = (data?: CruxDate) => {
-  if (!data) {
-    return ""
-  }
-  const date = new Date(data.year, data.month - 1, data.day);
-  return date.toLocaleDateString()
-}
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const params = await searchParams;
@@ -111,56 +106,56 @@ function formatFormFactor(string: string) {
 
 async function ChartsHistoricalSection({ url, formFactor }: { url: string, formFactor: formFactor }) {
   const currentCruxHistoricalResult = await getHistoricalCruxData(url, formFactor);
-  const collectionPeriod = currentCruxHistoricalResult?.record.collectionPeriods.at(-1)
+  const collectionPeriods = currentCruxHistoricalResult?.record.collectionPeriods;
   const metrics = currentCruxHistoricalResult?.record.metrics;
-  if (!collectionPeriod) {
+  if (!collectionPeriods?.length || !metrics) {
     return null;
   }
-  const date = `${formatDate(collectionPeriod?.firstDate)} to ${formatDate(collectionPeriod?.lastDate)}`
+  const date = `${formatDate(collectionPeriods[0]?.firstDate)} to ${formatDate(collectionPeriods.at(-1)?.lastDate)}`
 
 
   return (
     <AccordionItem value={`historical-${formFactor}`}>
-      <AccordionTrigger>Historical Performance Report for {url} on { formatFormFactor(formFactor) } Devices</AccordionTrigger>
+      <AccordionTrigger>Historical Performance Report For {formatFormFactor(formFactor)} Devices</AccordionTrigger>
       <AccordionContent>
-        {metrics ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-2 gap-2">
-          <RedYellowGreenChart
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-2 gap-2">
+          <HistoricalChart
             title="Cumulative Layout Shift"
             dateRage={date}
             histogramData={metrics.cumulative_layout_shift.histogramTimeseries}
-            percentiles={metrics.cumulative_layout_shift.percentilesTimeseries}
+            collectionPeriods={collectionPeriods}
           />
-          <RedYellowGreenChart
+          <HistoricalChart
             title="Experimental Time to First Byte"
             dateRage={date}
-            histogramData={metrics.experimental_time_to_first_byte.histogramTimeseries}
-            percentiles={metrics.experimental_time_to_first_byte.percentilesTimeseries}
+            histogramData={metrics.cumulative_layout_shift.histogramTimeseries}
+            collectionPeriods={collectionPeriods}
           />
-          <RedYellowGreenChart
+          <HistoricalChart
             title="Interaction to Next Paint"
             dateRage={date}
-            histogramData={metrics.interaction_to_next_paint.histogramTimeseries}
-            percentiles={metrics.interaction_to_next_paint.percentilesTimeseries}
+            histogramData={metrics.cumulative_layout_shift.histogramTimeseries}
+            collectionPeriods={collectionPeriods}
           />
-          <RedYellowGreenChart
+          <HistoricalChart
             title="Largest Contentful Paint"
             dateRage={date}
-            histogramData={metrics.largest_contentful_paint.histogramTimeseries}
-            percentiles={metrics.largest_contentful_paint.percentilesTimeseries}
+            histogramData={metrics.cumulative_layout_shift.histogramTimeseries}
+            collectionPeriods={collectionPeriods}
           />
-          <RedYellowGreenChart
+          <HistoricalChart
             title="Round Trip Time"
             dateRage={date}
-            histogramData={metrics.round_trip_time.histogramTimeseries}
-            percentiles={metrics.round_trip_time.percentilesTimeseries}
+            histogramData={metrics.cumulative_layout_shift.histogramTimeseries}
+            collectionPeriods={collectionPeriods}
           />
-          <RedYellowGreenChart
+          <HistoricalChart
             title="First Contentful Paint"
             dateRage={date}
-            histogramData={metrics.first_contentful_paint.histogramTimeseries}
-            percentiles={metrics.first_contentful_paint.percentilesTimeseries}
+            histogramData={metrics.cumulative_layout_shift.histogramTimeseries}
+            collectionPeriods={collectionPeriods}
           />
-        </div> : <div>No data available</div>}
+        </div>
       </AccordionContent>
 
     </AccordionItem>)
@@ -171,12 +166,12 @@ async function CurrentPerformanceCharts({ url, formFactor }: { url: string, form
   const collectionPeriod = data?.record?.collectionPeriod;
   const metrics = data?.record?.metrics;
   const date = `${formatDate(collectionPeriod?.firstDate)} to ${formatDate(collectionPeriod?.lastDate)}`
-
+  if(!metrics){ return null;}
   return (
     <AccordionItem value={`current-${formFactor}`}>
-      <AccordionTrigger>Latest Performance Report for {url} on {formatFormFactor(formFactor)} Devices</AccordionTrigger>
+      <AccordionTrigger>Latest Performance Report For {formatFormFactor(formFactor)} Devices</AccordionTrigger>
       <AccordionContent>
-        {metrics ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-2 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-2 gap-2">
           <RedYellowGreenChart
             title="Cumulative Layout Shift"
             dateRage={date}
@@ -213,7 +208,7 @@ async function CurrentPerformanceCharts({ url, formFactor }: { url: string, form
             histogramData={metrics.first_contentful_paint.histogram}
             percentiles={metrics.first_contentful_paint.percentiles}
           />
-        </div> : <div>No data available</div>}
+        </div>
       </AccordionContent>
     </AccordionItem>)
 } 

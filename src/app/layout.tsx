@@ -35,7 +35,7 @@ export default function RootLayout({
               {children}
             </main>
             <footer className="w-full text-center">
-              &copy; {new Date().getFullYear()} Maxwell Cohen. All rights reserved.
+             Made by Maxwell Cohen, with data from Google crux report.
             </footer>
           </div>
         </div>
