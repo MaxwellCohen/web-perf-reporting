@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "wep performance reporting",
-  description: "Web performance reporting from CRUX data",
+  title: "Web Performance Report",
+  description: "Web performance report from CRUX data",
 };
 
 export default function RootLayout({

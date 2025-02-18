@@ -1,7 +1,9 @@
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { RedYellowGreenChart } from "./_components/RedYellowGreenChart";
-import { CruxDate, cruxReportSchema, urlSchema } from "./lib/scema";
+import * as Sentry from "@sentry/nextjs";
+import { CruxDate, cruxHistogramSchema, CruxHistoryReport, cruxReportSchema, urlSchema } from "./lib/scema";
+import { AccordionItem, Accordion, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 
 const pageSpeedURL = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed'
 const makePageSpeedURL = (testURL: string) => {
@@ -23,7 +25,7 @@ const requestPageSpeedData = async (testURL: string) => {
   }
 }
 
-type formFactor = 'PHONE' | 'TABLET' | 'DESKTOP'
+type formFactor = 'PHONE' | 'TABLET' | 'DESKTOP' | 'ALL_FORM_FACTORS';
 const getCurrentCruxData = async (testURL: string, formFactor: formFactor) => {
   try {
 
@@ -35,13 +37,29 @@ const getCurrentCruxData = async (testURL: string, formFactor: formFactor) => {
       return null;
     }
     const data = await request.json();
-    return cruxReportSchema.safeParse(data);
+    return cruxReportSchema.parse(data);
   } catch (error) {
+    Sentry.captureException(error);
     return null;
   }
 }
 
-
+const getHistoricalCruxData = async (testURL: string, formFactor: formFactor) => {
+  try {
+    const request = await fetch(`https://chromeuxreport.googleapis.com/v1/records:queryHistoryRecord?key=${process.env.PAGESPEED_INSIGHTS_API}`, {
+      "body": JSON.stringify({ "origin": testURL, "formFactor": formFactor }),
+      "method": "POST"
+    });
+    if (!request.ok) {
+      return null;
+    }
+    const data = await request.json();
+    return CruxHistoryReport.parse(data);
+  } catch (error) {
+    Sentry.captureException(error);
+    return null;
+  }
+}
 const formatDate = (data?: CruxDate) => {
   if (!data) {
     return ""
@@ -58,7 +76,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ [
     pramUrl = 'https://' + pramUrl;
   }
   const url = urlSchema.safeParse(pramUrl).data;
-  console.log(pramUrl, url);
   return (
     <div>
       <h1 className="text-center mx-auto text-xl font-extrabold">Web Performance Report</h1>
@@ -72,63 +89,131 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ [
       {url ?
         <>
           <h2 className="text-center mx-auto text-lg font-extrabold"> Web perf report for {url}</h2>
-          <ChartsSection url={url} formFactor="PHONE" />
-          <ChartsSection url={url} formFactor="TABLET" />
-          <ChartsSection url={url} formFactor="DESKTOP" /></>
+          <Accordion type="multiple" className="w-full">
+            <CurrentPerformanceCharts url={url} formFactor="PHONE" />
+            <CurrentPerformanceCharts url={url} formFactor="TABLET" />
+            <CurrentPerformanceCharts url={url} formFactor="DESKTOP" />
+            <ChartsHistoricalSection url={url} formFactor="ALL_FORM_FACTORS" />
+            <ChartsHistoricalSection url={url} formFactor="PHONE" />
+            <ChartsHistoricalSection url={url} formFactor="TABLET" />
+            <ChartsHistoricalSection url={url} formFactor="DESKTOP" />
+          </Accordion></>
         : null}
 
     </div>
   );
 }
 
+function formatFormFactor(string: string) {
+  return string.replaceAll('_', ' ').toLowerCase().split(' ').map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
+
+}
+
+async function ChartsHistoricalSection({ url, formFactor }: { url: string, formFactor: formFactor }) {
+  const currentCruxHistoricalResult = await getHistoricalCruxData(url, formFactor);
+  const collectionPeriod = currentCruxHistoricalResult?.record.collectionPeriods.at(-1)
+  const metrics = currentCruxHistoricalResult?.record.metrics;
+  if (!collectionPeriod) {
+    return null;
+  }
+  const date = `${formatDate(collectionPeriod?.firstDate)} to ${formatDate(collectionPeriod?.lastDate)}`
 
 
-async function ChartsSection({ url, formFactor }: { url: string, formFactor: formFactor }) {
-  const data = await getCurrentCruxData(url, formFactor);
-  const date = `${formatDate(data?.data?.record?.collectionPeriod?.firstDate)} to ${formatDate(data?.data?.record?.collectionPeriod?.lastDate)}`
-
-  console.log(data);
   return (
-    <details>
-      <summary>Performance Report for {url} on {formFactor.toLowerCase()}</summary>
+    <AccordionItem value={`historical-${formFactor}`}>
+      <AccordionTrigger>Historical Performance Report for {url} on { formatFormFactor(formFactor) } Devices</AccordionTrigger>
+      <AccordionContent>
+        {metrics ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-2 gap-2">
+          <RedYellowGreenChart
+            title="Cumulative Layout Shift"
+            dateRage={date}
+            histogramData={metrics.cumulative_layout_shift.histogramTimeseries}
+            percentiles={metrics.cumulative_layout_shift.percentilesTimeseries}
+          />
+          <RedYellowGreenChart
+            title="Experimental Time to First Byte"
+            dateRage={date}
+            histogramData={metrics.experimental_time_to_first_byte.histogramTimeseries}
+            percentiles={metrics.experimental_time_to_first_byte.percentilesTimeseries}
+          />
+          <RedYellowGreenChart
+            title="Interaction to Next Paint"
+            dateRage={date}
+            histogramData={metrics.interaction_to_next_paint.histogramTimeseries}
+            percentiles={metrics.interaction_to_next_paint.percentilesTimeseries}
+          />
+          <RedYellowGreenChart
+            title="Largest Contentful Paint"
+            dateRage={date}
+            histogramData={metrics.largest_contentful_paint.histogramTimeseries}
+            percentiles={metrics.largest_contentful_paint.percentilesTimeseries}
+          />
+          <RedYellowGreenChart
+            title="Round Trip Time"
+            dateRage={date}
+            histogramData={metrics.round_trip_time.histogramTimeseries}
+            percentiles={metrics.round_trip_time.percentilesTimeseries}
+          />
+          <RedYellowGreenChart
+            title="First Contentful Paint"
+            dateRage={date}
+            histogramData={metrics.first_contentful_paint.histogramTimeseries}
+            percentiles={metrics.first_contentful_paint.percentilesTimeseries}
+          />
+        </div> : <div>No data available</div>}
+      </AccordionContent>
 
-      {data?.success ? <div className="grid grid-cols-3 mt-2 gap-2">
-        <RedYellowGreenChart
-          title="Cumulative Layout Shift"
-          dateRage={date}
-          histogramData={data.data.record.metrics.cumulative_layout_shift.histogram}
-          percentiles={data.data.record.metrics.cumulative_layout_shift.percentiles}
-        />
-        <RedYellowGreenChart
-          title="Experimental Time to First Byte"
-          dateRage={date}
-          histogramData={data.data.record.metrics.experimental_time_to_first_byte.histogram}
-          percentiles={data.data.record.metrics.experimental_time_to_first_byte.percentiles}
-        />
-        <RedYellowGreenChart
-          title="Interaction to Next Paint"
-          dateRage={date}
-          histogramData={data.data.record.metrics.interaction_to_next_paint.histogram}
-          percentiles={data.data.record.metrics.interaction_to_next_paint.percentiles}
-        />
-        <RedYellowGreenChart
-          title="Largest Contentful Paint"
-          dateRage={date}
-          histogramData={data.data.record.metrics.largest_contentful_paint.histogram}
-          percentiles={data.data.record.metrics.largest_contentful_paint.percentiles}
-        />
-        <RedYellowGreenChart
-          title="Round Trip Time"
-          dateRage={date}
-          histogramData={data.data.record.metrics.round_trip_time.histogram}
-          percentiles={data.data.record.metrics.round_trip_time.percentiles}
-        />
-        <RedYellowGreenChart
-          title="First Contentful Paint"
-          dateRage={date}
-          histogramData={data.data.record.metrics.first_contentful_paint.histogram}
-          percentiles={data.data.record.metrics.first_contentful_paint.percentiles}
-        />
-      </div> : <div>No data available</div>}
-    </details>)
+    </AccordionItem>)
+}
+
+async function CurrentPerformanceCharts({ url, formFactor }: { url: string, formFactor: formFactor }) {
+  const data = await getCurrentCruxData(url, formFactor);
+  const collectionPeriod = data?.record?.collectionPeriod;
+  const metrics = data?.record?.metrics;
+  const date = `${formatDate(collectionPeriod?.firstDate)} to ${formatDate(collectionPeriod?.lastDate)}`
+
+  return (
+    <AccordionItem value={`current-${formFactor}`}>
+      <AccordionTrigger>Latest Performance Report for {url} on {formatFormFactor(formFactor)} Devices</AccordionTrigger>
+      <AccordionContent>
+        {metrics ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-2 gap-2">
+          <RedYellowGreenChart
+            title="Cumulative Layout Shift"
+            dateRage={date}
+            histogramData={metrics.cumulative_layout_shift.histogram}
+            percentiles={metrics.cumulative_layout_shift.percentiles}
+          />
+          <RedYellowGreenChart
+            title="Experimental Time to First Byte"
+            dateRage={date}
+            histogramData={metrics.experimental_time_to_first_byte.histogram}
+            percentiles={metrics.experimental_time_to_first_byte.percentiles}
+          />
+          <RedYellowGreenChart
+            title="Interaction to Next Paint"
+            dateRage={date}
+            histogramData={metrics.interaction_to_next_paint.histogram}
+            percentiles={metrics.interaction_to_next_paint.percentiles}
+          />
+          <RedYellowGreenChart
+            title="Largest Contentful Paint"
+            dateRage={date}
+            histogramData={metrics.largest_contentful_paint.histogram}
+            percentiles={metrics.largest_contentful_paint.percentiles}
+          />
+          <RedYellowGreenChart
+            title="Round Trip Time"
+            dateRage={date}
+            histogramData={metrics.round_trip_time.histogram}
+            percentiles={metrics.round_trip_time.percentiles}
+          />
+          <RedYellowGreenChart
+            title="First Contentful Paint"
+            dateRage={date}
+            histogramData={metrics.first_contentful_paint.histogram}
+            percentiles={metrics.first_contentful_paint.percentiles}
+          />
+        </div> : <div>No data available</div>}
+      </AccordionContent>
+    </AccordionItem>)
 } 
