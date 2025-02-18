@@ -17,7 +17,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-import { CruxHistogram, CruxHistoryHistogramTimeseries, CruxHistoryPercentilesTimeseries, CruxPercentile } from "../lib/scema"
+import { CruxHistogram, CruxHistoryHistogramTimeseries, CruxHistoryPercentilesTimeseries, CruxPercentile } from "../../lib/scema"
 import { useMemo } from "react"
 
 const getDensity = (data: CruxHistogram | CruxHistoryHistogramTimeseries, index: number) => {

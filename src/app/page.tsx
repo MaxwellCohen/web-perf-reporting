@@ -1,67 +1,11 @@
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { CurrentPerformanceChart } from "./_components/Histogram";
-import * as Sentry from "@sentry/nextjs";
-import {  CruxHistoryReport, cruxReportSchema, urlSchema } from "./lib/scema";
+import { urlSchema } from "../lib/scema";
 import { AccordionItem, Accordion, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { formatDate } from "@/lib/utils";
 import { HistoricalChart } from "./_components/HistoricalChart";
-
-const pageSpeedURL = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed'
-const makePageSpeedURL = (testURL: string) => {
-  console.log(process.env.PAGESPEED_INSIGHTS_API);
-  return `${pageSpeedURL}?url=${encodeURIComponent(testURL)}&key=${process.env.PAGESPEED_INSIGHTS_API}`
-}
-
-const requestPageSpeedData = async (testURL: string) => {
-  try {
-
-    const response = await fetch(makePageSpeedURL(testURL))
-    if (!response.ok) {
-      return null;
-    }
-    const data = await response.json()
-    return data
-  } catch (error) {
-    return null
-  }
-}
-
-type formFactor = 'PHONE' | 'TABLET' | 'DESKTOP' | 'ALL_FORM_FACTORS';
-const getCurrentCruxData = async (testURL: string, formFactor: formFactor) => {
-  try {
-
-    const request = await fetch(`https://content-chromeuxreport.googleapis.com/v1/records:queryRecord?alt=json&key=${process.env.PAGESPEED_INSIGHTS_API}`, {
-      "body": JSON.stringify({ "origin": testURL, "formFactor": formFactor }),
-      "method": "POST"
-    });
-    if (!request.ok) {
-      return null;
-    }
-    const data = await request.json();
-    return cruxReportSchema.parse(data);
-  } catch (error) {
-    Sentry.captureException(error);
-    return null;
-  }
-}
-
-const getHistoricalCruxData = async (testURL: string, formFactor: formFactor) => {
-  try {
-    const request = await fetch(`https://chromeuxreport.googleapis.com/v1/records:queryHistoryRecord?key=${process.env.PAGESPEED_INSIGHTS_API}`, {
-      "body": JSON.stringify({ "origin": testURL, "formFactor": formFactor }),
-      "method": "POST"
-    });
-    if (!request.ok) {
-      return null;
-    }
-    const data = await request.json();
-    return CruxHistoryReport.parse(data);
-  } catch (error) {
-    Sentry.captureException(error);
-    return null;
-  }
-}
+import { formFactor, getCurrentCruxData, getHistoricalCruxData, requestPageSpeedData } from "../lib/services";
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const params = await searchParams;
@@ -211,4 +155,4 @@ async function CurrentPerformanceCharts({ url, formFactor }: { url: string, form
         </div>
       </AccordionContent>
     </AccordionItem>)
-} 
+}
