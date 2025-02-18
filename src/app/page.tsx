@@ -1,33 +1,48 @@
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { CurrentPerformanceChart } from "./_components/Histogram";
-import { urlSchema } from "../lib/scema";
+import { urlSchema } from "@/lib/scema";
 import { AccordionItem, Accordion, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatFormFactor } from "@/lib/utils";
+import { getCurrentCruxData, getHistoricalCruxData } from "@/lib/services";
 import { HistoricalChart } from "./_components/HistoricalChart";
-import { formFactor, getCurrentCruxData, getHistoricalCruxData, requestPageSpeedData } from "../lib/services";
+
+type formFactor = 'PHONE' | 'TABLET' | "DESKTOP" | "ALL_FORM_FACTORS"
+
+function updateURl(url?: string) {
+  if (!url) {
+    return '';
+  }
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    url = 'https://' + url;
+  }
+  if (!url.includes('www.')) {
+    const urlParts = url.split('://');
+    url = urlParts[0] + '://www.' + urlParts[1];
+  }
+  return urlSchema.safeParse(url).data ?? '';
+}
+
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const params = await searchParams;
 
-  let pramUrl = params.url as string;
-  if (pramUrl && !pramUrl.startsWith('https://') && !pramUrl.startsWith('http://')) {
-    pramUrl = 'https://' + pramUrl;
-  }
-  const url = urlSchema.safeParse(pramUrl).data;
+  let url = updateURl(params.url as string);
+
   return (
     <div>
       <h1 className="text-center mx-auto text-xl font-extrabold">Web Performance Report</h1>
-      {!pramUrl ? <><h2 className="text-center mx-auto text-lg font-extrabold"> please enter a url that you want a perf report on</h2>
+      {!url ? 
+      <>
+      <h2 className="text-center mx-auto text-lg font-extrabold"> please enter a url that you want a perf report on</h2>
         <form className="mx-auto max-w-[80ch] flex gap-3" method="GET"  >
           <Input className="min-w-[60]" type="text" placeholder="url" name="url" />
           <Button>Submit</Button>
         </form>
-      </> : null
-      }
-      {url ?
+      </> 
+      :
         <>
-          <h2 className="text-center mx-auto text-lg font-extrabold"> Web perf report for {url}</h2>
+          <h2 className="text-center mx-auto text-lg font-extrabold"> Web Perf Report For {url}</h2>
           <Accordion type="multiple" className="w-full">
             <CurrentPerformanceCharts url={url} formFactor="PHONE" />
             <CurrentPerformanceCharts url={url} formFactor="TABLET" />
@@ -37,15 +52,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ [
             <ChartsHistoricalSection url={url} formFactor="TABLET" />
             <ChartsHistoricalSection url={url} formFactor="DESKTOP" />
           </Accordion></>
-        : null}
-
+      }
     </div>
   );
-}
-
-function formatFormFactor(string: string) {
-  return string.replaceAll('_', ' ').toLowerCase().split(' ').map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
-
 }
 
 async function ChartsHistoricalSection({ url, formFactor }: { url: string, formFactor: formFactor }) {
@@ -110,7 +119,7 @@ async function CurrentPerformanceCharts({ url, formFactor }: { url: string, form
   const collectionPeriod = data?.record?.collectionPeriod;
   const metrics = data?.record?.metrics;
   const date = `${formatDate(collectionPeriod?.firstDate)} to ${formatDate(collectionPeriod?.lastDate)}`
-  if(!metrics){ return null;}
+  if (!metrics) { return null; }
   return (
     <AccordionItem value={`current-${formFactor}`}>
       <AccordionTrigger>Latest Performance Report For {formatFormFactor(formFactor)} Devices</AccordionTrigger>
