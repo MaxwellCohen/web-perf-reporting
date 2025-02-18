@@ -34,7 +34,7 @@ const getDensity = (data: CruxHistogram | CruxHistoryHistogramTimeseries, index:
 }   
 
 type ChartData = {
-  browser: string;
+  status: string;
   density: number;
   fill: string;
 };
@@ -51,9 +51,9 @@ const MakeChartData = (data?: CruxHistogram | CruxHistoryHistogramTimeseries) =>
 
 
   const chartData: ChartData[] = [
-    { browser: "good", density: getDensity(data, 0), fill: "var(--color-good)" },
-    { browser: "ni", density: getDensity(data, 1), fill: "var(--color-ni)" },
-    { browser: "poor", density: getDensity(data, 2), fill: "var(--color-poor)" },
+    { status: "good", density: getDensity(data, 0), fill: "var(--color-good)" },
+    { status: "ni", density: getDensity(data, 1), fill: "var(--color-ni)" },
+    { status: "poor", density: getDensity(data, 2), fill: "var(--color-poor)" },
   ];
 
   const chartConfig = {
@@ -103,7 +103,7 @@ export function RedYellowGreenChart({ title, dateRage, histogramData, percentile
             <BarChart accessibilityLayer data={chartData}>
               <CartesianGrid vertical={false} />
               <XAxis
-                dataKey="browser"
+                dataKey="status"
                 tickLine={false}
                 tickMargin={10}
                 axisLine={false}

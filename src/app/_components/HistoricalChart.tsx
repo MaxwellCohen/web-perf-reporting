@@ -1,6 +1,6 @@
 "use client"
 
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, XAxis } from "recharts"
 
 import {
     Card,
@@ -17,31 +17,46 @@ import {
     ChartTooltipContent,
 } from "@/components/ui/chart"
 import { CruxHistoryHistogramTimeseries, CruxHistoryPercentilesTimeseries, CruxHistoryReport, CruxHistoryReportCollectionPeriods } from "../lib/scema"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { formatDate } from "@/lib/utils"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const chartConfig = {
     good: {
         label: `Good`,
         color: "hsl(var(--chart-2))",
-      },
-      ni: {
+    },
+    ni: {
         label: `Needs Improvement`,
         color: "hsl(var(--chart-3))",
-      },
-      poor: {
+    },
+    poor: {
         label: `Poor`,
         color: "hsl(var(--chart-5))",
-      },
+    },
 } satisfies ChartConfig
+
+type ChartData = {
+    date: string;
+    good: number;
+    ni: number;
+    poor: number;
+};
+
+const ChartMap: Record<string, typeof MyAreaChart> = {
+    'Area': MyAreaChart,
+    'Bar': MyBarChart
+}
 
 export function HistoricalChart(
     { title, dateRage, histogramData, collectionPeriods }:
-    { title: string, dateRage: string, histogramData: CruxHistoryHistogramTimeseries, collectionPeriods: CruxHistoryReportCollectionPeriods }
+        { title: string, dateRage: string, histogramData: CruxHistoryHistogramTimeseries, collectionPeriods: CruxHistoryReportCollectionPeriods }
 ) {
-    const chartData = useMemo(() => {
+    const [ChartType, setChartType] = useState('Area')
+
+    const chartData: ChartData[] = useMemo(() => {
         if (!histogramData) {
-            return []
+            return [];
         }
 
         const chartData = collectionPeriods.map((period, index) => {
@@ -50,12 +65,12 @@ export function HistoricalChart(
                 good: histogramData[0].densities[index] ?? 0,
                 ni: histogramData[1].densities[index] ?? 0,
                 poor: histogramData[2].densities[index] ?? 0,
-            }
-        })
+            };
+        });
 
-        return chartData
+        return chartData;
     }, [histogramData, collectionPeriods]);
-    console.log(collectionPeriods)
+    const Chart = ChartMap[ChartType] ?? MyAreaChart;
 
     return (
         <Card>
@@ -64,56 +79,128 @@ export function HistoricalChart(
                 <CardDescription>{dateRage}</CardDescription>
             </CardHeader>
             <CardContent>
-                <ChartContainer config={chartConfig}>
-                    <AreaChart
-                        accessibilityLayer
-                        data={chartData}
-                        margin={{
-                            left: 12,
-                            right: 12,
-                        }}
-                    >
-                        <CartesianGrid vertical={false} />
-                        <XAxis
-                            dataKey="date"
-                            tickLine={false}
-                            axisLine={false}
-                            tickMargin={8}
-                            tickFormatter={(value) => value.slice(0, 3)}
-                        />
-                        <ChartTooltip
-                            cursor={false}
-                            content={<ChartTooltipContent indicator="dot" />}
-                        />
-                        <Area
-                            dataKey="good"
-                            type="natural"
-                            fill="var(--color-good)"
-                            fillOpacity={0.4}
-                            stroke="var(--color-good)"
-                            stackId="a"
-                        />
-                        <Area
-                            dataKey="ni"
-                            type="natural"
-                            fill="var(--color-ni)"
-                            fillOpacity={0.4}
-                            stroke="var(--color-ni)"
-                            stackId="a"
-                        />
-                        <Area
-                            dataKey="poor"
-                            type="natural"
-                            fill="var(--color-poor)"
-                            fillOpacity={0.4}
-                            stroke="var(--color-poor)"
-                            stackId="a"
-                        />
-                    </AreaChart>
-                </ChartContainer>
+                <ChartSelector onValueChange={(value) => setChartType(value)} />
+                <Chart chartData={chartData} />
             </CardContent>
             <CardFooter>
             </CardFooter>
         </Card>
+    )
+}
+
+function ChartSelector({onValueChange}: {onValueChange: (value: string) => void}) {
+    return (<Select onValueChange={(onValueChange)}>
+        <SelectTrigger className="w-[160px] ml-auto mb-2 text-xs">
+            <SelectValue placeholder="Area" className="text-xs" />
+        </SelectTrigger>
+        <SelectContent>
+            <SelectItem className="text-xs" value="Area">Area</SelectItem>
+            <SelectItem className="text-xs" value="Bar">Stacked Bar</SelectItem>
+        </SelectContent>
+    </Select>)
+}
+
+function MyAreaChart({ chartData }: { chartData: ChartData[] }) {
+    return (
+        <ChartContainer config={chartConfig}>
+            <AreaChart
+                accessibilityLayer
+                data={chartData}
+                margin={{
+                    left: 12,
+                    right: 12,
+                }}
+            >
+                <CartesianGrid vertical={false} />
+                <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    tickFormatter={(value) => value.slice(0, 3)}
+                />
+                <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent indicator="dot" />}
+                />
+                <Area
+                    dataKey="good"
+                    type="natural"
+                    fill="var(--color-good)"
+                    fillOpacity={0.4}
+                    stroke="var(--color-good)"
+                    stackId="a"
+                />
+                <Area
+                    dataKey="ni"
+                    type="natural"
+                    fill="var(--color-ni)"
+                    fillOpacity={0.4}
+                    stroke="var(--color-ni)"
+                    stackId="a"
+                />
+                <Area
+                    dataKey="poor"
+                    type="natural"
+                    fill="var(--color-poor)"
+                    fillOpacity={0.4}
+                    stroke="var(--color-poor)"
+                    stackId="a"
+                />
+            </AreaChart>
+        </ChartContainer>
+    )
+}
+
+
+function MyBarChart({ chartData }: { chartData: ChartData[] }) {
+    return (
+        <ChartContainer config={chartConfig}>
+            <BarChart
+                accessibilityLayer
+                data={chartData}
+                margin={{
+                    left: 12,
+                    right: 12,
+                }}
+            >
+                <CartesianGrid vertical={false} />
+                <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    tickFormatter={(value) => value.slice(0, 3)}
+                />
+                <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent indicator="dot" />}
+                />
+                <Bar
+                    dataKey="good"
+                    type="natural"
+                    fill="var(--color-good)"
+                    fillOpacity={0.4}
+                    stroke="var(--color-good)"
+                    stackId="a"
+                />
+                <Bar
+                    dataKey="ni"
+                    type="natural"
+                    fill="var(--color-ni)"
+                    fillOpacity={0.4}
+                    stroke="var(--color-ni)"
+                    stackId="a"
+                />
+                <Bar
+                    dataKey="poor"
+                    type="natural"
+                    fill="var(--color-poor)"
+                    fillOpacity={0.4}
+                    stroke="var(--color-poor)"
+                    stackId="a"
+                />
+            </BarChart>
+        </ChartContainer>
     )
 }

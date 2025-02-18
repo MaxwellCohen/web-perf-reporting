@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { RedYellowGreenChart } from "./_components/RedYellowGreenChart";
+import { RedYellowGreenChart } from "./_components/Histogram";
 import * as Sentry from "@sentry/nextjs";
 import { CruxDate, cruxHistogramSchema, CruxHistoryReport, cruxReportSchema, urlSchema } from "./lib/scema";
 import { AccordionItem, Accordion, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
