@@ -19,7 +19,7 @@ import {
 import { CruxHistoryHistogramTimeseries, CruxHistoryReportCollectionPeriods } from "@/lib/schema"
 import { useMemo, useState } from "react"
 import { formatDate } from "@/lib/utils"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ChartSelector } from "./ChartSelector"
 
 const chartConfig = {
     good: {
@@ -45,7 +45,7 @@ type ChartData = {
 
 const ChartMap: Record<string, typeof MyAreaChart> = {
     'Area': MyAreaChart,
-    'Bar': MyBarChart
+    'Stacked Bar': MyBarChart
 }
 
 export function HistoricalChart(
@@ -79,25 +79,13 @@ export function HistoricalChart(
                 <CardDescription>{dateRage}</CardDescription>
             </CardHeader>
             <CardContent>
-                <ChartSelector onValueChange={(value) => setChartType(value)} />
+                <ChartSelector onValueChange={(value) => setChartType(value)} options={Object.keys(ChartMap)}/>
                 <Chart chartData={chartData} />
             </CardContent>
             <CardFooter>
             </CardFooter>
         </Card>
     )
-}
-
-function ChartSelector({onValueChange}: {onValueChange: (value: string) => void}) {
-    return (<Select onValueChange={(onValueChange)}>
-        <SelectTrigger className="w-[160px] ml-auto mb-2 text-xs">
-            <SelectValue placeholder="Area" className="text-xs" />
-        </SelectTrigger>
-        <SelectContent>
-            <SelectItem className="text-xs" value="Area">Area</SelectItem>
-            <SelectItem className="text-xs" value="Bar">Stacked Bar</SelectItem>
-        </SelectContent>
-    </Select>)
 }
 
 function MyAreaChart({ chartData }: { chartData: ChartData[] }) {
