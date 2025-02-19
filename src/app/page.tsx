@@ -6,6 +6,7 @@ import { AccordionItem, Accordion, AccordionTrigger, AccordionContent } from "@/
 import { formatDate, formatFormFactor } from "@/lib/utils";
 import { getCurrentCruxData, getHistoricalCruxData } from "@/lib/services";
 import { HistoricalChart } from "./_components/HistoricalChart";
+import { UrlLookupForm } from "./_components/UrlLookupForm";
 
 type formFactor = 'PHONE' | 'TABLET' | "DESKTOP" | "ALL_FORM_FACTORS"
 
@@ -33,13 +34,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ [
     <div>
       <h1 className="text-center mx-auto text-xl font-extrabold">Web Performance Report</h1>
       {!url ? 
-      <>
-      <h2 className="text-center mx-auto text-lg font-extrabold"> please enter a url that you want a perf report on</h2>
-        <form className="mx-auto max-w-[80ch] flex gap-3" method="GET"  >
-          <Input className="min-w-[60]" type="text" placeholder="url" name="url" />
-          <Button>Submit</Button>
-        </form>
-      </> 
+      <UrlLookupForm />
       :
         <>
           <h2 className="text-center mx-auto text-lg font-extrabold"> Web Perf Report For {url}</h2>
