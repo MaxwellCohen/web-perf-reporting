@@ -1,4 +1,4 @@
-import { CruxDate } from "@/lib/scema"
+import { CruxDate } from "@/lib/schema"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 

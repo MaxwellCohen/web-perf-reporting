@@ -16,7 +16,7 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart"
-import { CruxHistoryHistogramTimeseries, CruxHistoryPercentilesTimeseries, CruxHistoryReport, CruxHistoryReportCollectionPeriods } from "../../lib/scema"
+import { CruxHistoryHistogramTimeseries, CruxHistoryReportCollectionPeriods } from "@/lib/schema"
 import { useMemo, useState } from "react"
 import { formatDate } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"

@@ -17,7 +17,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-import { CruxHistogram, CruxHistoryHistogramTimeseries, CruxHistoryPercentilesTimeseries, CruxPercentile } from "../../lib/scema"
+import { CruxHistogram, CruxHistoryHistogramTimeseries, CruxHistoryPercentilesTimeseries, CruxPercentile } from "../../lib/schema"
 import { useMemo } from "react"
 
 const getDensity = (data: CruxHistogram | CruxHistoryHistogramTimeseries, index: number) => {
@@ -39,7 +39,14 @@ type ChartData = {
   fill: string;
 };
 
-const MakeChartData = (data?: CruxHistogram | CruxHistoryHistogramTimeseries) => {
+const getChartRanges = (data: CruxHistoryHistogramTimeseries) => {
+  const ranges = data.map((item) => {
+    return item.start;
+  });
+  return ranges;
+}
+
+const MakeChartData = (data?: CruxHistogram ) => {
   if (!data) {
     return {
       chartData: [] as ChartData[],
@@ -86,7 +93,7 @@ const MakeChartData = (data?: CruxHistogram | CruxHistoryHistogramTimeseries) =>
   }
 }
 
-export function CurrentPerformanceChart({ title, dateRage, histogramData, percentiles }: { title: string, dateRage: string, histogramData: CruxHistogram | CruxHistoryHistogramTimeseries, percentiles?: CruxPercentile | CruxHistoryPercentilesTimeseries }) {
+export function CurrentPerformanceChart({ title, dateRage, histogramData, percentiles }: { title: string, dateRage: string, histogramData: CruxHistogram , percentiles?: CruxPercentile  }) {
   const { chartData, chartConfig, extraInfo } = useMemo(() => MakeChartData(histogramData), [histogramData]);
   if (!chartData.length) {
     return null;
@@ -138,7 +145,7 @@ export function CurrentPerformanceChart({ title, dateRage, histogramData, percen
         </CardContent>
         <CardFooter className="flex-col items-start gap-2 text-sm">
           <div className="flex gap-2 font-medium leading-none">
-            P75 is {percentiles && 'p75' in percentiles ? percentiles.p75 : (percentiles && 'p75s' in percentiles )? percentiles.p75s.at(-1) : 'N/A'}
+            P75 is {percentiles && 'p75' in percentiles ? percentiles.p75 :  'N/A'}
           </div>
           {extraInfo.map((info, idx) => <div className="leading-none text-muted-foreground" key={`${idx}-${info}`}>
             {info}

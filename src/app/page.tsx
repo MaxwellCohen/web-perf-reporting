@@ -1,7 +1,5 @@
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { CurrentPerformanceChart } from "./_components/Histogram";
-import { urlSchema } from "@/lib/scema";
+import { CurrentPerformanceChart } from "./_components/CurrentPerformanceChart";
+import { urlSchema } from "@/lib/schema";
 import { AccordionItem, Accordion, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { formatDate, formatFormFactor } from "@/lib/utils";
 import { getCurrentCruxData, getHistoricalCruxData } from "@/lib/services";

@@ -1,5 +1,5 @@
 import * as Sentry from "@sentry/nextjs";
-import { CruxHistoryReport, cruxReportSchema } from "./scema";
+import { CruxHistoryReport, cruxReportSchema } from "./schema";
 
 export type formFactor = 'PHONE' | 'TABLET' | 'DESKTOP' | 'ALL_FORM_FACTORS';
 
