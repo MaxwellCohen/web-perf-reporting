@@ -2,24 +2,24 @@ import exp from "constants";
 import { z } from "zod"
 
 export const cruxHistogramSchema = z.array(
-    z.object({
-      start: z.coerce.number().catch((e)=> NaN),
-      end: z.coerce.number().catch((e)=> NaN).optional(),
-      density: z.union([z.coerce.number().catch((e)=> NaN), z.nan()]),
-    })
+  z.object({
+    start: z.coerce.number().catch((e) => NaN),
+    end: z.coerce.number().catch((e) => NaN).optional(),
+    density: z.union([z.coerce.number().catch((e) => NaN), z.nan()]),
+  })
 );
 
 export type CruxHistogram = z.infer<typeof cruxHistogramSchema>;
 
 export const cruxDateSchema = z.object({
-    year: z.coerce.number().catch((e)=> NaN),
-    month: z.coerce.number().catch((e)=> NaN),
-    day: z.coerce.number().catch((e)=> NaN),
-  });
+  year: z.coerce.number().catch((e) => NaN),
+  month: z.coerce.number().catch((e) => NaN),
+  day: z.coerce.number().catch((e) => NaN),
+});
 
 export type CruxDate = z.infer<typeof cruxDateSchema>;
 
-export const cruxPercentileSchema = z.object({ p75: z.union([z.number() , z.string()]) })
+export const cruxPercentileSchema = z.object({ p75: z.union([z.number(), z.string()]) })
 
 export type CruxPercentile = z.infer<typeof cruxPercentileSchema>;
 
@@ -79,7 +79,7 @@ export const cruxReportSchema = z.object({
       })
     }),
     collectionPeriod: z.object({
-      firstDate:cruxDateSchema,
+      firstDate: cruxDateSchema,
       lastDate: cruxDateSchema
     })
   })
@@ -91,11 +91,11 @@ export const urlSchema = z.string().url();
 
 
 export const CruxHistoryHistogramTimeseries = z.array(
-    z.object({
-      start: z.coerce.number().catch((e)=> NaN),
-      end: z.coerce.number().catch((e)=> NaN).optional(),
-      densities: z.array(z.coerce.number().catch((e)=> NaN))
-    })
+  z.object({
+    start: z.coerce.number().catch((e) => NaN),
+    end: z.coerce.number().catch((e) => NaN).optional(),
+    densities: z.array(z.coerce.number().catch((e) => NaN))
+  })
 );
 
 export type CruxHistoryHistogramTimeseries = z.infer<typeof CruxHistoryHistogramTimeseries>;
@@ -120,7 +120,7 @@ export const CruxHistoryReport = z.object({
     key: z.object({ formFactor: z.string().optional(), origin: z.string() }),
     metrics: z.object({
       round_trip_time: z.object({
-        histogramTimeseries:CruxHistoryHistogramTimeseries,
+        histogramTimeseries: CruxHistoryHistogramTimeseries,
         percentilesTimeseries: CruxHistoryPercentilesTimeseries,
       }),
       experimental_time_to_first_byte: z.object({
@@ -132,7 +132,7 @@ export const CruxHistoryReport = z.object({
         percentilesTimeseries: CruxHistoryPercentilesTimeseries,
       }),
       interaction_to_next_paint: z.object({
-        histogramTimeseries:CruxHistoryHistogramTimeseries,
+        histogramTimeseries: CruxHistoryHistogramTimeseries,
         percentilesTimeseries: CruxHistoryPercentilesTimeseries,
       }),
       largest_contentful_paint_image_resource_load_delay: z.object({
@@ -182,3 +182,120 @@ export const CruxHistoryReport = z.object({
 })
 
 export type CruxHistoryReport = z.infer<typeof CruxHistoryReport>;
+
+
+export const UserPageLoadMetricV5schema = z.object({
+  percentile: z.number(),
+  distributions: z.array(
+    z.object({ min: z.number(), max: z.number().optional(), proportion: z.number() }),
+  ),
+  category: z.string()
+})
+
+export const PagespeedApiLoadingExperienceV5 = z.object({
+  "metrics": z.object({
+    CUMULATIVE_LAYOUT_SHIFT_SCORE: UserPageLoadMetricV5schema,
+    EXPERIMENTAL_TIME_TO_FIRST_BYTE: UserPageLoadMetricV5schema,
+    FIRST_CONTENTFUL_PAINT_MS: UserPageLoadMetricV5schema,
+    INTERACTION_TO_NEXT_PAINT: UserPageLoadMetricV5schema,
+    LARGEST_CONTENTFUL_PAINT_MS: UserPageLoadMetricV5schema,
+  }),
+  "overall_category": z.string()
+});
+
+export const LighthouseResultV5 = z.object({
+  "fetchTime": z.string(),
+  "requestedUrl": z.string(),
+  "finalUrl": z.string(),
+  "lighthouseVersion": z.string(),
+});
+
+const artifactsSchema = z.record(z.any()).optional()
+
+const auditRefSchema = z.object({
+  id: z.string(),
+  weight: z.number(),
+  group: z.string().optional()
+}).partial()
+
+const auditResultSchema = z.object({
+  description: z.string().optional(),
+  details: z.any().optional(),
+  errorMessage: z.string().optional(),
+  explanation: z.string().optional(),
+  id: z.string(),
+  numericValue: z.number().optional(),
+  score: z.number().nullable(),
+  scoreDisplayMode: z.string(),
+  title: z.string(),
+  warnings: z.array(z.any()).optional()
+}).partial();
+
+const categoryResultSchema = z.object({
+  auditRefs: z.array(auditRefSchema),
+  description: z.string(),
+  id: z.string(),
+  title: z.string(),
+  manualDescription: z.string().optional(),
+  score: z.number()
+}).partial();
+
+const configSettingsSchema = z.record(z.any())
+
+const environmentSchema = z.object({
+  benchmarkIndex: z.number(),
+  cpuThreads: z.number(),
+  hostUserAgent: z.string(),
+  networkUserAgent: z.string(),
+  userAgent: z.string()
+}).partial()
+
+const categorySchema = z.object({
+  auditRefs: z.array(auditRefSchema),
+  description: z.string(),
+  id: z.string(),
+  title: z.string(),
+  manualDescription: z.string().optional()
+}).partial()
+
+const lighthouseResultV5Schema = z.object({
+  artifacts: artifactsSchema,
+  categories: z.record(categoryResultSchema),
+  categoryGroups: z.record(categorySchema).optional(),
+  configSettings: configSettingsSchema,
+  environment: environmentSchema,
+  fetchTime: z.string(),
+  finalUrl: z.string(),
+  generatedTime: z.string(),
+  lighthouseVersion: z.string(),
+  requestedUrl: z.string(),
+  runWarnings: z.array(z.string()),
+  runtimeError: z
+    .object({
+      message: z.string(),
+      stack: z.string().optional()
+    })
+    .optional(),
+  timing: z.object({
+    entries: z.array(
+      z.object({
+        name: z.string().optional(),
+        startTime: z.number().optional(),
+        duration: z.number(),
+      }).partial()
+    ).optional(),
+  }),
+  userAgent: z.string(),
+  audits: z.record(auditResultSchema)
+}).partial()
+
+export const pageSpeedInsightsSchema = z.object({
+  "kind": z.string(),
+  "captchaResult": z.string(),
+  "id": z.string(),
+  "loadingExperience": PagespeedApiLoadingExperienceV5,
+  "originLoadingExperience": PagespeedApiLoadingExperienceV5,
+  "analysisUTCTimestamp": z.string(),
+  "lighthouseResult": lighthouseResultV5Schema,
+  "version": z.object({ "major": z.string(), "minor": z.string() }).optional(),
+});

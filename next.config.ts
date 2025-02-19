@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  experimental: {
+    dynamicIO: true,
+  },
 };
 
 export default withSentryConfig(nextConfig, {

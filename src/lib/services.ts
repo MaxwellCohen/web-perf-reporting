@@ -1,5 +1,8 @@
+'use cache';
+import { unstable_cacheLife as cacheLife } from 'next/cache'
+
 import * as Sentry from "@sentry/nextjs";
-import { CruxHistoryReport, cruxReportSchema } from "./schema";
+import { CruxHistoryReport, cruxReportSchema, pageSpeedInsightsSchema } from "./schema";
 
 export type formFactor = 'PHONE' | 'TABLET' | 'DESKTOP' | 'ALL_FORM_FACTORS';
 
@@ -37,21 +40,30 @@ export const getHistoricalCruxData = async (testURL: string, formFactor: formFac
   }
 }
 
-const pageSpeedURL = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed'
 
-const makePageSpeedURL = (testURL: string) => {
-  return `${pageSpeedURL}?url=${encodeURIComponent(testURL)}&key=${process.env.PAGESPEED_INSIGHTS_API}`
-}
-
-export const requestPageSpeedData = async (testURL: string) => {
+export const requestPageSpeedData = async (testURL: string, formFactor: formFactor) => {
   try {
-    const response = await fetch(makePageSpeedURL(testURL))
+    const baseurl = new URL("https://www.googleapis.com/pagespeedonline/v5/runPagespeed");
+    baseurl.searchParams.append("url", testURL);
+    baseurl.searchParams.append("category", "ACCESSIBILITY");
+    baseurl.searchParams.append("category", "BEST_PRACTICES");
+    baseurl.searchParams.append("category", "PERFORMANCE");
+    baseurl.searchParams.append("category", "PWA");
+    baseurl.searchParams.append("category", "SEO");
+    baseurl.searchParams.append("key", process.env.PAGESPEED_INSIGHTS_API ?? '');
+    baseurl.searchParams.append("strategy", formFactor);
+    console.log(baseurl.toString());
+
+    const response = await fetch(baseurl.toString());
     if (!response.ok) {
       return null;
     }
-    const data = await response.json()
-    return data
+    const data = await response.json();
+    const a = pageSpeedInsightsSchema.parse(data);
+    return a;
   } catch (error) {
-    return null
+    Sentry.captureException(error);
+    console.error(error);
+    return null;
   }
 }

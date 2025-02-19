@@ -21,7 +21,7 @@ import { useMemo, useState } from "react"
 import { formatDate } from "@/lib/utils"
 import { ChartSelector } from "./ChartSelector"
 
-const chartConfig = {
+const HistoricalPerformanceChartConfig = {
     good: {
         label: `Good`,
         color: "hsl(var(--chart-2))",
@@ -36,25 +36,24 @@ const chartConfig = {
     },
 } satisfies ChartConfig
 
-type ChartData = {
+export type HistoricalPerformanceChartData = {
     date: string;
     good: number;
     ni: number;
     poor: number;
 };
 
-const ChartMap: Record<string, typeof MyAreaChart> = {
-    'Area': MyAreaChart,
-    'Stacked Bar': MyBarChart
+const ChartMap: Record<string, typeof HistoricalPerformanceAreaChart> = {
+    'Area': HistoricalPerformanceAreaChart,
+    'Stacked Bar': HistoricalPerformanceBarChart
 }
-
 export function HistoricalChart(
     { title, dateRage, histogramData, collectionPeriods }:
         { title: string, dateRage: string, histogramData: CruxHistoryHistogramTimeseries, collectionPeriods: CruxHistoryReportCollectionPeriods }
 ) {
     const [ChartType, setChartType] = useState('Area')
 
-    const chartData: ChartData[] = useMemo(() => {
+    const chartData: HistoricalPerformanceChartData[] = useMemo(() => {
         if (!histogramData) {
             return [];
         }
@@ -70,7 +69,7 @@ export function HistoricalChart(
 
         return chartData;
     }, [histogramData, collectionPeriods]);
-    const Chart = ChartMap[ChartType] ?? MyAreaChart;
+    const Chart = ChartMap[ChartType] ?? HistoricalPerformanceAreaChart;
 
     return (
         <Card>
@@ -88,9 +87,9 @@ export function HistoricalChart(
     )
 }
 
-function MyAreaChart({ chartData }: { chartData: ChartData[] }) {
+function HistoricalPerformanceAreaChart({ chartData }: { chartData: HistoricalPerformanceChartData[] }) {
     return (
-        <ChartContainer config={chartConfig}>
+        <ChartContainer config={HistoricalPerformanceChartConfig}>
             <AreaChart
                 accessibilityLayer
                 data={chartData}
@@ -141,9 +140,9 @@ function MyAreaChart({ chartData }: { chartData: ChartData[] }) {
 }
 
 
-function MyBarChart({ chartData }: { chartData: ChartData[] }) {
+function HistoricalPerformanceBarChart({ chartData }: { chartData: HistoricalPerformanceChartData[] }) {
     return (
-        <ChartContainer config={chartConfig}>
+        <ChartContainer config={HistoricalPerformanceChartConfig}>
             <BarChart
                 accessibilityLayer
                 data={chartData}
