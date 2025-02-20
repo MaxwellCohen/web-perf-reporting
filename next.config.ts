@@ -10,7 +10,8 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   experimental: {
-    dynamicIO: true,
+    dynamicIO: false,
+
   },
 };
 

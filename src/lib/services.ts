@@ -1,7 +1,6 @@
-'use cache';
-import { unstable_cacheLife as cacheLife } from 'next/cache'
 
-import * as Sentry from "@sentry/nextjs";
+
+// import * as Sentry from "@sentry/nextjs";
 import { CruxHistoryReport, cruxReportSchema, pageSpeedInsightsSchema } from "./schema";
 
 export type formFactor = 'PHONE' | 'TABLET' | 'DESKTOP' | 'ALL_FORM_FACTORS';
@@ -18,7 +17,7 @@ export const getCurrentCruxData = async (testURL: string, formFactor: formFactor
     const data = await request.json();
     return cruxReportSchema.parse(data);
   } catch (error) {
-    Sentry.captureException(error);
+    // Sentry.captureException(error);
     return null;
   }
 }
@@ -35,7 +34,7 @@ export const getHistoricalCruxData = async (testURL: string, formFactor: formFac
     const data = await request.json();
     return CruxHistoryReport.parse(data);
   } catch (error) {
-    Sentry.captureException(error);
+    // Sentry.captureException(error);
     return null;
   }
 }
@@ -62,7 +61,7 @@ export const requestPageSpeedData = async (testURL: string, formFactor: formFact
     const a = pageSpeedInsightsSchema.parse(data);
     return a;
   } catch (error) {
-    Sentry.captureException(error);
+    // Sentry.captureException(error);
     console.error(error);
     return null;
   }
