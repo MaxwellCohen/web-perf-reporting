@@ -121,57 +121,31 @@ export async function ChartsHistoricalSection({ url, formFactor }: { url: string
   export  async function PageSpeedInsights({ url, formFactor }: { url: string, formFactor: formFactor }) {
     
     const data = await requestPageSpeedData(url, formFactor);
-  
+    console.log(data);
     return (
       <AccordionItem value={`PageSpeed-${formFactor}`}>
         <AccordionTrigger>Page speed Insights For {formatFormFactor(formFactor)} Devices</  AccordionTrigger>
         <AccordionContent>
   
   
-          <h3 className="text-xl">Loading Experience : <strong>{data?.loadingExperience.overall_category}</strong></h3>
+          <h3 className="text-xl">Page Loading Experience : <strong>{data?.loadingExperience.overall_category}</strong></h3>
           <div className="grid grid-cols-3 md:grid-cols-5  mt-2 gap-2">
-            <GaugeChart metric="Cumulative Layout Shift" value={data?.loadingExperience.metrics.CUMULATIVE_LAYOUT_SHIFT_SCORE.percentile || 0} />
-            <GaugeChart metric="Time to First Byte" value={data?.loadingExperience.metrics.EXPERIMENTAL_TIME_TO_FIRST_BYTE.percentile || 0} />
-            <GaugeChart metric="First Contentful Paint" value={data?.loadingExperience.metrics.FIRST_CONTENTFUL_PAINT_MS.percentile || 0} />
-            <GaugeChart metric="Interaction to Next Paint" value={data?.loadingExperience.metrics.INTERACTION_TO_NEXT_PAINT.percentile || 0} />
-            <GaugeChart metric="Largest Contentful Paint" value={data?.loadingExperience.metrics.LARGEST_CONTENTFUL_PAINT_MS.percentile || 0} />
+            <GaugeChart metric="Cumulative Layout Shift" data={data?.loadingExperience.metrics.CUMULATIVE_LAYOUT_SHIFT_SCORE} />
+            <GaugeChart metric="Time to First Byte" data={data?.loadingExperience.metrics.EXPERIMENTAL_TIME_TO_FIRST_BYTE} />
+            <GaugeChart metric="First Contentful Paint" data={data?.loadingExperience.metrics.FIRST_CONTENTFUL_PAINT_MS} />
+            <GaugeChart metric="Interaction to Next Paint" data={data?.loadingExperience.metrics.INTERACTION_TO_NEXT_PAINT} />
+            <GaugeChart metric="Largest Contentful Paint" data={data?.loadingExperience.metrics.LARGEST_CONTENTFUL_PAINT_MS} />
           </div>
           <h3 className="text-xl">Origin Loading Experience: <strong>{data?.originLoadingExperience.overall_category}</strong></h3>
           <div className="grid grid-cols-3 md:grid-cols-5  mt-2 gap-2">
-            <GaugeChart metric="Cumulative Layout Shift" value={data?.originLoadingExperience.metrics.CUMULATIVE_LAYOUT_SHIFT_SCORE.percentile || 0} />
-            <GaugeChart metric="Time to First Byte" value={data?.originLoadingExperience.metrics.EXPERIMENTAL_TIME_TO_FIRST_BYTE.percentile || 0} />
-            <GaugeChart metric="First Contentful Paint" value={data?.originLoadingExperience.metrics.FIRST_CONTENTFUL_PAINT_MS.percentile || 0} />
-            <GaugeChart metric="Interaction to Next Paint" value={data?.originLoadingExperience.metrics.INTERACTION_TO_NEXT_PAINT.percentile || 0} />
-            <GaugeChart metric="Largest Contentful Paint" value={data?.originLoadingExperience.metrics.LARGEST_CONTENTFUL_PAINT_MS.percentile || 0} />
+            <GaugeChart metric="Cumulative Layout Shift" data={data?.originLoadingExperience.metrics.CUMULATIVE_LAYOUT_SHIFT_SCORE} />
+            <GaugeChart metric="Time to First Byte" data={data?.originLoadingExperience.metrics.EXPERIMENTAL_TIME_TO_FIRST_BYTE} />
+            <GaugeChart metric="First Contentful Paint" data={data?.originLoadingExperience.metrics.FIRST_CONTENTFUL_PAINT_MS} />
+            <GaugeChart metric="Interaction to Next Paint" data={data?.originLoadingExperience.metrics.INTERACTION_TO_NEXT_PAINT} />
+            <GaugeChart metric="Largest Contentful Paint" data={data?.originLoadingExperience.metrics.LARGEST_CONTENTFUL_PAINT_MS} />
           </div>
   
-          loadingExperience
           <br />
-          {JSON.stringify(data?.loadingExperience.overall_category)}
-          <br />
-          {JSON.stringify(data?.loadingExperience.metrics.CUMULATIVE_LAYOUT_SHIFT_SCORE)}
-          <br />
-          {JSON.stringify(data?.loadingExperience.metrics.EXPERIMENTAL_TIME_TO_FIRST_BYTE)}
-          <br />
-          {JSON.stringify(data?.loadingExperience.metrics.FIRST_CONTENTFUL_PAINT_MS)}
-          <br />
-          {JSON.stringify(data?.loadingExperience.metrics.INTERACTION_TO_NEXT_PAINT)}
-          <br />
-          {JSON.stringify(data?.loadingExperience.metrics.LARGEST_CONTENTFUL_PAINT_MS)}
-          <br />
-          originLoadingExperience
-          <br />
-          {JSON.stringify(data?.originLoadingExperience.overall_category)}
-          <br />
-          {JSON.stringify(data?.originLoadingExperience.metrics.CUMULATIVE_LAYOUT_SHIFT_SCORE)}
-          <br />
-          {JSON.stringify(data?.originLoadingExperience.metrics.EXPERIMENTAL_TIME_TO_FIRST_BYTE)}
-          <br />
-          {JSON.stringify(data?.originLoadingExperience.metrics.FIRST_CONTENTFUL_PAINT_MS)}
-          <br />
-          {JSON.stringify(data?.originLoadingExperience.metrics.INTERACTION_TO_NEXT_PAINT)}
-          <br />
-          {JSON.stringify(data?.originLoadingExperience.metrics.LARGEST_CONTENTFUL_PAINT_MS)}
           <br />
           lighthouseResult
           <br />

@@ -192,6 +192,8 @@ export const UserPageLoadMetricV5schema = z.object({
   category: z.string()
 })
 
+export type UserPageLoadMetricV5 = z.infer<typeof UserPageLoadMetricV5schema>;
+
 export const PagespeedApiLoadingExperienceV5 = z.object({
   "metrics": z.object({
     CUMULATIVE_LAYOUT_SHIFT_SCORE: UserPageLoadMetricV5schema,
@@ -299,3 +301,5 @@ export const pageSpeedInsightsSchema = z.object({
   "lighthouseResult": lighthouseResultV5Schema,
   "version": z.object({ "major": z.string(), "minor": z.string() }).optional(),
 });
+
+export type PageSpeedInsights = z.infer<typeof pageSpeedInsightsSchema>;

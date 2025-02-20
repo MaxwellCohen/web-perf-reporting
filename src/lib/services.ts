@@ -1,7 +1,7 @@
 
 
 // import * as Sentry from "@sentry/nextjs";
-import { CruxHistoryReport, cruxReportSchema, pageSpeedInsightsSchema } from "./schema";
+import { CruxHistoryReport, cruxReportSchema, PageSpeedInsights, pageSpeedInsightsSchema } from "./schema";
 
 export type formFactor = 'PHONE' | 'TABLET' | 'DESKTOP' | 'ALL_FORM_FACTORS';
 
@@ -39,6 +39,9 @@ export const getHistoricalCruxData = async (testURL: string, formFactor: formFac
   }
 }
 
+const records: Record<string, PageSpeedInsights>= {
+
+}
 
 export const requestPageSpeedData = async (testURL: string, formFactor: formFactor) => {
   try {
@@ -52,13 +55,18 @@ export const requestPageSpeedData = async (testURL: string, formFactor: formFact
     baseurl.searchParams.append("key", process.env.PAGESPEED_INSIGHTS_API ?? '');
     baseurl.searchParams.append("strategy", formFactor);
     console.log(baseurl.toString());
+    if (records[baseurl.toString()]) {
+      return records[baseurl.toString()];
 
-    const response = await fetch(baseurl.toString());
+    }
+    
+    const response = await fetch(baseurl.toString(), {});
     if (!response.ok) {
       return null;
     }
     const data = await response.json();
     const a = pageSpeedInsightsSchema.parse(data);
+    records[baseurl.toString()] = a;
     return a;
   } catch (error) {
     // Sentry.captureException(error);

@@ -15,12 +15,13 @@ import {
 } from "@/components/ui/chart"
 import { Bar, BarChart, CartesianGrid, Rectangle, XAxis } from "recharts"
 
-import { CruxHistogram, CruxHistoryHistogramTimeseries, CruxPercentile } from "../../lib/schema"
+import { CruxHistogram, CruxHistoryHistogramTimeseries, CruxPercentile, UserPageLoadMetricV5 } from "../../lib/schema"
 import { useMemo, useState } from "react"
 import { ChartSelector } from "./ChartSelector"
 import { chartConfig, PerformanceChartData } from "./ChartSettings"
 import { RadialChart } from "./PerformanceRadialChart"
 import { PerformanceStackedBarChart } from "./PerformanceStackedBarChart"
+import GaugeChart from "./PageSpeedGuageChart"
 
 const getDensity = (data: CruxHistogram | CruxHistoryHistogramTimeseries, index: number) => {
   if (data instanceof Array) {
@@ -56,10 +57,11 @@ const makeHistogramData = (data?: CruxHistogram) => {
   }
 }
 
-const ChartMap: Record<string, typeof Histogram> = {
+const ChartMap: Record<string, typeof CurrentGaugeChart> = {
   'Histogram': Histogram,
   'Stacked Bar': PerformanceStackedBarChart,
   'Radial Chart': RadialChart,
+  'Gauge Chart': CurrentGaugeChart
 }
 
 export function CurrentPerformanceCard({ title, dateRage, histogramData, percentiles }: { title: string, dateRage: string, histogramData: CruxHistogram, percentiles?: CruxPercentile }) {
@@ -85,7 +87,7 @@ export function CurrentPerformanceCard({ title, dateRage, histogramData, percent
         </CardHeader>
         <CardContent>
           <ChartSelector onValueChange={(value) => setChartType(value)} options={Object.keys(ChartMap)} />
-          <Chart histogramData={histogramData} />
+          <Chart histogramData={histogramData} percentiles={percentiles?.p75} />
         </CardContent>
         <CardFooter className="flex-col items-start gap-2 text-sm">
           <div className="flex gap-2 font-medium leading-none">
@@ -98,6 +100,33 @@ export function CurrentPerformanceCard({ title, dateRage, histogramData, percent
       </Card>
     </div>
   )
+}
+
+
+function CurrentGaugeChart({ histogramData, percentiles }: { histogramData: CruxHistogram, percentiles?: number | string }) {
+  const data: UserPageLoadMetricV5 = {
+    "percentile": +(percentiles ?? 0),
+    "category": '',
+    "distributions": [
+      {
+        "min": histogramData[0]?.start ?? 0,
+        "max": histogramData[0]?.end ?? 0,
+        proportion: histogramData[0]?.density ?? 0,
+      },
+      {
+        "min": histogramData[1]?.start ?? 0,
+        "max": histogramData[1]?.end ?? 0,
+        proportion: histogramData[1]?.density ?? 0,
+      },
+      {
+        "min": histogramData[2]?.start ?? 0,
+        "max": histogramData[2]?.end ?? 0,
+        proportion: histogramData[2]?.density ?? 0,
+      }
+    ]
+  }
+
+return (<GaugeChart metric={""} data={data} />)
 }
 
 function Histogram({ histogramData }: { histogramData: CruxHistogram }) {
