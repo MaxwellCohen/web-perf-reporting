@@ -1,4 +1,4 @@
-import { ChartConfig } from "@/components/ui/chart";
+import { ChartConfig } from '@/components/ui/chart';
 
 export const chartConfig = {
   density: {
@@ -6,15 +6,15 @@ export const chartConfig = {
   },
   good: {
     label: `Good`,
-    color: "hsl(var(--chart-2))",
+    color: 'hsl(var(--chart-2))',
   },
   ni: {
     label: `Needs Improvement`,
-    color: "hsl(var(--chart-3))",
+    color: 'hsl(var(--chart-3))',
   },
   poor: {
     label: `Poor`,
-    color: "hsl(var(--chart-5))",
+    color: 'hsl(var(--chart-5))',
   },
 } satisfies ChartConfig;
 
@@ -24,10 +24,9 @@ export type PerformanceChartData = {
   fill: string;
 };
 
-
 export type HistoricalPerformanceChartData = {
-    date: string;
-    good: number;
-    ni: number;
-    poor: number;
+  date: string;
+  good: number;
+  ni: number;
+  poor: number;
 };

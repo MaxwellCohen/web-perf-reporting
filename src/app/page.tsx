@@ -1,10 +1,11 @@
-import { urlSchema } from "@/lib/schema";
-import { Accordion } from "@/components/ui/accordion";
-import { UrlLookupForm } from "@/app/_components/UrlLookupForm";
-import { Suspense } from "react";
-import { CurrentPerformanceCharts, ChartsHistoricalSection, PageSpeedInsights } from "./_components/Sections";
-
-
+import { urlSchema } from '@/lib/schema';
+import { Accordion } from '@/components/ui/accordion';
+import { UrlLookupForm } from '@/app/_components/UrlLookupForm';
+import { Suspense } from 'react';
+import {
+  CurrentPerformanceCharts,
+  ChartsHistoricalSection,
+} from './_components/Sections';
 
 function updateURl(url?: string) {
   if (!url) {
@@ -20,38 +21,47 @@ function updateURl(url?: string) {
   return urlSchema.safeParse(url).data ?? '';
 }
 
-
-export default async function Home({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const params = await searchParams;
 
-  let url = updateURl(params.url as string);
+  const url = updateURl(params.url as string);
 
   return (
     <div>
-      <h1 className="text-center mx-auto text-xl font-extrabold">Web Performance Report</h1>
-      {!url ?
+      <h1 className="mx-auto text-center text-xl font-extrabold">
+        Web Performance Report
+      </h1>
+      {!url ? (
         <UrlLookupForm />
-        :
+      ) : (
         <>
-          <h2 className="text-center mx-auto text-lg font-extrabold"> Web Perf Report For {url}</h2>
+          <h2 className="mx-auto text-center text-lg font-extrabold">
+            {' '}
+            Web Perf Report For {url}
+          </h2>
           <Suspense fallback={<div>Loading...</div>}>
             <Accordion type="multiple" className="w-full">
               <CurrentPerformanceCharts url={url} formFactor="PHONE" />
               <CurrentPerformanceCharts url={url} formFactor="TABLET" />
               <CurrentPerformanceCharts url={url} formFactor="DESKTOP" />
-              <ChartsHistoricalSection url={url} formFactor="ALL_FORM_FACTORS" />
+              <ChartsHistoricalSection
+                url={url}
+                formFactor="ALL_FORM_FACTORS"
+              />
               <ChartsHistoricalSection url={url} formFactor="PHONE" />
               <ChartsHistoricalSection url={url} formFactor="TABLET" />
               <ChartsHistoricalSection url={url} formFactor="DESKTOP" />
               <Suspense fallback={<div>Loading...</div>}>
-
                 {/* <PageSpeedInsights url={url} formFactor="DESKTOP" /> */}
               </Suspense>
             </Accordion>
           </Suspense>
         </>
-      }
+      )}
     </div>
   );
 }
-

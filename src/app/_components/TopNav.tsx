@@ -1,9 +1,6 @@
-"use client";
-import { NavigationMenuItems } from './NavigationMenuItems'
+'use client';
+import { NavigationMenuItems } from './NavigationMenuItems';
 
 export function TopNav() {
-  return (
-      <NavigationMenuItems />
-  );
+  return <NavigationMenuItems />;
 }
-
