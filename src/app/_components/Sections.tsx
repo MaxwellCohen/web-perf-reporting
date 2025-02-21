@@ -42,7 +42,6 @@ export async function ChartsHistoricalSection({
     formFactor,
     origin,
   });
-  console.log(currentCruxHistoricalResult);
   if (!currentCruxHistoricalResult) {
     return null;
   }
@@ -51,11 +50,10 @@ export async function ChartsHistoricalSection({
     ({ metric_name }) => metric_name || '',
   );
 
-  console.log(groupedMetics);
   return (
-    <AccordionItem value={`historical-${formFactor}`}>
+    <AccordionItem value={`historical-${formFactor}-${url}-${origin}`}>
       <AccordionTrigger>
-        Historical Performance Report For {formatFormFactor(formFactor)} Devices
+        Historical Performance Report For {formatFormFactor(formFactor)} Devices {url ? `for the page` : 'for the origin'}
       </AccordionTrigger>
       <AccordionContent>
         <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
@@ -106,7 +104,7 @@ export async function CurrentPerformanceCharts({
   return (
     <AccordionItem value={`current-${formFactor}`}>
       <AccordionTrigger>
-        Latest Performance Report For {formatFormFactor(formFactor)} Devices
+        Latest Performance Report For {formatFormFactor(formFactor)} Devices {url ? `for the page` : 'for the origin'}
       </AccordionTrigger>
       <AccordionContent>
         <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
@@ -148,9 +146,8 @@ export async function PageSpeedInsights({
   formFactor: formFactor;
 }) {
   const data = await requestPageSpeedData(url, formFactor);
-  // console.log(data);
   return (
-    <AccordionItem value={`PageSpeed-${formFactor}`}>
+    <AccordionItem value={`PageSpeed-${formFactor}-${url}-${origin}`}>
       <AccordionTrigger>
         Page speed Insights For {formatFormFactor(formFactor)} Devices
       </AccordionTrigger>

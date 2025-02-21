@@ -21,6 +21,7 @@ export function HistoricalPerformanceAreaChart({
           left: 12,
           right: 12,
         }}
+         stackOffset="expand"
       >
         <CartesianGrid vertical={false} />
         <XAxis
@@ -36,7 +37,7 @@ export function HistoricalPerformanceAreaChart({
         />
         <Area
           dataKey="good"
-          type="natural"
+          type="linear"
           fill="var(--color-good)"
           fillOpacity={0.4}
           stroke="var(--color-good)"
@@ -44,7 +45,7 @@ export function HistoricalPerformanceAreaChart({
         />
         <Area
           dataKey="ni"
-          type="natural"
+          type="linear"
           fill="var(--color-ni)"
           fillOpacity={0.4}
           stroke="var(--color-ni)"
@@ -52,7 +53,7 @@ export function HistoricalPerformanceAreaChart({
         />
         <Area
           dataKey="poor"
-          type="natural"
+          type="linear"
           fill="var(--color-poor)"
           fillOpacity={0.4}
           stroke="var(--color-poor)"

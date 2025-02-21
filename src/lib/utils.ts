@@ -43,8 +43,7 @@ const metrics = [
 
 export function formatCruxReport(item: CruxReport): CruxHistoryItem[] | null {
   const url =
-    item.urlNormalizationDetails?.normalizedUrl ?? item?.record?.key?.origin;
-  console.log('hi', url);
+    item.urlNormalizationDetails?.originalUrl ?? item?.record?.key?.origin;
   if (!url) return null;
   return metrics
     .map((metric) => {

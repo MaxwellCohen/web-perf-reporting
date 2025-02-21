@@ -6,6 +6,7 @@ import {
   pageSpeedInsightsSchema,
 } from './schema';
 import { formatCruxHistoryReport, formatCruxReport } from './utils';
+import * as Sentry from '@sentry/nextjs';
 
 export type formFactor = 'PHONE' | 'TABLET' | 'DESKTOP' | 'ALL_FORM_FACTORS';
 
@@ -27,14 +28,12 @@ export const getCurrentCruxData = async ({
       },
     );
     if (!request.ok) {
-      console.error('Failed to fetch current CRUX data:', request.statusText);
-      return null;
+      throw new Error('Failed to fetch current CRUX data: ' + request.statusText);
     }
     const data = await request.json();
     return formatCruxReport(cruxReportSchema.parse(data));
   } catch (error) {
-    console.log(error);
-    // Sentry.captureException(error);
+    Sentry.captureException(error);
     return null;
   }
 };
@@ -57,18 +56,13 @@ export const getHistoricalCruxData = async ({
       },
     );
     if (!request.ok) {
-      console.error(
-        'Failed to fetch historical CRUX data:',
-        request.statusText,
-      );
-      return null;
+      throw new Error('Failed to fetch historical CRUX data: ' + request.statusText);
     }
     const data = await request.json();
 
     return formatCruxHistoryReport(CruxHistoryReportSchema.parse(data));
   } catch (error) {
-    console.log(error);
-    // Sentry.captureException(error);
+    Sentry.captureException(error);
     return null;
   }
 };
@@ -108,8 +102,7 @@ export const requestPageSpeedData = async (
     records[baseurl.toString()] = a;
     return a;
   } catch (error) {
-    // Sentry.captureException(error);
-    console.error(error);
+    Sentry.captureException(error);
     return null;
   }
 };

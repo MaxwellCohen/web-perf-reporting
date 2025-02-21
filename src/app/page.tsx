@@ -43,11 +43,14 @@ export default async function Home({
             {' '}
             Web Perf Report For {url}
           </h2>
-          <Suspense fallback={<div>Loading...</div>}>
+          
             <Accordion type="multiple" className="w-full">
               <CurrentPerformanceCharts url={url} formFactor="PHONE" />
               <CurrentPerformanceCharts url={url} formFactor="TABLET" />
               <CurrentPerformanceCharts url={url} formFactor="DESKTOP" />
+              <CurrentPerformanceCharts origin={url} formFactor="PHONE" />
+              <CurrentPerformanceCharts origin={url} formFactor="TABLET" />
+              <CurrentPerformanceCharts origin={url} formFactor="DESKTOP" />
               <ChartsHistoricalSection
                 url={url}
                 formFactor="ALL_FORM_FACTORS"
@@ -55,11 +58,17 @@ export default async function Home({
               <ChartsHistoricalSection url={url} formFactor="PHONE" />
               <ChartsHistoricalSection url={url} formFactor="TABLET" />
               <ChartsHistoricalSection url={url} formFactor="DESKTOP" />
+              <ChartsHistoricalSection
+                origin={url}
+                formFactor="ALL_FORM_FACTORS"
+              />
+              <ChartsHistoricalSection origin={url} formFactor="PHONE" />
+              <ChartsHistoricalSection origin={url} formFactor="TABLET" />
+              <ChartsHistoricalSection origin={url} formFactor="DESKTOP" />
               <Suspense fallback={<div>Loading...</div>}>
                 {/* <PageSpeedInsights url={url} formFactor="DESKTOP" /> */}
               </Suspense>
             </Accordion>
-          </Suspense>
         </>
       )}
     </div>
