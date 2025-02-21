@@ -38,6 +38,7 @@ export function GaugeChart({ metric, data }: { metric: string, data?: UserPageLo
                     endAngle={180}
                     innerRadius={'50%'}
                     strokeWidth={5}
+                    isAnimationActive={false}
                 >
                     <Label
                         content={({ viewBox }) => {

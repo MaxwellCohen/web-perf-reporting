@@ -1,4 +1,3 @@
-import exp from "constants";
 import { z } from "zod"
 
 export const cruxHistogramSchema = z.array(
@@ -23,12 +22,22 @@ export const cruxPercentileSchema = z.object({ p75: z.union([z.number(), z.strin
 
 export type CruxPercentile = z.infer<typeof cruxPercentileSchema>;
 
+export const CruxHistogramItem = z.object({
+  histogram: cruxHistogramSchema,
+  percentiles: cruxPercentileSchema
+})
+
+const  urlNormalizationDetails =  z.object({
+  originalUrl: z.string().url(),
+  normalizedUrl: z.string().url()
+}).partial().optional() 
+
 export const cruxReportSchema = z.object({
   record: z.object({
-    key: z.object({ formFactor: z.string(), origin: z.string() }),
+    key: z.object({ formFactor: z.string(), origin: z.string() }).partial(),
     metrics: z.object({
       largest_contentful_paint_resource_type: z.object({
-        fractions: z.object({ image: z.number(), text: z.number() })
+        fractions: z.object({ image: z.number(), text: z.number() }).optional()
       }),
       navigation_types: z.object({
         fractions: z.object({
@@ -41,49 +50,32 @@ export const cruxReportSchema = z.object({
           prerender: z.number()
         })
       }).optional(),
-      cumulative_layout_shift: z.object({
-        histogram: cruxHistogramSchema,
-        percentiles: cruxPercentileSchema
-      }),
-      experimental_time_to_first_byte: z.object({
-        histogram: cruxHistogramSchema,
-        percentiles: cruxPercentileSchema
-      }),
-      interaction_to_next_paint: z.object({
-        histogram: cruxHistogramSchema,
-        percentiles: cruxPercentileSchema
-      }),
-      largest_contentful_paint: z.object({
-        histogram: cruxHistogramSchema,
-        percentiles: cruxPercentileSchema
-      }),
+      cumulative_layout_shift: CruxHistogramItem,
+      experimental_time_to_first_byte: CruxHistogramItem,
+      interaction_to_next_paint: CruxHistogramItem,
+      largest_contentful_paint: CruxHistogramItem,
+      round_trip_time: CruxHistogramItem,
+      first_contentful_paint: CruxHistogramItem,
       largest_contentful_paint_image_resource_load_duration: z.object({
         percentiles: cruxPercentileSchema
-      }),
-      round_trip_time: z.object({
-        histogram: cruxHistogramSchema,
-        percentiles: cruxPercentileSchema
-      }),
-      first_contentful_paint: z.object({
-        histogram: cruxHistogramSchema,
-        percentiles: cruxPercentileSchema
-      }),
+      }).optional(),
       largest_contentful_paint_image_element_render_delay: z.object({
         percentiles: cruxPercentileSchema
-      }),
+      }).optional(),
       largest_contentful_paint_image_resource_load_delay: z.object({
         percentiles: cruxPercentileSchema
-      }),
+      }).optional(),
       largest_contentful_paint_image_time_to_first_byte: z.object({
         percentiles: cruxPercentileSchema
-      })
+      }).optional()
     }),
     collectionPeriod: z.object({
       firstDate: cruxDateSchema,
       lastDate: cruxDateSchema
     })
-  })
-})
+  }),
+  urlNormalizationDetails
+});
 
 export type CruxReport = z.infer<typeof cruxReportSchema>;
 
@@ -101,7 +93,7 @@ export const CruxHistoryHistogramTimeseries = z.array(
 export type CruxHistoryHistogramTimeseries = z.infer<typeof CruxHistoryHistogramTimeseries>;
 
 export const CruxHistoryPercentilesTimeseries = z.object({
-  p75s: z.array(z.union([z.null(), z.number(), z.string()]))
+  p75s: z.array(z.union([z.null(), z.number(), z.string()])).optional(),
 })
 
 export type CruxHistoryPercentilesTimeseries = z.infer<typeof CruxHistoryPercentilesTimeseries>;
@@ -115,36 +107,23 @@ export const CruxHistoryReportCollectionPeriods = z.array(
 
 export type CruxHistoryReportCollectionPeriods = z.infer<typeof CruxHistoryReportCollectionPeriods>;
 
-export const CruxHistoryReport = z.object({
+export const CruxHistoryTimeseries = z.object({
+  histogramTimeseries: CruxHistoryHistogramTimeseries,
+  percentilesTimeseries: CruxHistoryPercentilesTimeseries,
+});
+
+export const CruxHistoryReportSchema = z.object({
   record: z.object({
-    key: z.object({ formFactor: z.string().optional(), origin: z.string() }),
+    key: z.object({ formFactor: z.string().optional(), origin: z.string().optional() }).partial(),
     metrics: z.object({
-      round_trip_time: z.object({
-        histogramTimeseries: CruxHistoryHistogramTimeseries,
-        percentilesTimeseries: CruxHistoryPercentilesTimeseries,
-      }),
-      experimental_time_to_first_byte: z.object({
-        histogramTimeseries: CruxHistoryHistogramTimeseries,
-        percentilesTimeseries: CruxHistoryPercentilesTimeseries,
-      }),
-      first_contentful_paint: z.object({
-        histogramTimeseries: CruxHistoryHistogramTimeseries,
-        percentilesTimeseries: CruxHistoryPercentilesTimeseries,
-      }),
-      interaction_to_next_paint: z.object({
-        histogramTimeseries: CruxHistoryHistogramTimeseries,
-        percentilesTimeseries: CruxHistoryPercentilesTimeseries,
-      }),
+      round_trip_time: CruxHistoryTimeseries,
+      experimental_time_to_first_byte: CruxHistoryTimeseries,
+      first_contentful_paint: CruxHistoryTimeseries,
+      interaction_to_next_paint: CruxHistoryTimeseries,
+      cumulative_layout_shift: CruxHistoryTimeseries,
+      largest_contentful_paint: CruxHistoryTimeseries,
       largest_contentful_paint_image_resource_load_delay: z.object({
         percentilesTimeseries: CruxHistoryPercentilesTimeseries
-      }),
-      cumulative_layout_shift: z.object({
-        histogramTimeseries: CruxHistoryHistogramTimeseries,
-        percentilesTimeseries: CruxHistoryPercentilesTimeseries
-      }),
-      largest_contentful_paint: z.object({
-        histogramTimeseries: CruxHistoryHistogramTimeseries,
-        percentilesTimeseries: CruxHistoryPercentilesTimeseries,
       }),
       largest_contentful_paint_image_element_render_delay: z.object({
         percentilesTimeseries: CruxHistoryPercentilesTimeseries
@@ -167,21 +146,22 @@ export const CruxHistoryReport = z.object({
       }),
       navigation_types: z.object({
         fractionTimeseries: z.object({
-          navigate: z.object({ fractions: z.array(z.number()) }),
-          navigate_cache: z.object({ fractions: z.array(z.number()) }),
-          reload: z.object({ fractions: z.array(z.number()) }),
-          restore: z.object({ fractions: z.array(z.number()) }),
-          back_forward: z.object({ fractions: z.array(z.number()) }),
-          back_forward_cache: z.object({ fractions: z.array(z.number()) }),
-          prerender: z.object({ fractions: z.array(z.number()) })
+          navigate: z.object({ fractions: z.array(z.coerce.number().catch(0)) }),
+          navigate_cache: z.object({ fractions: z.array(z.coerce.number().catch(0)) }),
+          reload: z.object({ fractions: z.array(z.coerce.number().catch(0)) }),
+          restore: z.object({ fractions: z.array(z.coerce.number().catch(0)) }),
+          back_forward: z.object({ fractions: z.array(z.coerce.number().catch(0)) }),
+          back_forward_cache: z.object({ fractions: z.array(z.coerce.number().catch(0)) }),
+          prerender: z.object({ fractions: z.array(z.coerce.number().catch(0)) })
         })
       }).optional()
     }),
-    collectionPeriods: CruxHistoryReportCollectionPeriods
-  })
+    collectionPeriods: CruxHistoryReportCollectionPeriods,
+  }),
+  urlNormalizationDetails,
 })
 
-export type CruxHistoryReport = z.infer<typeof CruxHistoryReport>;
+export type CruxHistoryReport = z.infer<typeof CruxHistoryReportSchema>;
 
 
 export const UserPageLoadMetricV5schema = z.object({
@@ -303,3 +283,21 @@ export const pageSpeedInsightsSchema = z.object({
 });
 
 export type PageSpeedInsights = z.infer<typeof pageSpeedInsightsSchema>;
+
+// URL | Origin | start_date | end_date | metric_name | P75 | good_max | ni_max | good_densities | ni_densities | poor_densities
+
+export const cruxHistoryItemSchema = z.object({
+  url: z.string(),
+  origin: z.boolean(),
+  start_date: z.string(),
+  end_date: z.string(),
+  metric_name: z.string().optional(),
+  P75: z.number().optional(),
+  good_max: z.number().optional(),
+  ni_max: z.number().optional(),
+  good_density: z.number().optional(),
+  ni_density: z.number().optional(),
+  poor_density: z.number().optional(),
+})
+
+export type CruxHistoryItem = z.infer<typeof cruxHistoryItemSchema>;

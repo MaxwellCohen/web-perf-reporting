@@ -7,7 +7,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import { CruxHistoryHistogramTimeseries, CruxHistoryReportCollectionPeriods } from "@/lib/schema"
+import { CruxHistoryHistogramTimeseries, CruxHistoryItem, CruxHistoryReportCollectionPeriods } from "@/lib/schema"
 import { useMemo, useState } from "react"
 import { formatDate } from "@/lib/utils"
 import { ChartSelector } from "./ChartSelector"
@@ -24,35 +24,31 @@ const ChartMap: Record<string, typeof HistoricalPerformanceAreaChart> = {
 }
 
 
-export function HistoricalPerformanceCard(
-    { title, dateRage, histogramData, collectionPeriods }:
-        { title: string, dateRage: string, histogramData: CruxHistoryHistogramTimeseries, collectionPeriods: CruxHistoryReportCollectionPeriods }
-) {
+export function HistoricalPerformanceCard({ histogramData, title }: { histogramData?: CruxHistoryItem[], title: string })
+ {
     const [ChartType, setChartType] = useState('Area')
 
     const chartData: HistoricalPerformanceChartData[] = useMemo(() => {
-        if (!histogramData) {
+        if (!histogramData?.length) {
             return [];
         }
 
-        const chartData = collectionPeriods.map((period, index) => {
+        return histogramData.map((period) => {
             return {
-                date: formatDate(period.lastDate),
-                good: histogramData[0].densities[index] ?? 0,
-                ni: histogramData[1].densities[index] ?? 0,
-                poor: histogramData[2].densities[index] ?? 0,
+                date: period.end_date,
+                good: period.good_density ?? 0,
+                ni: period.ni_density ?? 0,
+                poor: period.poor_density ?? 0,
             };
-        });
-
-        return chartData;
-    }, [histogramData, collectionPeriods]);
+        }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    }, [histogramData]);
     const Chart = ChartMap[ChartType] ?? HistoricalPerformanceAreaChart;
 
     return (
         <Card>
             <CardHeader>
                 <CardTitle>{title}</CardTitle>
-                <CardDescription>{dateRage}</CardDescription>
+                <CardDescription>{chartData[0].date} - {chartData?.at(-1)?.date}</CardDescription>
             </CardHeader>
             <CardContent>
                 <ChartSelector onValueChange={(value) => setChartType(value)} options={Object.keys(ChartMap)} />

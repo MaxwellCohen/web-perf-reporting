@@ -1,14 +1,14 @@
 "use client"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { CruxHistogram } from "@/lib/schema"
+import { CruxHistoryItem } from "@/lib/schema"
 import { CartesianGrid, Bar,BarChart } from "recharts"
 import { chartConfig } from "./ChartSettings"
 
-export function PerformanceStackedBarChart({ histogramData }: { histogramData: CruxHistogram }) {
+export function PerformanceStackedBarChart({ histogramData }: { histogramData: CruxHistoryItem }) {
     const chartData = [{
-      good: histogramData[0].density ?? 0,
-      ni: histogramData[1].density ?? 0,
-      poor: histogramData[2].density ?? 0,
+      good: histogramData.good_density ?? 0,
+      ni: histogramData.ni_density ?? 0,
+      poor: histogramData.poor_density ?? 0,
     }]
     
     return (

@@ -1,39 +1,45 @@
 
 
 // import * as Sentry from "@sentry/nextjs";
-import { CruxHistoryReport, cruxReportSchema, PageSpeedInsights, pageSpeedInsightsSchema } from "./schema";
+import { CruxHistoryReportSchema, cruxReportSchema, PageSpeedInsights, pageSpeedInsightsSchema } from "./schema";
+import { formatCruxHistoryReport, formatCruxReport } from "./utils";
 
 export type formFactor = 'PHONE' | 'TABLET' | 'DESKTOP' | 'ALL_FORM_FACTORS';
 
-export const getCurrentCruxData = async (testURL: string, formFactor: formFactor) => {
+export const getCurrentCruxData = async ({url, origin, formFactor}: {url?: string; origin?: string; formFactor: formFactor}) => {
   try {
     const request = await fetch(`https://content-chromeuxreport.googleapis.com/v1/records:queryRecord?alt=json&key=${process.env.PAGESPEED_INSIGHTS_API}`, {
-      "body": JSON.stringify({ "origin": testURL, "formFactor": formFactor }),
+      "body": JSON.stringify({  url, formFactor, origin }),
       "method": "POST"
     });
     if (!request.ok) {
+      console.error('Failed to fetch current CRUX data:', request.statusText);
       return null;
     }
     const data = await request.json();
-    return cruxReportSchema.parse(data);
+    return formatCruxReport(cruxReportSchema.parse(data));
   } catch (error) {
+    console.log(error);
     // Sentry.captureException(error);
     return null;
   }
 }
 
-export const getHistoricalCruxData = async (testURL: string, formFactor: formFactor) => {
+export const getHistoricalCruxData = async ({url, origin, formFactor}: {url?: string; origin?: string; formFactor: formFactor}) => {
   try {
     const request = await fetch(`https://chromeuxreport.googleapis.com/v1/records:queryHistoryRecord?key=${process.env.PAGESPEED_INSIGHTS_API}`, {
-      "body": JSON.stringify({ "origin": testURL, "formFactor": formFactor }),
+      "body": JSON.stringify({  url, formFactor, origin }),
       "method": "POST"
     });
     if (!request.ok) {
+      console.error('Failed to fetch historical CRUX data:', request.statusText);
       return null;
     }
     const data = await request.json();
-    return CruxHistoryReport.parse(data);
+
+    return formatCruxHistoryReport(CruxHistoryReportSchema.parse(data));
   } catch (error) {
+    console.log(error);
     // Sentry.captureException(error);
     return null;
   }

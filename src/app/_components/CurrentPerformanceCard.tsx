@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/chart"
 import { Bar, BarChart, CartesianGrid, Rectangle, XAxis } from "recharts"
 
-import { CruxHistogram, CruxHistoryHistogramTimeseries, CruxPercentile, UserPageLoadMetricV5 } from "../../lib/schema"
+import { CruxHistogram, CruxHistoryHistogramTimeseries, CruxHistoryItem, CruxPercentile, UserPageLoadMetricV5 } from "../../lib/schema"
 import { useMemo, useState } from "react"
 import { ChartSelector } from "./ChartSelector"
 import { chartConfig, PerformanceChartData } from "./ChartSettings"
@@ -37,7 +37,7 @@ const getDensity = (data: CruxHistogram | CruxHistoryHistogramTimeseries, index:
 }
 
 
-const makeHistogramData = (data?: CruxHistogram) => {
+const makeHistogramData = (data?: CruxHistoryItem) => {
   if (!data) {
     return {
       chartData: [] as PerformanceChartData[],
@@ -47,9 +47,9 @@ const makeHistogramData = (data?: CruxHistogram) => {
   }
 
   const chartData: PerformanceChartData[] = [
-    { status: "good", density: getDensity(data, 0), fill: "var(--color-good)" },
-    { status: "ni", density: getDensity(data, 1), fill: "var(--color-ni)" },
-    { status: "poor", density: getDensity(data, 2), fill: "var(--color-poor)" },
+    { status: "good", density: data.good_density || 0, fill: "var(--color-good)" },
+    { status: "ni", density: data.ni_density || 0, fill: "var(--color-ni)" },
+    { status: "poor", density: data.poor_density || 0, fill: "var(--color-poor)" },
   ];
 
   return {
@@ -64,34 +64,34 @@ const ChartMap: Record<string, typeof CurrentGaugeChart> = {
   'Gauge Chart': CurrentGaugeChart
 }
 
-export function CurrentPerformanceCard({ title, dateRage, histogramData, percentiles }: { title: string, dateRage: string, histogramData: CruxHistogram, percentiles?: CruxPercentile }) {
+export function CurrentPerformanceCard({ histogramData, title }: { histogramData?: CruxHistoryItem, title: string }) {
   const [ChartType, setChartType] = useState('Histogram')
+  if (!histogramData) {
+    return null;
+  }
 
   const extraInfo = useMemo(() => [
-    `Good: ${histogramData[0]?.start ?? 0} ${histogramData[0]?.end ? `to ${histogramData[0]?.end}` : ""}`,
-    `Needs Improvement: ${histogramData[1]?.start ?? 0} ${histogramData[1]?.end ? `to ${histogramData[1]?.end}` : ""}`,
-    `Poor: ${histogramData[2]?.start ?? 0} ${histogramData[2]?.end ? `to ${histogramData[2]?.end}` : ""}`,
+    `Good: 0 to ${histogramData.good_max ?? 0}`,
+    `Needs Improvement: ${histogramData.good_max ?? 0} to ${histogramData.ni_max ?? 0}`,
+    `Poor: ${histogramData.ni_max} and above`,
   ], [histogramData]);
 
   const Chart = ChartMap[ChartType] ?? Histogram;
 
-  if (!histogramData.length) {
-    return null;
-  }
   return (
     <div>
       <Card>
         <CardHeader>
           <CardTitle>{title}</CardTitle>
-          <CardDescription>{dateRage}</CardDescription>
+          <CardDescription>{`Date Range: ${histogramData.start_date} - ${histogramData.end_date}`}</CardDescription>
         </CardHeader>
         <CardContent>
           <ChartSelector onValueChange={(value) => setChartType(value)} options={Object.keys(ChartMap)} />
-          <Chart histogramData={histogramData} percentiles={percentiles?.p75} />
+          <Chart histogramData={histogramData} />
         </CardContent>
         <CardFooter className="flex-col items-start gap-2 text-sm">
           <div className="flex gap-2 font-medium leading-none">
-            P75 is {percentiles && 'p75' in percentiles ? percentiles.p75 : 'N/A'}
+            P75 is {histogramData.P75 ?? 'N/A'}
           </div>
           {extraInfo.map((info, idx) => <div className="leading-none text-muted-foreground" key={`${idx}-${info}`}>
             {info}
@@ -103,33 +103,33 @@ export function CurrentPerformanceCard({ title, dateRage, histogramData, percent
 }
 
 
-function CurrentGaugeChart({ histogramData, percentiles }: { histogramData: CruxHistogram, percentiles?: number | string }) {
+function CurrentGaugeChart({ histogramData }: { histogramData: CruxHistoryItem }) {
   const data: UserPageLoadMetricV5 = {
-    "percentile": +(percentiles ?? 0),
+    "percentile": +(histogramData.P75 ?? 0),
     "category": '',
     "distributions": [
       {
-        "min": histogramData[0]?.start ?? 0,
-        "max": histogramData[0]?.end ?? 0,
-        proportion: histogramData[0]?.density ?? 0,
+        "min": 0,
+        "max": histogramData.good_max ?? 0,
+        proportion: histogramData.good_density ?? 0,
       },
       {
-        "min": histogramData[1]?.start ?? 0,
-        "max": histogramData[1]?.end ?? 0,
-        proportion: histogramData[1]?.density ?? 0,
+        "min": histogramData.good_max ?? 0,
+        "max": histogramData.ni_max ?? 0,
+        proportion: histogramData.ni_density ?? 0,
       },
       {
-        "min": histogramData[2]?.start ?? 0,
-        "max": histogramData[2]?.end ?? 0,
-        proportion: histogramData[2]?.density ?? 0,
+        "min": histogramData.ni_max ?? 0,
+        "max": (histogramData.ni_max ?? 0) * 1.25,
+        proportion: histogramData.poor_density ?? 0,
       }
     ]
   }
 
-return (<GaugeChart metric={""} data={data} />)
+  return (<GaugeChart metric={""} data={data} />)
 }
 
-function Histogram({ histogramData }: { histogramData: CruxHistogram }) {
+function Histogram({ histogramData }: { histogramData: CruxHistoryItem }) {
   const { chartData } = useMemo(() => makeHistogramData(histogramData), [histogramData]);
   return (
     <div>
