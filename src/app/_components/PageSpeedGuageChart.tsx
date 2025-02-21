@@ -54,6 +54,7 @@ export function GaugeChart({
           innerRadius={'50%'}
           strokeWidth={5}
           isAnimationActive={false}
+          animationDuration={0}
         >
           <Label
             content={({ viewBox }) => {
