@@ -15,7 +15,7 @@ export function ChartSelector({
 }) {
   return (
     <Select onValueChange={onValueChange}>
-      <SelectTrigger className="mb-2 ml-auto w-[160px] text-xs">
+      <SelectTrigger className="mb-2 w-[160px] text-xs">
         <SelectValue placeholder={options[0]} className="text-xs" />
       </SelectTrigger>
       <SelectContent>

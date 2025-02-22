@@ -24,13 +24,12 @@ export function RadialChart({
   return (
     <ChartContainer
       config={chartConfig}
-      className="mx-auto aspect-square w-full max-w-[250px]"
+      className="w-full"
     >
       <RadialBarChart
         data={chartData}
-        endAngle={180}
-        innerRadius={80}
-        outerRadius={130}
+        innerRadius={"50%"}
+        outerRadius={"100%"}
       >
         <ChartTooltip
           cursor={false}

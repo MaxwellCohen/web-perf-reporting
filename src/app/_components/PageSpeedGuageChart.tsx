@@ -41,7 +41,7 @@ export function GaugeChart({
   return (
     <ChartContainer
       config={chartConfig}
-      className="mx-auto aspect-[2/1] max-h-[250px] min-w-[200px]"
+      className="w-full aspect-[2/1]"
     >
       <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
         <Pie
@@ -106,13 +106,13 @@ export function GaugeChart({
                       >
                         {value.toLocaleString()} {data.category}
                       </tspan>
-                      <tspan
+                      {metric ? <tspan
                         x={viewBox.cx}
                         y={(viewBox.cy || 0) + 40}
                         className="fill-muted-foreground"
                       >
                         {metric}
-                      </tspan>
+                      </tspan> : null}
                     </text>
                   </>
                 );

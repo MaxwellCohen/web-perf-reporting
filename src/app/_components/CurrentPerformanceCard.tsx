@@ -15,12 +15,13 @@ import {
 import { Bar, BarChart, CartesianGrid, Rectangle, XAxis } from 'recharts';
 
 import { CruxHistoryItem, UserPageLoadMetricV5 } from '../../lib/schema';
-import { useMemo, useState } from 'react';
-import { ChartSelector } from './ChartSelector';
+import { useContext, useMemo, useState } from 'react';
+
 import { chartConfig, PerformanceChartData } from './ChartSettings';
 import { RadialChart } from './PerformanceRadialChart';
 import { PerformanceStackedBarChart } from './PerformanceStackedBarChart';
 import GaugeChart from './PageSpeedGuageChart';
+import { createContext } from 'react';
 
 const makeHistogramData = (data?: CruxHistoryItem) => {
   if (!data) {
@@ -50,12 +51,15 @@ const makeHistogramData = (data?: CruxHistoryItem) => {
   };
 };
 
-const ChartMap: Record<string, typeof CurrentGaugeChart> = {
+export const ChartMap: Record<string, typeof CurrentGaugeChart> = {
   Histogram: Histogram,
   'Stacked Bar': PerformanceStackedBarChart,
   'Radial Chart': RadialChart,
   'Gauge Chart': CurrentGaugeChart,
 };
+
+
+export const CurrentPerformanceChartContext = createContext<string>('Histogram');
 
 export function CurrentPerformanceCard({
   histogramData,
@@ -64,7 +68,7 @@ export function CurrentPerformanceCard({
   histogramData?: CruxHistoryItem;
   title: string;
 }) {
-  const [ChartType, setChartType] = useState('Histogram');
+  const ChartType = useContext(CurrentPerformanceChartContext);
 
   const extraInfo = useMemo(
     () => [
@@ -75,39 +79,30 @@ export function CurrentPerformanceCard({
     [histogramData],
   );
 
+  const Chart = ChartMap[ChartType] ?? Histogram;
+
   if (!histogramData) {
     return null;
   }
-  const Chart = ChartMap[ChartType] ?? Histogram;
 
   return (
-    <div>
-      <Card className='h-full flex  flex-col'>
-        <CardHeader className='flex-1'>
-          <CardTitle>{title}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ChartSelector
-            onValueChange={(value) => setChartType(value)}
-            options={Object.keys(ChartMap)}
-          />
-          <Chart histogramData={histogramData} />
-        </CardContent>
-        <CardFooter className="flex-col items-start gap-2 text-sm">
-          <div className="flex gap-2 font-medium leading-none">
-            P75 is {histogramData.P75 ?? 'N/A'}
+    <Card className='h-full grid grid-rows-[44px,auto,72px] grid-cols-1 gap-3'>
+      <div className='text-md font-bold'>{title}</div>
+      <Chart histogramData={histogramData} />
+      <div className="flex-col items-start gap-2 text-sm">
+        <div className="flex gap-2 font-medium leading-none">
+          P75 is {histogramData.P75 ?? 'N/A'}
+        </div>
+        {extraInfo.map((info, idx) => (
+          <div
+            className="leading-none text-muted-foreground text-xs"
+            key={`${idx}-${info}`}
+          >
+            {info}
           </div>
-          {extraInfo.map((info, idx) => (
-            <div
-              className="leading-none text-muted-foreground"
-              key={`${idx}-${info}`}
-            >
-              {info}
-            </div>
-          ))}
-        </CardFooter>
-      </Card>
-    </div>
+        ))}
+      </div>
+    </Card>
   );
 }
 

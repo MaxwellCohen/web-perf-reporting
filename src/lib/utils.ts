@@ -8,7 +8,6 @@ import {
 } from '@/lib/schema';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import type { formFactor } from './services';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -60,7 +59,6 @@ const percentilesTimeseries = [
 
 export function formatCruxReport(
   item: CruxReport,
-  formFactor: formFactor,
 ): CruxHistoryItem[] | null {
   const url =
     item.urlNormalizationDetails?.originalUrl ??
@@ -74,7 +72,7 @@ export function formatCruxReport(
       const d: CruxHistoryItem = JSON.parse(
         JSON.stringify({
           url,
-          formFactor: formFactor || '',
+          formFactor: item.record.key.formFactor || '',
           origin: !item.urlNormalizationDetails ? 'origin' : 'url',
           start_date: formatDate(item.record.collectionPeriod.firstDate),
           end_date: formatDate(item.record.collectionPeriod.lastDate),
@@ -275,4 +273,19 @@ export function convertCruxHistoryToReports(
       urlNormalizationDetails : historicalData.urlNormalizationDetails
     };
   });
+}
+
+
+export function groupBy<T>(list: T[], keyGetter: (item: T) => string) {
+  const map = new Map<string, T[]>();
+  list.forEach((item) => {
+    const key = keyGetter(item);
+    const collection = map.get(key);
+    if (!collection) {
+      map.set(key, [item]);
+    } else {
+      collection.push(item);
+    }
+  });
+  return Object.fromEntries(map.entries());
 }

@@ -8,25 +8,13 @@ import {
   getCurrentCruxData,
   requestPageSpeedData,
 } from '@/lib/services';
-import { formatCruxReport, formatFormFactor } from '@/lib/utils';
-import { CurrentPerformanceCard } from './CurrentPerformanceCard';
-import { HistoricalPerformanceCard } from './HistoricalPerformanceCard';
+import { formatCruxReport, formatFormFactor, groupBy } from '@/lib/utils';
+
 import GaugeChart from './PageSpeedGuageChart';
 import { formFactor } from '@/lib/services';
+import { HistoricalPerformanceCard } from './HistoricalPerformanceCard';
+import { CurrentPerformanceDashboard } from './CurrentPerformanceDashboard';
 
-function groupBy<T>(list: T[], keyGetter: (item: T) => string) {
-  const map = new Map<string, T[]>();
-  list.forEach((item) => {
-    const key = keyGetter(item);
-    const collection = map.get(key);
-    if (!collection) {
-      map.set(key, [item]);
-    } else {
-      collection.push(item);
-    }
-  });
-  return Object.fromEntries(map.entries());
-}
 
 export async function ChartsHistoricalSection({
   url,
@@ -46,11 +34,9 @@ export async function ChartsHistoricalSection({
     return null;
   }
 
-  const currentCruxHistoricalResult = reports.map((report) => formatCruxReport(report, formFactor)).flatMap(i => i).filter(i => !!i)
-  const groupedMetics = groupBy(
-    currentCruxHistoricalResult,
-    ({ metric_name }) => metric_name || '',
-  );
+  const currentCruxHistoricalResult = reports.map((report) => formatCruxReport(report)).flatMap(i => i).filter(i => !!i)
+  const groupedMetics = groupBy(currentCruxHistoricalResult,({ metric_name }) => metric_name || '');
+ 
 
   return (
     <AccordionItem value={`historical-${formFactor}-${url}-${origin}`}>
@@ -59,7 +45,7 @@ export async function ChartsHistoricalSection({
         {url ? `for the page` : 'for the origin'}
       </AccordionTrigger>
       <AccordionContent>
-        <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
           <HistoricalPerformanceCard
             title="Cumulative Layout Shift"
             histogramData={groupedMetics.cumulative_layout_shift || []}
@@ -104,12 +90,8 @@ export async function CurrentPerformanceCharts({
     return null;
   }
 
-  const data = formatCruxReport(report, formFactor)
-  if (!data) {
-    return null;
-  }
-  const groupedMetics = groupBy(data , ({ metric_name }) => metric_name || '');
-  const form_factors = report?.record?.metrics?.form_factors?.fractions
+
+
   return (
     <AccordionItem value={`current-${formFactor}`}>
       <AccordionTrigger>
@@ -119,34 +101,7 @@ export async function CurrentPerformanceCharts({
         </h2>
       </AccordionTrigger>
       <AccordionContent>
-        <h3>{`Date Range: ${groupedMetics?.cumulative_layout_shift?.[0].start_date} - ${groupedMetics?.cumulative_layout_shift?.[0].end_date}`}</h3>
-        {form_factors ?  <div><strong>Desktop</strong> {form_factors.desktop * 100} %  <strong>Phone</strong> {form_factors.phone * 100} % <strong>tablet</strong> {form_factors.tablet * 100} %</div> : null }
-        <div className="mt-2 grid gap-1 md:grid-cols-3 lg:grid-cols-6">
-          <CurrentPerformanceCard
-            title="Largest Contentful Paint (LCP)"
-            histogramData={groupedMetics?.largest_contentful_paint?.[0]}
-          />
-          <CurrentPerformanceCard
-            title="Interaction to Next Paint (INP)"
-            histogramData={groupedMetics?.interaction_to_next_paint?.[0]}
-          />
-          <CurrentPerformanceCard
-            title="Cumulative Layout Shift (CLS)"
-            histogramData={groupedMetics?.cumulative_layout_shift?.[0]}
-          />
-          <CurrentPerformanceCard
-            title="First Contentful Paint (FCP)"
-            histogramData={groupedMetics?.first_contentful_paint?.[0]}
-          />
-          <CurrentPerformanceCard
-            title="Time to First Byte (TTFB)"
-            histogramData={groupedMetics?.experimental_time_to_first_byte?.[0]}
-          />
-          <CurrentPerformanceCard
-            title="Round Trip Time (RTT)"
-            histogramData={groupedMetics?.round_trip_time?.[0]}
-          />
-        </div>
+       <CurrentPerformanceDashboard report={report} />
       </AccordionContent>
     </AccordionItem>
   );
