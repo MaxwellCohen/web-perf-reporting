@@ -42,19 +42,6 @@ export const getCurrentCruxData = async ({
     }
     const data = await request.json();
     const parsedData = cruxReportSchema.parse(data);
-    if (parsedData) {
-      db.insert(historicalMetrics)
-        .values({
-          id: `${url ?? ''}-${origin ?? ''}-${formFactor}-${parsedData}`,
-          url: url ?? '',
-          origin: origin ?? '',
-          formFactor: formFactor ?? '',
-          date: formatDate(parsedData.record.collectionPeriod.lastDate),
-          data: parsedData,
-        })
-        .execute()
-        .catch(() => {});
-    }
     return parsedData;
   } catch (error) {
     console.log(JSON.stringify({ url, formFactor, origin }));
@@ -82,16 +69,14 @@ export const getHistoricalCruxData = async ({
       },
     );
     if (!request.ok) {
-      throw new Error(
-        'Failed to fetch historical CRUX data: ' + request.statusText,
-      );
+      return null;
     }
     const data = await request.json();
     const parseData = CruxHistoryReportSchema.parse(data);
     const reports = convertCruxHistoryToReports(parseData);
 
     if (reports.length) {
-      db.insert(historicalMetrics)
+      await db.insert(historicalMetrics)
         .values(
           reports.map((data) => {
             const date = formatDate(data.record.collectionPeriod.lastDate);
@@ -122,7 +107,6 @@ export const getHistoricalCruxData = async ({
 
     return dbData.map(({ data }) => data);
   } catch (error) {
-    console.log(error);
     Sentry.captureException(error);
     return null;
   }
@@ -138,7 +122,7 @@ export const requestPageSpeedData = async (
     const baseurl = new URL(
       'https://www.googleapis.com/pagespeedonline/v5/runPagespeed',
     );
-    baseurl.searchParams.append('url', testURL);
+    baseurl.searchParams.append('url', encodeURI(testURL));
     baseurl.searchParams.append('category', 'ACCESSIBILITY');
     baseurl.searchParams.append('category', 'BEST_PRACTICES');
     baseurl.searchParams.append('category', 'PERFORMANCE');

@@ -1,12 +1,8 @@
 import { urlSchema } from '@/lib/schema';
 import {
   Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
 } from '@/components/ui/accordion';
 import { UrlLookupForm } from '@/app/_components/UrlLookupForm';
-import { Suspense } from 'react';
 import {
   CurrentPerformanceCharts,
   ChartsHistoricalSection,
