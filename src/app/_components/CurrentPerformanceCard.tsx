@@ -2,7 +2,6 @@
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -83,10 +82,9 @@ export function CurrentPerformanceCard({
 
   return (
     <div>
-      <Card>
-        <CardHeader>
+      <Card className='h-full flex  flex-col'>
+        <CardHeader className='flex-1'>
           <CardTitle>{title}</CardTitle>
-          <CardDescription>{`Date Range: ${histogramData.start_date} - ${histogramData.end_date}`}</CardDescription>
         </CardHeader>
         <CardContent>
           <ChartSelector

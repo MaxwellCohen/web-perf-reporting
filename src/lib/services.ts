@@ -1,14 +1,22 @@
 // import * as Sentry from "@sentry/nextjs";
+import { db } from '@/db';
 import {
   CruxHistoryReportSchema,
   cruxReportSchema,
   PageSpeedInsights,
   pageSpeedInsightsSchema,
 } from './schema';
-import { formatCruxHistoryReport, formatCruxReport } from './utils';
+import { convertCruxHistoryToReports, formatDate } from './utils';
 import * as Sentry from '@sentry/nextjs';
+import { historicalMetrics as historicalMetrics } from '@/db/schema';
+import { eq, and, desc } from 'drizzle-orm';
 
-export type formFactor = 'PHONE' | 'TABLET' | 'DESKTOP' | 'ALL_FORM_FACTORS';
+export type formFactor =
+  | 'PHONE'
+  | 'TABLET'
+  | 'DESKTOP'
+  | 'ALL_FORM_FACTORS'
+  | undefined;
 
 export const getCurrentCruxData = async ({
   url,
@@ -28,11 +36,29 @@ export const getCurrentCruxData = async ({
       },
     );
     if (!request.ok) {
-      throw new Error('Failed to fetch current CRUX data: ' + request.statusText);
+      throw new Error(
+        'Failed to fetch current CRUX data: ' + request.statusText,
+      );
     }
     const data = await request.json();
-    return formatCruxReport(cruxReportSchema.parse(data));
+    const parsedData = cruxReportSchema.parse(data);
+    if (parsedData) {
+      db.insert(historicalMetrics)
+        .values({
+          id: `${url ?? ''}-${origin ?? ''}-${formFactor}-${parsedData}`,
+          url: url ?? '',
+          origin: origin ?? '',
+          formFactor: formFactor ?? '',
+          date: formatDate(parsedData.record.collectionPeriod.lastDate),
+          data: parsedData,
+        })
+        .execute()
+        .catch(() => {});
+    }
+    return parsedData;
   } catch (error) {
+    console.log(JSON.stringify({ url, formFactor, origin }));
+    console.log(error);
     Sentry.captureException(error);
     return null;
   }
@@ -45,7 +71,7 @@ export const getHistoricalCruxData = async ({
 }: {
   url?: string;
   origin?: string;
-  formFactor: formFactor;
+  formFactor?: formFactor;
 }) => {
   try {
     const request = await fetch(
@@ -56,12 +82,47 @@ export const getHistoricalCruxData = async ({
       },
     );
     if (!request.ok) {
-      throw new Error('Failed to fetch historical CRUX data: ' + request.statusText);
+      throw new Error(
+        'Failed to fetch historical CRUX data: ' + request.statusText,
+      );
     }
     const data = await request.json();
+    const parseData = CruxHistoryReportSchema.parse(data);
+    const reports = convertCruxHistoryToReports(parseData);
 
-    return formatCruxHistoryReport(CruxHistoryReportSchema.parse(data));
+    if (reports.length) {
+      db.insert(historicalMetrics)
+        .values(
+          reports.map((data) => {
+            const date = formatDate(data.record.collectionPeriod.lastDate);
+            return {
+              id: `${url ?? ''}-${origin ?? ''}-${formFactor}-${date}`,
+              url: url ?? '',
+              origin: origin ?? '',
+              formFactor: formFactor ?? '',
+              date: date,
+              data,
+            };
+          }),
+        )
+        .execute()
+        .catch(() => {});
+    }
+    const dbData = await db
+      .select({ data: historicalMetrics.data })
+      .from(historicalMetrics)
+      .where(
+        and(
+          eq(historicalMetrics.url, url ?? ''),
+          eq(historicalMetrics.origin, origin ?? ''),
+          eq(historicalMetrics.formFactor, formFactor ?? ''),
+        ),
+      )
+      .orderBy(desc(historicalMetrics.id));
+
+    return dbData.map(({ data }) => data);
   } catch (error) {
+    console.log(error);
     Sentry.captureException(error);
     return null;
   }
@@ -87,7 +148,9 @@ export const requestPageSpeedData = async (
       'key',
       process.env.PAGESPEED_INSIGHTS_API ?? '',
     );
-    baseurl.searchParams.append('strategy', formFactor);
+    if (formFactor) {
+      baseurl.searchParams.append('strategy', formFactor);
+    }
     console.log(baseurl.toString());
     if (records[baseurl.toString()]) {
       return records[baseurl.toString()];
