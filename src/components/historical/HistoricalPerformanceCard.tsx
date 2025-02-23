@@ -8,10 +8,11 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { CruxHistoryItem } from '@/lib/schema';
-import { useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { ChartSelector } from '../../components/common/ChartSelector';
 import { HistoricalPerformanceChartData } from '../../components/common/ChartSettings';
 import dynamic from 'next/dynamic';
+import { CurrentPerformanceChartContext } from '../latest-crux/PerformanceCard';
 
 const HistoricalPerformanceBarChart = dynamic(() =>
   import('./HistoricalPerformanceBarChart').then(
@@ -24,7 +25,7 @@ const HistoricalPerformanceAreaChart = dynamic(() =>
   ),
 );
 
-const ChartMap: Record<string, typeof HistoricalPerformanceAreaChart> = {
+export const ChartMap: Record<string, typeof HistoricalPerformanceAreaChart> = {
   Area: HistoricalPerformanceAreaChart,
   'Stacked Bar': HistoricalPerformanceBarChart,
 };
@@ -33,10 +34,11 @@ export function HistoricalPerformanceCard({
   histogramData,
   title,
 }: {
-  histogramData?: CruxHistoryItem[];
+  histogramData?: CruxHistoryItem[] | null;
   title: string;
 }) {
-  const [ChartType, setChartType] = useState('Area');
+
+  const ChartType = useContext(CurrentPerformanceChartContext);
 
   const chartData: HistoricalPerformanceChartData[] = useMemo(() => {
     if (!histogramData?.length) {
@@ -57,21 +59,9 @@ export function HistoricalPerformanceCard({
   const Chart = ChartMap[ChartType] ?? HistoricalPerformanceAreaChart;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>
-          {chartData[0].date} - {chartData?.at(-1)?.date}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartSelector
-          onValueChange={(value) => setChartType(value)}
-          options={Object.keys(ChartMap)}
-        />
-        <Chart chartData={chartData} />
-      </CardContent>
-      <CardFooter></CardFooter>
+    <Card className="grid h-full grid-cols-1 grid-rows-[44px,auto,72px] gap-3 p-2">
+      <div className="text-md text-center font-bold">{title}</div>
+      <Chart chartData={chartData} />
     </Card>
   );
 }

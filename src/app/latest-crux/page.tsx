@@ -1,6 +1,6 @@
 import { UrlLookupForm } from '@/components/common/UrlLookupForm';
 import { updateURl } from '@/lib/utils';
-import { CurrentPerformanceCharts } from '@/components/latest-crux/CurrentPerformanceCharts';
+import { CurrentPerformanceSection } from '@/components/latest-crux/CurrentPerformanceSection';
 
 export default async function Home({
     searchParams,
@@ -19,7 +19,7 @@ export default async function Home({
             {!url ? (
                 <UrlLookupForm />
             ) : (
-                <CurrentPerformanceCharts url={url} />
+                <CurrentPerformanceSection url={url} />
             )}
         </div>
     );

@@ -1,6 +1,3 @@
-import {
-  Accordion,
-} from '@/components/ui/accordion';
 import { UrlLookupForm } from '@/components/common/UrlLookupForm';
 
 import { updateURl } from '@/lib/utils';
@@ -18,29 +15,13 @@ export default async function Home({
   return (
     <div>
       <h1 className="mx-auto text-center text-3xl font-extrabold">
-        Web Performance Report
+        Historical CrUX reports for {url ? ` for ${url} ` : ''}
       </h1>
-      {!url ? (
+      {!url ?
         <UrlLookupForm />
-      ) : (
-        <>
-          <div className="mx-auto text-center text-2xl font-extrabold">
-            Historical web performance {url}
-          </div>
-
-          <Accordion type="multiple" className="w-full">
-
-            <HistoricalChartsSection url={url} />
-            <HistoricalChartsSection url={url} formFactor="PHONE" />
-            <HistoricalChartsSection url={url} formFactor="TABLET" />
-            <HistoricalChartsSection url={url} formFactor="DESKTOP" />
-            <HistoricalChartsSection origin={url} />
-            <HistoricalChartsSection origin={url} formFactor="PHONE" />
-            <HistoricalChartsSection origin={url} formFactor="TABLET" />
-            <HistoricalChartsSection origin={url} formFactor="DESKTOP" />
-          </Accordion>
-        </>
-      )}
-    </div>
+        :
+        <HistoricalChartsSection url={url} />
+      }
+    </div >
   );
 }

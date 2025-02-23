@@ -14,7 +14,7 @@ export default function Home() {
       <div className="grid md:grid-cols-3 gap-6 mb-12">
         <Card className="h-full flex flex-col">
           <CardHeader className='flex-1'>
-            <CardTitle>Real User Metrics</CardTitle>
+            <CardTitle>Latest CrUX Metrics</CardTitle>
             <CardDescription>Analyze actual user experience data from Chrome UX Report</CardDescription>
           </CardHeader>
           <CardContent>

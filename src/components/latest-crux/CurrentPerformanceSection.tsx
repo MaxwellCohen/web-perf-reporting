@@ -2,7 +2,7 @@ import { getCurrentCruxData } from '@/lib/services';
 
 import { CurrentPerformanceDashboard } from '@/components/latest-crux/PerformanceDashboard';
 
-export async function CurrentPerformanceCharts({ url }: { url: string }) {
+export async function CurrentPerformanceSection({ url }: { url: string }) {
   const cruxData = await Promise.all([
     getCurrentCruxData({ origin: url, formFactor: undefined }),
     getCurrentCruxData({ origin: url, formFactor: 'DESKTOP' }),

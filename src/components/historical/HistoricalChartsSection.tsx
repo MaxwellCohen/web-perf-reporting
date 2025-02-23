@@ -1,79 +1,42 @@
-/* eslint-disable @next/next/no-img-element */
-import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
 import {
   getHistoricalCruxData,
-  formFactor,
-} from '@/lib/services';
-import { formatCruxReport, formatFormFactor, groupBy } from '@/lib/utils';
 
-import { HistoricalPerformanceCard } from '@/components/historical/HistoricalPerformanceCard';
+} from '@/lib/services';
+
+import { HistoricalDashboard } from './HistoricalDashbord';
 
 export async function HistoricalChartsSection({
   url,
-  formFactor,
-  origin,
+  
 }: {
-  url?: string;
-  formFactor?: formFactor;
-  origin?: string;
+  url: string;
 }) {
-  const reports = await getHistoricalCruxData({
-    url,
-    formFactor,
-    origin,
-  });
 
-  if (!reports?.length) {
-    return null;
-  }
-  const currentCruxHistoricalResult = reports
-    .map((report) => formatCruxReport(report))
-    .flatMap((i) => i)
-    .filter((i) => !!i);
-  const groupedMetics = groupBy(
-    currentCruxHistoricalResult,
-    ({ metric_name }) => metric_name || '',
-  );
+  const cruxData = await Promise.all([
+    getHistoricalCruxData({ origin: url, formFactor: undefined }),
+    getHistoricalCruxData({ origin: url, formFactor: 'DESKTOP' }),
+    getHistoricalCruxData({ origin: url, formFactor: 'TABLET' }),
+    getHistoricalCruxData({ origin: url, formFactor: 'PHONE' }),
+    getHistoricalCruxData({ url, formFactor: undefined }),
+    getHistoricalCruxData({ url, formFactor: 'DESKTOP' }),
+    getHistoricalCruxData({ url, formFactor: 'TABLET' }),
+    getHistoricalCruxData({ url, formFactor: 'PHONE' }),
+  ]);
+  const cruxReport = {
+    originAll: cruxData[0],
+    originDESKTOP: cruxData[1],
+    originTABLET: cruxData[2],
+    originPHONE: cruxData[3],
+    urlAll: cruxData[4],
+    urlDESKTOP: cruxData[5],
+    urlTABLET: cruxData[6],
+    urlPHONE: cruxData[7],
+  };
 
   return (
-    <AccordionItem value={`historical-${formFactor}-${url}-${origin}`}>
-      <AccordionTrigger>
-        Historical Performance Report For {formatFormFactor(formFactor)} Devices{' '}
-        {url ? `for the page` : 'for the origin'}
-      </AccordionTrigger>
-      <AccordionContent>
-        <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
-          <HistoricalPerformanceCard
-            title="Cumulative Layout Shift"
-            histogramData={groupedMetics.cumulative_layout_shift || []}
-          />
-          <HistoricalPerformanceCard
-            title="Experimental Time to First Byte"
-            histogramData={groupedMetics.experimental_time_to_first_byte || []}
-          />
-          <HistoricalPerformanceCard
-            title="Interaction to Next Paint"
-            histogramData={groupedMetics.interaction_to_next_paint || []}
-          />
-          <HistoricalPerformanceCard
-            title="Largest Contentful Paint"
-            histogramData={groupedMetics.largest_contentful_paint || []}
-          />
-          <HistoricalPerformanceCard
-            title="Round Trip Time"
-            histogramData={groupedMetics.round_trip_time || []}
-          />
-          <HistoricalPerformanceCard
-            title="First Contentful Paint"
-            histogramData={groupedMetics.first_contentful_paint || []}
-          />
-        </div>
-      </AccordionContent>
-    </AccordionItem>
+    <div className="flex flex-col mt-4">
+    <HistoricalDashboard reportMap={cruxReport} />
+  </div>
   );
 }
 

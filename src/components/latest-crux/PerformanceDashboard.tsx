@@ -7,12 +7,11 @@ import {
   CurrentPerformanceCard,
   CurrentPerformanceChartContext,
 } from '@/components/latest-crux/PerformanceCard';
-import { ChartSelector } from '@/components/common/ChartSelector';
 import { useId, useState } from 'react';
 import { PercentTable } from '@/components/common/FormFactorPercentPieChart';
 
-import { Label } from '@/components/ui/label';
-import { Card } from '../ui/card';
+import { PerformanceOptions } from './PerformanceOptions';
+
 
 type Scope = 'origin' | 'url';
 type DeviceType = 'All' | 'DESKTOP' | 'TABLET' | 'PHONE';
@@ -28,53 +27,32 @@ export function CurrentPerformanceDashboard({
   const [deviceType, setDeviceType] = useState<DeviceType>('All');
   const report = reportMap[`${reportScope}${deviceType}`];
   const data = formatCruxReport(report);
- 
+
 
   const groupedMetics = data ? groupBy(data, ({ metric_name }) => metric_name || '') : {};
   const form_factors = reportMap[`${reportScope}All`]?.record?.metrics?.form_factors?.fractions;
   const navigation_types = report?.record?.metrics?.navigation_types?.fractions;
-  const collectionPeriod = report?.record?.collectionPeriod 
+  const collectionPeriod = report?.record?.collectionPeriod
   return (
     <CurrentPerformanceChartContext.Provider value={ChartType}>
-            <h2 className="text-xl">
+      <h2 className="text-xl">
         Latest Performance Report for
         {collectionPeriod ? ` ${formatDate(collectionPeriod.firstDate)} - ${formatDate(collectionPeriod.lastDate)}` : null}
-      </h2> 
-      <Card className="flex flex-row gap-2 flex-wrap sticky pl-2">
-        <OptionsSelector
-          id={`current-chart-scope${id}`}
-          title="Report Scope"
-          onValueChange={(value) => setReportScope(value)}
-          options={[
-            { value: 'origin', label: 'Whole Site' },
-            { value: 'url', label: 'Current Page' },
-          ]}
-        />
-        <OptionsSelector
-          id={`current-chart-device${id}`}
-          title="Device"
-          onValueChange={(value) => setDeviceType(value)}
-          options={[
-            'All',
-            { value: 'DESKTOP', label: 'Desktop' },
-            { value: 'TABLET', label: 'Tablet' },
-            { value: 'PHONE', label: 'Phone' },
-          ] as const}
-        />
-        <OptionsSelector
-          id={`current-chart-type${id}`}
-          title="Chart type"
-          onValueChange={setChartType}
-          options={Object.keys(ChartMap)}
-          />
+      </h2>
+      <PerformanceOptions
+        setChartType={setChartType}
+        setReportScope={setReportScope}
+        setDeviceType={setDeviceType}
+        chartKeys={Object.keys(ChartMap)}
+      >
         {form_factors ? (
           <PercentTable
-          title={'Form Factors'}
-          data={form_factors}
-          className='md:grid md:grid-cols-[auto,1fr] gap-2 pl-2 justify-between items-center flex-row flex-1 min-w-full md:min-w-[300px] '
+            title={'Form Factors'}
+            data={form_factors}
+            className='md:grid md:grid-cols-[auto,1fr] gap-2 pl-2 justify-between items-center flex-row flex-1 min-w-full md:min-w-[300px] '
           />
         ) : null}
-        </Card>
+      </PerformanceOptions>
       <div className="mt-2 grid gap-1 grid-cols-3 md:grid-cols-3 lg:grid-cols-6">
         <CurrentPerformanceCard
           title="Largest Contentful Paint (LCP)"
@@ -107,27 +85,7 @@ export function CurrentPerformanceDashboard({
           data={navigation_types}
         />
       ) : null}
-  
+
     </CurrentPerformanceChartContext.Provider >
   );
-}
-
-function OptionsSelector<T extends string>(
-  { id, onValueChange, title, options }
-    : {
-      id: string; onValueChange: (value: T) => void; title: string, options: (T | {
-        label: string;
-        value: T;
-      })[];
-    }) {
-  return <div className=''>
-    <Label className='text-center my-2 block' htmlFor={id}>
-      <div>{title} </div>
-    </Label>
-    <ChartSelector
-      id={id}
-      onValueChange={onValueChange}
-      options={options}
-    />
-  </div>;
 }
