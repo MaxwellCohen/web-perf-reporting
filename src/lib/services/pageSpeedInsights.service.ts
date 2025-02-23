@@ -1,10 +1,10 @@
 import * as Sentry from '@sentry/nextjs';
 import { PageSpeedInsights } from '../schema';
 import { formFactor } from '../services';
-
+import {unstable_cache as cache } from 'next/cache'
 const records: Record<string, PageSpeedInsights> = {};
 
-export const requestPageSpeedData = async (
+export const requestPageSpeedData = cache(async (
   testURL: string,
   formFactor: formFactor,
 ): Promise<PageSpeedInsights | null> => {
@@ -42,4 +42,6 @@ export const requestPageSpeedData = async (
     Sentry.captureException(error);
     return null;
   }
-};
+},[], {
+  revalidate: 60 * 60 * 24
+} );

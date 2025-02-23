@@ -1,4 +1,3 @@
-import { Accordion } from '@/components/ui/accordion';
 import { UrlLookupForm } from '@/components/common/UrlLookupForm';
 import { updateURl } from '@/lib/utils';
 import { Suspense } from 'react';
@@ -16,23 +15,14 @@ export default async function Home({
   return (
     <div>
       <h1 className="mx-auto text-center text-3xl font-extrabold">
-        Page Speed PageSpeedInsights
+        Page Speed Insights {url ? ` for ${url}` : ''}
       </h1>
       {!url ? (
         <UrlLookupForm />
       ) : (
-        <>
-          <div className="mx-auto text-center text-2xl font-extrabold">
-            Page Speed Insights For {url}
-          </div>
-
-          <Accordion type="multiple" className="w-full">
-
-            <Suspense fallback={<div>Loading...</div>}>
-              <PageSpeedInsights url={url} formFactor="DESKTOP" />
-            </Suspense>
-          </Accordion>
-        </>
+        <Suspense fallback={<div>Loading...</div>}>
+          <PageSpeedInsights url={url} formFactor="DESKTOP" />
+        </Suspense>
       )}
     </div>
   );

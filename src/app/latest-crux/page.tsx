@@ -1,6 +1,7 @@
 import { UrlLookupForm } from '@/components/common/UrlLookupForm';
 import { updateURl } from '@/lib/utils';
 import { CurrentPerformanceSection } from '@/components/latest-crux/CurrentPerformanceSection';
+import { Suspense } from 'react';
 
 export default async function Home({
     searchParams,
@@ -19,7 +20,9 @@ export default async function Home({
             {!url ? (
                 <UrlLookupForm />
             ) : (
-                <CurrentPerformanceSection url={url} />
+                <Suspense fallback={<div>Loading...</div>}>
+                    <CurrentPerformanceSection url={url} />
+                </Suspense>
             )}
         </div>
     );

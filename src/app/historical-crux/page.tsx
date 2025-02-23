@@ -2,6 +2,7 @@ import { UrlLookupForm } from '@/components/common/UrlLookupForm';
 
 import { updateURl } from '@/lib/utils';
 import { HistoricalChartsSection } from '@/components/historical/HistoricalChartsSection';
+import { Suspense } from 'react';
 
 export default async function Home({
   searchParams,
@@ -20,7 +21,9 @@ export default async function Home({
       {!url ?
         <UrlLookupForm />
         :
-        <HistoricalChartsSection url={url} />
+        <Suspense fallback={<div>Loading...</div>}>
+          <HistoricalChartsSection url={url} />
+        </Suspense>
       }
     </div >
   );

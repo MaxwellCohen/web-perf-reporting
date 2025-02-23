@@ -41,8 +41,8 @@ export function HistoricalDashboard({
         setDeviceType={setDeviceType}
         chartKeys={Object.keys(ChartMap)}
       />
-      <div className="mt-2 grid gap-1 grid-cols-3 md:grid-cols-3 lg:grid-cols-6">
-        <HistoricalPerformanceCard
+     <div className="mt-2 grid gap-1 grid-cols-3 md:grid-cols-3 lg:grid-cols-6">
+     <HistoricalPerformanceCard
           title="Largest Contentful Paint (LCP)"
           histogramData={groupedMetics?.largest_contentful_paint}
         />
