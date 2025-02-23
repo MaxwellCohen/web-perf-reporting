@@ -28,7 +28,7 @@ export const formatDate = (data?: CruxDate) => {
 
 export function formatFormFactor(string?: string) {
   if (!string) {
-    return 'all';
+    return 'All';
   }
   return string
     .replaceAll('_', ' ')

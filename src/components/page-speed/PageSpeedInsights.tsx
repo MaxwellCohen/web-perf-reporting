@@ -5,110 +5,13 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import {
-  getHistoricalCruxData,
-  getCurrentCruxData,
-  requestPageSpeedData,
+  formFactor,
 } from '@/lib/services';
-import { formatCruxReport, formatFormFactor, groupBy } from '@/lib/utils';
+import { requestPageSpeedData } from '@/lib/services/pageSpeedInsights.service';
+import { formatFormFactor } from '@/lib/utils';
 
-import GaugeChart from './PageSpeedGuageChart';
-import { formFactor } from '@/lib/services';
-import { HistoricalPerformanceCard } from './HistoricalPerformanceCard';
-import { CurrentPerformanceDashboard } from './CurrentPerformanceDashboard';
+import GaugeChart from '@/components/common/PageSpeedGuageChart';
 
-export async function ChartsHistoricalSection({
-  url,
-  formFactor,
-  origin,
-}: {
-  url?: string;
-  formFactor?: formFactor;
-  origin?: string;
-}) {
-  const reports = await getHistoricalCruxData({
-    url,
-    formFactor,
-    origin,
-  });
-  if (!reports?.length) {
-    return null;
-  }
-
-  const currentCruxHistoricalResult = reports
-    .map((report) => formatCruxReport(report))
-    .flatMap((i) => i)
-    .filter((i) => !!i);
-  const groupedMetics = groupBy(
-    currentCruxHistoricalResult,
-    ({ metric_name }) => metric_name || '',
-  );
-
-  return (
-    <AccordionItem value={`historical-${formFactor}-${url}-${origin}`}>
-      <AccordionTrigger>
-        Historical Performance Report For {formatFormFactor(formFactor)} Devices{' '}
-        {url ? `for the page` : 'for the origin'}
-      </AccordionTrigger>
-      <AccordionContent>
-        <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
-          <HistoricalPerformanceCard
-            title="Cumulative Layout Shift"
-            histogramData={groupedMetics.cumulative_layout_shift || []}
-          />
-          <HistoricalPerformanceCard
-            title="Experimental Time to First Byte"
-            histogramData={groupedMetics.experimental_time_to_first_byte || []}
-          />
-          <HistoricalPerformanceCard
-            title="Interaction to Next Paint"
-            histogramData={groupedMetics.interaction_to_next_paint || []}
-          />
-          <HistoricalPerformanceCard
-            title="Largest Contentful Paint"
-            histogramData={groupedMetics.largest_contentful_paint || []}
-          />
-          <HistoricalPerformanceCard
-            title="Round Trip Time"
-            histogramData={groupedMetics.round_trip_time || []}
-          />
-          <HistoricalPerformanceCard
-            title="First Contentful Paint"
-            histogramData={groupedMetics.first_contentful_paint || []}
-          />
-        </div>
-      </AccordionContent>
-    </AccordionItem>
-  );
-}
-
-export async function CurrentPerformanceCharts({
-  url,
-  formFactor,
-  origin,
-}: {
-  url?: string;
-  origin?: string;
-  formFactor?: formFactor;
-}) {
-  const report = await getCurrentCruxData({ url, formFactor, origin });
-  if (!report) {
-    return null;
-  }
-
-  return (
-    <AccordionItem value={`current-${formFactor}`}>
-      <AccordionTrigger>
-        <h2 className="text-xl">
-          Latest Performance Report For {formatFormFactor(formFactor)} Devices{' '}
-          {url ? `for the page` : 'for the origin'}
-        </h2>
-      </AccordionTrigger>
-      <AccordionContent>
-        <CurrentPerformanceDashboard report={report} />
-      </AccordionContent>
-    </AccordionItem>
-  );
-}
 
 export async function PageSpeedInsights({
   url,

@@ -5,7 +5,7 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 import { RadialBarChart, RadialBar } from 'recharts';
-import { chartConfig } from './ChartSettings';
+import { chartConfig } from '@/components/common/ChartSettings';
 import { CruxHistoryItem } from '@/lib/schema';
 
 export function RadialChart({

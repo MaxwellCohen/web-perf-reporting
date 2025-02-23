@@ -9,8 +9,8 @@ import {
 } from '@/components/ui/card';
 import { CruxHistoryItem } from '@/lib/schema';
 import { useMemo, useState } from 'react';
-import { ChartSelector } from './ChartSelector';
-import { HistoricalPerformanceChartData } from './ChartSettings';
+import { ChartSelector } from '../../components/common/ChartSelector';
+import { HistoricalPerformanceChartData } from '../../components/common/ChartSettings';
 import dynamic from 'next/dynamic';
 
 const HistoricalPerformanceBarChart = dynamic(() =>

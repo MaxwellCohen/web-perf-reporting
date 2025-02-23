@@ -1,11 +1,8 @@
 import { Accordion } from '@/components/ui/accordion';
-import { UrlLookupForm } from '@/app/_components/UrlLookupForm';
-import {
-  CurrentPerformanceCharts,
-  PageSpeedInsights,
-} from '@/app/_components/Sections';
+import { UrlLookupForm } from '@/components/common/UrlLookupForm';
 import { updateURl } from '@/lib/utils';
 import { Suspense } from 'react';
+import { PageSpeedInsights } from '@/components/page-speed/PageSpeedInsights';
 
 export default async function Home({
   searchParams,
@@ -30,7 +27,6 @@ export default async function Home({
           </div>
 
           <Accordion type="multiple" className="w-full">
-            <CurrentPerformanceCharts url={url} />
 
             <Suspense fallback={<div>Loading...</div>}>
               <PageSpeedInsights url={url} formFactor="DESKTOP" />

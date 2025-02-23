@@ -10,13 +10,13 @@ import {
 } from '@/components/ui/chart';
 import { Bar, BarChart, CartesianGrid, Rectangle, XAxis } from 'recharts';
 
-import { CruxHistoryItem, UserPageLoadMetricV5 } from '../../lib/schema';
+import { CruxHistoryItem, UserPageLoadMetricV5 } from '@/lib/schema';
 import { useContext, useMemo } from 'react';
 
-import { chartConfig, PerformanceChartData } from './ChartSettings';
-import { RadialChart } from './PerformanceRadialChart';
-import { PerformanceStackedBarChart } from './PerformanceStackedBarChart';
-import GaugeChart from './PageSpeedGuageChart';
+import { chartConfig, PerformanceChartData } from '@/components/common/ChartSettings';
+import { RadialChart } from '@/components/latest-crux/PerformanceRadialChart';
+import { PerformanceStackedBarChart } from '@/components/latest-crux/PerformanceStackedBarChart';
+import GaugeChart from '@/components/common/PageSpeedGuageChart';
 import { createContext } from 'react';
 
 const makeHistogramData = (data?: CruxHistoryItem) => {

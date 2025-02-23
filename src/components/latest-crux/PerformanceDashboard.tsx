@@ -6,10 +6,10 @@ import {
   ChartMap,
   CurrentPerformanceCard,
   CurrentPerformanceChartContext,
-} from './CurrentPerformanceCard';
-import { ChartSelector } from './ChartSelector';
+} from '@/components/latest-crux/PerformanceCard';
+import { ChartSelector } from '@/components/common/ChartSelector';
 import { useState } from 'react';
-import { FormFactorPercentPieChart } from './FormFactorPercentPieChart';
+import { FormFactorPercentPieChart } from '@/components/common/FormFactorPercentPieChart';
 
 export function CurrentPerformanceDashboard({
   report,
@@ -26,10 +26,12 @@ export function CurrentPerformanceDashboard({
   return (
     <CurrentPerformanceChartContext.Provider value={ChartType}>
       <h3>{`Date Range: ${groupedMetics?.cumulative_layout_shift?.[0].start_date} - ${groupedMetics?.cumulative_layout_shift?.[0].end_date}`}</h3>
+      <div className='px-4'>
       <ChartSelector
         onValueChange={(value) => setChartType(value)}
         options={Object.keys(ChartMap)}
       />
+      </div>
       <div className="mt-2 grid gap-1 md:grid-cols-3 lg:grid-cols-6">
         <CurrentPerformanceCard
           title="Largest Contentful Paint (LCP)"

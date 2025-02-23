@@ -4,24 +4,23 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
-import { HistoricalPerformanceChartData, chartConfig } from './ChartSettings';
+import { CartesianGrid, XAxis, Bar, BarChart } from 'recharts';
+import { HistoricalPerformanceChartData, chartConfig } from '../../components/common/ChartSettings';
 
-export function HistoricalPerformanceAreaChart({
+export function HistoricalPerformanceBarChart({
   chartData,
 }: {
   chartData: HistoricalPerformanceChartData[];
 }) {
   return (
     <ChartContainer config={chartConfig}>
-      <AreaChart
+      <BarChart
         accessibilityLayer
         data={chartData}
         margin={{
           left: 12,
           right: 12,
         }}
-         stackOffset="expand"
       >
         <CartesianGrid vertical={false} />
         <XAxis
@@ -35,31 +34,31 @@ export function HistoricalPerformanceAreaChart({
           cursor={false}
           content={<ChartTooltipContent indicator="dot" />}
         />
-        <Area
+        <Bar
           dataKey="good"
-          type="linear"
+          type="natural"
           fill="var(--color-good)"
           fillOpacity={0.4}
           stroke="var(--color-good)"
           stackId="a"
         />
-        <Area
+        <Bar
           dataKey="ni"
-          type="linear"
+          type="natural"
           fill="var(--color-ni)"
           fillOpacity={0.4}
           stroke="var(--color-ni)"
           stackId="a"
         />
-        <Area
+        <Bar
           dataKey="poor"
-          type="linear"
+          type="natural"
           fill="var(--color-poor)"
           fillOpacity={0.4}
           stroke="var(--color-poor)"
           stackId="a"
         />
-      </AreaChart>
+      </BarChart>
     </ChartContainer>
   );
 }

@@ -6,7 +6,7 @@ import {
 } from '@/components/ui/chart';
 import { CruxHistoryItem } from '@/lib/schema';
 import { CartesianGrid, Bar, BarChart } from 'recharts';
-import { chartConfig } from './ChartSettings';
+import { chartConfig } from '@/components/common/ChartSettings';
 
 export function PerformanceStackedBarChart({
   histogramData,
