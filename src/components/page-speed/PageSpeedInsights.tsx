@@ -4,14 +4,21 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import {
-  formFactor,
-} from '@/lib/services';
+import { formFactor } from '@/lib/services';
 import { requestPageSpeedData } from '@/lib/services/pageSpeedInsights.service';
 import { formatFormFactor } from '@/lib/utils';
 
 import GaugeChart from '@/components/common/PageSpeedGuageChart';
 
+import {
+  TableCaption,
+  TableHeader,
+  TableRow,
+  Table,
+  TableHead,
+  TableBody,
+  TableCell,
+} from '@/components/ui/table';
 
 export async function PageSpeedInsights({
   url,
@@ -110,30 +117,40 @@ export async function PageSpeedInsights({
         </div>
         {data?.lighthouseResult?.entities ? (
           <>
-            <div className="grid grid-cols-1">
-              <div className="grid grid-cols-4 border">
-                <div>Name </div>
-                <div>is First Party </div>
-                <div>is Unrecognized </div>
-                <div>origins </div>
-              </div>
-              {data.lighthouseResult.entities.map((entity, i) => (
-                <div
-                  key={`${i}-${entity.name}`}
-                  className="grid grid-cols-4 border"
-                >
-                  <div> {entity.name} </div>
-                  <div> {entity.isFirstParty ? '✅ - yes' : '❌ - no'} </div>
-                  <div> {entity.isUnrecognized ? '✅ - yes' : '❌ - no'} </div>
-                  <div>
-                    {' '}
-                    {entity.origins.map((o, i) => (
-                      <div key={`${i}-${o}`}>{o} </div>
-                    ))}{' '}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <Table>
+              <TableCaption>A list of entities that {url} uses </TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead >Name </TableHead>
+                  <TableHead >Is First Party </TableHead>
+                  <TableHead >Is Unrecognized </TableHead>
+                  <TableHead >Origins </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data.lighthouseResult.entities.map((entity, i) => (
+                  <TableRow
+                    key={`${i}-${entity.name}`}
+                  >
+                    <TableCell> {entity.name} </TableCell>
+                    <TableCell>
+                      {' '}
+                      {entity.isFirstParty ? '✅ - yes' : '❌ - no'}{' '}
+                    </TableCell>
+                    <TableCell>
+                      {' '}
+                      {entity.isUnrecognized ? '✅ - yes' : '❌ - no'}{' '}
+                    </TableCell>
+                    <TableCell>
+                      {' '}
+                      {entity.origins.map((o, i) => (
+                        <div key={`${i}-${o}`}>{o} </div>
+                      ))}{' '}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </>
         ) : null}
         <br />
