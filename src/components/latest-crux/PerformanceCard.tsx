@@ -87,7 +87,10 @@ export function CurrentPerformanceCard({
       <Chart histogramData={histogramData} />
       <div className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
-          P75 is {histogramData.P75 ?? 'N/A'} <StatusLabel histogramData={histogramData} />
+          P75 is {histogramData.P75 ?? 'N/A'}
+        </div>
+        <div className="flex gap-2 font-medium leading-none">
+          <StatusLabel histogramData={histogramData} />
         </div>
         {extraInfo.map((info, idx) => (
           <div

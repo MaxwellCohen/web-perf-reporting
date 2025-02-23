@@ -14,17 +14,12 @@ export default async function Home({
     return (
         <div>
             <h1 className="mx-auto text-center text-3xl font-extrabold">
-                Web Performance Report
+                Most recent Crux Report {url ? ` for ${url} ` : ''}
             </h1>
             {!url ? (
                 <UrlLookupForm />
             ) : (
-                <>
-                    <div className="mx-auto text-center text-2xl font-extrabold">
-                        Most recent Crux data for {url}
-                    </div>
-                    <CurrentPerformanceCharts url={url} />
-                </>
+                <CurrentPerformanceCharts url={url} />
             )}
         </div>
     );

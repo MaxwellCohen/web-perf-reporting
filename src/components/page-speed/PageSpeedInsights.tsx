@@ -40,7 +40,7 @@ export async function PageSpeedInsights({
       </AccordionTrigger>
       <AccordionContent>
         <h3 className="text-xl">
-          Page Loading Experience :{' '}
+          Page Loading Experience :
           <strong>{data?.loadingExperience.overall_category}</strong>
         </h3>
         <div className="mt-2 grid grid-cols-3 gap-2 md:grid-cols-5">
@@ -68,7 +68,7 @@ export async function PageSpeedInsights({
           />
         </div>
         <h3 className="text-xl">
-          Origin Loading Experience:{' '}
+          Origin Loading Experience:
           <strong>{data?.originLoadingExperience.overall_category}</strong>
         </h3>
         <div className="mt-2 grid grid-cols-3 gap-2 md:grid-cols-5">
@@ -121,31 +121,26 @@ export async function PageSpeedInsights({
               <TableCaption>A list of entities that {url} uses </TableCaption>
               <TableHeader>
                 <TableRow>
-                  <TableHead >Name </TableHead>
-                  <TableHead >Is First Party </TableHead>
-                  <TableHead >Is Unrecognized </TableHead>
-                  <TableHead >Origins </TableHead>
+                  <TableHead>Name </TableHead>
+                  <TableHead>Is First Party </TableHead>
+                  <TableHead>Is Unrecognized </TableHead>
+                  <TableHead>Origins </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {data.lighthouseResult.entities.map((entity, i) => (
-                  <TableRow
-                    key={`${i}-${entity.name}`}
-                  >
+                  <TableRow key={`${i}-${entity.name}`}>
                     <TableCell> {entity.name} </TableCell>
                     <TableCell>
-                      {' '}
-                      {entity.isFirstParty ? '✅ - yes' : '❌ - no'}{' '}
+                      {entity.isFirstParty ? '✅ - yes' : '❌ - no'}
                     </TableCell>
                     <TableCell>
-                      {' '}
-                      {entity.isUnrecognized ? '✅ - yes' : '❌ - no'}{' '}
+                      {entity.isUnrecognized ? '✅ - yes' : '❌ - no'}
                     </TableCell>
                     <TableCell>
-                      {' '}
                       {entity.origins.map((o, i) => (
                         <div key={`${i}-${o}`}>{o} </div>
-                      ))}{' '}
+                      ))}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -157,15 +152,15 @@ export async function PageSpeedInsights({
         <br />
         lighthouseResult
         <br />
-        title:{' '}
+        title:
         {JSON.stringify(data?.lighthouseResult?.categories?.performance.title)}
         <br />
-        score:{' '}
+        score:
         {JSON.stringify(data?.lighthouseResult?.categories?.performance.score)}
         <br />
         lighthouseResult
         <br />
-        categoryGroups:{' '}
+        categoryGroups:
         {JSON.stringify(data?.lighthouseResult?.categories?.categoryGroups)}
         <br />
         <br />

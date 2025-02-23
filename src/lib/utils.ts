@@ -48,10 +48,10 @@ const histogramFields = [
 ] as const;
 
 const percentilesTimeseries = [
-  'largest_contentful_paint_image_resource_load_delay',
-  'largest_contentful_paint_image_element_render_delay',
-  'largest_contentful_paint_image_resource_load_duration',
   'largest_contentful_paint_image_time_to_first_byte',
+  'largest_contentful_paint_image_resource_load_delay',
+  'largest_contentful_paint_image_resource_load_duration',
+  'largest_contentful_paint_image_element_render_delay',
 ] as const;
 
 // form_factors
@@ -59,12 +59,12 @@ const percentilesTimeseries = [
 // navigation_types
 
 export function formatCruxReport(
-  item: CruxReport,
+  item: CruxReport | null,
 ): CruxHistoryItem[] | null {
   const url =
-    item.urlNormalizationDetails?.originalUrl ??
+    item?.urlNormalizationDetails?.originalUrl ??
     item?.record?.key?.origin ??
-    item.record.key.url;
+    item?.record?.key?.url;
   if (!url) return null;
   return histogramFields
     .map((metric) => {

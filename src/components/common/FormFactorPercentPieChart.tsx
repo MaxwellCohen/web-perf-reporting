@@ -10,32 +10,42 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 import { FormFactorFractions } from '@/lib/schema';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+import React from 'react';
+import { cn } from '@/lib/utils';
+
+function toSentenceCase(str: string) {
+  if (!str) {
+    return "";
+  }
+  const result = str.split('_').join(' ').toLowerCase();
+  return result.charAt(0).toUpperCase() + result.slice(1);
+}
 
 export function FormFactorPercentPieChart({
   title,
   form_factors,
 }: {
   title: string;
-  form_factors: FormFactorFractions;
+  form_factors: Record<string, number>;
 }) {
   const entries = Object.entries(form_factors);
   const chartData = [
-    {
-      desktop: form_factors.desktop * 100,
-      phone: form_factors.phone * 100,
-      tablet: form_factors.tablet * 100,
-    },
+    entries.reduce((acc: Record<string, number>, [key, value]) => {
+      acc[key] = value * 100;
+      return acc;
+    }, {})
   ];
-  const chartConfig = entries.reduce((acc: ChartConfig, [key], i) => {
-    acc[key] = {
-      label: key,
+  const chartConfig = entries.reduce((acc: ChartConfig, [label], i) => {
+    acc[label] = {
+      label: toSentenceCase(label),
       color: `hsl(var(--chart-${i + 4}))`,
     };
     return acc;
   }, {});
 
   return (
-    <Card className="grid grid-cols-1 grid-rows-[44px,auto,72px] gap-3 p-2">
+    <Card className="grid grid-cols-1 grid-rows-[44px,auto, 1fr] gap-3 p-2">
       <div className="text-md text-center font-bold">{title}</div>
       <ChartContainer
         config={chartConfig}
@@ -48,45 +58,59 @@ export function FormFactorPercentPieChart({
         >
           <ChartTooltip
             cursor={false}
-            
-            content={<ChartTooltipContent hideLabel   
-          />}
+            content={<ChartTooltipContent hideLabel
+            />}
           />
-          <RadialBar
-            dataKey="desktop"
-            type="natural"
-            fill="var(--color-desktop)"
-            fillOpacity={0.4}
-            stroke="var(--color-desktop)"
-            stackId="a"
-            animationDuration={0}
-          />
+          {entries.map(([label]) => (
+            <RadialBar
+              key={label}
+              dataKey={label}
+              type="natural"
+              fill={chartConfig[label].color}
+              fillOpacity={0.4}
+              stroke={chartConfig[label].color}
+              stackId="a"
+              animationDuration={0}
+            />
+          ))}
 
-          <RadialBar
-            dataKey="phone"
-            type="natural"
-            fill="var(--color-phone)"
-            fillOpacity={0.4}
-            stroke="var(--color-phone)"
-            stackId="a"
-            animationDuration={0}
-          />
-          <RadialBar
-            dataKey="tablet"
-            type="natural"
-            fill="var(--color-tablet)"
-            fillOpacity={0.4}
-            stroke="var(--color-tablet)"
-            stackId="a"
-            animationDuration={0}
-          />
         </RadialBarChart>
       </ChartContainer>
-    <div className='p-2'>
-      <div className="text-xs leading-none text-muted-foreground"> <strong>desktop:</strong> {form_factors.desktop * 100} % </div>
-      <div className="text-xs leading-none text-muted-foreground"> <strong>phone:</strong> {form_factors.phone * 100} % </div>
-      <div className="text-xs leading-none text-muted-foreground"> <strong>tablet:</strong> {form_factors.tablet * 100} % </div>
+      <div className='p-2'>
+        {entries.map(([label, value]) => {
+          return (<div className="text-xs leading-none text-muted-foreground"> <strong>{toSentenceCase(label)}</strong> {(value * 100).toFixed(2)} % </div>)
+        })}
       </div>
     </Card>
   );
+}
+
+export function PercentTable({
+  title,
+  data,
+  className,
+}: {
+  title: string;
+  data: Record<string, number>;
+  className?: string,
+}) {
+  const entries = Object.entries(data);
+  return (
+    <Card className={cn('flex-1', className)} >
+      <div className="text-md text-center font-bold">{title}</div>
+      <Table>
+        <TableHeader>
+          {entries.map(([label, value]) => {
+            return (<TableHead key={label}> {toSentenceCase(label)} </TableHead>)
+          })}
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            {entries.map(([label, value]) => {
+              return (<TableCell key={label}> {(value * 100).toFixed(2)} % </TableCell>)
+            })}
+          </TableRow>
+        </TableBody>
+      </Table>
+    </Card >);
 }

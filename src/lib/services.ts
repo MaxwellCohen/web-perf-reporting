@@ -2,6 +2,7 @@
 import { db } from '@/db';
 import {
   CruxHistoryReportSchema,
+  CruxReport,
   cruxReportSchema,
 } from './schema';
 import { convertCruxHistoryToReports, formatDate } from './utils';
@@ -31,6 +32,7 @@ export const getCurrentCruxData = async ({
       {
         body: JSON.stringify({ url, formFactor, origin }),
         method: 'POST',
+        cache: 'force-cache'
       },
     );
     if (!request.ok) {
@@ -38,7 +40,7 @@ export const getCurrentCruxData = async ({
         'Failed to fetch current CRUX data: ' + request.statusText,
       );
     }
-    const data = await request.json();
+    const data = await request.json() as CruxReport;
     const parsedData = cruxReportSchema.parse(data);
     return parsedData;
   } catch (error) {
