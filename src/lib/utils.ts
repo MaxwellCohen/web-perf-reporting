@@ -5,6 +5,7 @@ import {
   CruxHistoryItem,
   CruxHistoryReport,
   CruxReport,
+  urlSchema,
 } from '@/lib/schema';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -288,4 +289,18 @@ export function groupBy<T>(list: T[], keyGetter: (item: T) => string) {
     }
   });
   return Object.fromEntries(map.entries());
+}
+
+export function updateURl(url?: string) {
+  if (!url) {
+    return '';
+  }
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    url = 'https://' + url;
+  }
+  if (!url.includes('www.')) {
+    const urlParts = url.split('://');
+    url = urlParts[0] + '://www.' + urlParts[1];
+  }
+  return urlSchema.safeParse(url).data ?? '';
 }

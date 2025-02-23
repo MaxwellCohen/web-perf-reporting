@@ -320,6 +320,27 @@ const lighthouseResultV5Schema = z
     lighthouseVersion: z.string(),
     requestedUrl: z.string(),
     runWarnings: z.array(z.string()),
+    fullPageScreenshot: z.object({
+      nodes: z.record(z.object({
+        bottom: coerceNumber,
+        height: coerceNumber,
+        left: coerceNumber,
+        right: coerceNumber,
+        top: coerceNumber,
+        width: coerceNumber,
+      })),
+      screenshot: z.object({
+        data: z.string(),
+        height: z.number(),
+        width: z.number()
+      })
+    }),
+    entities: z.array(z.object({
+      "name": z.string(),
+      "isFirstParty": z.boolean(),
+      "isUnrecognized": z.boolean(),
+      "origins": z.array(z.string())
+  })),
     runtimeError: z
       .object({
         message: z.string(),

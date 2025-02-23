@@ -1,4 +1,3 @@
-import { urlSchema } from '@/lib/schema';
 import {
   Accordion,
 } from '@/components/ui/accordion';
@@ -7,20 +6,9 @@ import {
   CurrentPerformanceCharts,
   ChartsHistoricalSection,
 } from './_components/Sections';
+import { updateURl } from '@/lib/utils';
 
-function updateURl(url?: string) {
-  if (!url) {
-    return '';
-  }
-  if (!url.startsWith('http://') && !url.startsWith('https://')) {
-    url = 'https://' + url;
-  }
-  if (!url.includes('www.')) {
-    const urlParts = url.split('://');
-    url = urlParts[0] + '://www.' + urlParts[1];
-  }
-  return urlSchema.safeParse(url).data ?? '';
-}
+
 
 export default async function Home({
   searchParams,
@@ -62,10 +50,6 @@ export default async function Home({
             <ChartsHistoricalSection origin={url} formFactor="PHONE" />
             <ChartsHistoricalSection origin={url} formFactor="TABLET" />
             <ChartsHistoricalSection origin={url} formFactor="DESKTOP" />
-
-            {/* <Suspense fallback={<div>Loading...</div>}> */}
-            {/* <PageSpeedInsights url={url} formFactor="DESKTOP" /> */}
-            {/* </Suspense>  */}
           </Accordion>
         </>
       )}

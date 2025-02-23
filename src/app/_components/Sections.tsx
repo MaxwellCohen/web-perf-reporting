@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import {
   AccordionContent,
   AccordionItem,
@@ -14,7 +15,6 @@ import GaugeChart from './PageSpeedGuageChart';
 import { formFactor } from '@/lib/services';
 import { HistoricalPerformanceCard } from './HistoricalPerformanceCard';
 import { CurrentPerformanceDashboard } from './CurrentPerformanceDashboard';
-
 
 export async function ChartsHistoricalSection({
   url,
@@ -34,9 +34,14 @@ export async function ChartsHistoricalSection({
     return null;
   }
 
-  const currentCruxHistoricalResult = reports.map((report) => formatCruxReport(report)).flatMap(i => i).filter(i => !!i)
-  const groupedMetics = groupBy(currentCruxHistoricalResult,({ metric_name }) => metric_name || '');
- 
+  const currentCruxHistoricalResult = reports
+    .map((report) => formatCruxReport(report))
+    .flatMap((i) => i)
+    .filter((i) => !!i);
+  const groupedMetics = groupBy(
+    currentCruxHistoricalResult,
+    ({ metric_name }) => metric_name || '',
+  );
 
   return (
     <AccordionItem value={`historical-${formFactor}-${url}-${origin}`}>
@@ -45,7 +50,7 @@ export async function ChartsHistoricalSection({
         {url ? `for the page` : 'for the origin'}
       </AccordionTrigger>
       <AccordionContent>
-      <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
           <HistoricalPerformanceCard
             title="Cumulative Layout Shift"
             histogramData={groupedMetics.cumulative_layout_shift || []}
@@ -86,11 +91,9 @@ export async function CurrentPerformanceCharts({
   formFactor?: formFactor;
 }) {
   const report = await getCurrentCruxData({ url, formFactor, origin });
-  if(!report) {
+  if (!report) {
     return null;
   }
-
-
 
   return (
     <AccordionItem value={`current-${formFactor}`}>
@@ -101,7 +104,7 @@ export async function CurrentPerformanceCharts({
         </h2>
       </AccordionTrigger>
       <AccordionContent>
-       <CurrentPerformanceDashboard report={report} />
+        <CurrentPerformanceDashboard report={report} />
       </AccordionContent>
     </AccordionItem>
   );
@@ -115,8 +118,13 @@ export async function PageSpeedInsights({
   formFactor: formFactor;
 }) {
   const data = await requestPageSpeedData(url, formFactor);
+  if (!data) {
+    return null;
+  }
+  console.log(data?.lighthouseResult.entities);
+  const screenshot = data.lighthouseResult.fullPageScreenshot?.screenshot;
   return (
-    <AccordionItem value={`PageSpeed-${formFactor}-${url}-${origin}`}>
+    <AccordionItem value={`PageSpeed-${formFactor}-${url}`}>
       <AccordionTrigger>
         Page speed Insights For {formatFormFactor(formFactor)} Devices
       </AccordionTrigger>
@@ -187,6 +195,44 @@ export async function PageSpeedInsights({
             }
           />
         </div>
+        <div className="grid grid-cols-3">
+          {screenshot ? (
+            <img
+              alt={'fullscreen image'}
+              width={80}
+              src={screenshot.data}
+              className={`w-20 aspect-[${screenshot.width}/${screenshot.height}]`}
+            />
+          ) : null}
+        </div>
+        {data?.lighthouseResult?.entities ? (
+          <>
+            <div className="grid grid-cols-1">
+              <div className="grid grid-cols-4 border">
+                <div>Name </div>
+                <div>is First Party </div>
+                <div>is Unrecognized </div>
+                <div>origins </div>
+              </div>
+              {data.lighthouseResult.entities.map((entity, i) => (
+                <div
+                  key={`${i}-${entity.name}`}
+                  className="grid grid-cols-4 border"
+                >
+                  <div> {entity.name} </div>
+                  <div> {entity.isFirstParty ? '✅ - yes' : '❌ - no'} </div>
+                  <div> {entity.isUnrecognized ? '✅ - yes' : '❌ - no'} </div>
+                  <div>
+                    {' '}
+                    {entity.origins.map((o, i) => (
+                      <div key={`${i}-${o}`}>{o} </div>
+                    ))}{' '}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : null}
         <br />
         <br />
         lighthouseResult

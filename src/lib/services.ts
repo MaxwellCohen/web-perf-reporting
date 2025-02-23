@@ -4,7 +4,7 @@ import {
   CruxHistoryReportSchema,
   cruxReportSchema,
   PageSpeedInsights,
-  pageSpeedInsightsSchema,
+  // pageSpeedInsightsSchema,
 } from './schema';
 import { convertCruxHistoryToReports, formatDate } from './utils';
 import * as Sentry from '@sentry/nextjs';
@@ -144,8 +144,8 @@ export const requestPageSpeedData = async (
     if (!response.ok) {
       return null;
     }
-    const data = await response.json();
-    const a = pageSpeedInsightsSchema.parse(data);
+    const data = await response.json() as PageSpeedInsights;
+    const a = data //pageSpeedInsightsSchema.parse(data);
     records[baseurl.toString()] = a;
     return a;
   } catch (error) {
