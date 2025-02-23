@@ -1,10 +1,6 @@
 'use client';
 import {
   Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import {
   ChartConfig,
@@ -15,7 +11,7 @@ import {
 import { Bar, BarChart, CartesianGrid, Rectangle, XAxis } from 'recharts';
 
 import { CruxHistoryItem, UserPageLoadMetricV5 } from '../../lib/schema';
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useMemo } from 'react';
 
 import { chartConfig, PerformanceChartData } from './ChartSettings';
 import { RadialChart } from './PerformanceRadialChart';
@@ -58,8 +54,8 @@ export const ChartMap: Record<string, typeof CurrentGaugeChart> = {
   'Gauge Chart': CurrentGaugeChart,
 };
 
-
-export const CurrentPerformanceChartContext = createContext<string>('Histogram');
+export const CurrentPerformanceChartContext =
+  createContext<string>('Histogram');
 
 export function CurrentPerformanceCard({
   histogramData,
@@ -86,16 +82,16 @@ export function CurrentPerformanceCard({
   }
 
   return (
-    <Card className='h-full grid grid-rows-[44px,auto,72px] grid-cols-1 gap-3'>
-      <div className='text-md font-bold'>{title}</div>
+    <Card className="grid h-full grid-cols-1 grid-rows-[44px,auto,72px] gap-3 p-2">
+      <div className="text-md text-center font-bold">{title}</div>
       <Chart histogramData={histogramData} />
       <div className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
-          P75 is {histogramData.P75 ?? 'N/A'}
+          P75 is {histogramData.P75 ?? 'N/A'} <StatusLabel histogramData={histogramData} />
         </div>
         {extraInfo.map((info, idx) => (
           <div
-            className="leading-none text-muted-foreground text-xs"
+            className="text-xs leading-none text-muted-foreground"
             key={`${idx}-${info}`}
           >
             {info}
@@ -104,6 +100,18 @@ export function CurrentPerformanceCard({
       </div>
     </Card>
   );
+}
+
+function StatusLabel({ histogramData }: { histogramData: CruxHistoryItem }) {
+  const p75 = histogramData.P75;
+
+  let status = chartConfig['poor'];
+  if (p75 <= histogramData.good_max) {
+    status = chartConfig['good'];
+  } else if (p75 <= histogramData.ni_max) {
+    status = chartConfig['ni'];
+  }
+  return <span style={{ color: status.color }}>{status.label}</span>;
 }
 
 function CurrentGaugeChart({

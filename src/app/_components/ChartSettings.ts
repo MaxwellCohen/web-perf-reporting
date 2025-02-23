@@ -6,15 +6,15 @@ export const chartConfig = {
   },
   good: {
     label: `Good`,
-    color: 'hsl(var(--chart-2))',
+    color: 'hsl(var(--chart-1))',
   },
   ni: {
     label: `Needs Improvement`,
-    color: 'hsl(var(--chart-3))',
+    color: 'hsl(var(--chart-2))',
   },
   poor: {
     label: `Poor`,
-    color: 'hsl(var(--chart-5))',
+    color: 'hsl(var(--chart-3))',
   },
 } satisfies ChartConfig;
 

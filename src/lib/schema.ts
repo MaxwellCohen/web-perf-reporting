@@ -53,6 +53,15 @@ const keySchema = z
   })
   .partial();
 
+
+export const FormFactorFractionsSchema =  z.object({
+  desktop: coerceNumber,
+  phone: coerceNumber,
+  tablet: coerceNumber,
+})
+
+export type FormFactorFractions = z.infer<typeof FormFactorFractionsSchema>
+
 export const cruxReportSchema = z.object({
   record: z.object({
     key: keySchema,
@@ -81,11 +90,7 @@ export const cruxReportSchema = z.object({
       first_contentful_paint: CruxHistogramItem,
       form_factors: z
         .object({
-          fractions: z.object({
-            desktop: coerceNumber,
-            phone: coerceNumber,
-            tablet: coerceNumber,
-          }),
+          fractions:FormFactorFractionsSchema,
         })
         .optional(),
       largest_contentful_paint_image_resource_load_duration:

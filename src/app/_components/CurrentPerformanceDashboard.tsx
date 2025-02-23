@@ -2,9 +2,14 @@
 
 import { CruxReport } from '@/lib/schema';
 import { formatCruxReport, groupBy } from '@/lib/utils';
-import { ChartMap, CurrentPerformanceCard, CurrentPerformanceChartContext } from './CurrentPerformanceCard';
+import {
+  ChartMap,
+  CurrentPerformanceCard,
+  CurrentPerformanceChartContext,
+} from './CurrentPerformanceCard';
 import { ChartSelector } from './ChartSelector';
 import { useState } from 'react';
+import { FormFactorPercentPieChart } from './FormFactorPercentPieChart';
 
 export function CurrentPerformanceDashboard({
   report,
@@ -19,21 +24,12 @@ export function CurrentPerformanceDashboard({
   const groupedMetics = groupBy(data, ({ metric_name }) => metric_name || '');
   const form_factors = report?.record?.metrics?.form_factors?.fractions;
   return (
-
     <CurrentPerformanceChartContext.Provider value={ChartType}>
       <h3>{`Date Range: ${groupedMetics?.cumulative_layout_shift?.[0].start_date} - ${groupedMetics?.cumulative_layout_shift?.[0].end_date}`}</h3>
       <ChartSelector
-            onValueChange={(value) => setChartType(value)}
-            options={Object.keys(ChartMap)}
-          />
-
-      {form_factors ? (
-        <div>
-          <strong>Desktop</strong> {form_factors.desktop * 100} %
-          <strong>Phone</strong> {form_factors.phone * 100} %
-          <strong>tablet</strong> {form_factors.tablet * 100} %
-        </div>
-      ) : null}
+        onValueChange={(value) => setChartType(value)}
+        options={Object.keys(ChartMap)}
+      />
       <div className="mt-2 grid gap-1 md:grid-cols-3 lg:grid-cols-6">
         <CurrentPerformanceCard
           title="Largest Contentful Paint (LCP)"
@@ -59,6 +55,12 @@ export function CurrentPerformanceDashboard({
           title="Round Trip Time (RTT)"
           histogramData={groupedMetics?.round_trip_time?.[0]}
         />
+        {form_factors ? (
+          <FormFactorPercentPieChart
+            title={'Form Factors'}
+            form_factors={form_factors}
+          />
+        ) : null}
       </div>
     </CurrentPerformanceChartContext.Provider>
   );

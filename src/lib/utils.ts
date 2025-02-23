@@ -77,7 +77,7 @@ export function formatCruxReport(
           start_date: formatDate(item.record.collectionPeriod.firstDate),
           end_date: formatDate(item.record.collectionPeriod.lastDate),
           metric_name: metric,
-          P75: +data.percentiles.p75 || 0,
+          P75: +data.percentiles.p75,
           good_max: +(data?.histogram?.[0]?.end || 0),
           ni_max: +(data?.histogram?.[1]?.end || 0),
           good_density: +(data?.histogram?.[0]?.density || 0),
