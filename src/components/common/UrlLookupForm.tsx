@@ -27,9 +27,9 @@ export const UrlLookupForm = () => {
         <Input
           id={`url-${id}`}
           className="min-w-[60]"
-          type="text"
-          placeholder="url"
+          type="url"
           name="url"
+          placeholder="https://example.com"
         />
         <Button>Submit</Button>
       </form>
