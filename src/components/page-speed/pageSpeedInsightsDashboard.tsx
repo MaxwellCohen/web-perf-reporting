@@ -38,6 +38,7 @@ export function PageSpeedInsightsDashboard({
 
   const entities: Entities | undefined = data?.lighthouseResult?.entities;
   const audits: AuditResult | undefined = data?.lighthouseResult?.audits;
+  // console.log(data.lo.categoryGroups)
   return (
     <div>
       <LoadingExperienceGauges
@@ -211,8 +212,9 @@ return (
         </TableRow>
       </TableHeader>
       <TableBody>
-        {Object.entries(audits).map(([key,audit], i) => (
-          <TableRow key={`${i}-${audit.id}`}>
+        {Object.entries(audits).map(([key,audit], i) => {
+          console.log(audit)
+          return(<TableRow key={`${i}-${audit.id}`}>
             <TableCell> {key} </TableCell>
             <TableCell> {audit.id} </TableCell>
             <TableCell> {audit.title} </TableCell>
@@ -226,7 +228,7 @@ return (
                 )}
               </TableCell> */}
           </TableRow>
-        ))}
+        )})}
       </TableBody>
     </Table>
   </>
