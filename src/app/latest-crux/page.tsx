@@ -20,9 +20,7 @@ export default async function Home({
             {!url ? (
                 <UrlLookupForm />
             ) : (
-                <Suspense fallback={<div>Loading...</div>}>
-                    <CurrentPerformanceSection url={url} />
-                </Suspense>
+                <CurrentPerformanceSection url={url} />
             )}
         </div>
     );

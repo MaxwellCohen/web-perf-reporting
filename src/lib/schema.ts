@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+
+// const x: Details.Table = {}
 const coerceNumber = z.coerce.number().default(0).catch(NaN);
 
 const cruxHistogramItemSchema = z.object({
@@ -53,56 +55,56 @@ const keySchema = z
   })
   .partial();
 
-
-export const FormFactorFractionsSchema =  z.object({
+export const FormFactorFractionsSchema = z.object({
   desktop: coerceNumber,
   phone: coerceNumber,
   tablet: coerceNumber,
-})
+});
 
-export type FormFactorFractions = z.infer<typeof FormFactorFractionsSchema>
+export type FormFactorFractions = z.infer<typeof FormFactorFractionsSchema>;
 
 export const cruxReportSchema = z.object({
   record: z.object({
     key: keySchema,
-    metrics: z.object({
-      largest_contentful_paint_resource_type: z.object({
-        fractions: z.object({ image: coerceNumber, text: coerceNumber }),
-      }),
-      navigation_types: z
-        .object({
-          fractions: z.object({
-            navigate: z.number(),
-            navigate_cache: z.number(),
-            reload: z.number(),
-            restore: z.number(),
-            back_forward: z.number(),
-            back_forward_cache: z.number(),
-            prerender: z.number(),
-          }),
-        })
-        .optional(),
-      cumulative_layout_shift: CruxHistogramItem,
-      experimental_time_to_first_byte: CruxHistogramItem,
-      interaction_to_next_paint: CruxHistogramItem,
-      largest_contentful_paint: CruxHistogramItem,
-      round_trip_time: CruxHistogramItem,
-      first_contentful_paint: CruxHistogramItem,
-      form_factors: z
-        .object({
-          fractions:FormFactorFractionsSchema,
-        })
-        .optional(),
-      largest_contentful_paint_image_resource_load_duration:
-        CruxHistogramItem.omit({ histogram: true }).optional(),
-      largest_contentful_paint_image_element_render_delay:
-        CruxHistogramItem.omit({ histogram: true }).optional(),
-      largest_contentful_paint_image_resource_load_delay:
-        CruxHistogramItem.omit({ histogram: true }).optional(),
-      largest_contentful_paint_image_time_to_first_byte: CruxHistogramItem.omit(
-        { histogram: true },
-      ).optional(),
-    }).partial(),
+    metrics: z
+      .object({
+        largest_contentful_paint_resource_type: z.object({
+          fractions: z.object({ image: coerceNumber, text: coerceNumber }),
+        }),
+        navigation_types: z
+          .object({
+            fractions: z.object({
+              navigate: z.number(),
+              navigate_cache: z.number(),
+              reload: z.number(),
+              restore: z.number(),
+              back_forward: z.number(),
+              back_forward_cache: z.number(),
+              prerender: z.number(),
+            }),
+          })
+          .optional(),
+        cumulative_layout_shift: CruxHistogramItem,
+        experimental_time_to_first_byte: CruxHistogramItem,
+        interaction_to_next_paint: CruxHistogramItem,
+        largest_contentful_paint: CruxHistogramItem,
+        round_trip_time: CruxHistogramItem,
+        first_contentful_paint: CruxHistogramItem,
+        form_factors: z
+          .object({
+            fractions: FormFactorFractionsSchema,
+          })
+          .optional(),
+        largest_contentful_paint_image_resource_load_duration:
+          CruxHistogramItem.omit({ histogram: true }).optional(),
+        largest_contentful_paint_image_element_render_delay:
+          CruxHistogramItem.omit({ histogram: true }).optional(),
+        largest_contentful_paint_image_resource_load_delay:
+          CruxHistogramItem.omit({ histogram: true }).optional(),
+        largest_contentful_paint_image_time_to_first_byte:
+          CruxHistogramItem.omit({ histogram: true }).optional(),
+      })
+      .partial(),
     collectionPeriod: z.object({
       firstDate: cruxDateSchema,
       lastDate: cruxDateSchema,
@@ -175,19 +177,21 @@ export const CruxHistoryReportSchema = z.object({
         CruxHistoryTimeseries.omit({ histogramTimeseries: true }).optional(),
       largest_contentful_paint_image_time_to_first_byte:
         CruxHistoryTimeseries.omit({ histogramTimeseries: true }).optional(),
-      form_factors: z.object({
-        fractionTimeseries: z.object({
-          desktop: z.object({
-            fractions: z.array(coerceNumber),
+      form_factors: z
+        .object({
+          fractionTimeseries: z.object({
+            desktop: z.object({
+              fractions: z.array(coerceNumber),
+            }),
+            phone: z.object({
+              fractions: z.array(coerceNumber),
+            }),
+            tablet: z.object({
+              fractions: z.array(coerceNumber),
+            }),
           }),
-          phone: z.object({
-            fractions: z.array(coerceNumber),
-          }),
-          tablet: z.object({
-            fractions: z.array(coerceNumber),
-          }),
-        }),
-      }).optional(),
+        })
+        .optional(),
       largest_contentful_paint_resource_type: z
         .object({
           fractionTimeseries: z.object({
@@ -231,7 +235,7 @@ export const UserPageLoadMetricV5schema = z.object({
 
 export type UserPageLoadMetricV5 = z.infer<typeof UserPageLoadMetricV5schema>;
 
-export const PageSpeedApiLoadingExperienceV5 = z.object({
+export const PageSpeedApiLoadingExperienceV5schema = z.object({
   metrics: z.object({
     CUMULATIVE_LAYOUT_SHIFT_SCORE: UserPageLoadMetricV5schema,
     EXPERIMENTAL_TIME_TO_FIRST_BYTE: UserPageLoadMetricV5schema,
@@ -241,6 +245,10 @@ export const PageSpeedApiLoadingExperienceV5 = z.object({
   }),
   overall_category: z.string(),
 });
+
+export type PageSpeedApiLoadingExperience = z.infer<
+  typeof PageSpeedApiLoadingExperienceV5schema
+>;
 
 export const LighthouseResultV5 = z.object({
   fetchTime: z.string(),
@@ -259,20 +267,75 @@ const auditRefSchema = z
   })
   .partial();
 
-const auditResultSchema = z
-  .object({
-    description: z.string().optional(),
-    details: z.any().optional(),
-    errorMessage: z.string().optional(),
-    explanation: z.string().optional(),
-    id: z.string(),
-    numericValue: z.number().optional(),
-    score: z.number().nullable(),
-    scoreDisplayMode: z.string(),
-    title: z.string(),
-    warnings: z.array(z.any()).optional(),
-  })
-  .partial();
+const auditDebugData = z.union([z.object({
+  type: z.literal('debugdata'),
+}), z.any()]);
+
+const AuditDetailsTableHeading = z.array(
+  z.object({
+    valueType: z.union([z.string(), z.number()]).optional(),
+    key: z.string().optional(),
+    label: z.string().optional(),
+    granularity: z.number().optional(),
+    subItemsHeading: z.object({
+      valueType: z.union([z.string(), z.number()]).optional(),
+      key: z.string().optional(),
+      label: z.string().optional(),
+      granularity: z.number().optional(),
+    }),
+  }),
+)
+const AuditDetailTable = z.object({
+  type: z.literal('table'),
+  items: z.array(
+    z.any(), //use heading to get key
+  ),
+  isEntityGrouped: z.boolean().optional(),
+  headings: AuditDetailsTableHeading,
+  sortedBy: z.array(z.string()).optional(),
+  debugData: auditDebugData.optional()
+});
+
+export const AuditDetailFilmstrip = z.object({
+  type: z.literal('filmstrip'),
+  items: z.array(
+    z.object({
+      timing: coerceNumber,
+      timestamp: coerceNumber,
+      data: z.string(),
+    }),
+  ),
+  scale: coerceNumber,
+});
+
+const AuditDetailOpportunity = z.object({
+  type: z.literal('opportunity'),
+  headings: AuditDetailsTableHeading,
+  sortedBy: z.array(z.string()),
+  overallSavingsMs: coerceNumber.optional(),
+  overallSavingsBytes: coerceNumber.optional(),
+  items: z.array(z.any()),
+  debugData: auditDebugData.optional(),
+  numericValue: z.string(),
+  numericUnit: z.string(),
+});
+
+const auditResultSchema = z.object({
+  description: z.string().optional(),
+  details: z
+    .union([z.any(), AuditDetailTable, AuditDetailFilmstrip, AuditDetailOpportunity])
+    .optional(),
+  errorMessage: z.string().optional(),
+  explanation: z.string().optional(),
+  id: z.string(),
+  numericValue: z.number().optional(),
+  score: z.number().nullable(),
+  scoreDisplayMode: z.string(),
+  title: z.string(),
+  warnings: z.array(z.any()).optional(),
+});
+
+export type AuditResult = z.infer<typeof auditResultSchema>;
 
 const categoryResultSchema = z
   .object({
@@ -309,6 +372,7 @@ const categorySchema = z
 
 const lighthouseResultV5Schema = z
   .object({
+    finalDisplayedUrl: urlSchema,
     artifacts: artifactsSchema,
     categories: z.record(categoryResultSchema),
     categoryGroups: z.record(categorySchema).optional(),
@@ -321,26 +385,30 @@ const lighthouseResultV5Schema = z
     requestedUrl: z.string(),
     runWarnings: z.array(z.string()),
     fullPageScreenshot: z.object({
-      nodes: z.record(z.object({
-        bottom: coerceNumber,
-        height: coerceNumber,
-        left: coerceNumber,
-        right: coerceNumber,
-        top: coerceNumber,
-        width: coerceNumber,
-      })),
+      nodes: z.record(
+        z.object({
+          bottom: coerceNumber,
+          height: coerceNumber,
+          left: coerceNumber,
+          right: coerceNumber,
+          top: coerceNumber,
+          width: coerceNumber,
+        }),
+      ),
       screenshot: z.object({
         data: z.string(),
         height: z.number(),
-        width: z.number()
-      })
+        width: z.number(),
+      }),
     }),
-    entities: z.array(z.object({
-      "name": z.string(),
-      "isFirstParty": z.boolean(),
-      "isUnrecognized": z.boolean(),
-      "origins": z.array(z.string())
-  })),
+    entities: z.array(
+      z.object({
+        name: z.string(),
+        isFirstParty: z.boolean(),
+        isUnrecognized: z.boolean(),
+        origins: z.array(z.string()),
+      }),
+    ),
     runtimeError: z
       .object({
         message: z.string(),
@@ -369,8 +437,8 @@ export const pageSpeedInsightsSchema = z.object({
   kind: z.string(),
   captchaResult: z.string(),
   id: z.string(),
-  loadingExperience: PageSpeedApiLoadingExperienceV5,
-  originLoadingExperience: PageSpeedApiLoadingExperienceV5,
+  loadingExperience: PageSpeedApiLoadingExperienceV5schema,
+  originLoadingExperience: PageSpeedApiLoadingExperienceV5schema,
   analysisUTCTimestamp: z.string(),
   lighthouseResult: lighthouseResultV5Schema,
   version: z.object({ major: z.string(), minor: z.string() }).optional(),
