@@ -14,12 +14,13 @@ export const UrlLookupForm = () => {
   };
 
   return (
-    <>
+  
+      <div className="mx-auto flex flex-col max-w-[80ch] gap-3">
       <label htmlFor={`url-${id}`} className="w-full">
-        Enter an url
+        Enter an url: 
       </label>
       <form
-        className="mx-auto flex max-w-[80ch] gap-3"
+        className="mx-auto flex w-full max-w-[80ch] gap-3"
         method="GET"
         onSubmit={handleSubmit}
       >
@@ -32,6 +33,6 @@ export const UrlLookupForm = () => {
         />
         <Button>Submit</Button>
       </form>
-    </>
+    </div>
   );
 };
