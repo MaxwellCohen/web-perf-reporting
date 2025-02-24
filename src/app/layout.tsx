@@ -28,16 +28,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} dark antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <PostHogProvider>
           <div className="grid h-screen grid-rows-[auto,1fr]">
             <TopNav />
             <div className="overflow-y-scroll">
-              <main className="container mx-auto min-h-screen p-4">
+              <main className="container mx-auto min-h-screen p-4 print:min-h-0">
                 {children}
               </main>
-              <footer className="w-full text-center">
+              <footer className="w-full text-center print:hidden">
                 Made by Maxwell Cohen, with data from Google crux report.
               </footer>
             </div>

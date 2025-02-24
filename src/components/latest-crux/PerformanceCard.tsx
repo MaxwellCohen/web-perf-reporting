@@ -82,10 +82,10 @@ export function CurrentPerformanceCard({
   }
 
   return (
-    <Card className="grid h-full grid-cols-1 grid-rows-[44px,auto,72px] gap-3 p-2">
+    <Card className="grid h-full grid-cols-1 grid-rows-[44px,auto,72px] gap-2 p-2">
       <div className="text-md text-center font-bold">{title}</div>
       <Chart histogramData={histogramData} />
-      <div className="flex-col items-start gap-2 text-sm">
+      <div className="flex-col items-start gap-1 text-sm">
         <div className="flex gap-2 font-medium leading-none">
           P75 is {histogramData.P75 ?? 'N/A'}
         </div>

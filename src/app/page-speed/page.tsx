@@ -14,7 +14,7 @@ export default async function Home({
 
   return (
     <div>
-      <h1 className="mx-auto text-center text-3xl font-extrabold">
+      <h1 className="mx-auto text-center text-2xl font-extrabold">
         Page Speed Insights {url ? ` for ${url}` : ''}
       </h1>
       {!url ? (

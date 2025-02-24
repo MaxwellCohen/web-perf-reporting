@@ -35,7 +35,7 @@ export function CurrentPerformanceDashboard({
   const collectionPeriod = report?.record?.collectionPeriod
   return (
     <CurrentPerformanceChartContext.Provider value={ChartType}>
-      <h2 className="text-xl">
+      <h2 className="text-lg">
         Latest Performance Report for
         {collectionPeriod ? ` ${formatDate(collectionPeriod.firstDate)} - ${formatDate(collectionPeriod.lastDate)}` : null}
       </h2>

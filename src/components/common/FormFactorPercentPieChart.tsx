@@ -99,15 +99,15 @@ export function PercentTable({
     <Card className={cn('flex-1', className)} >
       <div className="text-md text-center font-bold">{title}</div>
       <Table>
-        <TableHeader>
+        <TableHeader className='pt-2'>
           {entries.map(([label, value]) => {
-            return (<TableHead key={label}> {toSentenceCase(label)} </TableHead>)
+            return (<TableHead key={label} className='h-4'> {toSentenceCase(label)} </TableHead>)
           })}
         </TableHeader>
         <TableBody>
           <TableRow>
             {entries.map(([label, value]) => {
-              return (<TableCell key={label}> {(value * 100).toFixed(2)} % </TableCell>)
+              return (<TableCell key={label} className='h-4'> {(value * 100).toFixed(2)} % </TableCell>)
             })}
           </TableRow>
         </TableBody>

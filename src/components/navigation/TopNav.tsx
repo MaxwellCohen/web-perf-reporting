@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export function TopNav() {
   return (
-    <nav className="flex w-full flex-wrap items-center justify-between border-b p-4 align-baseline text-xl font-semibold">
+    <nav className="flex w-full flex-wrap items-center justify-between border-b p-4 align-baseline text-xl font-semibold print:p-2">
       <Link href="/" className="">
         <span className="text-1xl break-keep font-bold">
           Web Performance Reporting
