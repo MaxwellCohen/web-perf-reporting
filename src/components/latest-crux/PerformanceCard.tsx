@@ -16,7 +16,7 @@ import { useContext, useMemo } from 'react';
 import { chartConfig, PerformanceChartData } from '@/components/common/ChartSettings';
 import { RadialChart } from '@/components/latest-crux/PerformanceRadialChart';
 import { PerformanceStackedBarChart } from '@/components/latest-crux/PerformanceStackedBarChart';
-import GaugeChart from '@/components/common/PageSpeedGuageChart';
+import GaugeChart from '@/components/common/PageSpeedGaugeChart';
 import { createContext } from 'react';
 
 const makeHistogramData = (data?: CruxHistoryItem) => {

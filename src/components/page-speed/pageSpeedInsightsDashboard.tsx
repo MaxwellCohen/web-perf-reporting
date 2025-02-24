@@ -1,10 +1,9 @@
 /* eslint-disable react/no-children-prop */
 /* eslint-disable @next/next/no-img-element */
 'use client';
-import GaugeChart from '@/components/common/PageSpeedGuageChart';
+import GaugeChart from '@/components/common/PageSpeedGaugeChart';
 
 import {
-  TableCaption,
   TableHeader,
   TableRow,
   Table,
@@ -14,6 +13,9 @@ import {
 } from '@/components/ui/table';
 import {
   AuditDetailFilmstrip,
+  AuditDetailFilmstripSchema,
+  AuditResult,
+  Entities,
   PageSpeedApiLoadingExperience,
   PageSpeedInsights,
 } from '@/lib/schema';
@@ -28,11 +30,14 @@ export function PageSpeedInsightsDashboard({
   if (!data) {
     return null;
   }
-  const url = data?.lighthouseResult.finalDisplayedUrl;
+  // const url = data?.lighthouseResult.finalDisplayedUrl;
   const screenshot = data.lighthouseResult.fullPageScreenshot?.screenshot;
-  const timeline = AuditDetailFilmstrip.safeParse(
+  const timeline = AuditDetailFilmstripSchema.safeParse(
     data?.lighthouseResult?.audits?.['screenshot-thumbnails'].details,
   ).data;
+
+  const entities: Entities | undefined = data?.lighthouseResult?.entities;
+  const audits: AuditResult | undefined = data?.lighthouseResult?.audits;
   return (
     <div>
       <LoadingExperienceGauges
@@ -44,99 +49,12 @@ export function PageSpeedInsightsDashboard({
         experience={data?.originLoadingExperience}
       />
 
-      {screenshot ? (
-        <div className="grid grid-cols-3">
-          <img
-            alt={'fullscreen image'}
-            width={80}
-            src={screenshot.data}
-            className={`w-20 aspect-[${screenshot.width}/${screenshot.height}]`}
-          />
-        </div>
-      ) : null}
-      <div className="mt-3 flex flex-row border">
-        {timeline ? (
-          timeline?.items?.length ? (
-            <>
-              {timeline.items.map((item, i) => {
-                return (
-                  <div key={`${i}-${item.timestamp}`} className="w-[250px]">
-                    <img alt={'timeline image'} width={80} src={item.data} />
-                    <div>{item.timing} ms</div>
-                  </div>
-                );
-              })}
-            </>
-          ) : null
-        ) : null}
+      <div className='grid grid-cols-[1fr_2fr]'>
+        <ScreenshotComponent screenshot={screenshot} />
+        <TimelineComponent timeline={timeline} />
       </div>
-      {data?.lighthouseResult?.entities ? (
-        <>
-          <h3> Entities - list of Origins that the site uses</h3>
-          <Table>
-            <TableCaption>A list of entities that {url} uses </TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name </TableHead>
-                <TableHead>Is First Party </TableHead>
-                <TableHead>Is Unrecognized </TableHead>
-                <TableHead>Origins </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.lighthouseResult.entities.map((entity, i) => (
-                <TableRow key={`${i}-${entity.name}`}>
-                  <TableCell> {entity.name} </TableCell>
-                  <TableCell>
-                    {entity.isFirstParty ? '✅ - yes' : '❌ - no'}
-                  </TableCell>
-                  <TableCell>
-                    {entity.isUnrecognized ? '✅ - yes' : '❌ - no'}
-                  </TableCell>
-                  <TableCell>
-                    {entity.origins.map((o, i) => (
-                      <div key={`${i}-${o}`}>{o} </div>
-                    ))}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </>
-      ) : null}
-      {data?.lighthouseResult?.audits ? (
-        <>
-          <h3> Audits </h3>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Title </TableHead>
-                <TableHead>Description </TableHead>
-                {/* <TableHead>Details </TableHead> */}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {Object.values(data.lighthouseResult.audits).map((audit, i) => (
-                <TableRow key={`${i}-${audit.id}`}>
-                  <TableCell> {audit.id} </TableCell>
-                  <TableCell> {audit.title} </TableCell>
-                  <TableCell>
-                    {' '}
-                    <ReactMarkdown children={audit.description || ''} />
-                  </TableCell>
-                  <TableCell>{audit.score}</TableCell>
-                  {/* <TableCell>
-                      {JSON.stringify(
-                        audit.details
-                      )}
-                    </TableCell> */}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </>
-      ) : null}
+      <EntitiesTable entities={entities} />
+      <AuditTable audits={audits} /> 
     </div>
   );
 }
@@ -183,3 +101,133 @@ export function LoadingExperienceGauges({
     </div>
   );
 }
+
+
+function ScreenshotComponent({
+  screenshot,
+}: {
+  screenshot?: {
+    data: string;
+    width: number;
+    height: number;
+  };
+}) {
+  if (!screenshot) {
+    return null
+  }
+  return (
+    <div className="border">
+      <img
+        alt={'fullscreen image'}
+        width={80}
+        src={screenshot.data}
+        className={`w-20 aspect-[${screenshot.width}/${screenshot.height}]`}
+      />
+    </div>
+  );
+}
+
+// Add at the bottom of the file
+function TimelineComponent({
+  timeline,
+}: {
+  timeline?: AuditDetailFilmstrip
+}) {
+  if (!timeline?.items?.length) {
+    return null;
+  }
+
+  return (
+    <div className="mt-3 flex flex-row border gap-2 align-top">
+      {timeline.items.map((item, i) => (
+        <div key={`${i}-${item.timestamp}`} className="">
+          <img alt={'timeline image'} width={80} src={item.data} />
+          <div>{item.timing} ms</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EntitiesTable({
+  entities,
+}: {
+  entities?: Entities;
+}) {
+  if (!entities?.length) {
+    return null;
+  }
+
+  return (
+    <>
+      <h3> Entities - list of Origins that the site uses</h3>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name </TableHead>
+            <TableHead>Is First Party </TableHead>
+            <TableHead>Is Unrecognized </TableHead>
+            <TableHead>Origins </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {entities.map((entity, i) => (
+            <TableRow key={`${i}-${entity.name}`}>
+              <TableCell> {entity.name} </TableCell>
+              <TableCell>
+                {entity.isFirstParty ? '✅ - yes' : '❌ - no'}
+              </TableCell>
+              <TableCell>
+                {entity.isUnrecognized ? '✅ - yes' : '❌ - no'}
+              </TableCell>
+              <TableCell>
+                {entity.origins.map((o, i) => (
+                  <div key={`${i}-${o}`}>{o} </div>
+                ))}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </>
+  );
+}
+
+function AuditTable({audits}: {audits?: AuditResult}) {
+  if (!audits) {
+    return null;
+  }
+return (
+  <>
+    <h3> Audits </h3>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Key</TableHead>
+          <TableHead>ID</TableHead>
+          <TableHead>Title </TableHead>
+          <TableHead>Description </TableHead>
+          {/* <TableHead>Details </TableHead> */}
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {Object.entries(audits).map(([key,audit], i) => (
+          <TableRow key={`${i}-${audit.id}`}>
+            <TableCell> {key} </TableCell>
+            <TableCell> {audit.id} </TableCell>
+            <TableCell> {audit.title} </TableCell>
+            <TableCell>
+              <ReactMarkdown children={audit.description || ''} />
+            </TableCell>
+            <TableCell>{audit.score}</TableCell>
+            {/* <TableCell>
+                {JSON.stringify(
+                  audit.details
+                )}
+              </TableCell> */}
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  </>
+)}

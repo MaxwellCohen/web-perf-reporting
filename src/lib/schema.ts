@@ -296,7 +296,7 @@ const AuditDetailTable = z.object({
   debugData: auditDebugData.optional()
 });
 
-export const AuditDetailFilmstrip = z.object({
+export const AuditDetailFilmstripSchema = z.object({
   type: z.literal('filmstrip'),
   items: z.array(
     z.object({
@@ -307,6 +307,8 @@ export const AuditDetailFilmstrip = z.object({
   ),
   scale: coerceNumber,
 });
+
+export type AuditDetailFilmstrip = z.infer<typeof AuditDetailFilmstripSchema>;
 
 const AuditDetailOpportunity = z.object({
   type: z.literal('opportunity'),
@@ -320,10 +322,10 @@ const AuditDetailOpportunity = z.object({
   numericUnit: z.string(),
 });
 
-const auditResultSchema = z.object({
+const auditResultSchema = z.record(z.object({
   description: z.string().optional(),
   details: z
-    .union([z.any(), AuditDetailTable, AuditDetailFilmstrip, AuditDetailOpportunity])
+    .union([z.any(), AuditDetailTable, AuditDetailFilmstripSchema, AuditDetailOpportunity])
     .optional(),
   errorMessage: z.string().optional(),
   explanation: z.string().optional(),
@@ -333,7 +335,7 @@ const auditResultSchema = z.object({
   scoreDisplayMode: z.string(),
   title: z.string(),
   warnings: z.array(z.any()).optional(),
-});
+}));
 
 export type AuditResult = z.infer<typeof auditResultSchema>;
 
@@ -370,6 +372,17 @@ const categorySchema = z
   })
   .partial();
 
+const entitiesSchema = z.array(
+  z.object({
+    name: z.string(),
+    isFirstParty: z.boolean(),
+    isUnrecognized: z.boolean(),
+    origins: z.array(z.string()),
+  }),
+);
+
+export type Entities = z.infer<typeof entitiesSchema>;  
+
 const lighthouseResultV5Schema = z
   .object({
     finalDisplayedUrl: urlSchema,
@@ -401,14 +414,7 @@ const lighthouseResultV5Schema = z
         width: z.number(),
       }),
     }),
-    entities: z.array(
-      z.object({
-        name: z.string(),
-        isFirstParty: z.boolean(),
-        isUnrecognized: z.boolean(),
-        origins: z.array(z.string()),
-      }),
-    ),
+    entities: entitiesSchema,
     runtimeError: z
       .object({
         message: z.string(),
@@ -429,7 +435,7 @@ const lighthouseResultV5Schema = z
         .optional(),
     }),
     userAgent: z.string(),
-    audits: z.record(auditResultSchema),
+    audits: auditResultSchema,
   })
   .partial();
 
