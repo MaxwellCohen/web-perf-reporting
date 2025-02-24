@@ -12,50 +12,29 @@ export default function Home() {
         </p>
       </div>
       <div className="grid md:grid-cols-3 gap-6 mb-12">
-        <Card className="h-full flex flex-col">
-          <CardHeader className='flex-1'>
-            <CardTitle>Latest CrUX Metrics</CardTitle>
-            <CardDescription>Analyze actual user experience data from Chrome UX Report</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">Get insights into Core Web Vitals and other key performance metrics based on real user data.</p>
-            <Button asChild variant="outline" className="w-full">
-              <Link href="/latest-crux">
-                View Latest CrUX Data
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <HomeCard
+          title="Latest CrUX Metrics"
+          description="Analyze actual user experience data from Chrome UX Report"
+          content="Get insights into Core Web Vitals and other key performance metrics based on real user data."
+          url="/latest-crux"
+          linkText="View Latest CrUX Data"
+        />
 
-        <Card className="h-full flex flex-col">
-          <CardHeader className='flex-1'>
-            <CardTitle>Historical Trends</CardTitle>
-            <CardDescription>Track performance changes over time</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">{`Monitor how your website's performance evolves with historical CrUX data analysis.`}</p>
-            <Button variant="outline" className="w-full" asChild>
-              <Link href="/historical-crux">
-                View Historical Data
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <HomeCard
+          title="Historical Trends"
+          description="Track performance changes over time"
+          content="Monitor how your website's performance evolves with historical CrUX data analysis."
+          url="/historical-crux"
+          linkText="View Historical Data"
+        />
 
-        <Card className="h-full flex flex-col">
-          <CardHeader className='flex-1'>
-            <CardTitle>PageSpeed Insights</CardTitle>
-            <CardDescription>Lab data and optimization recommendations</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">Get detailed performance audits and actionable recommendations to improve your site.</p>
-            <Button asChild variant="outline" className="w-full">
-              <Link href="/page-speed">
-                Run PageSpeed Analysis
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <HomeCard
+          title="PageSpeed Insights"
+          description="Lab data and optimization recommendations"
+          content="Get detailed performance audits and actionable recommendations to improve your site."
+          url="/page-speed"
+          linkText="Run PageSpeed Analysis"
+        />
       </div>
 
       <div className="text-center">
@@ -81,4 +60,38 @@ export default function Home() {
       </div>
     </div>
   );
+}
+
+
+function HomeCard({
+    title,
+    description,
+    content,
+    url,
+    linkText,
+
+}: {
+title: string,
+description: string,
+content: string,
+url: string,
+linkText: string,
+}) {
+  
+  return(
+    <Card className="h-full flex flex-col">
+          <CardHeader className='flex-1'>
+            <CardTitle>{title}</CardTitle>
+            <CardDescription>{description}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4">{content}</p>
+            <Button asChild variant="outline" className="w-full">
+              <Link href={url}>
+                {linkText}
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+  )
 }

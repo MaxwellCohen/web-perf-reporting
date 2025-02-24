@@ -15,7 +15,7 @@ export default async function Home({
   return (
     <div>
       <h1 className="mx-auto text-center text-3xl font-extrabold">
-        Historical CrUX reports for {url ? ` for ${url} ` : ''}
+        Historical CrUX reports {url ? ` for ${url} ` : ''}
       </h1>
       {!url ?
         <UrlLookupForm />
