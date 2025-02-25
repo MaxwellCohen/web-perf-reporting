@@ -14,6 +14,7 @@ import {
 import {
   AuditDetailFilmstrip,
   AuditDetailFilmstripSchema,
+  AuditDetailOpportunitySchema,
   AuditResult,
   Entities,
   PageSpeedApiLoadingExperience,
@@ -27,6 +28,7 @@ import {
 } from '@/components/ui/accordion';
 
 import ReactMarkdown from 'react-markdown';
+import { useId } from 'react';
 
 export function PageSpeedInsightsDashboard({
   data,
@@ -44,40 +46,49 @@ export function PageSpeedInsightsDashboard({
 
   const entities: Entities | undefined = data?.lighthouseResult?.entities;
   const audits: AuditResult | undefined = data?.lighthouseResult?.audits;
+  const categories = data.lighthouseResult.categories;
+
   return (
-    <Accordion 
-      type="multiple" 
+    <Accordion
+      type="multiple"
       defaultValue={[
-        "page-loading-experience",
-        "origin-loading-experience",
-        "screenshot",
-        "entities",
-        "audits"
+        'page-loading-experience',
+        'origin-loading-experience',
+        'screenshot',
+        'entities',
+        'audits',
+        ...Object.keys(categories || {}),
       ]}
     >
+      <h2 className="text-2xl font-bold">
+        Report for {new Date(data.analysisUTCTimestamp).toLocaleDateString()}
+      </h2>
       <AccordionItem value="page-loading-experience">
         <AccordionTrigger>
-          <h2 className="text-lg font-bold">Page Loading Experience: {data?.loadingExperience?.overall_category}</h2>
+          <div className="text-lg font-bold">
+            Page Loading Experience: {data?.loadingExperience?.overall_category}
+          </div>
         </AccordionTrigger>
         <AccordionContent>
-          <LoadingExperienceGauges
-            experience={data?.loadingExperience}
-          />
+          <LoadingExperienceGauges experience={data?.loadingExperience} />
         </AccordionContent>
       </AccordionItem>
+
       <AccordionItem value="origin-loading-experience">
         <AccordionTrigger>
-          <h2 className="text-lg font-bold">Origin Loading Experience: {data?.originLoadingExperience?.overall_category}</h2>
+          <div className="text-lg font-bold">
+            Origin Loading Experience:{' '}
+            {data?.originLoadingExperience?.overall_category}
+          </div>
         </AccordionTrigger>
         <AccordionContent>
-          <LoadingExperienceGauges
-            experience={data?.originLoadingExperience}
-          />
+          <LoadingExperienceGauges experience={data?.originLoadingExperience} />
         </AccordionContent>
       </AccordionItem>
+
       <AccordionItem value="screenshot">
         <AccordionTrigger>
-          <h2 className="text-lg font-bold">Screenshots</h2>
+          <div className="text-lg font-bold">Screenshots</div>
         </AccordionTrigger>
         <AccordionContent>
           <div className="grid grid-cols-[1fr_2fr]">
@@ -86,9 +97,99 @@ export function PageSpeedInsightsDashboard({
           </div>
         </AccordionContent>
       </AccordionItem>
+
+      {Object.entries(categories || {}).map(([key, category]) => {
+        console.log(category);
+        return (
+          <AccordionItem key={key} value={key}>
+            <AccordionTrigger>
+              <div className="text-lg font-bold">
+                {category.title}{' '}
+                {category.score ? `score: ${category.score * 100}` : ''}
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <ReactMarkdown>{category.description}</ReactMarkdown>
+              <div className="w-full" role="table" aria-label="Audit Table">
+                <div
+                  className="grid grid-cols-[1fr_4fr] gap-4"
+                  role="row"
+                  aria-label="Audit table header"
+                >
+                  <div className="border-b pb-2 font-bold" role="columnheader">
+                    Audit Name
+                  </div>
+                  <div className="border-b pb-2 font-bold" role="columnheader">
+                    Description
+                  </div>
+                  {/* <div className="font-bold border-b pb-2 text-right" role="columnheader">Weight</div> */}
+                  {/* <div className="font-bold border-b pb-2 text-right" role="columnheader">Group</div> */}
+                </div>
+
+                <Accordion type="multiple">
+                  {category.auditRefs?.map((audit) => {
+                    if (!audit.id) {
+                      console.log('no id for', audit);
+                      return null;
+                    }
+                    const auditData = audits?.[audit.id];
+                    if (!auditData) {
+                      console.log('no audit result for', audit);
+                      return null;
+                    }
+                    return (
+                      <AccordionItem key={audit.id} value={audit.id}>
+                        <AccordionTrigger>
+                          <div
+                            className="grid grid-cols-[1fr_4fr] gap-4 border-b"
+                            key={audit.id}
+                            role="row"
+                          >
+                            <div className="py-2" role="cell">
+                              {auditData.title}{' '}
+                              {audit.acronym ? `(${audit.acronym})` : ''}
+                            </div>
+                            <div className="py-2" role="cell">
+                              <ReactMarkdown
+                                children={auditData.description || ''}
+                              />
+                            </div>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <ReactMarkdown>{auditData.description}</ReactMarkdown>
+                          <div className="grid grid-cols-[auto_1fr] gap-4">
+                            <div className="py-2">Weight:</div>
+                            <div className="py-2" role="cell">
+                              {audit.weight}
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-[auto_1fr] gap-4">
+                            <div className="py-2">Score:</div>
+                            <div className="py-2" role="cell">
+                              {auditData.score}
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-[auto_1fr] gap-4">
+                            <div className="py-2">Details:</div>
+                            <div className="py-2">
+                              <AuditDetails details={auditData.details} />
+                            </div>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    );
+                  })}
+                </Accordion>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        );
+      })}
+
       <AccordionItem value="entities">
         <AccordionTrigger>
-          <h2 className="text-lg font-bold">Entities</h2>
+          <div className="text-lg font-bold">Entities</div>
         </AccordionTrigger>
         <AccordionContent>
           <EntitiesTable entities={entities} />
@@ -96,7 +197,7 @@ export function PageSpeedInsightsDashboard({
       </AccordionItem>
       <AccordionItem value="audits">
         <AccordionTrigger>
-          <h2 className="text-lg font-bold">Audits</h2>
+          <div className="text-lg font-bold">Audits</div>
         </AccordionTrigger>
         <AccordionContent>
           <AuditTable audits={audits} />
@@ -114,32 +215,35 @@ export function LoadingExperienceGauges({
   if (!experience) {
     return null;
   }
-  const metrics: {metric: string, key: keyof PageSpeedApiLoadingExperience['metrics']}[] = [
+  const metrics: {
+    metric: string;
+    key: keyof PageSpeedApiLoadingExperience['metrics'];
+  }[] = [
     {
-      metric: "Cumulative Layout Shift",
-      key: "CUMULATIVE_LAYOUT_SHIFT_SCORE"
+      metric: 'Cumulative Layout Shift',
+      key: 'CUMULATIVE_LAYOUT_SHIFT_SCORE',
     },
     {
-      metric: "Time to First Byte", 
-      key: "EXPERIMENTAL_TIME_TO_FIRST_BYTE"
+      metric: 'Time to First Byte',
+      key: 'EXPERIMENTAL_TIME_TO_FIRST_BYTE',
     },
     {
-      metric: "First Contentful Paint",
-      key: "FIRST_CONTENTFUL_PAINT_MS"
+      metric: 'First Contentful Paint',
+      key: 'FIRST_CONTENTFUL_PAINT_MS',
     },
     {
-      metric: "Interaction to Next Paint",
-      key: "INTERACTION_TO_NEXT_PAINT"
+      metric: 'Interaction to Next Paint',
+      key: 'INTERACTION_TO_NEXT_PAINT',
     },
     {
-      metric: "Largest Contentful Paint",
-      key: "LARGEST_CONTENTFUL_PAINT_MS"
-    }
-  ]
+      metric: 'Largest Contentful Paint',
+      key: 'LARGEST_CONTENTFUL_PAINT_MS',
+    },
+  ];
   return (
     <div>
       <div className="mt-2 grid grid-cols-3 gap-2 md:grid-cols-5">
-        {metrics.map(({metric, key}) => (
+        {metrics.map(({ metric, key }) => (
           <GaugeChart
             key={key}
             metric={metric}
@@ -194,14 +298,18 @@ function TimelineComponent({ timeline }: { timeline?: AuditDetailFilmstrip }) {
 }
 
 function EntitiesTable({ entities }: { entities?: Entities }) {
+  const id = useId();
   if (!entities?.length) {
     return null;
   }
 
   return (
     <>
-      <h3> Entities - list of Origins that the site uses</h3>
-      <Table>
+      <div id={`${id}-entities-title`}>
+        {' '}
+        Entities - list of Origins that the site uses
+      </div>
+      <Table aria-labelledby={`${id}-entities-title`}>
         <TableHeader>
           <TableRow>
             <TableHead>Name </TableHead>
@@ -239,7 +347,7 @@ function AuditTable({ audits }: { audits?: AuditResult }) {
   }
   return (
     <>
-      <h3> Audits </h3>
+      <div className="text-lg font-bold"> Audits </div>
       <Table>
         <TableHeader>
           <TableRow>
@@ -254,18 +362,12 @@ function AuditTable({ audits }: { audits?: AuditResult }) {
           {Object.entries(audits).map(([key, audit], i) => {
             return (
               <TableRow key={`${i}-${audit.id}`}>
-                <TableCell> {key} </TableCell>
-                <TableCell> {audit.id} </TableCell>
-                <TableCell> {audit.title} </TableCell>
-                <TableCell>
+                <TableCell rowSpan={1}> {key} </TableCell>
+                <TableCell rowSpan={1}> {audit.id} </TableCell>
+                <TableCell rowSpan={1}> {audit.title} </TableCell>
+                <TableCell rowSpan={1}>
                   <ReactMarkdown children={audit.description || ''} />
                 </TableCell>
-                <TableCell>{audit.score}</TableCell>
-                {/* <TableCell>
-                {JSON.stringify(
-                  audit.details
-                )}
-              </TableCell> */}
               </TableRow>
             );
           })}
@@ -273,4 +375,57 @@ function AuditTable({ audits }: { audits?: AuditResult }) {
       </Table>
     </>
   );
+}
+
+function AuditDetails({ details }: { details: unknown }) {
+  const opportunity = AuditDetailOpportunitySchema.safeParse(details);
+
+  console.log(opportunity);
+  if (opportunity.success) {
+    const data = opportunity.data;
+    if (data?.items?.length && data?.headings?.length) {
+      return (
+        <>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {data.headings.map((heading, i) => {
+                  if (heading.key === 'node') {
+                    return null;
+                  }
+                  return (
+                    <TableHead key={`${i}-${heading.label}`}>
+                      {heading.label}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.items.map((item, i) => (
+                <TableRow key={`${i}-${item.label}`}>
+                  {data?.headings?.map((heading, j) => {
+                    if (heading?.key === 'node') {
+                      return null;
+                    }
+
+                    return heading?.key && heading.key in item ? (
+                      <TableCell key={`${i}-${j}`}>
+                        {JSON.stringify(item[heading.key])}
+                      </TableCell>
+                    ) : null;
+                  })}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <div>
+            <pre>{JSON.stringify(data, null, 2)}</pre>
+          </div>
+        </>
+      );
+    }
+  }
+
+  return <div>{JSON.stringify(details)}</div>;
 }

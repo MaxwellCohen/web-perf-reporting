@@ -264,6 +264,7 @@ const auditRefSchema = z
     id: z.string(),
     weight: z.number(),
     group: z.string().optional(),
+    acronym: z.string().optional(),
   })
   .partial();
 
@@ -282,8 +283,8 @@ const AuditDetailsTableHeading = z.array(
       key: z.string().optional(),
       label: z.string().optional(),
       granularity: z.number().optional(),
-    }),
-  }),
+    }).partial(),
+  }).partial(),
 )
 const AuditDetailTable = z.object({
   type: z.literal('table'),
@@ -310,7 +311,7 @@ export const AuditDetailFilmstripSchema = z.object({
 
 export type AuditDetailFilmstrip = z.infer<typeof AuditDetailFilmstripSchema>;
 
-const AuditDetailOpportunity = z.object({
+export const AuditDetailOpportunitySchema = z.object({
   type: z.literal('opportunity'),
   headings: AuditDetailsTableHeading,
   sortedBy: z.array(z.string()),
@@ -320,12 +321,14 @@ const AuditDetailOpportunity = z.object({
   debugData: auditDebugData.optional(),
   numericValue: z.string(),
   numericUnit: z.string(),
-});
+}).partial();
+
+export type AuditDetailOpportunity = z.infer<typeof AuditDetailOpportunitySchema>;
 
 const auditResultSchema = z.record(z.object({
   description: z.string().optional(),
   details: z
-    .union([z.any(), AuditDetailTable, AuditDetailFilmstripSchema, AuditDetailOpportunity])
+    .union([z.any(), AuditDetailTable, AuditDetailFilmstripSchema, AuditDetailOpportunitySchema])
     .optional(),
   errorMessage: z.string().optional(),
   explanation: z.string().optional(),

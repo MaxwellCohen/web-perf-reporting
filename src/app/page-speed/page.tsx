@@ -21,7 +21,7 @@ export default async function Home({
         <UrlLookupForm />
       ) : (
         <Suspense fallback={<div>Loading...</div>}>
-          <PageSpeedInsights url={url} formFactor="DESKTOP" />
+          <PageSpeedInsights url={url} />
         </Suspense>
       )}
     </div>

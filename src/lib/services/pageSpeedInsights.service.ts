@@ -32,6 +32,7 @@ export const requestPageSpeedData = async (
           gt(PageSpeedInsightsTable.date, new Date(Date.now() - 6 * 60 * 60 * 1000))
         )
     })
+    console.log('result', result);
     if (result) {
       console.log('using db')
 
