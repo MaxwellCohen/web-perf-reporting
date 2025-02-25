@@ -19,6 +19,12 @@ import {
   PageSpeedApiLoadingExperience,
   PageSpeedInsights,
 } from '@/lib/schema';
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@/components/ui/accordion';
 
 import ReactMarkdown from 'react-markdown';
 
@@ -39,23 +45,56 @@ export function PageSpeedInsightsDashboard({
   const entities: Entities | undefined = data?.lighthouseResult?.entities;
   const audits: AuditResult | undefined = data?.lighthouseResult?.audits;
   return (
-    <div>
-      <LoadingExperienceGauges
-        title={'Page Loading Experience: '}
-        experience={data?.loadingExperience}
-      />
-      <LoadingExperienceGauges
-        title={'Origin Loading Experience:'}
-        experience={data?.originLoadingExperience}
-      />
-
-      <div className='grid grid-cols-[1fr_2fr]'>
-        <ScreenshotComponent screenshot={screenshot} />
-        <TimelineComponent timeline={timeline} />
-      </div>
-      <EntitiesTable entities={entities} />
-      <AuditTable audits={audits} /> 
-    </div>
+    <Accordion 
+      type="multiple" 
+      defaultValue={[
+        "page-loading-experience",
+        "origin-loading-experience",
+        "screenshot",
+        "entities",
+        "audits"
+      ]}
+    >
+      <AccordionItem value="page-loading-experience">
+        <AccordionTrigger>Page Loading Experience</AccordionTrigger>
+        <AccordionContent>
+          <LoadingExperienceGauges
+            title={'Page Loading Experience: '}
+            experience={data?.loadingExperience}
+          />
+        </AccordionContent>
+      </AccordionItem>
+      <AccordionItem value="origin-loading-experience">
+        <AccordionTrigger>Origin Loading Experience</AccordionTrigger>
+        <AccordionContent>
+          <LoadingExperienceGauges
+            title={'Origin Loading Experience:'}
+            experience={data?.originLoadingExperience}
+          />
+        </AccordionContent>
+      </AccordionItem>
+      <AccordionItem value="screenshot">
+        <AccordionTrigger>Screenshot</AccordionTrigger>
+        <AccordionContent>
+          <div className="grid grid-cols-[1fr_2fr]">
+            <ScreenshotComponent screenshot={screenshot} />
+            <TimelineComponent timeline={timeline} />
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+      <AccordionItem value="entities">
+        <AccordionTrigger>Entities</AccordionTrigger>
+        <AccordionContent>
+          <EntitiesTable entities={entities} />
+        </AccordionContent>
+      </AccordionItem>
+      <AccordionItem value="audits">
+        <AccordionTrigger>Audits</AccordionTrigger>
+        <AccordionContent>
+          <AuditTable audits={audits} />
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 }
 
@@ -69,7 +108,28 @@ export function LoadingExperienceGauges({
   if (!experience) {
     return null;
   }
-
+  const metrics: {metric: string, key: keyof PageSpeedApiLoadingExperience['metrics']}[] = [
+    {
+      metric: "Cumulative Layout Shift",
+      key: "CUMULATIVE_LAYOUT_SHIFT_SCORE"
+    },
+    {
+      metric: "Time to First Byte", 
+      key: "EXPERIMENTAL_TIME_TO_FIRST_BYTE"
+    },
+    {
+      metric: "First Contentful Paint",
+      key: "FIRST_CONTENTFUL_PAINT_MS"
+    },
+    {
+      metric: "Interaction to Next Paint",
+      key: "INTERACTION_TO_NEXT_PAINT"
+    },
+    {
+      metric: "Largest Contentful Paint",
+      key: "LARGEST_CONTENTFUL_PAINT_MS"
+    }
+  ]
   return (
     <div>
       <h3 className="text-xl">
@@ -77,31 +137,17 @@ export function LoadingExperienceGauges({
         <strong>{experience.overall_category}</strong>
       </h3>
       <div className="mt-2 grid grid-cols-3 gap-2 md:grid-cols-5">
-        <GaugeChart
-          metric="Cumulative Layout Shift"
-          data={experience.metrics.CUMULATIVE_LAYOUT_SHIFT_SCORE}
-        />
-        <GaugeChart
-          metric="Time to First Byte"
-          data={experience.metrics.EXPERIMENTAL_TIME_TO_FIRST_BYTE}
-        />
-        <GaugeChart
-          metric="First Contentful Paint"
-          data={experience.metrics.FIRST_CONTENTFUL_PAINT_MS}
-        />
-        <GaugeChart
-          metric="Interaction to Next Paint"
-          data={experience.metrics.INTERACTION_TO_NEXT_PAINT}
-        />
-        <GaugeChart
-          metric="Largest Contentful Paint"
-          data={experience.metrics.LARGEST_CONTENTFUL_PAINT_MS}
-        />
+        {metrics.map(({metric, key}) => (
+          <GaugeChart
+            key={key}
+            metric={metric}
+            data={experience.metrics[key]}
+          />
+        ))}
       </div>
     </div>
   );
 }
-
 
 function ScreenshotComponent({
   screenshot,
@@ -113,7 +159,7 @@ function ScreenshotComponent({
   };
 }) {
   if (!screenshot) {
-    return null
+    return null;
   }
   return (
     <div className="border">
@@ -128,17 +174,13 @@ function ScreenshotComponent({
 }
 
 // Add at the bottom of the file
-function TimelineComponent({
-  timeline,
-}: {
-  timeline?: AuditDetailFilmstrip
-}) {
+function TimelineComponent({ timeline }: { timeline?: AuditDetailFilmstrip }) {
   if (!timeline?.items?.length) {
     return null;
   }
 
   return (
-    <div className="mt-3 flex flex-row border gap-2 align-top">
+    <div className="mt-3 flex flex-row gap-2 border align-top">
       {timeline.items.map((item, i) => (
         <div key={`${i}-${item.timestamp}`} className="">
           <img alt={'timeline image'} width={80} src={item.data} />
@@ -149,11 +191,7 @@ function TimelineComponent({
   );
 }
 
-function EntitiesTable({
-  entities,
-}: {
-  entities?: Entities;
-}) {
+function EntitiesTable({ entities }: { entities?: Entities }) {
   if (!entities?.length) {
     return null;
   }
@@ -193,41 +231,44 @@ function EntitiesTable({
   );
 }
 
-function AuditTable({audits}: {audits?: AuditResult}) {
+function AuditTable({ audits }: { audits?: AuditResult }) {
   if (!audits) {
     return null;
   }
-return (
-  <>
-    <h3> Audits </h3>
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Key</TableHead>
-          <TableHead>ID</TableHead>
-          <TableHead>Title </TableHead>
-          <TableHead>Description </TableHead>
-          {/* <TableHead>Details </TableHead> */}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {Object.entries(audits).map(([key,audit], i) => {
-          return(<TableRow key={`${i}-${audit.id}`}>
-            <TableCell> {key} </TableCell>
-            <TableCell> {audit.id} </TableCell>
-            <TableCell> {audit.title} </TableCell>
-            <TableCell>
-              <ReactMarkdown children={audit.description || ''} />
-            </TableCell>
-            <TableCell>{audit.score}</TableCell>
-            {/* <TableCell>
+  return (
+    <>
+      <h3> Audits </h3>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Key</TableHead>
+            <TableHead>ID</TableHead>
+            <TableHead>Title </TableHead>
+            <TableHead>Description </TableHead>
+            {/* <TableHead>Details </TableHead> */}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {Object.entries(audits).map(([key, audit], i) => {
+            return (
+              <TableRow key={`${i}-${audit.id}`}>
+                <TableCell> {key} </TableCell>
+                <TableCell> {audit.id} </TableCell>
+                <TableCell> {audit.title} </TableCell>
+                <TableCell>
+                  <ReactMarkdown children={audit.description || ''} />
+                </TableCell>
+                <TableCell>{audit.score}</TableCell>
+                {/* <TableCell>
                 {JSON.stringify(
                   audit.details
                 )}
               </TableCell> */}
-          </TableRow>
-        )})}
-      </TableBody>
-    </Table>
-  </>
-)}
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </>
+  );
+}
