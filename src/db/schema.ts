@@ -1,4 +1,4 @@
-import { CruxReport } from '@/lib/schema';
+import { CruxReport, PageSpeedInsights } from '@/lib/schema';
 import * as t from 'drizzle-orm/sqlite-core';
 
 export const historicalMetrics = t.sqliteTable('Historical_Metrics', {
@@ -7,6 +7,7 @@ export const historicalMetrics = t.sqliteTable('Historical_Metrics', {
   origin: t.text(),
   formFactor: t.text(),
   date: t.text().notNull(),
+  date2: t.integer({ mode: 'timestamp' }),
   data: t.blob({mode: 'json'}).$type<CruxReport>().notNull(),
 },
 (table) => [
@@ -23,5 +24,20 @@ export const historicalMetrics = t.sqliteTable('Historical_Metrics', {
     table.origin,
   ),
 ]);
+
+export const PageSpeedInsightsTable = t.sqliteTable('PageSpeedInsightsTable', {
+  id: t.int().primaryKey({ autoIncrement: true}),
+  url: t.text().notNull(),
+  date: t.integer({ mode: 'timestamp' }),
+  data: t.blob({mode: 'json'}).$type<PageSpeedInsights>().notNull(), 
+},
+(table) => [
+  t.index('PageSpeedInsightsTable_index1').on(table.url),
+  t.index('PageSpeedInsightsTable_index2').on(
+    table.url,
+    table.date,
+  ),
+]
+)
 
 

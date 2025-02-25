@@ -44,7 +44,6 @@ export const getCurrentCruxData = async ({
     const parsedData = cruxReportSchema.parse(data);
     return parsedData;
   } catch (error) {
-    console.log(JSON.stringify({ url, formFactor, origin }));
     console.log(error);
     Sentry.captureException(error);
     return null;
@@ -79,6 +78,7 @@ export const getHistoricalCruxData = async ({
       await db.insert(historicalMetrics)
         .values(
           reports.map((data) => {
+            const lastDate = data.record.collectionPeriod.lastDate
             const date = formatDate(data.record.collectionPeriod.lastDate);
             return {
               id: `${url ?? ''}-${origin ?? ''}-${formFactor}-${date}`,
@@ -86,6 +86,7 @@ export const getHistoricalCruxData = async ({
               origin: origin ?? '',
               formFactor: formFactor ?? '',
               date: date,
+              date2: new Date(lastDate.year, lastDate.month, lastDate.day),
               data,
             };
           }),

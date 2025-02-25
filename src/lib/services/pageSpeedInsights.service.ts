@@ -1,12 +1,11 @@
 import * as Sentry from '@sentry/nextjs';
+import { PageSpeedInsightsTable } from '@/db/schema';
+import { db } from '@/db';
 import { PageSpeedInsights } from '../schema';
-import { formFactor } from '../services';
-import {unstable_cache as cache } from 'next/cache'
-const records: Record<string, PageSpeedInsights> = {};
 
-export const requestPageSpeedData = cache(async (
+export const requestPageSpeedData = async (
   testURL: string,
-  formFactor: formFactor,
+  formFactor: 'DESKTOP' | 'MOBILE',
 ): Promise<PageSpeedInsights | null> => {
   try {
     const baseurl = new URL(
@@ -25,23 +24,36 @@ export const requestPageSpeedData = cache(async (
     if (formFactor) {
       baseurl.searchParams.append('strategy', formFactor);
     }
-    console.log(baseurl.toString());
-    if (records[baseurl.toString()]) {
-      return records[baseurl.toString()];
+
+    const result = await db.query.PageSpeedInsightsTable.findFirst({
+      where: (PageSpeedInsightsTable, { eq, and, gt }) => 
+        and(
+          eq(PageSpeedInsightsTable.url, baseurl.toString()),
+          gt(PageSpeedInsightsTable.date, new Date(Date.now() - 6 * 60 * 60 * 1000))
+        )
+    })
+    if (result) {
+      console.log('using db')
+
+      return result.data;
     }
 
     const response = await fetch(baseurl.toString(), {});
     if (!response.ok) {
       return null;
     }
-    const data = await response.json() as PageSpeedInsights;
-    const a = data;
-    records[baseurl.toString()] = a;
-    return a;
+    const data = await response.json() as PageSpeedInsights
+    if (data) {
+      db.insert(PageSpeedInsightsTable).values({
+        url: baseurl.toString(),
+        date: new Date(data.analysisUTCTimestamp),
+        data: data
+      }).execute();
+    }
+   
+    return data;
   } catch (error) {
     Sentry.captureException(error);
     return null;
   }
-},[], {
-  revalidate: 60 * 60 * 24
-} );
+};

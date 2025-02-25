@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "2a0ef09d-dbb2-4875-b0c3-bb5acc34806d",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "2cf13cbd-2f64-48a8-a52e-e726006ed2a0",
+  "prevId": "2a0ef09d-dbb2-4875-b0c3-bb5acc34806d",
   "tables": {
     "PageSpeedInsightsTable": {
       "name": "PageSpeedInsightsTable",
@@ -66,7 +66,7 @@
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "url": {
           "name": "url",

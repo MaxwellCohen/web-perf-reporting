@@ -5,8 +5,22 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1740202118861,
-      "tag": "0000_worthless_red_hulk",
+      "when": 1740439012901,
+      "tag": "0000_careful_mesmero",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1740448149382,
+      "tag": "0001_daily_galactus",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1740448205006,
+      "tag": "0002_chunky_randall",
       "breakpoints": true
     }
   ]

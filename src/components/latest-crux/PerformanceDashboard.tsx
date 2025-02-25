@@ -7,7 +7,7 @@ import {
   CurrentPerformanceCard,
   CurrentPerformanceChartContext,
 } from '@/components/latest-crux/PerformanceCard';
-import { useId, useState } from 'react';
+import {  useState } from 'react';
 import { PercentTable } from '@/components/common/FormFactorPercentPieChart';
 
 import { PerformanceOptions } from './PerformanceOptions';
@@ -21,7 +21,6 @@ export function CurrentPerformanceDashboard({
 }: {
   reportMap: Record<`${Scope}${DeviceType}`, CruxReport | null>;
 }) {
-  const id = useId()
   const [ChartType, setChartType] = useState('bar');
   const [reportScope, setReportScope] = useState<Scope>('origin');
   const [deviceType, setDeviceType] = useState<DeviceType>('All');

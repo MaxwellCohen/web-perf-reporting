@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "2a0ef09d-dbb2-4875-b0c3-bb5acc34806d",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "947937f7-47ca-4e7e-82b6-41ad302478f7",
+  "prevId": "2cf13cbd-2f64-48a8-a52e-e726006ed2a0",
   "tables": {
     "PageSpeedInsightsTable": {
       "name": "PageSpeedInsightsTable",
@@ -63,10 +63,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "url": {
           "name": "url",
