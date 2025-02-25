@@ -69,7 +69,7 @@ export function GaugeChart({
                     (viewBox.outerRadius || 0)) as number) / 2;
                 const sin = Math.sin(-RADIAN * ang);
                 const cos = Math.cos(-RADIAN * ang);
-                const r = 5;
+                const r = 1;
                 const x0 = viewBox.cx as number;
                 const y0 = viewBox.cy as number;
                 const xba = x0 + r * sin;
@@ -83,15 +83,15 @@ export function GaugeChart({
                   <>
                     <path
                       d={`M ${xba} ${yba} L ${xbb} ${ybb} L ${xp} ${yp} `}
-                      stroke="#d0d000"
-                      fill={'#d0d000'}
+                      stroke="hsl(var(--muted-foreground))"
+                      fill={'hsl(var(--muted-foreground))'}
                     />
                     <circle
                       cx={x0}
                       cy={y0}
                       r={5}
-                      stroke="#d0d000"
-                      fill={'#d0d000'}
+                      stroke="hsl(var(--muted-foreground))"
+                      fill={'hsl(var(--muted-foreground))'}
                     />
                     <text
                       x={viewBox.cx}

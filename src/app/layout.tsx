@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
-import { PostHogProvider } from './providers';
+import { PostHogProvider, ThemeProvider } from './providers';
 import { TopNav } from '@/components/navigation/TopNav';
 
 const geistSans = Geist({
@@ -27,23 +27,30 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
       >
         <PostHogProvider>
-          <div className="grid h-screen grid-rows-[auto,1fr]">
-            <TopNav />
-            <div className="overflow-y-scroll">
-              <main className="container mx-auto min-h-screen p-4 print:min-h-0">
-                {children}
-              </main>
-              <footer className="w-full text-center print:hidden">
-                Made by Maxwell Cohen, with data from Google crux report.
-              </footer>
+          <body
+            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          >
+            <div className="grid h-screen grid-rows-[auto,1fr]">
+              <TopNav />
+              <div className="overflow-y-scroll">
+                <main className="container mx-auto min-h-screen p-4 print:min-h-0">
+                  {children}
+                </main>
+                <footer className="w-full text-center print:hidden">
+                  Made by Maxwell Cohen, with data from Google crux report.
+                </footer>
+              </div>
             </div>
-          </div>
+          </body>
         </PostHogProvider>
-      </body>
+      </ThemeProvider>
     </html>
   );
 }
