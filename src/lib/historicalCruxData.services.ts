@@ -74,8 +74,7 @@ export const getHistoricalCruxData = async ({
         .onConflictDoNothing() // Handle duplicate entries gracefully
         .execute();
     }
-
-    return await db
+    const dbData = await db
       .select({ data: historicalMetrics.data })
       .from(historicalMetrics)
       .where(
@@ -86,6 +85,8 @@ export const getHistoricalCruxData = async ({
         ),
       )
       .orderBy(desc(historicalMetrics.id));
+
+    return dbData.map(({ data }) => data);
   } catch (error) {
     Sentry.captureException(error);
     return null;

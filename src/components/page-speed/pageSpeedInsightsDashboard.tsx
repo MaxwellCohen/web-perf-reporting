@@ -56,25 +56,29 @@ export function PageSpeedInsightsDashboard({
       ]}
     >
       <AccordionItem value="page-loading-experience">
-        <AccordionTrigger>Page Loading Experience</AccordionTrigger>
+        <AccordionTrigger>
+          <h2 className="text-lg font-bold">Page Loading Experience: {data?.loadingExperience?.overall_category}</h2>
+        </AccordionTrigger>
         <AccordionContent>
           <LoadingExperienceGauges
-            title={'Page Loading Experience: '}
             experience={data?.loadingExperience}
           />
         </AccordionContent>
       </AccordionItem>
       <AccordionItem value="origin-loading-experience">
-        <AccordionTrigger>Origin Loading Experience</AccordionTrigger>
+        <AccordionTrigger>
+          <h2 className="text-lg font-bold">Origin Loading Experience: {data?.originLoadingExperience?.overall_category}</h2>
+        </AccordionTrigger>
         <AccordionContent>
           <LoadingExperienceGauges
-            title={'Origin Loading Experience:'}
             experience={data?.originLoadingExperience}
           />
         </AccordionContent>
       </AccordionItem>
       <AccordionItem value="screenshot">
-        <AccordionTrigger>Screenshot</AccordionTrigger>
+        <AccordionTrigger>
+          <h2 className="text-lg font-bold">Screenshots</h2>
+        </AccordionTrigger>
         <AccordionContent>
           <div className="grid grid-cols-[1fr_2fr]">
             <ScreenshotComponent screenshot={screenshot} />
@@ -83,13 +87,17 @@ export function PageSpeedInsightsDashboard({
         </AccordionContent>
       </AccordionItem>
       <AccordionItem value="entities">
-        <AccordionTrigger>Entities</AccordionTrigger>
+        <AccordionTrigger>
+          <h2 className="text-lg font-bold">Entities</h2>
+        </AccordionTrigger>
         <AccordionContent>
           <EntitiesTable entities={entities} />
         </AccordionContent>
       </AccordionItem>
       <AccordionItem value="audits">
-        <AccordionTrigger>Audits</AccordionTrigger>
+        <AccordionTrigger>
+          <h2 className="text-lg font-bold">Audits</h2>
+        </AccordionTrigger>
         <AccordionContent>
           <AuditTable audits={audits} />
         </AccordionContent>
@@ -99,10 +107,8 @@ export function PageSpeedInsightsDashboard({
 }
 
 export function LoadingExperienceGauges({
-  title,
   experience,
 }: {
-  title: string;
   experience?: PageSpeedApiLoadingExperience;
 }) {
   if (!experience) {
@@ -132,10 +138,6 @@ export function LoadingExperienceGauges({
   ]
   return (
     <div>
-      <h3 className="text-xl">
-        {title}
-        <strong>{experience.overall_category}</strong>
-      </h3>
       <div className="mt-2 grid grid-cols-3 gap-2 md:grid-cols-5">
         {metrics.map(({metric, key}) => (
           <GaugeChart
