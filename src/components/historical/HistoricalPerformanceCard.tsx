@@ -1,7 +1,5 @@
 'use client';
-import {
-  Card,
-} from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { CruxHistoryItem } from '@/lib/schema';
 import { useContext, useMemo } from 'react';
 import { HistoricalPerformanceChartData } from '../../components/common/ChartSettings';
@@ -32,7 +30,6 @@ export function HistoricalPerformanceCard({
   histogramData?: CruxHistoryItem[] | null;
   title: string;
 }) {
-
   const ChartType = useContext(CurrentPerformanceChartContext);
 
   const chartData: HistoricalPerformanceChartData[] = useMemo(() => {
@@ -55,10 +52,15 @@ export function HistoricalPerformanceCard({
   const Chart = ChartMap[ChartType] ?? HistoricalPerformanceAreaChart;
 
   return (
-    <Card className="grid h-full grid-cols-1 grid-rows-[52px_1fr_1fr] gap-3 p-2">
-      <div className="text-md text-center font-bold">{title}</div>
-      <Chart chartData={chartData} />
-      <HistoricalP75Chart chartData={chartData} />
+    <Card className="grid h-full grid-rows-[2.5rem_1fr_1fr_4rem]  gap-3">
+      <h3 className="text-md text-center self-center justify-self-center font-bold">{title}</h3>
+      <div className="grid grid-row-[auto_1fr]"><h4 className="text-sm text-muted-foreground px-2">Density</h4><Chart chartData={chartData} /></div>
+      <div className="grid grid-row-[auto_1fr]"><h4 className="text-sm text-muted-foreground px-2">P75</h4><HistoricalP75Chart chartData={chartData} /></div>
+      <div className="text-sm pb-2 px-2 text-muted-foreground">
+        <div><strong>Good:</strong> 0 to {histogramData?.[0]?.good_max ?? 0}</div>
+        <div><strong>Needs Improvement:</strong> {histogramData?.[0]?.good_max ?? 0} to {histogramData?.[0]?.ni_max ?? 0}</div>
+        <div><strong>Poor:</strong> {histogramData?.[0]?.ni_max ?? 0} and above</div>
+      </div>
     </Card>
   );
 }

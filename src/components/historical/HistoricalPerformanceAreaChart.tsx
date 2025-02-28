@@ -25,19 +25,19 @@ export function HistoricalPerformanceAreaChart({
       <ComposedChart
         accessibilityLayer
         data={chartData}
-        margin={{
-          left: 12,
-          right: 12,
-        }}
         stackOffset="expand"
       >
-        <CartesianGrid vertical={false} />
+        <CartesianGrid vertical={false}   horizontal={true} syncWithTicks={true}/>
         <XAxis
           dataKey="date"
           tickLine={false}
           axisLine={false}
-          tickMargin={8}
-          tickFormatter={(value) => value.slice(0, 3)}
+          tickFormatter={(value) => value}
+        />
+          <YAxis 
+          domain={[ 0, 1]}
+          ticks={[0, 0.5, 0.89, 1]}
+          hide={true}
         />
         <ChartTooltip
           cursor={true}
@@ -72,6 +72,40 @@ export function HistoricalPerformanceAreaChart({
   );
 }
 
+interface DotProps {
+  cx: number;
+  cy: number;
+  payload: {
+    P75: number;
+    good_max: number;
+    ni_max: number;
+  };
+}
+
+export const Dot = ({ cx, cy, r, payload }: { cx: number, cy: number, r: number, payload: DotProps['payload'] } ) => {
+  // Determine color based on P75 value
+  let dotColor;
+  if (payload.P75 <= payload.good_max) {
+    dotColor = "var(--color-good_density)"; // Green for good
+  } else if (payload.P75 <= payload.ni_max) {
+    dotColor = "var(--color-ni_density)"; // Yellow/amber for needs improvement
+  } else {
+    dotColor = "var(--color-poor_density)"; // Red for poor
+  }
+  
+  return (
+    <circle 
+      cx={cx} 
+      cy={cy} 
+      r={r} 
+      fill={dotColor} 
+      stroke="white" 
+      strokeWidth={1} 
+    />
+  );
+};
+
+
 export function HistoricalP75Chart({
   chartData,
 }: {
@@ -83,7 +117,7 @@ export function HistoricalP75Chart({
   const maxValue = possibleTop * 1.05;
   return (
     <ChartContainer config={chartConfig}
-    className="[&_.recharts-cartesian-gridstripes-horizontal>rect]:opacity-50">
+    className="[&_.recharts-cartesian-gridstripes-horizontal>rect]:opacity-40">
       <ComposedChart 
         accessibilityLayer 
         data={chartData} 
@@ -118,53 +152,9 @@ export function HistoricalP75Chart({
           dataKey="P75"
           type="linear"
           stroke="var(--color-good_density)"
-          dot={(props) => {
-            const { cx, cy, payload } = props;
-            // Determine color based on P75 value
-            let dotColor;
-            if (payload.P75 <= payload.good_max) {
-              dotColor = "var(--color-good_density)"; // Green for good
-            } else if (payload.P75 <= payload.ni_max) {
-              dotColor = "var(--color-ni_density)"; // Yellow/amber for needs improvement
-            } else {
-              dotColor = "var(--color-poor_density)"; // Red for poor
-            }
-            
-            return (
-              <circle 
-                cx={cx} 
-                cy={cy} 
-                r={2} 
-                fill={dotColor} 
-                stroke="white" 
-                strokeWidth={1} 
-              />
-            );
-          }}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          activeDot={(props: any) => {
-            const { cx, cy, payload } = props;
-            // Determine color based on P75 value
-            let dotColor;
-            if (payload.P75 <= payload.good_max) {
-              dotColor = "var(--color-good_density)"; // Green for good
-            } else if (payload.P75 <= payload.ni_max) {
-              dotColor = "var(--color-ni_density)"; // Yellow/amber for needs improvement
-            } else {
-              dotColor = "var(--color-poor_density)"; // Red for poor
-            }
-            
-            return (
-              <circle 
-                cx={cx} 
-                cy={cy} 
-                r={1} 
-                fill={dotColor} 
-                stroke="white" 
-                strokeWidth={2} 
-              />
-            );
-          }}
+          dot={(props) => <Dot {...props} r={2} />}
+          // @ts-expect-error dot props are not typed
+          activeDot={(props) => <Dot {...props} r={1} />}
         />
       </ComposedChart>
     </ChartContainer>
