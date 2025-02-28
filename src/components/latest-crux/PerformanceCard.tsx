@@ -32,13 +32,13 @@ const makeHistogramData = (data?: CruxHistoryItem) => {
     {
       status: 'good',
       density: data.good_density || 0,
-      fill: 'var(--color-good)',
+      fill: 'var(--color-good_density)',
     },
-    { status: 'ni', density: data.ni_density || 0, fill: 'var(--color-ni)' },
+    { status: 'ni', density: data.ni_density || 0, fill: 'var(--color-ni_density)' },
     {
       status: 'poor',
       density: data.poor_density || 0,
-      fill: 'var(--color-poor)',
+      fill: 'var(--color-poor_density)',
     },
   ];
 
@@ -108,11 +108,11 @@ export function CurrentPerformanceCard({
 function StatusLabel({ histogramData }: { histogramData: CruxHistoryItem }) {
   const p75 = histogramData.P75;
 
-  let status = chartConfig['poor'];
+  let status = chartConfig['poor_density'];
   if (p75 <= histogramData.good_max) {
-    status = chartConfig['good'];
+    status = chartConfig['good_density'];
   } else if (p75 <= histogramData.ni_max) {
-    status = chartConfig['ni'];
+    status = chartConfig['ni_density'];
   }
   return <span style={{ color: status.color }}>{status.label}</span>;
 }

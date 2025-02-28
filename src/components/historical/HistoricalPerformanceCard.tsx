@@ -7,6 +7,7 @@ import { useContext, useMemo } from 'react';
 import { HistoricalPerformanceChartData } from '../../components/common/ChartSettings';
 import dynamic from 'next/dynamic';
 import { CurrentPerformanceChartContext } from '../latest-crux/PerformanceCard';
+import { HistoricalP75Chart } from './HistoricalPerformanceAreaChart';
 
 const HistoricalPerformanceBarChart = dynamic(() =>
   import('./HistoricalPerformanceBarChart').then(
@@ -46,6 +47,7 @@ export function HistoricalPerformanceCard({
           good: period.good_density ?? 0,
           ni: period.ni_density ?? 0,
           poor: period.poor_density ?? 0,
+          ...period,
         };
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -53,9 +55,10 @@ export function HistoricalPerformanceCard({
   const Chart = ChartMap[ChartType] ?? HistoricalPerformanceAreaChart;
 
   return (
-    <Card className="grid h-full grid-cols-1 grid-rows-[44px,auto] gap-3 p-2">
+    <Card className="grid h-full grid-cols-1 grid-rows-[52px_1fr_1fr] gap-3 p-2">
       <div className="text-md text-center font-bold">{title}</div>
       <Chart chartData={chartData} />
+      <HistoricalP75Chart chartData={chartData} />
     </Card>
   );
 }

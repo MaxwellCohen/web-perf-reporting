@@ -22,19 +22,19 @@ export function GaugeChart({
   const distributions = data.distributions;
   const chartData = [
     {
-      name: chartConfig['poor'].label,
+      name: chartConfig['poor_density'].label,
       value: Math.max(distributions[2].min * 1.1 || 0, value),
-      fill: 'var(--color-poor)',
+      fill: 'var(--color-poor_density)',
     },
     {
-      name: chartConfig['ni'].label,
+      name: chartConfig['ni_density'].label,
       value: distributions[1].max,
-      fill: 'var(--color-ni)',
+      fill: 'var(--color-ni_density)',
     },
     {
-      name: chartConfig['good'].label,
+      name: chartConfig['good_density'].label,
       value: distributions[0].max,
-      fill: 'var(--color-good)',
+      fill: 'var(--color-good_density)',
     },
   ];
 

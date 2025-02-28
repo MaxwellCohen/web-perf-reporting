@@ -35,27 +35,27 @@ export function HistoricalPerformanceBarChart({
           content={<ChartTooltipContent indicator="dot" />}
         />
         <Bar
-          dataKey="good"
+          dataKey="good_density"
           type="natural"
-          fill="var(--color-good)"
+          fill="var(--color-good_density)"
           fillOpacity={0.4}
-          stroke="var(--color-good)"
+          stroke="var(--color-good_density)"
           stackId="a"
         />
         <Bar
-          dataKey="ni"
+          dataKey="ni_density"
           type="natural"
-          fill="var(--color-ni)"
+          fill="var(--color-ni_density)"
           fillOpacity={0.4}
-          stroke="var(--color-ni)"
+          stroke="var(--color-ni_density)"
           stackId="a"
         />
         <Bar
-          dataKey="poor"
+          dataKey="poor_density"
           type="natural"
-          fill="var(--color-poor)"
+          fill="var(--color-poor_density)"
           fillOpacity={0.4}
-          stroke="var(--color-poor)"
+          stroke="var(--color-poor_density)"
           stackId="a"
         />
       </BarChart>

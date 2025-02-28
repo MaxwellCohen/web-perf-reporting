@@ -32,8 +32,8 @@ export function HistoricalDashboard({
   return (
     <CurrentPerformanceChartContext.Provider value={ChartType}>
             <h2 className="text-xl">
-        historical CrUX Report for
-        {firstDate ? ` ${formatDate(firstDate)}}` : null} {firstDate && endDate ? ` to ${formatDate(endDate)}` : null}
+        Historical CrUX Report for
+        {firstDate ? ` ${formatDate(firstDate)}` : null} {firstDate && endDate ? ` to ${formatDate(endDate)}` : null}
       </h2> 
       <PerformanceOptions
         setChartType={setChartType}
@@ -42,19 +42,19 @@ export function HistoricalDashboard({
         chartKeys={Object.keys(ChartMap)}
       />
      <div className="mt-2 grid gap-1 grid-cols-3 md:grid-cols-3 lg:grid-cols-6">
-     <HistoricalPerformanceCard
+      <HistoricalPerformanceCard
           title="Largest Contentful Paint (LCP)"
           histogramData={groupedMetics?.largest_contentful_paint}
         />
         <HistoricalPerformanceCard
           title="Interaction to Next Paint (INP)"
           histogramData={groupedMetics?.interaction_to_next_paint}
-        />
+        /> 
         <HistoricalPerformanceCard
           title="Cumulative Layout Shift (CLS)"
           histogramData={groupedMetics?.cumulative_layout_shift}
         />
-        <HistoricalPerformanceCard
+         <HistoricalPerformanceCard
           title="First Contentful Paint (FCP)"
           histogramData={groupedMetics?.first_contentful_paint}
         />
@@ -65,7 +65,7 @@ export function HistoricalDashboard({
         <HistoricalPerformanceCard
           title="Round Trip Time (RTT)"
           histogramData={groupedMetics?.round_trip_time}
-        />
+        /> 
       </div>
     </CurrentPerformanceChartContext.Provider >
   );

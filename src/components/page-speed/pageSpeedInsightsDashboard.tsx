@@ -306,7 +306,6 @@ function EntitiesTable({ entities }: { entities?: Entities }) {
   return (
     <>
       <div id={`${id}-entities-title`}>
-        {' '}
         Entities - list of Origins that the site uses
       </div>
       <Table aria-labelledby={`${id}-entities-title`}>

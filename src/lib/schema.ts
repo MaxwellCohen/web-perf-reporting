@@ -462,12 +462,12 @@ export const cruxHistoryItemSchema = z.object({
   start_date: z.string(),
   end_date: z.string(),
   metric_name: z.string(),
-  P75: z.number().default(0),
-  good_max: z.number().default(0),
-  ni_max: z.number().default(0),
-  good_density: z.number().default(0),
-  ni_density: z.number().default(0),
-  poor_density: z.number().default(0),
+  P75: z.coerce.number().default(0),
+  good_max: z.coerce.number().default(0),
+  ni_max: z.coerce.number().default(0),
+  good_density: z.coerce.number().default(0),
+  ni_density: z.coerce.number().default(0),
+  poor_density: z.coerce.number().default(0),
 });
 
 export type CruxHistoryItem = z.infer<typeof cruxHistoryItemSchema>;
