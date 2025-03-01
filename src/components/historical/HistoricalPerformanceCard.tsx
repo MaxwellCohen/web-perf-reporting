@@ -52,14 +52,30 @@ export function HistoricalPerformanceCard({
   const Chart = ChartMap[ChartType] ?? HistoricalPerformanceAreaChart;
 
   return (
-    <Card className="grid h-full grid-rows-[2.5rem_1fr_1fr_4rem]  gap-3">
-      <h3 className="text-md text-center self-center justify-self-center font-bold">{title}</h3>
-      <div className="grid grid-row-[auto_1fr]"><h4 className="text-sm text-muted-foreground px-2">Density</h4><Chart chartData={chartData} /></div>
-      <div className="grid grid-row-[auto_1fr]"><h4 className="text-sm text-muted-foreground px-2">P75</h4><HistoricalP75Chart chartData={chartData} /></div>
-      <div className="text-sm pb-2 px-2 text-muted-foreground">
-        <div><strong>Good:</strong> 0 to {histogramData?.[0]?.good_max ?? 0}</div>
-        <div><strong>Needs Improvement:</strong> {histogramData?.[0]?.good_max ?? 0} to {histogramData?.[0]?.ni_max ?? 0}</div>
-        <div><strong>Poor:</strong> {histogramData?.[0]?.ni_max ?? 0} and above</div>
+    <Card className="grid h-full grid-rows-[2.5rem_1fr_1fr_4rem] gap-3">
+      <h3 className="text-md self-center justify-self-center text-center font-bold">
+        {title}
+      </h3>
+      <div className="grid-row-[auto_1fr] grid">
+        <h4 className="px-2 text-sm text-muted-foreground">Density</h4>
+        <Chart chartData={chartData} />
+      </div>
+      <div className="grid-row-[auto_1fr] grid">
+        <h4 className="px-2 text-sm text-muted-foreground">P75</h4>
+        <HistoricalP75Chart chartData={chartData} />
+      </div>
+      <div className="px-2 pb-2 text-sm text-muted-foreground">
+        <div>
+          <strong>Good:</strong> 0 to {histogramData?.[0]?.good_max ?? 0}
+        </div>
+        <div>
+          <strong>Needs Improvement:</strong>{' '}
+          {histogramData?.[0]?.good_max ?? 0} to{' '}
+          {histogramData?.[0]?.ni_max ?? 0}
+        </div>
+        <div>
+          <strong>Poor:</strong> {histogramData?.[0]?.ni_max ?? 0} and above
+        </div>
       </div>
     </Card>
   );
