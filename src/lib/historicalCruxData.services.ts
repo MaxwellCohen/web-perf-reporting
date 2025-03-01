@@ -3,7 +3,7 @@ import { CruxHistoryReportSchema } from './schema';
 import { convertCruxHistoryToReports, formatDate } from './utils';
 import * as Sentry from '@sentry/nextjs';
 import { historicalMetrics } from '@/db/schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, asc } from 'drizzle-orm';
 import { formFactor } from './services';
 
 export const getHistoricalCruxData = async ({
@@ -84,7 +84,7 @@ export const getHistoricalCruxData = async ({
           eq(historicalMetrics.formFactor, formFactor ?? ''),
         ),
       )
-      .orderBy(desc(historicalMetrics.id));
+      .orderBy(asc(historicalMetrics.date2));
 
     return dbData.map(({ data }) => data);
   } catch (error) {

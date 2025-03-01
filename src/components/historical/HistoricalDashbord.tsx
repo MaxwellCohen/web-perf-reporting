@@ -45,7 +45,7 @@ export function HistoricalDashboard({
         {firstDate ? ` ${formatDate(firstDate)}` : null}{' '}
         {firstDate && endDate ? ` to ${formatDate(endDate)}` : null}
       </h2>
-        <PerformanceOptions
+      <PerformanceOptions
         setChartType={setChartType}
         setReportScope={setReportScope}
         setDeviceType={setDeviceType}
@@ -55,7 +55,7 @@ export function HistoricalDashboard({
           <PercentTable
             title={'Form Factors'}
             data={form_factors}
-            className='md:grid md:grid-cols-[auto,1fr] gap-2 pl-2 justify-between items-center flex-row flex-1 min-w-full md:min-w-[300px] '
+            className="min-w-full flex-1 flex-row items-center justify-between gap-2 pl-2 md:grid md:min-w-[300px] md:grid-cols-[auto,1fr]"
           />
         ) : null}
       </PerformanceOptions>

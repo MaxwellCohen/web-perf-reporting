@@ -52,7 +52,7 @@ export function CurrentPerformanceDashboard({
           />
         ) : null}
       </PerformanceOptions>
-      <div className="mt-2 grid gap-1 grid-cols-3 md:grid-cols-3 lg:grid-cols-6">
+      <div className="mt-2 grid gap-1 grid-cols-2 md:grid-cols-3 lg:grid-cols-6 print:grid-cols-3">
         <CurrentPerformanceCard
           title="Largest Contentful Paint (LCP)"
           histogramData={groupedMetics?.largest_contentful_paint?.[0]}
