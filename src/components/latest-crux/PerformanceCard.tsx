@@ -1,7 +1,5 @@
 'use client';
-import {
-  Card,
-} from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import {
   ChartConfig,
   ChartContainer,
@@ -13,7 +11,10 @@ import { Bar, BarChart, CartesianGrid, Rectangle, XAxis } from 'recharts';
 import { CruxHistoryItem, UserPageLoadMetricV5 } from '@/lib/schema';
 import { useContext, useMemo } from 'react';
 
-import { chartConfig, PerformanceChartData } from '@/components/common/ChartSettings';
+import {
+  chartConfig,
+  PerformanceChartData,
+} from '@/components/common/ChartSettings';
 import { RadialChart } from '@/components/latest-crux/PerformanceRadialChart';
 import { PerformanceStackedBarChart } from '@/components/latest-crux/PerformanceStackedBarChart';
 import GaugeChart from '@/components/common/PageSpeedGaugeChart';
@@ -34,7 +35,11 @@ const makeHistogramData = (data?: CruxHistoryItem) => {
       density: data.good_density || 0,
       fill: 'var(--color-good_density)',
     },
-    { status: 'ni', density: data.ni_density || 0, fill: 'var(--color-ni_density)' },
+    {
+      status: 'ni',
+      density: data.ni_density || 0,
+      fill: 'var(--color-ni_density)',
+    },
     {
       status: 'poor',
       density: data.poor_density || 0,
@@ -85,7 +90,7 @@ export function CurrentPerformanceCard({
     <Card className="grid h-full grid-cols-1 grid-rows-[2.75rem,auto,1rem,auto] p-2">
       <div className="text-md text-center font-bold">{title}</div>
       <Chart histogramData={histogramData} />
-        <P75barChart histogramData={histogramData} />
+      <P75barChart histogramData={histogramData} />
       <div className="flex-col items-start text-sm">
         <div className="flex gap-2 font-medium leading-none">
           P75 is {histogramData.P75 ?? 'N/A'}
@@ -118,60 +123,50 @@ function StatusLabel({ histogramData }: { histogramData: CruxHistoryItem }) {
   return <span style={{ color: status.color }}>{status.label}</span>;
 }
 
-
-function P75barChart({
-  histogramData,
-}: {
-  histogramData: CruxHistoryItem;
-}) {
-  
-
+function P75barChart({ histogramData }: { histogramData: CruxHistoryItem }) {
   const maxValue = Math.max(histogramData.P75, histogramData.ni_max) * 1.05;
   const goodPercent = `${(histogramData.good_max / maxValue) * 100}% `;
-  const niPercent =   `${((histogramData.ni_max - histogramData.good_max) / maxValue) * 100}% `;
+  const niPercent = `${((histogramData.ni_max - histogramData.good_max) / maxValue) * 100}% `;
   const poorPercent = `${((maxValue - histogramData.ni_max) / maxValue) * 100}% `;
   const p75Location = `${(histogramData.P75 / maxValue) * 100}% `;
 
-return (
-  <svg  viewBox="0 0 100 7">
-    <g className='flex flex-row'>
-      <rect
-        width={goodPercent}
-        height="10"
-        fill="hsl(var(--chart-1))"
-      />
-      <rect
-        width={niPercent}
-        height="10"
-        x={parseFloat(goodPercent) || 0}
-        fill="hsl(var(--chart-2))"
-      />
-      <rect
-        width={poorPercent}
-        height="10"
-        x={parseFloat(goodPercent) + parseFloat(niPercent) || 0}
-        fill="hsl(var(--chart-3))"
-      />
-    </g>
-    <g className='flex flex-row'>
-      <line
-        x1={parseFloat(p75Location)}
-        y1="0"
-        x2={parseFloat(p75Location)}
-        y2="10"
-        stroke="currentColor"
-        strokeWidth="1"
-      />
-      <line
-        x1={parseFloat(p75Location)}
-        y1="0"
-        x2={parseFloat(p75Location)}
-        y2="4"
-        stroke="bg-primary"
-        strokeWidth="1"
-      />
-    </g>
-  </svg>) 
+  return (
+    <svg viewBox="0 0 100 7">
+      <g className="flex flex-row">
+        <rect width={goodPercent} height="10" fill="hsl(var(--chart-1))" />
+        <rect
+          width={niPercent}
+          height="10"
+          x={parseFloat(goodPercent) || 0}
+          fill="hsl(var(--chart-2))"
+        />
+        <rect
+          width={poorPercent}
+          height="10"
+          x={parseFloat(goodPercent) + parseFloat(niPercent) || 0}
+          fill="hsl(var(--chart-3))"
+        />
+      </g>
+      <g className="flex flex-row">
+        <line
+          x1={parseFloat(p75Location)}
+          y1="0"
+          x2={parseFloat(p75Location)}
+          y2="10"
+          stroke="currentColor"
+          strokeWidth="1"
+        />
+        <line
+          x1={parseFloat(p75Location)}
+          y1="0"
+          x2={parseFloat(p75Location)}
+          y2="4"
+          stroke="bg-primary"
+          strokeWidth="1"
+        />
+      </g>
+    </svg>
+  );
 }
 
 function CurrentGaugeChart({
@@ -195,7 +190,7 @@ function CurrentGaugeChart({
       },
       {
         min: histogramData.ni_max ?? 0,
-        max: (Math.max(histogramData.P75, histogramData.ni_max) * 1.05),
+        max: Math.max(histogramData.P75, histogramData.ni_max) * 1.05,
         proportion: histogramData.poor_density ?? 0,
       },
     ],
@@ -223,10 +218,7 @@ function Histogram({ histogramData }: { histogramData: CruxHistoryItem }) {
               chartConfig[value as keyof typeof chartConfig]?.label || ''
             }
           />
-          <ChartTooltip
-            cursor={false}
-            content={<ChartTooltipContent />}
-          />
+          <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
           <Bar
             dataKey="density"
             strokeWidth={2}
