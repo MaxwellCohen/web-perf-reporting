@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
-import { PostHogProvider, ThemeProvider } from './providers';
+import { PostHogProvider } from './providers';
 import { TopNav } from '@/components/navigation/TopNav';
 
 const geistSans = Geist({
@@ -27,15 +27,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <ThemeProvider
+      {/* <ThemeProvider
         attribute="class"
         defaultTheme="system"
         enableSystem
         disableTransitionOnChange
-      >
+      > */}
         <PostHogProvider>
           <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+            className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}
           >
             <div className="grid h-screen grid-rows-[auto,1fr]">
               <TopNav />
@@ -50,7 +50,7 @@ export default function RootLayout({
             </div>
           </body>
         </PostHogProvider>
-      </ThemeProvider>
+      {/* </ThemeProvider> */}
     </html>
   );
 }
