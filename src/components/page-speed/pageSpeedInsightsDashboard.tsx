@@ -12,9 +12,9 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import {
-  AuditDetailFilmstrip,
   AuditDetailFilmstripSchema,
   AuditDetailOpportunitySchema,
+  AuditRef,
   AuditResult,
   Entities,
   PageSpeedApiLoadingExperience,
@@ -30,6 +30,11 @@ import {
 import ReactMarkdown from 'react-markdown';
 import { useId } from 'react';
 
+import { HorizontalScoreChart } from '@/components/common/PageSpeedGaugeChart';
+import { Card } from '../ui/card';
+import { Timeline } from './Timeline';
+import { LoadingExperience } from './LoadingExperience';
+
 export function PageSpeedInsightsDashboard({
   data,
 }: {
@@ -39,15 +44,15 @@ export function PageSpeedInsightsDashboard({
     return null;
   }
   // const url = data?.lighthouseResult.finalDisplayedUrl;
-  const screenshot = data.lighthouseResult.fullPageScreenshot?.screenshot;
+  // const screenshot = data.lighthouseResult.fullPageScreenshot?.screenshot;
   const timeline = AuditDetailFilmstripSchema.safeParse(
     data?.lighthouseResult?.audits?.['screenshot-thumbnails'].details,
   ).data;
 
   const entities: Entities | undefined = data?.lighthouseResult?.entities;
-  const audits: AuditResult | undefined = data?.lighthouseResult?.audits;
+  const auditRecords: AuditResult | undefined = data?.lighthouseResult?.audits;
   const categories = data.lighthouseResult.categories;
-
+  const categoryGroups = data.lighthouseResult.categoryGroups;
   return (
     <Accordion
       type="multiple"
@@ -60,53 +65,40 @@ export function PageSpeedInsightsDashboard({
         ...Object.keys(categories || {}),
       ]}
     >
-      <h2 className="text-2xl font-bold">
+      <h2 className="text-2xl font-bold text-center">
         Report for {new Date(data.analysisUTCTimestamp).toLocaleDateString()}
       </h2>
-      <AccordionItem value="page-loading-experience">
-        <AccordionTrigger>
-          <div className="text-lg font-bold">
-            Page Loading Experience: {data?.loadingExperience?.overall_category}
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <LoadingExperienceGauges experience={data?.loadingExperience} />
-        </AccordionContent>
-      </AccordionItem>
+      <LoadingExperience title="Page Loading Experience" experience={data?.loadingExperience} />
+      <LoadingExperience title="Origin Loading Experience" experience={data?.originLoadingExperience} />
 
-      <AccordionItem value="origin-loading-experience">
-        <AccordionTrigger>
-          <div className="text-lg font-bold">
-            Origin Loading Experience:{' '}
-            {data?.originLoadingExperience?.overall_category}
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <LoadingExperienceGauges experience={data?.originLoadingExperience} />
-        </AccordionContent>
-      </AccordionItem>
-
-      <AccordionItem value="screenshot">
-        <AccordionTrigger>
-          <div className="text-lg font-bold">Screenshots</div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <div className="grid grid-cols-[1fr_2fr]">
-            <ScreenshotComponent screenshot={screenshot} />
-            <TimelineComponent timeline={timeline} />
-          </div>
-        </AccordionContent>
-      </AccordionItem>
+      <div className="grid grid-rows-[auto_1fr]">
+        <MetricsComponent
+          categoryGroups={categoryGroups}
+          audits={auditRecords}
+        />
+        <Timeline timeline={timeline} />
+      </div>
 
       {Object.entries(categories || {}).map(([key, category]) => {
         console.log(category);
         return (
           <AccordionItem key={key} value={key}>
-            <AccordionTrigger>
-              <div className="text-lg font-bold">
-                {category.title}{' '}
-                {category.score ? `score: ${category.score * 100}` : ''}
+            <AccordionTrigger className="flex flex-row gap-2 text-lg font-bold flex-wrap">
+              <div className="w-64 whitespace-nowrap">
+                {category.score
+                  ? `${category.title} - Score: ${Math.round(category.score * 100)}`
+                  : `${category.title}`}
               </div>
+              {category.score ? (
+                <div className="flex-1 min-w-64">
+                  <HorizontalScoreChart
+                    score={category.score || 0}
+                    className="overflow-hidden h-2 min-w-11 flex-1"
+                  />
+                </div>
+              ) : (
+                ''
+              )}
             </AccordionTrigger>
             <AccordionContent>
               <ReactMarkdown>{category.description}</ReactMarkdown>
@@ -122,65 +114,19 @@ export function PageSpeedInsightsDashboard({
                   <div className="border-b pb-2 font-bold" role="columnheader">
                     Description
                   </div>
-                  {/* <div className="font-bold border-b pb-2 text-right" role="columnheader">Weight</div> */}
-                  {/* <div className="font-bold border-b pb-2 text-right" role="columnheader">Group</div> */}
                 </div>
 
-                <Accordion type="multiple">
-                  {category.auditRefs?.map((audit) => {
-                    if (!audit.id) {
-                      console.log('no id for', audit);
-                      return null;
-                    }
-                    const auditData = audits?.[audit.id];
-                    if (!auditData) {
-                      console.log('no audit result for', audit);
-                      return null;
-                    }
-                    return (
-                      <AccordionItem key={audit.id} value={audit.id}>
-                        <AccordionTrigger>
-                          <div
-                            className="grid grid-cols-[1fr_4fr] gap-4 border-b"
-                            key={audit.id}
-                            role="row"
-                          >
-                            <div className="py-2" role="cell">
-                              {auditData.title}{' '}
-                              {audit.acronym ? `(${audit.acronym})` : ''}
-                            </div>
-                            <div className="py-2" role="cell">
-                              <ReactMarkdown
-                                children={auditData.description || ''}
-                              />
-                            </div>
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <ReactMarkdown>{auditData.description}</ReactMarkdown>
-                          <div className="grid grid-cols-[auto_1fr] gap-4">
-                            <div className="py-2">Weight:</div>
-                            <div className="py-2" role="cell">
-                              {audit.weight}
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-[auto_1fr] gap-4">
-                            <div className="py-2">Score:</div>
-                            <div className="py-2" role="cell">
-                              {auditData.score}
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-[auto_1fr] gap-4">
-                            <div className="py-2">Details:</div>
-                            <div className="py-2">
-                              <AuditDetails details={auditData.details} />
-                            </div>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                    );
-                  })}
-                </Accordion>
+                {category.auditRefs && auditRecords ? (
+                  <Accordion type="multiple">
+                    {category.auditRefs.map((auditRef) => (
+                      <AuditDetailsSection
+                        key={auditRef.id}
+                        auditRef={auditRef}
+                        auditRecords={auditRecords}
+                      />
+                    ))}
+                  </Accordion>
+                ) : null}
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -195,14 +141,14 @@ export function PageSpeedInsightsDashboard({
           <EntitiesTable entities={entities} />
         </AccordionContent>
       </AccordionItem>
-      <AccordionItem value="audits">
+      {/* <AccordionItem value="audits">
         <AccordionTrigger>
           <div className="text-lg font-bold">Audits</div>
         </AccordionTrigger>
         <AccordionContent>
-          <AuditTable audits={audits} />
+          <AuditTable audits={auditRecords} />
         </AccordionContent>
-      </AccordionItem>
+      </AccordionItem> */}
     </Accordion>
   );
 }
@@ -241,21 +187,15 @@ export function LoadingExperienceGauges({
     },
   ];
   return (
-    <div>
-      <div className="mt-2 grid grid-cols-3 gap-2 md:grid-cols-5">
-        {metrics.map(({ metric, key }) => (
-          <GaugeChart
-            key={key}
-            metric={metric}
-            data={experience.metrics[key]}
-          />
-        ))}
-      </div>
+    <div className="grid-auto-rows-[1fr] mt-2 grid grid-cols-[repeat(auto-fill,_minmax(180px,_1fr))] gap-2">
+      {metrics.map(({ metric, key }) => (
+        <GaugeChart key={key} metric={metric} data={experience.metrics[key]} />
+      ))}
     </div>
   );
 }
 
-function ScreenshotComponent({
+export function ScreenshotComponent({
   screenshot,
 }: {
   screenshot?: {
@@ -279,23 +219,6 @@ function ScreenshotComponent({
   );
 }
 
-// Add at the bottom of the file
-function TimelineComponent({ timeline }: { timeline?: AuditDetailFilmstrip }) {
-  if (!timeline?.items?.length) {
-    return null;
-  }
-
-  return (
-    <div className="mt-3 flex flex-row gap-2 border align-top">
-      {timeline.items.map((item, i) => (
-        <div key={`${i}-${item.timestamp}`} className="">
-          <img alt={'timeline image'} width={80} src={item.data} />
-          <div>{item.timing} ms</div>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 function EntitiesTable({ entities }: { entities?: Entities }) {
   const id = useId();
@@ -340,46 +263,10 @@ function EntitiesTable({ entities }: { entities?: Entities }) {
   );
 }
 
-function AuditTable({ audits }: { audits?: AuditResult }) {
-  if (!audits) {
-    return null;
-  }
-  return (
-    <>
-      <div className="text-lg font-bold"> Audits </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Key</TableHead>
-            <TableHead>ID</TableHead>
-            <TableHead>Title </TableHead>
-            <TableHead>Description </TableHead>
-            {/* <TableHead>Details </TableHead> */}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {Object.entries(audits).map(([key, audit], i) => {
-            return (
-              <TableRow key={`${i}-${audit.id}`}>
-                <TableCell rowSpan={1}> {key} </TableCell>
-                <TableCell rowSpan={1}> {audit.id} </TableCell>
-                <TableCell rowSpan={1}> {audit.title} </TableCell>
-                <TableCell rowSpan={1}>
-                  <ReactMarkdown children={audit.description || ''} />
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
-    </>
-  );
-}
 
-function AuditDetails({ details }: { details: unknown }) {
-  const opportunity = AuditDetailOpportunitySchema.safeParse(details);
-
-  console.log(opportunity);
+ 
+function AuditDetails({ details }: { details: AuditResult[string] }) {
+  const opportunity = AuditDetailOpportunitySchema.safeParse(details.details);
   if (opportunity.success) {
     const data = opportunity.data;
     if (data?.items?.length && data?.headings?.length) {
@@ -425,6 +312,230 @@ function AuditDetails({ details }: { details: unknown }) {
       );
     }
   }
+  if (details.scoreDisplayMode === ScoreDisplayModes.MANUAL) {
+    return null;
+  }
+  if (details.scoreDisplayMode === ScoreDisplayModes.NOT_APPLICABLE) {
+    return <div>Not applicable</div>;
+  }
+  if (details.scoreDisplayMode === ScoreDisplayModes.ERROR) {
+    return null;
+  }
+  if (
+    details.scoreDisplayMode === ScoreDisplayModes.NUMERIC &&
+    !details.details?.items?.length
+  ) {
+    return null;
+  }
+  return (
+    <div>
+      <pre>{JSON.stringify(details, null, 2)}</pre>
+    </div>
+  );
+}
 
-  return <div>{JSON.stringify(details)}</div>;
+function MetricsComponent({
+  categoryGroups,
+  audits,
+}: {
+  categoryGroups?: PageSpeedInsights['lighthouseResult']['categoryGroups'];
+  categories?: PageSpeedInsights['lighthouseResult']['categories'];
+  audits?: AuditResult;
+}) {
+  return (
+    <>
+      {categoryGroups?.['metrics']?.title ? (
+        <h3 className="text-lg font-bold">
+          {categoryGroups?.['metrics']?.title}
+        </h3>
+      ) : null}
+      <div className="grid grid-cols-[repeat(auto-fill,_minmax(16rem,_1fr))] gap-2">
+        {[
+          'first-contentful-paint',
+          'largest-contentful-paint',
+          'total-blocking-time',
+          'cumulative-layout-shift',
+          'speed-index',
+        ]?.map((audit) => {
+          const auditData = audits?.[audit];
+          if (!auditData) {
+            return null;
+          }
+          return (
+            <Card key={audit} className="px-4 py-4 w-full min-w-64">
+              <Accordion type="multiple" defaultValue={[]}>
+                <AccordionItem value={audit} className="border-b-0">
+                  <AccordionTrigger>
+                    <div className="text-md font-bold">{auditData.title}</div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <ReactMarkdown>{auditData.description}</ReactMarkdown>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+              {auditData.score ? <ScoreDisplay audit={auditData} /> : null}
+              <HorizontalScoreChart score={auditData.score || 0} />
+            </Card>
+          );
+        }) || null}
+      </div>
+    </>
+  );
+}
+
+const ScoreDisplayModes = {
+  /** Scores of 0-1 (map to displayed scores of 0-100). */
+  NUMERIC: 'numeric',
+  /** Pass/fail audit (0 and 1 are only possible scores). */
+  BINARY: 'binary',
+  /**
+   * Audit result score is determined by the metric savings and product score:
+   * 1   - audit passed based on product score
+   * 0.5 - audit failed and had no metric savings
+   * 0   - audit failed and had metric savings
+   */
+  METRIC_SAVINGS: 'metricSavings',
+  /** The audit exists only to tell you to review something yourself. Score is null and should be ignored. */
+  MANUAL: 'manual',
+  /** The audit is an FYI only, and can't be interpreted as pass/fail. Score is null and should be ignored. */
+  INFORMATIVE: 'informative',
+  /** The audit turned out to not apply to the page. Score is null and should be ignored. */
+  NOT_APPLICABLE: 'notApplicable',
+  /** There was an error while running the audit (check `errorMessage` for details). Score is null and should be ignored. */
+  ERROR: 'error',
+} as const;
+
+function ScoreDisplay({ audit }: { audit?: AuditResult[string] }) {
+  if (!audit) {
+    return null;
+  }
+  if (audit.score === null || audit.scoreDisplayMode === undefined) {
+    return null;
+  }
+  if (audit.scoreDisplayMode === ScoreDisplayModes.NUMERIC) {
+    return (
+      <>
+        <div>Score: {Math.round(audit.score * 100)} / 100</div>
+        <div>
+          Value: {audit.numericValue?.toFixed(2) || 'N/A'}{' '}
+          {audit.numericUnit && audit.numericUnit !== 'unitless'
+            ? audit.numericUnit
+            : ''}
+        </div>
+      </>
+    );
+  }
+  if (audit.scoreDisplayMode === ScoreDisplayModes.BINARY) {
+    return <div>Score: {audit.score ? '✅ - Passed' : '❌ - Failed'}</div>;
+  }
+  if (
+    audit.scoreDisplayMode === ScoreDisplayModes.METRIC_SAVINGS &&
+    Object.keys(audit.metricSavings || {}).length > 0
+  ) {
+    return (
+      <div>
+        Metric Savings:{' '}
+        {Object.entries(audit.metricSavings || {}).map(([metric, savings]) => (
+          <div key={metric}>
+            {metric}: {savings?.toFixed(0) || 'N/A'}
+          </div>
+        ))}
+      </div>
+    );
+  }
+  if (audit.scoreDisplayMode === ScoreDisplayModes.MANUAL) {
+    return null;
+  }
+  if (audit.scoreDisplayMode === ScoreDisplayModes.INFORMATIVE) {
+    return (
+      <div>
+        <div>Score: {audit.score}</div>
+        {audit.displayValue ? <div>Value: {audit.displayValue}</div> : null}
+        {Object.entries(audit.metricSavings || {}).map(([metric, savings]) => (
+          <div key={metric}>
+            {metric}: {savings?.toFixed(0) || 'N/A'}
+          </div>
+        ))}
+      </div>
+    );
+  }
+  if (audit.scoreDisplayMode === ScoreDisplayModes.NOT_APPLICABLE) {
+    return <div>Score: {audit.score}</div>;
+  }
+  if (audit.scoreDisplayMode === ScoreDisplayModes.ERROR) {
+    return <div>Error: {audit.errorMessage}</div>;
+  }
+
+  return <div>Score: {Math.round(audit.score * 100)} / 100</div>;
+}
+
+function AuditDetailsSection({
+  auditRef,
+  auditRecords,
+}: {
+  auditRef: AuditRef;
+  auditRecords: AuditResult;
+}) {
+  if (!auditRef.id) {
+    console.log('no id for', auditRef);
+    return null;
+  }
+  if (auditRef.group === 'metrics') {
+    return null;
+  }
+  const auditData = auditRecords?.[auditRef.id];
+  if (!auditData) {
+    console.log('no audit result for', auditRef);
+    return null;
+  }
+
+  return (
+    <AccordionItem key={auditRef.id} value={auditRef.id}>
+      <AccordionTrigger>
+        <div
+          className="grid grid-cols-[1fr_4fr] gap-4 border-b"
+          key={auditRef.id}
+          role="row"
+        >
+          <div className="py-2" role="cell">
+            {auditData.title} {auditRef.acronym ? `(${auditRef.acronym})` : ''}
+          </div>
+          <div className="py-2" role="cell">
+            <ReactMarkdown children={auditData.description || ''} />
+          </div>
+        </div>
+      </AccordionTrigger>
+      <AccordionContent>
+        <ReactMarkdown>{auditData.description}</ReactMarkdown>
+        {auditData.score ? <ScoreDisplay audit={auditData} /> : null}
+        {auditData.metricSavings ? (
+          <div className="grid grid-cols-[auto_1fr] gap-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Metric</TableHead>
+                  <TableHead>Savings</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Object.entries(auditData.metricSavings).map(
+                  ([metric, savings]) => (
+                    <TableRow key={metric}>
+                      <TableCell>{metric}</TableCell>
+                      <TableCell>{savings}</TableCell>
+                    </TableRow>
+                  ),
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        ) : null}
+        <div className="grid grid-cols-[auto_1fr] gap-4">
+          <div className="py-2">
+            <AuditDetails details={auditData} />
+          </div>
+        </div>
+      </AccordionContent>
+    </AccordionItem>
+  );
 }

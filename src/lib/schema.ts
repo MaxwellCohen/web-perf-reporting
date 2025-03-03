@@ -226,7 +226,7 @@ export const UserPageLoadMetricV5schema = z.object({
   distributions: z.array(
     z.object({
       min: z.number(),
-      max: z.number().optional(),
+      max: z.number().optional().default(0),
       proportion: z.number(),
     }),
   ),
@@ -267,6 +267,8 @@ const auditRefSchema = z
     acronym: z.string().optional(),
   })
   .partial();
+
+export type AuditRef = z.infer<typeof auditRefSchema>;
 
 const auditDebugData = z.union([z.object({
   type: z.literal('debugdata'),
@@ -334,10 +336,14 @@ const auditResultSchema = z.record(z.object({
   explanation: z.string().optional(),
   id: z.string(),
   numericValue: z.number().optional(),
+  // sore is 0 to 1 where 0-.49 is bad and .50-.89 is needs improvement and .90-1 is good
   score: z.number().nullable(),
   scoreDisplayMode: z.string(),
   title: z.string(),
   warnings: z.array(z.any()).optional(),
+numericUnit: z.string().optional(),
+displayValue: z.string().optional(),
+metricSavings: z.record(z.number()).optional(),
 }));
 
 export type AuditResult = z.infer<typeof auditResultSchema>;

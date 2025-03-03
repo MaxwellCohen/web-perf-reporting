@@ -19,6 +19,7 @@ import { RadialChart } from '@/components/latest-crux/PerformanceRadialChart';
 import { PerformanceStackedBarChart } from '@/components/latest-crux/PerformanceStackedBarChart';
 import GaugeChart from '@/components/common/PageSpeedGaugeChart';
 import { createContext } from 'react';
+import { cn } from '@/lib/utils';
 
 const makeHistogramData = (data?: CruxHistoryItem) => {
   if (!data) {
@@ -87,11 +88,13 @@ export function CurrentPerformanceCard({
   }
 
   return (
-    <Card className="grid h-full grid-cols-1 grid-rows-[2.75rem,auto,1rem,auto] p-2">
-      <div className="text-md text-center font-bold">{title}</div>
+    <Card className="grid h-full grid-cols-1 grid-rows-[2.75rem,auto,1rem,auto] gap-1 p-2">
+      <div className="text-md overflow-hidden text-center font-bold">
+        {title}
+      </div>
       <Chart histogramData={histogramData} />
       <P75barChart histogramData={histogramData} />
-      <div className="flex-col items-start text-sm">
+      <div className="mt-1 flex-col items-start text-sm">
         <div className="flex gap-2 font-medium leading-none">
           P75 is {histogramData.P75 ?? 'N/A'}
         </div>
@@ -131,43 +134,93 @@ function P75barChart({ histogramData }: { histogramData: CruxHistoryItem }) {
   const p75Location = `${(histogramData.P75 / maxValue) * 100}% `;
 
   return (
-    <svg viewBox="0 0 100 7">
-      <g className="flex flex-row">
-        <rect width={goodPercent} height="10" fill="hsl(var(--chart-1))" />
-        <rect
-          width={niPercent}
-          height="10"
-          x={parseFloat(goodPercent) || 0}
-          fill="hsl(var(--chart-2))"
-        />
-        <rect
-          width={poorPercent}
-          height="10"
-          x={parseFloat(goodPercent) + parseFloat(niPercent) || 0}
-          fill="hsl(var(--chart-3))"
-        />
-      </g>
-      <g className="flex flex-row">
-        <line
-          x1={parseFloat(p75Location)}
-          y1="0"
-          x2={parseFloat(p75Location)}
-          y2="10"
-          stroke="currentColor"
-          strokeWidth="1"
-        />
-        <line
-          x1={parseFloat(p75Location)}
-          y1="0"
-          x2={parseFloat(p75Location)}
-          y2="4"
-          stroke="bg-primary"
-          strokeWidth="1"
-        />
-      </g>
-    </svg>
+    <div className="m h-8 w-full">
+      <svg viewBox="0 0 100 7">
+        <g className="flex flex-row">
+          <rect width={goodPercent} height="10" fill="hsl(var(--chart-1))" />
+          <rect
+            width={niPercent}
+            height="10"
+            x={parseFloat(goodPercent) || 0}
+            fill="hsl(var(--chart-2))"
+          />
+          <rect
+            width={poorPercent}
+            height="10"
+            x={parseFloat(goodPercent) + parseFloat(niPercent) || 0}
+            fill="hsl(var(--chart-3))"
+          />
+        </g>
+        <g className="flex flex-row">
+          <line
+            x1={parseFloat(p75Location)}
+            y1="0"
+            x2={parseFloat(p75Location)}
+            y2="10"
+            stroke="currentColor"
+            strokeWidth="1"
+          />
+          <line
+            x1={parseFloat(p75Location)}
+            y1="0"
+            x2={parseFloat(p75Location)}
+            y2="4"
+            stroke="bg-primary"
+            strokeWidth="1"
+          />
+        </g>
+      </svg>
+    </div>
   );
 }
+
+export function HorizontalScoreChart({ score, className }: { score: number, className?: string }) {
+  const goodPercent = `10%`;
+  const niPercent = `50%`;
+  const poorPercent = `40%`;
+  const Marker = score <= 1 ? `${(score / 1) * 100}% ` : `${score}% `;
+
+  return (
+    <div className={cn("h-8 w-full", className)}>
+      <svg viewBox="0 0 100 7">
+        <g className="flex flex-row">
+          <rect width={poorPercent} height="10" fill="hsl(var(--chart-3))" />
+          <rect
+            width={niPercent}
+            height="10"
+            x={parseFloat(poorPercent) || 0}
+            fill="hsl(var(--chart-2))"
+          />
+          <rect
+            width={goodPercent}
+            height="10"
+            x={parseFloat(niPercent) + parseFloat(poorPercent) || 0}
+            fill="hsl(var(--chart-1))"
+          />
+        </g>
+        <g className="flex flex-row">
+          <line
+            x1={parseFloat(Marker)}
+            y1="0"
+            x2={parseFloat(Marker)}
+            y2="10"
+            stroke="currentColor"
+            strokeWidth="1"
+          />
+          <line
+            x1={parseFloat(Marker)}
+            y1="0"
+            x2={parseFloat(Marker)}
+            y2="4"
+            stroke="bg-primary"
+            strokeWidth="1"
+          />
+        </g>
+      </svg>
+    </div>
+  );
+}
+
 
 function CurrentGaugeChart({
   histogramData,

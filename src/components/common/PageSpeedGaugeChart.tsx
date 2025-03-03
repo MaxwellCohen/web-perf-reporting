@@ -8,6 +8,9 @@ import { UserPageLoadMetricV5 } from '@/lib/schema';
 
 const RADIAN = Math.PI / 180;
 
+type ChartData = [{ name: string, value: number, fill: string },{ name: string, value: number, fill: string },{ name: string, value: number, fill: string }];
+
+
 export function GaugeChart({
   metric,
   data,
@@ -39,10 +42,7 @@ export function GaugeChart({
   ];
 
   return (
-    <ChartContainer
-      config={chartConfig}
-      className="w-full aspect-[2/1]"
-    >
+    <ChartContainer config={chartConfig} className="aspect-[2/1] w-full">
       <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
         <Pie
           data={chartData}
@@ -55,6 +55,9 @@ export function GaugeChart({
           strokeWidth={5}
           isAnimationActive={false}
           animationDuration={0}
+          paddingAngle={0}
+          cx="50%"
+          cy="50%"
         >
           <Label
             content={({ viewBox }) => {
@@ -89,7 +92,7 @@ export function GaugeChart({
                     <circle
                       cx={x0}
                       cy={y0}
-                      r={5}
+                      r={1}
                       stroke="hsl(var(--muted-foreground))"
                       fill={'hsl(var(--muted-foreground))'}
                     />
@@ -106,13 +109,15 @@ export function GaugeChart({
                       >
                         {value.toLocaleString()} {data.category}
                       </tspan>
-                      {metric ? <tspan
-                        x={viewBox.cx}
-                        y={(viewBox.cy || 0) + 40}
-                        className="fill-muted-foreground"
-                      >
-                        {metric}
-                      </tspan> : null}
+                      {metric ? (
+                        <tspan
+                          x={viewBox.cx}
+                          y={(viewBox.cy || 0) + 40}
+                          className="fill-muted-foreground"
+                        >
+                          {metric}
+                        </tspan>
+                      ) : null}
                     </text>
                   </>
                 );
@@ -126,3 +131,132 @@ export function GaugeChart({
 }
 
 export default GaugeChart;
+
+export function HorizontalGaugeChart({
+  metric,
+  data,
+}: {
+  metric: string;
+  data?: UserPageLoadMetricV5;
+}) {
+  if (!data || data.distributions.length !== 3) {
+    return null;
+  }
+  const value = data.percentile;
+  const distributions = data.distributions;
+  const chartData: ChartData = [
+    {
+      name: chartConfig['good_density'].label,
+      value: distributions[0].max || 0,
+      fill: 'hsl(var(--chart-1))',
+    },
+    {
+      name: chartConfig['ni_density'].label,
+      value: distributions[1].max || 0,
+      fill: 'hsl(var(--chart-2))',
+    },
+    {
+      name: chartConfig['poor_density'].label,
+      value: Math.max(distributions[2].min || 0, value) * 1.1,
+      fill: 'hsl(var(--chart-3))',
+    },
+  ] ;
+
+
+  return (
+    <div className="flex h-full w-full flex-col justify-center">
+      <div className="mb-2 flex w-full items-center gap-2 whitespace-nowrap">
+        <div className="text-sm font-medium">{metric}</div>
+        <div className="whitespace-nowrap text-sm font-bold">
+          {value.toLocaleString()} 
+        </div>
+      </div>
+      <LineChart chartData={chartData} value={value} />
+    </div>
+  );
+}
+
+export function LineChart({ chartData, value}: { chartData: ChartData, value: number }) {
+  const maxValue = Math.max(...chartData.map((dist) => dist.value));
+  return (<svg
+    width="100%"
+    height="16"
+    viewBox="0 0 100 16"
+    preserveAspectRatio="none"
+    className="overflow-hidden rounded-full"
+  >
+    <rect
+      x="0"
+      y="0"
+      width="100"
+      height="16"
+      fill="hsl(var(--muted))"
+      rx="8"
+      ry="8"
+    />
+
+    {/* Good segment */}
+    <rect
+      x="0"
+      y="0"
+      width={(chartData[0].value / maxValue) * 100}
+      height="16"
+      fill={chartData[0].fill}
+      rx="0"
+      ry="0"
+    />
+
+    {/* Needs Improvement segment */}
+    <rect
+      x={(chartData[0].value / maxValue) * 100}
+      y="0"
+      width={
+        ((chartData[1].value - chartData[0].value) / maxValue) * 100
+      }
+      height="16"
+      fill={chartData[1].fill}
+    />
+
+    {/* Poor segment */}
+    <rect
+      x={(chartData[1].value / maxValue) * 100}
+      y="0"
+      width={((maxValue - chartData[1].value) / maxValue) * 100}
+      height="16"
+      fill={chartData[2].fill}
+    />
+
+    {/* Indicator line for current value */}
+    <rect
+      x={(value / maxValue) * 100 - 0.5}
+      y="0"
+      width="1"
+      height="16"
+      fill="hsl(var(--foreground))"
+    /> 
+  </svg>
+  )
+}
+
+export function HorizontalScoreChart({ score }: { score: number, className?: string }) {
+
+  const chartData: ChartData  = [
+    {
+      name: chartConfig['poor_density'].label,
+      value: .49,
+      fill: 'hsl(var(--chart-3))',
+    },
+    {
+      name: chartConfig['ni_density'].label,
+      value: .89,
+      fill: 'hsl(var(--chart-2))',
+    },
+    {
+      name: chartConfig['good_density'].label,
+      value: 1.05,
+      fill: 'hsl(var(--chart-1))',
+    },
+  ] ;
+
+  return <LineChart chartData={chartData} value={score} />;
+}
