@@ -17,9 +17,8 @@ export function Timeline({ timeline }: TimelineProps) {
       <h3 className="text-lg font-bold">Timeline</h3>
       <div className="mt-3 flex flex-row gap-2 align-top">
         {timeline.items.map((item, i) => (
-          <>
+          <div key={`${i}-${item.timestamp}`}>
             <button
-              key={`${i}-${item.timestamp}`}
               className="rounded-md border-2 border-gray-300"
               onClick={() => setOpenIndex(i)}
             >
@@ -34,7 +33,7 @@ export function Timeline({ timeline }: TimelineProps) {
                 </Button>
               </form>
             </dialog>
-          </>
+          </div>
         ))}
       </div>
     </div>
