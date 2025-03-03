@@ -65,11 +65,17 @@ export function PageSpeedInsightsDashboard({
         ...Object.keys(categories || {}),
       ]}
     >
-      <h2 className="text-2xl font-bold text-center">
+      <h2 className="text-center text-2xl font-bold">
         Report for {new Date(data.analysisUTCTimestamp).toLocaleDateString()}
       </h2>
-      <LoadingExperience title="Page Loading Experience" experience={data?.loadingExperience} />
-      <LoadingExperience title="Origin Loading Experience" experience={data?.originLoadingExperience} />
+      <LoadingExperience
+        title="Page Loading Experience"
+        experience={data?.loadingExperience}
+      />
+      <LoadingExperience
+        title="Origin Loading Experience"
+        experience={data?.originLoadingExperience}
+      />
 
       <div className="grid grid-rows-[auto_1fr]">
         <MetricsComponent
@@ -83,17 +89,17 @@ export function PageSpeedInsightsDashboard({
         console.log(category);
         return (
           <AccordionItem key={key} value={key}>
-            <AccordionTrigger className="flex flex-row gap-2 text-lg font-bold flex-wrap">
-              <div className="w-64 whitespace-nowrap">
+            <AccordionTrigger className="flex flex-row flex-wrap gap-2 text-lg font-bold">
+              <div className="w-[300px] whitespace-nowrap">
                 {category.score
                   ? `${category.title} - Score: ${Math.round(category.score * 100)}`
                   : `${category.title}`}
               </div>
               {category.score ? (
-                <div className="flex-1 min-w-64">
+                <div className="min-w-64 flex-1">
                   <HorizontalScoreChart
                     score={category.score || 0}
-                    className="overflow-hidden h-2 min-w-11 flex-1"
+                    className="h-2 min-w-11 flex-1 overflow-hidden"
                   />
                 </div>
               ) : (
@@ -103,7 +109,7 @@ export function PageSpeedInsightsDashboard({
             <AccordionContent>
               <ReactMarkdown>{category.description}</ReactMarkdown>
               <div className="w-full" role="table" aria-label="Audit Table">
-                <div
+                {/* <div
                   className="grid grid-cols-[1fr_4fr] gap-4"
                   role="row"
                   aria-label="Audit table header"
@@ -114,7 +120,7 @@ export function PageSpeedInsightsDashboard({
                   <div className="border-b pb-2 font-bold" role="columnheader">
                     Description
                   </div>
-                </div>
+                </div> */}
 
                 {category.auditRefs && auditRecords ? (
                   <Accordion type="multiple">
@@ -219,7 +225,6 @@ export function ScreenshotComponent({
   );
 }
 
-
 function EntitiesTable({ entities }: { entities?: Entities }) {
   const id = useId();
   if (!entities?.length) {
@@ -263,8 +268,6 @@ function EntitiesTable({ entities }: { entities?: Entities }) {
   );
 }
 
-
- 
 function AuditDetails({ details }: { details: AuditResult[string] }) {
   const opportunity = AuditDetailOpportunitySchema.safeParse(details.details);
   if (opportunity.success) {
@@ -362,7 +365,7 @@ function MetricsComponent({
             return null;
           }
           return (
-            <Card key={audit} className="px-4 py-4 w-full min-w-64">
+            <Card key={audit} className="w-full min-w-64 px-4 py-4">
               <Accordion type="multiple" defaultValue={[]}>
                 <AccordionItem value={audit} className="border-b-0">
                   <AccordionTrigger>
@@ -419,7 +422,7 @@ function ScoreDisplay({ audit }: { audit?: AuditResult[string] }) {
         <div>
           Value: {audit.numericValue?.toFixed(2) || 'N/A'}{' '}
           {audit.numericUnit && audit.numericUnit !== 'unitless'
-            ? audit.numericUnit
+            ? `${audit.numericUnit}s`
             : ''}
         </div>
       </>
@@ -491,22 +494,17 @@ function AuditDetailsSection({
 
   return (
     <AccordionItem key={auditRef.id} value={auditRef.id}>
-      <AccordionTrigger>
-        <div
-          className="grid grid-cols-[1fr_4fr] gap-4 border-b"
-          key={auditRef.id}
-          role="row"
-        >
-          <div className="py-2" role="cell">
+      <AccordionTrigger className="flex flex-row gap-4 border-b">
+        <div className="flex flex-row gap-4 flex-1">
+          <div className="flex-[0_0_300px]" >
             {auditData.title} {auditRef.acronym ? `(${auditRef.acronym})` : ''}
           </div>
-          <div className="py-2" role="cell">
+          <div className="flex-1 align-top">
             <ReactMarkdown children={auditData.description || ''} />
           </div>
         </div>
       </AccordionTrigger>
       <AccordionContent>
-        <ReactMarkdown>{auditData.description}</ReactMarkdown>
         {auditData.score ? <ScoreDisplay audit={auditData} /> : null}
         {auditData.metricSavings ? (
           <div className="grid grid-cols-[auto_1fr] gap-4">

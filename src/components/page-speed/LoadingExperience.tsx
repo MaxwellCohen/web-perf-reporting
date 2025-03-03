@@ -39,17 +39,7 @@ export function LoadingExperience({
           {metrics.map(({ metric, key }) => {
             console.log(experience.metrics[key]);
             return (<div key={key} className="flex flex-col gap-2">
-              {/* <div className="text-md font-bold">{metric}</div> */}
-              
-            <HorizontalGaugeChart key={key} metric={metric} data={experience.metrics[key]} />
-
-              {/* <HorizontalScoreChart
-                score={experience.metrics[key].percentile || 0}
-                className="h-2 min-w-11 flex-1 overflow-hidden"
-              /> */}
-              {/* <div className="text-sm text-muted-foreground">
-                {experience.metrics[key].category} - {experience.metrics[key].percentile || 0}
-              </div> */}
+              <HorizontalGaugeChart key={key} metric={metric} data={experience.metrics[key]} />
               </div>
             );
           })}
