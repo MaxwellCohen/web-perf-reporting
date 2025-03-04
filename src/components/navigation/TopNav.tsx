@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ModeToggle } from '../ui/darkmode';
+// import { ModeToggle } from '../ui/darkmode';
 
 export function TopNav() {
   return (
@@ -21,7 +21,7 @@ export function TopNav() {
         <Link href="/page-speed" className="">
           <span className="text-md break-keep font-bold">Insights</span>
         </Link>
-        <ModeToggle />
+      {/* <ModeToggle /> */}
       </div>
     </nav>
   );

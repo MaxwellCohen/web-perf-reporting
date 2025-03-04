@@ -2,7 +2,7 @@
 'use client';
 import posthog from 'posthog-js';
 import { PostHogProvider as PHProvider } from 'posthog-js/react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import PostHogPageView from './PostHogPageView';
 import { ThemeProvider as NextThemesProvider } from "next-themes"
 
@@ -27,6 +27,15 @@ export function ThemeProvider({
   children,
   ...props
 }: React.ComponentProps<typeof NextThemesProvider>) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <>{children}</>; // Render children without ThemeProvider during SSR
+  }
   return <NextThemesProvider {...props}>{children}</NextThemesProvider>
 }
 
