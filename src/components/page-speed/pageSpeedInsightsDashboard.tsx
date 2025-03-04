@@ -28,31 +28,38 @@ import {
 } from '@/components/ui/accordion';
 
 import ReactMarkdown from 'react-markdown';
-import { useId } from 'react';
 
 import { HorizontalScoreChart } from '@/components/common/PageSpeedGaugeChart';
 import { Card } from '../ui/card';
 import { Timeline } from './Timeline';
 import { LoadingExperience } from './LoadingExperience';
+import { EntitiesTable } from './EntitiesTable';
 
 export function PageSpeedInsightsDashboard({
-  data,
+  desktopData,
+  mobileData,
 }: {
-  data: PageSpeedInsights;
+  desktopData?: PageSpeedInsights | null;
+  mobileData?: PageSpeedInsights | null;
 }) {
-  if (!data) {
-    return null;
-  }
-  // const url = data?.lighthouseResult.finalDisplayedUrl;
-  // const screenshot = data.lighthouseResult.fullPageScreenshot?.screenshot;
-  const timeline = AuditDetailFilmstripSchema.safeParse(
-    data?.lighthouseResult?.audits?.['screenshot-thumbnails'].details,
+  const DesktopTimeline = AuditDetailFilmstripSchema.safeParse(
+    desktopData?.lighthouseResult?.audits?.['screenshot-thumbnails'].details,
+  ).data;
+  const MobileTimeline = AuditDetailFilmstripSchema.safeParse(
+    mobileData?.lighthouseResult?.audits?.['screenshot-thumbnails'].details,
   ).data;
 
-  const entities: Entities | undefined = data?.lighthouseResult?.entities;
-  const auditRecords: AuditResult | undefined = data?.lighthouseResult?.audits;
-  const categories = data.lighthouseResult.categories;
-  const categoryGroups = data.lighthouseResult.categoryGroups;
+  const desktopEntities: Entities | undefined =
+    desktopData?.lighthouseResult?.entities;
+  const desktopAuditRecords: AuditResult | undefined =
+    desktopData?.lighthouseResult?.audits;
+  const desktopCategories = desktopData?.lighthouseResult?.categories;
+  const desktopCategoryGroups = desktopData?.lighthouseResult?.categoryGroups;
+  const mobileAuditRecords: AuditResult | undefined =
+    mobileData?.lighthouseResult?.audits;
+  const mobileCategoryGroups = mobileData?.lighthouseResult?.categoryGroups;
+  // const mobileCategories = mobileData?.lighthouseResult?.categories;
+
   return (
     <Accordion
       type="multiple"
@@ -62,30 +69,38 @@ export function PageSpeedInsightsDashboard({
         'screenshot',
         'entities',
         'audits',
-        ...Object.keys(categories || {}),
+        ...Object.keys(desktopCategories || {}),
       ]}
     >
       <h2 className="text-center text-2xl font-bold">
-        Report for {new Date(data.analysisUTCTimestamp).toLocaleDateString()}
+        Report for{' '}
+        {new Date(desktopData?.analysisUTCTimestamp || mobileData?.analysisUTCTimestamp || 0).toLocaleDateString()}
       </h2>
       <LoadingExperience
         title="Page Loading Experience"
-        experience={data?.loadingExperience}
+        experienceDesktop={desktopData?.loadingExperience}
+        experienceMobile={mobileData?.loadingExperience}
       />
       <LoadingExperience
         title="Origin Loading Experience"
-        experience={data?.originLoadingExperience}
+        experienceDesktop={desktopData?.originLoadingExperience}
+        experienceMobile={mobileData?.originLoadingExperience}
       />
 
       <div className="grid grid-rows-[auto_1fr]">
         <MetricsComponent
-          categoryGroups={categoryGroups}
-          audits={auditRecords}
+          desktopCategoryGroups={desktopCategoryGroups}
+          desktopAudits={desktopAuditRecords}
+          mobileCategoryGroups={mobileCategoryGroups}
+          mobileAudits={mobileAuditRecords}
         />
-        <Timeline timeline={timeline} />
+        <div className="flex flex-row flex-wrap gap-2">
+          <Timeline timeline={MobileTimeline} device="Mobile" />
+          <Timeline timeline={DesktopTimeline} device="Desktop" />
+        </div>
       </div>
 
-      {Object.entries(categories || {}).map(([key, category]) => {
+      {Object.entries(desktopCategories || {}).map(([key, category]) => {
         console.log(category);
         return (
           <AccordionItem key={key} value={key}>
@@ -122,13 +137,13 @@ export function PageSpeedInsightsDashboard({
                   </div>
                 </div> */}
 
-                {category.auditRefs && auditRecords ? (
+                {category.auditRefs && desktopAuditRecords ? (
                   <Accordion type="multiple">
                     {category.auditRefs.map((auditRef) => (
                       <AuditDetailsSection
                         key={auditRef.id}
                         auditRef={auditRef}
-                        auditRecords={auditRecords}
+                        auditRecords={desktopAuditRecords}
                       />
                     ))}
                   </Accordion>
@@ -144,7 +159,7 @@ export function PageSpeedInsightsDashboard({
           <div className="text-lg font-bold">Entities</div>
         </AccordionTrigger>
         <AccordionContent>
-          <EntitiesTable entities={entities} />
+          <EntitiesTable entities={desktopEntities} />
         </AccordionContent>
       </AccordionItem>
       {/* <AccordionItem value="audits">
@@ -225,131 +240,24 @@ export function ScreenshotComponent({
   );
 }
 
-function EntitiesTable({ entities }: { entities?: Entities }) {
-  const id = useId();
-  if (!entities?.length) {
-    return null;
-  }
-
-  return (
-    <>
-      <div id={`${id}-entities-title`}>
-        Entities - list of Origins that the site uses
-      </div>
-      <Table aria-labelledby={`${id}-entities-title`}>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name </TableHead>
-            <TableHead>Is First Party </TableHead>
-            <TableHead>Is Unrecognized </TableHead>
-            <TableHead>Origins </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {entities.map((entity, i) => (
-            <TableRow key={`${i}-${entity.name}`}>
-              <TableCell> {entity.name} </TableCell>
-              <TableCell>
-                {entity.isFirstParty ? '✅ - yes' : '❌ - no'}
-              </TableCell>
-              <TableCell>
-                {entity.isUnrecognized ? '✅ - yes' : '❌ - no'}
-              </TableCell>
-              <TableCell>
-                {entity.origins.map((o, i) => (
-                  <div key={`${i}-${o}`}>{o} </div>
-                ))}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </>
-  );
-}
-
-function AuditDetails({ details }: { details: AuditResult[string] }) {
-  const opportunity = AuditDetailOpportunitySchema.safeParse(details.details);
-  if (opportunity.success) {
-    const data = opportunity.data;
-    if (data?.items?.length && data?.headings?.length) {
-      return (
-        <>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {data.headings.map((heading, i) => {
-                  if (heading.key === 'node') {
-                    return null;
-                  }
-                  return (
-                    <TableHead key={`${i}-${heading.label}`}>
-                      {heading.label}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.items.map((item, i) => (
-                <TableRow key={`${i}-${item.label}`}>
-                  {data?.headings?.map((heading, j) => {
-                    if (heading?.key === 'node') {
-                      return null;
-                    }
-
-                    return heading?.key && heading.key in item ? (
-                      <TableCell key={`${i}-${j}`}>
-                        {JSON.stringify(item[heading.key])}
-                      </TableCell>
-                    ) : null;
-                  })}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <div>
-            <pre>{JSON.stringify(data, null, 2)}</pre>
-          </div>
-        </>
-      );
-    }
-  }
-  if (details.scoreDisplayMode === ScoreDisplayModes.MANUAL) {
-    return null;
-  }
-  if (details.scoreDisplayMode === ScoreDisplayModes.NOT_APPLICABLE) {
-    return <div>Not applicable</div>;
-  }
-  if (details.scoreDisplayMode === ScoreDisplayModes.ERROR) {
-    return null;
-  }
-  if (
-    details.scoreDisplayMode === ScoreDisplayModes.NUMERIC &&
-    !details.details?.items?.length
-  ) {
-    return null;
-  }
-  return (
-    <div>
-      <pre>{JSON.stringify(details, null, 2)}</pre>
-    </div>
-  );
-}
-
 function MetricsComponent({
-  categoryGroups,
-  audits,
+  desktopCategoryGroups,
+  desktopAudits,
+  mobileCategoryGroups,
+  mobileAudits,
 }: {
-  categoryGroups?: PageSpeedInsights['lighthouseResult']['categoryGroups'];
-  categories?: PageSpeedInsights['lighthouseResult']['categories'];
-  audits?: AuditResult;
+  desktopCategoryGroups?: PageSpeedInsights['lighthouseResult']['categoryGroups'];
+  desktopAudits?: AuditResult;
+  mobileCategoryGroups?: PageSpeedInsights['lighthouseResult']['categoryGroups'];
+  mobileAudits?: AuditResult;
 }) {
   return (
     <>
-      {categoryGroups?.['metrics']?.title ? (
+      {desktopCategoryGroups?.['metrics']?.title ||
+      mobileCategoryGroups?.['metrics']?.title ? (
         <h3 className="text-lg font-bold">
-          {categoryGroups?.['metrics']?.title}
+          {desktopCategoryGroups?.['metrics']?.title ||
+            mobileCategoryGroups?.['metrics']?.title}
         </h3>
       ) : null}
       <div className="grid grid-cols-[repeat(auto-fill,_minmax(16rem,_1fr))] gap-2">
@@ -359,25 +267,54 @@ function MetricsComponent({
           'total-blocking-time',
           'cumulative-layout-shift',
           'speed-index',
-        ]?.map((audit) => {
-          const auditData = audits?.[audit];
-          if (!auditData) {
+        ]?.map((auditName) => {
+          const desktopAuditData = desktopAudits?.[auditName];
+          const mobileAuditData = mobileAudits?.[auditName];
+          if (!desktopAuditData && !mobileAuditData) {
             return null;
           }
           return (
-            <Card key={audit} className="w-full min-w-64 px-4 py-4">
+            <Card key={auditName} className="w-full min-w-64 px-4 py-4">
               <Accordion type="multiple" defaultValue={[]}>
-                <AccordionItem value={audit} className="border-b-0">
+                <AccordionItem value={auditName} className="border-b-0">
                   <AccordionTrigger>
-                    <div className="text-md font-bold">{auditData.title}</div>
+                    <div className="flex w-full flex-col gap-2">
+                      <div className="text-md font-bold">
+                        {desktopAuditData?.title || mobileAuditData?.title}
+                      </div>
+
+                      {mobileAuditData?.score != undefined ? (
+                        <>
+                          <ScoreDisplay
+                            audit={mobileAuditData}
+                            device="Mobile"
+                          />{' '}
+                          <HorizontalScoreChart
+                            score={mobileAuditData?.score || 0}
+                          />
+                        </>
+                      ) : null}
+                      {desktopAuditData?.score != undefined ? (
+                        <>
+                          <ScoreDisplay
+                            audit={desktopAuditData}
+                            device="Desktop"
+                          />{' '}
+                          <HorizontalScoreChart
+                            score={desktopAuditData?.score || 0}
+                          />
+                        </>
+                      ) : null}
+                    </div>
                   </AccordionTrigger>
                   <AccordionContent>
-                    <ReactMarkdown>{auditData.description}</ReactMarkdown>
+                    <ReactMarkdown>
+                      {desktopAuditData?.description ||
+                        mobileAuditData?.description}
+                    </ReactMarkdown>
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
-              {auditData.score ? <ScoreDisplay audit={auditData} /> : null}
-              <HorizontalScoreChart score={auditData.score || 0} />
             </Card>
           );
         }) || null}
@@ -408,7 +345,13 @@ const ScoreDisplayModes = {
   ERROR: 'error',
 } as const;
 
-function ScoreDisplay({ audit }: { audit?: AuditResult[string] }) {
+function ScoreDisplay({
+  audit,
+  device,
+}: {
+  audit?: AuditResult[string];
+  device?: string;
+}) {
   if (!audit) {
     return null;
   }
@@ -418,12 +361,10 @@ function ScoreDisplay({ audit }: { audit?: AuditResult[string] }) {
   if (audit.scoreDisplayMode === ScoreDisplayModes.NUMERIC) {
     return (
       <>
-        <div>Score: {Math.round(audit.score * 100)} / 100</div>
         <div>
-          Value: {audit.numericValue?.toFixed(2) || 'N/A'}{' '}
-          {audit.numericUnit && audit.numericUnit !== 'unitless'
-            ? `${audit.numericUnit}s`
-            : ''}
+          {device ? `${device} - ` : ''}{' '}
+          {audit.displayValue ? `${audit.displayValue} - ` : ''}
+          Score: {Math.round(audit.score * 100)} / 100
         </div>
       </>
     );
@@ -495,8 +436,8 @@ function AuditDetailsSection({
   return (
     <AccordionItem key={auditRef.id} value={auditRef.id}>
       <AccordionTrigger className="flex flex-row gap-4 border-b">
-        <div className="flex flex-row gap-4 flex-1">
-          <div className="flex-[0_0_300px]" >
+        <div className="flex flex-1 flex-row gap-4">
+          <div className="flex-[0_0_300px]">
             {auditData.title} {auditRef.acronym ? `(${auditRef.acronym})` : ''}
           </div>
           <div className="flex-1 align-top">
@@ -535,5 +476,74 @@ function AuditDetailsSection({
         </div>
       </AccordionContent>
     </AccordionItem>
+  );
+}
+
+function AuditDetails({ details }: { details: AuditResult[string] }) {
+  const opportunity = AuditDetailOpportunitySchema.safeParse(details.details);
+  if (opportunity.success) {
+    const data = opportunity.data;
+    if (data?.items?.length && data?.headings?.length) {
+      return (
+        <>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {data.headings.map((heading, i) => {
+                  if (heading.key === 'node') {
+                    return null;
+                  }
+                  return (
+                    <TableHead key={`${i}-${heading.label}`}>
+                      {heading.label}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.items.map((item, i) => (
+                <TableRow key={`${i}-${item.label}`}>
+                  {data?.headings?.map((heading, j) => {
+                    if (heading?.key === 'node') {
+                      return null;
+                    }
+
+                    return heading?.key && heading.key in item ? (
+                      <TableCell key={`${i}-${j}`}>
+                        {JSON.stringify(item[heading.key])}
+                      </TableCell>
+                    ) : null;
+                  })}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <div>
+            <pre>{JSON.stringify(data, null, 2)}</pre>
+          </div>
+        </>
+      );
+    }
+  }
+  if (details.scoreDisplayMode === ScoreDisplayModes.MANUAL) {
+    return null;
+  }
+  if (details.scoreDisplayMode === ScoreDisplayModes.NOT_APPLICABLE) {
+    return <div>Not applicable</div>;
+  }
+  if (details.scoreDisplayMode === ScoreDisplayModes.ERROR) {
+    return null;
+  }
+  if (
+    details.scoreDisplayMode === ScoreDisplayModes.NUMERIC &&
+    !details.details?.items?.length
+  ) {
+    return null;
+  }
+  return (
+    <div>
+      <pre>{JSON.stringify(details, null, 2)}</pre>
+    </div>
   );
 }

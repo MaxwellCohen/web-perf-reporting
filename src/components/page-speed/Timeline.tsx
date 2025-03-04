@@ -21,9 +21,10 @@ import { CarouselContent } from '../ui/carousel';
 
 interface TimelineProps {
   timeline?: AuditDetailFilmstrip;
+  device?: string;
 }
 
-export function Timeline({ timeline }: TimelineProps) {
+export function Timeline({ timeline, device }: TimelineProps) {
   const [api, setApi] = useState<CarouselApi>();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -37,7 +38,7 @@ export function Timeline({ timeline }: TimelineProps) {
 
   return (
     <div className="mt-3 flex flex-col">
-      <h3 className="text-lg font-bold">Timeline</h3>
+      <h3 className="text-lg font-bold">{device ? `${device} - ` : ''} Timeline</h3>
       <Dialog>
         <div className="mt-3 flex flex-row gap-2 align-top">
           {timeline.items.map((item, i) => (
@@ -74,7 +75,7 @@ export function Timeline({ timeline }: TimelineProps) {
               <CarouselNext />
             </Carousel>
             <DialogClose asChild>
-              <Button autoFocus>close</Button>
+              <Button className="w-17" autoFocus>close</Button>
             </DialogClose>
           </DialogContent>
         </div>

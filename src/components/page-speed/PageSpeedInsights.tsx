@@ -10,10 +10,8 @@ export async function PageSpeedInsights({
 
 }) {
   const data = await Promise.all([requestPageSpeedData(url, 'DESKTOP'), requestPageSpeedData(url, 'MOBILE')]);
-  if (!data[0]) {
-    return null;
-  }
+
   return (
-    <PageSpeedInsightsDashboard data={data[0]} />
+    <PageSpeedInsightsDashboard desktopData={data[0]} mobileData={data[1]} />
   );
 }

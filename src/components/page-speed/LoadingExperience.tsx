@@ -5,19 +5,23 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from '@/components/ui/accordion';
+import { useId } from 'react';
 
 interface LoadingExperienceProps {
   title: string;
-  experience?: PageSpeedApiLoadingExperience;
+  experienceDesktop?: PageSpeedApiLoadingExperience;
+  experienceMobile?: PageSpeedApiLoadingExperience;
   category?: string;
 }
 
 export function LoadingExperience({
   title,
-  experience,
+  experienceDesktop,
+  experienceMobile,
   category,
 }: LoadingExperienceProps) {
-  if (!experience) return null;
+    const id = useId();
+  if (!experienceDesktop && !experienceMobile) return null;
 
   const metrics = [
     { metric: 'Cumulative Layout Shift', key: 'CUMULATIVE_LAYOUT_SHIFT_SCORE' },
@@ -28,7 +32,7 @@ export function LoadingExperience({
   ] as const;
 
   return (
-    <AccordionItem value={title.toLowerCase().replace(/\s+/g, '-')}>
+    <AccordionItem value={title.toLowerCase().replace(/\s+/g, '-') + id}>
       <AccordionTrigger>
         <div className="text-lg font-bold">
           {title}: {category}
@@ -37,9 +41,21 @@ export function LoadingExperience({
       <AccordionContent>
         <div className="grid-auto-rows-[1fr] mt-2 grid grid-cols-[repeat(auto-fill,_minmax(180px,_1fr))] gap-2">
           {metrics.map(({ metric, key }) => {
-            console.log(experience.metrics[key]);
-            return (<div key={key} className="flex flex-col gap-2">
-              <HorizontalGaugeChart key={key} metric={metric} data={experience.metrics[key]} />
+            return (
+              <div key={key + id} className="flex flex-col gap-2">
+                {experienceMobile?.metrics[key] && experienceDesktop?.metrics[key] ? ( <h4 className="text-sm font-bold">{metric}</h4>) : null}
+                {experienceMobile?.metrics[key] ? (
+                  <HorizontalGaugeChart
+                    metric={`${experienceMobile?.metrics[key].percentile} - ${experienceMobile?.metrics[key].category} - Mobile`}
+                    data={experienceMobile?.metrics[key]}
+                  />
+                ) : null}
+                {experienceDesktop?.metrics[key] ? (
+                  <HorizontalGaugeChart
+                    metric={`${experienceDesktop?.metrics[key].percentile} - ${experienceDesktop?.metrics[key].category} - Desktop`}
+                    data={experienceDesktop?.metrics[key]}
+                  />
+                ) : null}
               </div>
             );
           })}

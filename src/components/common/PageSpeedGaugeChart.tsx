@@ -136,7 +136,7 @@ export function HorizontalGaugeChart({
   metric,
   data,
 }: {
-  metric: string;
+  metric?: string;
   data?: UserPageLoadMetricV5;
 }) {
   if (!data || data.distributions.length !== 3) {
@@ -167,9 +167,9 @@ export function HorizontalGaugeChart({
     <div className="flex h-full w-full flex-col justify-center">
       <div className="mb-2 flex w-full items-center gap-2 whitespace-nowrap">
         <div className="text-sm font-medium">{metric}</div>
-        <div className="whitespace-nowrap text-sm font-bold">
+        {/* <div className="whitespace-nowrap text-sm font-bold">
           {value.toLocaleString()} 
-        </div>
+        </div> */}
       </div>
       <LineChart chartData={chartData} value={value} />
     </div>
