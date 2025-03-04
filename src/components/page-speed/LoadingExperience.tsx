@@ -5,7 +5,6 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from '@/components/ui/accordion';
-import { useId } from 'react';
 
 interface LoadingExperienceProps {
   title: string;
@@ -20,7 +19,6 @@ export function LoadingExperience({
   experienceMobile,
   category,
 }: LoadingExperienceProps) {
-    const id = useId();
   if (!experienceDesktop && !experienceMobile) return null;
 
   const metrics = [
@@ -32,7 +30,7 @@ export function LoadingExperience({
   ] as const;
 
   return (
-    <AccordionItem value={title.toLowerCase().replace(/\s+/g, '-') + id}>
+    <AccordionItem value={title.toLowerCase().replace(/\s+/g, '-')}>
       <AccordionTrigger>
         <div className="text-lg font-bold">
           {title}: {category}
@@ -42,7 +40,7 @@ export function LoadingExperience({
         <div className="grid-auto-rows-[1fr] mt-2 grid grid-cols-[repeat(auto-fill,_minmax(180px,_1fr))] gap-2">
           {metrics.map(({ metric, key }) => {
             return (
-              <div key={key + id} className="flex flex-col gap-2">
+              <div key={key} className="flex flex-col gap-2">
                 {experienceMobile?.metrics[key] && experienceDesktop?.metrics[key] ? ( <h4 className="text-sm font-bold">{metric}</h4>) : null}
                 {experienceMobile?.metrics[key] ? (
                   <HorizontalGaugeChart

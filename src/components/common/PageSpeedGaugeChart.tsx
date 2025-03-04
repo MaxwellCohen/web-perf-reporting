@@ -8,8 +8,11 @@ import { UserPageLoadMetricV5 } from '@/lib/schema';
 
 const RADIAN = Math.PI / 180;
 
-type ChartData = [{ name: string, value: number, fill: string },{ name: string, value: number, fill: string },{ name: string, value: number, fill: string }];
-
+type ChartData = [
+  { name: string; value: number; fill: string },
+  { name: string; value: number; fill: string },
+  { name: string; value: number; fill: string },
+];
 
 export function GaugeChart({
   metric,
@@ -160,8 +163,7 @@ export function HorizontalGaugeChart({
       value: Math.max(distributions[2].min || 0, value) * 1.1,
       fill: 'hsl(var(--chart-3))',
     },
-  ] ;
-
+  ];
 
   return (
     <div className="flex h-full w-full flex-col justify-center">
@@ -176,87 +178,126 @@ export function HorizontalGaugeChart({
   );
 }
 
-export function LineChart({ chartData, value}: { chartData: ChartData, value: number }) {
+export function LineChart({
+  chartData,
+  value,
+}: {
+  chartData: ChartData;
+  value: number;
+}) {
   const maxValue = Math.max(...chartData.map((dist) => dist.value));
-  return (<svg
-    width="100%"
-    height="16"
-    viewBox="0 0 100 16"
-    preserveAspectRatio="none"
-    className="overflow-hidden rounded-full"
-  >
-    <rect
-      x="0"
-      y="0"
-      width="100"
+  return (
+    <svg
+      width="100%"
       height="16"
-      fill="hsl(var(--muted))"
-      rx="8"
-      ry="8"
-    />
+      viewBox="0 0 100 16"
+      preserveAspectRatio="none"
+      className="overflow-hidden rounded-full"
+    >
+      <rect
+        x="0"
+        y="0"
+        width="100"
+        height="16"
+        fill="hsl(var(--muted))"
+        rx="8"
+        ry="8"
+      />
 
-    {/* Good segment */}
-    <rect
-      x="0"
-      y="0"
-      width={(chartData[0].value / maxValue) * 100}
-      height="16"
-      fill={chartData[0].fill}
-      rx="0"
-      ry="0"
-    />
+      {/* Good segment */}
+      <rect
+        x="0"
+        y="0"
+        width={(chartData[0].value / maxValue) * 100}
+        height="16"
+        fill={chartData[0].fill}
+        rx="0"
+        ry="0"
+      />
 
-    {/* Needs Improvement segment */}
-    <rect
-      x={(chartData[0].value / maxValue) * 100}
-      y="0"
-      width={
-        ((chartData[1].value - chartData[0].value) / maxValue) * 100
-      }
-      height="16"
-      fill={chartData[1].fill}
-    />
+      {/* Needs Improvement segment */}
+      <rect
+        x={(chartData[0].value / maxValue) * 100}
+        y="0"
+        width={((chartData[1].value - chartData[0].value) / maxValue) * 100}
+        height="16"
+        fill={chartData[1].fill}
+      />
 
-    {/* Poor segment */}
-    <rect
-      x={(chartData[1].value / maxValue) * 100}
-      y="0"
-      width={((maxValue - chartData[1].value) / maxValue) * 100}
-      height="16"
-      fill={chartData[2].fill}
-    />
-
-    {/* Indicator line for current value */}
-    <rect
-      x={(value / maxValue) * 100 - 0.5}
-      y="0"
-      width="1"
-      height="16"
-      fill="hsl(var(--foreground))"
-    /> 
-  </svg>
-  )
+      {/* Poor segment */}
+      <rect
+        x={(chartData[1].value / maxValue) * 100}
+        y="0"
+        width={((maxValue - chartData[1].value) / maxValue) * 100}
+        height="16"
+        fill={chartData[2].fill}
+      />
+      {/* Indicator line for current value */}
+      <rect
+        x={(value / maxValue) * 100 - 0.5}
+        y="0"
+        width="1"
+        height="16"
+        fill="hsl(var(--secondary-foreground))"
+      />
+      <text
+        x={(chartData[0].value / maxValue) * 100}
+        y="12"
+        z={1000}
+        fontSize="8"
+        textAnchor="middle"
+        fill="hsl(var(--secondary-foreground))"
+        style={{
+          textShadow: '1px 1px 2px rgba(0,0,0,0.7)',
+        }}
+      >
+        {chartData[0].value > 1
+          ? chartData[0].value.toFixed(0)
+          : chartData[0].value}
+      </text>
+      <text
+        x={(chartData[1].value / maxValue) * 100}
+        y="12"
+        z={1000}
+        fontSize="8"
+        textAnchor="middle"
+        fill="hsl(var(--secondary-foreground))"
+        className="text-shadow-lg"
+        style={{
+          textShadow: '1px 1px 2px rgba(0,0,0,0.7)',
+        }}
+      >
+        {chartData[1].value > 1
+          ? chartData[1].value.toFixed(0)
+          : chartData[1].value.toFixed(2)}
+      </text>
+    </svg>
+  );
 }
 
-export function HorizontalScoreChart({ score }: { score: number, className?: string }) {
-
-  const chartData: ChartData  = [
+export function HorizontalScoreChart({
+  score,
+}: {
+  score: number;
+  className?: string;
+}) {
+  const chartData: ChartData = [
     {
       name: chartConfig['poor_density'].label,
-      value: .49,
+      value: 50,
       fill: 'hsl(var(--chart-3))',
     },
     {
       name: chartConfig['ni_density'].label,
-      value: .89,
+      value: 90,
       fill: 'hsl(var(--chart-2))',
     },
     {
       name: chartConfig['good_density'].label,
-      value: 1.05,
+      value: 100,
       fill: 'hsl(var(--chart-1))',
     },
-  ] ;
+  ];
 
-  return <LineChart chartData={chartData} value={score} />;
+  return <LineChart chartData={chartData} value={score * 100} />;
 }

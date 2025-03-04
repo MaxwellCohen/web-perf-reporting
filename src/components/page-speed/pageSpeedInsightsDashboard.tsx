@@ -104,14 +104,15 @@ export function PageSpeedInsightsDashboard({
         console.log(category);
         return (
           <AccordionItem key={key} value={key}>
-            <AccordionTrigger className="flex flex-row flex-wrap gap-2 text-lg font-bold">
-              <div className="w-[300px] whitespace-nowrap">
+            <AccordionTrigger className="flex flex-row  gap-2 text-lg font-bold justify-start">
+              <div className="flex flex-row flex-1 flex-wrap items-center">
+                <div className="w-[300px] whitespace-nowrap flex">
                 {category.score
                   ? `${category.title} - Score: ${Math.round(category.score * 100)}`
                   : `${category.title}`}
               </div>
               {category.score ? (
-                <div className="min-w-64 flex-1">
+                <div className="w-64 flex-0 align-top">
                   <HorizontalScoreChart
                     score={category.score || 0}
                     className="h-2 min-w-11 flex-1 overflow-hidden"
@@ -120,6 +121,7 @@ export function PageSpeedInsightsDashboard({
               ) : (
                 ''
               )}
+              </div>
             </AccordionTrigger>
             <AccordionContent>
               <ReactMarkdown>{category.description}</ReactMarkdown>
