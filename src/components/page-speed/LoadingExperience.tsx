@@ -39,19 +39,21 @@ export function LoadingExperience({
       <AccordionContent>
         <div className="grid-auto-rows-[1fr] mt-2 grid grid-cols-[repeat(auto-fill,_minmax(180px,_1fr))] gap-2">
           {metrics.map(({ metric, key }) => {
+            const mobileMetric = experienceMobile?.metrics[key];
+            const desktopMetric = experienceDesktop?.metrics[key];
             return (
               <div key={key} className="flex flex-col gap-2">
-                {experienceMobile?.metrics[key] && experienceDesktop?.metrics[key] ? ( <h4 className="text-sm font-bold">{metric}</h4>) : null}
-                {experienceMobile?.metrics[key] ? (
+                {mobileMetric && desktopMetric ? ( <h4 className="text-sm font-bold">{metric}</h4>) : null}
+                {mobileMetric ? (
                   <HorizontalGaugeChart
-                    metric={`${experienceMobile?.metrics[key].percentile} - ${experienceMobile?.metrics[key].category} - Mobile`}
-                    data={experienceMobile?.metrics[key]}
+                    metric={`${mobileMetric.percentile} - ${mobileMetric.category} - Mobile`}
+                    data={mobileMetric}
                   />
                 ) : null}
-                {experienceDesktop?.metrics[key] ? (
+                  {desktopMetric ? (
                   <HorizontalGaugeChart
-                    metric={`${experienceDesktop?.metrics[key].percentile} - ${experienceDesktop?.metrics[key].category} - Desktop`}
-                    data={experienceDesktop?.metrics[key]}
+                    metric={`${desktopMetric.percentile} - ${desktopMetric.category} - Desktop`}
+                    data={desktopMetric}
                   />
                 ) : null}
               </div>

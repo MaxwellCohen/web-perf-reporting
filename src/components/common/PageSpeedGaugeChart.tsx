@@ -192,7 +192,7 @@ export function LineChart({
       height="16"
       viewBox="0 0 100 16"
       preserveAspectRatio="none"
-      className="overflow-hidden rounded-full"
+      className="rounded-full"
     >
       <rect
         x="0"
@@ -231,15 +231,26 @@ export function LineChart({
         width={((maxValue - chartData[1].value) / maxValue) * 100}
         height="16"
         fill={chartData[2].fill}
+        rx="0 100% 100% 0"
+        ry="0 100% 100% 0"
       />
       {/* Indicator line for current value */}
+      
       <rect
-        x={(value / maxValue) * 100 - 0.5}
+        x={value === maxValue ? (value / maxValue) * 96 : (value / maxValue) * 100 - 1}
         y="0"
-        width="1"
+        width={(value === maxValue || value === 0) ? 4 : 2}
         height="16"
-        fill="hsl(var(--secondary-foreground))"
+        className="rounded-l-full"
+        fill="hsl(var(--muted-foreground))"
       />
+      {/* <circle
+        cx={(value / maxValue) * 100 }
+        cy="7"
+        r="2"
+        fill="hsl(var(--muted-foreground))"
+      /> */}
+      
       <text
         x={(chartData[0].value / maxValue) * 100}
         y="12"
