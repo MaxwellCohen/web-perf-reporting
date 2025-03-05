@@ -65,7 +65,7 @@ export function Timeline({ timeline, device }: TimelineProps) {
                     className="basis-1/2"
                   >
                     <div>
-                      <img alt="timeline image" width={500} src={item.data} />
+                      <img className="max-w-full h-full max-h-[75vh] object-contain" alt="timeline image" width={500} src={item.data} />
                       <div>{item.timing} ms</div>
                     </div>
                   </CarouselItem>

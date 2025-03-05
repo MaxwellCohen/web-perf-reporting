@@ -30,10 +30,11 @@ import {
 import ReactMarkdown from 'react-markdown';
 
 import { HorizontalScoreChart } from '@/components/common/PageSpeedGaugeChart';
-import { Card } from '../ui/card';
-import { Timeline } from './Timeline';
+import { Card, CardTitle } from '../ui/card';
 import { LoadingExperience } from './LoadingExperience';
 import { EntitiesTable } from './EntitiesTable';
+import { Fragment } from 'react';
+import { Timeline } from './Timeline';
 
 export function PageSpeedInsightsDashboard({
   desktopData,
@@ -74,20 +75,25 @@ export function PageSpeedInsightsDashboard({
     >
       <h2 className="text-center text-2xl font-bold">
         Report for{' '}
-        {new Date(desktopData?.analysisUTCTimestamp || mobileData?.analysisUTCTimestamp || 0).toLocaleDateString()}
+        {new Date(
+          desktopData?.analysisUTCTimestamp ||
+            mobileData?.analysisUTCTimestamp ||
+            0,
+        ).toLocaleDateString()}
       </h2>
       <LoadingExperience
         title="Page Loading Experience"
         experienceDesktop={desktopData?.loadingExperience}
         experienceMobile={mobileData?.loadingExperience}
       />
+      <div className="schreenhidden print:break-before-page"></div>
       <LoadingExperience
         title="Origin Loading Experience"
         experienceDesktop={desktopData?.originLoadingExperience}
         experienceMobile={mobileData?.originLoadingExperience}
       />
 
-      <div className="grid grid-rows-[auto_1fr]">
+      <div className="grid grid-rows-[auto_1fr] print:break-before-page">
         <MetricsComponent
           desktopCategoryGroups={desktopCategoryGroups}
           desktopAudits={desktopAuditRecords}
@@ -104,23 +110,23 @@ export function PageSpeedInsightsDashboard({
         console.log(category);
         return (
           <AccordionItem key={key} value={key}>
-            <AccordionTrigger className="flex flex-row  gap-2 text-lg font-bold justify-start">
-              <div className="flex flex-row flex-1 flex-wrap items-center">
-                <div className="w-[300px] whitespace-nowrap flex">
-                {category.score
-                  ? `${category.title} - Score: ${Math.round(category.score * 100)}`
-                  : `${category.title}`}
-              </div>
-              {category.score ? (
-                <div className="w-64 flex-0 align-top">
-                  <HorizontalScoreChart
-                    score={category.score || 0}
-                    className="h-2 min-w-11 flex-1 overflow-hidden"
-                  />
+            <AccordionTrigger className="flex flex-row justify-start gap-2 text-lg font-bold">
+              <div className="flex flex-1 flex-row flex-wrap items-center">
+                <div className="flex w-[300px] whitespace-nowrap">
+                  {category.score
+                    ? `${category.title} - Score: ${Math.round(category.score * 100)}`
+                    : `${category.title}`}
                 </div>
-              ) : (
-                ''
-              )}
+                {category.score ? (
+                  <div className="flex-0 w-64 align-top">
+                    <HorizontalScoreChart
+                      score={category.score || 0}
+                      className="h-2 min-w-11 flex-1 overflow-hidden"
+                    />
+                  </div>
+                ) : (
+                  ''
+                )}
               </div>
             </AccordionTrigger>
             <AccordionContent>
@@ -262,7 +268,7 @@ function MetricsComponent({
             mobileCategoryGroups?.['metrics']?.title}
         </h3>
       ) : null}
-      <div className="grid grid-cols-[repeat(auto-fill,_minmax(16rem,_1fr))] gap-2">
+      <div className="grid grid-cols-[repeat(auto-fill,_minmax(14rem,_1fr))] gap-2">
         {[
           'first-contentful-paint',
           'largest-contentful-paint',
@@ -276,47 +282,40 @@ function MetricsComponent({
             return null;
           }
           return (
-            <Card key={auditName} className="w-full min-w-64 px-4 py-4">
-              <Accordion type="multiple" defaultValue={[]}>
-                <AccordionItem value={auditName} className="border-b-0">
-                  <AccordionTrigger>
-                    <div className="flex w-full flex-col gap-2">
-                      <div className="text-md font-bold">
-                        {desktopAuditData?.title || mobileAuditData?.title}
-                      </div>
+            <Card
+              key={auditName}
+              className="flex w-full min-w-64 flex-col gap-2 px-4 py-4"
+            >
+              <div className="flex w-full flex-col gap-2">
+                <CardTitle className="text-md font-bold">
+                  {desktopAuditData?.title || mobileAuditData?.title}
+                </CardTitle>
 
-                      {mobileAuditData?.score != undefined ? (
-                        <>
-                          <ScoreDisplay
-                            audit={mobileAuditData}
-                            device="Mobile"
-                          />{' '}
-                          <HorizontalScoreChart
-                            score={mobileAuditData?.score || 0}
-                          />
-                        </>
-                      ) : null}
-                      {desktopAuditData?.score != undefined ? (
-                        <>
-                          <ScoreDisplay
-                            audit={desktopAuditData}
-                            device="Desktop"
-                          />{' '}
-                          <HorizontalScoreChart
-                            score={desktopAuditData?.score || 0}
-                          />
-                        </>
-                      ) : null}
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ReactMarkdown>
-                      {desktopAuditData?.description ||
-                        mobileAuditData?.description}
-                    </ReactMarkdown>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
+                <div className="contents text-sm">
+                  {mobileAuditData?.score != undefined ? (
+                    <>
+                      <ScoreDisplay audit={mobileAuditData} device="Mobile" />{' '}
+                      <HorizontalScoreChart
+                        score={mobileAuditData?.score || 0}
+                      />
+                    </>
+                  ) : null}
+                  {desktopAuditData?.score != undefined ? (
+                    <>
+                      <ScoreDisplay audit={desktopAuditData} device="Desktop" />{' '}
+                      <HorizontalScoreChart
+                        score={desktopAuditData?.score || 0}
+                      />
+                    </>
+                  ) : null}
+                </div>
+                <div className="mt-2 text-xs">
+                  <ReactMarkdown>
+                    {desktopAuditData?.description ||
+                      mobileAuditData?.description}
+                  </ReactMarkdown>
+                </div>
+              </div>
             </Card>
           );
         }) || null}
@@ -473,7 +472,12 @@ function AuditDetailsSection({
         ) : null}
         <div className="grid grid-cols-[auto_1fr] gap-4">
           <div className="py-2">
-            <AuditDetails details={auditData} />
+            {/* <AuditDetails details={auditData} /> */}
+            <DetailTable
+              headings={auditData.details?.headings}
+              items={auditData.details?.items}
+              entities={auditData.details?.entities}
+            />
           </div>
         </div>
       </AccordionContent>
@@ -481,7 +485,7 @@ function AuditDetailsSection({
   );
 }
 
-function AuditDetails({ details }: { details: AuditResult[string] }) {
+export function AuditDetails({ details }: { details: AuditResult[string] }) {
   const opportunity = AuditDetailOpportunitySchema.safeParse(details.details);
   if (opportunity.success) {
     const data = opportunity.data;
@@ -546,6 +550,252 @@ function AuditDetails({ details }: { details: AuditResult[string] }) {
   return (
     <div>
       <pre>{JSON.stringify(details, null, 2)}</pre>
+    </div>
+  );
+}
+
+type ValueType =
+  | 'bytes'
+  | 'code'
+  | 'ms'
+  | 'numeric'
+  | 'text'
+  | 'thumbnail'
+  | 'timespanMs'
+  | 'url';
+
+interface TableColumnHeading {
+  key?: string;
+  valueType?: ValueType;
+  label: string;
+  granularity?: number;
+  displayUnit?: string;
+}
+
+interface TableItem {
+  entity?: string;
+  subItems?: {
+    items: TableItem[];
+  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+}
+
+interface EntityInfo {
+  name: string;
+  category?: string;
+  isFirstParty?: boolean;
+  homepage?: string;
+}
+
+interface TableProps {
+  headings: TableColumnHeading[];
+  items: TableItem[];
+  isEntityGrouped?: boolean;
+  skipSumming?: string[];
+  sortedBy?: string;
+  entities?: EntityInfo[];
+}
+
+const SUMMABLE_VALUETYPES: ValueType[] = [
+  'bytes',
+  'numeric',
+  'ms',
+  'timespanMs',
+];
+
+const getEntityGroupItems = ({
+  items,
+  headings,
+  isEntityGrouped,
+  skipSumming,
+  sortedBy,
+}: {
+  items: TableItem[];
+  headings: TableColumnHeading[];
+  isEntityGrouped: boolean;
+  skipSumming: string[];
+  sortedBy?: string;
+}) => {
+  // Exclude entity-grouped audits and results without entity classification
+  if (!items.length || isEntityGrouped || !items.some((item) => item.entity)) {
+    return [];
+  }
+
+  const skippedColumns = new Set(skipSumming);
+  const summableColumns: string[] = [];
+
+  for (const heading of headings) {
+    if (!heading.key || skippedColumns.has(heading.key)) continue;
+    if (SUMMABLE_VALUETYPES.includes(heading.valueType as ValueType)) {
+      summableColumns.push(heading.key);
+    }
+  }
+
+  const firstColumnKey = headings[0].key;
+  if (!firstColumnKey) return [];
+
+  const byEntity = new Map<string | undefined, TableItem>();
+
+  for (const item of items) {
+    const entityName =
+      typeof item.entity === 'string' ? item.entity : undefined;
+    const groupedItem = byEntity.get(entityName) || {
+      [firstColumnKey]: entityName || 'Unattributable',
+      entity: entityName,
+    };
+
+    for (const key of summableColumns) {
+      groupedItem[key] = Number(groupedItem[key] || 0) + Number(item[key] || 0);
+    }
+    byEntity.set(entityName, groupedItem);
+  }
+
+  const result = Array.from(byEntity.values());
+  if (sortedBy) {
+    result.sort((a, b) => (a[sortedBy] > b[sortedBy] ? -1 : 1));
+  }
+  return result;
+};
+
+const renderEntityAdornments = (entityName: string, entities: EntityInfo[]) => {
+  const matchedEntity = entities.find((e) => e.name === entityName);
+  if (!matchedEntity) return null;
+
+  return (
+    <div className="ml-2 inline-flex gap-2">
+      {matchedEntity.category && (
+        <span className="rounded bg-gray-100 px-2 py-1 text-xs">
+          {matchedEntity.category}
+        </span>
+      )}
+      {matchedEntity.isFirstParty && (
+        <span className="rounded bg-blue-100 px-2 py-1 text-xs">1P</span>
+      )}
+      {matchedEntity.homepage && (
+        <a
+          href={matchedEntity.homepage}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:text-blue-800"
+          title="Open in new tab"
+        >
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+            />
+          </svg>
+        </a>
+      )}
+    </div>
+  );
+};
+
+function DetailTable({
+  headings,
+  items,
+  isEntityGrouped = false,
+  skipSumming = [],
+  sortedBy,
+  entities = [],
+}: TableProps) {
+  if (!items?.length) return null;
+  if (!headings?.length) return null;
+
+  const entityItems = getEntityGroupItems({
+    items,
+    headings,
+    isEntityGrouped,
+    skipSumming,
+    sortedBy,
+  });
+
+  return (
+    <div className="overflow-x-auto">
+      <Table className="">
+        <TableHeader className="">
+          <TableRow>
+            {headings.map((heading, index) => (
+              <TableHead
+                key={index}
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+              >
+                {heading.label}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {entityItems.length > 0
+            ? // Render entity-grouped rows
+              entityItems.map((entityItem, index) => (
+                <Fragment key={index}>
+                  <TableRow className="">
+                    {headings.map((heading, colIndex) => (
+                      <TableCell
+                        key={colIndex}
+                        className="whitespace-nowrap px-6 py-4 text-sm"
+                      >
+                        {heading.key && (
+                          <>
+                            {entityItem[heading.key]}
+                            {colIndex === 0 &&
+                              entityItem.entity &&
+                              renderEntityAdornments(
+                                entityItem.entity,
+                                entities,
+                              )}
+                          </>
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                  {items
+                    .filter((item) => item.entity === entityItem.entity)
+                    .map((item, subIndex) => (
+                      <TableRow key={`${index}-${subIndex}`} className="">
+                        {headings.map((heading, colIndex) => (
+                          <TableCell
+                            key={colIndex}
+                            className="whitespace-nowrap px-6 py-4 text-sm"
+                          >
+                            {heading.key && item[heading.key]}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                </Fragment>
+              ))
+            : // Render regular rows
+              items.map((item, index) => (
+                <TableRow key={index}>
+                  {headings.map((heading, colIndex) => (
+                    <TableCell
+                      key={colIndex}
+                      className="whitespace-nowrap px-6 py-4 text-sm"
+                    >
+                      {heading.key && (
+                        <>
+                          {item[heading.key]}
+                          {colIndex === 0 &&
+                            item.entity &&
+                            renderEntityAdornments(item.entity, entities)}
+                        </>
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }
