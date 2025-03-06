@@ -210,6 +210,7 @@ function categoryAuditSection({
                   auditRef={auditRef}
                   auditRecords={desktopAuditRecords}
                   device="Desktop"
+                  acronym={auditRef.acronym}
                 />
               ))}
             </Accordion>
@@ -224,10 +225,12 @@ function AuditDetailsSection({
   auditRef,
   auditRecords,
   device,
+  acronym,
 }: {
   auditRef: AuditRef;
   auditRecords: AuditResult;
   device: 'Desktop' | 'Mobile';
+  acronym?: string;
 }) {
   if (!auditRef.id) {
     console.log('no id for', auditRef);
@@ -238,7 +241,6 @@ function AuditDetailsSection({
   }
   const auditData = auditRecords?.[auditRef.id];
   if (!auditData) {
-    console.log('no audit result for', auditRef);
     return null;
   }
 
@@ -247,16 +249,18 @@ function AuditDetailsSection({
   }
 
   return (
-    <AccordionItem key={auditRef.id} value={auditRef.id}>
+    <AccordionItem key={auditData.id} value={auditData.id}>
       <AccordionTrigger className="flex flex-row gap-4 border-b">
-        <div className="flex flex-1 flex-row gap-4">
-          <div className="flex-[0_0_300px]">
-            {auditData.title} {auditRef.acronym ? `(${auditRef.acronym})` : ''}
+        <div className="flex flex-1 flex-row flex-wrap gap-4">
+          <div className="flex-[0_0_300px] font-bold">
+            {auditData.title} {acronym ? `(${acronym})` : ''}
           </div>
           <div className="flex-1 align-top">
             <ReactMarkdown children={auditData.description || ''} />
           </div>
-          <div className="flex-1 align-top">{auditData.scoreDisplayMode}</div>
+          <div className="hidden align-top md:block">
+            {auditData.scoreDisplayMode}
+          </div>
         </div>
       </AccordionTrigger>
       <AccordionContent>
@@ -559,12 +563,66 @@ type ValueType =
   | 'timespanMs'
   | 'url';
 
+export type IcuMessage = {
+  // NOTE: `i18nId` rather than just `id` to make tsc typing easier (vs type branding which won't survive JSON roundtrip).
+  /** The id locating this message in the locale message json files. */
+  i18nId: string;
+  /** The dynamic values, if any, to insert into the localized string. */
+  values?: Record<string, string | number>;
+  /**
+   * A formatted version of the string, usually as found in a file's `UIStrings`
+   * entry, and used as backup if the `i18nId` doesn't refer to an existing
+   * message in the requested locale. Used when serialized and a new version of
+   * Lighthouse no longer contains the needed message (or in development and
+   * the locale files don't yet contain it).
+   */
+  formattedDefault: string;
+};
+
+type ItemValueType =
+  | 'bytes'
+  | 'code'
+  | 'link'
+  | 'ms'
+  | 'multi'
+  | 'node'
+  | 'source-location'
+  | 'numeric'
+  | 'text'
+  | 'thumbnail'
+  | 'timespanMs'
+  | 'url';
+
 interface TableColumnHeading {
-  key?: string;
-  valueType?: ValueType;
-  label: string;
-  granularity?: number;
+  /**
+   * The name of the property within items being described.
+   * If null, subItemsHeading must be defined, and the first table row in this column for
+   * every item will be empty.
+   * See legacy-javascript for an example.
+   */
+  key: string | null;
+  /** Readable text label of the field. */
+  label: IcuMessage | string;
+  /**
+   * The data format of the column of values being described. Usually
+   * those values will be primitives rendered as this type, but the values
+   * could also be objects with their own type to override this field.
+   */
+  valueType: ItemValueType;
+  /**
+   * Optional - defines an inner table of values that correspond to this column.
+   * Key is required - if other properties are not provided, the value for the heading is used.
+   */
+  subItemsHeading?: {
+    key: string;
+    valueType?: ItemValueType;
+    displayUnit?: string;
+    granularity?: number;
+    label?: IcuMessage | string;
+  };
+
   displayUnit?: string;
+  granularity?: number;
 }
 
 interface TableItem {
@@ -676,7 +734,7 @@ function DetailTable({
   return (
     <div
       className="grid overflow-x-auto"
-      style={{ gridTemplateColumns: `repeat(${headings.length}, 1fr)` }}
+      style={{ gridTemplateColumns: `repeat(${headings.length}, auto)` }}
     >
       <div
         className="grid grid-cols-subgrid border-b-2"
@@ -687,10 +745,9 @@ function DetailTable({
         {headings.map((heading, index) => (
           <div
             key={index}
-            // style={{ gridColumn: `${index + 1} / ${index + 2}` }}
             className="grid-col-span-1 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
           >
-            {heading.label}
+            {typeof heading.label === 'string' ? heading.label : heading.label.formattedDefault}
           </div>
         ))}
 
@@ -699,7 +756,7 @@ function DetailTable({
             entityItems.map((entityItem, index) => (
               <Fragment key={index}>
                 <div
-                  className="grid grid-cols-subgrid border-b-2"
+                  className="grid grid-cols-subgrid border-b-2 transition-colors hover:bg-muted/50"
                   style={{
                     gridColumn: `span ${headings.length} / span ${headings.length}`,
                   }}
@@ -727,7 +784,7 @@ function DetailTable({
                   .map((item, subIndex) => (
                     <div
                       key={`${index}-${subIndex}`}
-                      className="grid grid-cols-subgrid border-b-2"
+                      className="grid grid-cols-subgrid border-b-2 transition-colors hover:bg-muted/50"
                       style={{
                         gridColumn: `span ${headings.length} / span ${headings.length}`,
                       }}
@@ -735,7 +792,7 @@ function DetailTable({
                       {headings.map((heading, colIndex) => (
                         <div
                           key={colIndex}
-                          className="whitespace-nowrap px-6 py-4 text-sm"                    
+                          className="whitespace-nowrap px-6 py-4 text-sm"
                         >
                           {heading.key ? (
                             <RenderTableValue
@@ -746,33 +803,70 @@ function DetailTable({
                           ) : null}
                         </div>
                       ))}
+                      {item.subItems?.items.map((subItem, subIndex) => (
+                        <div key={subIndex}
+                        className="grid grid-cols-subgrid border-b-2 transition-colors hover:bg-muted/50"
+                      style={{
+                        gridColumn: `span ${headings.length} / span ${headings.length}`,
+                      }}
+                        >
+                          {headings.map((heading, colIndex) => (
+                            <div key={colIndex} className="px-6 py-4 text-sm">
+                              {heading.subItemsHeading?.key ? (
+                                <RenderTableValue
+                                  value={subItem[heading.subItemsHeading.key]}
+                                  heading={heading.subItemsHeading}
+                                  device={device}
+                                />
+                              ) : null}
+                            </div>
+                          ))}
+                        </div>
+                      ))}
                     </div>
                   ))}
               </Fragment>
             ))
           : items.map((item, index) => (
-              <div
-                key={index}
-                className="grid grid-cols-subgrid border-b-2"
-                style={{
-                  gridColumn: `span ${headings.length} / span ${headings.length}`,
-                }}
-              >
-                {headings.map((heading, colIndex) => (
-                  <div
-                    key={colIndex}
-                    className="whitespace-nowrap px-6 py-4 text-sm"
-                  >
-                    {heading.key ? (
-                      <RenderTableValue
-                        value={item[heading.key]}
-                        heading={heading}
-                        device={device}
-                      />
-                    ) : null}
+              <>
+                <div
+                  key={index}
+                  className="grid grid-cols-subgrid border-b-2 transition-colors hover:bg-muted/50"
+                  style={{
+                    gridColumn: `span ${headings.length} / span ${headings.length}`,
+                  }}
+                >
+                  {headings.map((heading, colIndex) => (
+                    <div key={colIndex} className="px-6 py-4 text-sm">
+                      {heading.key ? (
+                        <RenderTableValue
+                          value={item[heading.key]}
+                          heading={heading}
+                          device={device}
+                        />
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+                {item.subItems?.items.map((subItem, subIndex) => (
+                  <div key={subIndex} className="grid grid-cols-subgrid border-b-2 transition-colors hover:bg-muted/50"
+                  style={{
+                    gridColumn: `span ${headings.length} / span ${headings.length}`,
+                  }}>
+                    {headings.map((heading, colIndex) => (
+                      <div key={colIndex} className="px-6 py-4 text-sm">
+                        {heading.subItemsHeading?.key ? (
+                          <RenderTableValue
+                            value={subItem[heading.subItemsHeading.key]}
+                            heading={heading.subItemsHeading}
+                            device={device}
+                          />
+                        ) : null}
+                      </div>
+                    ))}
                   </div>
                 ))}
-              </div>
+              </>
             ))}
       </div>
     </div>
@@ -795,7 +889,7 @@ function RenderTableValue({
   device,
 }: {
   value: any;
-  heading: TableColumnHeading;
+  heading: TableColumnHeading | TableColumnHeading['subItemsHeading'];
   device: 'Desktop' | 'Mobile';
 }) {
   if (value === undefined || value === null) {
@@ -850,7 +944,7 @@ function RenderTableValue({
   }
 
   // Next, deal with primitives.
-  switch (heading.valueType) {
+  switch (heading?.valueType) {
     case 'bytes': {
       const numValue = Number(value);
       return <div title="bytes">{numValue}</div>;
@@ -917,26 +1011,6 @@ function NodeComponent({
     device === 'Desktop'
       ? screenshotData?.desktopFullPageScreenshot
       : screenshotData?.mobileFullPageScreenshot;
-  // React.useEffect(() => {
-  //   // Handle screenshot rendering if available
-  //   if (fullPageScreenshot && nodeRef.current) {
-  //     const rect = item.lhId && fullPageScreenshot.nodes[item.lhId];
-  //     if (rect && rect.width !== 0 && rect.height !== 0) {
-  //       const maxThumbnailSize = { width: 147, height: 100 };
-  //       const elementScreenshot = ElementScreenshotRenderer.render(
-  //         document, // This would need to be replaced with appropriate DOM utility
-  //         fullPageScreenshot.screenshot,
-  //         rect,
-  //         maxThumbnailSize
-  //       );
-
-  //       if (elementScreenshot) {
-  //         // In React, we'd insert this differently
-  //         nodeRef.current.prepend(elementScreenshot);
-  //       }
-  //     }
-  //   }
-  // }, [item, fullPageScreenshot, ElementScreenshotRenderer]);
   const imageSize = 300;
   const scale = imageSize / item?.boundingRect?.width;
   return (
