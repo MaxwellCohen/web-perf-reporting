@@ -359,6 +359,8 @@ const categoryResultSchema = z
   })
   .partial();
 
+export type CategoryResult = z.infer<typeof categoryResultSchema>;
+
 const configSettingsSchema = z.record(z.any());
 
 const environmentSchema = z
@@ -381,6 +383,8 @@ const categorySchema = z
   })
   .partial();
 
+export type Category = z.infer<typeof categorySchema>;
+
 const entitiesSchema = z.array(
   z.object({
     name: z.string(),
@@ -392,11 +396,31 @@ const entitiesSchema = z.array(
 
 export type Entities = z.infer<typeof entitiesSchema>;  
 
+const FullPageScreenshotSchema = z.object({
+  nodes: z.record(
+    z.object({
+      bottom: coerceNumber,
+      height: coerceNumber,
+      left: coerceNumber,
+      right: coerceNumber,
+      top: coerceNumber,
+      width: coerceNumber,
+    }),
+  ),
+  screenshot: z.object({
+    data: z.string(),
+    height: z.number(),
+    width: z.number(),
+  }),
+});
+
+export type FullPageScreenshot = z.infer<typeof FullPageScreenshotSchema>;
+
 const lighthouseResultV5Schema = z
   .object({
     finalDisplayedUrl: urlSchema,
     artifacts: artifactsSchema,
-    categories: z.record(categoryResultSchema),
+    categories: z.record(categoryResultSchema.partial()),
     categoryGroups: z.record(categorySchema).optional(),
     configSettings: configSettingsSchema,
     environment: environmentSchema,
@@ -406,23 +430,7 @@ const lighthouseResultV5Schema = z
     lighthouseVersion: z.string(),
     requestedUrl: z.string(),
     runWarnings: z.array(z.string()),
-    fullPageScreenshot: z.object({
-      nodes: z.record(
-        z.object({
-          bottom: coerceNumber,
-          height: coerceNumber,
-          left: coerceNumber,
-          right: coerceNumber,
-          top: coerceNumber,
-          width: coerceNumber,
-        }),
-      ),
-      screenshot: z.object({
-        data: z.string(),
-        height: z.number(),
-        width: z.number(),
-      }),
-    }),
+    fullPageScreenshot: FullPageScreenshotSchema,
     entities: entitiesSchema,
     runtimeError: z
       .object({
