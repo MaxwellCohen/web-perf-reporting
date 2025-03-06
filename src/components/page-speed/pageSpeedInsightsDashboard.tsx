@@ -735,8 +735,7 @@ function DetailTable({
                       {headings.map((heading, colIndex) => (
                         <div
                           key={colIndex}
-                          className="whitespace-nowrap px-6 py-4 text-sm"
-                    
+                          className="whitespace-nowrap px-6 py-4 text-sm"                    
                         >
                           {heading.key ? (
                             <RenderTableValue
@@ -763,9 +762,6 @@ function DetailTable({
                   <div
                     key={colIndex}
                     className="whitespace-nowrap px-6 py-4 text-sm"
-                    style={{
-                      gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
-                    }}
                   >
                     {heading.key ? (
                       <RenderTableValue
