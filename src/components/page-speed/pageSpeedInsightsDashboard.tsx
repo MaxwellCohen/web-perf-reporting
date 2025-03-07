@@ -44,14 +44,6 @@ const fullPageScreenshotContext = createContext<{
   mobileFullPageScreenshot: null,
 });
 
-// const screenshotContext = createContext<{
-//   fullPageScreenshot: FullPageScreenshot | null;
-//   ElementScreenshotRenderer: ElementScreenshotRenderer | null;
-// }>({
-//   fullPageScreenshot: null,
-//   ElementScreenshotRenderer: null,
-// });
-
 export function PageSpeedInsightsDashboard({
   desktopData,
   mobileData,
@@ -75,7 +67,7 @@ export function PageSpeedInsightsDashboard({
   const mobileAuditRecords: AuditResult | undefined =
     mobileData?.lighthouseResult?.audits;
   const mobileCategoryGroups = mobileData?.lighthouseResult?.categoryGroups;
-  // const mobileCategories = mobileData?.lighthouseResult?.categories;
+  const mobileCategories = mobileData?.lighthouseResult?.categories;
   const desktopFullPageScreenshotData =
     desktopData?.lighthouseResult.fullPageScreenshot || null;
   const mobileFullPageScreenshotData =
@@ -92,11 +84,7 @@ export function PageSpeedInsightsDashboard({
         style={
           {
             '--desktopFullPageScreenshot': `url(${desktopFullPageScreenshotData?.screenshot.data})`,
-            '--desktopFullPageScreenshotHeight': `${desktopFullPageScreenshotData?.screenshot.height}px`,
-            '--desktopFullPageScreenshotWidth': `${desktopFullPageScreenshotData?.screenshot.width}px`,
             '--mobileFullPageScreenshot': `url(${mobileFullPageScreenshotData?.screenshot.data})`,
-            '--mobileFullPageScreenshotHeight': `${mobileFullPageScreenshotData?.screenshot.height}px`,
-            '--mobileFullPageScreenshotWidth': `${mobileFullPageScreenshotData?.screenshot.width}px`,
           } as React.CSSProperties
         }
       >
@@ -124,7 +112,7 @@ export function PageSpeedInsightsDashboard({
             experienceDesktop={desktopData?.loadingExperience}
             experienceMobile={mobileData?.loadingExperience}
           />
-          <div className="schreenhidden print:break-before-page"></div>
+          <div className="screen:hidden print:break-before-page"></div>
           <LoadingExperience
             title="Origin Loading Experience"
             experienceDesktop={desktopData?.originLoadingExperience}
@@ -144,13 +132,18 @@ export function PageSpeedInsightsDashboard({
             </div>
           </div>
 
-          {Object.entries(desktopCategories || {}).map(([key, category]) => {
-            return categoryAuditSection({
-              category,
-              key,
-              desktopAuditRecords,
-            });
-          })}
+          {Object.entries(desktopCategories || {}).map(
+            ([key, desktopCategory]) => (
+              <CategoryAuditSection
+                key={key}
+                categoryKey={key}
+                desktopCategory={desktopCategory}
+                mobileCategory={mobileCategories?.[key] || null}
+                desktopAuditRecords={desktopAuditRecords}
+                mobileAuditRecords={mobileAuditRecords}
+              />
+            ),
+          )}
           <AccordionItem value="entities">
             <AccordionTrigger>
               <div className="text-lg font-bold">Entities</div>
@@ -165,46 +158,61 @@ export function PageSpeedInsightsDashboard({
   );
 }
 
-function categoryAuditSection({
-  category,
-  key,
+function CategoryAuditSection({
+  categoryKey,
+  mobileCategory,
+  desktopCategory,
   desktopAuditRecords,
+  mobileAuditRecords,
 }: {
-  category: CategoryResult;
-  key: string;
+  mobileCategory?: CategoryResult | null;
+  desktopCategory?: CategoryResult | null;
+  categoryKey: string;
   desktopAuditRecords?: AuditResult;
+  mobileAuditRecords?: AuditResult;
 }) {
-  if (!category) {
+  if (!desktopCategory || !mobileCategory) {
     return null;
   }
   return (
-    <AccordionItem key={key} value={key}>
+    <AccordionItem key={categoryKey} value={categoryKey}>
       <AccordionTrigger className="flex flex-row justify-start gap-2 text-lg font-bold">
-        <div className="flex flex-1 flex-row flex-wrap items-center">
-          <div className="flex w-[300px] whitespace-nowrap">
-            {category.score
-              ? `${category.title} - Score: ${Math.round(category.score * 100)}`
-              : `${category.title}`}
+        <div className="flex flex-1 flex-row flex-wrap items-center justify-between">
+          <div className="flex w-[200px] whitespace-nowrap">
+            {desktopCategory?.title || mobileCategory?.title}
           </div>
-          {category.score ? (
-            <div className="flex-0 w-64 align-top">
+
+          {mobileCategory.score ? (
+            <div className="flex-0 flex w-64 flex-col gap-2 align-top hover:no-underline">
+              <div className="text-center text-xs hover:no-underline">
+                {' '}
+                Mobile - {Math.round(mobileCategory.score * 100)}
+              </div>
               <HorizontalScoreChart
-                score={category.score || 0}
+                score={mobileCategory.score || 0}
                 className="h-2 min-w-11 flex-1 overflow-hidden"
               />
             </div>
-          ) : (
-            ''
-          )}
+          ) : null}
+          {desktopCategory.score ? (
+            <div className="flex-0 flex w-64 flex-col gap-2 align-top">
+              <div className="text-center text-xs hover:no-underline">
+                {' '}
+                Desktop {Math.round(desktopCategory.score * 100)}
+              </div>
+              <HorizontalScoreChart
+                score={desktopCategory.score || 0}
+                className="h-2 min-w-11 flex-1 overflow-hidden"
+              />
+            </div>
+          ) : null}
         </div>
       </AccordionTrigger>
       <AccordionContent>
-        {/* {category.description ? <ReactMarkdown>{category.description}</ReactMarkdown> : null}
-          {category.manualDescription ? <ReactMarkdown>{category.manualDescription}</ReactMarkdown> : null} */}
         <div className="w-full" role="table" aria-label="Audit Table">
-          {category.auditRefs && desktopAuditRecords ? (
+          {desktopCategory.auditRefs && desktopAuditRecords ? (
             <Accordion type="multiple">
-              {category.auditRefs.map((auditRef) => (
+              {desktopCategory.auditRefs.map((auditRef) => (
                 <AuditDetailsSection
                   key={auditRef.id}
                   auditRef={auditRef}
@@ -484,75 +492,6 @@ function RenderUnknown({
   );
 }
 
-// export function AuditDetails({ details }: { details: AuditResult[string] }) {
-//   const opportunity = AuditDetailOpportunitySchema.safeParse(details.details);
-//   if (opportunity.success) {
-//     const data = opportunity.data;
-//     if (data?.items?.length && data?.headings?.length) {
-//       return (
-//         <>
-//           <Table>
-//             <TableHeader>
-//               <TableRow>
-//                 {data.headings.map((heading, i) => {
-//                   if (heading.key === 'node') {
-//                     return null;
-//                   }
-//                   return (
-//                     <TableHead key={`${i}-${heading.label}`}>
-//                       {heading.label}
-//                     </TableHead>
-//                   );
-//                 })}
-//               </TableRow>
-//             </TableHeader>
-//             <TableBody>
-//               {data.items.map((item, i) => (
-//                 <TableRow key={`${i}-${item.label}`}>
-//                   {data?.headings?.map((heading, j) => {
-//                     if (heading?.key === 'node') {
-//                       return null;
-//                     }
-
-//                     return heading?.key && heading.key in item ? (
-//                       <TableCell key={`${i}-${j}`}>
-//                         {JSON.stringify(item[heading.key])}
-//                       </TableCell>
-//                     ) : null;
-//                   })}
-//                 </TableRow>
-//               ))}
-//             </TableBody>
-//           </Table>
-//           <div>
-//             <pre>{JSON.stringify(data, null, 2)}</pre>
-//           </div>
-//         </>
-//       );
-//     }
-//   }
-//   if (details.scoreDisplayMode === ScoreDisplayModes.MANUAL) {
-//     return null;
-//   }
-//   if (details.scoreDisplayMode === ScoreDisplayModes.NOT_APPLICABLE) {
-//     return <div>Not applicable</div>;
-//   }
-//   if (details.scoreDisplayMode === ScoreDisplayModes.ERROR) {
-//     return null;
-//   }
-//   if (
-//     details.scoreDisplayMode === ScoreDisplayModes.NUMERIC &&
-//     !details.details?.items?.length
-//   ) {
-//     return null;
-//   }
-//   return (
-//     <div>
-//       <pre>{JSON.stringify(details, null, 2)}</pre>
-//     </div>
-//   );
-// }
-
 type ValueType =
   | 'bytes'
   | 'code'
@@ -747,43 +686,46 @@ function DetailTable({
             key={index}
             className="grid-col-span-1 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
           >
-            {typeof heading.label === 'string' ? heading.label : heading.label.formattedDefault}
+            {typeof heading.label === 'string'
+              ? heading.label
+              : heading.label.formattedDefault}
           </div>
         ))}
+      </div>
 
-        {entityItems.length > 0
-          ? // Render entity-grouped rows
-            entityItems.map((entityItem, index) => (
-              <Fragment key={index}>
-                <div
-                  className="grid grid-cols-subgrid border-b-2 transition-colors hover:bg-muted/50"
-                  style={{
-                    gridColumn: `span ${headings.length} / span ${headings.length}`,
-                  }}
-                >
-                  {headings.map((heading, colIndex) => (
+      {entityItems.length > 0
+        ? // Render entity-grouped rows
+          entityItems.map((entityItem, index) => (
+            <Fragment key={index}>
+              <div
+                className="grid grid-cols-subgrid border-b-2 transition-colors hover:bg-muted/50"
+                style={{
+                  gridColumn: `span ${headings.length} / span ${headings.length}`,
+                }}
+              >
+                {headings.map((heading, colIndex) => (
+                  <div
+                    key={colIndex}
+                    className="whitespace-nowrap px-6 py-4 text-sm"
+                    style={{
+                      gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
+                    }}
+                  >
+                    {heading.key && (
+                      <>
+                        {typeof entityItem[heading.key] === 'object'
+                          ? JSON.stringify(entityItem[heading.key])
+                          : entityItem[heading.key]}
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+              {items
+                .filter((item) => item.entity === entityItem.entity)
+                .map((item, subIndex) => (
+                  <Fragment key={`${index}-${subIndex}`}>
                     <div
-                      key={colIndex}
-                      className="whitespace-nowrap px-6 py-4 text-sm"
-                      style={{
-                        gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
-                      }}
-                    >
-                      {heading.key && (
-                        <>
-                          {typeof entityItem[heading.key] === 'object'
-                            ? JSON.stringify(entityItem[heading.key])
-                            : entityItem[heading.key]}
-                        </>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                {items
-                  .filter((item) => item.entity === entityItem.entity)
-                  .map((item, subIndex) => (
-                    <div
-                      key={`${index}-${subIndex}`}
                       className="grid grid-cols-subgrid border-b-2 transition-colors hover:bg-muted/50"
                       style={{
                         gridColumn: `span ${headings.length} / span ${headings.length}`,
@@ -803,34 +745,55 @@ function DetailTable({
                           ) : null}
                         </div>
                       ))}
-                      {item.subItems?.items.map((subItem, subIndex) => (
-                        <div key={subIndex}
-                        className="grid grid-cols-subgrid border-b-2 transition-colors hover:bg-muted/50"
-                      style={{
-                        gridColumn: `span ${headings.length} / span ${headings.length}`,
-                      }}
-                        >
-                          {headings.map((heading, colIndex) => (
-                            <div key={colIndex} className="px-6 py-4 text-sm">
-                              {heading.subItemsHeading?.key ? (
-                                <RenderTableValue
-                                  value={subItem[heading.subItemsHeading.key]}
-                                  heading={heading.subItemsHeading}
-                                  device={device}
-                                />
-                              ) : null}
-                            </div>
-                          ))}
-                        </div>
-                      ))}
                     </div>
-                  ))}
-              </Fragment>
-            ))
-          : items.map((item, index) => (
-              <>
+                    {item.subItems?.items.map((subItem, subIndex) => (
+                      <div
+                        key={subIndex}
+                        className="grid grid-cols-subgrid border-b-2 transition-colors hover:bg-muted/50"
+                        style={{
+                          gridColumn: `span ${headings.length} / span ${headings.length}`,
+                        }}
+                      >
+                        {headings.map((heading, colIndex) => (
+                          <div key={colIndex} className="px-6 py-4 text-sm">
+                            {heading.subItemsHeading?.key ? (
+                              <RenderTableValue
+                                value={subItem[heading.subItemsHeading.key]}
+                                heading={heading.subItemsHeading}
+                                device={device}
+                              />
+                            ) : null}
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </Fragment>
+                ))}
+            </Fragment>
+          ))
+        : items.map((item, index) => (
+            <Fragment key={index}>
+              <div
+                className="grid grid-cols-subgrid border-b-2 transition-colors hover:bg-muted/50"
+                style={{
+                  gridColumn: `span ${headings.length} / span ${headings.length}`,
+                }}
+              >
+                {headings.map((heading, colIndex) => (
+                  <div key={colIndex} className="px-6 py-4 text-sm">
+                    {heading.key ? (
+                      <RenderTableValue
+                        value={item[heading.key]}
+                        heading={heading}
+                        device={device}
+                      />
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+              {item.subItems?.items.map((subItem, subIndex) => (
                 <div
-                  key={index}
+                  key={subIndex}
                   className="grid grid-cols-subgrid border-b-2 transition-colors hover:bg-muted/50"
                   style={{
                     gridColumn: `span ${headings.length} / span ${headings.length}`,
@@ -838,37 +801,19 @@ function DetailTable({
                 >
                   {headings.map((heading, colIndex) => (
                     <div key={colIndex} className="px-6 py-4 text-sm">
-                      {heading.key ? (
+                      {heading.subItemsHeading?.key ? (
                         <RenderTableValue
-                          value={item[heading.key]}
-                          heading={heading}
+                          value={subItem[heading.subItemsHeading.key]}
+                          heading={heading.subItemsHeading}
                           device={device}
                         />
                       ) : null}
                     </div>
                   ))}
                 </div>
-                {item.subItems?.items.map((subItem, subIndex) => (
-                  <div key={subIndex} className="grid grid-cols-subgrid border-b-2 transition-colors hover:bg-muted/50"
-                  style={{
-                    gridColumn: `span ${headings.length} / span ${headings.length}`,
-                  }}>
-                    {headings.map((heading, colIndex) => (
-                      <div key={colIndex} className="px-6 py-4 text-sm">
-                        {heading.subItemsHeading?.key ? (
-                          <RenderTableValue
-                            value={subItem[heading.subItemsHeading.key]}
-                            heading={heading.subItemsHeading}
-                            device={device}
-                          />
-                        ) : null}
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </>
-            ))}
-      </div>
+              ))}
+            </Fragment>
+          ))}
     </div>
   );
 }
@@ -1029,13 +974,12 @@ function NodeComponent({
             <div
               className="absolute"
               style={{
-                width: `var(--${device.toLowerCase()}FullPageScreenshotWidth)`,
-                height: `var(--${device.toLowerCase()}FullPageScreenshotHeight)`,
+                width: `${fullPageScreenshot.screenshot.width}px`,
+                height: `${fullPageScreenshot.screenshot.height}px`,
                 backgroundImage: `var(--${device.toLowerCase()}FullPageScreenshot)`,
                 backgroundSize: 'cover',
                 left: `-${fullPageScreenshot?.nodes[item.lhId]?.left}px`,
                 top: `-${fullPageScreenshot?.nodes[item.lhId]?.top}px`,
-                // transform: ``,
                 backgroundRepeat: 'no-repeat',
               }}
             ></div>
