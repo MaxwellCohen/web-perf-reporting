@@ -1,12 +1,4 @@
 import { AuditResult } from '@/lib/schema';
-import {
-  Table,
-  TableCell,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../ui/table';
 
 export const ScoreDisplayModes = {
   /** Scores of 0-1 (map to displayed scores of 0-100). */
@@ -30,6 +22,33 @@ export const ScoreDisplayModes = {
   ERROR: 'error',
 } as const;
 
+export const ScoreDisplayModesRanking: Record<
+  AuditResult[string]['scoreDisplayMode'],
+  number
+> = {
+  numeric: 1,
+  metricSavings: 2,
+  binary: 3,
+  informative: 4,
+  manual: 5,
+  error: 6,
+  notApplicable: 7,
+} as const;
+
+export const sortByScoreDisplayModes = (
+  a: AuditResult[string] | undefined,
+  b: AuditResult[string] | undefined,
+) => {
+  if (!a || !b) {
+    return 0;
+  }
+
+  return (
+    ScoreDisplayModesRanking[a.scoreDisplayMode || 'notApplicable'] -
+    ScoreDisplayModesRanking[b.scoreDisplayMode || 'notApplicable']
+  );
+};
+
 export function ScoreDisplay({
   audit,
   device,
@@ -46,7 +65,7 @@ export function ScoreDisplay({
   if (audit.scoreDisplayMode === ScoreDisplayModes.NUMERIC) {
     return (
       <>
-        <div>
+        <div className="text-xs">
           {device ? `${device} - ` : ''}{' '}
           {audit.displayValue ? `${audit.displayValue} - ` : ''}
           Score: {Math.round(audit.score * 100)} / 100
@@ -55,27 +74,29 @@ export function ScoreDisplay({
     );
   }
   if (audit.scoreDisplayMode === ScoreDisplayModes.BINARY) {
-    return <div>Score: {audit.score ? '✅ - Passed' : '❌ - Failed'}</div>;
-  }
-
-  if (audit.scoreDisplayMode === ScoreDisplayModes.MANUAL) {
-    return null;
-  }
-  if (audit.scoreDisplayMode === ScoreDisplayModes.INFORMATIVE) {
     return (
-      <div>
-        <div>Score: {audit.score}</div>
-        {audit.displayValue ? <div>Value: {audit.displayValue}</div> : null}
-
+      <div className="text-xs">
+        {device} - {audit.score ? '✅ - Passed' : '❌ - Failed'}
       </div>
     );
   }
+
+  if (audit.scoreDisplayMode === ScoreDisplayModes.MANUAL) {
+    return <div className="text-xs">{device} - Manual</div>;
+  }
+  if (audit.scoreDisplayMode === ScoreDisplayModes.INFORMATIVE) {
+    return null;
+  }
   if (audit.scoreDisplayMode === ScoreDisplayModes.NOT_APPLICABLE) {
-    return <div>Score: {audit.score}</div>;
+    return <div className="text-xs">{device} - Not Applicable</div>;
   }
   if (audit.scoreDisplayMode === ScoreDisplayModes.ERROR) {
-    return <div>Error: {audit.errorMessage}</div>;
+    return <div className="text-xs">Error: {audit.errorMessage}</div>;
   }
 
-  return <div>Score: {Math.round(audit.score * 100)} / 100</div>;
+  return (
+    <div className="text-xs">
+      Score: {Math.round(audit.score * 100)} / 100
+    </div>
+  );
 }

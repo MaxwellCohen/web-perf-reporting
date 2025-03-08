@@ -327,6 +327,20 @@ export const AuditDetailOpportunitySchema = z.object({
 
 export type AuditDetailOpportunity = z.infer<typeof AuditDetailOpportunitySchema>;
 
+
+
+export const AuditDetailChecklistSchema = z.object({
+  type: z.literal('checklist'),
+  items: z.record(z.object({
+    value: z.boolean(),
+    label: z.string(),
+  })),
+  debugData: auditDebugData.optional(),
+});
+
+export type AuditDetailChecklist = z.infer<typeof AuditDetailChecklistSchema>;
+
+
 const auditResultSchema = z.record(z.object({
   description: z.string().optional(),
   details: z
@@ -338,7 +352,7 @@ const auditResultSchema = z.record(z.object({
   numericValue: z.number().optional(),
   // sore is 0 to 1 where 0-.49 is bad and .50-.89 is needs improvement and .90-1 is good
   score: z.number().nullable(),
-  scoreDisplayMode: z.string(),
+  scoreDisplayMode: z.literal('numeric').or(z.literal('binary')).or(z.literal('metricSavings')).or(z.literal('manual')).or(z.literal('informative')).or(z.literal('notApplicable')).or(z.literal('error')),
   title: z.string(),
   warnings: z.array(z.any()).optional(),
 numericUnit: z.string().optional(),

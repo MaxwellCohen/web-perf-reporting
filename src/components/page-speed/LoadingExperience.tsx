@@ -31,7 +31,7 @@ export function LoadingExperience({
   return (
     <AccordionItem value={title.toLowerCase().replace(/\s+/g, '-')}  className="print:border-0">
       <AccordionTrigger>
-        <div className="text-lg font-bold">
+        <div className="text-lg font-bold group-hover:underline">
           {title}: {experienceMobile?.overall_category ? `Mobile -  ${experienceMobile?.overall_category} ` : ''} {experienceDesktop?.overall_category ? `Desktop - ${experienceDesktop?.overall_category}` : ''}
         </div>
       </AccordionTrigger>

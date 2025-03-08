@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react/no-children-prop */
 'use client';
 
 import {
@@ -11,6 +10,7 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import {
+  AuditDetailChecklistSchema,
   AuditDetailFilmstripSchema,
   AuditRef,
   AuditResult,
@@ -34,7 +34,7 @@ import { EntitiesTable } from './EntitiesTable';
 import { createContext, Fragment, useContext } from 'react';
 import { Timeline } from './Timeline';
 import { CWVMetricsComponent } from './CWVMetricsComponent';
-import { ScoreDisplay } from './ScoreDisplay';
+import { ScoreDisplay, sortByScoreDisplayModes } from './ScoreDisplay';
 
 const fullPageScreenshotContext = createContext<{
   desktopFullPageScreenshot: FullPageScreenshot | null;
@@ -72,6 +72,15 @@ export function PageSpeedInsightsDashboard({
     desktopData?.lighthouseResult.fullPageScreenshot || null;
   const mobileFullPageScreenshotData =
     mobileData?.lighthouseResult.fullPageScreenshot || null;
+
+  const categoryKeys = [
+    ...new Set<string>([
+      ...Object.keys(desktopCategories || {}),
+      ...Object.keys(mobileCategories || {}),
+    ]),
+  ];
+
+  console.log('categoryKeys', categoryKeys);
 
   return (
     <fullPageScreenshotContext.Provider
@@ -132,21 +141,36 @@ export function PageSpeedInsightsDashboard({
             </div>
           </div>
 
-          {Object.entries(desktopCategories || {}).map(
-            ([key, desktopCategory]) => (
+          {categoryKeys
+            .map((key) => ({
+              key,
+              desktopCategory: desktopCategories?.[key],
+              mobileCategory: mobileCategories?.[key],
+            }))
+            .filter(({ desktopCategory, mobileCategory }) => {
+              if (!desktopCategory && !mobileCategory) {
+                return false;
+              }
+              if (desktopCategory?.id && mobileCategory?.id) {
+                return desktopCategory.id === mobileCategory.id;
+              }
+              return true;
+            })
+            .map(({ key, desktopCategory, mobileCategory }) => (
               <CategoryAuditSection
                 key={key}
                 categoryKey={key}
                 desktopCategory={desktopCategory}
-                mobileCategory={mobileCategories?.[key] || null}
+                mobileCategory={mobileCategory}
                 desktopAuditRecords={desktopAuditRecords}
                 mobileAuditRecords={mobileAuditRecords}
               />
-            ),
-          )}
+            ))}
           <AccordionItem value="entities">
             <AccordionTrigger>
-              <div className="text-lg font-bold">Entities</div>
+              <div className="text-lg font-bold group-hover:underline">
+                Entities
+              </div>
             </AccordionTrigger>
             <AccordionContent>
               <EntitiesTable entities={desktopEntities} />
@@ -178,49 +202,80 @@ function CategoryAuditSection({
     <AccordionItem key={categoryKey} value={categoryKey}>
       <AccordionTrigger className="flex flex-row justify-start gap-2 text-lg font-bold">
         <div className="flex flex-1 flex-row flex-wrap items-center justify-between">
-          <div className="flex w-[200px] whitespace-nowrap">
+          <div className="flex w-[200px] whitespace-nowrap group-hover:underline">
             {desktopCategory?.title || mobileCategory?.title}
           </div>
-
-          {mobileCategory.score ? (
-            <div className="flex-0 flex w-64 flex-col gap-2 align-top hover:no-underline">
-              <div className="text-center text-xs hover:no-underline">
-                {' '}
-                Mobile - {Math.round(mobileCategory.score * 100)}
-              </div>
-              <HorizontalScoreChart
-                score={mobileCategory.score || 0}
-                className="h-2 min-w-11 flex-1 overflow-hidden"
-              />
-            </div>
-          ) : null}
-          {desktopCategory.score ? (
-            <div className="flex-0 flex w-64 flex-col gap-2 align-top">
-              <div className="text-center text-xs hover:no-underline">
-                {' '}
-                Desktop {Math.round(desktopCategory.score * 100)}
-              </div>
-              <HorizontalScoreChart
-                score={desktopCategory.score || 0}
-                className="h-2 min-w-11 flex-1 overflow-hidden"
-              />
-            </div>
-          ) : null}
+          <CategoryScoreInfo category={mobileCategory} device="Mobile" />
+          <CategoryScoreInfo category={desktopCategory} device="Desktop" />
         </div>
       </AccordionTrigger>
       <AccordionContent>
         <div className="w-full" role="table" aria-label="Audit Table">
           {desktopCategory.auditRefs && desktopAuditRecords ? (
             <Accordion type="multiple">
-              {desktopCategory.auditRefs.map((auditRef) => (
-                <AuditDetailsSection
-                  key={auditRef.id}
-                  auditRef={auditRef}
-                  auditRecords={desktopAuditRecords}
-                  device="Desktop"
-                  acronym={auditRef.acronym}
-                />
-              ))}
+              {desktopCategory.auditRefs
+                .filter((auditRef) => {
+                  if (!auditRef.id) {
+                    return false;
+                  }
+                  if (auditRef.group === 'metrics') {
+                    return false;
+                  }
+                  if (!auditRef.id) {
+                    return null;
+                  }
+                  if (auditRef.group === 'metrics') {
+                    return null;
+                  }
+                  const desktopAuditData = desktopAuditRecords?.[auditRef.id];
+                  const mobileAuditData = mobileAuditRecords?.[auditRef.id];
+                  if (!desktopAuditData && !mobileAuditData) {
+                    return null;
+                  }
+                  if (
+                    desktopAuditData?.details?.type !==
+                    mobileAuditData?.details?.type
+                  ) {
+                    return null;
+                  }
+
+                  if (desktopAuditData?.details?.type === 'filmstrip') {
+                    return null;
+                  }
+                  if (!desktopAuditData && !mobileAuditData) {
+                    return false;
+                  }
+                  if (
+                    desktopAuditData?.details?.type !==
+                    mobileAuditData?.details?.type
+                  ) {
+                    return false;
+                  }
+
+                  if (desktopAuditData?.details?.type === 'filmstrip') {
+                    return false;
+                  }
+                  return true;
+                })
+                .sort((a, b) => {
+                  const aDetails =
+                    desktopAuditRecords?.[a.id || ''] ||
+                    mobileAuditRecords?.[a.id || ''];
+                  const bDetails =
+                    desktopAuditRecords?.[b.id || ''] ||
+                    mobileAuditRecords?.[b.id || ''];
+
+                  return sortByScoreDisplayModes(aDetails, bDetails);
+                })
+                .map((auditRef) => (
+                  <AuditDetailsSection
+                    key={auditRef.id}
+                    auditRef={auditRef}
+                    desktopAuditRecords={desktopAuditRecords || {}}
+                    mobileAuditRecords={mobileAuditRecords || {}}
+                    acronym={auditRef.acronym}
+                  />
+                ))}
             </Accordion>
           ) : null}
         </div>
@@ -229,120 +284,199 @@ function CategoryAuditSection({
   );
 }
 
+function CategoryScoreInfo({
+  category,
+  device,
+}: {
+  category: CategoryResult;
+  device: 'Mobile' | 'Desktop';
+}) {
+  if (!category.score) {
+    return null;
+  }
+  return (
+    <div className="flex-0 flex w-64 flex-col gap-2 align-top hover:no-underline">
+      <div className="text-center text-xs hover:no-underline">
+        {' '}
+        {device} - {Math.round(category.score * 100)}
+      </div>
+      <HorizontalScoreChart
+        score={category.score || 0}
+        className="h-2 min-w-11 flex-1 overflow-hidden"
+      />
+    </div>
+  );
+}
+
 function AuditDetailsSection({
   auditRef,
-  auditRecords,
-  device,
+  desktopAuditRecords,
+  mobileAuditRecords,
   acronym,
 }: {
   auditRef: AuditRef;
-  auditRecords: AuditResult;
-  device: 'Desktop' | 'Mobile';
+  desktopAuditRecords: AuditResult;
+  mobileAuditRecords: AuditResult;
   acronym?: string;
 }) {
-  if (!auditRef.id) {
-    console.log('no id for', auditRef);
-    return null;
-  }
-  if (auditRef.group === 'metrics') {
-    return null;
-  }
-  const auditData = auditRecords?.[auditRef.id];
-  if (!auditData) {
-    return null;
-  }
+  const desktopAuditData = desktopAuditRecords?.[auditRef.id || ''];
+  const mobileAuditData = mobileAuditRecords?.[auditRef.id || ''];
+  const scoreDisplayMode =
+    desktopAuditData.scoreDisplayMode ||
+    mobileAuditData.scoreDisplayMode ||
+    'numeric';
 
-  if (auditData?.details?.type === 'filmstrip') {
-    return null;
-  }
+  let emptyTable = false;
+  if ((desktopAuditData.details?.type === 'table' && desktopAuditData.details.items.length === 0 )&& (mobileAuditData.details?.type === 'table' && mobileAuditData.details.items.length === 0)) {
+    emptyTable = true;
+  } 
+  if ((desktopAuditData.details?.type === 'opportunity' && desktopAuditData.details.items.length === 0 )&& (mobileAuditData.details?.type === 'opportunity' && mobileAuditData.details.items.length === 0)) {
+    emptyTable = true;
+  } 
+  const noDetails = !desktopAuditData.details && !mobileAuditData.details;
+
+  const disabled = emptyTable  || noDetails|| ['notApplicable', 'manual',].includes(scoreDisplayMode);
 
   return (
-    <AccordionItem key={auditData.id} value={auditData.id}>
-      <AccordionTrigger className="flex flex-row gap-4 border-b">
-        <div className="flex flex-1 flex-row flex-wrap gap-4">
-          <div className="flex-[0_0_300px] font-bold">
-            {auditData.title} {acronym ? `(${acronym})` : ''}
-          </div>
-          <div className="flex-1 align-top">
-            <ReactMarkdown children={auditData.description || ''} />
-          </div>
-          <div className="hidden align-top md:block">
-            {auditData.scoreDisplayMode}
-          </div>
-        </div>
+    <AccordionItem key={desktopAuditData.id} value={desktopAuditData.id}>
+      <AccordionTrigger className="flex flex-row gap-4" disabled={disabled}>
+        <AuditDetailsSummary
+          desktopAuditData={desktopAuditData}
+          mobileAuditData={mobileAuditData}
+          acronym={acronym}
+        />
       </AccordionTrigger>
+      <RenderJSONDetails data={{ desktopAuditData, mobileAuditData }} />
       <AccordionContent>
-        {auditData.score ? <ScoreDisplay audit={auditData} /> : null}
-        {auditData.metricSavings ? (
-          <div className="grid grid-cols-[auto_1fr] gap-4">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Metric</TableHead>
-                  <TableHead>Possible Savings</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {Object.entries(auditData.metricSavings).map(
-                  ([metric, savings]) => (
-                    <TableRow key={metric}>
-                      <TableCell>{metric}</TableCell>
-                      <TableCell>{savings}</TableCell>
-                    </TableRow>
-                  ),
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        ) : null}
-
-        <div className="">
-          <RenderDetails auditData={auditData} device={device} />
-        </div>
-        <details>
-          <summary>Details</summary>
-          <pre>{JSON.stringify(auditData, null, 2)}</pre>
-        </details>
-
-        {/* <pre>{JSON.stringify(auditData, null, 2)}</pre> */}
-
-        {/* <DetailTable
-              headings={auditData.details?.headings}
-              items={auditData.details?.items}
-              entities={auditData.details?.entities}
-            /> */}
+        <RenderMetricSavings auditData={desktopAuditData} />
+        <RenderDetails
+          desktopAuditData={desktopAuditData}
+          mobileAuditData={mobileAuditData}
+        />
       </AccordionContent>
     </AccordionItem>
   );
 }
 
-function RenderDetails({
-  auditData,
-  device,
+function AuditDetailsSummary({
+  desktopAuditData,
+  mobileAuditData,
+  acronym,
 }: {
-  auditData?: AuditResult[string];
-  device: 'Desktop' | 'Mobile';
+  desktopAuditData: AuditResult[string];
+  mobileAuditData: AuditResult[string];
+  acronym?: string;
 }) {
-  if (!auditData?.details) {
+  return (
+    <div className="flex flex-1 flex-col flex-wrap gap-4 md:flex-row">
+      <div className="flex flex-col gap-1 font-bold md:flex-[0_0_300px]">
+        <span className="group-hover:underline">
+          {desktopAuditData.title} {acronym ? `(${acronym})` : ''}
+        </span>
+        <ScoreDisplay audit={mobileAuditData} device={'Mobile'} />
+        <ScoreDisplay audit={desktopAuditData} device={'Desktop'} />
+        <div className="text-xs">
+          {desktopAuditData.scoreDisplayMode === 'notApplicable'
+            ? 'Not Applicable'
+            : ''}
+          {desktopAuditData.scoreDisplayMode === 'manual'
+            ? 'Manual validation required'
+            : ''}
+        </div>
+      </div>
+      <div className="align-top no-underline hover:no-underline focus:no-underline md:flex-1">
+        <ReactMarkdown>
+          {desktopAuditData.description || mobileAuditData.description || ''}
+        </ReactMarkdown>
+      </div>
+      {/* <div className="align-top no-underline hover:no-underline focus:no-underline md:flex-1">
+      {desktopAuditData.scoreDisplayMode ||
+        mobileAuditData.scoreDisplayMode ||
+        ''}
+    </div> */}
+    </div>
+  );
+}
+
+function RenderMetricSavings({
+  auditData,
+}: {
+  auditData: AuditResult[string];
+}) {
+  if (!auditData.metricSavings) {
     return null;
   }
 
-  const details = auditData.details;
+  const totalSavings = Object.values(auditData.metricSavings).reduce(
+    (acc, savings) => acc + savings,
+    0,
+  );
+  if (totalSavings === 0) {
+    return null;
+  }
+
+  return (
+    <div className="grid grid-cols-[auto_1fr] gap-4">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Metric</TableHead>
+            <TableHead>Possible Savings</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {Object.entries(auditData.metricSavings).map(([metric, savings]) => (
+            <TableRow key={metric}>
+              <TableCell>{metric}</TableCell>
+              <TableCell>{savings}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
+function RenderDetails({
+  desktopAuditData,
+  mobileAuditData,
+}: {
+  desktopAuditData?: AuditResult[string];
+  mobileAuditData?: AuditResult[string];
+}) {
+  if (!desktopAuditData?.details) {
+    return null;
+  }
+  if (!mobileAuditData?.details) {
+    return null;
+  }
+
+  const details = desktopAuditData.details;
   console.log('list', details);
   switch (details.type) {
     case 'filmstrip':
-      return <Timeline timeline={details} device={device} />;
+      return <Timeline timeline={details} device={'Desktop'} />;
     case 'list':
       console.log('list', details);
-      return <RenderList auditData={auditData} device={device} />;
+      return (
+        <RenderList
+          desktopAuditData={desktopAuditData}
+          mobileAuditData={mobileAuditData}
+        />
+      );
     case 'checklist':
-      return <RenderChecklist auditData={auditData} device={device} />;
+      return (
+        <RenderChecklist
+          desktopAuditData={desktopAuditData}
+          mobileAuditData={mobileAuditData}
+        />
+      );
     case 'table':
     case 'opportunity':
       console.log('table', details);
       return (
         <DetailTable
-          device={device}
+          device={'Desktop'}
           headings={details.headings}
           items={details.items}
           isEntityGrouped={details.isEntityGrouped}
@@ -360,10 +494,11 @@ function RenderDetails({
         </div>
       );
     // Internal-only details, not for rendering.
-    // case 'screenshot':
+    case 'screenshot':
+      return null;
     // case 'debugdata':
-    // case 'treemap-data':
-    //   return null;
+    case 'treemap-data':
+      return <RenderJSONDetails data={details} />;
 
     default:
       return <RenderUnknown details={details} />;
@@ -371,13 +506,13 @@ function RenderDetails({
 }
 
 function RenderList({
-  auditData,
-  device,
+  desktopAuditData,
+  mobileAuditData,
 }: {
-  auditData: AuditResult[string];
-  device: 'Desktop' | 'Mobile';
+  desktopAuditData?: AuditResult[string];
+  mobileAuditData?: AuditResult[string];
 }) {
-  const details = auditData.details;
+  const details = desktopAuditData?.details;
   if (details.type !== 'list') {
     return null;
   }
@@ -387,13 +522,23 @@ function RenderList({
         console.log('item', item);
         switch (item.type) {
           case 'filmstrip':
-            return <Timeline key={index} timeline={item} device={device} />;
+            return <Timeline key={index} timeline={item} device={'Desktop'} />;
           case 'list':
             console.log('list', details);
-            return <RenderList key={index} auditData={item} device={device} />;
+            return (
+              <RenderList
+                key={index}
+                desktopAuditData={item}
+                mobileAuditData={mobileAuditData?.details?.items[index]}
+              />
+            );
           case 'checklist':
             return (
-              <RenderChecklist key={index} auditData={item} device={device} />
+              <RenderChecklist
+                key={index}
+                desktopAuditData={item}
+                mobileAuditData={mobileAuditData?.details?.items[index]}
+              />
             );
           case 'table':
           case 'opportunity':
@@ -401,7 +546,7 @@ function RenderList({
             return (
               <DetailTable
                 key={index}
-                device={device}
+                device={'Desktop'}
                 headings={item.headings}
                 items={item.items}
                 isEntityGrouped={item.isEntityGrouped}
@@ -433,46 +578,65 @@ function RenderList({
 }
 
 function RenderChecklist({
-  auditData,
-  device,
+  desktopAuditData,
+  mobileAuditData,
 }: {
-  auditData: AuditResult[string];
-  device: 'Desktop' | 'Mobile';
+  desktopAuditData: AuditResult[string];
+  mobileAuditData: AuditResult[string];
 }) {
-  const details = auditData.details;
-  if (details.type !== 'checklist') {
+  const desktopDetails = AuditDetailChecklistSchema.safeParse(
+    desktopAuditData.details,
+  );
+  const mobileDetails = AuditDetailChecklistSchema.safeParse(
+    mobileAuditData.details,
+  );
+  if (!desktopDetails.success || !mobileDetails.success) {
     return null;
   }
-  return (
-    <div className="flex flex-col gap-2">
-      <div>
-        {' '}
-        Checklist for {auditData.title} on {device}
-      </div>
-      {Object.entries(
-        details.items as Record<string, { label: string; value: boolean }>,
-      ).map(([key, item]) => {
-        if (typeof item !== 'object') {
-          return null;
-        }
-        if (typeof item?.label !== 'string') {
-          return null;
-        }
+  const checklistItems = Object.keys(desktopDetails.data.items);
+  const mobileChecklistItems = Object.keys(mobileDetails.data.items);
+  const allKeys = [...new Set([...checklistItems, ...mobileChecklistItems])];
 
-        return (
-          <div key={key}>
-            <div>
-              {item.value ? (
-                <span title="true">✅</span>
-              ) : (
-                <span title="false">❌</span>
-              )}{' '}
-              - {item?.label}
-            </div>
-          </div>
-        );
-      })}
-    </div>
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Checklist Item</TableHead>
+          <TableHead>Mobile</TableHead>
+          <TableHead>Desktop</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {allKeys.map((key) => {
+          const desktopItem = desktopDetails.data.items[key];
+          const mobileItem = mobileDetails.data.items[key];
+          const label = desktopItem?.label || mobileItem?.label || '';
+          return (
+            <TableRow key={key}>
+              <TableCell>{label}</TableCell>
+              <TableCell>
+                {mobileItem ? (
+                  mobileItem.value ? (
+                    <span title="true">✅</span>
+                  ) : (
+                    <span title="false"> ❌</span>
+                  )
+                ) : null}{' '}
+              </TableCell>
+              <TableCell>
+                {desktopItem ? (
+                  desktopItem.value ? (
+                    <span title="true">✅</span>
+                  ) : (
+                    <span title="false"> ❌</span>
+                  )
+                ) : null}{' '}
+              </TableCell>
+            </TableRow>
+          );
+        })}
+      </TableBody>
+    </Table>
   );
 }
 
@@ -584,7 +748,7 @@ interface TableProps {
   items: TableItem[];
   isEntityGrouped?: boolean;
   skipSumming?: string[];
-  sortedBy?: string;
+  sortedBy?: string[];
   entities?: EntityInfo[];
   device: 'Desktop' | 'Mobile';
 }
@@ -595,6 +759,38 @@ const SUMMABLE_VALUETYPES: ValueType[] = [
   'ms',
   'timespanMs',
 ];
+
+function getTableItemSortComparator(sortedBy: string[]) {
+  return (a: any, b: any) => {
+    for (const key of sortedBy) {
+      const aVal = a[key];
+      const bVal = b[key];
+      if (
+        typeof aVal !== typeof bVal ||
+        !['number', 'string'].includes(typeof aVal)
+      ) {
+        console.warn(
+          `Warning: Attempting to sort unsupported value type: ${key}.`,
+        );
+      }
+      if (
+        typeof aVal === 'number' &&
+        typeof bVal === 'number' &&
+        aVal !== bVal
+      ) {
+        return bVal - aVal;
+      }
+      if (
+        typeof aVal === 'string' &&
+        typeof bVal === 'string' &&
+        aVal !== bVal
+      ) {
+        return aVal.localeCompare(bVal);
+      }
+    }
+    return 0;
+  };
+}
 
 const getEntityGroupItems = ({
   items,
@@ -607,7 +803,7 @@ const getEntityGroupItems = ({
   headings: TableColumnHeading[];
   isEntityGrouped: boolean;
   skipSumming: string[];
-  sortedBy?: string;
+  sortedBy?: string[];
 }) => {
   // Exclude entity-grouped audits and results without entity classification
   if (!items.length || isEntityGrouped || !items.some((item) => item.entity)) {
@@ -645,7 +841,7 @@ const getEntityGroupItems = ({
 
   const result = Array.from(byEntity.values());
   if (sortedBy) {
-    result.sort((a, b) => (a[sortedBy] > b[sortedBy] ? -1 : 1));
+    result.sort(getTableItemSortComparator(sortedBy));
   }
   return result;
 };
@@ -688,7 +884,7 @@ function DetailTable({
           >
             {typeof heading.label === 'string'
               ? heading.label
-              : heading.label.formattedDefault}
+              : heading.label?.formattedDefault}
           </div>
         ))}
       </div>
@@ -734,7 +930,7 @@ function DetailTable({
                       {headings.map((heading, colIndex) => (
                         <div
                           key={colIndex}
-                          className="whitespace-nowrap px-6 py-4 text-sm"
+                          className="whitespace-nowrap px-6 py-4 text-xs"
                         >
                           {heading.key ? (
                             <RenderTableValue
@@ -749,13 +945,13 @@ function DetailTable({
                     {item.subItems?.items.map((subItem, subIndex) => (
                       <div
                         key={subIndex}
-                        className="grid grid-cols-subgrid border-b-2 transition-colors hover:bg-muted/50"
+                        className="grid grid-cols-subgrid border-b-2 px-4 transition-colors hover:bg-muted/50"
                         style={{
                           gridColumn: `span ${headings.length} / span ${headings.length}`,
                         }}
                       >
                         {headings.map((heading, colIndex) => (
-                          <div key={colIndex} className="px-6 py-4 text-sm">
+                          <div key={colIndex} className="px-6 py-4 text-xs ">
                             {heading.subItemsHeading?.key ? (
                               <RenderTableValue
                                 value={subItem[heading.subItemsHeading.key]}
@@ -774,13 +970,13 @@ function DetailTable({
         : items.map((item, index) => (
             <Fragment key={index}>
               <div
-                className="grid grid-cols-subgrid border-b-2 transition-colors hover:bg-muted/50"
+                className="0 grid grid-cols-subgrid border-b-2 transition-colors hover:bg-muted/50"
                 style={{
                   gridColumn: `span ${headings.length} / span ${headings.length}`,
                 }}
               >
                 {headings.map((heading, colIndex) => (
-                  <div key={colIndex} className="px-6 py-4 text-sm">
+                  <div key={colIndex} className="px-6 py-4 text-xs">
                     {heading.key ? (
                       <RenderTableValue
                         value={item[heading.key]}
@@ -791,10 +987,45 @@ function DetailTable({
                   </div>
                 ))}
               </div>
+              {item.subItems?.items ? (
+                <div
+                  className="1 grid grid-cols-subgrid border-2 px-4 transition-colors hover:bg-muted/50 whitespace-nowrap text-left font-medium uppercase tracking-wider text-gray-500"
+
+                  style={{
+                    gridColumn: `span ${headings.length} / span ${headings.length}`,
+                  }}
+                >
+                  {headings.map((heading, colIndex) => {
+                    const headingKey = heading.subItemsHeading?.key;
+                    if (!headingKey) {
+                      return null;
+                      return <div key={colIndex}> </div>;
+                    }
+                    const headingInfo = headings.find(
+                      ({ key }) => key === headingKey,
+                    );
+                    if (!headingInfo ) {
+                      return null;
+                      // return <div key={colIndex}> </div>;
+                    }
+                    if (headingInfo.key === heading.subItemsHeading?.key) {
+                      return null;
+                    }
+
+                    return (
+                      <div key={colIndex} className="px-6 py-4 text-sm" style={{ gridColumn: `${colIndex + 1} / ${colIndex + 2}` }}>
+                        {typeof headingInfo.label === 'string'
+                          ? headingInfo.label
+                          : headingInfo.label?.formattedDefault}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
               {item.subItems?.items.map((subItem, subIndex) => (
                 <div
                   key={subIndex}
-                  className="grid grid-cols-subgrid border-b-2 transition-colors hover:bg-muted/50"
+                  className="2 grid grid-cols-subgrid border-2 px-4 transition-colors hover:bg-muted/50"
                   style={{
                     gridColumn: `span ${headings.length} / span ${headings.length}`,
                   }}
@@ -807,7 +1038,9 @@ function DetailTable({
                           heading={heading.subItemsHeading}
                           device={device}
                         />
-                      ) : null}
+                      ) : (
+                        ' '
+                      )}
                     </div>
                   ))}
                 </div>
@@ -854,7 +1087,7 @@ function RenderTableValue({
       }
       case 'link': {
         return (
-          <a href={value.value} title="link">
+          <a href={value.value} title="link" className="w-[50ch] overflow-hidden whitespace-nowrap text-ellipsis">
             {value.value}
           </a>
         );
@@ -863,6 +1096,14 @@ function RenderTableValue({
         return <NodeComponent item={value} device={device} />;
       }
       case 'numeric': {
+        if (heading?.granularity) {
+          return (
+            <div title="numeric">
+              {value.value.toFixed(-Math.log10(heading.granularity))}
+            </div>
+          );
+        }
+
         return <div title="numeric">{value.value}</div>;
       }
       case 'source-location': {
@@ -874,7 +1115,7 @@ function RenderTableValue({
       }
       case 'url': {
         return (
-          <a href={value.value} title="url">
+          <a href={value.value} title="url" className="w-[50ch] overflow-hidden whitespace-nowrap text-ellipsis">
             {value.value}
           </a>
         );
@@ -883,6 +1124,7 @@ function RenderTableValue({
         return <div title="text">{value.value}</div>;
       }
       default: {
+        console.log('default', value);
         return <pre title="default">{JSON.stringify(value, null, 2)}</pre>;
       }
     }
@@ -891,8 +1133,18 @@ function RenderTableValue({
   // Next, deal with primitives.
   switch (heading?.valueType) {
     case 'bytes': {
-      const numValue = Number(value);
-      return <div title="bytes">{numValue}</div>;
+      const bytes = Number(value);
+      const kb = bytes / 1024;
+      const mb = kb / 1024;
+      return (
+        <div title="bytes" className="align-right">
+          {mb > 1
+            ? `${mb.toFixed(2)} MB`
+            : kb > 1
+              ? `${kb.toFixed(2)} KB`
+              : `${bytes} bytes`}
+        </div>
+      );
     }
     case 'code': {
       const strValue = String(value);
@@ -903,11 +1155,18 @@ function RenderTableValue({
       );
     }
     case 'ms': {
-      return <div title="ms"> {value.toFixed(2)} ms</div>;
+      return <div title="ms" className="align-right"> {value.toFixed(2)} ms</div>;
     }
     case 'numeric': {
-      const numValue = Number(value);
-      return <div title="numeric">{numValue}</div>;
+      if (heading?.granularity && value) {
+        return (
+          <div title="numeric" className="align-right">
+            {value.toFixed(-Math.log10(heading.granularity))}
+          </div>
+        );
+      }
+
+      return <div title="numeric" className="align-right">{value}</div>;
     }
     case 'text': {
       const strValue = String(value);
@@ -919,13 +1178,13 @@ function RenderTableValue({
     }
     case 'timespanMs': {
       const numValue = Number(value);
-      return <div title="timespanMs">{numValue}</div>;
+      return <div title="timespanMs" className="align-right">{numValue}</div>;
     }
     case 'url': {
       const strValue = String(value);
       if (URL_PREFIXES.some((prefix) => strValue.startsWith(prefix))) {
         return (
-          <a href={strValue} className="break-all">
+          <a href={strValue} className="w-[50ch] overflow-hidden whitespace-nowrap text-ellipsis">
             {strValue}
           </a>
         );
@@ -935,6 +1194,7 @@ function RenderTableValue({
       }
     }
     default: {
+      console.log('default', value);
       return <pre title="default">{JSON.stringify(value, null, 2)}</pre>;
     }
   }
@@ -951,41 +1211,11 @@ function NodeComponent({
   item: any;
   device: 'Desktop' | 'Mobile';
 }) {
-  const screenshotData = useContext(fullPageScreenshotContext);
-  const fullPageScreenshot =
-    device === 'Desktop'
-      ? screenshotData?.desktopFullPageScreenshot
-      : screenshotData?.mobileFullPageScreenshot;
-  const imageSize = 300;
-  const scale = imageSize / item?.boundingRect?.width;
+ 
   return (
     <div className="flex flex-col gap-2">
-      {fullPageScreenshot &&
-      item?.boundingRect &&
-      fullPageScreenshot?.nodes[item.lhId] ? (
-        <div
-          className="relative overflow-hidden"
-          style={{
-            aspectRatio: item?.boundingRect?.width / item?.boundingRect?.height,
-            width: `${imageSize}px`,
-          }}
-        >
-          <div className="absolute" style={{ scale: scale }}>
-            <div
-              className="absolute"
-              style={{
-                width: `${fullPageScreenshot.screenshot.width}px`,
-                height: `${fullPageScreenshot.screenshot.height}px`,
-                backgroundImage: `var(--${device.toLowerCase()}FullPageScreenshot)`,
-                backgroundSize: 'cover',
-                left: `-${fullPageScreenshot?.nodes[item.lhId]?.left}px`,
-                top: `-${fullPageScreenshot?.nodes[item.lhId]?.top}px`,
-                backgroundRepeat: 'no-repeat',
-              }}
-            ></div>
-          </div>
-        </div>
-      ) : null}
+        <RenderNodeImage item={item} device={device} />
+      
       {item.nodeLabel ? <div>{item.nodeLabel}</div> : null}
 
       {item.snippet && (
@@ -994,10 +1224,55 @@ function NodeComponent({
         </div>
       )}
 
-      <details>
-        <summary>Details</summary>
-        <pre>{JSON.stringify(item, null, 2)}</pre>
-      </details>
+      <RenderJSONDetails data={item} />
     </div>
+  );
+}
+
+
+function RenderNodeImage({ item, device,  imageSize = 150 }: { item: any, device: 'Desktop' | 'Mobile', imageSize?: number }) {
+  const screenshotData = useContext(fullPageScreenshotContext);
+  const fullPageScreenshot =
+    device === 'Desktop'
+      ? screenshotData?.desktopFullPageScreenshot
+      : screenshotData?.mobileFullPageScreenshot;
+
+
+  if (!fullPageScreenshot || !item?.boundingRect) {
+    return null;
+  }
+
+
+  const scale: number | undefined = item?.boundingRect?.width ? imageSize / item?.boundingRect?.width : undefined;
+  return (<div
+  className="relative overflow-hidden"
+  style={{
+    aspectRatio: (item?.boundingRect?.width / item?.boundingRect?.height) || undefined,
+    width: `${imageSize}px`,
+  }}
+>
+  <div className="absolute" style={{ scale: scale }}>
+    <div
+      className="absolute"
+      style={{
+        width: `${fullPageScreenshot.screenshot.width}px`,
+        height: `${fullPageScreenshot.screenshot.height}px`,
+        backgroundImage: `var(--${device.toLowerCase()}FullPageScreenshot)`,
+        backgroundSize: 'cover',
+        left: `-${fullPageScreenshot?.nodes[item.lhId]?.left}px`,
+        top: `-${fullPageScreenshot?.nodes[item.lhId]?.top}px`,
+        backgroundRepeat: 'no-repeat',
+      }}
+    ></div>
+  </div>
+</div>)
+}
+
+function RenderJSONDetails({ data }: { data: any }) {
+  return (
+    <details>
+      <summary>All Data</summary>
+      <pre>{JSON.stringify(data, null, 2)}</pre>
+    </details>
   );
 }
