@@ -1087,7 +1087,7 @@ function RenderTableValue({
       }
       case 'link': {
         return (
-          <a href={value.value} title="link" className="w-[50ch] overflow-hidden whitespace-nowrap text-ellipsis">
+          <a href={value.value} title="link" className="block w-[50ch] overflow-hidden whitespace-nowrap text-ellipsis">
             {value.value}
           </a>
         );
@@ -1115,7 +1115,7 @@ function RenderTableValue({
       }
       case 'url': {
         return (
-          <a href={value.value} title="url" className="w-[50ch] overflow-hidden whitespace-nowrap text-ellipsis">
+          <a href={value.value} title="url" className="block w-[50ch] overflow-hidden whitespace-nowrap text-ellipsis">
             {value.value}
           </a>
         );
@@ -1184,7 +1184,7 @@ function RenderTableValue({
       const strValue = String(value);
       if (URL_PREFIXES.some((prefix) => strValue.startsWith(prefix))) {
         return (
-          <a href={strValue} className="w-[50ch] overflow-hidden whitespace-nowrap text-ellipsis">
+          <a href={strValue} className="block w-[50ch] overflow-hidden whitespace-nowrap text-ellipsis">
             {strValue}
           </a>
         );

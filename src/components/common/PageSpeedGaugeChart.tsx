@@ -231,8 +231,6 @@ export function LineChart({
         width={((maxValue - chartData[1].value) / maxValue) * 100}
         height="16"
         fill={chartData[2].fill}
-        rx="0 100% 100% 0"
-        ry="0 100% 100% 0"
       />
       {/* Indicator line for current value */}
       
