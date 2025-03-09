@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-
 // const x: Details.Table = {}
 const coerceNumber = z.coerce.number().default(0).catch(NaN);
 
@@ -270,24 +269,64 @@ const auditRefSchema = z
 
 export type AuditRef = z.infer<typeof auditRefSchema>;
 
-const auditDebugData = z.union([z.object({
-  type: z.literal('debugdata'),
-}), z.any()]);
+export const DebugDataSchema = z.intersection(
+  z.object({
+    type: z.literal('debugdata'),
+  }),
+  z.record(z.any()),
+);
+
+export type DebugData = z.infer<typeof DebugDataSchema>;
+
+export const RectSchema = z.object({
+  width: z.number(),
+  height: z.number(),
+  top: z.number(),
+  right: z.number(),
+  bottom: z.number(),
+  left: z.number(),
+});
+
+export type Rect = z.infer<typeof RectSchema>;
+
+export const NodeValueSchema = z.object({
+  type: z.literal('node'),
+  lhId: z.string().optional(),
+  path: z.string().optional(),
+  selector: z.string().optional(),
+  boundingRect: RectSchema.optional(),
+  nodeLabel: z.string().optional(),
+  explanation: z.string().optional(),
+  snippet: z.string().optional(),
+});
+
+export type NodeValue = z.infer<typeof NodeValueSchema>;
+
+/** A table item for rows that are nested within a top-level TableItem (row). */
+export interface TableSubItems {
+  type: 'subitems';
+  items: TableItem[];
+}
+
 
 const AuditDetailsTableHeading = z.array(
-  z.object({
-    valueType: z.union([z.string(), z.number()]).optional(),
-    key: z.string().optional(),
-    label: z.string().optional(),
-    granularity: z.number().optional(),
-    subItemsHeading: z.object({
+  z
+    .object({
       valueType: z.union([z.string(), z.number()]).optional(),
       key: z.string().optional(),
       label: z.string().optional(),
       granularity: z.number().optional(),
-    }).partial(),
-  }).partial(),
-)
+      subItemsHeading: z
+        .object({
+          valueType: z.union([z.string(), z.number()]).optional(),
+          key: z.string().optional(),
+          label: z.string().optional(),
+          granularity: z.number().optional(),
+        })
+        .partial(),
+    })
+    .partial(),
+);
 const AuditDetailTable = z.object({
   type: z.literal('table'),
   items: z.array(
@@ -296,7 +335,7 @@ const AuditDetailTable = z.object({
   isEntityGrouped: z.boolean().optional(),
   headings: AuditDetailsTableHeading,
   sortedBy: z.array(z.string()).optional(),
-  debugData: auditDebugData.optional()
+  debugData: DebugDataSchema.optional(),
 });
 
 export const AuditDetailFilmstripSchema = z.object({
@@ -313,52 +352,195 @@ export const AuditDetailFilmstripSchema = z.object({
 
 export type AuditDetailFilmstrip = z.infer<typeof AuditDetailFilmstripSchema>;
 
-export const AuditDetailOpportunitySchema = z.object({
-  type: z.literal('opportunity'),
-  headings: AuditDetailsTableHeading,
-  sortedBy: z.array(z.string()),
-  overallSavingsMs: coerceNumber.optional(),
-  overallSavingsBytes: coerceNumber.optional(),
-  items: z.array(z.any()),
-  debugData: auditDebugData.optional(),
-  numericValue: z.string(),
-  numericUnit: z.string(),
-}).partial();
+export const AuditDetailOpportunitySchema = z
+  .object({
+    type: z.literal('opportunity'),
+    headings: AuditDetailsTableHeading,
+    sortedBy: z.array(z.string()),
+    overallSavingsMs: coerceNumber.optional(),
+    overallSavingsBytes: coerceNumber.optional(),
+    items: z.array(z.any()),
+    debugData: DebugDataSchema.optional(),
+    numericValue: z.string(),
+    numericUnit: z.string(),
+  })
+  .partial();
 
-export type AuditDetailOpportunity = z.infer<typeof AuditDetailOpportunitySchema>;
+export type AuditDetailOpportunity = z.infer<
+  typeof AuditDetailOpportunitySchema
+>;
 
+/** String enum of possible types of values found within table items. */
+export const ItemValueTypeSchema = z.union([
+  z.literal('bytes'),
+  z.literal('code'),
+  z.literal('link'),
+  z.literal('ms'),
+  z.literal('multi'),
+  z.literal('node'),
+  z.literal('source-location'),
+  z.literal('numeric'),
+  z.literal('text'),
+  z.literal('source-location'),
+  z.literal('numeric'),
+  z.literal('text'),
+  z.literal('thumbnail'),
+  z.literal('timespanMs'),
+  z.literal('url'),
+]);
 
+/** String enum of possible types of values found within table items. */
+export type ItemValueType = z.infer<typeof ItemValueTypeSchema>;
+
+export const SourceLocationValueSchema = z.object({
+  type: z.literal('source-location'),
+  url: z.string(),
+  urlProvider: z.enum(['network', 'comment']),
+  line: z.number(),
+  column: z.number(),
+  original: z
+    .object({
+      file: z.string(),
+      line: z.number(),
+      column: z.number(),
+    })
+    .optional(),
+});
+
+export type SourceLocationValue = z.infer<typeof SourceLocationValueSchema>;
+
+export const LinkValueSchema = z.object({
+  type: z.literal('link'),
+  text: z.string(),
+  url: z.string(),
+});
+
+export type LinkValue = z.infer<typeof LinkValueSchema>;
+
+export const UrlValueSchema = z.object({
+  type: z.literal('url'),
+  value: z.string(),
+});
+
+export type UrlValue = z.infer<typeof UrlValueSchema>;
+
+export const IcuMessageSchema = z.object({
+  i18nId: z.string(),
+  values: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
+  formattedDefault: z.string(),
+});
+
+export type IcuMessage = z.infer<typeof IcuMessageSchema>;
+
+export const CodeValueSchema = z.object({
+  type: z.literal('code'),
+  value: z.union([IcuMessageSchema, z.string()]),
+});
+
+export type CodeValue = z.infer<typeof CodeValueSchema>;
+
+export const NumericValueSchema = z.object({
+  type: z.literal('numeric'),
+  value: z.number(),
+  granularity: z.number().optional(),
+});
+
+export type NumericValue = z.infer<typeof NumericValueSchema>;
+
+export const TextValueSchema = z.object({
+  type: z.literal('text'),
+  value: z.string(),
+});
+
+export type TextValue = z.infer<typeof TextValueSchema>;
+
+/** Possible types of values found within table items. */
+export const ItemValueSchema = z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+  DebugDataSchema,
+  NodeValueSchema,
+  SourceLocationValueSchema,
+  LinkValueSchema,
+  UrlValueSchema,
+  CodeValueSchema,
+  NumericValueSchema,
+  IcuMessageSchema,
+  TextValueSchema
+]);
+
+export type ItemValue = z.infer<typeof ItemValueSchema> | TableSubItems;
+  
+export const TableColumnHeadingSchema = z.object({
+  key: z.string().nullable(),
+  label: IcuMessageSchema.or(z.string()),
+  valueType: ItemValueTypeSchema,
+  subItemsHeading: z
+    .object({
+      key: z.string(),
+      valueType: ItemValueTypeSchema,
+      displayUnit: z.string().optional(),
+      granularity: z.number().optional(),
+    })
+    .optional(),
+  displayUnit: z.string().optional(),
+  granularity: z.number().optional(),
+});
+
+export type TableColumnHeading = z.infer<typeof TableColumnHeadingSchema>;
+
+export type TableItem = {
+  debugData?: DebugData;
+  subItems?: TableSubItems;
+  [key: string]: ItemValue | undefined;
+};
 
 export const AuditDetailChecklistSchema = z.object({
   type: z.literal('checklist'),
-  items: z.record(z.object({
-    value: z.boolean(),
-    label: z.string(),
-  })),
-  debugData: auditDebugData.optional(),
+  items: z.record(
+    z.object({
+      value: z.boolean(),
+      label: z.string(),
+    }),
+  ),
+  debugData: DebugDataSchema.optional(),
 });
 
 export type AuditDetailChecklist = z.infer<typeof AuditDetailChecklistSchema>;
 
-
-const auditResultSchema = z.record(z.object({
-  description: z.string().optional(),
-  details: z
-    .union([z.any(), AuditDetailTable, AuditDetailFilmstripSchema, AuditDetailOpportunitySchema])
-    .optional(),
-  errorMessage: z.string().optional(),
-  explanation: z.string().optional(),
-  id: z.string(),
-  numericValue: z.number().optional(),
-  // sore is 0 to 1 where 0-.49 is bad and .50-.89 is needs improvement and .90-1 is good
-  score: z.number().nullable(),
-  scoreDisplayMode: z.literal('numeric').or(z.literal('binary')).or(z.literal('metricSavings')).or(z.literal('manual')).or(z.literal('informative')).or(z.literal('notApplicable')).or(z.literal('error')),
-  title: z.string(),
-  warnings: z.array(z.any()).optional(),
-numericUnit: z.string().optional(),
-displayValue: z.string().optional(),
-metricSavings: z.record(z.number()).optional(),
-}));
+const auditResultSchema = z.record(
+  z.object({
+    description: z.string().optional(),
+    details: z
+      .union([
+        z.any(),
+        AuditDetailTable,
+        AuditDetailFilmstripSchema,
+        AuditDetailOpportunitySchema,
+      ])
+      .optional(),
+    errorMessage: z.string().optional(),
+    explanation: z.string().optional(),
+    id: z.string(),
+    numericValue: z.number().optional(),
+    // sore is 0 to 1 where 0-.49 is bad and .50-.89 is needs improvement and .90-1 is good
+    score: z.number().nullable(),
+    scoreDisplayMode: z
+      .literal('numeric')
+      .or(z.literal('binary'))
+      .or(z.literal('metricSavings'))
+      .or(z.literal('manual'))
+      .or(z.literal('informative'))
+      .or(z.literal('notApplicable'))
+      .or(z.literal('error')),
+    title: z.string(),
+    warnings: z.array(z.any()).optional(),
+    numericUnit: z.string().optional(),
+    displayValue: z.string().optional(),
+    metricSavings: z.record(z.number()).optional(),
+  }),
+);
 
 export type AuditResult = z.infer<typeof auditResultSchema>;
 
@@ -408,7 +590,7 @@ const entitiesSchema = z.array(
   }),
 );
 
-export type Entities = z.infer<typeof entitiesSchema>;  
+export type Entities = z.infer<typeof entitiesSchema>;
 
 const FullPageScreenshotSchema = z.object({
   nodes: z.record(

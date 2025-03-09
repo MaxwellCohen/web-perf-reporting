@@ -27,9 +27,8 @@ export function LoadingExperience({
     { metric: 'Time to First Byte', key: 'EXPERIMENTAL_TIME_TO_FIRST_BYTE' },
     { metric: 'Interaction to Next Paint', key: 'INTERACTION_TO_NEXT_PAINT' },
   ] as const;
-
   return (
-    <AccordionItem value={title.toLowerCase().replace(/\s+/g, '-')}  className="print:border-0">
+    <AccordionItem value={title.toLowerCase().replace(/\s+/g, '-')} className="print:border-0" defaultValue={title.toLowerCase().replace(/\s+/g, '-')}>
       <AccordionTrigger>
         <div className="text-lg font-bold group-hover:underline">
           {title}: {experienceMobile?.overall_category ? `Mobile -  ${experienceMobile?.overall_category} ` : ''} {experienceDesktop?.overall_category ? `Desktop - ${experienceDesktop?.overall_category}` : ''}
