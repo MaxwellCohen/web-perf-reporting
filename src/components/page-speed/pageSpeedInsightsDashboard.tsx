@@ -89,7 +89,6 @@ export function PageSpeedInsightsDashboard({
           experienceMobile={mobileData?.originLoadingExperience}
         />
 
-        <div className="grid grid-rows-[auto_1fr] print:break-before-page">
           <CWVMetricsComponent
             desktopCategoryGroups={desktopCategoryGroups}
             desktopAudits={desktopAuditRecords}
@@ -100,7 +99,6 @@ export function PageSpeedInsightsDashboard({
             <Timeline timeline={MobileTimeline} device="Mobile" />
             <Timeline timeline={DesktopTimeline} device="Desktop" />
           </div>
-        </div>
 
         <PageSpeedCategorySection
           desktopCategories={desktopCategories}

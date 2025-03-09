@@ -23,30 +23,59 @@ export const ScoreDisplayModes = {
 } as const;
 
 export const ScoreDisplayModesRanking: Record<
-  AuditResult[string]['scoreDisplayMode'],
+  AuditResult[string]['scoreDisplayMode'] | 'empty',
   number
 > = {
-  numeric: 1,
-  metricSavings: 2,
+  metricSavings: 1,
+  numeric: 2,
   binary: 3,
   informative: 4,
   manual: 5,
-  error: 6,
-  notApplicable: 7,
+  empty: 6,
+  error: 7,
+  notApplicable: 8,
 } as const;
+
+export function isEmptyResult(auditData: AuditResult[string]) {
+  if (
+    auditData.details?.type === 'table' &&
+    auditData.details.items.length === 0
+  ) {
+    return true;
+  }
+  if (
+    auditData.details?.type === 'opportunity' &&
+    auditData.details.items.length === 0
+  ) {
+    return true;
+  }
+
+  return !auditData.details;
+}
 
 export const sortByScoreDisplayModes = (
   a: AuditResult[string] | undefined,
   b: AuditResult[string] | undefined,
 ) => {
   if (!a || !b) {
-    return 0;
+    return -1;
   }
 
-  return (
-    ScoreDisplayModesRanking[a.scoreDisplayMode || 'notApplicable'] -
-    ScoreDisplayModesRanking[b.scoreDisplayMode || 'notApplicable']
-  );
+
+  const scoreDiff = (a.score || 0) - (b.score || 0);
+  if (scoreDiff !== 0) {
+    return scoreDiff;
+  }
+
+  const scoreDisplayModeDiff =
+    ScoreDisplayModesRanking[
+      isEmptyResult(a) ? 'empty' : a.scoreDisplayMode || 'notApplicable'
+    ] -
+    ScoreDisplayModesRanking[
+      isEmptyResult(b) ? 'empty' : b.scoreDisplayMode || 'notApplicable'
+    ];
+
+  return scoreDisplayModeDiff;
 };
 
 export function ScoreDisplay({
@@ -95,8 +124,6 @@ export function ScoreDisplay({
   }
 
   return (
-    <div className="text-xs">
-      Score: {Math.round(audit.score * 100)} / 100
-    </div>
+    <div className="text-xs">Score: {Math.round(audit.score * 100)} / 100</div>
   );
 }

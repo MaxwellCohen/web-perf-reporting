@@ -4,13 +4,13 @@ import {
   AccordionContent,
 } from '../../ui/accordion';
 import { RenderJSONDetails } from '../RenderJSONDetails';
-import {
-  AuditRef,
-  AuditResult,
-} from '@/lib/schema';
+import { AuditRef, AuditResult } from '@/lib/schema';
 import { AuditDetailsSummary } from './AuditDetailsSummary';
 import { RenderMetricSavings } from './RenderMetricSavings';
 import { RenderDetails } from './RenderDetails';
+import { isEmptyResult } from '../ScoreDisplay';
+
+
 
 export function AuditDetailsSection({
   auditRef,
@@ -28,31 +28,14 @@ export function AuditDetailsSection({
   const scoreDisplayMode =
     desktopAuditData.scoreDisplayMode ||
     mobileAuditData.scoreDisplayMode ||
-    'numeric';
+    'bottom';
 
-  let emptyTable = false;
-  if (
-    desktopAuditData.details?.type === 'table' &&
-    desktopAuditData.details.items.length === 0 &&
-    mobileAuditData.details?.type === 'table' &&
-    mobileAuditData.details.items.length === 0
-  ) {
-    emptyTable = true;
-  }
-  if (
-    desktopAuditData.details?.type === 'opportunity' &&
-    desktopAuditData.details.items.length === 0 &&
-    mobileAuditData.details?.type === 'opportunity' &&
-    mobileAuditData.details.items.length === 0
-  ) {
-    emptyTable = true;
-  }
-  const noDetails = !desktopAuditData.details && !mobileAuditData.details;
+  const emptyTable =
+    isEmptyResult(desktopAuditData) && isEmptyResult(mobileAuditData);
 
   const disabled =
     emptyTable ||
-    noDetails ||
-    ['notApplicable', 'manual'].includes(scoreDisplayMode);
+    ['notApplicable', 'manual', 'bottom'].includes(scoreDisplayMode);
 
   return (
     <AccordionItem key={desktopAuditData.id} value={desktopAuditData.id}>
@@ -65,7 +48,10 @@ export function AuditDetailsSection({
       </AccordionTrigger>
       <RenderJSONDetails data={{ desktopAuditData, mobileAuditData }} />
       <AccordionContent>
-        <RenderMetricSavings auditData={desktopAuditData} />
+        <RenderMetricSavings
+          desktopAuditData={desktopAuditData}
+          mobileAuditData={mobileAuditData}
+        />
         <RenderDetails
           desktopAuditData={desktopAuditData}
           mobileAuditData={mobileAuditData}
@@ -74,4 +60,3 @@ export function AuditDetailsSection({
     </AccordionItem>
   );
 }
-

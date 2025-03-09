@@ -1,13 +1,13 @@
 import { Fragment } from 'react';
-import { NodeComponent } from './RenderNode';
-import { ItemValue, ItemValueType, TableColumnHeading, TableItem } from '@/lib/schema';
-
-interface EntityInfo {
-  name: string;
-  category?: string;
-  isFirstParty?: boolean;
-  homepage?: string;
-}
+import {
+  Entities,
+  ItemValue,
+  ItemValueType,
+  TableColumnHeading,
+  TableItem,
+} from '@/lib/schema';
+import { RenderTableValue } from './RenderTableValue';
+import { cn } from '@/lib/utils';
 
 interface TableProps {
   headings: TableColumnHeading[];
@@ -15,7 +15,7 @@ interface TableProps {
   isEntityGrouped?: boolean;
   skipSumming?: string[];
   sortedBy?: string[];
-  entities?: EntityInfo[];
+  entities?: Entities[];
   device: 'Desktop' | 'Mobile';
 }
 
@@ -26,7 +26,9 @@ const SUMMABLE_VALUETYPES: ItemValueType[] = [
   'timespanMs',
 ];
 
-function getDerivedSubItemsHeading(heading: TableColumnHeading ) {
+function getDerivedSubItemsHeading(
+  heading: TableColumnHeading,
+): TableColumnHeading | null {
   if (!heading.subItemsHeading) return null;
   return {
     key: heading.subItemsHeading.key || '',
@@ -36,7 +38,6 @@ function getDerivedSubItemsHeading(heading: TableColumnHeading ) {
     label: '',
   };
 }
-
 
 export function getTableItemSortComparator(sortedBy: string[]) {
   return (a: TableItem, b: TableItem) => {
@@ -149,359 +150,235 @@ export function DetailTable({
       className="grid overflow-x-auto"
       style={{ gridTemplateColumns: `repeat(${headings.length}, auto)` }}
     >
-      <div
-        className="grid grid-cols-subgrid border-b-2"
-        style={{
-          gridColumn: `span ${headings.length} / span ${headings.length}`,
-        }}
-      >
-        {headings.map((heading, index) => (
-          <div
-            key={index}
-            className="grid-col-span-1 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-          >
-            {typeof heading.label === 'string'
-              ? heading.label
-              : heading.label?.formattedDefault}
-          </div>
-        ))}
-      </div>
+      <RenderTableHeader headings={headings} />
+      {entityItems.length > 0 ? (
+        <RenderEntityGroupRows
+          entityItems={entityItems}
+          headings={headings}
+          device={device}
+          items={items}
+        />
+      ) : (
+        <RenderTableItems items={items} headings={headings} device={device} />
+      )}
+    </div>
+  );
+}
 
-      {entityItems.length > 0
-        ? // Render entity-grouped rows
-          entityItems.map((entityItem, index) => (
-            <Fragment key={index}>
-              <div
-                className="grid grid-cols-subgrid border-b-2 transition-colors hover:bg-muted/50"
-                style={{
-                  gridColumn: `span ${headings.length} / span ${headings.length}`,
-                }}
-              >
-                {headings.map((heading, colIndex) => (
-                  <div
+function RenderTableHeader({ headings }: { headings: TableColumnHeading[] }) {
+  return (
+    <RenderTableRowContainer headings={headings}>
+      {headings.map((heading, index) => (
+        <RenderHeading
+          key={index}
+          heading={heading}
+          className="grid-col-span-1 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+        />
+      ))}
+    </RenderTableRowContainer>
+  );
+}
+
+function RenderTableRowContainer({
+  children,
+  headings,
+  ...props
+}: {
+  children: React.ReactNode;
+  headings: TableColumnHeading[];
+} & React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn('grid grid-cols-subgrid border-b-2', props.className)}
+      style={{
+        gridColumn: `span ${headings.length} / span ${headings.length}`,
+      }}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
+function RenderHeading({
+  heading,
+  ...props
+}: { heading: TableColumnHeading } & React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div {...props}>
+      {typeof heading.label === 'string'
+        ? heading.label
+        : heading.label?.formattedDefault}
+    </div>
+  );
+}
+
+function RenderTableCell({
+  value,
+  heading,
+  device,
+  ...props
+}: {
+  value?: ItemValue;
+  heading: TableColumnHeading | null;
+  device: 'Desktop' | 'Mobile';
+} & React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div {...props}>
+      {heading?.key ? (
+        <RenderTableValue value={value} heading={heading} device={device} />
+      ) : null}
+    </div>
+  );
+}
+
+function RenderEntityGroupRows({
+  entityItems,
+  headings,
+  device,
+  items,
+}: {
+  entityItems: TableItem[];
+  headings: TableColumnHeading[];
+  device: 'Desktop' | 'Mobile';
+  items: TableItem[];
+}) {
+  return entityItems?.map((entityItem, index) => (
+    <Fragment key={index}>
+      <RenderTableRowContainer headings={headings}>
+        {headings.map((heading, colIndex) => {
+          if (!heading.key) return null;
+          return (
+            <RenderTableCell
+              key={colIndex}
+              className="whitespace-nowrap px-6 py-4 text-sm"
+              style={{
+                gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
+              }}
+              value={entityItem[heading.key]}
+              heading={heading}
+              device={device}
+            />
+          );
+        })}
+      </RenderTableRowContainer>
+      {items
+        .filter((item) => item.entity === entityItem.entity)
+        .map((item, subIndex) => (
+          <Fragment key={`${index}-${subIndex}`}>
+            <RenderTableRowContainer headings={headings}>
+              {headings.map((heading, colIndex) => {
+                if (!heading.key) return null;
+                return (
+                  <RenderTableCell
                     key={colIndex}
                     className="whitespace-nowrap px-6 py-4 text-sm"
                     style={{
                       gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
                     }}
-                  >
-                    {heading.key ? (
-                      <RenderTableValue
-                        value={entityItem[heading.key]}
-                        heading={heading}
-                        device={device}
-                      />
-                    ) : null}
-
-                  </div>
-                ))}
-              </div>
-              {items
-                .filter((item) => item.entity === entityItem.entity)
-                .map((item, subIndex) => (
-                  <Fragment key={`${index}-${subIndex}`}>
-                    <div
-                      className="grid grid-cols-subgrid border-b-2 transition-colors hover:bg-muted/50"
+                    value={entityItem[heading.key]}
+                    heading={heading}
+                    device={device}
+                  />
+                );
+              })}
+            </RenderTableRowContainer>
+            {item.subItems?.items.map((subItem, subIndex) => (
+              <RenderTableRowContainer headings={headings} key={subIndex}>
+                {headings.map((heading, colIndex) => {
+                  if (!heading.subItemsHeading?.key) return null;
+                  return (
+                    <RenderTableCell
+                      key={colIndex}
+                      className="whitespace-nowrap px-6 py-4 text-sm"
                       style={{
-                        gridColumn: `span ${headings.length} / span ${headings.length}`,
+                        gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
                       }}
-                    >
-                      {headings.map((heading, colIndex) => (
-                        <div
-                          key={colIndex}
-                          className="whitespace-nowrap px-6 py-4 text-xs"
-                        >
-                          {heading.key ? (
-                            <RenderTableValue
-                              value={item[heading.key]}
-                              heading={heading}
-                              device={device}
-                            />
-                          ) : null}
-                        </div>
-                      ))}
-                    </div>
-                    {item.subItems?.items.map((subItem, subIndex) => (
-                      <div
-                        key={subIndex}
-                        className="grid grid-cols-subgrid border-b-2 px-4 transition-colors hover:bg-muted/50"
-                        style={{
-                          gridColumn: `span ${headings.length} / span ${headings.length}`,
-                        }}
-                      >
-                        {headings.map((heading, colIndex) => (
-                          <div key={colIndex} className="px-6 py-4 text-xs">
-                            {heading.subItemsHeading?.key ? (
-                              <RenderTableValue
-                                value={subItem[heading.subItemsHeading.key]}
-                                heading={getDerivedSubItemsHeading(heading)}
-                                device={device}
-                              />
-                            ) : null}
-                          </div>
-                        ))}
-                      </div>
-                    ))}
-                  </Fragment>
-                ))}
-            </Fragment>
-          ))
-        : items.map((item, index) => (
-            <Fragment key={index}>
-              <div
-                className="0 grid grid-cols-subgrid border-b-2 transition-colors hover:bg-muted/50"
-                style={{
-                  gridColumn: `span ${headings.length} / span ${headings.length}`,
-                }}
-              >
-                {headings.map((heading, colIndex) => (
-                  <div key={colIndex} className="px-6 py-4 text-xs">
-                    {heading.key ? (
-                      <RenderTableValue
-                        value={item[heading.key]}
-                        heading={heading}
-                        device={device}
-                      />
-                    ) : null}
-                  </div>
-                ))}
-              </div>
-              {item.subItems?.items ? (
-                <div
-                  className="1 grid grid-cols-subgrid whitespace-nowrap border-2 px-4 text-left font-medium uppercase tracking-wider text-gray-500 transition-colors hover:bg-muted/50"
-                  style={{
-                    gridColumn: `span ${headings.length} / span ${headings.length}`,
-                  }}
-                >
-                  {headings.map((heading, colIndex) => {
-                    const headingKey = heading.subItemsHeading?.key;
-                    if (!headingKey) {
-                      return null;
-                      return <div key={colIndex}> </div>;
-                    }
-                    const headingInfo = headings.find(
-                      ({ key }) => key === headingKey,
-                    );
-                    if (!headingInfo) {
-                      return null;
-                      // return <div key={colIndex}> </div>;
-                    }
-                    if (headingInfo.key === heading.subItemsHeading?.key) {
-                      return null;
-                    }
-
-                    return (
-                      <div
-                        key={colIndex}
-                        className="px-6 py-4 text-sm"
-                        style={{
-                          gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
-                        }}
-                      >
-                        {typeof headingInfo.label === 'string'
-                          ? headingInfo.label
-                          : headingInfo.label?.formattedDefault}
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : null}
-              {item.subItems?.items.map((subItem, subIndex) => (
-                <div
-                  key={subIndex}
-                  className="2 grid grid-cols-subgrid border-2 px-4 transition-colors hover:bg-muted/50"
-                  style={{
-                    gridColumn: `span ${headings.length} / span ${headings.length}`,
-                  }}
-                >
-                  {headings.map((heading, colIndex) => (
-                    <div key={colIndex} className="px-6 py-4 text-sm">
-                      {heading.subItemsHeading?.key ? (
-                        <RenderTableValue
-                          value={subItem[heading.subItemsHeading.key]}
-                          heading={getDerivedSubItemsHeading(heading)}
-                          device={device}
-                        />
-                      ) : (
-                        ' '
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </Fragment>
-          ))}
-    </div>
-  );
+                      value={subItem[heading.subItemsHeading.key]}
+                      heading={getDerivedSubItemsHeading(heading)}
+                      device={device}
+                    />
+                  );
+                })}
+              </RenderTableRowContainer>
+            ))}
+          </Fragment>
+        ))}
+    </Fragment>
+  ));
 }
 
-const URL_PREFIXES = ['http://', 'https://', 'data:'];
-
-/**
- * Render a details item value for embedding in a table. Renders the value
- * based on the heading's valueType, unless the value itself has a `type`
- * property to override it.
- * @param {TableItemValue} value
- * @param {LH.Audit.Details.TableColumnHeading} heading
- * @return {Element|null}
- */
-function RenderTableValue({
-  value,
-  heading,
+function RenderTableItems({
+  items,
+  headings,
   device,
 }: {
-  value?: ItemValue;
-  heading?: TableColumnHeading | null;
+  items: TableItem[];
+  headings: TableColumnHeading[];
   device: 'Desktop' | 'Mobile';
 }) {
-  if (value === undefined || value === null) {
-    return null;
-  }
-
-  // First deal with the possible object forms of value.
-  if (typeof value === 'object' && 'type' in value) {
-    // The value's type overrides the heading's for this column.
-    switch (value.type) {
-      case 'code': {
-        return (
-          <pre title="code" className="text-xs">
-            {typeof value.value === 'string' ? value.value : JSON.stringify(value.value)}
-          </pre>
-        );
-      }
-      case 'link': {
-        return (
-          <a
-            href={value.url}
-            title="link"
-            className="block w-[50ch] overflow-hidden text-ellipsis whitespace-nowrap"
-          >
-            {value.text}
-          </a>
-        );
-      }
-      case 'node': {
-        return <NodeComponent item={value} device={device} />;
-      }
-      case 'numeric': {
-        if (heading?.granularity) {
+  return items.map((item, index) => (
+    <Fragment key={index}>
+      <RenderTableRowContainer headings={headings}>
+        {headings.map((heading, colIndex) => {
+          if (!heading.key) return null;
           return (
-            <div title="numeric">
-              {value.value.toFixed(-Math.log10(heading.granularity))}
-            </div>
+            <RenderTableCell
+              key={colIndex}
+              className="px-6 py-4 text-xs"
+              value={item[heading.key]}
+              heading={heading}
+              device={device}
+            />
           );
-        }
+        })}
+      </RenderTableRowContainer>
+      {item.subItems?.items ? (
+        <RenderTableRowContainer headings={headings}>
+          {headings.map((heading, colIndex) => {
+            const headingKey = heading.subItemsHeading?.key;
+            if (!headingKey) {
+              return null;
+            }
+            const headingInfo = headings.find(({ key }) => key === headingKey);
+            if (!headingInfo) {
+              return null;
+              // return <div key={colIndex}> </div>;
+            }
+            if (headingInfo.key === heading.subItemsHeading?.key) {
+              return null;
+            }
 
-        return <div title="numeric">{value.value}</div>;
-      }
-      case 'source-location': {
-        return (
-          <div title="source-location" className="font-mono text-xs">
-            {JSON.stringify(value, null, 2)}
-          </div>
-        );
-      }
-      case 'url': {
-        return (
-          <a
-            href={value.value}
-            title="url"
-            className="block w-[50ch] overflow-hidden text-ellipsis whitespace-nowrap"
-          >
-            {value.value}
-          </a>
-        );
-      }
-      case 'text': {
-        return <div title="text">{value.value}</div>;
-      }
-      default: {
-        return <pre title="default">{JSON.stringify(value, null, 2)}</pre>;
-      }
-    }
-  }
-
-  // Next, deal with primitives.
-  switch (heading?.valueType) {
-    case 'bytes': {
-      const bytes = Number(value);
-      const kb = bytes / 1024;
-      const mb = kb / 1024;
-      return (
-        <div title="bytes" className="align-right">
-          {mb > 1
-            ? `${mb.toFixed(2)} MB`
-            : kb > 1
-              ? `${kb.toFixed(2)} KB`
-              : `${bytes} bytes`}
-        </div>
-      );
-    }
-    case 'code': {
-      const strValue = String(value);
-      return (
-        <code title="code" className="font-mono text-xs">
-          {strValue}
-        </code>
-      );
-    }
-    case 'ms': {
-      return (
-        <div title="ms" className="align-right">
-          {(value  as number).toFixed(2)} ms
-        </div>
-      );
-    }
-    case 'numeric': {
-      if (heading?.granularity && value) {
-        return (
-          <div title="numeric" className="align-right">
-            {(value as number).toFixed(-Math.log10(heading.granularity || 1))}
-          </div>
-        );
-      }
-
-      return (
-        <div title="numeric" className="align-right">
-          {(value as number).toFixed(-Math.log10(heading.granularity || 1))}
-        </div>
-      );
-    }
-    case 'text': {
-      const strValue = String(value);
-      return <div title="text">{strValue}</div>;
-    }
-    case 'thumbnail': {
-      const strValue = String(value);
-      return <div title="thumbnail">{strValue}</div>;
-    }
-    case 'timespanMs': {
-      const numValue = Number(value);
-      return (
-        <div title="timespanMs" className="align-right">
-          {numValue}
-        </div>
-      );
-    }
-    case 'url': {
-      const strValue = String(value);
-      if (URL_PREFIXES.some((prefix) => strValue.startsWith(prefix))) {
-        return (
-          <a
-            href={strValue}
-            className="block w-[50ch] overflow-hidden text-ellipsis whitespace-nowrap"
-          >
-            {strValue}
-          </a>
-        );
-      } else {
-        // Fall back to <pre> rendering if not actually a URL.
-        return <div title="url">{strValue}</div>;
-      }
-    }
-    default: {
-      console.log('default', value);
-      return <pre title="default">{JSON.stringify(value, null, 2)}</pre>;
-    }
-  }
+            return (
+              <RenderHeading
+                key={colIndex}
+                heading={headingInfo}
+                className="px-6 py-4 text-sm"
+                style={{
+                  gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
+                }}
+              />
+            );
+          })}
+        </RenderTableRowContainer>
+      ) : null}
+      {item.subItems?.items.map((subItem, subIndex) => (
+        <RenderTableRowContainer headings={headings} key={subIndex}>
+          {headings.map((heading, colIndex) => (
+            <div key={colIndex} className="px-6 py-4 text-sm">
+              {heading.subItemsHeading?.key ? (
+                <RenderTableValue
+                  value={subItem[heading.subItemsHeading.key]}
+                  heading={getDerivedSubItemsHeading(heading)}
+                  device={device}
+                />
+              ) : (
+                ' '
+              )}
+            </div>
+          ))}
+        </RenderTableRowContainer>
+      ))}
+    </Fragment>
+  ));
 }

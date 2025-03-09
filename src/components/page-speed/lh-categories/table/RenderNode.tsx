@@ -1,9 +1,7 @@
-import { useContext } from 'react';
+import { useContext, useMemo, useRef } from 'react';
 import { fullPageScreenshotContext } from '../../PageSpeedContext';
 import { RenderJSONDetails } from '../../RenderJSONDetails';
-import { NodeValue } from '@/lib/schema';
-
-
+import { NodeValue, FullPageScreenshot } from '@/lib/schema';
 
 /**
  * React component that renders a node element similar to the renderNode function
@@ -16,19 +14,19 @@ export function NodeComponent({
   item: NodeValue;
   device: 'Desktop' | 'Mobile';
 }) {
-
   return (
     <div className="flex flex-col gap-2">
-      <RenderNodeImage item={item} device={device} />
-
-      {item.nodeLabel ? <div>{item.nodeLabel}</div> : null}
-
-      {item.snippet && (
-        <div className="whitespace-pre-wrap font-mono text-sm leading-5 text-blue-500">
-          {item.snippet}
+      <div className="grid gap-2 md:grid-cols-[auto_auto]">
+        <RenderNodeImage item={item} device={device} />
+        <div className="flex flex-col gap-2 self-end">
+          {item.nodeLabel ? <div>{item.nodeLabel}</div> : null}
+          {item.snippet && (
+            <div className="whitespace-pre-wrap font-mono text-sm leading-5 text-blue-500">
+              {item.snippet}
+            </div>
+          )}
         </div>
-      )}
-
+      </div>
       <RenderJSONDetails data={item} />
     </div>
   );
@@ -37,7 +35,7 @@ export function NodeComponent({
 export function RenderNodeImage({
   item,
   device,
-  imageSize = 150,
+  imageSize = 300,
 }: {
   item: NodeValue;
   device: 'Desktop' | 'Mobile';
@@ -52,33 +50,412 @@ export function RenderNodeImage({
   if (!fullPageScreenshot || !item?.boundingRect || !item?.lhId) {
     return null;
   }
+  return (
+    <ElementScreenshotRenderer
+      screenshot={fullPageScreenshot.screenshot}
+      elementRects={[fullPageScreenshot.nodes[item.lhId]]}
+      maxThumbnailSize={{ width: imageSize, height: imageSize }}
+    />
+  );
 
-  const scale: number | undefined = item?.boundingRect?.width
-    ? imageSize / item?.boundingRect?.width
-    : undefined;
+  // const scale: number | undefined = item?.boundingRect?.width
+  //   ? imageSize / item?.boundingRect?.width
+  //   : undefined;
+  // return (
+  //   <div
+  //     className="relative overflow-hidden"
+  //     style={{
+  //       aspectRatio:
+  //         item?.boundingRect?.width / item?.boundingRect?.height || undefined,
+  //       width: `${imageSize}px`,
+  //     }}
+  //   >
+  //     <div className="absolute" style={{ scale: scale, clipPath: `polygon(
+  //             ${fullPageScreenshot?.nodes[item.lhId]?.left}px ${fullPageScreenshot?.nodes[item.lhId]?.top}px,
+  //             ${fullPageScreenshot?.nodes[item.lhId]?.left + fullPageScreenshot?.nodes[item.lhId]?.width}px ${fullPageScreenshot?.nodes[item.lhId]?.top}px,
+  //             ${fullPageScreenshot?.nodes[item.lhId]?.left + fullPageScreenshot?.nodes[item.lhId]?.width}px ${fullPageScreenshot?.nodes[item.lhId]?.top + fullPageScreenshot?.nodes[item.lhId]?.height}px,
+  //             ${fullPageScreenshot?.nodes[item.lhId]?.left}px ${fullPageScreenshot?.nodes[item.lhId]?.top + fullPageScreenshot?.nodes[item.lhId]?.height}px
+  //           )`,
+  //           objectFit: 'cover',
+  //           objectPosition: 'center',
+  //           }}>
+  //       <img
+  //         src={fullPageScreenshot.screenshot.data}
+  //         alt="Full page screenshot"
+  //         className="absolute"
+  //         style={{
+  //           width: `${fullPageScreenshot.screenshot.width}px`,
+  //           height: `${fullPageScreenshot.screenshot.height}px`,
+  //           backgroundSize: 'cover',
+  //           left: `-${fullPageScreenshot?.nodes[item.lhId]?.left}px`,
+  //           top: `-${fullPageScreenshot?.nodes[item.lhId]?.top}px`,
+  //           backgroundRepeat: 'no-repeat',
+  //         }}
+  //       />
+  //     </div>
+  //   </div>
+  // );
+}
+
+/**
+ * Screenshot object type definition
+ */
+
+/**
+ * Rectangle coordinates type definition
+ */
+interface ElementRect {
+  /** Left position in pixels */
+  left: number;
+  /** Top position in pixels */
+  top: number;
+  /** Width in pixels */
+  width: number;
+  /** Height in pixels */
+  height: number;
+  /** Right position in pixels (left + width) */
+  right: number;
+  /** Bottom position in pixels (top + height) */
+  bottom: number;
+}
+
+/**
+ * Size type definition
+ */
+interface Size {
+  /** Width in pixels */
+  width: number;
+  /** Height in pixels */
+  height: number;
+}
+
+/**
+ * Position type definition
+ */
+interface Position {
+  /** Left position in pixels */
+  left: number;
+  /** Top position in pixels */
+  top: number;
+}
+
+/**
+ * Screenshot positions type definition
+ */
+interface ScreenshotPositions {
+  /** Screenshot position */
+  screenshot: Position;
+  /** Clip position */
+  clip: Position;
+}
+
+/**
+ * ElementScreenshotRenderer props
+ */
+interface ElementScreenshotRendererProps {
+  /** Screenshot object with data, width, and height */
+  screenshot: FullPageScreenshot['screenshot'];
+  /** Array of element rectangles */
+  elementRects?: ElementRect[];
+  /** Maximum thumbnail size */
+  maxThumbnailSize?: Size;
+}
+
+/**
+ * ElementScreenshot props
+ */
+interface ElementScreenshotProps {
+  /** Screenshot object with data, width, and height */
+  screenshot: FullPageScreenshot['screenshot'];
+  /** Element rectangle */
+  elementRect: ElementRect;
+  /** Maximum render size */
+  maxRenderSize: Size;
+}
+
+/**
+ * ClipPath props
+ */
+interface ClipPathProps {
+  /** Position of the clip */
+  positionClip: Position;
+  /** Element rectangle */
+  elementRect: ElementRect;
+  /** Element preview size */
+  elementPreviewSize: Size;
+  /** Clip path ID */
+  clipId: string;
+}
+
+/**
+ * Helper function to check if screenshot overlaps with the element rect
+ * @param screenshot - The screenshot object with width and height
+ * @param rect - The element rect with left, right, top, bottom
+ * @return Whether the screenshot overlaps with the rect
+ */
+function screenshotOverlapsRect(
+  screenshot: FullPageScreenshot['screenshot'],
+  rect: ElementRect,
+): boolean {
+  return (
+    rect.left <= screenshot.width &&
+    0 <= rect.right &&
+    rect.top <= screenshot.height &&
+    0 <= rect.bottom
+  );
+}
+
+/**
+ * Helper function to clamp a value between min and max
+ * @param value - The value to clamp
+ * @param min - The minimum value
+ * @param max - The maximum value
+ * @return The clamped value
+ */
+function clamp(value: number, min: number, max: number): number {
+  if (value < min) return min;
+  if (value > max) return max;
+  return value;
+}
+
+/**
+ * Helper function to get the center point of a rect
+ * @param rect - The rectangle
+ * @return The center point of the rectangle
+ */
+function getElementRectCenterPoint(rect: ElementRect): {
+  x: number;
+  y: number;
+} {
+  return {
+    x: rect.left + rect.width / 2,
+    y: rect.top + rect.height / 2,
+  };
+}
+
+/**
+ * Generate a unique ID for SVG clip paths
+ * @return A unique ID string
+ */
+function getUniqueId(): string {
+  return `clip-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+/**
+ * Calculate screenshot positions based on element rect and preview size
+ * @param elementRectSC - Element rect in screenshot coordinates
+ * @param elementPreviewSizeSC - Preview size in screenshot coordinates
+ * @param screenshotSize - Screenshot size
+ * @return The screenshot positions
+ */
+function getScreenshotPositions(
+  elementRectSC: ElementRect,
+  elementPreviewSizeSC: Size,
+  screenshotSize: Size,
+): ScreenshotPositions {
+  const elementRectCenter = getElementRectCenterPoint(elementRectSC);
+
+  // Try to center clipped region.
+  const screenshotLeftVisibleEdge = clamp(
+    elementRectCenter.x - elementPreviewSizeSC.width / 2,
+    0,
+    screenshotSize.width - elementPreviewSizeSC.width,
+  );
+  const screenshotTopVisisbleEdge = clamp(
+    elementRectCenter.y - elementPreviewSizeSC.height / 2,
+    0,
+    screenshotSize.height - elementPreviewSizeSC.height,
+  );
+
+  return {
+    screenshot: {
+      left: screenshotLeftVisibleEdge,
+      top: screenshotTopVisisbleEdge,
+    },
+    clip: {
+      left: elementRectSC.left - screenshotLeftVisibleEdge,
+      top: elementRectSC.top - screenshotTopVisisbleEdge,
+    },
+  };
+}
+
+/**
+ * Compute zoom factor based on element rect and container size
+ * @param elementRectSC - Element rect in screenshot coordinates
+ * @param renderContainerSizeDC - Container size in display coordinates
+ * @return The zoom factor
+ */
+function computeZoomFactor(
+  elementRectSC: ElementRect,
+  renderContainerSizeDC: Size,
+): number {
+  const targetClipToViewportRatio = 0.75;
+  const zoomRatioXY = {
+    x: renderContainerSizeDC.width / elementRectSC.width,
+    y: renderContainerSizeDC.height / elementRectSC.height,
+  };
+  const zoomFactor =
+    targetClipToViewportRatio * Math.min(zoomRatioXY.x, zoomRatioXY.y);
+  return Math.min(1, zoomFactor);
+}
+
+/**
+ * ClipPath component for the screenshot mask
+ */
+function ClipPath({
+  positionClip,
+  elementRect,
+  elementPreviewSize,
+  clipId,
+}: ClipPathProps): React.ReactElement {
+  // Normalize values between 0-1.
+  const top = positionClip.top / elementPreviewSize.height;
+  const bottom = top + elementRect.height / elementPreviewSize.height;
+  const left = positionClip.left / elementPreviewSize.width;
+  const right = left + elementRect.width / elementPreviewSize.width;
+
+  const polygonsPoints = [
+    `0,0             1,0            1,${top}          0,${top}`,
+    `0,${bottom}     1,${bottom}    1,1               0,1`,
+    `0,${top}        ${left},${top} ${left},${bottom} 0,${bottom}`,
+    `${right},${top} 1,${top}       1,${bottom}       ${right},${bottom}`,
+  ];
+
+  return (
+    <clipPath id={clipId} clipPathUnits="objectBoundingBox">
+      {polygonsPoints.map((points, index) => (
+        <polygon key={index} points={points} />
+      ))}
+    </clipPath>
+  );
+}
+
+/**
+ * ElementScreenshot component for rendering a screenshot with highlighted element
+ */
+function ElementScreenshot({
+  screenshot,
+  elementRect,
+  maxRenderSize,
+}: ElementScreenshotProps): React.ReactElement | null {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const clipId = getUniqueId();
+
+  if (!screenshotOverlapsRect(screenshot, elementRect)) {
+    return null;
+  }
+
+  // Compute zoom factor
+  const zoomFactor = computeZoomFactor(elementRect, maxRenderSize);
+
+  // Calculate preview size in screenshot coordinates
+  const elementPreviewSizeSC: Size = {
+    width: maxRenderSize.width / zoomFactor,
+    height: maxRenderSize.height / zoomFactor,
+  };
+
+  elementPreviewSizeSC.width = Math.min(
+    screenshot.width,
+    elementPreviewSizeSC.width,
+  );
+  elementPreviewSizeSC.height = Math.min(
+    screenshot.height,
+    elementPreviewSizeSC.height,
+  );
+
+  // Calculate preview size in display coordinates
+  const elementPreviewSizeDC: Size = {
+    width: elementPreviewSizeSC.width * zoomFactor,
+    height: elementPreviewSizeSC.height * zoomFactor,
+  };
+
+  // Get positions for screenshot and clip
+  const positions = getScreenshotPositions(elementRect, elementPreviewSizeSC, {
+    width: screenshot.width,
+    height: screenshot.height,
+  });
+
+  // Styles for the image element
+  const imageStyle: React.CSSProperties = {
+    width: `${elementPreviewSizeDC.width}px`,
+    height: `${elementPreviewSizeDC.height}px`,
+    backgroundImage: `url(${screenshot.data})`,
+    backgroundPositionY: `${-(positions.screenshot.top * zoomFactor)}px`,
+    backgroundPositionX: `${-(positions.screenshot.left * zoomFactor)}px`,
+    backgroundSize: `${screenshot.width * zoomFactor}px ${screenshot.height * zoomFactor}px`,
+  };
+
+  // Styles for the marker element
+  const markerStyle: React.CSSProperties = {
+    width: `${elementRect.width * zoomFactor}px`,
+    height: `${elementRect.height * zoomFactor}px`,
+    left: `${positions.clip.left * zoomFactor}px`,
+    top: `${positions.clip.top * zoomFactor}px`,
+  };
+
+  // Styles for the mask element
+  const maskStyle: React.CSSProperties = {
+    width: `${elementPreviewSizeDC.width}px`,
+    height: `${elementPreviewSizeDC.height}px`,
+    clipPath: `url(#${clipId})`,
+  };
+
   return (
     <div
       className="relative overflow-hidden"
-      style={{
-        aspectRatio:
-          item?.boundingRect?.width / item?.boundingRect?.height || undefined,
-        width: `${imageSize}px`,
-      }}
+      ref={containerRef}
+      data-rect-width={elementRect.width}
+      data-rect-height={elementRect.height}
+      data-rect-left={elementRect.left}
+      data-rect-top={elementRect.top}
     >
-      <div className="absolute" style={{ scale: scale }}>
-        <div
-          className="absolute"
-          style={{
-            width: `${fullPageScreenshot.screenshot.width}px`,
-            height: `${fullPageScreenshot.screenshot.height}px`,
-            backgroundImage: `var(--${device.toLowerCase()}FullPageScreenshot)`,
-            backgroundSize: 'cover',
-            left: `-${fullPageScreenshot?.nodes[item.lhId]?.left}px`,
-            top: `-${fullPageScreenshot?.nodes[item.lhId]?.top}px`,
-            backgroundRepeat: 'no-repeat',
-          }}
-        ></div>
+      <div className="relative">
+        <div className="relative bg-no-repeat" style={imageStyle}>
+          <div className="absolute inset-0 bg-black/50" style={maskStyle}>
+            <svg height="0" width="0">
+              <defs>
+                <ClipPath
+                  clipId={clipId}
+                  positionClip={positions.clip}
+                  elementRect={elementRect}
+                  elementPreviewSize={elementPreviewSizeSC}
+                />
+              </defs>
+            </svg>
+          </div>
+          <div
+            className="pointer-events-none absolute border-2 border-orange-500 shadow-[0_0_0_2px_rgba(255,255,255,0.8)]"
+            style={markerStyle}
+          ></div>
+        </div>
       </div>
     </div>
   );
+}
+
+/**
+ * ElementScreenshotRenderer component without overlay functionality
+ */
+function ElementScreenshotRenderer({
+  screenshot,
+  elementRects = [],
+  maxThumbnailSize = { width: 120, height: 80 },
+}: ElementScreenshotRendererProps): React.ReactElement {
+  // Render thumbnails
+  const renderThumbnails = useMemo(() => {
+    return elementRects.map((rect, index) => (
+      <div
+        key={index}
+        className="cursor-pointer overflow-hidden rounded border border-gray-300 transition-transform hover:scale-105 hover:shadow-md"
+      >
+        <ElementScreenshot
+          screenshot={screenshot}
+          elementRect={rect}
+          maxRenderSize={maxThumbnailSize}
+        />
+      </div>
+    ));
+  }, [elementRects, maxThumbnailSize, screenshot]);
+
+  return <div className="flex flex-wrap gap-2.5">{renderThumbnails}</div>;
 }
