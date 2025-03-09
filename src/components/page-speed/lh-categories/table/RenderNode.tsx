@@ -1,7 +1,7 @@
 import { useContext, useMemo, useRef } from 'react';
 import { fullPageScreenshotContext } from '../../PageSpeedContext';
 import { RenderJSONDetails } from '../../RenderJSONDetails';
-import { NodeValue, FullPageScreenshot } from '@/lib/schema';
+import { NodeValue, FullPageScreenshot, Rect } from '@/lib/schema';
 
 /**
  * React component that renders a node element similar to the renderNode function
@@ -57,66 +57,6 @@ export function RenderNodeImage({
       maxThumbnailSize={{ width: imageSize, height: imageSize }}
     />
   );
-
-  // const scale: number | undefined = item?.boundingRect?.width
-  //   ? imageSize / item?.boundingRect?.width
-  //   : undefined;
-  // return (
-  //   <div
-  //     className="relative overflow-hidden"
-  //     style={{
-  //       aspectRatio:
-  //         item?.boundingRect?.width / item?.boundingRect?.height || undefined,
-  //       width: `${imageSize}px`,
-  //     }}
-  //   >
-  //     <div className="absolute" style={{ scale: scale, clipPath: `polygon(
-  //             ${fullPageScreenshot?.nodes[item.lhId]?.left}px ${fullPageScreenshot?.nodes[item.lhId]?.top}px,
-  //             ${fullPageScreenshot?.nodes[item.lhId]?.left + fullPageScreenshot?.nodes[item.lhId]?.width}px ${fullPageScreenshot?.nodes[item.lhId]?.top}px,
-  //             ${fullPageScreenshot?.nodes[item.lhId]?.left + fullPageScreenshot?.nodes[item.lhId]?.width}px ${fullPageScreenshot?.nodes[item.lhId]?.top + fullPageScreenshot?.nodes[item.lhId]?.height}px,
-  //             ${fullPageScreenshot?.nodes[item.lhId]?.left}px ${fullPageScreenshot?.nodes[item.lhId]?.top + fullPageScreenshot?.nodes[item.lhId]?.height}px
-  //           )`,
-  //           objectFit: 'cover',
-  //           objectPosition: 'center',
-  //           }}>
-  //       <img
-  //         src={fullPageScreenshot.screenshot.data}
-  //         alt="Full page screenshot"
-  //         className="absolute"
-  //         style={{
-  //           width: `${fullPageScreenshot.screenshot.width}px`,
-  //           height: `${fullPageScreenshot.screenshot.height}px`,
-  //           backgroundSize: 'cover',
-  //           left: `-${fullPageScreenshot?.nodes[item.lhId]?.left}px`,
-  //           top: `-${fullPageScreenshot?.nodes[item.lhId]?.top}px`,
-  //           backgroundRepeat: 'no-repeat',
-  //         }}
-  //       />
-  //     </div>
-  //   </div>
-  // );
-}
-
-/**
- * Screenshot object type definition
- */
-
-/**
- * Rectangle coordinates type definition
- */
-interface ElementRect {
-  /** Left position in pixels */
-  left: number;
-  /** Top position in pixels */
-  top: number;
-  /** Width in pixels */
-  width: number;
-  /** Height in pixels */
-  height: number;
-  /** Right position in pixels (left + width) */
-  right: number;
-  /** Bottom position in pixels (top + height) */
-  bottom: number;
 }
 
 /**
@@ -156,7 +96,7 @@ interface ElementScreenshotRendererProps {
   /** Screenshot object with data, width, and height */
   screenshot: FullPageScreenshot['screenshot'];
   /** Array of element rectangles */
-  elementRects?: ElementRect[];
+  elementRects?: Rect[];
   /** Maximum thumbnail size */
   maxThumbnailSize?: Size;
 }
@@ -168,7 +108,7 @@ interface ElementScreenshotProps {
   /** Screenshot object with data, width, and height */
   screenshot: FullPageScreenshot['screenshot'];
   /** Element rectangle */
-  elementRect: ElementRect;
+  elementRect: Rect;
   /** Maximum render size */
   maxRenderSize: Size;
 }
@@ -180,7 +120,7 @@ interface ClipPathProps {
   /** Position of the clip */
   positionClip: Position;
   /** Element rectangle */
-  elementRect: ElementRect;
+  elementRect: Rect;
   /** Element preview size */
   elementPreviewSize: Size;
   /** Clip path ID */
@@ -195,7 +135,7 @@ interface ClipPathProps {
  */
 function screenshotOverlapsRect(
   screenshot: FullPageScreenshot['screenshot'],
-  rect: ElementRect,
+  rect: Rect,
 ): boolean {
   return (
     rect.left <= screenshot.width &&
@@ -223,7 +163,7 @@ function clamp(value: number, min: number, max: number): number {
  * @param rect - The rectangle
  * @return The center point of the rectangle
  */
-function getElementRectCenterPoint(rect: ElementRect): {
+function getElementRectCenterPoint(rect: Rect): {
   x: number;
   y: number;
 } {
@@ -249,7 +189,7 @@ function getUniqueId(): string {
  * @return The screenshot positions
  */
 function getScreenshotPositions(
-  elementRectSC: ElementRect,
+  elementRectSC: Rect,
   elementPreviewSizeSC: Size,
   screenshotSize: Size,
 ): ScreenshotPositions {
@@ -286,7 +226,7 @@ function getScreenshotPositions(
  * @return The zoom factor
  */
 function computeZoomFactor(
-  elementRectSC: ElementRect,
+  elementRectSC: Rect,
   renderContainerSizeDC: Size,
 ): number {
   const targetClipToViewportRatio = 0.75;
