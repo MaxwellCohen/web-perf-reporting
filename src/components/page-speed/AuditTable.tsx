@@ -1,4 +1,4 @@
-import { AuditResult } from '@/lib/schema';
+import { AuditResultsRecord } from '@/lib/schema';
 import {
   Table,
   TableBody,
@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/table';
 import ReactMarkdown from 'react-markdown';
 
-export function AuditTable({ audits }: { audits?: AuditResult }) {
+export function AuditTable({ audits }: { audits?: AuditResultsRecord }) {
   if (!audits) {
     return null;
   }

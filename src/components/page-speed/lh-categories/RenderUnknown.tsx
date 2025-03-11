@@ -1,9 +1,9 @@
-import { AuditResult } from "@/lib/schema";
+import { AuditResultsRecord } from "@/lib/schema";
 
 export function RenderUnknown({
     details,
   }: {
-    details: AuditResult[string]['details'];
+    details: AuditResultsRecord[string]['details'];
   }) {
     return (
       <div className="overflow-x-auto">

@@ -4,7 +4,7 @@ import {
   AccordionContent,
 } from '../../ui/accordion';
 import { RenderJSONDetails } from '../RenderJSONDetails';
-import { AuditRef, AuditResult } from '@/lib/schema';
+import { AuditRef, AuditResultsRecord } from '@/lib/schema';
 import { AuditDetailsSummary } from './AuditDetailsSummary';
 import { RenderMetricSavings } from './RenderMetricSavings';
 import { RenderDetails } from './RenderDetails';
@@ -19,8 +19,8 @@ export function AuditDetailsSection({
   acronym,
 }: {
   auditRef: AuditRef;
-  desktopAuditRecords: AuditResult;
-  mobileAuditRecords: AuditResult;
+  desktopAuditRecords: AuditResultsRecord;
+  mobileAuditRecords: AuditResultsRecord;
   acronym?: string;
 }) {
   const desktopAuditData = desktopAuditRecords?.[auditRef.id || ''];
@@ -46,7 +46,7 @@ export function AuditDetailsSection({
           acronym={acronym}
         />
       </AccordionTrigger>
-      <RenderJSONDetails data={{ desktopAuditData, mobileAuditData }} />
+      <RenderJSONDetails data={desktopAuditData} data2={mobileAuditData} title={`All Data for ${auditRef.id}`} />
       <AccordionContent>
         <RenderMetricSavings
           desktopAuditData={desktopAuditData}

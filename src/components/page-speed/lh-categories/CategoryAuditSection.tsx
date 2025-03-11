@@ -8,7 +8,7 @@ import {
 } from '../../ui/accordion';
 import { sortByScoreDisplayModes } from '../ScoreDisplay';
 import {
-  AuditResult,
+  AuditResultsRecord,
   CategoryResult,
 } from '@/lib/schema';
 import { CategoryScoreInfo } from './CategoryScoreInfo';
@@ -24,8 +24,8 @@ export function CategoryAuditSection({
   mobileCategory?: CategoryResult | null;
   desktopCategory?: CategoryResult | null;
   categoryKey: string;
-  desktopAuditRecords?: AuditResult;
-  mobileAuditRecords?: AuditResult;
+  desktopAuditRecords?: AuditResultsRecord;
+  mobileAuditRecords?: AuditResultsRecord;
 }) {
   if (!desktopCategory || !mobileCategory) {
     return null;
@@ -56,9 +56,7 @@ export function CategoryAuditSection({
                   if (!auditRef.id) {
                     return null;
                   }
-                  if (auditRef.group === 'metrics') {
-                    return null;
-                  }
+                  
                   const desktopAuditData = desktopAuditRecords?.[auditRef.id];
                   const mobileAuditData = mobileAuditRecords?.[auditRef.id];
                   if (!desktopAuditData && !mobileAuditData) {
@@ -84,9 +82,6 @@ export function CategoryAuditSection({
                     return false;
                   }
 
-                  if (desktopAuditData?.details?.type === 'filmstrip') {
-                    return false;
-                  }
                   return true;
                 })
                 .sort((a, b) => {

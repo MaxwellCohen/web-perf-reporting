@@ -6,14 +6,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { AuditResult } from '@/lib/schema';
+import { AuditResultsRecord } from '@/lib/schema';
 
 export function RenderMetricSavings({
   mobileAuditData,
   desktopAuditData,
 }: {
-  mobileAuditData: AuditResult[string];
-  desktopAuditData: AuditResult[string];
+  mobileAuditData: AuditResultsRecord[string];
+  desktopAuditData: AuditResultsRecord[string];
 }) {
   if (!mobileAuditData.metricSavings && !desktopAuditData.metricSavings) {
     return null;
@@ -37,27 +37,30 @@ export function RenderMetricSavings({
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Metric</TableHead>
-          <TableHead>Mobile Possible Savings</TableHead>
-          <TableHead>Desktop Possible Savings</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {keys.map((metric) => (
-          <TableRow key={metric}>
-            <TableCell>{metric}</TableCell>
-            <TableCell>
-              {mobileAuditData?.metricSavings?.[metric] || 0}
-            </TableCell>
-            <TableCell>
-              {desktopAuditData?.metricSavings?.[metric] || 0}
-            </TableCell>
+    <>
+      <h4 className="text-md font-bold">CWV Possible Metric Savings</h4>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Metric</TableHead>
+            <TableHead>Possible Mobile Savings</TableHead>
+            <TableHead>Possible Desktop Savings</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>  
+        </TableHeader>
+        <TableBody>
+          {keys.map((metric) => (
+            <TableRow key={metric}>
+              <TableCell>{metric}</TableCell>
+              <TableCell>
+                {mobileAuditData?.metricSavings?.[metric] || 0}
+              </TableCell>
+              <TableCell>
+                {desktopAuditData?.metricSavings?.[metric] || 0}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </>
   );
 }

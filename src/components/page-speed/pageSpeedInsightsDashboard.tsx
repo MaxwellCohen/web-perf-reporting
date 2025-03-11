@@ -2,7 +2,7 @@
 
 import {
   AuditDetailFilmstripSchema,
-  AuditResult,
+  AuditResultsRecord,
   Entities,
   PageSpeedInsights,
 } from '@/lib/schema';
@@ -31,11 +31,11 @@ export function PageSpeedInsightsDashboard({
 
   const desktopEntities: Entities | undefined =
     desktopData?.lighthouseResult?.entities;
-  const desktopAuditRecords: AuditResult | undefined =
+  const desktopAuditRecords: AuditResultsRecord | undefined =
     desktopData?.lighthouseResult?.audits;
   const desktopCategories = desktopData?.lighthouseResult?.categories;
   const desktopCategoryGroups = desktopData?.lighthouseResult?.categoryGroups;
-  const mobileAuditRecords: AuditResult | undefined =
+  const mobileAuditRecords: AuditResultsRecord | undefined =
     mobileData?.lighthouseResult?.audits;
   const mobileCategoryGroups = mobileData?.lighthouseResult?.categoryGroups;
   const mobileCategories = mobileData?.lighthouseResult?.categories;
@@ -52,13 +52,7 @@ export function PageSpeedInsightsDashboard({
         mobileFullPageScreenshot,
       }}
     >
-      <Accordion
-        style={
-          {
-            '--desktopFullPageScreenshot': `url(${mobileFullPageScreenshot?.screenshot.data})`,
-            '--mobileFullPageScreenshot': `url(${mobileFullPageScreenshot?.screenshot.data})`,
-          } as React.CSSProperties
-        }
+        <Accordion
         type="multiple"
         defaultValue={[
           'page-loading-experience',

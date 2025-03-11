@@ -1,6 +1,7 @@
 import { Fragment } from 'react';
 import {
-  Entities,
+  AuditDetailOpportunity,
+  AuditDetailTable,
   ItemValue,
   ItemValueType,
   TableColumnHeading,
@@ -8,16 +9,6 @@ import {
 } from '@/lib/schema';
 import { RenderTableValue } from './RenderTableValue';
 import { cn } from '@/lib/utils';
-
-interface TableProps {
-  headings: TableColumnHeading[];
-  items: TableItem[];
-  isEntityGrouped?: boolean;
-  skipSumming?: string[];
-  sortedBy?: string[];
-  entities?: Entities[];
-  device: 'Desktop' | 'Mobile';
-}
 
 const SUMMABLE_VALUETYPES: ItemValueType[] = [
   'bytes',
@@ -125,15 +116,27 @@ const getEntityGroupItems = ({
   return result;
 };
 
+
 export function DetailTable({
-  headings,
-  items,
-  isEntityGrouped = false,
-  skipSumming = [],
-  sortedBy,
-  device,
-}: TableProps) {
-  console.log('headings', headings);
+  mobileDetails,
+  desktopDetails,
+}: {
+  mobileDetails?: AuditDetailOpportunity | AuditDetailTable;
+  desktopDetails?: AuditDetailOpportunity | AuditDetailTable;
+}) {
+
+  console.log('desktopDetails', desktopDetails?.items
+  );
+
+
+  const items = desktopDetails?.items || [];
+  const headings = desktopDetails?.headings;
+  const isEntityGrouped = !!desktopDetails?.isEntityGrouped;
+  const skipSumming =
+    desktopDetails?.skipSumming || mobileDetails?.skipSumming || [];
+  const sortedBy = desktopDetails?.sortedBy || mobileDetails?.sortedBy;
+
+  const device = 'Desktop';
   if (!items?.length) return null;
   if (!headings?.length) return null;
 
@@ -189,11 +192,11 @@ function RenderTableRowContainer({
 } & React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
+      {...props}
       className={cn('grid grid-cols-subgrid border-b-2', props.className)}
       style={{
         gridColumn: `span ${headings.length} / span ${headings.length}`,
       }}
-      {...props}
     >
       {children}
     </div>
@@ -284,7 +287,11 @@ function RenderEntityGroupRows({
               })}
             </RenderTableRowContainer>
             {item.subItems?.items.map((subItem, subIndex) => (
-              <RenderTableRowContainer headings={headings} key={subIndex}>
+              <RenderTableRowContainer
+                headings={headings}
+                key={subIndex}
+                className="border-red-500"
+              >
                 {headings.map((heading, colIndex) => {
                   if (!heading.subItemsHeading?.key) return null;
                   return (
@@ -323,13 +330,15 @@ function RenderTableItems({
         {headings.map((heading, colIndex) => {
           if (!heading.key) return null;
           return (
-            <RenderTableCell
-              key={colIndex}
-              className="px-6 py-4 text-xs"
-              value={item[heading.key]}
-              heading={heading}
-              device={device}
-            />
+            <>
+              <RenderTableCell
+                key={colIndex}
+                className="px-6 py-4 text-xs"
+                value={item[heading.key]}
+                heading={heading}
+                device={device}
+              />
+            </>
           );
         })}
       </RenderTableRowContainer>
@@ -363,7 +372,11 @@ function RenderTableItems({
         </RenderTableRowContainer>
       ) : null}
       {item.subItems?.items.map((subItem, subIndex) => (
-        <RenderTableRowContainer headings={headings} key={subIndex}>
+        <RenderTableRowContainer
+          headings={headings}
+          key={subIndex}
+          className="border-2"
+        >
           {headings.map((heading, colIndex) => (
             <div key={colIndex} className="px-6 py-4 text-sm">
               {heading.subItemsHeading?.key ? (

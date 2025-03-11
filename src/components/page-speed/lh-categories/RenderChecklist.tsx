@@ -1,12 +1,12 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { AuditDetailChecklistSchema, AuditResult } from "@/lib/schema";
+import { AuditDetailChecklistSchema, AuditResultsRecord } from "@/lib/schema";
 
 export function RenderChecklist({
     desktopAuditData,
     mobileAuditData,
   }: {
-    desktopAuditData: AuditResult[string];
-    mobileAuditData: AuditResult[string];
+    desktopAuditData: AuditResultsRecord[string];
+    mobileAuditData: AuditResultsRecord[string];
   }) {
     const desktopDetails = AuditDetailChecklistSchema.safeParse(
       desktopAuditData.details,

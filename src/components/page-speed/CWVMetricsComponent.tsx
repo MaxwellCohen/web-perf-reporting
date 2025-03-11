@@ -1,5 +1,5 @@
 import { PageSpeedInsights } from "@/lib/schema";
-import { AuditResult } from "@/lib/schema";
+import { AuditResultsRecord } from "@/lib/schema";
 import { Card, CardTitle } from "../ui/card";
 import { ScoreDisplay } from "./ScoreDisplay";
 import ReactMarkdown from "react-markdown";
@@ -12,9 +12,9 @@ export function CWVMetricsComponent({
     mobileAudits,
 }: {
       desktopCategoryGroups?: PageSpeedInsights['lighthouseResult']['categoryGroups'];
-    desktopAudits?: AuditResult;
+    desktopAudits?: AuditResultsRecord;
     mobileCategoryGroups?: PageSpeedInsights['lighthouseResult']['categoryGroups'];
-    mobileAudits?: AuditResult;
+    mobileAudits?: AuditResultsRecord;
   }) {
     return (
       <>

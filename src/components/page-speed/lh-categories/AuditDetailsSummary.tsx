@@ -1,14 +1,14 @@
 import ReactMarkdown from 'react-markdown';
 import { ScoreDisplay } from '../ScoreDisplay';
-import { AuditResult } from '@/lib/schema';
+import { AuditResultsRecord } from '@/lib/schema';
 
 export function AuditDetailsSummary({
   desktopAuditData,
   mobileAuditData,
   acronym,
 }: {
-  desktopAuditData: AuditResult[string];
-  mobileAuditData: AuditResult[string];
+  desktopAuditData: AuditResultsRecord[string];
+  mobileAuditData: AuditResultsRecord[string];
   acronym?: string;
 }) {
   return (

@@ -1,4 +1,4 @@
-import { AuditResult } from '@/lib/schema';
+import { AuditResultsRecord } from '@/lib/schema';
 
 export const ScoreDisplayModes = {
   /** Scores of 0-1 (map to displayed scores of 0-100). */
@@ -23,7 +23,7 @@ export const ScoreDisplayModes = {
 } as const;
 
 export const ScoreDisplayModesRanking: Record<
-  AuditResult[string]['scoreDisplayMode'] | 'empty',
+  AuditResultsRecord[string]['scoreDisplayMode'] | 'empty',
   number
 > = {
   metricSavings: 1,
@@ -36,16 +36,16 @@ export const ScoreDisplayModesRanking: Record<
   notApplicable: 8,
 } as const;
 
-export function isEmptyResult(auditData: AuditResult[string]) {
+export function isEmptyResult(auditData: AuditResultsRecord[string]) {
   if (
     auditData.details?.type === 'table' &&
-    auditData.details.items.length === 0
+    auditData.details.items?.length === 0
   ) {
     return true;
   }
   if (
     auditData.details?.type === 'opportunity' &&
-    auditData.details.items.length === 0
+    auditData.details.items?.length === 0
   ) {
     return true;
   }
@@ -54,8 +54,8 @@ export function isEmptyResult(auditData: AuditResult[string]) {
 }
 
 export const sortByScoreDisplayModes = (
-  a: AuditResult[string] | undefined,
-  b: AuditResult[string] | undefined,
+  a: AuditResultsRecord[string] | undefined,
+  b: AuditResultsRecord[string] | undefined,
 ) => {
   if (!a || !b) {
     return -1;
@@ -82,7 +82,7 @@ export function ScoreDisplay({
   audit,
   device,
 }: {
-  audit?: AuditResult[string];
+  audit?: AuditResultsRecord[string];
   device?: string;
 }) {
   if (!audit) {

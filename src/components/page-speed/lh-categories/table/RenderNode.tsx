@@ -27,7 +27,7 @@ export function NodeComponent({
           )}
         </div>
       </div>
-      <RenderJSONDetails data={item} />
+      <RenderJSONDetails data={item} title={`Node Data for ${item.lhId}`} />
     </div>
   );
 }

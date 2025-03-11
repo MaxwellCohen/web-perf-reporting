@@ -1,4 +1,4 @@
-import { AuditResult, CategoryResult } from '@/lib/schema';
+import { AuditResultsRecord, CategoryResult } from '@/lib/schema';
 import { CategoryAuditSection } from './CategoryAuditSection';
 
 export function PageSpeedCategorySection({
@@ -9,8 +9,8 @@ export function PageSpeedCategorySection({
 }: {
   desktopCategories?: Record<string, CategoryResult>;
   mobileCategories?: Record<string, CategoryResult>;
-  desktopAuditRecords: AuditResult | undefined;
-  mobileAuditRecords: AuditResult | undefined;
+  desktopAuditRecords: AuditResultsRecord | undefined;
+  mobileAuditRecords: AuditResultsRecord | undefined;
 }) {
   const categoryKeys = [
     ...new Set<string>([

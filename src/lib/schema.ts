@@ -269,14 +269,20 @@ const auditRefSchema = z
 
 export type AuditRef = z.infer<typeof auditRefSchema>;
 
-export const DebugDataSchema = z.intersection(
-  z.object({
-    type: z.literal('debugdata'),
-  }),
-  z.record(z.any()),
-);
 
-export type DebugData = z.infer<typeof DebugDataSchema>;
+
+export type DebugData = {
+  type: 'debugdata';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [p: string]: any;
+};
+
+export const DebugDataSchema = z.custom<DebugData>((v) => {
+  if (v.type === 'debugdata') {
+    return v;
+  }
+  return null;
+});
 
 export const RectSchema = z.object({
   width: z.number(),
@@ -308,8 +314,7 @@ export interface TableSubItems {
   items: TableItem[];
 }
 
-
-const AuditDetailsTableHeading = z.array(
+export const AuditDetailsTableHeading = z.array(
   z
     .object({
       valueType: z.union([z.string(), z.number()]).optional(),
@@ -327,16 +332,62 @@ const AuditDetailsTableHeading = z.array(
     })
     .partial(),
 );
-const AuditDetailTable = z.object({
-  type: z.literal('table'),
-  items: z.array(
-    z.any(), //use heading to get key
-  ),
-  isEntityGrouped: z.boolean().optional(),
-  headings: AuditDetailsTableHeading,
-  sortedBy: z.array(z.string()).optional(),
+
+export interface AuditDetailTable extends BaseDetails {
+  type: 'table';
+  headings: TableColumnHeading[];
+  items: TableItem[];
+  summary?: {
+    wastedMs?: number;
+    wastedBytes?: number;
+  };
+  /**
+   * Columns to sort the items by, during grouping.
+   * If omitted, entity groups will be sorted by the audit ordering vs. the new totals.
+   */
+  sortedBy?: Array<string>;
+  /** Will be true if the table is already grouped by entities. */
+  isEntityGrouped?: boolean;
+  /** Column keys to skip summing. If omitted, all column types supported are summed. */
+  skipSumming?: Array<string>;
+  
+}
+
+export const AuditDetailTableSchema = z.custom<AuditDetailTable>((v) => {
+  if (v.type === 'table') {
+    return v;
+  }
+  return null;
+});
+
+export interface TreeMapNode {
+  /** Could be a url, a path component from a source map, or an arbitrary string. */
+  name: string;
+  resourceBytes: number;
+  unusedBytes?: number;
+  /** If present, this module is a duplicate. String is normalized source path. See ModuleDuplication.normalizeSource */
+  duplicatedNormalizedModuleName?: string;
+  children?: TreeMapNode[];
+}
+export interface TreeMapData extends BaseDetails {
+  type: 'treemap-data';
+  nodes: TreeMapNode[];
+}
+
+export const TreeMapDataSchema = z.custom<TreeMapData>((v) => {
+  if (v.type === 'treemap-data') {
+    return v;
+  }
+  return null;
+});
+
+export const AuditDetailListSchema = z.object({
+  type: z.literal('list'),
+  items: z.array(AuditDetailTableSchema.or(DebugDataSchema)),
   debugData: DebugDataSchema.optional(),
 });
+
+export type AuditDetailList = z.infer<typeof AuditDetailListSchema>;
 
 export const AuditDetailFilmstripSchema = z.object({
   type: z.literal('filmstrip'),
@@ -352,41 +403,97 @@ export const AuditDetailFilmstripSchema = z.object({
 
 export type AuditDetailFilmstrip = z.infer<typeof AuditDetailFilmstripSchema>;
 
-export const AuditDetailOpportunitySchema = z
-  .object({
-    type: z.literal('opportunity'),
-    headings: AuditDetailsTableHeading,
-    sortedBy: z.array(z.string()),
-    overallSavingsMs: coerceNumber.optional(),
-    overallSavingsBytes: coerceNumber.optional(),
-    items: z.array(z.any()),
-    debugData: DebugDataSchema.optional(),
-    numericValue: z.string(),
-    numericUnit: z.string(),
-  })
-  .partial();
+interface OpportunityItem extends TableItem {
+  url: string;
+  wastedBytes?: number;
+  totalBytes?: number;
+  wastedMs?: number;
+  debugData?: DebugData;
+  [p: string]: undefined | ItemValue;
+}
+export  interface AuditDetailOpportunity  extends BaseDetails {
+  type: 'opportunity';
+  headings: TableColumnHeading[];
+  items: OpportunityItem[];
+  /**
+   * Columns to sort the items by, during grouping.
+   * If omitted, entity groups will be sorted by the audit ordering vs. the new totals.
+   */
+  sortedBy?: Array<string>;
+  /** Will be true if the table is already grouped by entities. */
+  isEntityGrouped?: boolean;
+  /** Column keys to skip summing. If omitted, all column types supported are summed. */
+  skipSumming?: Array<string>;
+  /**
+   * @deprecated
+   * Historically this represents the time saved on the entire page load. It's mostly used as an
+   * alias for `metricSavings.LCP` now. We recommend using `metricSavings` directly for more
+   * metric-specific savings estimates.
+   */
+  overallSavingsMs?: number;
+  /** Total byte savings covered by this audit. */
+  overallSavingsBytes?: number;
+}
 
-export type AuditDetailOpportunity = z.infer<
-  typeof AuditDetailOpportunitySchema
->;
+export const AuditDetailOpportunitySchema = z.custom<AuditDetailOpportunity>((v) => {
+  if (v.type === 'opportunity') {
+    return v;
+  }
+  return null;
+});
+
+export interface BaseDetails {
+  /** Additional information, usually used for including debug or meta information in the LHR */
+  debugData?: DebugData;
+}
+
+export interface CriticalRequestChain extends BaseDetails {
+  type: 'criticalrequestchain';
+  longestChain: {
+    duration: number;
+    length: number;
+    transferSize: number;
+  };
+  chains: SimpleCriticalRequestNode;
+}
+
+export type SimpleCriticalRequestNode = {
+  [id: string]: {
+    request: {
+      url: string;
+      startTime: number;
+      endTime: number;
+      responseReceivedTime: number;
+      transferSize: number;
+    };
+    children?: SimpleCriticalRequestNode;
+  };
+};
+
+export const AuditDetailScreenshotSchema = z.object({
+  type: z.literal('screenshot'),
+  timing: coerceNumber,
+  timestamp: coerceNumber,
+  data: z.string(),
+  debugData: DebugDataSchema.optional(),
+});
+
+export type AuditDetailScreenshot = z.infer<typeof AuditDetailScreenshotSchema>;
 
 /** String enum of possible types of values found within table items. */
 export const ItemValueTypeSchema = z.union([
   z.literal('bytes'),
+  z.literal('ms'),
+  z.literal('url'),
   z.literal('code'),
   z.literal('link'),
-  z.literal('ms'),
-  z.literal('multi'),
   z.literal('node'),
-  z.literal('source-location'),
-  z.literal('numeric'),
-  z.literal('text'),
   z.literal('source-location'),
   z.literal('numeric'),
   z.literal('text'),
   z.literal('thumbnail'),
   z.literal('timespanMs'),
-  z.literal('url'),
+  z.literal('multi'), // not sure what this is 
 ]);
 
 /** String enum of possible types of values found within table items. */
@@ -467,28 +574,51 @@ export const ItemValueSchema = z.union([
   CodeValueSchema,
   NumericValueSchema,
   IcuMessageSchema,
-  TextValueSchema
+  TextValueSchema,
 ]);
 
 export type ItemValue = z.infer<typeof ItemValueSchema> | TableSubItems;
-  
-export const TableColumnHeadingSchema = z.object({
-  key: z.string().nullable(),
-  label: IcuMessageSchema.or(z.string()),
-  valueType: ItemValueTypeSchema,
-  subItemsHeading: z
-    .object({
-      key: z.string(),
-      valueType: ItemValueTypeSchema,
-      displayUnit: z.string().optional(),
-      granularity: z.number().optional(),
-    })
-    .optional(),
-  displayUnit: z.string().optional(),
-  granularity: z.number().optional(),
-});
 
-export type TableColumnHeading = z.infer<typeof TableColumnHeadingSchema>;
+export interface TableColumnHeading {
+  /**
+   * The name of the property within items being described.
+   * If null, subItemsHeading must be defined, and the first table row in this column for
+   * every item will be empty.
+   * See legacy-javascript for an example.
+   */
+  key: string | null;
+  /** Readable text label of the field. */
+  label: IcuMessage | string;
+  /**
+   * The data format of the column of values being described. Usually
+   * those values will be primitives rendered as this type, but the values
+   * could also be objects with their own type to override this field.
+   */
+  valueType: ItemValueType;
+  /**
+   * Optional - defines an inner table of values that correspond to this column.
+   * Key is required - if other properties are not provided, the value for the heading is used.
+   */
+  subItemsHeading?: {
+    key: string;
+    valueType?: ItemValueType;
+    displayUnit?: string;
+    granularity?: number;
+    showBothDevices: boolean;
+  };
+
+  displayUnit?: string;
+  granularity?: number;
+
+  showBothDevices: boolean;
+}
+
+export const TableColumnHeadingSchema = z.custom<TableColumnHeading>((v) => {
+  if (v.key === null) {
+    return v;
+  }
+  return null;
+});
 
 export type TableItem = {
   debugData?: DebugData;
@@ -509,16 +639,25 @@ export const AuditDetailChecklistSchema = z.object({
 
 export type AuditDetailChecklist = z.infer<typeof AuditDetailChecklistSchema>;
 
-const auditResultSchema = z.record(
+export const AuditDetailCriticalRequestChainSchema =
+  z.custom<CriticalRequestChain>((v) => {
+    if (v.type === 'criticalrequestchain') {
+      return v;
+    }
+    return null;
+  });
+
+const auditResultsRecordSchema = z.record(
   z.object({
     description: z.string().optional(),
-    details: z
-      .union([
-        z.any(),
-        AuditDetailTable,
-        AuditDetailFilmstripSchema,
-        AuditDetailOpportunitySchema,
-      ])
+    details: AuditDetailTableSchema.or(AuditDetailFilmstripSchema)
+      .or(AuditDetailOpportunitySchema)
+      .or(AuditDetailChecklistSchema)
+      .or(AuditDetailListSchema)
+      .or(TreeMapDataSchema)
+      .or(AuditDetailCriticalRequestChainSchema)
+      .or(AuditDetailScreenshotSchema)
+      .or(DebugDataSchema)
       .optional(),
     errorMessage: z.string().optional(),
     explanation: z.string().optional(),
@@ -542,7 +681,7 @@ const auditResultSchema = z.record(
   }),
 );
 
-export type AuditResult = z.infer<typeof auditResultSchema>;
+export type AuditResultsRecord = z.infer<typeof auditResultsRecordSchema>;
 
 const categoryResultSchema = z
   .object({
@@ -582,12 +721,14 @@ const categorySchema = z
 export type Category = z.infer<typeof categorySchema>;
 
 const entitiesSchema = z.array(
-  z.object({
-    name: z.string(),
-    isFirstParty: z.boolean(),
-    isUnrecognized: z.boolean(),
-    origins: z.array(z.string()),
-  }),
+  z
+    .object({
+      name: z.string(),
+      isFirstParty: z.boolean(),
+      isUnrecognized: z.boolean(),
+      origins: z.array(z.string()),
+    })
+    .optional(),
 );
 
 export type Entities = z.infer<typeof entitiesSchema>;
@@ -648,7 +789,7 @@ const lighthouseResultV5Schema = z
         .optional(),
     }),
     userAgent: z.string(),
-    audits: auditResultSchema,
+    audits: auditResultsRecordSchema,
   })
   .partial();
 
