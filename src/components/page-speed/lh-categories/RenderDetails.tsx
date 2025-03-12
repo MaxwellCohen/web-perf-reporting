@@ -99,6 +99,7 @@ function RenderList({
           case 'table':
             return (
               <DetailTable
+                key={index}
                 desktopDetails={item}
                 mobileDetails={
                   MobileDetails.items?.[index] as

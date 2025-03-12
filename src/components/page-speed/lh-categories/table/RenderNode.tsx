@@ -27,7 +27,7 @@ export function NodeComponent({
           )}
         </div>
       </div>
-      <RenderJSONDetails data={item} title={`Node Data for ${item.lhId}`} />
+      <RenderJSONDetails data={item} title={`Node Data for ${item.lhId} on ${device}`} />
     </div>
   );
 }
@@ -137,11 +137,13 @@ function screenshotOverlapsRect(
   screenshot: FullPageScreenshot['screenshot'],
   rect: Rect,
 ): boolean {
+
+
   return (
-    rect.left <= screenshot.width &&
-    0 <= rect.right &&
-    rect.top <= screenshot.height &&
-    0 <= rect.bottom
+    rect?.left <= screenshot.width &&
+    0 <= rect?.right &&
+    rect?.top <= screenshot.height &&
+    0 <= rect?.bottom
   );
 }
 
@@ -380,7 +382,8 @@ function ElementScreenshotRenderer({
   screenshot,
   elementRects = [],
   maxThumbnailSize = { width: 120, height: 80 },
-}: ElementScreenshotRendererProps): React.ReactElement {
+}: ElementScreenshotRendererProps){
+
   // Render thumbnails
   const renderThumbnails = useMemo(() => {
     return elementRects.map((rect, index) => (
@@ -396,6 +399,6 @@ function ElementScreenshotRenderer({
       </div>
     ));
   }, [elementRects, maxThumbnailSize, screenshot]);
-
+  if(!screenshot) return null;
   return <div className="flex flex-wrap gap-2.5">{renderThumbnails}</div>;
 }

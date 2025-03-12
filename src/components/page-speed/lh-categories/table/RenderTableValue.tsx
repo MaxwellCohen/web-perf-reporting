@@ -76,8 +76,8 @@ function RenderLinkValue({ value }: { value: LinkValue }) {
   return (
     <a
       href={value.url}
-      title="link"
-      className="block w-[50ch] overflow-hidden text-ellipsis whitespace-nowrap"
+      title={value.text}
+      className="block max-w-[50ch] overflow-hidden text-ellipsis"
     >
       {value.text}
     </a>
@@ -205,8 +205,8 @@ function RenderUrlValue({ value }: { value: UrlValue }) {
   return (
     <a
       href={value.value}
-      title="url"
-      className="block w-[50ch] overflow-hidden text-ellipsis whitespace-nowrap"
+      title={value.value}
+      className="block max-w-[50ch] overflow-hidden text-ellipsis"
     >
       {value.value}
     </a>
@@ -247,7 +247,19 @@ function RenderCode({ value }: { value: unknown }) {
 
 function RenderMSValue({ value }: { value: unknown }) {
   const ms = Number(value);
-  return <div title="ms">{ms.toFixed(2)} ms</div>;
+  if (ms < 1000) {
+    return <div title="ms">{ms.toFixed(2)} ms</div>;
+  }
+  const seconds = ms / 1000;
+  if (seconds < 60) {
+    return <div title="ms">{seconds.toFixed(2)} s</div>;
+  }
+  const minutes = seconds / 60;
+  if (minutes < 60) {
+    return <div title="ms">{minutes.toFixed(2)} min</div>;
+  }
+  const hours = minutes / 60;
+  return <div title="ms">{hours.toFixed(2)} h</div>;
 }
 
 function RenderNumberValue({ value, heading }: { value: unknown, heading?: TableColumnHeading | null }) {
@@ -277,7 +289,8 @@ function RenderUrl({ value }: { value: unknown }) {
     return (
       <a
         href={strValue}
-        className="block w-[50ch] overflow-hidden text-ellipsis whitespace-nowrap"
+        title={strValue}
+        className="block max-w-[50ch] overflow-hidden text-ellipsis"
       >
         {strValue}
       </a>

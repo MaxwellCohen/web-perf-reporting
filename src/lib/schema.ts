@@ -604,13 +604,11 @@ export interface TableColumnHeading {
     valueType?: ItemValueType;
     displayUnit?: string;
     granularity?: number;
-    showBothDevices: boolean;
   };
 
   displayUnit?: string;
   granularity?: number;
 
-  showBothDevices: boolean;
 }
 
 export const TableColumnHeadingSchema = z.custom<TableColumnHeading>((v) => {
