@@ -1,5 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AuditDetailChecklistSchema, AuditResultsRecord } from "@/lib/schema";
+import { renderBoolean } from "./renderBoolean";
 
 export function RenderChecklist({
     desktopAuditData,
@@ -39,22 +40,10 @@ export function RenderChecklist({
               <TableRow key={key}>
                 <TableCell>{label}</TableCell>
                 <TableCell>
-                  {mobileItem ? (
-                    mobileItem.value ? (
-                      <span title="true">✅</span>
-                    ) : (
-                      <span title="false"> ❌</span>
-                    )
-                  ) : null}{' '}
+                  {mobileItem ? renderBoolean(mobileItem.value): null}{' '}
                 </TableCell>
                 <TableCell>
-                  {desktopItem ? (
-                    desktopItem.value ? (
-                      <span title="true">✅</span>
-                    ) : (
-                      <span title="false"> ❌</span>
-                    )
-                  ) : null}{' '}
+                  {desktopItem ?  renderBoolean(desktopItem.value) : null}{' '}
                 </TableCell>
               </TableRow>
             );
@@ -63,4 +52,4 @@ export function RenderChecklist({
       </Table>
     );
   }
- 
+
