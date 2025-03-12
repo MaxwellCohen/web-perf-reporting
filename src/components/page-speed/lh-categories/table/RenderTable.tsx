@@ -222,7 +222,6 @@ function RenderTableHeader({ headings }: { headings: TableColumnHeading[] }) {
   return (
     <RenderTableRowContainer headings={headings}>
       {headings.map((heading, index) => {
-        if (heading.key === null) return null;
         return (
           <RenderHeading
             key={index}
@@ -261,14 +260,14 @@ function RenderHeading({
   device,
   ...props
 }: {
-  heading: TableColumnHeading;
+  heading?: TableColumnHeading;
   device?: 'Desktop' | 'Mobile';
 } & React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div {...props}>
-      {typeof heading.label === 'string'
-        ? heading.label
-        : heading.label?.formattedDefault}
+      {typeof heading?.label === 'string'
+        ? heading?.label
+        : heading?.label?.formattedDefault || ''}
       {device ? `(${device})` : null}
     </div>
   );
@@ -304,6 +303,13 @@ function RenderEntityGroupRows({
   device: 'Desktop' | 'Mobile';
   items: TableItem[];
 }) {
+  console.log({
+    entityItems,
+    headings,
+    device,
+    items,
+  })
+
   return (
     <div
       className="grid overflow-x-auto"
@@ -311,10 +317,10 @@ function RenderEntityGroupRows({
     >
       <RenderTableHeader headings={headings} />
       {entityItems?.map((entityItem, index) => (
-        <div key={index}>
+        <Fragment key={index}>
           <RenderTableRowContainer headings={headings}>
             {headings.map((heading, colIndex) => {
-              if (!heading.key) return null;
+              // if (!heading.key) return null;
               return (
                 <RenderTableCell
                   key={`${index}-${colIndex}`}
@@ -322,13 +328,13 @@ function RenderEntityGroupRows({
                   style={{
                     gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
                   }}
-                  value={entityItem[heading.key]}
+                  value={entityItem[heading.key || '']}
                   heading={heading}
                   device={device}
                 />
               );
             })}
-          </RenderTableRowContainer>
+          </RenderTableRowContainer> 
           {items
             .filter((item) => item.entity === entityItem.entity)
             .map((item, subIndex) => (
@@ -343,7 +349,7 @@ function RenderEntityGroupRows({
                         style={{
                           gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
                         }}
-                        value={entityItem[heading.key]}
+                        value={item[heading.key || '']}
                         heading={heading}
                         device={device}
                       />
@@ -374,8 +380,8 @@ function RenderEntityGroupRows({
                   </RenderTableRowContainer>
                 ))}
               </Fragment>
-            ))}
-        </div>
+            ))} 
+        </Fragment>
       ))}
     </div>
   );
