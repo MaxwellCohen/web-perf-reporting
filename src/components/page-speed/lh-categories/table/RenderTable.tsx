@@ -159,7 +159,6 @@ export function DetailTable({
           desktopItems={desktopDetails?.items}
           mobileHeadings={desktopDetails?.headings}
           mobileItems={mobileDetails?.items}
-          
         />
       )}
     </>
@@ -192,14 +191,24 @@ function mergeHeadings(
   mobileHeadings?: TableColumnHeading[],
   desktopHeadings?: TableColumnHeading[],
 ) {
-  return [
-    ...(mobileHeadings || []).map((heading) =>
-      updateTableHeading(heading, 'Mobile'),
-    ),
-    ...(desktopHeadings || []).map((heading) =>
-      updateTableHeading(heading, 'Desktop'),
-    ),
-  ].filter(
+  const headings: TableColumnHeading[] = [];
+  const mHeadings = (mobileHeadings || []).map((heading) =>
+    updateTableHeading(heading, 'Mobile'),
+  )
+  const dHeadings = (desktopHeadings || []).map((heading) =>
+    updateTableHeading(heading, 'Desktop'),
+  )
+  while (mHeadings.length && dHeadings.length) {
+    let i = mHeadings.shift()
+    if (i) {
+      headings.push(i)
+    }
+    i = dHeadings.shift()
+    if (i) {
+      headings.push(i)
+    }
+  }
+  return headings.filter(
     (heading, i, Arr) => Arr.findIndex((t) => t.key === heading.key) === i,
   );
 }
@@ -209,7 +218,6 @@ function showBothDevices(heading: TableColumnHeading) {
 }
 
 function RenderTableHeader({ headings }: { headings: TableColumnHeading[] }) {
-  // const headings = mergeHeadings(mobileHeadings, desktopHeading);
   return (
     <RenderTableRowContainer headings={headings}>
       {headings.map((heading, index) => {
@@ -239,7 +247,7 @@ function RenderTableRowContainer({
       {...props}
       className={cn('grid grid-cols-subgrid border-b-2', props.className)}
       style={{
-        gridColumn: `span ${headings.length * 2} / span ${headings.length * 2}`,
+        gridColumn: `span ${headings.length} / span ${headings.length }`,
       }}
     >
       {children}
@@ -373,9 +381,10 @@ function RenderEntityGroupRows({
 }
 
 const makeID = (i: TableItem) =>
-  Object.entries(i).sort((a,b) => a[0].localeCompare(b[0]))
+  Object.entries(i)
+    .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([k, v]) => {
-      if (typeof v === 'string' &&  k !== '_device') {
+      if (typeof v === 'string' && k !== '_device') {
         return `${k}|${v}`;
       }
       return '';
@@ -407,7 +416,7 @@ function reduceTableItems(acc: TableItem[], item: TableItem) {
   if (!groupByID) {
     acc.push(item);
     return acc;
-  };
+  }
   const inArrayIndex = acc.findIndex((i) => makeID(i) === groupByID);
   if (inArrayIndex !== -1) {
     acc[inArrayIndex] = mergeTableItem(acc[inArrayIndex], item);
@@ -461,24 +470,21 @@ function RenderTableItems({
   const mItems = (mobileItems || []).map((i) => renameKeys(i, 'Mobile'));
   const dItems = (desktopItems || []).map((i) => renameKeys(i, 'Desktop'));
   if (!desktopItems?.length && mItems?.length) {
-    headings = mergeHeadings( mobileHeadings || [],);
+    headings = mergeHeadings(mobileHeadings || []);
     headings = mobileHeadings || [];
     items = mItems;
     device = 'Mobile';
   }
   if (!mobileItems?.length && dItems?.length) {
-    headings = mergeHeadings( [], desktopHeadings || []);
+    headings = mergeHeadings([], desktopHeadings || []);
     items = dItems;
     device = 'Desktop';
   }
   if (dItems?.length && mItems?.length) {
     headings = mergeHeadings(mobileHeadings, desktopHeadings);
-    items = [
-      ...mItems,
-      ...dItems,
-    ].reduce(reduceTableItems, []);
+    items = [...mItems, ...dItems].reduce(reduceTableItems, []);
   }
-  console.log({headings, items})
+  console.log({ headings, items });
   return (
     <div
       className="grid overflow-x-auto"
@@ -488,18 +494,20 @@ function RenderTableItems({
       {items.map((item, index) => (
         <Fragment key={index}>
           <RenderTableRowContainer headings={headings}>
-            {headings.map((heading, colIndex) => {
-              if (!heading.key) return null;
-              return (
-                <RenderTableCell
-                  key={`${index}-${colIndex}-ADF`}
-                  className="px-6 py-4 text-xs"
-                  value={item[heading.key]}
-                  heading={heading}
-                  device={item._device as 'Desktop' | 'Mobile' || device}
-                />
-              );
-            }).filter(Boolean)}
+            {headings
+              .map((heading, colIndex) => {
+                if (!heading.key) return null;
+                return (
+                  <RenderTableCell
+                    key={`${index}-${colIndex}-ADF`}
+                    className="px-6 py-4 text-xs"
+                    value={item[heading.key]}
+                    heading={heading}
+                    device={(item._device as 'Desktop' | 'Mobile') || device}
+                  />
+                );
+              })
+              .filter(Boolean)}
           </RenderTableRowContainer>
           {item.subItems?.items ? (
             <RenderTableRowContainer headings={headings}>
@@ -544,7 +552,7 @@ function RenderTableItems({
                     <RenderTableValue
                       value={subItem[heading.subItemsHeading.key]}
                       heading={getDerivedSubItemsHeading(heading)}
-                      device={item._device as 'Desktop' | 'Mobile' || device}
+                      device={(item._device as 'Desktop' | 'Mobile') || device}
                     />
                   ) : (
                     ' '

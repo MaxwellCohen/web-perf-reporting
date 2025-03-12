@@ -4,10 +4,12 @@ import {
   AuditDetailOpportunity,
   AuditDetailTable,
   AuditResultsRecord,
+  DebugData,
 } from '@/lib/schema';
 import { RenderChecklist } from './RenderChecklist';
 import { RenderUnknown } from './RenderUnknown';
 import { DetailTable } from './table/RenderTable';
+import { RenderDebugData } from './RenderDebugdata';
 
 export function RenderDetails({
   desktopAuditData,
@@ -44,7 +46,6 @@ export function RenderDetails({
       );
     case 'table':
     case 'opportunity':
-      console.log('table', desktopDetails);
       return (
         <DetailTable
           desktopDetails={desktopDetails}
@@ -62,6 +63,7 @@ export function RenderDetails({
     case 'screenshot':
       return null;
     case 'debugdata':
+      return <RenderDebugData desktopDebugData={desktopDetails} mobileDebugData={mobileDetails as DebugData} />;
     case 'treemap-data':
       return (
         <RenderJSONDetails
@@ -94,7 +96,6 @@ function RenderList({
   return (
     <div>
       {DesktopDetails.items.map((item, index: number) => {
-        console.log('item', item);
         switch (item.type) {
           case 'table':
             return (

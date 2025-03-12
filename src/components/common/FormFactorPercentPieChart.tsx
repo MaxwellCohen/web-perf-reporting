@@ -9,14 +9,20 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import { FormFactorFractions } from '@/lib/schema';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../ui/table';
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-function toSentenceCase(str: string) {
+export function toSentenceCase(str: string) {
   if (!str) {
-    return "";
+    return '';
   }
   const result = str.split('_').join(' ').toLowerCase();
   return result.charAt(0).toUpperCase() + result.slice(1);
@@ -34,7 +40,7 @@ export function FormFactorPercentPieChart({
     entries.reduce((acc: Record<string, number>, [key, value]) => {
       acc[key] = value * 100;
       return acc;
-    }, {})
+    }, {}),
   ];
   const chartConfig = entries.reduce((acc: ChartConfig, [label], i) => {
     acc[label] = {
@@ -45,12 +51,9 @@ export function FormFactorPercentPieChart({
   }, {});
 
   return (
-    <Card className="grid grid-cols-1 grid-rows-[44px,auto, 1fr] gap-3 p-2">
+    <Card className="grid-rows-[44px,auto, 1fr] grid grid-cols-1 gap-3 p-2">
       <div className="text-md text-center font-bold">{title}</div>
-      <ChartContainer
-        config={chartConfig}
-        className="w-full"
-      >
+      <ChartContainer config={chartConfig} className="w-full">
         <RadialBarChart
           data={chartData}
           innerRadius={'50%'}
@@ -58,8 +61,7 @@ export function FormFactorPercentPieChart({
         >
           <ChartTooltip
             cursor={false}
-            content={<ChartTooltipContent hideLabel
-            />}
+            content={<ChartTooltipContent hideLabel />}
           />
           {entries.map(([label]) => (
             <RadialBar
@@ -73,12 +75,17 @@ export function FormFactorPercentPieChart({
               animationDuration={0}
             />
           ))}
-
         </RadialBarChart>
       </ChartContainer>
-      <div className='p-2'>
+      <div className="p-2">
         {entries.map(([label, value]) => {
-          return (<div className="text-xs leading-none text-muted-foreground"> <strong>{toSentenceCase(label)}</strong> {(value * 100).toFixed(2)} % </div>)
+          return (
+            <div key={label} className="text-xs leading-none text-muted-foreground">
+              {' '}
+              <strong>{toSentenceCase(label)}</strong>{' '}
+              {(value * 100).toFixed(2)} %{' '}
+            </div>
+          );
         })}
       </div>
     </Card>
@@ -92,25 +99,36 @@ export function PercentTable({
 }: {
   title: string;
   data: Record<string, number>;
-  className?: string,
+  className?: string;
 }) {
   const entries = Object.entries(data);
   return (
-    <Card className={cn('flex-1', className)} >
+    <Card className={cn('flex-1', className)}>
       <div className="text-md text-center font-bold">{title}</div>
       <Table>
-        <TableHeader className='pt-2'>
-          {entries.map(([label, value]) => {
-            return (<TableHead key={label} className='h-4'> {toSentenceCase(label)} </TableHead>)
+        <TableHeader className="pt-2">
+          {entries.map(([label]) => {
+            return (
+              <TableHead key={label} className="h-4">
+                {' '}
+                {toSentenceCase(label)}{' '}
+              </TableHead>
+            );
           })}
         </TableHeader>
         <TableBody>
           <TableRow>
             {entries.map(([label, value]) => {
-              return (<TableCell key={label} className='h-4'> {(value * 100).toFixed(2)} % </TableCell>)
+              return (
+                <TableCell key={label} className="h-4">
+                  {' '}
+                  {(value * 100).toFixed(2)} %{' '}
+                </TableCell>
+              );
             })}
           </TableRow>
         </TableBody>
       </Table>
-    </Card >);
+    </Card>
+  );
 }
