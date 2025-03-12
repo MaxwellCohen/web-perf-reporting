@@ -7,7 +7,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { DebugData } from '@/lib/schema';
-import { renderBoolean } from "./renderBoolean";
+import { renderBoolean } from './renderBoolean';
+import { camelCaseToSentenceCase } from './camelCaseToSentenceCase';
 
 export function RenderDebugData({
   mobileDebugData,
@@ -16,30 +17,16 @@ export function RenderDebugData({
   mobileDebugData?: DebugData;
   desktopDebugData?: DebugData;
 }) {
-  if (
-    !mobileDebugData?.items?.length  &&
-    !desktopDebugData?.items?.length 
-  ) {
-    return null;
-  }
-  const mobileItems = (mobileDebugData?.items || []).reduce(
-    (acc: Record<string, unknown>, i: Record<string, unknown>) => ({
-      ...acc,
-      ...i,
-    }),
-    {},
-  );
-  const desktopItems = (desktopDebugData?.items || []).reduce(
-    (acc: Record<string, unknown>, i: Record<string, unknown>) => ({
-      ...acc,
-      ...i,
-    }),
-    {},
-  );
+  const mobileItems = cleanDebugData(mobileDebugData);
+  const desktopItems = cleanDebugData(desktopDebugData);
 
   const keys = [
     ...new Set([...Object.keys(mobileItems), ...Object.keys(desktopItems)]),
   ].filter((k) => k !== 'type');
+
+  if (!keys.length) {
+    return null;
+  }
 
   return (
     <Table>
@@ -93,13 +80,22 @@ function renderItem(item: unknown) {
   return '';
 }
 
-function camelCaseToSentenceCase(str: string) {
-  if (!str) {
-    return '';
+function cleanDebugData(data: DebugData | undefined) {
+  if (!data) {
+    return {};
   }
-  const result = str
-    .split(/(?=[A-Z])/)
-    .join(' ')
-    .toLowerCase();
-  return result.charAt(0).toUpperCase() + result.slice(1);
+  return [
+    Object.fromEntries(
+      Object.entries(data || {}).filter(
+        (v) => !['type', 'items'].includes(v[0]),
+      ),
+    ),
+    ...(data?.items || []),
+  ].reduce(
+    (acc: Record<string, unknown>, i: Record<string, unknown>) => ({
+      ...acc,
+      ...i,
+    }),
+    {},
+  );
 }
