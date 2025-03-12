@@ -18,7 +18,7 @@ export function NodeComponent({
     <div className="flex flex-col gap-2">
       <div className="grid gap-2 md:grid-cols-[auto_auto]">
         <RenderNodeImage item={item} device={device} />
-        <div className="flex flex-col gap-2 self-end">
+        <div className="flex flex-col gap-2 md:self-baseline">
           {item.nodeLabel ? <div>{item.nodeLabel}</div> : null}
           {item.snippet && (
             <div className="whitespace-pre-wrap font-mono text-sm leading-5 text-blue-500">

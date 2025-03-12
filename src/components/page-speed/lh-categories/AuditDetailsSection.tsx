@@ -10,7 +10,7 @@ import { RenderMetricSavings } from './RenderMetricSavings';
 import { RenderDetails } from './RenderDetails';
 import { isEmptyResult } from '../ScoreDisplay';
 
-
+const doNotRenderDetails = ['screenshot-thumbnails', 'main-thread-tasks'];
 
 export function AuditDetailsSection({
   auditRef,
@@ -33,7 +33,9 @@ export function AuditDetailsSection({
   const emptyTable =
     isEmptyResult(desktopAuditData) && isEmptyResult(mobileAuditData);
 
+  const doNotRender = doNotRenderDetails.includes(auditRef.id || 'adasfdas');
   const disabled =
+    doNotRender ||
     emptyTable ||
     ['notApplicable', 'manual', 'bottom'].includes(scoreDisplayMode);
 
@@ -46,8 +48,12 @@ export function AuditDetailsSection({
           acronym={acronym}
         />
       </AccordionTrigger>
-      <RenderJSONDetails data={desktopAuditData} data2={mobileAuditData} title={`All Data for ${auditRef.id}`} />
-      <AccordionContent>
+      <RenderJSONDetails
+        data={desktopAuditData}
+        data2={mobileAuditData}
+        title={`All Data for ${auditRef.id}`}
+      />
+      {!disabled ? <AccordionContent>
         <RenderMetricSavings
           desktopAuditData={desktopAuditData}
           mobileAuditData={mobileAuditData}
@@ -56,7 +62,7 @@ export function AuditDetailsSection({
           desktopAuditData={desktopAuditData}
           mobileAuditData={mobileAuditData}
         />
-      </AccordionContent>
+      </AccordionContent> : null}
     </AccordionItem>
   );
 }

@@ -22,7 +22,7 @@ function getDerivedSubItemsHeading(
 ): TableColumnHeading | null {
   if (!heading.subItemsHeading) return null;
   return {
-    key: heading.subItemsHeading.key || '',
+    key: heading.subItemsHeading.key || null,
     valueType: heading.subItemsHeading.valueType || heading.valueType,
     granularity: heading.subItemsHeading.granularity || heading.granularity,
     displayUnit: heading.subItemsHeading.displayUnit || heading.displayUnit,
@@ -169,22 +169,23 @@ function updateTableHeading(
   heading: TableColumnHeading,
   device: 'Desktop' | 'Mobile',
 ): TableColumnHeading {
+
   if (!showBothDevices(heading)) {
     return heading;
   }
 
   return {
-    key: `${heading.key}-${device}`,
+    key: heading.key ?`${heading.key}-${device}` : null,
     label: `${heading.label} (${device})`,
     valueType: heading.valueType,
     granularity: heading.granularity,
     displayUnit: heading.displayUnit,
     ...(heading.subItemsHeading
       ? {
-          subItemsHeading: heading.subItemsHeading,
+          subItemsHeading: getDerivedSubItemsHeading(heading) ? updateTableHeading(getDerivedSubItemsHeading(heading) as TableColumnHeading, device) : undefined,
         }
       : {}),
-  };
+  } as TableColumnHeading;
 }
 
 function mergeHeadings(
