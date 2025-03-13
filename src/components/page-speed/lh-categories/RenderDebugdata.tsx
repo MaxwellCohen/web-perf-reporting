@@ -51,7 +51,7 @@ export function RenderDebugData({
               </TableCell>
               {mobileDebugData?.items.length ? (
                 <TableCell rowSpan={1}>
-                  {renderItem(desktopItems?.[key])}
+                  {renderItem(mobileItems?.[key])}
                 </TableCell>
               ) : null}
               {desktopDebugData?.items.length ? (
