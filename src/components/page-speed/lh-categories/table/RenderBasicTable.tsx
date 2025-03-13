@@ -121,6 +121,8 @@ function RenderMainRow({
 }) {
   return (
     <RenderTableRowContainer headings={headings}>
+
+
       {headings
         .map((heading, colIndex) => {
           if (!heading.key) return null;
