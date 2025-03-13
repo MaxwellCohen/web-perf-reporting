@@ -383,13 +383,13 @@ function ElementScreenshotRenderer({
   elementRects = [],
   maxThumbnailSize = { width: 120, height: 80 },
 }: ElementScreenshotRendererProps){
-
+  //cursor-pointer  hover:scale-105 hover:shadow-md
   // Render thumbnails
   const renderThumbnails = useMemo(() => {
     return elementRects.map((rect, index) => (
       <div
         key={index}
-        className="cursor-pointer overflow-hidden rounded border border-gray-300 transition-transform hover:scale-105 hover:shadow-md"
+        className="overflow-hidden rounded border border-gray-300 transition-transform"
       >
         <ElementScreenshot
           screenshot={screenshot}
