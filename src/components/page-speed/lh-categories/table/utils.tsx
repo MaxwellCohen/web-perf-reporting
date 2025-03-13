@@ -33,7 +33,7 @@ export function mergedTable(
   let items: TableItem[] = [];
   let device: 'Desktop' | 'Mobile' = 'Desktop';
   if (!desktopItems && !mobileItems) {
-    return [[] as TableColumnHeading[], [] as TableItem[], 'Desktop'] as const;
+    return [[], [], 'Desktop'] as const;
   }
   const mItems = (mobileItems || []).map((i) => renameKeys(i, 'Mobile'));
   const dItems = (desktopItems || []).map((i) => renameKeys(i, 'Desktop'));
@@ -45,12 +45,10 @@ export function mergedTable(
   } else if (!mobileItems?.length && dItems?.length) {
     headings = mergeHeadings([], desktopHeadings || []);
     items = dItems;
-    device = 'Desktop';
   } else if (dItems?.length && mItems?.length) {
     headings = mergeHeadings(mobileHeadings, desktopHeadings);
     items = [...mItems, ...dItems].reduce(reduceTableItems, []);
   }
-  console.log(headings, items, device);
   return [headings, items, device] as const;
 }
 
