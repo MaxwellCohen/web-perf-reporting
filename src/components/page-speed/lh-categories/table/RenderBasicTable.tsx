@@ -1,28 +1,21 @@
 import { TableItem, TableColumnHeading } from '@/lib/schema';
 import { Fragment } from 'react';
-import { getDerivedSubItemsHeading, useMergedTable } from './utils';
-import { RenderTableHeader, RenderTableRowContainer } from './RenderTable';
+import { getDerivedSubItemsHeading } from './utils';
+import { RenderTableRowContainer } from './RenderTableRowContainer';
+import { RenderTableHeader } from './RenderTableHeader';
 import { RenderHeading } from './RenderHeading';
 import { RenderTableCell } from './RenderTableCell';
 import { RenderTableValue } from './RenderTableValue';
 
-export function RenderTableItems({
-  desktopItems,
-  mobileItems,
-  mobileHeadings,
-  desktopHeadings,
+export function RenderBasicTable({
+  headings,
+  items,
+  device,
 }: {
-  desktopItems?: TableItem[];
-  mobileItems?: TableItem[];
-  mobileHeadings?: TableColumnHeading[];
-  desktopHeadings?: TableColumnHeading[];
+  headings: TableColumnHeading[];
+  items: TableItem[];
+  device:'Desktop' | 'Mobile';
 }) {
-  const [headings, items, device] = useMergedTable(
-    desktopItems,
-    mobileItems,
-    mobileHeadings,
-    desktopHeadings,
-  );
   return (
     <div
       className="grid overflow-x-auto"

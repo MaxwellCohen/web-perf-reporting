@@ -1,9 +1,7 @@
 import { TableColumnHeading, TableItem } from '@/lib/schema';
-import { useMemo } from 'react';
 import { reduceTableItems } from './reduceTableItems';
 import { renameKeys } from './renameKeys';
 import { ItemValueType } from '@/lib/schema';
-
 
 export const SUMMABLE_VALUETYPES: ItemValueType[] = [
   'bytes',
@@ -12,9 +10,8 @@ export const SUMMABLE_VALUETYPES: ItemValueType[] = [
   'timespanMs',
 ];
 
-
 export function getDerivedSubItemsHeading(
-  heading: TableColumnHeading
+  heading: TableColumnHeading,
 ): TableColumnHeading | null {
   if (!heading.subItemsHeading) return null;
   return {
@@ -26,38 +23,35 @@ export function getDerivedSubItemsHeading(
   };
 }
 
-
-export function useMergedTable(
+export function mergedTable(
   desktopItems?: TableItem[],
   mobileItems?: TableItem[],
   mobileHeadings?: TableColumnHeading[],
   desktopHeadings?: TableColumnHeading[],
-) {
-  return useMemo(() => {
-    let headings: TableColumnHeading[] = [];
-    let items: TableItem[] = [];
-    let device: 'Desktop' | 'Mobile' = 'Desktop';
-    if (!desktopItems && !mobileItems) {
-      return [[] as TableColumnHeading[], [] as TableItem[], 'Desktop'] as const;
-    }
-    const mItems = (mobileItems || []).map((i) => renameKeys(i, 'Mobile'));
-    const dItems = (desktopItems || []).map((i) => renameKeys(i, 'Desktop'));
-    if (!desktopItems?.length && mItems?.length) {
-      headings = mergeHeadings(mobileHeadings || []);
-      headings = mobileHeadings || [];
-      items = mItems;
-      device = 'Mobile';
-    } else if (!mobileItems?.length && dItems?.length) {
-      headings = mergeHeadings([], desktopHeadings || []);
-      items = dItems;
-      device = 'Desktop';
-    } else if (dItems?.length && mItems?.length) {
-      headings = mergeHeadings(mobileHeadings, desktopHeadings);
-      items = [...mItems, ...dItems].reduce(reduceTableItems, []);
-    }
-    console.log(headings, items, device)
-    return [headings, items, device] as const;
-  }, [desktopItems, mobileItems, mobileHeadings, desktopHeadings]);
+): [TableColumnHeading[], TableItem[], 'Desktop' | 'Mobile'] {
+  let headings: TableColumnHeading[] = [];
+  let items: TableItem[] = [];
+  let device: 'Desktop' | 'Mobile' = 'Desktop';
+  if (!desktopItems && !mobileItems) {
+    return [[] as TableColumnHeading[], [] as TableItem[], 'Desktop'] as const;
+  }
+  const mItems = (mobileItems || []).map((i) => renameKeys(i, 'Mobile'));
+  const dItems = (desktopItems || []).map((i) => renameKeys(i, 'Desktop'));
+  if (!desktopItems?.length && mItems?.length) {
+    headings = mergeHeadings(mobileHeadings || []);
+    headings = mobileHeadings || [];
+    items = mItems;
+    device = 'Mobile';
+  } else if (!mobileItems?.length && dItems?.length) {
+    headings = mergeHeadings([], desktopHeadings || []);
+    items = dItems;
+    device = 'Desktop';
+  } else if (dItems?.length && mItems?.length) {
+    headings = mergeHeadings(mobileHeadings, desktopHeadings);
+    items = [...mItems, ...dItems].reduce(reduceTableItems, []);
+  }
+  console.log(headings, items, device);
+  return [headings, items, device] as const;
 }
 
 export function mergeHeadings(
@@ -85,7 +79,6 @@ export function mergeHeadings(
     (heading, i, Arr) => Arr.findIndex((t) => t.key === heading.key) === i,
   );
 }
-
 
 export function updateTableHeading(
   heading: TableColumnHeading,

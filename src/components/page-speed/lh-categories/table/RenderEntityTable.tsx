@@ -1,23 +1,34 @@
 import { TableItem, TableColumnHeading } from '@/lib/schema';
-import { Fragment } from 'react';
+import { Fragment, useMemo } from 'react';
 import { getDerivedSubItemsHeading } from './utils';
-import { RenderTableHeader, RenderTableRowContainer } from './RenderTable';
+import { RenderTableRowContainer } from './RenderTableRowContainer';
+import { RenderTableHeader } from './RenderTableHeader';
 import { RenderTableCell } from './RenderTableCell';
+import { getEntityGroupItems } from './getEntityGroupItems';
 
-export function RenderEntityGroupRows({
-  entityItems, headings = [], device, items,
+type Device = 'Desktop' | 'Mobile';
+export function RenderEntityTable({
+  headings = [],
+  device,
+  items,
+  isEntityGrouped,
+  skipSumming,
+  sortedBy,
 }: {
-  entityItems: TableItem[];
   headings?: TableColumnHeading[];
-  device: 'Desktop' | 'Mobile';
+  device: Device;
   items: TableItem[];
+  isEntityGrouped: boolean;
+  skipSumming: string[];
+  sortedBy: string[];
 }) {
-  console.log({
-    entityItems,
-    headings,
-    device,
+  const entityItems = useMemo(() => getEntityGroupItems({
     items,
-  });
+    headings,
+    isEntityGrouped,
+    skipSumming,
+    sortedBy,
+  }), [items, headings, isEntityGrouped, skipSumming, sortedBy]);
 
   return (
     <div
@@ -39,7 +50,8 @@ export function RenderEntityGroupRows({
                   }}
                   value={entityItem[heading.key || '']}
                   heading={heading}
-                  device={device} />
+                  device={(entityItem?._device as Device) || device}
+                />
               );
             })}
           </RenderTableRowContainer>
@@ -57,9 +69,10 @@ export function RenderEntityGroupRows({
                         style={{
                           gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
                         }}
-                        value={item[heading.key || '']}
+                        value={item[heading.key]}
                         heading={heading}
-                        device={device} />
+                        device={(item?._device as Device) || device}
+                      />
                     );
                   })}
                 </RenderTableRowContainer>
@@ -80,7 +93,8 @@ export function RenderEntityGroupRows({
                           }}
                           value={subItem[heading.subItemsHeading.key]}
                           heading={getDerivedSubItemsHeading(heading)}
-                          device={device} />
+                          device={(subItem._device as Device) || device}
+                        />
                       );
                     })}
                   </RenderTableRowContainer>

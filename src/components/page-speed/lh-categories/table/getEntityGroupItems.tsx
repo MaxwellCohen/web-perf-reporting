@@ -1,35 +1,40 @@
 import { TableItem, TableColumnHeading, ItemValueType } from '@/lib/schema';
 import { SUMMABLE_VALUETYPES } from './utils';
 
-
-
 export function getTableItemSortComparator(sortedBy: string[]) {
   return (a: TableItem, b: TableItem) => {
     for (const key of sortedBy) {
       const aVal = a[key];
       const bVal = b[key];
-      if (typeof aVal !== typeof bVal ||
-        !['number', 'string'].includes(typeof aVal)) {
-        console.warn(
-          `Warning: Attempting to sort unsupported value type: ${key}.`
-        );
-      }
-      if (typeof aVal === 'number' &&
+      if (
+        typeof aVal === 'number' &&
         typeof bVal === 'number' &&
-        aVal !== bVal) {
+        aVal !== bVal
+      ) {
         return bVal - aVal;
       }
-      if (typeof aVal === 'string' &&
+      if (
+        typeof aVal === 'string' &&
         typeof bVal === 'string' &&
-        aVal !== bVal) {
+        aVal !== bVal
+      ) {
         return aVal.localeCompare(bVal);
       }
     }
     return 0;
   };
 }
+
+export function shouldGroupEntity(items: TableItem[], isEntityGrouped: boolean) {
+  return !(!items.length || isEntityGrouped || !items.some((item) => item.entity))
+}
+
 export const getEntityGroupItems = ({
-  items, headings = [], isEntityGrouped, skipSumming, sortedBy,
+  items,
+  headings = [],
+  isEntityGrouped,
+  skipSumming,
+  sortedBy,
 }: {
   items: TableItem[];
   headings?: TableColumnHeading[];
@@ -38,7 +43,7 @@ export const getEntityGroupItems = ({
   sortedBy?: string[];
 }) => {
   // Exclude entity-grouped audits and results without entity classification
-  if (!items.length || isEntityGrouped || !items.some((item) => item.entity)) {
+  if (shouldGroupEntity(items, isEntityGrouped)) {
     return [];
   }
 
@@ -58,7 +63,8 @@ export const getEntityGroupItems = ({
   const byEntity = new Map<string | undefined, TableItem>();
 
   for (const item of items) {
-    const entityName = typeof item.entity === 'string' ? item.entity : undefined;
+    const entityName =
+      typeof item.entity === 'string' ? item.entity : undefined;
     const groupedItem = byEntity.get(entityName) || {
       [firstColumnKey]: entityName || 'Unattributable',
       entity: entityName,

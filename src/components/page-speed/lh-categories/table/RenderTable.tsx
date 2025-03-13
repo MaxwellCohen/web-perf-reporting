@@ -1,13 +1,12 @@
+import { AuditDetailOpportunity, AuditDetailTable } from '@/lib/schema';
 import {
-  AuditDetailOpportunity,
-  AuditDetailTable,
-  TableColumnHeading,
-} from '@/lib/schema';
-import { cn } from '@/lib/utils';
-import { getEntityGroupItems } from './getEntityGroupItems';
-import { RenderTableItems } from './RenderTableItems';
-import { RenderEntityGroupRows } from './RenderEntityGroupRows';
-import { RenderHeading } from './RenderHeading';
+  getTableItemSortComparator,
+  shouldGroupEntity,
+} from './getEntityGroupItems';
+import { RenderBasicTable } from './RenderBasicTable';
+import { RenderEntityTable } from './RenderEntityTable';
+import { mergedTable } from './utils';
+import { useMemo } from 'react';
 
 export function DetailTable({
   mobileDetails,
@@ -16,83 +15,54 @@ export function DetailTable({
   mobileDetails?: AuditDetailOpportunity | AuditDetailTable;
   desktopDetails?: AuditDetailOpportunity | AuditDetailTable;
 }) {
-  const items = desktopDetails?.items || [];
-  const headings = desktopDetails?.headings;
-  const isEntityGrouped = !!desktopDetails?.isEntityGrouped;
-  const skipSumming =
-    desktopDetails?.skipSumming || mobileDetails?.skipSumming || [];
-  const sortedBy = desktopDetails?.sortedBy || mobileDetails?.sortedBy;
-
-  const device = 'Desktop';
-  if (!items?.length) return null;
-  // if (!headings?.length && mobileDetails?.headings?.length) return null;
-
-  const entityItems = getEntityGroupItems({
-    items,
-    headings,
-    isEntityGrouped,
-    skipSumming,
-    sortedBy,
-  });
+   const { items, headings, device, sortedBy } = useMemo(() => {
+    const [_headings, _items, _device] = mergedTable(
+    desktopDetails?.items,
+    mobileDetails?.items,
+    mobileDetails?.headings,
+    desktopDetails?.headings,
+  );
+  const _sortedBy = combineAndDedupe(
+    desktopDetails?.sortedBy,
+    mobileDetails?.sortedBy,
+  );
+  if (_sortedBy.length) {
+    _items.sort(getTableItemSortComparator(_sortedBy));
+  }
+  return {
+    items: _items,
+    headings: _headings,
+    device: _device,
+    sortedBy: _sortedBy,
+  }
+}, [desktopDetails, mobileDetails]);
+  const isEntityGrouped =
+    !!desktopDetails?.isEntityGrouped || !!mobileDetails?.isEntityGrouped;
+  const shouldRenderEntityTable = shouldGroupEntity(items, isEntityGrouped);
+  const skipSumming = combineAndDedupe(
+    desktopDetails?.skipSumming,
+    mobileDetails?.skipSumming,
+  );
+  
 
   return (
     <>
-      {entityItems.length > 0 ? (
-        <RenderEntityGroupRows
-          entityItems={entityItems}
+      {shouldRenderEntityTable ? (
+        <RenderEntityTable
           headings={headings}
           device={device}
           items={items}
+          isEntityGrouped={isEntityGrouped}
+          skipSumming={skipSumming}
+          sortedBy={sortedBy}
         />
       ) : (
-        <RenderTableItems
-          desktopHeadings={desktopDetails?.headings}
-          desktopItems={desktopDetails?.items}
-          mobileHeadings={desktopDetails?.headings}
-          mobileItems={mobileDetails?.items}
-        />
+        <RenderBasicTable headings={headings} items={items} device={device} />
       )}
     </>
   );
 }
 
-
-
-export function RenderTableHeader({ headings }: { headings: TableColumnHeading[] }) {
-  return (
-    <RenderTableRowContainer headings={headings}>
-      {headings.map((heading, index) => {
-        return (
-          <RenderHeading
-            key={index}
-            heading={heading}
-            className="grid-col-span-1 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-          />
-        );
-      })}
-    </RenderTableRowContainer>
-  );
+function combineAndDedupe<T>(a?: T[], b?: T[]): T[] {
+  return [...new Set([...(a || []), ...(b || [])])];
 }
-
-export function RenderTableRowContainer({
-  children,
-  headings,
-  ...props
-}: {
-  children: React.ReactNode;
-  headings: TableColumnHeading[];
-} & React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      {...props}
-      className={cn('grid grid-cols-subgrid border-b-2', props.className)}
-      style={{
-        gridColumn: `span ${headings.length} / span ${headings.length}`,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-
