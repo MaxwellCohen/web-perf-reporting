@@ -3,7 +3,6 @@ import { updateURl } from '@/lib/utils';
 import { Suspense } from 'react';
 import { PageSpeedInsights } from '@/components/page-speed/PageSpeedInsights';
 
-export const maxDuration = 45;
 
 export default async function Home({
   searchParams,
