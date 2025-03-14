@@ -1,6 +1,4 @@
 import { DeviceType, TableColumnHeading, TableItem } from '@/lib/schema';
-import { reduceTableItems } from './reduceTableItems';
-import { renameKeys } from './renameKeys';
 import { ItemValueType } from '@/lib/schema';
 
 export const SUMMABLE_VALUETYPES: ItemValueType[] = [
@@ -9,6 +7,20 @@ export const SUMMABLE_VALUETYPES: ItemValueType[] = [
   'ms',
   'timespanMs',
 ];
+
+export const SHOW_BOTH_DEVICES_KEYS: string[] = [
+  '_device',
+  'percent',
+];
+
+
+function showKeyBothDevices(key: string) {
+  return !!SHOW_BOTH_DEVICES_KEYS.find((k) => key.includes(k));
+}
+export function showBothDevices(heading: TableColumnHeading) {
+  return SUMMABLE_VALUETYPES.includes(heading.valueType as ItemValueType) || showKeyBothDevices(heading.key || 'zzz');
+}
+
 
 export function getDerivedSubItemsHeading(
   heading: TableColumnHeading,
@@ -106,6 +118,73 @@ export function updateTableHeading(
   } as TableColumnHeading;
 }
 
-export function showBothDevices(heading: TableColumnHeading) {
-  return SUMMABLE_VALUETYPES.includes(heading.valueType as ItemValueType);
+
+
+export function renameKeys(obj: TableItem, device: DeviceType): TableItem {
+  return {
+    ...obj,
+    ...Object.entries(obj).reduce((acc: TableItem, [key, value]) => {
+      if (typeof value === 'number' || showKeyBothDevices(key)) {
+        acc[`${key}-${device}`] = value;
+      }
+      return acc;
+    }, {}),
+    ...(obj.subItems
+      ? {
+        subItems: {
+          ...obj.subItems,
+          items: obj.subItems.items.map((subItem) => renameKeys(subItem, device)
+          ),
+        },
+      }
+      : {}),
+    _device: device,
+  };
 }
+
+
+export function mergeTableItem(a: TableItem, b: TableItem): TableItem {
+  return {
+    ...a,
+    ...b,
+    ...(a.subItems
+      ? {
+          subItems: {
+            type: 'subitems',
+            items: [
+              ...(a.subItems.items || []),
+              ...(b.subItems?.items || []),
+            ].reduce(reduceTableItems, []),
+          },
+        }
+      : {}),
+  };
+}
+
+export function reduceTableItems(acc: TableItem[], item: TableItem) {
+  const groupByID = makeID(item);
+  if (!groupByID) {
+    acc.push(item);
+    return acc;
+  }
+  const inArrayIndex = acc.findIndex((i) => makeID(i) === groupByID);
+  if (inArrayIndex !== -1) {
+    acc[inArrayIndex] = mergeTableItem(acc[inArrayIndex], item);
+  } else {
+    acc.push(item);
+  }
+
+  return acc;
+}
+
+export const makeID = (i: TableItem) =>
+  Object.entries(i)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([k, v]) => {
+      if (typeof v === 'string' &&  !showKeyBothDevices(k)) {
+        return `${k}|${v}`;
+      }
+      return '';
+    })
+    .filter(Boolean)
+    .join(',');

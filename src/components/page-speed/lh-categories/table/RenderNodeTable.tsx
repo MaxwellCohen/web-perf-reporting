@@ -65,9 +65,10 @@ export function NodeComponent({
   item: NodeValue;
   device: DeviceType;
 }) {
+  if (!item) return null;
   return (
     <div className="grid grid-cols-1 gap-2">
-      {item.type === 'text' ? <h3 className='text-lg font-bold px-2 pt-6'>{item.value} </h3>: ''}
+      {item?.type === 'text' ? <h3 className='text-lg font-bold px-2 pt-6'>{item.value} </h3>: ''}
       <RenderNodeImage item={item} device={device} />
       <div className="flex flex-col gap-2 md:self-baseline">
           {item.nodeLabel ? <div className='px-2'>{item.nodeLabel}</div> : null}
