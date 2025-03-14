@@ -96,7 +96,7 @@ export function RenderSubItemsHeader({
           <RenderHeading
             key={`subheading-${heading.key || colIndex}`}
             heading={heading}
-            className="px-6 py-2 text-sm tracking-wider text-muted"
+            className="px-6 py-2 text-sm tracking-wider text-muted-foreground"
             style={{
               gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
             }}

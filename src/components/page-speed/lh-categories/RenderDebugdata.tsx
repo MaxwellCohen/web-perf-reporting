@@ -18,10 +18,12 @@ export function RenderDebugData({
   desktopDebugData?: DebugData;
 }) {
   const mobileItems = cleanDebugData(mobileDebugData);
+  const mobileKeys = Object.keys(mobileItems);
   const desktopItems = cleanDebugData(desktopDebugData);
+  const desktopKeys = Object.keys(desktopItems);
 
   const keys = [
-    ...new Set([...Object.keys(mobileItems), ...Object.keys(desktopItems)]),
+    ...new Set([...mobileKeys, ...desktopKeys]),
   ].filter((k) => k !== 'type');
 
   if (!keys.length) {
@@ -33,10 +35,10 @@ export function RenderDebugData({
       <TableHeader>
         <TableRow>
           <TableHead>Item</TableHead>
-          {mobileDebugData?.items.length ? (
+          {mobileKeys.length ? (
             <TableHead>Mobile Value</TableHead>
           ) : null}
-          {desktopDebugData?.items.length ? (
+          {desktopKeys?.length ? (
             <TableHead>Desktop Value </TableHead>
           ) : null}
         </TableRow>
@@ -49,12 +51,12 @@ export function RenderDebugData({
                 {' '}
                 {camelCaseToSentenceCase(key)}{' '}
               </TableCell>
-              {mobileDebugData?.items.length ? (
+              {mobileKeys?.length ? (
                 <TableCell rowSpan={1}>
                   {renderItem(mobileItems?.[key])}
                 </TableCell>
               ) : null}
-              {desktopDebugData?.items.length ? (
+              {desktopKeys?.length ? (
                 <TableCell rowSpan={1}>
                   {renderItem(desktopItems?.[key])}
                 </TableCell>

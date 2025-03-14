@@ -97,7 +97,7 @@ export function updateTableHeading(
   }
 
   return {
-    key: heading.key ? `${heading.key}-${device}` : null,
+    key: heading.key ? `${heading.key}_${device}` : null,
     label: `${heading.label}`,
     valueType: heading.valueType,
     granularity: heading.granularity,
@@ -120,9 +120,9 @@ export function renameKeys(obj: TableItem, device: DeviceType): TableItem {
   return {
     ...obj,
     ...Object.entries(obj).reduce((acc: TableItem, [key, value]) => {
-      // if (typeof value === 'number' || showKeyBothDevices(key)) {
-        acc[`${key}-${device}`] = value;
-      // }
+      if (key !== 'subItems') {
+        acc[`${key}_${device}`] = value;
+      }
       return acc;
     }, {}),
     ...(obj.subItems
@@ -143,7 +143,7 @@ export function mergeTableItem(a: TableItem, b: TableItem): TableItem {
   return {
     ...a,
     ...b,
-    ...((a.subItems || b.subItems)
+    ...(a.subItems || b.subItems
       ? {
           subItems: {
             type: 'subitems',
@@ -177,7 +177,7 @@ export const makeID = (i: TableItem) =>
   Object.entries(i)
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([k, v]) => {
-      if (typeof v === 'string' && !showKeyBothDevices(k)) {
+      if (typeof v === 'string' && !showKeyBothDevices(k) && !k.includes('_')) {
         return `${k}|${v}`;
       }
       return '';

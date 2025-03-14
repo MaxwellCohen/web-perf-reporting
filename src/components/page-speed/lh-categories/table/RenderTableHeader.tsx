@@ -14,7 +14,7 @@ export function RenderTableHeader({
           <RenderHeading
             key={index}
             heading={heading}
-            className="grid-col-span-1 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+            className="grid-col-span-1 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground"
           />
         );
       })}

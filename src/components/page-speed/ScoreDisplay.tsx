@@ -124,6 +124,6 @@ export function ScoreDisplay({
   }
 
   return (
-    <div className="text-xs">Score: {Math.round(audit.score * 100)} / 100</div>
+    <div className="text-xs">{device} - Score: {Math.round(audit.score * 100)} / 100</div>
   );
 }

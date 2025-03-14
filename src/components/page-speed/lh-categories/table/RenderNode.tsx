@@ -1,4 +1,4 @@
-import { useContext, useMemo, useRef } from 'react';
+import { useCallback, useContext, useRef } from 'react';
 import { fullPageScreenshotContext } from '../../PageSpeedContext';
 import { RenderJSONDetails } from '../../RenderJSONDetails';
 import { NodeValue, FullPageScreenshot, Rect, DeviceType } from '@/lib/schema';
@@ -394,7 +394,8 @@ function ElementScreenshotRenderer({
 }: ElementScreenshotRendererProps) {
   //cursor-pointer  hover:scale-105 hover:shadow-md
   // Render thumbnails
-  const renderThumbnails = useMemo(() => {
+  const ref = useRef<HTMLDivElement>(null);
+  const renderThumbnails = useCallback((thumbnailSize: Size) => {
     return elementRects.map((rect, index) => (
       <div
         key={index}
@@ -403,22 +404,22 @@ function ElementScreenshotRenderer({
         <ElementScreenshot
           screenshot={screenshot}
           elementRect={rect}
-          maxRenderSize={maxThumbnailSize}
+          maxRenderSize={thumbnailSize}
         />
       </div>
     ));
-  }, [elementRects, maxThumbnailSize, screenshot]);
+  }, [elementRects, screenshot]);
   if (!screenshot) return null;
   return (
     <Dialog>
       <DialogTrigger>
         <div className="flex flex-wrap place-content-center gap-2.5">
-          {renderThumbnails}
+          {renderThumbnails(maxThumbnailSize)}
         </div>
       </DialogTrigger>
-      <DialogContent className="h-full w-screen max-w-none md:w-[74vw]">
+      <DialogContent ref={ref} className="h-full w-screen max-w-none md:w-[74vw] justify-center ">
         <DialogTitle>screenshot</DialogTitle>
-        {renderThumbnails}
+        {renderThumbnails({ width: ref.current?.clientWidth || 500, height: ref.current?.clientHeight || 500 })}
         <DialogClose asChild>
           <Button className="w-17" autoFocus>
             close

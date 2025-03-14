@@ -32,6 +32,16 @@ export function AuditDetailsSummary({
         <ReactMarkdown>
           {desktopAuditData.description || mobileAuditData.description || ''}
         </ReactMarkdown>
+        <div>
+          {mobileAuditData.displayValue
+            ? `Mobile: ${mobileAuditData.displayValue}`
+            : ''}
+        </div>
+        <div>
+          {desktopAuditData.displayValue
+            ? `Desktop: ${desktopAuditData.displayValue}`
+            : ''}
+        </div>
       </div>
       {/* <div className="align-top no-underline hover:no-underline focus:no-underline md:flex-1">
             {desktopAuditData.scoreDisplayMode ||
