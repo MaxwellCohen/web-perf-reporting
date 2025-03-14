@@ -67,7 +67,7 @@ export function RenderTableValue({
 
 function RenderCodeValue({ value }: { value: CodeValue }) {
   return (
-    <code title="code" className="font-mono text-xs">
+    <code title="code" className="font-mono text-xs max-w-[50ch]">
       {typeof value === 'string' ? value : JSON.stringify(value)}
     </code>
   );
@@ -240,7 +240,7 @@ function RenderBytesValue({ value }: { value: unknown }) {
 function RenderCode({ value }: { value: unknown }) {
   const strValue = String(value);
   return (
-    <code title="code" className="font-mono text-xs">
+    <code title="code" className="font-mono text-xs max-w-[50ch]">
       {strValue}
     </code>
   );

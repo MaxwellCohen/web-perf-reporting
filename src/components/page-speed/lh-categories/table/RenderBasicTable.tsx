@@ -8,6 +8,7 @@ import { RenderTableCell } from './RenderTableCell';
 import { RenderTableValue } from './RenderTableValue';
 import { Fragment } from 'react';
 
+
 export function RenderBasicTable({
   headings,
   items,
@@ -27,9 +28,10 @@ export function RenderBasicTable({
         <Fragment key={`item-${index}`}>
           <RenderMainRow item={item} headings={headings} device={device} />
           {item.subItems?.items?.length ? (
-            <div className="border-b-2 contents">
+            <div className="contents">
               <RenderSubItemsHeader headings={headings} />
               <RenderSubItems item={item} headings={headings} device={device} />
+              <div className="w-full mb-2"></div>
             </div>
           ) : null}
         </Fragment>
@@ -54,10 +56,7 @@ function RenderSubItems({
   if (!item.subItems?.items?.length) return null;
 
   return item.subItems.items.map((subItem, subIndex) => (
-    <RenderTableRowContainer
-      key={`subitem-${subIndex}`}
-      className="border-2"
-    >
+    <RenderTableRowContainer key={`subitem-${subIndex}`} className="border-2">
       {headings.map((heading, colIndex) => (
         <div
           key={`subcell-${heading.key || colIndex}`}
@@ -84,7 +83,7 @@ export function RenderSubItemsHeader({
   headings: TableColumnHeading[];
 }) {
   return (
-    <RenderTableRowContainer>
+    <RenderTableRowContainer className='border-2'>
       {headings.map((h, colIndex) => {
         const headingKey = h?.subItemsHeading?.key;
         if (!headingKey) return null;
@@ -97,7 +96,7 @@ export function RenderSubItemsHeader({
           <RenderHeading
             key={`subheading-${heading.key || colIndex}`}
             heading={heading}
-            className="px-6 py-2 text-sm tracking-wider text-gray-500"
+            className="px-6 py-2 text-sm tracking-wider text-gray-500 border-2"
             style={{
               gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
             }}
@@ -118,7 +117,7 @@ function RenderMainRow({
   device: DeviceType;
 }) {
   return (
-    <RenderTableRowContainer>
+    <RenderTableRowContainer className='border-2'>
       {headings
         .map((heading, colIndex) => {
           if (!heading.key) return null;
