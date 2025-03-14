@@ -31,9 +31,9 @@ export function RenderBasicTable({
             <div className="contents">
               <RenderSubItemsHeader headings={headings} />
               <RenderSubItems item={item} headings={headings} device={device} />
-              <div className="w-full mb-2"></div>
             </div>
           ) : null}
+          <div className="w-full mb-2"></div>
         </Fragment>
       ))}
     </div>
