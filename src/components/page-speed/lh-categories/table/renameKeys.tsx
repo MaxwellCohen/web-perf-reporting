@@ -1,7 +1,7 @@
-import { TableItem } from '@/lib/schema';
+import { DeviceType, TableItem } from '@/lib/schema';
 
 
-export function renameKeys(obj: TableItem, device: 'Desktop' | 'Mobile'): TableItem {
+export function renameKeys(obj: TableItem, device: DeviceType): TableItem {
   return {
     ...obj,
     ...Object.entries(obj).reduce((acc: TableItem, [key, value]) => {

@@ -64,9 +64,9 @@ export function Timeline({ timeline, device }: TimelineProps) {
                     key={`${i}-${item.timestamp}`}
                     className="basis-1/2"
                   >
-                    <div>
+                    <div className='flex flex-col gap-2 justify-center'>
                       <img className="max-w-full h-full max-h-[75vh] object-contain" alt="timeline image" width={500} src={item.data} />
-                      <div>{item.timing} ms</div>
+                      <div className='text-center'>{item.timing} ms</div>
                     </div>
                   </CarouselItem>
                 ))}

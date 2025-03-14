@@ -1,4 +1,4 @@
-import { ItemValue, TableColumnHeading } from '@/lib/schema';
+import { DeviceType, ItemValue, TableColumnHeading } from '@/lib/schema';
 import { RenderTableValue } from './RenderTableValue';
 
 
@@ -7,7 +7,7 @@ export function RenderTableCell({
 }: {
   value?: ItemValue;
   heading: TableColumnHeading | null;
-  device: 'Desktop' | 'Mobile';
+  device: DeviceType;
 } & React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div {...props}>

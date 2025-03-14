@@ -1,4 +1,4 @@
-import { TableColumnHeading, TableItem } from '@/lib/schema';
+import { DeviceType, TableColumnHeading, TableItem } from '@/lib/schema';
 import { reduceTableItems } from './reduceTableItems';
 import { renameKeys } from './renameKeys';
 import { ItemValueType } from '@/lib/schema';
@@ -28,10 +28,10 @@ export function mergedTable(
   mobileItems?: TableItem[],
   mobileHeadings?: TableColumnHeading[],
   desktopHeadings?: TableColumnHeading[],
-): [TableColumnHeading[], TableItem[], 'Desktop' | 'Mobile'] {
+): [TableColumnHeading[], TableItem[], DeviceType] {
   let headings: TableColumnHeading[] = [];
   let items: TableItem[] = [];
-  let device: 'Desktop' | 'Mobile' = 'Desktop';
+  let device: DeviceType = 'Desktop';
   if (!desktopItems && !mobileItems) {
     return [[], [], 'Desktop'] as const;
   }
@@ -80,7 +80,7 @@ export function mergeHeadings(
 
 export function updateTableHeading(
   heading: TableColumnHeading,
-  device: 'Desktop' | 'Mobile',
+  device: DeviceType,
 ): TableColumnHeading {
   if (!showBothDevices(heading)) {
     return heading;
@@ -88,10 +88,11 @@ export function updateTableHeading(
 
   return {
     key: heading.key ? `${heading.key}-${device}` : null,
-    label: `${heading.label} (${device})`,
+    label: `${heading.label}`,
     valueType: heading.valueType,
     granularity: heading.granularity,
     displayUnit: heading.displayUnit,
+    _device: device,
     ...(heading.subItemsHeading
       ? {
           subItemsHeading: getDerivedSubItemsHeading(heading)

@@ -1,9 +1,8 @@
-import { TableItem, TableColumnHeading, NodeValue } from '@/lib/schema';
+import { TableItem, TableColumnHeading, NodeValue, DeviceType } from '@/lib/schema';
 import { Card } from '@/components/ui/card';
 import { RenderNodeImage } from './RenderNode';
 import { RenderTableCell } from './RenderTableCell';
 
-type DeviceType = 'Desktop' | 'Mobile';
 
 export function RenderNodeTable({
   headings,
@@ -31,6 +30,7 @@ export function RenderNodeTable({
             {headings.map((heading, colIndex) => {
               if (!heading.key) return null;
               if (heading?.valueType === 'node') return null;
+              if (!item[heading.key]) return null;
               return (
                 <div  className="flex flex-col gap-2 pt-4" key={`cell-${heading.key}-${colIndex}`}>
                   <span className='break-words'>
@@ -62,7 +62,7 @@ export function NodeComponent({
   device,
 }: {
   item: NodeValue;
-  device: 'Desktop' | 'Mobile';
+  device: DeviceType;
 }) {
   return (
     <div className="grid grid-cols-1 gap-2">

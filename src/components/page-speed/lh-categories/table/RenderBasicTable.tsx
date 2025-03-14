@@ -1,13 +1,12 @@
-import { TableItem, TableColumnHeading } from '@/lib/schema';
-import { Fragment } from 'react';
+import { TableItem, TableColumnHeading, DeviceType } from '@/lib/schema';
+
 import { getDerivedSubItemsHeading } from './utils';
 import { RenderTableRowContainer } from './RenderTableRowContainer';
 import { RenderTableHeader } from './RenderTableHeader';
 import { RenderHeading } from './RenderHeading';
 import { RenderTableCell } from './RenderTableCell';
 import { RenderTableValue } from './RenderTableValue';
-
-type DeviceType = 'Desktop' | 'Mobile';
+import { Fragment } from 'react';
 
 export function RenderBasicTable({
   headings,
@@ -39,8 +38,9 @@ export function RenderBasicTable({
   );
 }
 
-const getItemDevice = (item: TableItem, device: DeviceType): DeviceType =>
-  (item._device as DeviceType) || device;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getItemDevice = (item: any, device: DeviceType): DeviceType =>
+  (item?._device as DeviceType) || device;
 
 function RenderSubItems({
   item,
@@ -62,7 +62,7 @@ function RenderSubItems({
       {headings.map((heading, colIndex) => (
         <div
           key={`subcell-${heading.key || colIndex}`}
-          className="px-6 py-4 text-sm"
+          className="px-6 py-2 text-sm"
         >
           {heading.subItemsHeading?.key ? (
             <RenderTableValue
@@ -79,12 +79,11 @@ function RenderSubItems({
   ));
 }
 
-function RenderSubItemsHeader({
+export function RenderSubItemsHeader({
   headings,
 }: {
   headings: TableColumnHeading[];
 }) {
-
   return (
     <RenderTableRowContainer headings={headings}>
       {headings.map((h, colIndex) => {
@@ -99,7 +98,7 @@ function RenderSubItemsHeader({
           <RenderHeading
             key={`subheading-${heading.key || colIndex}`}
             heading={heading}
-            className="px-6 py-4 text-sm tracking-wider text-gray-500"
+            className="px-6 py-2 text-sm tracking-wider text-gray-500"
             style={{
               gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
             }}
@@ -121,8 +120,6 @@ function RenderMainRow({
 }) {
   return (
     <RenderTableRowContainer headings={headings}>
-
-
       {headings
         .map((heading, colIndex) => {
           if (!heading.key) return null;

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-// const x: Details.Table = {}
+export type DeviceType = 'Desktop' | 'Mobile';
 const coerceNumber = z.coerce.number().default(0).catch(NaN);
 
 const cruxHistogramItemSchema = z.object({
@@ -595,6 +595,7 @@ export interface TableColumnHeading {
    * could also be objects with their own type to override this field.
    */
   valueType: ItemValueType;
+  _device?: DeviceType;
   /**
    * Optional - defines an inner table of values that correspond to this column.
    * Key is required - if other properties are not provided, the value for the heading is used.

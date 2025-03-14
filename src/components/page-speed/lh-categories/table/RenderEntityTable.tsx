@@ -1,4 +1,4 @@
-import { TableItem, TableColumnHeading } from '@/lib/schema';
+import { TableItem, TableColumnHeading, DeviceType } from '@/lib/schema';
 import { Fragment, useMemo } from 'react';
 import { getDerivedSubItemsHeading } from './utils';
 import { RenderTableRowContainer } from './RenderTableRowContainer';
@@ -6,7 +6,7 @@ import { RenderTableHeader } from './RenderTableHeader';
 import { RenderTableCell } from './RenderTableCell';
 import { getEntityGroupItems } from './getEntityGroupItems';
 
-type Device = 'Desktop' | 'Mobile';
+
 export function RenderEntityTable({
   headings = [],
   device,
@@ -16,7 +16,7 @@ export function RenderEntityTable({
   sortedBy,
 }: {
   headings?: TableColumnHeading[];
-  device: Device;
+  device: DeviceType;
   items: TableItem[];
   isEntityGrouped: boolean;
   skipSumming: string[];
@@ -35,7 +35,7 @@ export function RenderEntityTable({
       className="grid overflow-x-auto"
       style={{ gridTemplateColumns: `repeat(${headings?.length || 0}, auto)` }}
     >
-      <RenderTableHeader headings={headings} />
+      <RenderTableHeader headings={headings}  />
       {entityItems?.map((entityItem, index) => (
         <Fragment key={index}>
           <RenderTableRowContainer headings={headings}>
@@ -44,13 +44,13 @@ export function RenderEntityTable({
               return (
                 <RenderTableCell
                   key={`${index}-${colIndex}`}
-                  className="whitespace-nowrap px-6 py-4 text-sm"
+                  className="whitespace-nowrap px-6 py-2 text-sm"
                   style={{
                     gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
                   }}
                   value={entityItem[heading.key || '']}
                   heading={heading}
-                  device={(entityItem?._device as Device) || device}
+                  device={(entityItem?._device as DeviceType) || device}
                 />
               );
             })}
@@ -65,13 +65,13 @@ export function RenderEntityTable({
                     return (
                       <RenderTableCell
                         key={`${index}-${colIndex}`}
-                        className="whitespace-nowrap px-6 py-4 text-sm"
+                        className="whitespace-nowrap px-6 py-2 text-sm"
                         style={{
                           gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
                         }}
                         value={item[heading.key]}
                         heading={heading}
-                        device={(item?._device as Device) || device}
+                        device={(item?._device as DeviceType) || device}
                       />
                     );
                   })}
@@ -87,13 +87,13 @@ export function RenderEntityTable({
                       return (
                         <RenderTableCell
                           key={`${index}-${colIndex}`}
-                          className="whitespace-nowrap px-6 py-4 text-sm"
+                          className="whitespace-nowrap px-6 py-2 text-sm"
                           style={{
                             gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
                           }}
                           value={subItem[heading.subItemsHeading.key]}
                           heading={getDerivedSubItemsHeading(heading)}
-                          device={(subItem._device as Device) || device}
+                          device={(subItem._device as DeviceType) || device}
                         />
                       );
                     })}

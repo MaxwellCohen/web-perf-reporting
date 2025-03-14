@@ -1,7 +1,7 @@
 import { useContext, useMemo, useRef } from 'react';
 import { fullPageScreenshotContext } from '../../PageSpeedContext';
 import { RenderJSONDetails } from '../../RenderJSONDetails';
-import { NodeValue, FullPageScreenshot, Rect } from '@/lib/schema';
+import { NodeValue, FullPageScreenshot, Rect, DeviceType } from '@/lib/schema';
 
 /**
  * React component that renders a node element similar to the renderNode function
@@ -12,7 +12,7 @@ export function NodeComponent({
   device,
 }: {
   item: NodeValue;
-  device: 'Desktop' | 'Mobile';
+  device: DeviceType;
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -38,7 +38,7 @@ export function RenderNodeImage({
   imageSize = 300,
 }: {
   item: NodeValue;
-  device: 'Desktop' | 'Mobile';
+  device: DeviceType;
   imageSize?: number;
 }) {
   const screenshotData = useContext(fullPageScreenshotContext);

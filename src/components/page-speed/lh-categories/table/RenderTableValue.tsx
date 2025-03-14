@@ -2,6 +2,7 @@
 import { NodeComponent } from './RenderNode';
 import {
   CodeValue,
+  DeviceType,
   ItemValue,
   LinkValue,
   NodeValue,
@@ -28,7 +29,7 @@ export function RenderTableValue({
 }: {
   value?: ItemValue;
   heading?: TableColumnHeading | null;
-  device: 'Desktop' | 'Mobile';
+  device: DeviceType;
 }) {
   if (value === undefined || value === null) {
     return null;
@@ -77,7 +78,7 @@ function RenderLinkValue({ value }: { value: LinkValue }) {
     <a
       href={value.url}
       title={value.text}
-      className="block max-w-[50ch] overflow-hidden text-ellipsis"
+      className="block max-w-[50ch] overflow-hidden break-words"
     >
       {value.text}
     </a>
@@ -206,7 +207,7 @@ function RenderUrlValue({ value }: { value: UrlValue }) {
     <a
       href={value.value}
       title={value.value}
-      className="block max-w-[50ch] overflow-hidden text-ellipsis"
+      className="block max-w-[50ch] overflow-hidden break-words"
     >
       {value.value}
     </a>
@@ -290,7 +291,7 @@ function RenderUrl({ value }: { value: unknown }) {
       <a
         href={strValue}
         title={strValue}
-        className="block max-w-[50ch] overflow-hidden text-ellipsis"
+        className="block max-w-[50ch] overflow-hidden break-words"
       >
         {strValue}
       </a>

@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 
 
 export function RenderTableRowContainer({
-  children, headings, ...props
+  children, className, ...props
 }: {
   children: React.ReactNode;
   headings: TableColumnHeading[];
@@ -13,10 +13,7 @@ export function RenderTableRowContainer({
   return (
     <div
       {...props}
-      className={cn('grid grid-cols-subgrid border-b-2', props.className)}
-      style={{
-        gridColumn: `span ${headings.length} / span ${headings.length}`,
-      }}
+      className={cn('grid grid-cols-subgrid border-b-2 items-center col-span-full', className)}
     >
       {children}
     </div>

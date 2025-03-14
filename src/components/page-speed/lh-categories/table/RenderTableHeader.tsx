@@ -2,10 +2,11 @@ import { TableColumnHeading } from '@/lib/schema';
 import { RenderHeading } from './RenderHeading';
 import { RenderTableRowContainer } from './RenderTableRowContainer';
 
-
-
-
-export function RenderTableHeader({ headings }: { headings: TableColumnHeading[]; }) {
+export function RenderTableHeader({
+  headings,
+}: {
+  headings: TableColumnHeading[];
+}) {
   return (
     <RenderTableRowContainer headings={headings}>
       {headings.map((heading, index) => {
@@ -13,7 +14,8 @@ export function RenderTableHeader({ headings }: { headings: TableColumnHeading[]
           <RenderHeading
             key={index}
             heading={heading}
-            className="grid-col-span-1 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500" />
+            className="grid-col-span-1 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+          />
         );
       })}
     </RenderTableRowContainer>
