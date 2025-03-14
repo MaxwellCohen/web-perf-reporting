@@ -8,19 +8,17 @@ export const SUMMABLE_VALUETYPES: ItemValueType[] = [
   'timespanMs',
 ];
 
-export const SHOW_BOTH_DEVICES_KEYS: string[] = [
-  '_device',
-  'percent',
-];
-
+export const SHOW_BOTH_DEVICES_KEYS: string[] = ['_device', 'percent'];
 
 function showKeyBothDevices(key: string) {
   return !!SHOW_BOTH_DEVICES_KEYS.find((k) => key.includes(k));
 }
 export function showBothDevices(heading: TableColumnHeading) {
-  return SUMMABLE_VALUETYPES.includes(heading.valueType as ItemValueType) || showKeyBothDevices(heading.key || 'zzz');
+  return (
+    SUMMABLE_VALUETYPES.includes(heading.valueType as ItemValueType) ||
+    showKeyBothDevices(heading.key || 'zzz')
+  );
 }
-
 
 export function getDerivedSubItemsHeading(
   heading: TableColumnHeading,
@@ -118,8 +116,6 @@ export function updateTableHeading(
   } as TableColumnHeading;
 }
 
-
-
 export function renameKeys(obj: TableItem, device: DeviceType): TableItem {
   return {
     ...obj,
@@ -131,28 +127,28 @@ export function renameKeys(obj: TableItem, device: DeviceType): TableItem {
     }, {}),
     ...(obj.subItems
       ? {
-        subItems: {
-          ...obj.subItems,
-          items: obj.subItems.items.map((subItem) => renameKeys(subItem, device)
-          ),
-        },
-      }
+          subItems: {
+            ...obj.subItems,
+            items: obj.subItems.items.map((subItem) =>
+              renameKeys(subItem, device),
+            ),
+          },
+        }
       : {}),
     _device: device,
   };
 }
 
-
 export function mergeTableItem(a: TableItem, b: TableItem): TableItem {
   return {
     ...a,
     ...b,
-    ...(a.subItems
+    ...((a.subItems || b.subItems)
       ? {
           subItems: {
             type: 'subitems',
             items: [
-              ...(a.subItems.items || []),
+              ...(a.subItems?.items || []),
               ...(b.subItems?.items || []),
             ].reduce(reduceTableItems, []),
           },
@@ -181,7 +177,7 @@ export const makeID = (i: TableItem) =>
   Object.entries(i)
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([k, v]) => {
-      if (typeof v === 'string' &&  !showKeyBothDevices(k)) {
+      if (typeof v === 'string' && !showKeyBothDevices(k)) {
         return `${k}|${v}`;
       }
       return '';
