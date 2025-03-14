@@ -8,7 +8,7 @@ export function RenderTableHeader({
   headings: TableColumnHeading[];
 }) {
   return (
-    <RenderTableRowContainer headings={headings}>
+    <RenderTableRowContainer>
       {headings.map((heading, index) => {
         return (
           <RenderHeading

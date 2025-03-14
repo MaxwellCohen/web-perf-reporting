@@ -27,10 +27,10 @@ export function RenderBasicTable({
         <Fragment key={`item-${index}`}>
           <RenderMainRow item={item} headings={headings} device={device} />
           {item.subItems?.items?.length ? (
-            <>
+            <div className="border-b-2 contents">
               <RenderSubItemsHeader headings={headings} />
               <RenderSubItems item={item} headings={headings} device={device} />
-            </>
+            </div>
           ) : null}
         </Fragment>
       ))}
@@ -55,7 +55,6 @@ function RenderSubItems({
 
   return item.subItems.items.map((subItem, subIndex) => (
     <RenderTableRowContainer
-      headings={headings}
       key={`subitem-${subIndex}`}
       className="border-2"
     >
@@ -85,7 +84,7 @@ export function RenderSubItemsHeader({
   headings: TableColumnHeading[];
 }) {
   return (
-    <RenderTableRowContainer headings={headings}>
+    <RenderTableRowContainer>
       {headings.map((h, colIndex) => {
         const headingKey = h?.subItemsHeading?.key;
         if (!headingKey) return null;
@@ -119,7 +118,7 @@ function RenderMainRow({
   device: DeviceType;
 }) {
   return (
-    <RenderTableRowContainer headings={headings}>
+    <RenderTableRowContainer>
       {headings
         .map((heading, colIndex) => {
           if (!heading.key) return null;

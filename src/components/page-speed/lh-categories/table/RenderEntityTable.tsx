@@ -38,7 +38,7 @@ export function RenderEntityTable({
       <RenderTableHeader headings={headings}  />
       {entityItems?.map((entityItem, index) => (
         <Fragment key={index}>
-          <RenderTableRowContainer headings={headings}>
+          <RenderTableRowContainer>
             {headings.map((heading, colIndex) => {
               // if (!heading.key) return null;
               return (
@@ -59,7 +59,7 @@ export function RenderEntityTable({
             .filter((item) => item.entity === entityItem.entity)
             .map((item, subIndex) => (
               <Fragment key={`${index}-${subIndex}`}>
-                <RenderTableRowContainer headings={headings}>
+                <RenderTableRowContainer>
                   {headings.map((heading, colIndex) => {
                     if (!heading.key) return null;
                     return (
@@ -78,7 +78,6 @@ export function RenderEntityTable({
                 </RenderTableRowContainer>
                 {item.subItems?.items.map((subItem, subIndex) => (
                   <RenderTableRowContainer
-                    headings={headings}
                     key={subIndex}
                     className="border-red-500"
                   >
