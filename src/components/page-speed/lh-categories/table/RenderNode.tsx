@@ -2,6 +2,14 @@ import { useContext, useMemo, useRef } from 'react';
 import { fullPageScreenshotContext } from '../../PageSpeedContext';
 import { RenderJSONDetails } from '../../RenderJSONDetails';
 import { NodeValue, FullPageScreenshot, Rect, DeviceType } from '@/lib/schema';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 /**
  * React component that renders a node element similar to the renderNode function
@@ -27,7 +35,10 @@ export function NodeComponent({
           )}
         </div>
       </div>
-      <RenderJSONDetails data={item} title={`Node Data for ${item.lhId} on ${device}`} />
+      <RenderJSONDetails
+        data={item}
+        title={`Node Data for ${item.lhId} on ${device}`}
+      />
     </div>
   );
 }
@@ -137,8 +148,6 @@ function screenshotOverlapsRect(
   screenshot: FullPageScreenshot['screenshot'],
   rect: Rect,
 ): boolean {
-
-
   return (
     rect?.left <= screenshot.width &&
     0 <= rect?.right &&
@@ -382,7 +391,7 @@ function ElementScreenshotRenderer({
   screenshot,
   elementRects = [],
   maxThumbnailSize = { width: 120, height: 80 },
-}: ElementScreenshotRendererProps){
+}: ElementScreenshotRendererProps) {
   //cursor-pointer  hover:scale-105 hover:shadow-md
   // Render thumbnails
   const renderThumbnails = useMemo(() => {
@@ -399,6 +408,23 @@ function ElementScreenshotRenderer({
       </div>
     ));
   }, [elementRects, maxThumbnailSize, screenshot]);
-  if(!screenshot) return null;
-  return <div className="flex flex-wrap gap-2.5 place-content-center">{renderThumbnails}</div>;
+  if (!screenshot) return null;
+  return (
+    <Dialog>
+      <DialogTrigger>
+        <div className="flex flex-wrap place-content-center gap-2.5">
+          {renderThumbnails}
+        </div>
+      </DialogTrigger>
+      <DialogContent className="h-full w-screen max-w-none md:w-[74vw]">
+        <DialogTitle>screenshot</DialogTitle>
+        {renderThumbnails}
+        <DialogClose asChild>
+          <Button className="w-17" autoFocus>
+            close
+          </Button>
+        </DialogClose>
+      </DialogContent>
+    </Dialog>
+  );
 }

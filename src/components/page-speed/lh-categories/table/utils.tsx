@@ -120,9 +120,9 @@ export function renameKeys(obj: TableItem, device: DeviceType): TableItem {
   return {
     ...obj,
     ...Object.entries(obj).reduce((acc: TableItem, [key, value]) => {
-      if (typeof value === 'number' || showKeyBothDevices(key)) {
+      // if (typeof value === 'number' || showKeyBothDevices(key)) {
         acc[`${key}-${device}`] = value;
-      }
+      // }
       return acc;
     }, {}),
     ...(obj.subItems

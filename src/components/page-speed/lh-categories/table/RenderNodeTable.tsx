@@ -21,13 +21,13 @@ export function RenderNodeTable({
     <div className="grid grid-cols-[repeat(auto-fit,_300px)] gap-3">
       {items.map((item, index) => (
         <Card key={`item-${index}`} className='w-300px'>
+          <div className='p-2' >Form Factor: {getItemDevice(item, device)}</div>
           <NodeComponent
             item={item[nodeHeader.key || ''] as NodeValue}
             device={getItemDevice(item, device)}
           />
           <div className="flex flex-col gap-2 pt-4 px-2">
             <div >{(item[nodeHeader.key || ''] as NodeValue)?.nodeLabel}</div>
-            <div >Form Factor: {getItemDevice(item, device)}</div>
             {headings.map((heading, colIndex) => {
               if (!heading.key) return null;
               if (heading?.valueType === 'node') return null;
