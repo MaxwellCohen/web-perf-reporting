@@ -296,7 +296,7 @@ export const RectSchema = z.object({
 export type Rect = z.infer<typeof RectSchema>;
 
 export const NodeValueSchema = z.object({
-  type: z.literal('node'),
+  type: z.literal('node').or(z.literal('text')),
   lhId: z.string().optional(),
   path: z.string().optional(),
   selector: z.string().optional(),
@@ -304,6 +304,7 @@ export const NodeValueSchema = z.object({
   nodeLabel: z.string().optional(),
   explanation: z.string().optional(),
   snippet: z.string().optional(),
+  value: z.string().optional()  
 });
 
 export type NodeValue = z.infer<typeof NodeValueSchema>;

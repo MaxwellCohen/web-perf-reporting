@@ -23,23 +23,24 @@ export function RenderNodeTable({
         <Card key={`item-${index}`} className='w-300px'>
           <NodeComponent
             item={item[nodeHeader.key || ''] as NodeValue}
-            device={device}
+            device={getItemDevice(item, device)}
           />
           <div className="flex flex-col gap-2 pt-4 px-2">
-            <div >Device Type: {device}</div>
+            <div >{(item[nodeHeader.key || ''] as NodeValue)?.nodeLabel}</div>
+            <div >Form Factor: {getItemDevice(item, device)}</div>
             {headings.map((heading, colIndex) => {
               if (!heading.key) return null;
               if (heading?.valueType === 'node') return null;
               if (!item[heading.key]) return null;
               return (
-                <div  className="flex flex-col gap-2 pt-4" key={`cell-${heading.key}-${colIndex}`}>
+                <div  className="flex flex-col  pb-4" key={`cell-${heading.key}-${colIndex}`}>
                   <span className='break-words'>
                     {typeof heading.label === 'string'
                       ? heading.label
                       : heading.label?.formattedDefault || ''} :
                   </span>
                   <RenderTableCell
-                    className="pb-4 text-xs"
+                    className="text-xs"
                     value={item[heading.key]}
                     heading={heading}
                     device={getItemDevice(item, device)}
@@ -66,15 +67,17 @@ export function NodeComponent({
 }) {
   return (
     <div className="grid grid-cols-1 gap-2">
+      {item.type === 'text' ? <h3 className='text-lg font-bold px-2 pt-6'>{item.value} </h3>: ''}
       <RenderNodeImage item={item} device={device} />
-      {/* <div className="flex flex-col gap-2 md:self-baseline">
-          {item.nodeLabel ? <div>{item.nodeLabel}</div> : null}
+      <div className="flex flex-col gap-2 md:self-baseline">
+          {item.nodeLabel ? <div className='px-2'>{item.nodeLabel}</div> : null}
           {item.snippet && (
-            <div className="whitespace-pre-wrap font-mono text-sm leading-5 text-blue-500">
+            <div className="whitespace-pre-wrap font-mono text-sm px-2 leading-5 text-blue-500 break-all">
               {item.snippet}
             </div>
           )}
-        </div> */}
+          {}
+        </div> 
     </div>
   );
 }

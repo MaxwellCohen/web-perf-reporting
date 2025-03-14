@@ -400,5 +400,5 @@ function ElementScreenshotRenderer({
     ));
   }, [elementRects, maxThumbnailSize, screenshot]);
   if(!screenshot) return null;
-  return <div className="flex flex-wrap gap-2.5">{renderThumbnails}</div>;
+  return <div className="flex flex-wrap gap-2.5 place-content-center">{renderThumbnails}</div>;
 }
