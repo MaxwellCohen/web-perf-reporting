@@ -27,11 +27,12 @@ export function RenderBasicTable({
       className="grid overflow-x-auto"
       style={{ gridTemplateColumns: `repeat(${headings?.length || 0}, auto)` }}
     >
-      <RenderTableHeader headings={headings} />
+      <RenderTableHeader headings={headings} className={'border-0'} />
       {items.map((item, index) => {
         if (!item.subItems?.items?.length) {
           return (
             <RenderMainRow
+            className={'border-0'}
               key={`item-${index}`}
               item={item}
               headings={headings}
@@ -63,7 +64,7 @@ export function NestedTableNoCollapse({
 }) {
   return (
     <Fragment>
-      <RenderMainRow item={item} headings={headings} device={device} />
+      <RenderMainRow item={item} headings={headings} device={device} className={'border-x-2 border-t-2 border-b-3'} />
       {item.subItems?.items?.length ? (
         <div className="contents">
           <RenderSubItemsHeader headings={headings} />
@@ -154,7 +155,7 @@ function RenderSubItems({
     <RenderTableRowContainer
       key={`subitem-${subIndex}`}
       {...props}
-      className={cn('border-2', props.className)}
+      className={cn('border-x-2 border-b-2', props.className)}
     >
       {headings.map((heading, colIndex) => (
         <RenderTableValue
@@ -207,13 +208,14 @@ function RenderMainRow({
   item,
   headings,
   device,
+  ...props
 }: {
   item: TableItem;
   headings: TableColumnHeading[];
   device: DeviceType;
-}) {
+} & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <RenderTableRowContainer className="border-2">
+    <RenderTableRowContainer {...props}>
       {headings
         .map((heading, colIndex) => {
           if (!heading.key) return null;

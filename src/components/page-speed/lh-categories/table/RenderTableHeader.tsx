@@ -4,11 +4,12 @@ import { RenderTableRowContainer } from './RenderTableRowContainer';
 
 export function RenderTableHeader({
   headings,
+  ...props
 }: {
   headings: TableColumnHeading[];
-}) {
+} & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <RenderTableRowContainer>
+    <RenderTableRowContainer {...props}>
       {headings.map((heading, index) => {
         return (
           <RenderHeading
