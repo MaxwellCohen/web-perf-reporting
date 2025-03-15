@@ -95,7 +95,7 @@ function RenderCodeValue({
     <code
       title="code"
       {...props}
-      className={cn('w-[50ch] break-all overflow-hidden font-mono text-xs', props.className)}
+      className={cn('w-[50ch] px-6 break-all overflow-hidden font-mono text-xs', props.className)}
     >
       {typeof value === 'string' ? value : JSON.stringify(value)}
     </code>
@@ -112,7 +112,7 @@ function RenderLinkValue({
       title={value.text}
       {...props}
       className={cn(
-        'block w-[50ch] break-all overflow-hidden break-words',
+        'block w-[50ch] px-6 break-all overflow-hidden break-words',
         props.className,
       )}
     >
@@ -257,7 +257,7 @@ function RenderUrlValue({ value, ...props }: { value: UrlValue }& React.HTMLAttr
       title={value.value}
       {...props}
       className={cn(
-        'block w-[50ch] break-all overflow-hidden break-words',
+        'block w-[50ch] px-6 break-all overflow-hidden break-words',
         props.className,
       )}
     >
@@ -292,7 +292,7 @@ function RenderBytesValue({ value, ...props }: { value: unknown }& React.HTMLAtt
 function RenderCode({ value, ...props }: { value: unknown }& React.HTMLAttributes<HTMLElement>) {
   const strValue = String(value);
   return (
-    <code title="code" {...props} className={cn("font-mono text-xs w-[50ch] break-all overflow-hidden", props.className)}>
+    <code title="code" {...props} className={cn("font-mono text-xs w-[50ch] px-6 break-all overflow-hidden", props.className)}>
       {strValue}
     </code>
   );
@@ -352,7 +352,7 @@ function RenderUrl({ value, ...props }: { value: unknown }& React.HTMLAttributes
         title={strValue}
         {...props}
         className={cn(
-          'block w-[50ch] break-all overflow-hidden break-words',
+          'block w-[50ch] px-6 break-all overflow-hidden break-words',
           props.className,
         )}
       >
