@@ -49,6 +49,7 @@ export function AuditDetailsSection({
         />
       </AccordionTrigger>
       <RenderJSONDetails
+        className='text-right'
         data={desktopAuditData}
         data2={mobileAuditData}
         title={`All Data for ${auditRef.id}`}

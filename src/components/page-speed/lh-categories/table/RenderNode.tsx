@@ -1,4 +1,4 @@
-import { useCallback, useContext, useRef } from 'react';
+import { memo, useContext, useRef } from 'react';
 import { fullPageScreenshotContext } from '../../PageSpeedContext';
 import { RenderJSONDetails } from '../../RenderJSONDetails';
 import { NodeValue, FullPageScreenshot, Rect, DeviceType } from '@/lib/schema';
@@ -212,7 +212,7 @@ function getScreenshotPositions(
     0,
     screenshotSize.width - elementPreviewSizeSC.width,
   );
-  const screenshotTopVisisbleEdge = clamp(
+  const screenshotTopVisibleEdge = clamp(
     elementRectCenter.y - elementPreviewSizeSC.height / 2,
     0,
     screenshotSize.height - elementPreviewSizeSC.height,
@@ -221,11 +221,11 @@ function getScreenshotPositions(
   return {
     screenshot: {
       left: screenshotLeftVisibleEdge,
-      top: screenshotTopVisisbleEdge,
+      top: screenshotTopVisibleEdge,
     },
     clip: {
       left: elementRectSC.left - screenshotLeftVisibleEdge,
-      top: elementRectSC.top - screenshotTopVisisbleEdge,
+      top: elementRectSC.top - screenshotTopVisibleEdge,
     },
   };
 }
@@ -384,6 +384,25 @@ function ElementScreenshot({
   );
 }
 
+const RenderThumbnails = memo(function RThumbnails({
+  screenshot,
+  elementRects = [],
+  maxThumbnailSize = { width: 120, height: 80 },
+}: ElementScreenshotRendererProps) {
+  return elementRects.map((rect, index) => (
+    <div
+      key={index}
+      className="overflow-hidden rounded border border-gray-300 transition-transform"
+    >
+      <ElementScreenshot
+        screenshot={screenshot}
+        elementRect={rect}
+        maxRenderSize={maxThumbnailSize}
+      />
+    </div>
+  ));
+});
+
 /**
  * ElementScreenshotRenderer component without overlay functionality
  */
@@ -392,34 +411,33 @@ function ElementScreenshotRenderer({
   elementRects = [],
   maxThumbnailSize = { width: 120, height: 80 },
 }: ElementScreenshotRendererProps) {
-  //cursor-pointer  hover:scale-105 hover:shadow-md
-  // Render thumbnails
   const ref = useRef<HTMLDivElement>(null);
-  const renderThumbnails = useCallback((thumbnailSize: Size) => {
-    return elementRects.map((rect, index) => (
-      <div
-        key={index}
-        className="overflow-hidden rounded border border-gray-300 transition-transform"
-      >
-        <ElementScreenshot
-          screenshot={screenshot}
-          elementRect={rect}
-          maxRenderSize={thumbnailSize}
-        />
-      </div>
-    ));
-  }, [elementRects, screenshot]);
   if (!screenshot) return null;
   return (
     <Dialog>
       <DialogTrigger>
-        <div className="flex flex-wrap place-content-center gap-2.5">
-          {renderThumbnails(maxThumbnailSize)}
+        <div className="flex cursor-pointer flex-wrap place-content-center gap-2.5 hover:scale-105 hover:shadow-md">
+          <RenderThumbnails
+            maxThumbnailSize={maxThumbnailSize}
+            elementRects={elementRects}
+            screenshot={screenshot}
+          />
         </div>
       </DialogTrigger>
-      <DialogContent ref={ref} className="h-full w-screen max-w-none md:w-[74vw] justify-center ">
+      <DialogContent
+        ref={ref}
+        className="h-full w-screen max-w-none justify-center md:w-[74vw]"
+      >
         <DialogTitle>screenshot</DialogTitle>
-        {renderThumbnails({ width: ref.current?.clientWidth || 500, height: ref.current?.clientHeight || 500 })}
+        <RenderThumbnails
+          maxThumbnailSize={{
+            width: ref.current?.clientWidth || 500,
+            height: ref.current?.clientHeight || 500,
+          }}
+          screenshot={screenshot}
+          elementRects={elementRects}
+        />
+
         <DialogClose asChild>
           <Button className="w-17" autoFocus>
             close

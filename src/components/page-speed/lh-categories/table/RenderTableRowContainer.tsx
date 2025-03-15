@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 
 
 
+export const renderTableRowContainerCss = 'grid grid-cols-subgrid border-b-2 items-center col-span-full';
 
 export function RenderTableRowContainer({
   children, className, ...props
@@ -12,7 +13,7 @@ export function RenderTableRowContainer({
   return (
     <div
       {...props}
-      className={cn('grid grid-cols-subgrid border-b-2 items-center col-span-full', className)}
+      className={cn(renderTableRowContainerCss, className)}
     >
       {children}
     </div>

@@ -623,6 +623,7 @@ export const TableColumnHeadingSchema = z.custom<TableColumnHeading>((v) => {
 export type TableItem = {
   debugData?: DebugData;
   subItems?: TableSubItems;
+  _device?: DeviceType;
   [key: string]: ItemValue | undefined;
 };
 

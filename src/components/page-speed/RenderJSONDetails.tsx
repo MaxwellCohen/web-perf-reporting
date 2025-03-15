@@ -1,13 +1,29 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
-export function RenderJSONDetails({ data, data2, title = 'All Data' }: { data: any, data2?: any, title?: string }) {
+import { JSX } from 'react';
+
+export function RenderJSONDetails({
+  data,
+  data2,
+  title = 'All Data',
+  ...props
+}: {
+  data: unknown;
+  data2?: unknown;
+  title?: string;
+} & JSX.IntrinsicElements['details']) {
   return (
-    <details>
+    <details {...props}>
       <summary>{title}</summary>
-      <div className="grid md:grid-cols-2">
-        <pre className="border-r-2 border-gray-300 overflow-x-auto">{JSON.stringify(data, null, 2)}</pre>
-        {data2 && <pre className="overflow-x-auto">{JSON.stringify(data2, null, 2)}</pre>}
+      <div className="grid md:grid-cols-2 text-left">
+        <pre className="overflow-x-auto border-r-2 text-muted-foreground">
+          {JSON.stringify(data, null, 2)}
+        </pre>
+        {data2 ? (
+          <pre className="overflow-x-auto">
+            {JSON.stringify(data2, null, 2)}
+          </pre>
+        ): null}
       </div>
     </details>
   );
-} 
+}
