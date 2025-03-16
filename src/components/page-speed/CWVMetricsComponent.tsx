@@ -4,6 +4,7 @@ import { Card, CardTitle } from "../ui/card";
 import { ScoreDisplay } from "./ScoreDisplay";
 import ReactMarkdown from "react-markdown";
 import { HorizontalScoreChart } from "../common/PageSpeedGaugeChart";
+import { Details } from "../ui/accordion";
 
 export function CWVMetricsComponent({
     desktopCategoryGroups,
@@ -16,8 +17,8 @@ export function CWVMetricsComponent({
     mobileCategoryGroups?: PageSpeedInsights['lighthouseResult']['categoryGroups'];
     mobileAudits?: AuditResultsRecord;
   }) {
-    return (
-      <>
+    return (<Details className="print:border-0 flex flex-col gap-2">
+        <summary className='flex flex-col gap-2'>
         {desktopCategoryGroups?.['metrics']?.title ||
         mobileCategoryGroups?.['metrics']?.title ? (
           <h3 className="text-lg font-bold">
@@ -25,7 +26,8 @@ export function CWVMetricsComponent({
               mobileCategoryGroups?.['metrics']?.title}
           </h3>
         ) : null}
-        <div className="grid grid-cols-[repeat(auto-fill,_minmax(14rem,_1fr))] gap-2">
+        </summary>
+        <div className="grid grid-cols-[repeat(auto-fill,_minmax(14rem,_1fr))] gap-2 -mx-2">
           {[
             'first-contentful-paint',
             'largest-contentful-paint',
@@ -77,6 +79,6 @@ export function CWVMetricsComponent({
             );
           }) || null}
         </div>
-      </>
+      </Details>
     );
   }

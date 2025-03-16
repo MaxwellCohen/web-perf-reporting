@@ -1,10 +1,6 @@
 import { HorizontalGaugeChart } from '@/components/common/PageSpeedGaugeChart';
 import { PageSpeedApiLoadingExperience } from '@/lib/schema';
-import {
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from '@/components/ui/accordion';
+import { Details } from '@/components/ui/accordion';
 import { Card, CardTitle } from '../ui/card';
 
 interface LoadingExperienceProps {
@@ -28,37 +24,46 @@ export function LoadingExperience({
     { metric: 'Interaction to Next Paint', key: 'INTERACTION_TO_NEXT_PAINT' },
   ] as const;
   return (
-    <AccordionItem value={title.toLowerCase().replace(/\s+/g, '-')} className="print:border-0" defaultValue={title.toLowerCase().replace(/\s+/g, '-')}>
-      <AccordionTrigger>
+    <Details className="print:border-0 flex flex-col gap-2">
+      <summary className='flex flex-col gap-2'>
         <div className="text-lg font-bold group-hover:underline">
-          {title}: {experienceMobile?.overall_category ? `Mobile -  ${experienceMobile?.overall_category} ` : ''} {experienceDesktop?.overall_category ? `Desktop - ${experienceDesktop?.overall_category}` : ''}
+          {title}:{' '}
+          {experienceMobile?.overall_category
+            ? `Mobile -  ${experienceMobile?.overall_category} `
+            : ''}{' '}
+          {experienceDesktop?.overall_category
+            ? `Desktop - ${experienceDesktop?.overall_category}`
+            : ''}
         </div>
-      </AccordionTrigger>
-      <AccordionContent>
-        <div className="grid grid-cols-[repeat(auto-fill,_minmax(14rem,_1fr))] gap-2">
-          {metrics.map(({ metric, key }) => {
-            const mobileMetric = experienceMobile?.metrics[key];
-            const desktopMetric = experienceDesktop?.metrics[key];
-            return (
-              <Card key={key} className="w-full min-w-64 px-4 py-4 flex flex-col gap-2">
-                {mobileMetric && desktopMetric ? ( <CardTitle className="text-sm font-bold">{metric}</CardTitle>) : null}
-                {mobileMetric ? (
-                  <HorizontalGaugeChart
-                    metric={`${mobileMetric.percentile} - ${mobileMetric.category} - Mobile`}
-                    data={mobileMetric}
-                  />
-                ) : null}
-                  {desktopMetric ? (
-                  <HorizontalGaugeChart
-                    metric={`${desktopMetric.percentile} - ${desktopMetric.category} - Desktop`}
-                    data={desktopMetric}
-                  />
-                ) : null}
-              </Card>
-            );
-          })}
-        </div>
-      </AccordionContent>
-    </AccordionItem>
+      </summary>
+      <div className="grid grid-cols-[repeat(auto-fill,_minmax(14rem,_1fr))] gap-2 max-w-full -mx-2">
+        {metrics.map(({ metric, key }) => {
+          const mobileMetric = experienceMobile?.metrics[key];
+          const desktopMetric = experienceDesktop?.metrics[key];
+          return (
+            <Card
+              key={key}
+              className="flex w-full min-w-64 flex-col gap-2 px-4 py-4"
+            >
+              {mobileMetric && desktopMetric ? (
+                <CardTitle className="text-sm font-bold">{metric}</CardTitle>
+              ) : null}
+              {mobileMetric ? (
+                <HorizontalGaugeChart
+                  metric={`${mobileMetric.percentile} - ${mobileMetric.category} - Mobile`}
+                  data={mobileMetric}
+                />
+              ) : null}
+              {desktopMetric ? (
+                <HorizontalGaugeChart
+                  metric={`${desktopMetric.percentile} - ${desktopMetric.category} - Desktop`}
+                  data={desktopMetric}
+                />
+              ) : null}
+            </Card>
+          );
+        })}
+      </div>
+    </Details>
   );
 }
