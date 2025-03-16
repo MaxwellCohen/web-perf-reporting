@@ -1,4 +1,5 @@
-import { memo, useContext, useRef } from 'react';
+"use client";
+import { memo, useContext, useEffect, useRef, useState } from 'react';
 import { fullPageScreenshotContext } from '../../PageSpeedContext';
 import { RenderJSONDetails } from '../../RenderJSONDetails';
 import { NodeValue, FullPageScreenshot, Rect, DeviceType } from '@/lib/schema';
@@ -46,7 +47,7 @@ export function NodeComponent({
 export function RenderNodeImage({
   item,
   device,
-  imageSize = 300,
+  imageSize = 200,
 }: {
   item: NodeValue;
   device: DeviceType;
@@ -412,16 +413,20 @@ function ElementScreenshotRenderer({
   maxThumbnailSize = { width: 120, height: 80 },
 }: ElementScreenshotRendererProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
   if (!screenshot) return null;
   return (
     <Dialog>
       <DialogTrigger>
         <div className="flex cursor-pointer flex-wrap place-content-center gap-2.5 hover:scale-105 hover:shadow-md">
-          <RenderThumbnails
+        {isClient ? <RenderThumbnails
             maxThumbnailSize={maxThumbnailSize}
             elementRects={elementRects}
             screenshot={screenshot}
-          />
+          /> : null}
         </div>
       </DialogTrigger>
       <DialogContent
@@ -429,14 +434,14 @@ function ElementScreenshotRenderer({
         className="h-full w-screen max-w-none justify-center md:w-[74vw]"
       >
         <DialogTitle>screenshot</DialogTitle>
-        <RenderThumbnails
+        {isClient ? <RenderThumbnails
           maxThumbnailSize={{
             width: ref.current?.clientWidth || 500,
             height: ref.current?.clientHeight || 500,
           }}
           screenshot={screenshot}
           elementRects={elementRects}
-        />
+        /> : null}
 
         <DialogClose asChild>
           <Button className="w-17" autoFocus>

@@ -1,3 +1,4 @@
+import { Details } from '@/components/ui/accordion';
 import {
   Table,
   TableBody,
@@ -37,8 +38,10 @@ export function RenderMetricSavings({
   }
 
   return (
-    <>
-      <h4 className="text-md font-bold">CWV Possible Metric Savings</h4>
+    <Details>
+      <summary className="flex flex-col gap-2">
+        <h4 className="text-md font-bold">CWV Possible Metric Savings</h4>
+      </summary>
       <Table>
         <TableHeader>
           <TableRow>
@@ -61,6 +64,6 @@ export function RenderMetricSavings({
           ))}
         </TableBody>
       </Table>
-    </>
+    </Details>
   );
 }

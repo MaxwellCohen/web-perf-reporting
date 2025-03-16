@@ -1,7 +1,5 @@
 import {
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
+  Details,
 } from '../../ui/accordion';
 import { RenderJSONDetails } from '../RenderJSONDetails';
 import { AuditRef, AuditResultsRecord } from '@/lib/schema';
@@ -39,31 +37,56 @@ export function AuditDetailsSection({
     emptyTable ||
     ['notApplicable', 'manual', 'bottom'].includes(scoreDisplayMode);
 
+  if (disabled) {
+    return (
+      <div className="rounded-2 mb-4 rounded-md border-4 p-2">
+        <div className="flex flex-col gap-4">
+          <AuditDetailsSummary
+            desktopAuditData={desktopAuditData}
+            mobileAuditData={mobileAuditData}
+            acronym={acronym}
+          />
+          <RenderJSONDetails
+            className="text-right"
+            data={desktopAuditData}
+            data2={mobileAuditData}
+            title={`All Data for ${auditRef.id}`}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <AccordionItem key={desktopAuditData.id} value={desktopAuditData.id}>
-      <AccordionTrigger className="flex flex-row gap-4" disabled={disabled}>
+    <Details
+      id={desktopAuditData.id}
+      className="rounded-2 mb-4 rounded-md border-4 p-2"
+    >
+      <summary className="flex flex-col gap-4">
         <AuditDetailsSummary
           desktopAuditData={desktopAuditData}
           mobileAuditData={mobileAuditData}
           acronym={acronym}
         />
-      </AccordionTrigger>
-      <RenderJSONDetails
-        className='text-right'
-        data={desktopAuditData}
-        data2={mobileAuditData}
-        title={`All Data for ${auditRef.id}`}
-      />
-      {!disabled ? <AccordionContent>
-        <RenderMetricSavings
-          desktopAuditData={desktopAuditData}
-          mobileAuditData={mobileAuditData}
+        <RenderJSONDetails
+          className="text-right"
+          data={desktopAuditData}
+          data2={mobileAuditData}
+          title={`All Data for ${auditRef.id}`}
         />
-        <RenderDetails
-          desktopAuditData={desktopAuditData}
-          mobileAuditData={mobileAuditData}
-        />
-      </AccordionContent> : null}
-    </AccordionItem>
+      </summary>
+      {!disabled ? (
+        <>
+          <RenderMetricSavings
+            desktopAuditData={desktopAuditData}
+            mobileAuditData={mobileAuditData}
+          />
+          <RenderDetails
+            desktopAuditData={desktopAuditData}
+            mobileAuditData={mobileAuditData}
+          />
+        </>
+      ) : null}
+    </Details>
   );
 }

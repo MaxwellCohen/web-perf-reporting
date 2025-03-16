@@ -1,6 +1,6 @@
 import { TableItem, TableColumnHeading, DeviceType } from '@/lib/schema';
 
-import { getDerivedSubItemsHeading } from './utils';
+import { getDerivedSubItemsHeading, showBothDevices } from './utils';
 import {
   RenderTableRowContainer,
   renderTableRowContainerCss,
@@ -9,47 +9,77 @@ import { RenderTableHeader } from './RenderTableHeader';
 import { RenderHeading } from './RenderHeading';
 import { RenderTableCell } from './RenderTableCell';
 import { RenderTableValue } from './RenderTableValue';
-import { Fragment, useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Fragment, JSX } from 'react';
 import { cn } from '@/lib/utils';
+import { Details } from '@/components/ui/accordion';
 
 export function RenderBasicTable({
   headings,
   items,
   device,
+  title,
 }: {
   headings: TableColumnHeading[];
   items: TableItem[];
   device: DeviceType;
+  title: string;
 }) {
   return (
-    <div
-      className="grid overflow-x-auto"
-      style={{ gridTemplateColumns: `repeat(${headings?.length || 0}, auto)` }}
-    >
-      <RenderTableHeader headings={headings} className={'border-0'} />
-      {items.map((item, index) => {
-        if (!item.subItems?.items?.length) {
+    <Details className="@container">
+      <summary className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2">
+          <div className="text-lg font-bold">{title} details</div>
+        </div>
+      </summary>
+      <TableContainer headings={headings} className="">
+        <RenderTableHeader headings={headings} className={'border-0'} />
+        {items.map((item, index) => {
+          if (!item.subItems?.items?.length) {
+            return (
+              <RenderMainRow
+                className={'border-0 px-1'}
+                key={`item-${index}`}
+                item={item}
+                headings={headings}
+                device={device}
+              />
+            );
+          }
           return (
-            <RenderMainRow
-            className={'border-0'}
+            <NestedTable
               key={`item-${index}`}
               item={item}
               headings={headings}
               device={device}
             />
           );
-        }
-        return (
-          <NestedTableNoCollapse
-            key={`item-${index}`}
-            item={item}
-            headings={headings}
-            device={device}
-          />
-        );
-      })}
-    </div>
+        })}
+      </TableContainer>
+    </Details>
+  );
+}
+
+export function TableContainer({
+  headings,
+  children,
+  className,
+  ...props
+}: { headings: TableColumnHeading[] } & JSX.IntrinsicElements['div']) {
+  const Div = 'div';
+
+  return (
+    <Div
+      {...props}
+      className={cn('grid w-full overflow-x-auto', className)}
+      style={{
+        ...(props.style || {}),
+        gridTemplateColumns: headings
+          .map((h) => (showBothDevices(h) ? '140px': h.label === 'Protocol' ? '140px' : 'minmax(300px, 1fr)' ))
+          .join(' '),
+      }}
+    >
+      {children}
+    </Div>
   );
 }
 
@@ -64,14 +94,19 @@ export function NestedTableNoCollapse({
 }) {
   return (
     <Fragment>
-      <RenderMainRow item={item} headings={headings} device={device} className={'border-x-2 border-t-2 border-b-3'} />
+      <RenderMainRow
+        item={item}
+        headings={headings}
+        device={device}
+        className={'border-b-3 -mx-3 border-x-2 border-t-2'}
+      />
       {item.subItems?.items?.length ? (
         <div className="contents">
           <RenderSubItemsHeader headings={headings} />
           <RenderSubItems item={item} headings={headings} device={device} />
         </div>
       ) : null}
-      <div className="mb-2 w-full"></div>
+      {/* <div className="mb-2 w-full"></div> */}
     </Fragment>
   );
 }
@@ -85,52 +120,36 @@ export function NestedTable({
   headings: TableColumnHeading[];
   device: DeviceType;
 }) {
-  const [isOpen, setIsOpen] = useState(true);
-  const rowClasses = cn({
-    'grid-template-rows-none h-0 overflow-hidden border-none': !isOpen,
-  });
   return (
-    <Fragment>
-      <Button
-        variant="outline"
-        size="lg"
-        className={cn(renderTableRowContainerCss, 'h-14 p-0 text-left')}
-        onClick={() => setIsOpen(!isOpen)}
-        type="button"
-      >
-        {headings
-          .map((heading, colIndex) => {
-            if (!heading.key) return null;
-            return (
-              <RenderTableCell
-                key={`cell-${heading.key}-${colIndex}`}
-                className="px-6 py-4 text-xs"
-                value={item[heading.key]}
-                heading={heading}
-                device={getItemDevice(item, device)}
-              />
-            );
-          })
-          .filter(Boolean)}
-      </Button>
-      {item.subItems?.items?.length ? (
-        <div
-          className={cn(renderTableRowContainerCss, {
-            'animate-accordion-up': !isOpen,
-            'animate-accordion-down': isOpen,
-          })}
-        >
-          <RenderSubItemsHeader headings={headings} className={rowClasses} />
-          <RenderSubItems
-            item={item}
-            headings={headings}
-            device={device}
-            className={rowClasses}
-          />
-        </div>
-      ) : null}
-      <div className="mb-2 w-full"></div>
-    </Fragment>
+    <Details className={cn(renderTableRowContainerCss, '@container  mb-1')}>
+      <summary className={cn(renderTableRowContainerCss, '')}>
+        <TableContainer headings={headings} className="col-span-full ">
+          {headings
+            .map((heading, colIndex) => {
+              if (!heading.key) return null;
+              return (
+                <RenderTableCell
+                  key={`cell-${heading.key}-${colIndex}`}
+                  className="px-6 py-4 text-xs text-left"
+                  value={item[heading.key]}
+                  heading={heading}
+                  device={getItemDevice(item, device)}
+                />
+              );
+            })
+            .filter(Boolean)}
+        </TableContainer>
+      </summary>
+      <TableContainer headings={headings} className="col-span-full ">
+        {item.subItems?.items?.length ? (
+          <>
+            <RenderSubItemsHeader headings={headings} />
+            <RenderSubItems item={item} headings={headings} device={device} />
+          </>
+        ) : null}
+      </TableContainer>
+      {/* <div className="mb-2 w-full"></div> */}
+    </Details>
   );
 }
 
@@ -176,30 +195,34 @@ export function RenderSubItemsHeader({
 }: {
   headings: TableColumnHeading[];
 } & React.HTMLAttributes<HTMLDivElement>) {
+  const content = headings
+    .map((h, colIndex) => {
+      const headingKey = h?.subItemsHeading?.key;
+      if (!headingKey) return null;
+      const heading = headings.find(({ key }) => key === headingKey);
+      if (!heading) {
+        return null;
+      }
+
+      return (
+        <RenderHeading
+          key={`subheading-${heading.key || colIndex}`}
+          heading={heading}
+          className="px-6 py-0.5 text-sm tracking-wider text-muted-foreground"
+          style={{
+            gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
+          }}
+        />
+      );
+    })
+    .filter(Boolean);
+  if (!content.length) return null;
   return (
     <RenderTableRowContainer
       {...props}
       className={cn(renderTableRowContainerCss, 'border-2', props.className)}
     >
-      {headings.map((h, colIndex) => {
-        const headingKey = h?.subItemsHeading?.key;
-        if (!headingKey) return null;
-        const heading = headings.find(({ key }) => key === headingKey);
-        if (!heading) {
-          return null;
-        }
-
-        return (
-          <RenderHeading
-            key={`subheading-${heading.key || colIndex}`}
-            heading={heading}
-            className="px-6 py-0.5 text-sm tracking-wider text-muted-foreground"
-            style={{
-              gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
-            }}
-          />
-        );
-      })}
+      {content}
     </RenderTableRowContainer>
   );
 }
@@ -222,7 +245,7 @@ function RenderMainRow({
           return (
             <RenderTableCell
               key={`cell-${heading.key}-${colIndex}`}
-              className="px-6 py-4 text-xs"
+              className="-mx-3 px-6 py-4 text-xs text-left"
               value={item[heading.key]}
               heading={heading}
               device={getItemDevice(item, device)}

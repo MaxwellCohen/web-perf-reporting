@@ -1,10 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import {
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-  Accordion,
 } from '../../ui/accordion';
 import { sortByScoreDisplayModes } from '../ScoreDisplay';
 import {
@@ -44,7 +41,7 @@ export function CategoryAuditSection({
       <AccordionContent>
         <div className="w-full" role="table" aria-label="Audit Table">
           {desktopCategory.auditRefs && desktopAuditRecords ? (
-            <Accordion type="multiple">
+            <div>
               {desktopCategory.auditRefs
                 .filter((auditRef) => {
                   if (!auditRef.id) {
@@ -103,7 +100,7 @@ export function CategoryAuditSection({
                     acronym={auditRef.acronym}
                   />
                 ))}
-            </Accordion>
+            </div>
           ) : null}
         </div>
       </AccordionContent>

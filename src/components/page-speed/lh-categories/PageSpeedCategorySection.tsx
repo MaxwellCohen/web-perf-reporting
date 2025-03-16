@@ -1,3 +1,4 @@
+"use client";
 import { AuditResultsRecord, CategoryResult } from '@/lib/schema';
 import { CategoryAuditSection } from './CategoryAuditSection';
 

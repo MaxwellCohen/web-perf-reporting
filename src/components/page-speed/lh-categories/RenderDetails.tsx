@@ -42,6 +42,7 @@ export function RenderDetails({
         <RenderChecklist
           desktopAuditData={desktopAuditData}
           mobileAuditData={mobileAuditData}
+          title={desktopAuditData.title || mobileAuditData.title}
         />
       );
     case 'table':
@@ -50,6 +51,7 @@ export function RenderDetails({
         <DetailTable
           desktopDetails={desktopDetails}
           mobileDetails={mobileDetails as AuditDetailTable | AuditDetailOpportunity}
+          title={desktopAuditData.title || mobileAuditData.title}
         />
       );
     case 'criticalrequestchain':
@@ -107,6 +109,7 @@ function RenderList({
                     | AuditDetailTable
                     | AuditDetailOpportunity
                 }
+                title={desktopAuditData.title || mobileAuditData.title}
               />
             );
 

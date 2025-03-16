@@ -28,7 +28,7 @@ const AccordionTrigger = React.forwardRef<
     <AccordionPrimitive.Trigger
       ref={ref}
       className={cn(
-        'flex flex-1 items-center justify-between py-4 text-left text-sm font-medium transition-all group disabled:hover:no-underline [&[data-state=open]>svg]:rotate-180 [&[disabled]>svg]:hidden hover:bg-muted hover:cursor-pointer',
+        'group flex flex-1 items-center justify-between py-4 text-left text-sm font-medium transition-all hover:cursor-pointer hover:bg-muted disabled:hover:no-underline [&[data-state=open]>svg]:rotate-180 [&[disabled]>svg]:hidden',
         className,
       )}
       {...props}
@@ -44,22 +44,21 @@ export const AccordionTriggerSubgrid = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => (
-  <AccordionPrimitive.Header className="contents relative">
+  <AccordionPrimitive.Header className="relative contents">
     <AccordionPrimitive.Trigger
       ref={ref}
       className={cn(
-        'grid grid-cols-subgrid col-span-full border-b-2 items-center justify-between py-4 text-left text-sm font-medium transition-all group disabled:hover:no-underline [&[data-state=open]>svg]:rotate-180 [&[disabled]>svg]:hidden hover:bg-muted hover:cursor-pointer',
+        'group col-span-full grid grid-cols-subgrid items-center justify-between border-b-2 py-4 text-left text-sm font-medium transition-all hover:cursor-pointer hover:bg-muted disabled:hover:no-underline [&[data-state=open]>svg]:rotate-180 [&[disabled]>svg]:hidden',
         className,
       )}
       {...props}
     >
       {children}
     </AccordionPrimitive.Trigger>
-      <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 inline-block -col-start-1 -col-end-1 self-center" />
+    <ChevronDown className="-col-start-1 -col-end-1 inline-block h-4 w-4 shrink-0 self-center text-muted-foreground transition-transform duration-200" />
   </AccordionPrimitive.Header>
 ));
 AccordionTriggerSubgrid.displayName = AccordionPrimitive.Trigger.displayName;
-
 
 const AccordionContent = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Content>,
@@ -75,6 +74,17 @@ const AccordionContent = React.forwardRef<
 ));
 AccordionContent.displayName = AccordionPrimitive.Content.displayName;
 
+export const Details = (({ className, children, ref, ...props }: React.JSX.IntrinsicElements['details']) => (
+  <details
+    ref={ref}
+    open
+    className={cn('rounded-2 mb-2 rounded-md border-4 p-2 w-full ', className)}
+    {...props}
+  >
+    {children}
+  </details>
+));
+
 
 export const AccordionContentSubgrid = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Content>,
@@ -82,7 +92,7 @@ export const AccordionContentSubgrid = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <AccordionPrimitive.Content
     ref={ref}
-    className="overflow-hidden text-sm  grid grid-cols-subgrid col-span-full"
+    className="col-span-full grid grid-cols-subgrid overflow-hidden text-sm"
     {...props}
     //data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down
   >
@@ -90,6 +100,5 @@ export const AccordionContentSubgrid = React.forwardRef<
   </AccordionPrimitive.Content>
 ));
 AccordionContentSubgrid.displayName = AccordionPrimitive.Content.displayName;
-
 
 export { Accordion, AccordionItem, AccordionTrigger, AccordionContent };

@@ -61,7 +61,7 @@ export function RenderTableValue({
     } as const;
     return (
       valueTypeMap[value.type as keyof typeof valueTypeMap]?.() || (
-        <RenderDefault value={value} />
+        <RenderDefault value={value} {...props} />
       )
     );
   }
@@ -77,12 +77,12 @@ export function RenderTableValue({
     text: () => <RenderText value={value} {...props} />,
     thumbnail: () => <RenderThumbnail value={value} {...props} />,
     timespanMs: () => <RenderTimespanMs value={value} {...props} />,
-    url: () => <RenderUrl value={value} />,
+    url: () => <RenderUrl value={value} {...props}/>,
   } as const;
 
   return (
     valueTypeMap[heading?.valueType as keyof typeof valueTypeMap]?.() || (
-      <RenderDefault value={value} />
+      <RenderDefault value={value}  {...props}/>
     )
   );
 }
@@ -95,7 +95,7 @@ function RenderCodeValue({
     <code
       title="code"
       {...props}
-      className={cn('w-[50ch] px-6 break-all overflow-hidden font-mono text-xs', props.className)}
+      className={cn('px-6 break-all overflow-hidden font-mono text-xs', props.className)}
     >
       {typeof value === 'string' ? value : JSON.stringify(value)}
     </code>
@@ -112,7 +112,7 @@ function RenderLinkValue({
       title={value.text}
       {...props}
       className={cn(
-        'block w-[50ch] px-6 break-all overflow-hidden break-words',
+        'block px-6 break-all overflow-hidden break-words',
         props.className,
       )}
     >
@@ -131,14 +131,14 @@ function RenderNumericValue({
 } & React.HTMLAttributes<HTMLElement>) {
   if (heading?.granularity) {
     return (
-      <div title="numeric" {...props}>
+      <div title="numeric" {...props} className={cn('', props.className)}>
         {value.value.toFixed(-Math.log10(heading.granularity))}
       </div>
     );
   }
 
   return (
-    <div title="numeric" {...props}>
+    <div title="numeric" {...props} className={cn('', props.className)}>
       {value.value}
     </div>
   );
@@ -240,7 +240,7 @@ function RenderSourceLocation({
 
   return (
     <div
-      className="lh-source-location py-1 font-mono text-sm"
+      className="py-1 font-mono text-sm"
       data-source-url={value.url}
       data-source-line={value.line.toString()}
       data-source-column={value.column.toString()}
@@ -257,7 +257,7 @@ function RenderUrlValue({ value, ...props }: { value: UrlValue }& React.HTMLAttr
       title={value.value}
       {...props}
       className={cn(
-        'block w-[50ch] px-6 break-all overflow-hidden break-words',
+        'block px-6 break-all overflow-hidden break-words',
         props.className,
       )}
     >
@@ -279,7 +279,7 @@ function RenderBytesValue({ value, ...props }: { value: unknown }& React.HTMLAtt
   const kb = bytes / 1024;
   const mb = kb / 1024;
   return (
-    <div title="bytes" {...props} className={cn("align-right", props.className)}>
+    <div title="bytes" {...props} className={cn("", props.className)}>
       {mb > 1
         ? `${mb.toFixed(2)} MB`
         : kb > 1
@@ -292,7 +292,7 @@ function RenderBytesValue({ value, ...props }: { value: unknown }& React.HTMLAtt
 function RenderCode({ value, ...props }: { value: unknown }& React.HTMLAttributes<HTMLElement>) {
   const strValue = String(value);
   return (
-    <code title="code" {...props} className={cn("font-mono text-xs w-[50ch] px-6 break-all overflow-hidden", props.className)}>
+    <code title="code" {...props} className={cn("font-mono text-xs px-6 break-all overflow-hidden", props.className)}>
       {strValue}
     </code>
   );
@@ -301,18 +301,18 @@ function RenderCode({ value, ...props }: { value: unknown }& React.HTMLAttribute
 function RenderMSValue({ value, ...props }: { value: unknown }& React.HTMLAttributes<HTMLElement>) {
   const ms = Number(value);
   if (ms < 1000) {
-    return <div title="ms" {...props}>{ms.toFixed(2)} ms</div>;
+    return <div title="ms" {...props} className={cn('', props.className)}>{ms.toFixed(0)} ms</div>;
   }
   const seconds = ms / 1000;
   if (seconds < 60) {
-    return <div title="ms" {...props}>{seconds.toFixed(2)} s</div>;
+    return <div title="ms" {...props} className={cn('', props.className)}>{seconds.toFixed(2)} s</div>;
   }
   const minutes = seconds / 60;
   if (minutes < 60) {
-    return <div title="ms" {...props}>{minutes.toFixed(2)} min</div>;
+    return <div title="ms" {...props} className={cn('', props.className)}>{minutes.toFixed(2)} min</div>;
   }
   const hours = minutes / 60;
-  return <div title="ms" {...props}>{hours.toFixed(2)} h</div>;
+  return <div title="ms" {...props} className={cn('', props.className)}>{hours.toFixed(2)} h</div>;
 }
 
 function RenderNumberValue({
@@ -340,6 +340,9 @@ function RenderNumberValue({
 
 function RenderText({ value, ...props }: { value: unknown }& React.HTMLAttributes<HTMLElement>) {
   const strValue = String(value);
+  if (strValue.length < 10) {
+    return <div title="text" {...props} className={cn('', props.className)}>{strValue}</div>;
+  }
   return <div title="text" {...props}>{strValue}</div>;
 }
 
@@ -352,7 +355,7 @@ function RenderUrl({ value, ...props }: { value: unknown }& React.HTMLAttributes
         title={strValue}
         {...props}
         className={cn(
-          'block w-[50ch] px-6 break-all overflow-hidden break-words',
+          'block px-6 break-all overflow-hidden break-words',
           props.className,
         )}
       >
@@ -373,8 +376,6 @@ function RenderThumbnail({ value, ...props }: { value: unknown }& React.HTMLAttr
 function RenderTimespanMs({ value, ...props }: { value: unknown }& React.HTMLAttributes<HTMLElement>) {
   const numValue = Number(value);
   return (
-    <div title="timespanMs" {...props} className={cn("align-right", props.className)}>
-      {numValue}
-    </div>
+    <RenderMSValue value={numValue} {...props} />
   );
 }

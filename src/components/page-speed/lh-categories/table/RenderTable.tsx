@@ -12,9 +12,11 @@ import { useMemo } from 'react';
 export function DetailTable({
   mobileDetails,
   desktopDetails,
+  title
 }: {
   mobileDetails?: AuditDetailOpportunity | AuditDetailTable;
   desktopDetails?: AuditDetailOpportunity | AuditDetailTable;
+  title:string
 }) {
   const { items, headings, device, sortedBy } = useMemo(() => {
     const [_headings, _items, _device] = mergedTable(
@@ -57,12 +59,11 @@ export function DetailTable({
   }
   
   const hasNode = headings.some((h) => h.valueType === 'node');
-  console.log('node', hasNode)
   if (hasNode) {
-    return <RenderNodeTable headings={headings} items={items} device={device} />;
+    return <RenderNodeTable headings={headings} items={items} device={device} title={title} />;
   }
 
-  return <RenderBasicTable headings={headings} items={items} device={device} />;
+  return <RenderBasicTable headings={headings} items={items} device={device} title={title} />;
 }
 
 function combineAndDedupe<T>(a?: T[], b?: T[]): T[] {

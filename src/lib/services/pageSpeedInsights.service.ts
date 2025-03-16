@@ -39,7 +39,7 @@ export const requestPageSpeedData = async (
       return result.data;
     }
 
-    const response = await fetch(baseurl.toString(), {});
+    const response = await fetch(baseurl.toString(), { cache: 'force-cache' });
     if (!response.ok) {
       return null;
     }
