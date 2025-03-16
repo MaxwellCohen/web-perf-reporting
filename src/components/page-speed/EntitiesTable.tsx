@@ -9,9 +9,7 @@ import {
 } from '@/components/ui/table';
 import { Entities } from '@/lib/schema';
 import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
+  Details,
 } from '../ui/accordion';
 
 export function EntitiesTable({ entities }: { entities?: Entities }) {
@@ -21,22 +19,24 @@ export function EntitiesTable({ entities }: { entities?: Entities }) {
   }
 
   return (
-    <AccordionItem value="entities">
-      <AccordionTrigger>
+    <Details className="flex flex-col gap-2 overflow-auto">
+      <summary className="flex flex-col gap-2">
         <div className="text-lg font-bold group-hover:underline">Entities</div>
-      </AccordionTrigger>
-      <AccordionContent>
-        <Table aria-labelledby={`${id}-entities-title`}>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name </TableHead>
-              <TableHead>Is First Party </TableHead>
-              <TableHead>Is Unrecognized </TableHead>
-              <TableHead>Origins </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {entities.map((entity, i) => (
+      </summary>
+
+      <Table aria-labelledby={`${id}-entities-title`}>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name </TableHead>
+            <TableHead>Is First Party </TableHead>
+            <TableHead>Is Unrecognized </TableHead>
+            <TableHead>Origins </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {entities.map((entity, i) => {
+            if (!entity) return null;
+            return (
               <TableRow key={`${i}-${entity.name}`}>
                 <TableCell> {entity.name} </TableCell>
                 <TableCell>
@@ -51,10 +51,10 @@ export function EntitiesTable({ entities }: { entities?: Entities }) {
                   ))}
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </AccordionContent>
-    </AccordionItem>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </Details>
   );
 }

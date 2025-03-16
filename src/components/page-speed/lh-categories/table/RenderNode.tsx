@@ -47,7 +47,7 @@ export function NodeComponent({
 export function RenderNodeImage({
   item,
   device,
-  imageSize = 200,
+  imageSize = 150,
 }: {
   item: NodeValue;
   device: DeviceType;
@@ -421,7 +421,7 @@ function ElementScreenshotRenderer({
   return (
     <Dialog>
       <DialogTrigger>
-        <div className="flex cursor-pointer flex-wrap place-content-center gap-2.5 hover:scale-105 hover:shadow-md">
+        <div className="flex cursor-pointer flex-wrap place-content-center gap-2.5 hover:scale-110 hover:shadow-md">
         {isClient ? <RenderThumbnails
             maxThumbnailSize={maxThumbnailSize}
             elementRects={elementRects}

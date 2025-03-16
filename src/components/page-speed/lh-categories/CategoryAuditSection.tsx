@@ -1,8 +1,6 @@
 import {
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from '../../ui/accordion';
+  Details,
+} from '@/components/ui/accordion';
 import { sortByScoreDisplayModes } from '../ScoreDisplay';
 import {
   AuditResultsRecord,
@@ -12,7 +10,6 @@ import { CategoryScoreInfo } from './CategoryScoreInfo';
 import { AuditDetailsSection } from './AuditDetailsSection';
 
 export function CategoryAuditSection({
-  categoryKey,
   mobileCategory,
   desktopCategory,
   desktopAuditRecords,
@@ -28,8 +25,8 @@ export function CategoryAuditSection({
     return null;
   }
   return (
-    <AccordionItem key={categoryKey} value={categoryKey}>
-      <AccordionTrigger className="flex flex-row justify-start gap-2 text-lg font-bold">
+    <Details className="flex flex-col gap-2">
+      <summary className="flex flex-row justify-start gap-2 text-lg font-bold">
         <div className="flex flex-1 flex-row flex-wrap items-center justify-between">
           <div className="flex w-[200px] whitespace-nowrap group-hover:underline">
             {desktopCategory?.title || mobileCategory?.title}
@@ -37,8 +34,8 @@ export function CategoryAuditSection({
           <CategoryScoreInfo category={mobileCategory} device="Mobile" />
           <CategoryScoreInfo category={desktopCategory} device="Desktop" />
         </div>
-      </AccordionTrigger>
-      <AccordionContent>
+      </summary>
+      
         <div className="w-full" role="table" aria-label="Audit Table">
           {desktopCategory.auditRefs && desktopAuditRecords ? (
             <div>
@@ -51,23 +48,23 @@ export function CategoryAuditSection({
                     return false;
                   }
                   if (!auditRef.id) {
-                    return null;
+                    return false;
                   }
                   
                   const desktopAuditData = desktopAuditRecords?.[auditRef.id];
                   const mobileAuditData = mobileAuditRecords?.[auditRef.id];
                   if (!desktopAuditData && !mobileAuditData) {
-                    return null;
+                    return false;
                   }
                   if (
                     desktopAuditData?.details?.type !==
                     mobileAuditData?.details?.type
                   ) {
-                    return null;
+                    return false;
                   }
 
                   if (desktopAuditData?.details?.type === 'filmstrip') {
-                    return null;
+                    return false;
                   }
                   if (!desktopAuditData && !mobileAuditData) {
                     return false;
@@ -103,7 +100,6 @@ export function CategoryAuditSection({
             </div>
           ) : null}
         </div>
-      </AccordionContent>
-    </AccordionItem>
+    </Details>
   );
 }

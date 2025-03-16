@@ -18,6 +18,7 @@ import {
   CarouselPrevious,
 } from '../ui/carousel';
 import { CarouselContent } from '../ui/carousel';
+import { Details } from '../ui/accordion';
 
 interface TimelineProps {
   timeline?: AuditDetailFilmstrip;
@@ -37,18 +38,20 @@ export function Timeline({ timeline, device }: TimelineProps) {
   if (!timeline?.items?.length) return null;
 
   return (
-    <div className="mt-3 flex flex-col">
-      <h3 className="text-lg font-bold">{device ? `${device} - ` : ''} Timeline</h3>
+    <Details className="mt-3 flex flex-col">
+      <summary className="flex flex-col gap-2 overflow-auto">
+        <h3 className="text-lg font-bold">{device ? `${device} - ` : ''} Timeline</h3>
+      </summary>
       <Dialog>
         <div className="mt-3 flex flex-row gap-2 align-top">
           {timeline.items.map((item, i) => (
             <DialogTrigger asChild key={`${i}-${item.timestamp}`}>
               <div>
                 <button
-                  className="rounded-md border-2 border-gray-300"
+                  className="rounded-md border-2  p-2 hover:scale-105 z-0"
                   onClick={() => setOpenIndex(i)}
                 >
-                  <img alt="timeline image" width={80} src={item.data} />
+                  <img alt={`timeline image at ${item.timing}`} width={80} src={item.data} />
                   <div>{item.timing} ms</div>
                 </button>
               </div>
@@ -65,7 +68,7 @@ export function Timeline({ timeline, device }: TimelineProps) {
                     className="basis-1/2"
                   >
                     <div className='flex flex-col gap-2 justify-center'>
-                      <img className="max-w-full h-full max-h-[75vh] object-contain" alt="timeline image" width={500} src={item.data} />
+                      <img className="max-w-full h-full max-h-[75vh] object-contain" alt={`timeline image at ${item.timing}`} width={500} src={item.data} />
                       <div className='text-center'>{item.timing} ms</div>
                     </div>
                   </CarouselItem>
@@ -80,6 +83,6 @@ export function Timeline({ timeline, device }: TimelineProps) {
           </DialogContent>
         </div>
       </Dialog>
-    </div>
+    </Details>
   );
 }

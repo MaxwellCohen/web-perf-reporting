@@ -6,7 +6,7 @@ import {
   Entities,
   PageSpeedInsights,
 } from '@/lib/schema';
-import { Accordion } from '@/components/ui/accordion';
+import { Accordion, Details } from '@/components/ui/accordion';
 
 import { LoadingExperience } from './LoadingExperience';
 import { EntitiesTable } from './EntitiesTable';
@@ -22,13 +22,6 @@ export function PageSpeedInsightsDashboard({
   desktopData?: PageSpeedInsights | null;
   mobileData?: PageSpeedInsights | null;
 }) {
-  const DesktopTimeline = AuditDetailFilmstripSchema.safeParse(
-    desktopData?.lighthouseResult?.audits?.['screenshot-thumbnails'].details,
-  ).data;
-  const MobileTimeline = AuditDetailFilmstripSchema.safeParse(
-    mobileData?.lighthouseResult?.audits?.['screenshot-thumbnails'].details,
-  ).data;
-
   const desktopEntities: Entities | undefined =
     desktopData?.lighthouseResult?.entities;
   const desktopAuditRecords: AuditResultsRecord | undefined =
@@ -44,7 +37,6 @@ export function PageSpeedInsightsDashboard({
   const mobileFullPageScreenshot =
     mobileData?.lighthouseResult.fullPageScreenshot || null;
 
-
   return (
     <fullPageScreenshotContext.Provider
       value={{
@@ -52,7 +44,7 @@ export function PageSpeedInsightsDashboard({
         mobileFullPageScreenshot,
       }}
     >
-        <Accordion
+      <Accordion
         type="multiple"
         defaultValue={[
           'page-loading-experience',
@@ -76,24 +68,21 @@ export function PageSpeedInsightsDashboard({
           experienceDesktop={desktopData?.loadingExperience}
           experienceMobile={mobileData?.loadingExperience}
         />
-        <div className="screen:hidden print:break-before-page"></div>
         <LoadingExperience
           title="Origin Loading Experience"
           experienceDesktop={desktopData?.originLoadingExperience}
           experienceMobile={mobileData?.originLoadingExperience}
         />
-
-          <CWVMetricsComponent
-            desktopCategoryGroups={desktopCategoryGroups}
-            desktopAudits={desktopAuditRecords}
-            mobileCategoryGroups={mobileCategoryGroups}
-            mobileAudits={mobileAuditRecords}
-          />
-          <div className="flex flex-row flex-wrap gap-2">
-            <Timeline timeline={MobileTimeline} device="Mobile" />
-            <Timeline timeline={DesktopTimeline} device="Desktop" />
-          </div>
-
+        <CWVMetricsComponent
+          desktopCategoryGroups={desktopCategoryGroups}
+          desktopAudits={desktopAuditRecords}
+          mobileCategoryGroups={mobileCategoryGroups}
+          mobileAudits={mobileAuditRecords}
+        />
+        <RenderPageSpeedInsights
+          desktopData={desktopData}
+          mobileData={mobileData}
+        />
         <PageSpeedCategorySection
           desktopCategories={desktopCategories}
           mobileCategories={mobileCategories}
@@ -103,5 +92,36 @@ export function PageSpeedInsightsDashboard({
         <EntitiesTable entities={desktopEntities} />
       </Accordion>
     </fullPageScreenshotContext.Provider>
+  );
+}
+
+function RenderPageSpeedInsights({
+  desktopData,
+  mobileData,
+}: {
+  desktopData?: PageSpeedInsights | null;
+  mobileData?: PageSpeedInsights | null;
+}) {
+  const DesktopTimeline = AuditDetailFilmstripSchema.safeParse(
+    desktopData?.lighthouseResult?.audits?.['screenshot-thumbnails'].details,
+  ).data;
+  const MobileTimeline = AuditDetailFilmstripSchema.safeParse(
+    mobileData?.lighthouseResult?.audits?.['screenshot-thumbnails'].details,
+  ).data;
+
+  if (!DesktopTimeline || !MobileTimeline) return null;
+
+  return (
+    <Details className="flex flex-col flex-wrap gap-2">
+      <summary className="flex flex-col gap-2 overflow-auto">
+        <h3 className="text-lg font-bold">Screenshots</h3>
+      </summary>
+      {MobileTimeline ? (
+        <Timeline timeline={MobileTimeline} device="Mobile" />
+      ) : null}
+      {DesktopTimeline ? (
+        <Timeline timeline={DesktopTimeline} device="Desktop" />
+      ) : null}
+    </Details>
   );
 }
