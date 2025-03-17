@@ -6,7 +6,7 @@ import {
   Entities,
   PageSpeedInsights,
 } from '@/lib/schema';
-import { Accordion, Details } from '@/components/ui/accordion';
+import { Details } from '@/components/ui/accordion';
 
 import { LoadingExperience } from './LoadingExperience';
 import { EntitiesTable } from './EntitiesTable';
@@ -18,17 +18,17 @@ import useSWR from 'swr';
 import { useSearchParams } from 'next/navigation';
 
 const fetcher = async (url: string) => {
-  const res = await fetch(url)
- 
+  const res = await fetch(url);
+
   // If the status code is not in the range 200-299,
   // we still try to parse and throw it.
   if (!res.ok) {
-    const error = new Error('An error occurred while fetching the data.')
-    throw error
+    const error = new Error('An error occurred while fetching the data.');
+    throw error;
   }
- 
-  return res.json()
-}
+
+  return res.json();
+};
 
 export function PageSpeedInsightsDashboard() {
   const searchParams = useSearchParams();
@@ -42,19 +42,27 @@ export function PageSpeedInsightsDashboard() {
     formFactor: 'MOBILE',
   }).toString();
 
-  const {data: desktopData} = useSWR<PageSpeedInsights>(`/api/pagespeed?${desktopSearchPrams}`, fetcher, {
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    revalidateIfStale: false,
-  });
+  const { data: desktopData } = useSWR<PageSpeedInsights>(
+    `/api/pagespeed?${desktopSearchPrams}`,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
+    },
+  );
 
-  const {data: mobileData} = useSWR<PageSpeedInsights>(`/api/pagespeed?${mobileSearchPrams}`, fetcher, {
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    revalidateIfStale: false,
-  });
+  const { data: mobileData } = useSWR<PageSpeedInsights>(
+    `/api/pagespeed?${mobileSearchPrams}`,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
+    },
+  );
 
-  if(!desktopData && !mobileData){
+  if (!desktopData && !mobileData) {
     return <div>Loading...</div>;
   }
 
@@ -80,53 +88,41 @@ export function PageSpeedInsightsDashboard() {
         mobileFullPageScreenshot,
       }}
     >
-      <Accordion
-        type="multiple"
-        defaultValue={[
-          'page-loading-experience',
-          'origin-loading-experience',
-          'screenshot',
-          'entities',
-          'audits',
-          ...Object.keys(desktopCategories || {}),
-        ]}
-      >
-        <h2 className="text-center text-2xl font-bold">
-          Report for{' '}
-          {new Date(
-            desktopData?.analysisUTCTimestamp ||
-              mobileData?.analysisUTCTimestamp ||
-              0,
-          ).toLocaleDateString()}
-        </h2>
-        <LoadingExperience
-          title="Page Loading Experience"
-          experienceDesktop={desktopData?.loadingExperience}
-          experienceMobile={mobileData?.loadingExperience}
-        />
-        <LoadingExperience
-          title="Origin Loading Experience"
-          experienceDesktop={desktopData?.originLoadingExperience}
-          experienceMobile={mobileData?.originLoadingExperience}
-        />
-        <CWVMetricsComponent
-          desktopCategoryGroups={desktopCategoryGroups}
-          desktopAudits={desktopAuditRecords}
-          mobileCategoryGroups={mobileCategoryGroups}
-          mobileAudits={mobileAuditRecords}
-        />
-        <RenderPageSpeedInsights
-          desktopData={desktopData}
-          mobileData={mobileData}
-        />
-        <PageSpeedCategorySection
-          desktopCategories={desktopCategories}
-          mobileCategories={mobileCategories}
-          desktopAuditRecords={desktopAuditRecords}
-          mobileAuditRecords={mobileAuditRecords}
-        />
-        <EntitiesTable entities={desktopEntities} />
-      </Accordion>
+      <h2 className="text-center text-2xl font-bold">
+        Report for{' '}
+        {new Date(
+          desktopData?.analysisUTCTimestamp ||
+            mobileData?.analysisUTCTimestamp ||
+            0,
+        ).toLocaleDateString()}
+      </h2>
+      <LoadingExperience
+        title="Page Loading Experience"
+        experienceDesktop={desktopData?.loadingExperience}
+        experienceMobile={mobileData?.loadingExperience}
+      />
+      <LoadingExperience
+        title="Origin Loading Experience"
+        experienceDesktop={desktopData?.originLoadingExperience}
+        experienceMobile={mobileData?.originLoadingExperience}
+      />
+      <CWVMetricsComponent
+        desktopCategoryGroups={desktopCategoryGroups}
+        desktopAudits={desktopAuditRecords}
+        mobileCategoryGroups={mobileCategoryGroups}
+        mobileAudits={mobileAuditRecords}
+      />
+      <RenderPageSpeedInsights
+        desktopData={desktopData}
+        mobileData={mobileData}
+      />
+      <PageSpeedCategorySection
+        desktopCategories={desktopCategories}
+        mobileCategories={mobileCategories}
+        desktopAuditRecords={desktopAuditRecords}
+        mobileAuditRecords={mobileAuditRecords}
+      />
+      <EntitiesTable entities={desktopEntities} />
     </fullPageScreenshotContext.Provider>
   );
 }
