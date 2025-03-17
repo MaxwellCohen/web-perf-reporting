@@ -1,10 +1,9 @@
 import * as Sentry from '@sentry/nextjs';
 import { PageSpeedInsightsTable } from '@/db/schema';
 import { db } from '@/db';
-import {
-  PageSpeedInsights,
-} from '../schema';
-import { formFactor } from '../services';
+import { PageSpeedInsights } from '../schema';
+
+type formFactor = 'DESKTOP' | 'MOBILE';
 
 export function getPageSpeedDataURl(testURL: string, formFactor: formFactor) {
   const baseurl = new URL(
@@ -24,7 +23,7 @@ export function getPageSpeedDataURl(testURL: string, formFactor: formFactor) {
   return baseurl.toString();
 }
 
-export const getPageSpeedDataUrl = async (
+export const getSavedPageSpeedData = async (
   testURL: string,
   formFactor: formFactor,
 ): Promise<PageSpeedInsights | null> => {
@@ -41,7 +40,7 @@ export const getPageSpeedDataUrl = async (
           ),
         ),
     });
-    if (result) {
+    if (result?.data) {
       return result.data;
     }
     return null;
@@ -57,17 +56,12 @@ export const requestPageSpeedData = async (
 ): Promise<PageSpeedInsights | null> => {
   try {
     const pageSpeedDataUrl = getPageSpeedDataURl(testURL, formFactor);
-    const databaseResult = await getPageSpeedDataUrl(testURL, formFactor);
-    if (databaseResult) {
-      return databaseResult;
-    }
-    const response = await fetch(pageSpeedDataUrl, { cache: 'force-cache' });
+    const response = await fetch(pageSpeedDataUrl);
     if (!response.ok) {
       return null;
     }
     const data = (await response.json()) as PageSpeedInsights;
     savePageSpeedData(pageSpeedDataUrl, data);
-
     return data;
   } catch (error) {
     Sentry.captureException(error);
@@ -83,13 +77,14 @@ async function savePageSpeedData(
     return null;
   }
   try {
-    await db.insert(PageSpeedInsightsTable)
+    await db
+      .insert(PageSpeedInsightsTable)
       .values({
         url: pageSpeedDataUrl,
         date: new Date(data.analysisUTCTimestamp),
         data: data,
       })
-      .onConflictDoNothing() // Handle duplicate entries gracefully
+      .onConflictDoNothing()
       .execute();
   } catch (error) {
     Sentry.captureException(error);

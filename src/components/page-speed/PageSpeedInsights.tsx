@@ -1,17 +1,15 @@
-"use server"
-import { requestPageSpeedData } from '@/lib/services/pageSpeedInsights.service';
+'use client';
+// import { requestPageSpeedData } from '@/lib/services/pageSpeedInsights.service';
+import dynamic from 'next/dynamic';
 
-import { PageSpeedInsightsDashboard } from './pageSpeedInsightsDashboard';
+const PageSpeedInsightsDashboard = dynamic(
+  () =>
+    import('./pageSpeedInsightsDashboard').then(
+      (mod) => mod.PageSpeedInsightsDashboard,
+    ),
+  { ssr: false },
+);
 
-export async function PageSpeedInsights({
-  url,
-}: {
-  url: string;
-
-}) {
-  const data = await Promise.all([requestPageSpeedData(url, 'DESKTOP'), requestPageSpeedData(url, 'MOBILE')]);
-
-  return (
-    <PageSpeedInsightsDashboard desktopData={data[0]} mobileData={data[1]} />
-  );
+export function PageSpeedInsights() {
+  return <PageSpeedInsightsDashboard />;
 }

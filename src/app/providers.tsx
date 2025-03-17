@@ -5,6 +5,7 @@ import { PostHogProvider as PHProvider } from 'posthog-js/react';
 import { useEffect, useState } from 'react';
 import PostHogPageView from './PostHogPageView';
 import { ThemeProvider as NextThemesProvider } from "next-themes"
+import { SWRConfig } from 'swr'
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -39,3 +40,6 @@ export function ThemeProvider({
   return <NextThemesProvider {...props}>{children}</NextThemesProvider>
 }
 
+export const SWRProvider = ({ children }: { children: React.ReactNode }) => {
+  return <SWRConfig value={{ dedupingInterval: 10000 }}>{children}</SWRConfig>
+};

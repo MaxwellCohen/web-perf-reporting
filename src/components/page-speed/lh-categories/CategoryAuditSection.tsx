@@ -35,7 +35,6 @@ export function CategoryAuditSection({
           <CategoryScoreInfo category={desktopCategory} device="Desktop" />
         </div>
       </summary>
-      
         <div className="w-full" role="table" aria-label="Audit Table">
           {desktopCategory.auditRefs && desktopAuditRecords ? (
             <div>

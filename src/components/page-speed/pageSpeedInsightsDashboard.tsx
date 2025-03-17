@@ -14,14 +14,50 @@ import { Timeline } from './Timeline';
 import { CWVMetricsComponent } from './CWVMetricsComponent';
 import { PageSpeedCategorySection } from './lh-categories/PageSpeedCategorySection';
 import { fullPageScreenshotContext } from './PageSpeedContext';
+import useSWR from 'swr';
+import { useSearchParams } from 'next/navigation';
 
-export function PageSpeedInsightsDashboard({
-  desktopData,
-  mobileData,
-}: {
-  desktopData?: PageSpeedInsights | null;
-  mobileData?: PageSpeedInsights | null;
-}) {
+const fetcher = async (url: string) => {
+  const res = await fetch(url)
+ 
+  // If the status code is not in the range 200-299,
+  // we still try to parse and throw it.
+  if (!res.ok) {
+    const error = new Error('An error occurred while fetching the data.')
+    throw error
+  }
+ 
+  return res.json()
+}
+
+export function PageSpeedInsightsDashboard() {
+  const searchParams = useSearchParams();
+  const url = encodeURI(searchParams?.get('url') ?? '');
+  const desktopSearchPrams = new URLSearchParams({
+    testURL: url as string,
+    formFactor: 'DESKTOP',
+  }).toString();
+  const mobileSearchPrams = new URLSearchParams({
+    testURL: url as string,
+    formFactor: 'MOBILE',
+  }).toString();
+
+  const {data: desktopData} = useSWR<PageSpeedInsights>(`/api/pagespeed?${desktopSearchPrams}`, fetcher, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    revalidateIfStale: false,
+  });
+
+  const {data: mobileData} = useSWR<PageSpeedInsights>(`/api/pagespeed?${mobileSearchPrams}`, fetcher, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    revalidateIfStale: false,
+  });
+
+  if(!desktopData && !mobileData){
+    return <div>Loading...</div>;
+  }
+
   const desktopEntities: Entities | undefined =
     desktopData?.lighthouseResult?.entities;
   const desktopAuditRecords: AuditResultsRecord | undefined =
