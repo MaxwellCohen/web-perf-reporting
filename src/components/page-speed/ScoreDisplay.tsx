@@ -61,12 +61,6 @@ export const sortByScoreDisplayModes = (
     return -1;
   }
 
-
-  const scoreDiff = (a.score || 0) - (b.score || 0);
-  if (scoreDiff !== 0) {
-    return scoreDiff;
-  }
-
   const scoreDisplayModeDiff =
     ScoreDisplayModesRanking[
       isEmptyResult(a) ? 'empty' : a.scoreDisplayMode || 'notApplicable'
@@ -74,6 +68,10 @@ export const sortByScoreDisplayModes = (
     ScoreDisplayModesRanking[
       isEmptyResult(b) ? 'empty' : b.scoreDisplayMode || 'notApplicable'
     ];
+  if (scoreDisplayModeDiff === 0) {
+    const scoreDiff = (a.score || 0) - (b.score || 0);
+    return scoreDiff;
+  }
 
   return scoreDisplayModeDiff;
 };
@@ -97,7 +95,8 @@ export function ScoreDisplay({
         <div className="text-xs">
           {device ? `${device} - ` : ''}{' '}
           {audit.displayValue ? `${audit.displayValue} - ` : ''}
-          Score: {Math.round(audit.score * 100)} / 100
+          Score: {Math.round(audit.score * 100)} / 100 
+          {audit.displayValue ? ` - ${audit.displayValue}` : ''}
         </div>
       </>
     );
@@ -124,6 +123,9 @@ export function ScoreDisplay({
   }
 
   return (
-    <div className="text-xs">{device} - Score: {Math.round(audit.score * 100)} / 100</div>
+    <div className="text-xs whitespace-nowrap">
+      {device} {audit.displayValue ? ` | ${audit.displayValue} | Score ${Math.round(audit.score * 100)} / 100` : ` | Score ${Math.round(audit.score * 100)} / 100`}
+      {/* Score: {Math.round(audit.score * 100)} / 100 */}
+    </div>
   );
 }

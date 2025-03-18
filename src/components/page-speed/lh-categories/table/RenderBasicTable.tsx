@@ -12,6 +12,7 @@ import { RenderTableValue } from './RenderTableValue';
 import { Fragment, JSX } from 'react';
 import { cn } from '@/lib/utils';
 import { Details } from '@/components/ui/accordion';
+import { toSentenceCase } from '@/components/common/FormFactorPercentPieChart';
 
 export function RenderBasicTable({
   headings,
@@ -28,7 +29,7 @@ export function RenderBasicTable({
     <Details className="@container">
       <summary className="flex flex-col gap-2">
         <div className="flex flex-col gap-2">
-          <div className="text-lg font-bold">{title} details</div>
+          <div className="text-lg font-bold"> {toSentenceCase(`${title} details`.trim()) } </div>
         </div>
       </summary>
       <TableContainer headings={headings} className="">

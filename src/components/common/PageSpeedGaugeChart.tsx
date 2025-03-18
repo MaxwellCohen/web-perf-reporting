@@ -240,7 +240,7 @@ export function LineChart({
         width={(value === maxValue || value === 0) ? 4 : 2}
         height="16"
         className="rounded-l-full"
-        fill="hsl(var(--muted-foreground))"
+        fill="hsl(var(--destructive-foreground))"
       />
       {/* <circle
         cx={(value / maxValue) * 100 }
