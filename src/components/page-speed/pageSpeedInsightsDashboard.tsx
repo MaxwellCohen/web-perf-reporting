@@ -36,7 +36,7 @@ const fetcher = async (url: string,  formFactor: string) => {
     throw error;
   }
 
-  return res.json();
+  return res.json() as Promise<PageSpeedInsights>;
 };
 const swrOptions =     {
   revalidateOnFocus: false,
@@ -47,7 +47,7 @@ const swrOptions =     {
 function useFetchPageSpeedData( formFactor: string) {
   const searchParams = useSearchParams();
   const url = encodeURI(searchParams?.get('url') ?? '');
-  return useSWR<PageSpeedInsights>(
+  return useSWR(
     [`/api/pagespeed`, url, formFactor],
     () => fetcher(url, formFactor),
     swrOptions
