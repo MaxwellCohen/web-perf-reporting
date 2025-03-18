@@ -1,10 +1,12 @@
 import { getSavedPageSpeedData } from '@/lib/services/pageSpeedInsights.service';
 import { type NextRequest } from 'next/server'
  
-export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams
-  const testURL = searchParams.get('testURL');
-  const formFactor = searchParams.get('formFactor');
+export async function POST(request: NextRequest) {
+  const { testURL, formFactor } = await request.json()
+  const url = new URL(testURL);
+  if (!url.origin) {
+    return  new Response('Invalid URL provided', { status: 400 });
+  }
   if (!testURL) {
     return  new Response('No testURL provided', { status: 400 });
   }

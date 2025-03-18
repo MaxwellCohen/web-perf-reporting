@@ -17,8 +17,17 @@ import { fullPageScreenshotContext } from './PageSpeedContext';
 import useSWR from 'swr';
 import { useSearchParams } from 'next/navigation';
 
-const fetcher = async (url: string) => {
-  const res = await fetch(url);
+const fetcher = async (url: string,  formFactor: string) => {
+  const res = await fetch('/api/pagespeed',{
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      testURL: url,
+      formFactor: formFactor,
+    }),
+  });
 
   // If the status code is not in the range 200-299,
   // we still try to parse and throw it.
@@ -29,39 +38,25 @@ const fetcher = async (url: string) => {
 
   return res.json();
 };
+const swrOptions =     {
+  revalidateOnFocus: false,
+  revalidateOnReconnect: false,
+  revalidateIfStale: false,
+};
 
-export function PageSpeedInsightsDashboard() {
+function useFetchPageSpeedData( formFactor: string) {
   const searchParams = useSearchParams();
   const url = encodeURI(searchParams?.get('url') ?? '');
-  const desktopSearchPrams = new URLSearchParams({
-    testURL: url as string,
-    formFactor: 'DESKTOP',
-  }).toString();
-  const mobileSearchPrams = new URLSearchParams({
-    testURL: url as string,
-    formFactor: 'MOBILE',
-  }).toString();
+  return useSWR<PageSpeedInsights>(
+    [`/api/pagespeed`, url, formFactor],
+    () => fetcher(url, formFactor),
+    swrOptions
+  )
+}
 
-  const { data: desktopData } = useSWR<PageSpeedInsights>(
-    `/api/pagespeed?${desktopSearchPrams}`,
-    fetcher,
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      revalidateIfStale: false,
-    },
-  );
-
-  const { data: mobileData } = useSWR<PageSpeedInsights>(
-    `/api/pagespeed?${mobileSearchPrams}`,
-    fetcher,
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      revalidateIfStale: false,
-    },
-  );
-
+export function PageSpeedInsightsDashboard() {  
+  const { data: desktopData } = useFetchPageSpeedData('DESKTOP');
+  const { data: mobileData } = useFetchPageSpeedData('MOBILE');
   if (!desktopData && !mobileData) {
     return <div>Loading...</div>;
   }
