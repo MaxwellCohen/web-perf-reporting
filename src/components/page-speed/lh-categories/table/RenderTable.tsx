@@ -18,8 +18,8 @@ export function DetailTable({
   desktopDetails?: AuditDetailOpportunity | AuditDetailTable;
   title:string
 }) {
-  const { items, headings, device, sortedBy } = useMemo(() => {
-    const [_headings, _items, _device] = mergedTable(
+  const { items, headings, device, sortedBy, hasNode } = useMemo(() => {
+    const [_headings, _items, _device, _hasNode] = mergedTable(
       desktopDetails?.items,
       mobileDetails?.items,
       mobileDetails?.headings,
@@ -29,7 +29,7 @@ export function DetailTable({
       desktopDetails?.sortedBy,
       mobileDetails?.sortedBy,
     );
-    if (_sortedBy.length) {
+    if (_sortedBy.length && !_hasNode) {
       _items.sort(getTableItemSortComparator(_sortedBy));
     }
     return {
@@ -37,6 +37,7 @@ export function DetailTable({
       headings: _headings,
       device: _device,
       sortedBy: _sortedBy,
+      hasNode: _hasNode,
     };
   }, [desktopDetails, mobileDetails]);
   const isEntityGrouped =
@@ -58,7 +59,6 @@ export function DetailTable({
     />;
   }
   
-  const hasNode = headings.some((h) => h.valueType === 'node');
   if (hasNode) {
     return <RenderNodeTable headings={headings} items={items} device={device} title={title} />;
   }

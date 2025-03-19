@@ -1,86 +1,33 @@
 'use client';
-
-import {
-  AuditDetailFilmstripSchema,
-  AuditResultsRecord,
-  Entities,
-  PageSpeedInsights,
-} from '@/lib/schema';
-import { Details } from '@/components/ui/accordion';
-
+import { PageSpeedInsights } from '@/lib/schema';
 import { LoadingExperience } from './LoadingExperience';
 import { EntitiesTable } from './EntitiesTable';
-import { Timeline } from './Timeline';
 import { CWVMetricsComponent } from './CWVMetricsComponent';
 import { PageSpeedCategorySection } from './lh-categories/PageSpeedCategorySection';
 import { fullPageScreenshotContext } from './PageSpeedContext';
-import useSWR from 'swr';
-import { useSearchParams } from 'next/navigation';
+import { useFetchPageSpeedData } from './useFetchPageSpeedData';
+import { RenderPageSpeedInsights } from './RenderPageSpeedInsights';
 
-const fetcher = async (url: string,  formFactor: string) => {
-  const res = await fetch('/api/pagespeed',{
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      testURL: url,
-      formFactor: formFactor,
-    }),
-  });
-
-  // If the status code is not in the range 200-299,
-  // we still try to parse and throw it.
-  if (!res.ok) {
-    const error = new Error('An error occurred while fetching the data.');
-    throw error;
-  }
-
-  return res.json() as Promise<PageSpeedInsights>;
-};
-const swrOptions =     {
-  revalidateOnFocus: false,
-  revalidateOnReconnect: false,
-  revalidateIfStale: false,
-};
-
-function useFetchPageSpeedData( formFactor: string) {
-  const searchParams = useSearchParams();
-  const url = encodeURI(searchParams?.get('url') ?? '');
-  return useSWR(
-    [`/api/pagespeed`, url, formFactor],
-    () => fetcher(url, formFactor),
-    swrOptions
-  )
-}
-
-export function PageSpeedInsightsDashboard() {  
-  const { data: desktopData } = useFetchPageSpeedData('DESKTOP');
-  const { data: mobileData } = useFetchPageSpeedData('MOBILE');
+export function PageSpeedInsightsDashboard({
+  mobileDataPrams,
+  desktopDataPrams,
+}: {
+  mobileDataPrams?: PageSpeedInsights;
+  desktopDataPrams?: PageSpeedInsights;
+}) {
+  const mobileData = useFetchPageSpeedData('MOBILE', mobileDataPrams);
+  const desktopData = useFetchPageSpeedData('DESKTOP', desktopDataPrams);
   if (!desktopData && !mobileData) {
     return <div>Loading...</div>;
   }
 
-  const desktopEntities: Entities | undefined =
-    desktopData?.lighthouseResult?.entities;
-  const desktopAuditRecords: AuditResultsRecord | undefined =
-    desktopData?.lighthouseResult?.audits;
-  const desktopCategories = desktopData?.lighthouseResult?.categories;
-  const desktopCategoryGroups = desktopData?.lighthouseResult?.categoryGroups;
-  const mobileAuditRecords: AuditResultsRecord | undefined =
-    mobileData?.lighthouseResult?.audits;
-  const mobileCategoryGroups = mobileData?.lighthouseResult?.categoryGroups;
-  const mobileCategories = mobileData?.lighthouseResult?.categories;
-  const desktopFullPageScreenshot =
-    desktopData?.lighthouseResult.fullPageScreenshot || null;
-  const mobileFullPageScreenshot =
-    mobileData?.lighthouseResult.fullPageScreenshot || null;
-
   return (
     <fullPageScreenshotContext.Provider
       value={{
-        desktopFullPageScreenshot,
-        mobileFullPageScreenshot,
+        desktopFullPageScreenshot:
+          desktopData?.lighthouseResult.fullPageScreenshot,
+        mobileFullPageScreenshot:
+          mobileData?.lighthouseResult.fullPageScreenshot,
       }}
     >
       <h2 className="text-center text-2xl font-bold">
@@ -102,53 +49,22 @@ export function PageSpeedInsightsDashboard() {
         experienceMobile={mobileData?.originLoadingExperience}
       />
       <CWVMetricsComponent
-        desktopCategoryGroups={desktopCategoryGroups}
-        desktopAudits={desktopAuditRecords}
-        mobileCategoryGroups={mobileCategoryGroups}
-        mobileAudits={mobileAuditRecords}
+        desktopCategoryGroups={desktopData?.lighthouseResult?.categoryGroups}
+        desktopAudits={desktopData?.lighthouseResult?.audits}
+        mobileCategoryGroups={mobileData?.lighthouseResult?.categoryGroups}
+        mobileAudits={mobileData?.lighthouseResult?.audits}
       />
       <RenderPageSpeedInsights
         desktopData={desktopData}
         mobileData={mobileData}
       />
       <PageSpeedCategorySection
-        desktopCategories={desktopCategories}
-        mobileCategories={mobileCategories}
-        desktopAuditRecords={desktopAuditRecords}
-        mobileAuditRecords={mobileAuditRecords}
+        desktopCategories={desktopData?.lighthouseResult?.categories}
+        mobileCategories={mobileData?.lighthouseResult?.categories}
+        desktopAuditRecords={desktopData?.lighthouseResult?.audits}
+        mobileAuditRecords={mobileData?.lighthouseResult?.audits}
       />
-      <EntitiesTable entities={desktopEntities} />
+      <EntitiesTable entities={desktopData?.lighthouseResult?.entities} />
     </fullPageScreenshotContext.Provider>
-  );
-}
-
-function RenderPageSpeedInsights({
-  desktopData,
-  mobileData,
-}: {
-  desktopData?: PageSpeedInsights | null;
-  mobileData?: PageSpeedInsights | null;
-}) {
-  const DesktopTimeline = AuditDetailFilmstripSchema.safeParse(
-    desktopData?.lighthouseResult?.audits?.['screenshot-thumbnails'].details,
-  ).data;
-  const MobileTimeline = AuditDetailFilmstripSchema.safeParse(
-    mobileData?.lighthouseResult?.audits?.['screenshot-thumbnails'].details,
-  ).data;
-
-  if (!DesktopTimeline || !MobileTimeline) return null;
-
-  return (
-    <Details className="flex flex-col flex-wrap gap-2">
-      <summary className="flex flex-col gap-2 overflow-auto">
-        <h3 className="text-lg font-bold">Screenshots</h3>
-      </summary>
-      {MobileTimeline ? (
-        <Timeline timeline={MobileTimeline} device="Mobile" />
-      ) : null}
-      {DesktopTimeline ? (
-        <Timeline timeline={DesktopTimeline} device="Desktop" />
-      ) : null}
-    </Details>
   );
 }

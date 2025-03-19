@@ -1,9 +1,7 @@
 import { UrlLookupForm } from '@/components/common/UrlLookupForm';
 import { updateURl } from '@/lib/utils';
-import { Suspense } from 'react';
-import { PageSpeedInsights } from '@/components/page-speed/PageSpeedInsights';
 import { requestPageSpeedData } from '@/lib/services/pageSpeedInsights.service';
-
+import { PageSpeedInsightsDashboard } from '@/components/page-speed/pageSpeedInsightsDashboard';
 
 export default async function Home({
   searchParams,
@@ -11,12 +9,11 @@ export default async function Home({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const params = await searchParams;
-
   const url = updateURl(params.url as string);
-
-  if (url){
-    Promise.all([requestPageSpeedData(url, 'DESKTOP'), requestPageSpeedData(url, 'MOBILE')]);
-  }
+  const data = await Promise.all([
+    requestPageSpeedData(url, 'MOBILE'),
+    requestPageSpeedData(url, 'DESKTOP'),
+  ]);
 
   return (
     <div>
@@ -26,9 +23,10 @@ export default async function Home({
       {!url ? (
         <UrlLookupForm />
       ) : (
-        <Suspense fallback={<div>Loading...</div>}>
-          <PageSpeedInsights />
-        </Suspense>
+        <PageSpeedInsightsDashboard
+          mobileDataPrams={data[0] || undefined}
+          desktopDataPrams={data[1] || undefined}
+        />
       )}
     </div>
   );

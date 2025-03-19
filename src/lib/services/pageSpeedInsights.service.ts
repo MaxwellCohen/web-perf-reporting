@@ -2,6 +2,7 @@ import * as Sentry from '@sentry/nextjs';
 import { PageSpeedInsightsTable } from '@/db/schema';
 import { db } from '@/db';
 import { PageSpeedInsights } from '../schema';
+import { waitUntil } from '@vercel/functions';
 
 type formFactor = 'DESKTOP' | 'MOBILE';
 
@@ -51,17 +52,24 @@ export const getSavedPageSpeedData = async (
 };
 
 export const requestPageSpeedData = async (
-  testURL: string,
+  testURL: string | undefined,
   formFactor: formFactor,
 ): Promise<PageSpeedInsights | null> => {
   try {
+    if (!testURL) {
+      return null;
+    }
+    const savedData = await getSavedPageSpeedData(testURL, formFactor);
+    if (savedData) {
+      return savedData;
+    }
     const pageSpeedDataUrl = getPageSpeedDataURl(testURL, formFactor);
     const response = await fetch(pageSpeedDataUrl);
     if (!response.ok) {
       return null;
     }
     const data = (await response.json()) as PageSpeedInsights;
-    savePageSpeedData(pageSpeedDataUrl, data);
+    waitUntil(savePageSpeedData(pageSpeedDataUrl, data));
     return data;
   } catch (error) {
     Sentry.captureException(error);
@@ -74,7 +82,7 @@ async function savePageSpeedData(
   data?: PageSpeedInsights,
 ) {
   if (!data) {
-    return null;
+    return;
   }
   try {
     await db
@@ -88,6 +96,5 @@ async function savePageSpeedData(
       .execute();
   } catch (error) {
     Sentry.captureException(error);
-    return null;
   }
 }

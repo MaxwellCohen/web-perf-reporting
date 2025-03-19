@@ -4,12 +4,14 @@ import {
   AuditDetailOpportunity,
   AuditDetailTable,
   AuditResultsRecord,
+  CriticalRequestChain,
   DebugData,
 } from '@/lib/schema';
 import { RenderChecklist } from './RenderChecklist';
 import { RenderUnknown } from './RenderUnknown';
 import { DetailTable } from './table/RenderTable';
 import { RenderDebugData } from './RenderDebugdata';
+import { RenderCriticalChainData } from './table/renderCricticalChain';
 
 export function RenderDetails({
   desktopAuditData,
@@ -58,7 +60,7 @@ export function RenderDetails({
       return (
         <div>
           Critical Request Chain
-          <pre>{JSON.stringify(desktopDetails, null, 2)}</pre>
+          <RenderCriticalChainData desktopDetails={desktopDetails} mobileDetails={mobileDetails as CriticalRequestChain} />
         </div>
       );
     // Internal-only details, not for rendering.

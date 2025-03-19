@@ -34,7 +34,7 @@ export function RenderTableValue({
   device: DeviceType;
 } & React.HTMLAttributes<HTMLElement>) {
   if (value === undefined || value === null) {
-    return null;
+    return <div className="col-span-1"></div>;
   }
 
   // First deal with the possible object forms of value.
@@ -77,12 +77,12 @@ export function RenderTableValue({
     text: () => <RenderText value={value} {...props} />,
     thumbnail: () => <RenderThumbnail value={value} {...props} />,
     timespanMs: () => <RenderTimespanMs value={value} {...props} />,
-    url: () => <RenderUrl value={value} {...props}/>,
+    url: () => <RenderUrl value={value} {...props} />,
   } as const;
 
   return (
     valueTypeMap[heading?.valueType as keyof typeof valueTypeMap]?.() || (
-      <RenderDefault value={value}  {...props}/>
+      <RenderDefault value={value} {...props} />
     )
   );
 }
@@ -95,7 +95,10 @@ function RenderCodeValue({
     <code
       title="code"
       {...props}
-      className={cn('px-6 break-all overflow-hidden font-mono text-xs', props.className)}
+      className={cn(
+        'overflow-hidden break-all px-6 font-mono text-xs',
+        props.className,
+      )}
     >
       {typeof value === 'string' ? value : JSON.stringify(value)}
     </code>
@@ -112,7 +115,7 @@ function RenderLinkValue({
       title={value.text}
       {...props}
       className={cn(
-        'block px-6 break-all overflow-hidden break-words',
+        'block overflow-hidden break-words break-all px-6',
         props.className,
       )}
     >
@@ -250,14 +253,17 @@ function RenderSourceLocation({
   );
 }
 
-function RenderUrlValue({ value, ...props }: { value: UrlValue }& React.HTMLAttributes<HTMLElement>) {
+function RenderUrlValue({
+  value,
+  ...props
+}: { value: UrlValue } & React.HTMLAttributes<HTMLElement>) {
   return (
     <a
       href={value.value}
       title={value.value}
       {...props}
       className={cn(
-        'block px-6 break-all overflow-hidden break-words',
+        'block overflow-hidden break-words break-all px-6',
         props.className,
       )}
     >
@@ -266,20 +272,37 @@ function RenderUrlValue({ value, ...props }: { value: UrlValue }& React.HTMLAttr
   );
 }
 
-function RenderTextValue({ value, ...props }: { value: TextValue }& React.HTMLAttributes<HTMLElement>) {
-  return <div title="text" {...props}>{value.value}</div>;
+function RenderTextValue({
+  value,
+  ...props
+}: { value: TextValue } & React.HTMLAttributes<HTMLElement>) {
+  return (
+    <div title="text" {...props}>
+      {value.value}
+    </div>
+  );
 }
 
-function RenderDefault({ value, ...props }: { value: unknown }& React.HTMLAttributes<HTMLElement>) {
-  return <pre title="default" {...props}>{JSON.stringify(value, null, 2)}</pre>;
+function RenderDefault({
+  value,
+  ...props
+}: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
+  return (
+    <pre title="default" {...props}>
+      {JSON.stringify(value, null, 2)}
+    </pre>
+  );
 }
 
-function RenderBytesValue({ value, ...props }: { value: unknown }& React.HTMLAttributes<HTMLElement>) { 
+function RenderBytesValue({
+  value,
+  ...props
+}: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
   const bytes = Number(value);
   const kb = bytes / 1024;
   const mb = kb / 1024;
   return (
-    <div title="bytes" {...props} className={cn("", props.className)}>
+    <div title="bytes" {...props} className={cn('', props.className)}>
       {mb > 1
         ? `${mb.toFixed(2)} MB`
         : kb > 1
@@ -289,30 +312,57 @@ function RenderBytesValue({ value, ...props }: { value: unknown }& React.HTMLAtt
   );
 }
 
-function RenderCode({ value, ...props }: { value: unknown }& React.HTMLAttributes<HTMLElement>) {
+function RenderCode({
+  value,
+  ...props
+}: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
   const strValue = String(value);
   return (
-    <code title="code" {...props} className={cn("font-mono text-xs px-6 break-all overflow-hidden", props.className)}>
+    <code
+      title="code"
+      {...props}
+      className={cn(
+        'overflow-hidden break-all px-6 font-mono text-xs',
+        props.className,
+      )}
+    >
       {strValue}
     </code>
   );
 }
 
-function RenderMSValue({ value, ...props }: { value: unknown }& React.HTMLAttributes<HTMLElement>) {
-  const ms = Number(value);
-  if (ms < 1000) {
-    return <div title="ms" {...props} className={cn('', props.className)}>{ms.toFixed(0)} ms</div>;
+export function renderTimeValue(value: number) {
+  const ms = value % 1000;
+  if (value < 1000) {
+    return `${value.toFixed(0)} ms`;
   }
-  const seconds = ms / 1000;
+  const seconds = value / 1000;
   if (seconds < 60) {
-    return <div title="ms" {...props} className={cn('', props.className)}>{seconds.toFixed(2)} s</div>;
+    return `${Math.floor(seconds)}S ${ms.toFixed(0)} s`;
   }
   const minutes = seconds / 60;
   if (minutes < 60) {
-    return <div title="ms" {...props} className={cn('', props.className)}>{minutes.toFixed(2)} min</div>;
+    return `${minutes.toFixed(2)} min`;
   }
   const hours = minutes / 60;
-  return <div title="ms" {...props} className={cn('', props.className)}>{hours.toFixed(2)} h</div>;
+  if (hours < 24) {
+  return `${hours.toFixed(2)} h`;
+  }
+  const days = hours / 24;
+  return `${days.toFixed(2)} d`;  
+}
+
+function RenderMSValue({
+  value,
+  ...props
+}: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
+  const time = renderTimeValue(Number(value));
+
+  return (
+    <div title="ms" {...props} className={cn('', props.className)}>
+      {time} h
+    </div>
+  );
 }
 
 function RenderNumberValue({
@@ -322,31 +372,53 @@ function RenderNumberValue({
 }: {
   value: unknown;
   heading?: TableColumnHeading | null;
-}& React.HTMLAttributes<HTMLElement>) {
+} & React.HTMLAttributes<HTMLElement>) {
   if (heading?.granularity && value) {
     return (
-      <div title="numeric" {...props} className={cn("align-right", props.className)}>
+      <div
+        title="numeric"
+        {...props}
+        className={cn('align-right', props.className)}
+      >
         {(value as number).toFixed(-Math.log10(heading.granularity || 1))}
       </div>
     );
   }
 
   return (
-    <div title="numeric" {...props} className={cn("align-right", props.className)}>
+    <div
+      title="numeric"
+      {...props}
+      className={cn('align-right', props.className)}
+    >
       {(value as number).toFixed(-Math.log10(heading?.granularity || 1))}
     </div>
   );
 }
 
-function RenderText({ value, ...props }: { value: unknown }& React.HTMLAttributes<HTMLElement>) {
+function RenderText({
+  value,
+  ...props
+}: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
   const strValue = String(value);
   if (strValue.length < 10) {
-    return <div title="text" {...props} className={cn('', props.className)}>{strValue}</div>;
+    return (
+      <div title="text" {...props} className={cn('', props.className)}>
+        {strValue}
+      </div>
+    );
   }
-  return <div title="text" {...props}>{strValue}</div>;
+  return (
+    <div title="text" {...props}>
+      {strValue}
+    </div>
+  );
 }
 
-function RenderUrl({ value, ...props }: { value: unknown }& React.HTMLAttributes<HTMLElement>) {
+function RenderUrl({
+  value,
+  ...props
+}: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
   const strValue = String(value);
   if (URL_PREFIXES.some((prefix) => strValue.startsWith(prefix))) {
     return (
@@ -355,7 +427,7 @@ function RenderUrl({ value, ...props }: { value: unknown }& React.HTMLAttributes
         title={strValue}
         {...props}
         className={cn(
-          'block px-6 break-all overflow-hidden break-words',
+          'block overflow-hidden break-words break-all px-6',
           props.className,
         )}
       >
@@ -364,18 +436,33 @@ function RenderUrl({ value, ...props }: { value: unknown }& React.HTMLAttributes
     );
   } else {
     // Fall back to <pre> rendering if not actually a URL.
-    return <div title="url">{strValue}</div>;
+    return (
+      <div
+        title="url"
+        {...props}
+        className={cn(
+          'block overflow-hidden break-words break-all px-6',
+          props.className,
+        )}
+      >
+        {strValue}
+      </div>
+    );
   }
 }
 
-function RenderThumbnail({ value, ...props }: { value: unknown }& React.HTMLAttributes<HTMLElement>) {
+function RenderThumbnail({
+  value,
+  ...props
+}: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
   const strValue = `${value}`;
-  return <img src={strValue} title={strValue} alt="" {...props} />
+  return <img src={strValue} title={strValue} alt="" {...props} />;
 }
 
-function RenderTimespanMs({ value, ...props }: { value: unknown }& React.HTMLAttributes<HTMLElement>) {
+function RenderTimespanMs({
+  value,
+  ...props
+}: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
   const numValue = Number(value);
-  return (
-    <RenderMSValue value={numValue} {...props} />
-  );
+  return <RenderMSValue value={numValue} {...props} />;
 }

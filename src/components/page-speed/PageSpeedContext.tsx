@@ -4,9 +4,9 @@ import { createContext } from "react";
 
 
 export const fullPageScreenshotContext = createContext<{
-    desktopFullPageScreenshot: FullPageScreenshot | null;
-    mobileFullPageScreenshot: FullPageScreenshot | null;
+    desktopFullPageScreenshot?: FullPageScreenshot;
+    mobileFullPageScreenshot?: FullPageScreenshot;
   }>({
-    desktopFullPageScreenshot: null,
-    mobileFullPageScreenshot: null,
+    desktopFullPageScreenshot: undefined,
+    mobileFullPageScreenshot: undefined,
   });

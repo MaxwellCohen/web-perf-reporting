@@ -144,7 +144,7 @@ export function NestedTable({
       <TableContainer headings={headings} className="col-span-full ">
         {item.subItems?.items?.length ? (
           <>
-            <RenderSubItemsHeader headings={headings} />
+            {/* <RenderSubItemsHeader headings={headings} /> */}
             <RenderSubItems item={item} headings={headings} device={device} />
           </>
         ) : null}
@@ -199,24 +199,22 @@ export function RenderSubItemsHeader({
   const content = headings
     .map((h, colIndex) => {
       const headingKey = h?.subItemsHeading?.key;
-      if (!headingKey) return null;
+      if (!headingKey) {
+        return (<div key={`subheading-${colIndex}`} className='col-span-1'></div>);
+      }
       const heading = headings.find(({ key }) => key === headingKey);
       if (!heading) {
-        return null;
+        return <div key={`subheading-${colIndex}`} className='col-span-1'></div>;
       }
 
       return (
         <RenderHeading
           key={`subheading-${heading.key || colIndex}`}
           heading={heading}
-          className="px-6 py-0.5 text-sm tracking-wider text-muted-foreground"
-          style={{
-            gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
-          }}
+          className="px-6 py-0.5 text-sm tracking-wider text-muted-foreground col-span-1"
         />
       );
     })
-    .filter(Boolean);
   if (!content.length) return null;
   return (
     <RenderTableRowContainer
