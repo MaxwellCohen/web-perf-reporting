@@ -28,7 +28,7 @@ export function CWVMetricsComponent({
           </h3>
         ) : null}
       </summary>
-      <div className="-mx-2 grid grid-cols-[repeat(auto-fill,_minmax(14rem,_1fr))] gap-2">
+      <div className="-mx-2 grid grid-cols-[repeat(auto-fit,_minmax(14rem,_1fr))] gap-2">
         {[
           'first-contentful-paint',
           'largest-contentful-paint',

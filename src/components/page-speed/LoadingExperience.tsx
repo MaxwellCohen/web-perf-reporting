@@ -37,7 +37,7 @@ export function LoadingExperience({
               : ''}
           </div>
         </summary>
-        <div className="-mx-2 grid max-w-full grid-cols-[repeat(auto-fill,_minmax(14rem,_1fr))] gap-2">
+        <div className="-mx-2 grid max-w-full grid-cols-[repeat(auto-fit,_minmax(14rem,_1fr))] gap-2">
           {metrics.map(({ metric, key }) => {
             const mobileMetric = experienceMobile?.metrics[key];
             const desktopMetric = experienceDesktop?.metrics[key];

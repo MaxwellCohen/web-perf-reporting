@@ -16,7 +16,7 @@ export default async function Home({
   ]);
 
   return (
-    <div>
+    <div className='max-w-screen-2xl mx-auto'>
       <h1 className="mx-auto text-center text-2xl font-extrabold">
         Page Speed Insights {url ? ` for ${url}` : ''}
       </h1>
