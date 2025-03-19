@@ -60,7 +60,7 @@ function chainToTree(node: CriticalRequestChain['chains']): TreeDataItem[] {
   return Object.entries(node).map(([key, value]) => {
     return {
       id: key,
-      name: `${value.request.url} - Start Time ${renderTimeValue((value.request.startTime))} - Time ${renderTimeValue((value.request.endTime - value.request.startTime) * 1000)} - Transfer ${value.request.transferSize} bytes`,
+      name: `${value.request.url} | Start Time ${renderTimeValue((value.request.startTime))} | Segment Time ${renderTimeValue((value.request.endTime - value.request.startTime) * 1000)} | Transfer Amount ${value.request.transferSize} bytes`,
       icon: undefined,
       selectedIcon: undefined,
       openIcon: undefined,

@@ -331,38 +331,60 @@ function RenderCode({
   );
 }
 
-export function renderTimeValue(value: number) {
-  const ms = value % 1000;
-  if (value < 1000) {
-    return `${value.toFixed(0)} ms`;
+export function renderTimeValue(ms: number) {
+  if (ms <= 0) {
+    return "0 ms";
   }
-  const seconds = value / 1000;
+
+  const milliseconds = Math.floor(ms % 1000);
+  const seconds = Math.floor((ms / 1000) % 60);
+  const minutes = Math.floor((ms / (1000 * 60)) % 60);
+  const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
+  const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+
+  const parts = [];
+
+  if (days > 0) {
+    parts.push(`${days} d`);
+  }
+
+  if (hours > 0) {
+    parts.push(`${hours} h`);
+  }
+
+  if (minutes > 0) {
+    parts.push(`${minutes} m`);
+  }
+
+  if (seconds > 0) {
+    parts.push(`${seconds} s`);
+  }
+
+  if (milliseconds > 0 || parts.length === 0) {
+    parts.push(`${milliseconds} ms`);
+  }
+
+  // Join parts with commas and "and" for the last separator
+
+    return `${parts.join(" ")}`;
+
+}
+
+function RenderMSValue({ value, ...props }: { value: unknown }& React.HTMLAttributes<HTMLElement>) {
+  const ms = Number(value);
+  if (ms < 1000) {
+    return <div title="ms" {...props} className={cn('', props.className)}>{ms.toFixed(0)} ms</div>;
+  }
+  const seconds = ms / 1000;
   if (seconds < 60) {
-    return `${Math.floor(seconds)}S ${ms.toFixed(0)} s`;
+    return <div title="ms" {...props} className={cn('', props.className)}>{seconds.toFixed(2)} s</div>;
   }
   const minutes = seconds / 60;
   if (minutes < 60) {
-    return `${minutes.toFixed(2)} min`;
+    return <div title="ms" {...props} className={cn('', props.className)}>{minutes.toFixed(2)} min</div>;
   }
   const hours = minutes / 60;
-  if (hours < 24) {
-  return `${hours.toFixed(2)} h`;
-  }
-  const days = hours / 24;
-  return `${days.toFixed(2)} d`;  
-}
-
-function RenderMSValue({
-  value,
-  ...props
-}: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
-  const time = renderTimeValue(Number(value));
-
-  return (
-    <div title="ms" {...props} className={cn('', props.className)}>
-      {time} h
-    </div>
-  );
+  return <div title="ms" {...props} className={cn('', props.className)}>{hours.toFixed(2)} h</div>;
 }
 
 function RenderNumberValue({

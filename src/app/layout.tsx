@@ -41,7 +41,7 @@ export default function RootLayout({
             <div className="grid h-screen grid-rows-[auto,1fr]">
               <TopNav />
               <div className="overflow-y-scroll">
-                <main className="container mx-auto min-h-screen p-4 print:min-h-0">
+                <main className="mx-auto min-h-screen p-4 print:min-h-0">
                   {children}
                 </main>
                 <footer className="w-full text-center print:hidden">
