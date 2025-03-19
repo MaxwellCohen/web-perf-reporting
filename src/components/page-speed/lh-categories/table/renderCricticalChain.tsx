@@ -1,6 +1,6 @@
 import { CriticalRequestChain } from '@/lib/schema';
 import { Details } from '@/components/ui/accordion';
-import { TreeDataItem, TreeView } from '@/components/tree-view';
+import { TreeDataItem, TreeView } from '@/components/ui/tree-view';
 import { renderTimeValue } from './RenderTableValue';
 
 export function RenderCriticalChainData({
