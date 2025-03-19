@@ -8,7 +8,7 @@ import { cva } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const treeVariants = cva(
-    'group hover:before:opacity-100 before:absolute before:rounded-lg before:left-0 px-2 before:w-full before:opacity-0 before:bg-accent/70 before:h-[2rem] before:-z-10'
+    'group hover:before:opacity-100 before:absolute before:rounded-lg before:left-0 px-2 before:w-full before:opacity-0 before:bg-accent/70 before:h-[2rem] before:-z-10 before:[bg] relative'
 )
 
 const selectedTreeVariants = cva(
@@ -130,8 +130,7 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
                     {...props}
                 />
                 <div
-                    className='w-full h-[48px]'
-                    onDrop={(e) => { handleDrop({id: '', name: 'parent_div'})}}>
+                    className='w-full h-[48px]'>
 
                 </div>
             </div>
@@ -374,7 +373,9 @@ const TreeLeaf = React.forwardRef<
                     treeVariants(),
                     className,
                     selectedItemId === item.id && selectedTreeVariants(),
-                    isDragOver && dragOverVariants()
+                    isDragOver && dragOverVariants(),
+                    'after:absolute after:left-[-2rem] after:h-[2px] after:right-[100%] after:bg-muted/70',
+                
                 )}
                 onClick={() => {
                     handleSelectChange(item)
