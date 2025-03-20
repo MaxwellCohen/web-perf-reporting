@@ -7,7 +7,7 @@ export function RenderJSONDetails({
   title = 'All Data',
   ...props
 }: {
-  data: unknown;
+  data?: unknown;
   data2?: unknown;
   title?: string;
 } & JSX.IntrinsicElements['details']) {
@@ -15,9 +15,9 @@ export function RenderJSONDetails({
     <details {...props}>
       <summary>{title}</summary>
       <div className="grid md:grid-cols-2 text-left">
-        <pre className="overflow-x-auto border-r-2 text-muted-foreground">
+        {data ? <pre className="overflow-x-auto border-r-2 text-muted-foreground">
           {JSON.stringify(data, null, 2)}
-        </pre>
+        </pre> : null}
         {data2 ? (
           <pre className="overflow-x-auto">
             {JSON.stringify(data2, null, 2)}

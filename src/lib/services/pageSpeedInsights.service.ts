@@ -3,6 +3,7 @@ import { PageSpeedInsightsTable } from '@/db/schema';
 import { db } from '@/db';
 import { PageSpeedInsights } from '../schema';
 import { waitUntil } from '@vercel/functions';
+import { and, eq } from 'drizzle-orm';
 
 type formFactor = 'DESKTOP' | 'MOBILE';
 
@@ -27,11 +28,11 @@ export function getPageSpeedDataURl(testURL: string, formFactor: formFactor) {
 export const getSavedPageSpeedData = async (
   testURL: string,
   formFactor: formFactor,
-): Promise<PageSpeedInsights | null> => {
+) => {
   try {
     const pageSpeedDataUrl = getPageSpeedDataURl(testURL, formFactor);
     const result = await db.query.PageSpeedInsightsTable.findFirst({
-      columns: { data: true },
+      columns: { data: true, status: true },
       where: (PageSpeedInsightsTable, { eq, and, gt }) =>
         and(
           eq(PageSpeedInsightsTable.url, pageSpeedDataUrl),
@@ -41,10 +42,8 @@ export const getSavedPageSpeedData = async (
           ),
         ),
     });
-    if (result?.data) {
-      return result.data;
-    }
-    return null;
+    console.log(result);
+    return result;
   } catch (error) {
     Sentry.captureException(error);
     return null;
@@ -59,42 +58,53 @@ export const requestPageSpeedData = async (
     if (!testURL) {
       return null;
     }
-    const savedData = await getSavedPageSpeedData(testURL, formFactor);
+    const savedData = (await getSavedPageSpeedData(testURL, formFactor))?.data;
     if (savedData) {
       return savedData;
     }
-    const pageSpeedDataUrl = getPageSpeedDataURl(testURL, formFactor);
-    const response = await fetch(pageSpeedDataUrl);
-    if (!response.ok) {
-      return null;
-    }
-    const data = (await response.json()) as PageSpeedInsights;
-    waitUntil(savePageSpeedData(pageSpeedDataUrl, data));
-    return data;
+
+    waitUntil(savePageSpeedData(testURL, formFactor));
+    return null;
   } catch (error) {
     Sentry.captureException(error);
     return null;
   }
 };
 
-async function savePageSpeedData(
-  pageSpeedDataUrl: string,
-  data?: PageSpeedInsights,
-) {
-  if (!data) {
-    return;
-  }
+async function savePageSpeedData(testURL: string, formFactor: formFactor) {
   try {
+    const pageSpeedDataUrl = getPageSpeedDataURl(testURL, formFactor);
+    const date = new Date(Date.now());
     await db
       .insert(PageSpeedInsightsTable)
       .values({
         url: pageSpeedDataUrl,
-        date: new Date(data.analysisUTCTimestamp),
-        data: data,
+        date,
+        status: 'PENDING',
       })
       .onConflictDoNothing()
       .execute();
+      console.log('saving data!!!');
+    const response = await fetch(pageSpeedDataUrl);
+    if (!response.ok) {
+      return null;
+    }
+    const data = (await response.json()) as PageSpeedInsights;
+    if (!data) {
+      return;
+    }
+    console.log(data);
+    await db
+      .update(PageSpeedInsightsTable).set({
+        url: pageSpeedDataUrl,
+        date,
+        data: data,
+        status: 'COMPLETED',
+      }).where(and(eq(PageSpeedInsightsTable.url, pageSpeedDataUrl), eq(PageSpeedInsightsTable.status, 'PENDING'), eq(PageSpeedInsightsTable.date, date)))
+      
+      console.log('done saving data!!!');
   } catch (error) {
+    console.log(error);
     Sentry.captureException(error);
   }
 }

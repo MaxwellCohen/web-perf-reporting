@@ -16,22 +16,23 @@ export function AuditDetailsSection({
   mobileAuditRecords,
   acronym,
 }: {
-  auditRef: AuditRef;
-  desktopAuditRecords: AuditResultsRecord;
-  mobileAuditRecords: AuditResultsRecord;
+  auditRef?: AuditRef;
+  desktopAuditRecords?: AuditResultsRecord;
+  mobileAuditRecords?: AuditResultsRecord;
   acronym?: string;
 }) {
-  const desktopAuditData = desktopAuditRecords?.[auditRef.id || ''];
-  const mobileAuditData = mobileAuditRecords?.[auditRef.id || ''];
+  const auditRefId = auditRef?.id || 'NOT_FOUND_ID!!!!';
+  const desktopAuditData = desktopAuditRecords?.[auditRefId];
+  const mobileAuditData = mobileAuditRecords?.[auditRefId];
   const scoreDisplayMode =
-    desktopAuditData.scoreDisplayMode ||
-    mobileAuditData.scoreDisplayMode ||
+    desktopAuditData?.scoreDisplayMode ||
+    mobileAuditData?.scoreDisplayMode ||
     'bottom';
 
   const emptyTable =
     isEmptyResult(desktopAuditData) && isEmptyResult(mobileAuditData);
 
-  const doNotRender = doNotRenderDetails.includes(auditRef.id || 'adasfdas');
+  const doNotRender = doNotRenderDetails.includes(auditRefId);
   const disabled =
     doNotRender ||
     emptyTable ||
@@ -50,7 +51,7 @@ export function AuditDetailsSection({
             className="text-right"
             data={desktopAuditData}
             data2={mobileAuditData}
-            title={`All Data for ${auditRef.id}`}
+            title={`All Data for ${auditRef?.id}`}
           />
         </div>
       </div>
@@ -59,7 +60,7 @@ export function AuditDetailsSection({
 
   return (
     <Details
-      id={desktopAuditData.id}
+      id={desktopAuditData?.id || mobileAuditData?.id}
       className="rounded-2 mb-4 rounded-md border-4 p-2"
     >
       <summary className="flex flex-col gap-4">
@@ -72,7 +73,7 @@ export function AuditDetailsSection({
           className="text-right"
           data={desktopAuditData}
           data2={mobileAuditData}
-          title={`All Data for ${auditRef.id}`}
+          title={`All Data for ${auditRef?.id}`}
         />
       </summary>
       {!disabled ? (

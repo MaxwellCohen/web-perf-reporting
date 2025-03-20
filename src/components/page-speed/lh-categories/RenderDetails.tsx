@@ -1,6 +1,7 @@
 import { RenderJSONDetails } from '../RenderJSONDetails';
 import { Timeline } from '../Timeline';
 import {
+  AuditDetailFilmstrip,
   AuditDetailOpportunity,
   AuditDetailTable,
   AuditResultsRecord,
@@ -20,18 +21,19 @@ export function RenderDetails({
   desktopAuditData?: AuditResultsRecord[string];
   mobileAuditData?: AuditResultsRecord[string];
 }) {
-  if (!desktopAuditData?.details?.type || !mobileAuditData?.details?.type) {
+  
+  const desktopDetails = desktopAuditData?.details;
+  const mobileDetails = mobileAuditData?.details;
+  const detailType = desktopDetails?.type || mobileDetails?.type;
+  const typesSet = new Set([desktopDetails?.type, mobileDetails?.type].filter(Boolean));
+  if (typesSet.size !== 1 ) {
     return null;
   }
-  const desktopDetails = desktopAuditData.details;
-  const mobileDetails = mobileAuditData.details;
-  if (desktopDetails.type !== mobileDetails.type) {
-    return null;
-  }
+  const title = desktopAuditData?.title || mobileAuditData?.title || '';
 
-  switch (desktopDetails.type) {
+  switch (detailType) {
     case 'filmstrip':
-      return <Timeline timeline={desktopDetails} device={'Desktop'} />;
+      return <Timeline timeline={desktopDetails as AuditDetailFilmstrip} device={'Desktop'} />;
     case 'list':
       return (
         <RenderList
@@ -44,41 +46,42 @@ export function RenderDetails({
         <RenderChecklist
           desktopAuditData={desktopAuditData}
           mobileAuditData={mobileAuditData}
-          title={desktopAuditData.title || mobileAuditData.title}
+          title={title}
         />
       );
     case 'table':
     case 'opportunity':
       return (
         <DetailTable
-          desktopDetails={desktopDetails}
+          desktopDetails={desktopDetails as AuditDetailTable | AuditDetailOpportunity}
           mobileDetails={mobileDetails as AuditDetailTable | AuditDetailOpportunity}
-          title={desktopAuditData.title || mobileAuditData.title}
+          title={title}
         />
       );
     case 'criticalrequestchain':
       return (
         <div>
           Critical Request Chain
-          <RenderCriticalChainData desktopDetails={desktopDetails} mobileDetails={mobileDetails as CriticalRequestChain} />
+          <RenderCriticalChainData desktopDetails={desktopDetails as CriticalRequestChain} mobileDetails={mobileDetails as CriticalRequestChain} />
         </div>
       );
     // Internal-only details, not for rendering.
     case 'screenshot':
       return null;
     case 'debugdata':
-      return <RenderDebugData desktopDebugData={desktopDetails} mobileDebugData={mobileDetails as DebugData} />;
+      return <RenderDebugData desktopDebugData={desktopDetails as DebugData} mobileDebugData={mobileDetails as DebugData} />;
     case 'treemap-data':
       return (
         <RenderJSONDetails
-          title={`${desktopDetails.type} Data`}
+          title={`${detailType} Data`}
           data={desktopAuditData}
           data2={mobileAuditData}
         />
       );
 
     default:
-      return <RenderUnknown details={desktopDetails} />;
+      return null;
+      // return <RenderUnknown details={desktopDetails} />;
   }
 }
 

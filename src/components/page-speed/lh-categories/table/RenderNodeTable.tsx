@@ -27,7 +27,7 @@ export function RenderNodeTable({
   }
 
   return (
-    <Details  className="w-full">
+    <Details  className="w-full @container">
       <summary className="flex flex-col gap-2">
         <div className="flex flex-col gap-2">
           <div className="text-lg font-bold">{title} details</div>
@@ -39,7 +39,7 @@ export function RenderNodeTable({
           return (
             <Card
               key={`item-${index}`}
-              className={cn("grid grid-cols-1 gap-2", {"md:grid-cols-[75%_25%]": info.length})}
+              className={cn("grid grid-cols-1 gap-2 w-full px-2", {"md:grid-cols-[75%_25%]": info.length})}
             >
               <div className="col-span-full p-2">
                 Form Factor: {getItemDevice(item, device)}

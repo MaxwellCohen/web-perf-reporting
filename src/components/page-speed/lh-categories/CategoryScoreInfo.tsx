@@ -5,10 +5,10 @@ export function CategoryScoreInfo({
     category,
     device,
   }: {
-    category: CategoryResult;
+    category?: CategoryResult | null;
     device: 'Mobile' | 'Desktop';
   }) {
-    if (!category.score) {
+    if (!category?.score) {
       return null;
     }
     return (

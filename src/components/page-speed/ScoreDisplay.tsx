@@ -36,21 +36,21 @@ export const ScoreDisplayModesRanking: Record<
   notApplicable: 8,
 } as const;
 
-export function isEmptyResult(auditData: AuditResultsRecord[string]) {
+export function isEmptyResult(auditData?: AuditResultsRecord[string]) {
   if (
-    auditData.details?.type === 'table' &&
-    auditData.details.items?.length === 0
+    auditData?.details?.type === 'table' &&
+    auditData?.details.items?.length === 0
   ) {
     return true;
   }
   if (
-    auditData.details?.type === 'opportunity' &&
-    auditData.details.items?.length === 0
+    auditData?.details?.type === 'opportunity' &&
+    auditData?.details.items?.length === 0
   ) {
     return true;
   }
 
-  return !auditData.details;
+  return !auditData?.details;
 }
 
 export const sortByScoreDisplayModes = (

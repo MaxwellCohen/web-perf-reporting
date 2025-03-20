@@ -21,9 +21,15 @@ export function CategoryAuditSection({
   desktopAuditRecords?: AuditResultsRecord;
   mobileAuditRecords?: AuditResultsRecord;
 }) {
-  if (!desktopCategory || !mobileCategory) {
+  if (!desktopCategory && !mobileCategory) {
     return null;
   }
+
+  const auditRefs = [...(desktopCategory?.auditRefs || []), ...(mobileCategory?.auditRefs || [])].filter(
+    (auditRef, index, arr) => arr.findIndex((a) => a.id === auditRef.id) === index,
+  );
+
+
   return (
     <Details className="flex flex-col gap-2">
       <summary className="flex flex-row justify-start gap-2 text-lg font-bold">
@@ -36,45 +42,27 @@ export function CategoryAuditSection({
         </div>
       </summary>
         <div className="w-full" role="table" aria-label="Audit Table">
-          {desktopCategory.auditRefs && desktopAuditRecords ? (
+          {auditRefs.length ? (
             <div>
-              {desktopCategory.auditRefs
+              {auditRefs
                 .filter((auditRef) => {
-                  if (!auditRef.id) {
+                 // should be an auditRef.id and not be metrics group
+                  if (!auditRef.id || auditRef.group === 'metrics') {
                     return false;
                   }
-                  if (auditRef.group === 'metrics') {
+                 
+                  const desktopAuditData = desktopAuditRecords?.[auditRef.id];
+                  const mobileAuditData = mobileAuditRecords?.[auditRef.id];
+                  
+                  if (!desktopAuditData && !mobileAuditData) {
                     return false;
                   }
-                  if (!auditRef.id) {
+                  const detailsType = desktopAuditData?.details?.type || mobileAuditData?.details?.type;
+
+                  if (detailsType === 'filmstrip') {
                     return false;
                   }
                   
-                  const desktopAuditData = desktopAuditRecords?.[auditRef.id];
-                  const mobileAuditData = mobileAuditRecords?.[auditRef.id];
-                  if (!desktopAuditData && !mobileAuditData) {
-                    return false;
-                  }
-                  if (
-                    desktopAuditData?.details?.type !==
-                    mobileAuditData?.details?.type
-                  ) {
-                    return false;
-                  }
-
-                  if (desktopAuditData?.details?.type === 'filmstrip') {
-                    return false;
-                  }
-                  if (!desktopAuditData && !mobileAuditData) {
-                    return false;
-                  }
-                  if (
-                    desktopAuditData?.details?.type !==
-                    mobileAuditData?.details?.type
-                  ) {
-                    return false;
-                  }
-
                   return true;
                 })
                 .sort((a, b) => {

@@ -15,7 +15,17 @@ export function useFetchPageSpeedData(
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
       revalidateIfStale: false,
-      isPaused: () => !defaultData,
+      isPaused: () => !!defaultData,
+      onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
+        console.log( error.message);
+        if (error.message === 'Data is not yet ready') {
+        // Retry after 5 seconds.
+        setTimeout(() => revalidate({ retryCount }), 5000)
+        } 
+        // Only retry up to 10 times.
+        if (retryCount >= 10) return
+     
+      }
     },
   );
 
@@ -40,8 +50,11 @@ async function fetcher(url: string, formFactor: string) {
   // If the status code is not in the range 200-299,
   // we still try to parse and throw it.
   if (!res.ok) {
-    const error = new Error('An error occurred while fetching the data.');
-    throw error;
+    const message = await res.text();
+    throw {
+      status: res.status,
+      message,
+    };
   }
 
   return res.json() as Promise<PageSpeedInsights>;

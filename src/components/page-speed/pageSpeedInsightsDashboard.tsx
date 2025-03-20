@@ -25,7 +25,7 @@ export function PageSpeedInsightsDashboard({
     <fullPageScreenshotContext.Provider
       value={{
         desktopFullPageScreenshot:
-          desktopData?.lighthouseResult.fullPageScreenshot,
+          desktopData?.lighthouseResult?.fullPageScreenshot,
         mobileFullPageScreenshot:
           mobileData?.lighthouseResult.fullPageScreenshot,
       }}
@@ -64,7 +64,7 @@ export function PageSpeedInsightsDashboard({
         desktopAuditRecords={desktopData?.lighthouseResult?.audits}
         mobileAuditRecords={mobileData?.lighthouseResult?.audits}
       />
-      <EntitiesTable entities={desktopData?.lighthouseResult?.entities} />
+      <EntitiesTable entities={desktopData?.lighthouseResult?.entities || mobileData?.lighthouseResult?.entities} />
     </fullPageScreenshotContext.Provider>
   );
 }

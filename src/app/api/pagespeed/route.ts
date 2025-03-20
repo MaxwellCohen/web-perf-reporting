@@ -14,9 +14,14 @@ export async function POST(request: NextRequest) {
     return  new Response('No formFactor provided', { status: 400 });
   }
 const data = await getSavedPageSpeedData(testURL, formFactor as 'DESKTOP' | 'MOBILE');
+console.log(data);
  if (!data) {
    return  new Response('No data found', { status: 404 });
  }  
- return Response.json(data);  
+ if (data.status !== 'COMPLETED') {
+   return  new Response('Data is not yet ready', { status: 404 });
+ }
+
+ return Response.json(data.data);  
 }
 

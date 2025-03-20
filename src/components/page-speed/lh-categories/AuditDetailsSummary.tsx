@@ -7,15 +7,15 @@ export function AuditDetailsSummary({
   mobileAuditData,
   acronym,
 }: {
-  desktopAuditData: AuditResultsRecord[string];
-  mobileAuditData: AuditResultsRecord[string];
+  desktopAuditData?: AuditResultsRecord[string];
+  mobileAuditData?: AuditResultsRecord[string];
   acronym?: string;
 }) {
   return (
     <div className="flex flex-1 flex-col flex-wrap gap-4 md:flex-row">
       <div className="flex flex-col gap-1 font-bold md:flex-[0_0_21rem]">
         <span className="underline">
-          {desktopAuditData.title} {acronym ? `(${acronym})` : ''}
+          {desktopAuditData?.title || mobileAuditData?.title || ''} {acronym ? `(${acronym})` : ''}
         </span>
         <ScoreDisplay audit={mobileAuditData} device={'Mobile'} />
         {/* {mobileAuditData.displayValue ? (
@@ -28,9 +28,9 @@ export function AuditDetailsSummary({
         ) : null} */}
         <SmallText
           text={
-            desktopAuditData.scoreDisplayMode === 'notApplicable'
+            desktopAuditData?.scoreDisplayMode === 'notApplicable'
               ? 'Not Applicable'
-              : desktopAuditData.scoreDisplayMode === 'manual'
+              : desktopAuditData?.scoreDisplayMode === 'manual'
                 ? 'Manual validation required'
                 : null
           }
@@ -38,7 +38,7 @@ export function AuditDetailsSummary({
       </div>
       <div className="align-top no-underline hover:no-underline focus:no-underline md:flex-1">
         <ReactMarkdown>
-          {desktopAuditData.description || mobileAuditData.description || ''}
+          {desktopAuditData?.description || mobileAuditData?.description || ''}
         </ReactMarkdown>
       </div>
     </div>

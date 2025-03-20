@@ -10,8 +10,8 @@ export function PageSpeedCategorySection({
 }: {
   desktopCategories?: Record<string, CategoryResult>;
   mobileCategories?: Record<string, CategoryResult>;
-  desktopAuditRecords: AuditResultsRecord | undefined;
-  mobileAuditRecords: AuditResultsRecord | undefined;
+  desktopAuditRecords?: AuditResultsRecord | undefined;
+  mobileAuditRecords?: AuditResultsRecord | undefined;
 }) {
   const categoryKeys = [
     ...new Set<string>([
@@ -25,15 +25,6 @@ export function PageSpeedCategorySection({
       desktopCategory: desktopCategories?.[key],
       mobileCategory: mobileCategories?.[key],
     }))
-    .filter(({ desktopCategory, mobileCategory }) => {
-      if (!desktopCategory && !mobileCategory) {
-        return false;
-      }
-      if (desktopCategory?.id && mobileCategory?.id) {
-        return desktopCategory.id === mobileCategory.id;
-      }
-      return true;
-    });
 
   return (
     <>

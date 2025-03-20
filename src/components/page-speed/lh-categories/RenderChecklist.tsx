@@ -15,21 +15,19 @@ export function RenderChecklist({
   mobileAuditData,
   title,
 }: {
-  desktopAuditData: AuditResultsRecord[string];
-  mobileAuditData: AuditResultsRecord[string];
+  desktopAuditData?: AuditResultsRecord[string];
+  mobileAuditData?: AuditResultsRecord[string];
   title: string;
 }) {
   const desktopDetails = AuditDetailChecklistSchema.safeParse(
-    desktopAuditData.details,
-  );
+    desktopAuditData?.details,
+  ).data;
   const mobileDetails = AuditDetailChecklistSchema.safeParse(
-    mobileAuditData.details,
-  );
-  if (!desktopDetails.success || !mobileDetails.success) {
-    return null;
-  }
-  const checklistItems = Object.keys(desktopDetails.data.items);
-  const mobileChecklistItems = Object.keys(mobileDetails.data.items);
+    mobileAuditData?.details,
+  ).data;
+  
+  const checklistItems = Object.keys(desktopDetails?.items || {});
+  const mobileChecklistItems = Object.keys(mobileDetails?.items || {});
   const allKeys = [...new Set([...checklistItems, ...mobileChecklistItems])];
 
   return (
@@ -48,8 +46,8 @@ export function RenderChecklist({
         </TableHeader>
         <TableBody>
           {allKeys.map((key) => {
-            const desktopItem = desktopDetails.data.items[key];
-            const mobileItem = mobileDetails.data.items[key];
+            const desktopItem = desktopDetails?.items[key];
+            const mobileItem = mobileDetails?.items[key];
             const label = desktopItem?.label || mobileItem?.label || '';
             return (
               <TableRow key={key}>

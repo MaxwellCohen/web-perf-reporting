@@ -13,10 +13,10 @@ export function RenderMetricSavings({
   mobileAuditData,
   desktopAuditData,
 }: {
-  mobileAuditData: AuditResultsRecord[string];
-  desktopAuditData: AuditResultsRecord[string];
+  mobileAuditData?: AuditResultsRecord[string];
+  desktopAuditData?: AuditResultsRecord[string];
 }) {
-  if (!mobileAuditData.metricSavings && !desktopAuditData.metricSavings) {
+  if (!mobileAuditData?.metricSavings && !desktopAuditData?.metricSavings) {
     return null;
   }
 
@@ -46,20 +46,24 @@ export function RenderMetricSavings({
         <TableHeader>
           <TableRow>
             <TableHead>Metric</TableHead>
-            <TableHead>Possible Mobile Savings</TableHead>
-            <TableHead>Possible Desktop Savings</TableHead>
+            {mobileTotalSavings ? (
+              <TableHead>Possible Mobile Savings</TableHead>
+            ) : null}
+            {desktopTotalSavings ? (
+              <TableHead>Possible Desktop Savings</TableHead>
+            ) : null}
           </TableRow>
         </TableHeader>
         <TableBody>
           {keys.map((metric) => (
             <TableRow key={metric}>
               <TableCell>{metric}</TableCell>
-              <TableCell>
-                {mobileAuditData?.metricSavings?.[metric] || 0}
-              </TableCell>
-              <TableCell>
-                {desktopAuditData?.metricSavings?.[metric] || 0}
-              </TableCell>
+              { mobileTotalSavings ?<TableCell>
+                {mobileAuditData?.metricSavings?.[metric] ?? 0}
+              </TableCell> : null}
+              {desktopTotalSavings ?<TableCell>
+                {desktopAuditData?.metricSavings?.[metric] ?? 0}
+              </TableCell> : null}
             </TableRow>
           ))}
         </TableBody>
