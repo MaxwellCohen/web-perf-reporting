@@ -3,6 +3,7 @@ import { updateURl } from '@/lib/utils';
 import { requestPageSpeedData } from '@/lib/services/pageSpeedInsights.service';
 import { PageSpeedInsightsDashboard } from '@/components/page-speed/pageSpeedInsightsDashboard';
 import { Suspense } from 'react';
+import { LoadingMessage } from './LoadingMessage';
 
 export default async function Home({
   searchParams,
@@ -20,7 +21,7 @@ export default async function Home({
       {!url ? (
         <UrlLookupForm />
       ) : (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<LoadingMessage />}>
           <PageSpeedInsightsDashboardWrapper url={url} />
         </Suspense>
 
