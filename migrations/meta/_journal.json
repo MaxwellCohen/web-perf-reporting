@@ -29,6 +29,13 @@
       "when": 1742154841248,
       "tag": "0003_illegal_iceman",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1742848730116,
+      "tag": "0004_brief_grandmaster",
+      "breakpoints": true
     }
   ]
 }

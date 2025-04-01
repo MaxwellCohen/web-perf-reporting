@@ -4,6 +4,35 @@ import { db } from '@/db';
 import { PageSpeedInsights } from '../schema';
 import { waitUntil } from '@vercel/functions';
 import { and, eq } from 'drizzle-orm';
+import { UTApi, UTFile } from 'uploadthing/server';
+
+export async function uploadJSONData(
+  url: string,
+  resultArray: (PageSpeedInsights | null)[],
+) {
+  // Convert object to string and then to Uint8Array
+  const jsonString = JSON.stringify(resultArray);
+  const bytes = new TextEncoder().encode(jsonString);
+
+  // Create compressed stream
+  const cs = new CompressionStream('gzip');
+  const writer = cs.writable.getWriter();
+  const compressed = cs.readable;
+
+  // Write and close
+  writer.write(bytes);
+  writer.close();
+
+  // Convert stream to blob
+  const blob = await new Response(compressed).blob();
+
+  const utapi = new UTApi();
+  const file = new UTFile([blob], `${url.replace(/[^a-zA-Z]/g, '')}.gz`, {
+    customId: Math.random().toString(),
+  });
+  const uploadResponse = await utapi.uploadFiles([file]);
+  return uploadResponse;
+}
 
 type formFactor = 'DESKTOP' | 'MOBILE';
 
@@ -12,37 +41,31 @@ export function getPageSpeedDataURl(testURL: string, formFactor: formFactor) {
     'https://www.googleapis.com/pagespeedonline/v5/runPagespeed',
   );
   baseurl.searchParams.append('url', encodeURI(testURL));
-  baseurl.searchParams.append('category', 'ACCESSIBILITY');
-  baseurl.searchParams.append('category', 'BEST_PRACTICES');
-  baseurl.searchParams.append('category', 'PERFORMANCE');
-  baseurl.searchParams.append('category', 'PWA');
-  baseurl.searchParams.append('category', 'SEO');
+  ['ACCESSIBILITY', 'BEST_PRACTICES', 'PERFORMANCE', 'PWA', 'SEO'].forEach(
+    (category) => baseurl.searchParams.append('category', category),
+  );
   baseurl.searchParams.append('key', process.env.PAGESPEED_INSIGHTS_API ?? '');
   if (formFactor) {
     baseurl.searchParams.append('strategy', formFactor);
   }
-
   return baseurl.toString();
 }
 
-export const getSavedPageSpeedData = async (
-  testURL: string,
-  formFactor: formFactor,
-) => {
+export const getSavedPageSpeedData = async (url: string) => {
   try {
-    const pageSpeedDataUrl = getPageSpeedDataURl(testURL, formFactor);
     const result = await db.query.PageSpeedInsightsTable.findFirst({
-      columns: { data: true, status: true },
+      columns: { status: true, jsonUrl: true },
       where: (PageSpeedInsightsTable, { eq, and, gt }) =>
         and(
-          eq(PageSpeedInsightsTable.url, pageSpeedDataUrl),
+          eq(PageSpeedInsightsTable.url, url),
           gt(
             PageSpeedInsightsTable.date,
             new Date(Date.now() - 6 * 60 * 60 * 1000),
           ),
         ),
     });
-    console.log(result);
+    console.log(result?.status);
+
     return result;
   } catch (error) {
     Sentry.captureException(error);
@@ -52,18 +75,17 @@ export const getSavedPageSpeedData = async (
 
 export const requestPageSpeedData = async (
   testURL: string | undefined,
-  formFactor: formFactor,
 ): Promise<PageSpeedInsights | null> => {
   try {
     if (!testURL) {
       return null;
     }
-    const savedData = (await getSavedPageSpeedData(testURL, formFactor))?.data;
+    const savedData = await getSavedPageSpeedData(testURL);
     if (savedData) {
-      return savedData;
+      return null;
     }
-
-    waitUntil(savePageSpeedData(testURL, formFactor));
+    const pageSpeedSaveProcess = savePageSpeedData(testURL);
+    waitUntil(pageSpeedSaveProcess);
     return null;
   } catch (error) {
     Sentry.captureException(error);
@@ -71,40 +93,92 @@ export const requestPageSpeedData = async (
   }
 };
 
-async function savePageSpeedData(testURL: string, formFactor: formFactor) {
+async function savePageSpeedData(url: string) {
+  const date = new Date(Date.now());
   try {
-    const pageSpeedDataUrl = getPageSpeedDataURl(testURL, formFactor);
-    const date = new Date(Date.now());
-    await db
-      .insert(PageSpeedInsightsTable)
-      .values({
-        url: pageSpeedDataUrl,
-        date,
-        status: 'PENDING',
-      })
-      .onConflictDoNothing()
-      .execute();
-      console.log('saving data!!!');
-    const response = await fetch(pageSpeedDataUrl);
-    if (!response.ok) {
-      return null;
+    await insertPendingMeasurement(url, date);
+
+    const data = await Promise.all([
+      fetchPageSpeedData(url, 'MOBILE'),
+      fetchPageSpeedData(url, 'DESKTOP'),
+    ]);
+
+    const uploadResponse = await uploadJSONData(url, data);
+
+    const uploadURL = uploadResponse[0]?.data?.ufsUrl;
+    if (!uploadURL) {
+      throw new Error('could not upload');
     }
-    const data = (await response.json()) as PageSpeedInsights;
-    if (!data) {
-      return;
-    }
-    console.log(data);
-    await db
-      .update(PageSpeedInsightsTable).set({
-        url: pageSpeedDataUrl,
-        date,
-        data: data,
-        status: 'COMPLETED',
-      }).where(and(eq(PageSpeedInsightsTable.url, pageSpeedDataUrl), eq(PageSpeedInsightsTable.status, 'PENDING'), eq(PageSpeedInsightsTable.date, date)))
-      
-      console.log('done saving data!!!');
+
+    await handleMeasurementSuccess(url, date, uploadURL);
   } catch (error) {
-    console.log(error);
-    Sentry.captureException(error);
+    await handleMeasurementFailure(error, url, date);
+    return null;
+  }
+}
+
+// New helper functions
+async function insertPendingMeasurement(url: string, date: Date) {
+  await db
+    .insert(PageSpeedInsightsTable)
+    .values({ url, date, status: 'PENDING' })
+    .onConflictDoNothing()
+    .execute();
+}
+
+async function fetchPageSpeedData(url: string, formFactor: formFactor) {
+  const pageSpeedDataUrl = getPageSpeedDataURl(url, formFactor);
+  const response = await fetch(pageSpeedDataUrl);
+  if (!response.ok) {
+    return null;
+  }
+  return response.json() as Promise<PageSpeedInsights>;
+}
+
+async function handleMeasurementSuccess(
+  url: string,
+  date: Date,
+
+  fileUrl: string | null,
+) {
+  await db
+    .update(PageSpeedInsightsTable)
+    .set({
+      url,
+      date,
+      status: 'COMPLETED',
+
+      jsonUrl: fileUrl,
+    })
+    .where(
+      and(
+        eq(PageSpeedInsightsTable.url, url),
+        eq(PageSpeedInsightsTable.status, 'PENDING'),
+        eq(PageSpeedInsightsTable.date, date),
+      ),
+    )
+    .execute();
+}
+
+async function handleMeasurementFailure(
+  error: unknown,
+  url: string,
+  date: Date,
+) {
+  Sentry.captureException(error);
+
+  try {
+    await db
+      .delete(PageSpeedInsightsTable)
+      .where(
+        and(
+          eq(PageSpeedInsightsTable.url, url),
+          eq(PageSpeedInsightsTable.status, 'PENDING'),
+          eq(PageSpeedInsightsTable.date, date),
+        ),
+      )
+      .execute();
+  } catch (dbError) {
+    Sentry.captureException(dbError);
   }
 }

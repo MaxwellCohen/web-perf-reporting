@@ -1,0 +1,1 @@
+ALTER TABLE `PageSpeedInsightsTable` ADD `jsonUrl` text;

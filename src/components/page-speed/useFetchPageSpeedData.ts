@@ -3,47 +3,46 @@ import { useSearchParams } from 'next/navigation';
 import useSWR from 'swr';
 
 export function useFetchPageSpeedData(
-  formFactor: string,
-  defaultData?: PageSpeedInsights,
-) {
+  defaultData?: (PageSpeedInsights | null | undefined)[],
+): (PageSpeedInsights | null | undefined)[]  {
+  const hasDefaultData = defaultData?.filter(Boolean).length;
   const searchParams = useSearchParams();
   const url = encodeURI(searchParams?.get('url') ?? '');
-  const { data } = useSWR(
-    [`/api/pagespeed`, url, formFactor],
-    () => fetcher(url, formFactor),
+  const { data } = useSWR<(PageSpeedInsights | undefined | null)[]>(
+    [`/api/pagespeed`, url],
+    () => fetcher(url),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
       revalidateIfStale: false,
-      isPaused: () => !!defaultData,
+      isPaused: () => !!hasDefaultData,
       onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
-        console.log( error.message);
+        console.log(error.message);
         if (error.message === 'Data is not yet ready') {
-        // Retry after 5 seconds.
-        setTimeout(() => revalidate({ retryCount }), 5000)
-        } 
+          // Retry after 5 seconds.
+          setTimeout(() => revalidate({ retryCount }), 5000);
+        }
         // Only retry up to 10 times.
-        if (retryCount >= 10) return
-     
-      }
+        if (retryCount >= 10) return;
+      },
     },
   );
 
-  if (defaultData) {
+  if (hasDefaultData) {
     return defaultData;
   }
-  return data;
+return data ?? [null, null];
 }
 
-async function fetcher(url: string, formFactor: string) {
+async function fetcher(url: string): Promise<(PageSpeedInsights | null | undefined)[]> {
   const res = await fetch('/api/pagespeed', {
+    mode: 'no-cors',
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       testURL: url,
-      formFactor: formFactor,
     }),
   });
 
@@ -56,6 +55,28 @@ async function fetcher(url: string, formFactor: string) {
       message,
     };
   }
+  const urlObj = await res.json();
+  if (!urlObj?.url) {
+    throw new Error('No data found');
+  }
+  return fetchAndDecompress(urlObj?.url);
+  
+}
 
-  return res.json() as Promise<PageSpeedInsights>;
+async function fetchAndDecompress(url: string): Promise<(PageSpeedInsights | null | undefined)[]> {
+  const compressedFetch = await fetch(url ?? '');
+  if (!compressedFetch.ok) {
+    return [null, null];
+  }
+
+  const compressedStream = compressedFetch.body;
+  if (!compressedStream) {
+    return [null, null];
+  }
+  const decompressionStream = new DecompressionStream('gzip');
+  const decompressedStream = compressedStream.pipeThrough(decompressionStream);
+  return JSON.parse(
+    await new Response(decompressedStream).text(),
+  );
+
 }

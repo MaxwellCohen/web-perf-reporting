@@ -15,8 +15,7 @@ export function PageSpeedInsightsDashboard({
   mobileDataPrams?: PageSpeedInsights;
   desktopDataPrams?: PageSpeedInsights;
 }) {
-  const mobileData = useFetchPageSpeedData('MOBILE', mobileDataPrams);
-  const desktopData = useFetchPageSpeedData('DESKTOP', desktopDataPrams);
+  const[mobileData, desktopData]= useFetchPageSpeedData([mobileDataPrams, desktopDataPrams]);
   if (!desktopData && !mobileData) {
     return <div>Loading...</div>;
   }
