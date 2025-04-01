@@ -2,6 +2,7 @@ import { UrlLookupForm } from '@/components/common/UrlLookupForm';
 import { updateURl } from '@/lib/utils';
 import { requestPageSpeedData } from '@/lib/services/pageSpeedInsights.service';
 import { PageSpeedInsightsDashboard } from '@/components/page-speed/pageSpeedInsightsDashboard';
+import { Suspense } from 'react';
 
 export default async function Home({
   searchParams,
@@ -10,8 +11,7 @@ export default async function Home({
 }) {
   const params = await searchParams;
   const url = updateURl(params.url as string);
-  const data = await requestPageSpeedData(url);
-  console.log('data', data);
+
   return (
     <div className='max-w-screen-2xl mx-auto'>
       <h1 className="mx-auto text-center text-2xl font-extrabold">
@@ -20,11 +20,24 @@ export default async function Home({
       {!url ? (
         <UrlLookupForm />
       ) : (
-        <PageSpeedInsightsDashboard
-          mobileDataPrams={data[0] ?? undefined}
-          desktopDataPrams={data[1] ?? undefined}
-        />
+        <Suspense fallback={<div>Loading...</div>}>
+          <PageSpeedInsightsDashboardWrapper url={url} />
+        </Suspense>
+
       )}
     </div>
   );
+}
+
+
+async function PageSpeedInsightsDashboardWrapper({
+  url,
+}: {
+  url : string;
+}) {
+  const data = await requestPageSpeedData(url);
+  return <PageSpeedInsightsDashboard
+  mobileDataPrams={data[0] ?? undefined}
+  desktopDataPrams={data[1] ?? undefined}
+/>
 }

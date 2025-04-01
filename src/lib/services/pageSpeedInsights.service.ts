@@ -4,7 +4,7 @@ import { db } from '@/db';
 import { PageSpeedInsights } from '../schema';
 import { and, eq } from 'drizzle-orm';
 import { UTApi, UTFile } from 'uploadthing/server';
-import { stringify } from 'zipson';
+import { stringify, parse } from 'zipson';
 
 export async function uploadJSONData(
   url: string,
@@ -65,6 +65,9 @@ export const getSavedPageSpeedData = async (url: string) => {
         ),
     });
     console.log(result?.status);
+    if (typeof result?.data === 'string') {
+      result.data = parse(result.data);
+    }
     return result;
   } catch (error) {
     Sentry.captureException(error);
@@ -80,7 +83,7 @@ export const requestPageSpeedData = async (
       return [null, null];
     }
     const savedData = await getSavedPageSpeedData(testURL);
-    if (savedData?.status === 'COMPLETED') {
+    if (savedData?.status === 'COMPLETED' && Array.isArray(savedData.data)) {
       return savedData.data ?? [null, null];
     }
     const pageSpeedSaveProcess = await savePageSpeedData(testURL);
@@ -141,7 +144,7 @@ async function handleMeasurementSuccess(
       url,
       date,
       status: 'COMPLETED',
-      data,
+      data: stringify(data),
     })
     .where(
       and(

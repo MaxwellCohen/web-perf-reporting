@@ -33,7 +33,7 @@ export const PageSpeedInsightsTable = t.sqliteTable('PageSpeedInsightsTable', {
   date: t.integer({ mode: 'timestamp' }),
   status: t.text(),
   jsonUrl: t.text(),
-  data: t.blob({mode: 'json'}).$type<(PageSpeedInsights | null | null)[]>(), 
+  data: t.blob({mode: 'json'}).$type<(PageSpeedInsights | null | null)[]|string>(), 
 },
 (table) => [
   t.index('PageSpeedInsightsTable_index1').on(table.url),

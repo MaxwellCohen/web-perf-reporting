@@ -15,6 +15,7 @@ import {
   HistoricalPerformanceCard,
 } from './HistoricalPerformanceCard';
 import { PercentTable } from '../common/FormFactorPercentPieChart';
+import { Details } from '../ui/accordion';
 
 export function HistoricalDashboard({
   reportMap,
@@ -40,11 +41,12 @@ export function HistoricalDashboard({
   const endDate = reports.at(-1)?.record?.collectionPeriod.lastDate;
   return (
     <CurrentPerformanceChartContext.Provider value={ChartType}>
-      <h2 className="text-xl">
+      <Details>
+      <summary  className="flex flex-col gap-2 p-2"><h2 className="text-xl">
         Historical CrUX Report for
         {firstDate ? ` ${formatDate(firstDate)}` : null}{' '}
         {firstDate && endDate ? ` to ${formatDate(endDate)}` : null}
-      </h2>
+      </h2></summary>
       <PerformanceOptions
         setChartType={setChartType}
         setReportScope={setReportScope}
@@ -85,6 +87,7 @@ export function HistoricalDashboard({
           histogramData={groupedMetics?.round_trip_time}
         />
       </div>
+      </Details>
     </CurrentPerformanceChartContext.Provider>
   );
 }
