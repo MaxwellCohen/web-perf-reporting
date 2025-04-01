@@ -10,8 +10,8 @@ export default async function Home({
 }) {
   const params = await searchParams;
   const url = updateURl(params.url as string);
-  await requestPageSpeedData(url);
-
+  const data = await requestPageSpeedData(url);
+  console.log('data', data);
   return (
     <div className='max-w-screen-2xl mx-auto'>
       <h1 className="mx-auto text-center text-2xl font-extrabold">
@@ -21,8 +21,8 @@ export default async function Home({
         <UrlLookupForm />
       ) : (
         <PageSpeedInsightsDashboard
-          mobileDataPrams={undefined}
-          desktopDataPrams={undefined}
+          mobileDataPrams={data[0] ?? undefined}
+          desktopDataPrams={data[1] ?? undefined}
         />
       )}
     </div>

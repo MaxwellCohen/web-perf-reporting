@@ -2,29 +2,29 @@ import * as Sentry from '@sentry/nextjs';
 import { PageSpeedInsightsTable } from '@/db/schema';
 import { db } from '@/db';
 import { PageSpeedInsights } from '../schema';
-import { waitUntil } from '@vercel/functions';
 import { and, eq } from 'drizzle-orm';
 import { UTApi, UTFile } from 'uploadthing/server';
+import { stringify } from 'zipson';
 
 export async function uploadJSONData(
   url: string,
   resultArray: (PageSpeedInsights | null)[],
 ) {
-  // Convert object to string and then to Uint8Array
-  const jsonString = JSON.stringify(resultArray);
-  const bytes = new TextEncoder().encode(jsonString);
+  // // Convert object to string and then to Uint8Array
+  // const jsonString = JSON.stringify(resultArray);
+  // const bytes = new TextEncoder().encode(jsonString);
 
-  // Create compressed stream
-  const cs = new CompressionStream('gzip');
-  const writer = cs.writable.getWriter();
-  const compressed = cs.readable;
+  // // Create compressed stream
+  // const cs = new CompressionStream('gzip');
+  // const writer = cs.writable.getWriter();
+  // const compressed = cs.readable;
 
-  // Write and close
-  writer.write(bytes);
-  writer.close();
+  // // Write and close
+  // writer.write(bytes);
+  // writer.close();
 
   // Convert stream to blob
-  const blob = await new Response(compressed).blob();
+  const blob = await new Response(stringify(resultArray)).blob();
 
   const utapi = new UTApi();
   const file = new UTFile([blob], `${url.replace(/[^a-zA-Z]/g, '')}.gz`, {
@@ -54,7 +54,7 @@ export function getPageSpeedDataURl(testURL: string, formFactor: formFactor) {
 export const getSavedPageSpeedData = async (url: string) => {
   try {
     const result = await db.query.PageSpeedInsightsTable.findFirst({
-      columns: { status: true, jsonUrl: true },
+      columns: { status: true,  data: true },
       where: (PageSpeedInsightsTable, { eq, and, gt }) =>
         and(
           eq(PageSpeedInsightsTable.url, url),
@@ -65,7 +65,6 @@ export const getSavedPageSpeedData = async (url: string) => {
         ),
     });
     console.log(result?.status);
-
     return result;
   } catch (error) {
     Sentry.captureException(error);
@@ -75,21 +74,21 @@ export const getSavedPageSpeedData = async (url: string) => {
 
 export const requestPageSpeedData = async (
   testURL: string | undefined,
-): Promise<PageSpeedInsights | null> => {
+): Promise<(PageSpeedInsights | null | undefined)[]> => {
   try {
     if (!testURL) {
-      return null;
+      return [null, null];
     }
     const savedData = await getSavedPageSpeedData(testURL);
-    if (savedData) {
-      return null;
+    if (savedData?.status === 'COMPLETED') {
+      return savedData.data ?? [null, null];
     }
-    const pageSpeedSaveProcess = savePageSpeedData(testURL);
-    waitUntil(pageSpeedSaveProcess);
-    return null;
+    const pageSpeedSaveProcess = await savePageSpeedData(testURL);
+    console.log('data loaded', pageSpeedSaveProcess)
+    return pageSpeedSaveProcess;
   } catch (error) {
     Sentry.captureException(error);
-    return null;
+    return [null, null];
   }
 };
 
@@ -102,18 +101,14 @@ async function savePageSpeedData(url: string) {
       fetchPageSpeedData(url, 'MOBILE'),
       fetchPageSpeedData(url, 'DESKTOP'),
     ]);
-
-    const uploadResponse = await uploadJSONData(url, data);
-
-    const uploadURL = uploadResponse[0]?.data?.ufsUrl;
-    if (!uploadURL) {
-      throw new Error('could not upload');
-    }
-
-    await handleMeasurementSuccess(url, date, uploadURL);
+    console.log('data fetched', data)
+    // const uploadResponse = await uploadJSONData(url, data);
+    await handleMeasurementSuccess(url, date, data);
+    return data;
   } catch (error) {
+    console.log('error', error);
     await handleMeasurementFailure(error, url, date);
-    return null;
+    return [null, null];
   }
 }
 
@@ -138,8 +133,7 @@ async function fetchPageSpeedData(url: string, formFactor: formFactor) {
 async function handleMeasurementSuccess(
   url: string,
   date: Date,
-
-  fileUrl: string | null,
+  data: (PageSpeedInsights | null | null)[],
 ) {
   await db
     .update(PageSpeedInsightsTable)
@@ -147,8 +141,7 @@ async function handleMeasurementSuccess(
       url,
       date,
       status: 'COMPLETED',
-
-      jsonUrl: fileUrl,
+      data,
     })
     .where(
       and(

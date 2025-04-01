@@ -5,17 +5,17 @@ import { EntitiesTable } from './EntitiesTable';
 import { CWVMetricsComponent } from './CWVMetricsComponent';
 import { PageSpeedCategorySection } from './lh-categories/PageSpeedCategorySection';
 import { fullPageScreenshotContext } from './PageSpeedContext';
-import { useFetchPageSpeedData } from './useFetchPageSpeedData';
+// import { useFetchPageSpeedData } from './useFetchPageSpeedData';
 import { RenderPageSpeedInsights } from './RenderPageSpeedInsights';
 
 export function PageSpeedInsightsDashboard({
-  mobileDataPrams,
-  desktopDataPrams,
+  mobileDataPrams: mobileData,
+  desktopDataPrams: desktopData,
 }: {
   mobileDataPrams?: PageSpeedInsights;
   desktopDataPrams?: PageSpeedInsights;
 }) {
-  const[mobileData, desktopData]= useFetchPageSpeedData([mobileDataPrams, desktopDataPrams]);
+  // const[mobileData, desktopData]= useFetchPageSpeedData([mobileDataPrams, desktopDataPrams]);
   if (!desktopData && !mobileData) {
     return <div>Loading...</div>;
   }
