@@ -9,6 +9,9 @@ import {
 import { CategoryScoreInfo } from './CategoryScoreInfo';
 import { AuditDetailsSection } from './AuditDetailsSection';
 
+
+const AuditRefsToHide = ['final-screenshot', 'script-treemap-data'];
+
 export function CategoryAuditSection({
   mobileCategory,
   desktopCategory,
@@ -47,10 +50,11 @@ export function CategoryAuditSection({
               {auditRefs
                 .filter((auditRef) => {
                  // should be an auditRef.id and not be metrics group
-                  if (!auditRef.id || auditRef.group === 'metrics') {
+                  if (!auditRef.id || auditRef.group === 'metrics' || AuditRefsToHide.includes(auditRef.id) ) {
                     return false;
                   }
                  
+                  
                   const desktopAuditData = desktopAuditRecords?.[auditRef.id];
                   const mobileAuditData = mobileAuditRecords?.[auditRef.id];
                   
