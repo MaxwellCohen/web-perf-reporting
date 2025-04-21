@@ -32,7 +32,8 @@ export const getHistoricalCruxData = async ({
         body: JSON.stringify({ 
           url: url || undefined, 
           formFactor: formFactor || undefined, 
-          origin: origin || undefined 
+          origin: origin || undefined, 
+          collectionPeriodCount: 40
         }),
         method: 'POST',
         headers: {
