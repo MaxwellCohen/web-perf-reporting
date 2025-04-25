@@ -273,6 +273,10 @@ export type AuditRef = z.infer<typeof auditRefSchema>;
 
 export type DebugData = {
   type: 'debugdata';
+  details:{
+    items: Array<Record<string, string | number>>;
+    [key: string]: unknown;
+  };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [p: string]: any;
 };

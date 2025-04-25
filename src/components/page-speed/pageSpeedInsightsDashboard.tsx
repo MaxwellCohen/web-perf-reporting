@@ -6,7 +6,8 @@ import { CWVMetricsComponent } from './CWVMetricsComponent';
 import { PageSpeedCategorySection } from './lh-categories/PageSpeedCategorySection';
 import { fullPageScreenshotContext } from './PageSpeedContext';
 // import { useFetchPageSpeedData } from './useFetchPageSpeedData';
-import { RenderPageSpeedInsights } from './RenderPageSpeedInsights';
+import { RenderFilmStrip } from './RenderFilmStrip';
+import { CWVMetricsSummary } from './CWVMetricsSummary';
 
 export function PageSpeedInsightsDashboard({
   mobileDataPrams: mobileData,
@@ -47,13 +48,18 @@ export function PageSpeedInsightsDashboard({
         experienceDesktop={desktopData?.originLoadingExperience}
         experienceMobile={mobileData?.originLoadingExperience}
       />
+
       <CWVMetricsComponent
         desktopCategoryGroups={desktopData?.lighthouseResult?.categoryGroups}
         desktopAudits={desktopData?.lighthouseResult?.audits}
         mobileCategoryGroups={mobileData?.lighthouseResult?.categoryGroups}
         mobileAudits={mobileData?.lighthouseResult?.audits}
       />
-      <RenderPageSpeedInsights
+      <CWVMetricsSummary
+        desktopData={desktopData}
+        mobileData={mobileData}
+      />
+      <RenderFilmStrip
         desktopData={desktopData}
         mobileData={mobileData}
       />

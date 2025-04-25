@@ -3,7 +3,7 @@ import { PageSpeedInsights, AuditDetailFilmstripSchema } from '@/lib/schema';
 import { Details } from '../ui/accordion';
 import { Timeline } from './Timeline';
 
-export function RenderPageSpeedInsights({
+export function RenderFilmStrip({
   desktopData, mobileData,
 }: {
   desktopData?: PageSpeedInsights | null;
@@ -16,7 +16,7 @@ export function RenderPageSpeedInsights({
     mobileData?.lighthouseResult?.audits?.['screenshot-thumbnails'].details
   ).data;
 
-  if (!DesktopTimeline || !MobileTimeline) return null;
+  if (!DesktopTimeline && !MobileTimeline) return null;
 
   return (
     <Details className="flex flex-col flex-wrap gap-2">
