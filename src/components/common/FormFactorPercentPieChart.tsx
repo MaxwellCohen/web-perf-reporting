@@ -110,8 +110,7 @@ export function PercentTable({
           {entries.map(([label]) => {
             return (
               <TableHead key={label} className="h-4">
-                {' '}
-                {toSentenceCase(label)}{' '}
+                {toSentenceCase(label)}
               </TableHead>
             );
           })}
