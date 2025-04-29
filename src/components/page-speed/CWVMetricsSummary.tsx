@@ -12,6 +12,8 @@ import { renderBoolean } from './lh-categories/renderBoolean';
 import { camelCaseToSentenceCase } from './lh-categories/camelCaseToSentenceCase';
 import { Card, CardHeader } from '../ui/card';
 import { Details } from '../ui/accordion';
+import { RenderBytesValue, RenderMSValue } from './lh-categories/table/RenderTableValue';
+import { JSX } from 'react';
 
 export function CWVMetricsSummary({
   desktopData,
@@ -38,6 +40,15 @@ export function CWVMetricsSummary({
     return null;
   }
 
+  const CWV = [
+    'cumulativeLayoutShift',
+    'cumulativeLayoutShiftMainFrame',
+    'firstContentfulPaint',
+    'largestContentfulPaint',
+    'interactive',
+    'totalBlockingTime',
+  ]
+  
   const taskKeys = [
     'numTasksOver10ms',
     'numTasksOver25ms',
@@ -52,42 +63,91 @@ export function CWVMetricsSummary({
     'numFonts',
     'numScripts',
     'numStylesheets',
+    'mainDocumentTransferSize',
+    'totalByteWeight',
   ];
 
-  const requestKeys = [
-    'numFonts',
-    'numScripts',
-    'numStylesheets',
-    'numRequests',
-  ];
+  const LCPInfo = [
+    'lcpLoadStart',
+    'lcpLoadEnd',
+    'lcpInvalidated',
+  ]
 
+  const timmingInfo = [
+    'firstContentfulPaint',
+    'firstContentfulPaintAllFrames',
+    'maxPotentialFID',  
+    'totalBlockingTime',
+    'largestContentfulPaint',
+    'speedIndex',
+    'interactive',
+  ];
+  const ObservedEvents = [
+    'observedNavigationStart',
+    'observedFirstPaint',
+    'observedFirstContentfulPaint',
+    'observedFirstContentfulPaintAllFrames',
+    'observedLargestContentfulPaint',
+    'observedLargestContentfulPaintAllFrames',
+    'observedTraceEnd',
+    'observedLoad',
+    'observedDomContentLoaded',
+  ]
   return (
     <Details>
       <summary className='flex flex-col gap-2'>
         <h3 className="text-xl font-semibold">Summary Metrics</h3>
         </summary>
-      <div className="flex flex-1 gap-3 py-3 md:basis-1/3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 py-3 ">
+        <RenderTable
+          mobileItems={mobileItems}
+          desktopItems={desktopItems}
+          keys={CWV}
+          title={'Core Web Vitals'}
+          formatter={(v) => `${v }`}
+        />
         <RenderTable
           mobileItems={mobileItems}
           desktopItems={desktopItems}
           keys={taskKeys}
           title={'Number of tasks'}
-          formatter={(v) => `${v || ''}`}
+          formatter={(v) => `${v}`}
         />
         <RenderTable
           mobileItems={mobileItems}
           desktopItems={desktopItems}
           keys={resourceKeys}
           title={'Resource Info'}
-          formatter={(v) => `${v || ''}`}
+          formatter={(v, key) => ['mainDocumentTransferSize','totalByteWeight'].includes(key as string) ? RenderBytesValue({value: v}): `${v}`}
         />
         <RenderTable
           mobileItems={mobileItems}
           desktopItems={desktopItems}
-          keys={requestKeys}
-          title={'Request Info'}
-          formatter={(v) => `${v || ''}`}
+          keys={LCPInfo}
+          title={'LCP info'}
+          formatter={(v) => {
+            return typeof v === 'boolean' ? renderBoolean(v) : RenderMSValue({value: v});
+          } }
         />
+        <RenderTable
+          mobileItems={mobileItems}
+          desktopItems={desktopItems}
+          keys={timmingInfo}
+          title={'Timings info'}
+          formatter={(v) => {
+            return  RenderMSValue({value: v});
+          } }
+        />
+        <RenderTable
+          mobileItems={mobileItems}
+          desktopItems={desktopItems}
+          keys={ObservedEvents}
+          title={'Observed Events'}
+          formatter={(v) => {
+            return  RenderMSValue({value: v});
+          } }
+        />
+ 
       </div>
     </Details>
   );
@@ -104,13 +164,13 @@ function RenderTable({
   desktopItems: Record<string, string | number>;
   keys: string[];
   title: string;
-  formatter: (item: unknown, key?: string) => string;
+  formatter: (item: unknown, key?: string) => string | JSX.Element;
 }) {
   const mobileKeys = Object.keys(mobileItems).filter((k) => keys.includes(k));
   const desktopKeys = Object.keys(desktopItems).filter((k) => keys.includes(k));
 
   return (
-    <Card className="w-full">
+    <Card className="min-w-1/3">
       <CardHeader className="text-center text-2xl font-bold">
         {title}
       </CardHeader>
@@ -166,26 +226,10 @@ function mergeData(auditData?: PageSpeedInsights) {
   return mergedData;
 }
 
-function renderItem(item: unknown) {
-  if (typeof item === 'string') {
-    return item;
-  }
-  if (typeof item === 'number') {
-    return item.toFixed(2);
-  }
-  if (typeof item === 'boolean') {
-    return renderBoolean(item);
-  }
-  return '';
-}
-
 const TitleMap: Record<string, { label: string; sortOrder: number }> = {
   // Core Web Vitals
   cumulativeLayoutShift: { label: 'Cumulative Layout Shift', sortOrder: 1 },
-  cumulativeLayoutShiftMainFrame: {
-    label: 'Cumulative Layout Shift (Main Frame)',
-    sortOrder: 2,
-  },
+  cumulativeLayoutShiftMainFrame: {label: 'Cumulative Layout Shift (Main Frame)', sortOrder: 2 },
   firstContentfulPaint: { label: 'First Contentful Paint', sortOrder: 3 },
   largestContentfulPaint: { label: 'Largest Contentful Paint', sortOrder: 4 },
   interactive: { label: 'Interactive', sortOrder: 5 },

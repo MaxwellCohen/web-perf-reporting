@@ -294,7 +294,7 @@ function RenderDefault({
   );
 }
 
-function RenderBytesValue({
+export function RenderBytesValue({
   value,
   ...props
 }: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
@@ -370,8 +370,11 @@ export function renderTimeValue(ms: number) {
 
 }
 
-function RenderMSValue({ value, ...props }: { value: unknown }& React.HTMLAttributes<HTMLElement>) {
+export function RenderMSValue({ value, ...props }: { value: unknown }& React.HTMLAttributes<HTMLElement>) {
   const ms = Number(value);
+  if(Number.isNaN(ms)) {
+    return <div title="ms" {...props} className={cn('', props.className)}>N/A</div>;
+  }
   if (ms < 1000) {
     return <div title="ms" {...props} className={cn('', props.className)}>{ms.toFixed(0)} ms</div>;
   }
