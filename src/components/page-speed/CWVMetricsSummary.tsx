@@ -73,7 +73,7 @@ export function CWVMetricsSummary({
     'lcpInvalidated',
   ]
 
-  const timmingInfo = [
+  const timingInfo = [
     'firstContentfulPaint',
     'firstContentfulPaintAllFrames',
     'maxPotentialFID',  
@@ -87,8 +87,6 @@ export function CWVMetricsSummary({
     'observedFirstPaint',
     'observedFirstContentfulPaint',
     'observedFirstContentfulPaintAllFrames',
-    'observedLargestContentfulPaint',
-    'observedLargestContentfulPaintAllFrames',
     'observedTraceEnd',
     'observedLoad',
     'observedDomContentLoaded',
@@ -133,7 +131,7 @@ export function CWVMetricsSummary({
         <RenderTable
           mobileItems={mobileItems}
           desktopItems={desktopItems}
-          keys={timmingInfo}
+          keys={timingInfo}
           title={'Timings info'}
           formatter={(v) => {
             return  RenderMSValue({value: v});
