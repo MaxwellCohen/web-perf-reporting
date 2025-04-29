@@ -104,7 +104,8 @@ export function CWVMetricsSummary({
           desktopItems={desktopItems}
           keys={CWV}
           title={'Core Web Vitals'}
-          formatter={(v) => `${v }`}
+          formatter={(v, k) => ([    'cumulativeLayoutShift',
+            'cumulativeLayoutShiftMainFrame'].includes(k as string)? `${v }`: RenderMSValue({value: v}))}
         />
         <RenderTable
           mobileItems={mobileItems}
