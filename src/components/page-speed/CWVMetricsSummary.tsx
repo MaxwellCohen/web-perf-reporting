@@ -1,5 +1,5 @@
 'use client';
-import { DebugData, PageSpeedInsights } from '@/lib/schema';
+import { AuditDetailTable, DebugData, PageSpeedInsights } from '@/lib/schema';
 import {
   Table,
   TableBody,
@@ -12,8 +12,60 @@ import { renderBoolean } from './lh-categories/renderBoolean';
 import { camelCaseToSentenceCase } from './lh-categories/camelCaseToSentenceCase';
 import { Card, CardHeader } from '../ui/card';
 import { Details } from '../ui/accordion';
-import { RenderBytesValue, RenderMSValue } from './lh-categories/table/RenderTableValue';
-import { JSX } from 'react';
+import {
+  RenderBytesValue,
+  RenderMSValue,
+} from './lh-categories/table/RenderTableValue';
+import { Fragment, JSX } from 'react';
+import { groupBy } from '@/lib/utils';
+
+const CWV = [
+  'cumulativeLayoutShift',
+  'cumulativeLayoutShiftMainFrame',
+  'firstContentfulPaint',
+  'largestContentfulPaint',
+  'interactive',
+  'totalBlockingTime',
+];
+
+const taskKeys = [
+  'numTasksOver10ms',
+  'numTasksOver25ms',
+  'numTasksOver50ms',
+  'numTasksOver100ms',
+  'numTasksOver500ms',
+  'numTasks',
+];
+
+const resourceKeys = [
+  'numRequests',
+  'numFonts',
+  'numScripts',
+  'numStylesheets',
+  'mainDocumentTransferSize',
+  'totalByteWeight',
+];
+
+const LCPInfo = ['lcpLoadStart', 'lcpLoadEnd', 'lcpInvalidated'];
+
+const timingInfo = [
+  'firstContentfulPaint',
+  'firstContentfulPaintAllFrames',
+  'maxPotentialFID',
+  'totalBlockingTime',
+  'largestContentfulPaint',
+  'speedIndex',
+  'interactive',
+];
+const ObservedEvents = [
+  'observedNavigationStart',
+  'observedFirstPaint',
+  'observedFirstContentfulPaint',
+  'observedFirstContentfulPaintAllFrames',
+  'observedTraceEnd',
+  'observedLoad',
+  'observedDomContentLoaded',
+];
 
 export function CWVMetricsSummary({
   desktopData,
@@ -40,70 +92,25 @@ export function CWVMetricsSummary({
     return null;
   }
 
-  const CWV = [
-    'cumulativeLayoutShift',
-    'cumulativeLayoutShiftMainFrame',
-    'firstContentfulPaint',
-    'largestContentfulPaint',
-    'interactive',
-    'totalBlockingTime',
-  ]
-  
-  const taskKeys = [
-    'numTasksOver10ms',
-    'numTasksOver25ms',
-    'numTasksOver50ms',
-    'numTasksOver100ms',
-    'numTasksOver500ms',
-    'numTasks',
-  ];
-
-  const resourceKeys = [
-    'numRequests',
-    'numFonts',
-    'numScripts',
-    'numStylesheets',
-    'mainDocumentTransferSize',
-    'totalByteWeight',
-  ];
-
-  const LCPInfo = [
-    'lcpLoadStart',
-    'lcpLoadEnd',
-    'lcpInvalidated',
-  ]
-
-  const timingInfo = [
-    'firstContentfulPaint',
-    'firstContentfulPaintAllFrames',
-    'maxPotentialFID',  
-    'totalBlockingTime',
-    'largestContentfulPaint',
-    'speedIndex',
-    'interactive',
-  ];
-  const ObservedEvents = [
-    'observedNavigationStart',
-    'observedFirstPaint',
-    'observedFirstContentfulPaint',
-    'observedFirstContentfulPaintAllFrames',
-    'observedTraceEnd',
-    'observedLoad',
-    'observedDomContentLoaded',
-  ]
   return (
     <Details>
-      <summary className='flex flex-col gap-2'>
+      <summary className="flex flex-col gap-2">
         <h3 className="text-xl font-semibold">Summary Metrics</h3>
-        </summary>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 py-3 ">
+      </summary>
+      <div className="grid grid-cols-1 gap-3 py-3 sm:grid-cols-2 lg:grid-cols-3">
         <RenderTable
           mobileItems={mobileItems}
           desktopItems={desktopItems}
           keys={CWV}
           title={'Core Web Vitals'}
-          formatter={(v, k) => ([    'cumulativeLayoutShift',
-            'cumulativeLayoutShiftMainFrame'].includes(k as string)? `${v }`: RenderMSValue({value: v}))}
+          formatter={(v, k) =>
+            [
+              'cumulativeLayoutShift',
+              'cumulativeLayoutShiftMainFrame',
+            ].includes(k as string)
+            ? `${v}`
+            : RenderMSValue({ value: v })
+          }
         />
         <RenderTable
           mobileItems={mobileItems}
@@ -112,21 +119,17 @@ export function CWVMetricsSummary({
           title={'Number of tasks'}
           formatter={(v) => `${v}`}
         />
-        <RenderTable
-          mobileItems={mobileItems}
-          desktopItems={desktopItems}
-          keys={resourceKeys}
-          title={'Resource Info'}
-          formatter={(v, key) => ['mainDocumentTransferSize','totalByteWeight'].includes(key as string) ? RenderBytesValue({value: v}): `${v}`}
-        />
+
         <RenderTable
           mobileItems={mobileItems}
           desktopItems={desktopItems}
           keys={LCPInfo}
           title={'LCP info'}
           formatter={(v) => {
-            return typeof v === 'boolean' ? renderBoolean(v) : RenderMSValue({value: v});
-          } }
+            return typeof v === 'boolean'
+              ? renderBoolean(v)
+              : RenderMSValue({ value: v });
+          }}
         />
         <RenderTable
           mobileItems={mobileItems}
@@ -134,8 +137,8 @@ export function CWVMetricsSummary({
           keys={timingInfo}
           title={'Timings info'}
           formatter={(v) => {
-            return  RenderMSValue({value: v});
-          } }
+            return RenderMSValue({ value: v });
+          }}
         />
         <RenderTable
           mobileItems={mobileItems}
@@ -143,14 +146,109 @@ export function CWVMetricsSummary({
           keys={ObservedEvents}
           title={'Observed Events'}
           formatter={(v) => {
-            return  RenderMSValue({value: v});
-          } }
+            return RenderMSValue({ value: v });
+          }}
         />
- 
+                <RenderNetworkRequestsSummary desktopData={desktopData} mobileData={mobileData} />
+        <RenderTable
+          mobileItems={mobileItems}
+          desktopItems={desktopItems}
+          keys={resourceKeys}
+          title={'Resource Info'}
+          formatter={(v, key) =>
+            ['mainDocumentTransferSize', 'totalByteWeight'].includes(
+              key as string,
+            )
+              ? RenderBytesValue({ value: v })
+              : `${v}`
+          }
+        />
       </div>
     </Details>
   );
 }
+
+function RenderNetworkRequestsSummary({
+  mobileData,
+  desktopData,
+}: {
+  mobileData?: PageSpeedInsights;
+  desktopData?: PageSpeedInsights;
+}) {
+  const mobileNetworkData = (mobileData?.lighthouseResult?.audits?.['network-requests']?.details as AuditDetailTable) 
+  const desktopNetworkData = (desktopData?.lighthouseResult?.audits?.['network-requests']?.details as AuditDetailTable)
+  const mobileGroupItems = groupBy(mobileNetworkData.items, (item) => `${item?.resourceType}` || '');
+  const desktopGroupItems = groupBy(desktopNetworkData.items, (item) => `${item?.resourceType}` || '');
+  const mobileKeys = Object.keys(mobileGroupItems).filter((k) => !!k);
+  const desktopKeys = Object.keys(desktopGroupItems).filter((k) => !!k);
+  const keys = [...new Set([...mobileKeys,...desktopKeys])]
+  if (!keys.length) {
+    return null;
+  }
+  return (
+    <Card className="col-span-2">
+      <CardHeader className="text-center text-2xl font-bold">
+        Network Request Summary
+      </CardHeader>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead> Request Type</TableHead>
+            <TableHead> Device</TableHead>
+            <TableHead> Count</TableHead>
+            <TableHead> Total Transfer Size</TableHead>
+            <TableHead> Total Resource Size</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {keys.map((key, i) => {
+          
+            return (
+              <Fragment key={`${i}-${key}`}>
+              <TableRow>
+                <TableCell rowSpan={2}> {key} </TableCell>
+                <TableCell > Mobile </TableCell>
+                <TableCell > {mobileGroupItems[key].length} </TableCell>
+                <TableCell > {RenderBytesValue({ value: sumOn(mobileGroupItems[key], 'transferSize') })} </TableCell>
+                <TableCell > {RenderBytesValue({ value: sumOn(mobileGroupItems[key], 'resourceSize') })}</TableCell>
+              </TableRow>
+              <TableRow >
+              <TableCell > Desktop </TableCell>
+                <TableCell > {desktopGroupItems[key].length} </TableCell>
+                <TableCell > {RenderBytesValue({ value: sumOn(desktopGroupItems[key], 'transferSize') })} </TableCell>
+                <TableCell > {RenderBytesValue({ value: sumOn(desktopGroupItems[key], 'resourceSize') })}</TableCell>
+              </TableRow>
+              </Fragment>
+            );
+          })}
+              <Fragment>
+              <TableRow >
+                <TableCell rowSpan={2}> Total </TableCell>
+                <TableCell > Mobile </TableCell>
+                <TableCell > {mobileNetworkData.items.length} </TableCell>
+                <TableCell > {RenderBytesValue({ value: sumOn(mobileNetworkData.items, 'transferSize') })} </TableCell>
+                <TableCell > {RenderBytesValue({ value: sumOn(mobileNetworkData.items, 'resourceSize') })}</TableCell>
+                
+              </TableRow>
+              <TableRow >
+                <TableCell > Desktop </TableCell>
+                <TableCell > {desktopNetworkData.items.length} </TableCell>
+                <TableCell > {RenderBytesValue({ value: sumOn(mobileNetworkData.items, 'transferSize') })} </TableCell>
+                <TableCell > {RenderBytesValue({ value: sumOn(mobileNetworkData.items, 'resourceSize') })}</TableCell>
+              </TableRow>
+              </Fragment>
+        </TableBody>
+      </Table>
+    </Card>
+  );
+}
+
+function sumOn<T>(items: T[], key: string) {
+  return items.reduce((acc, curr) => {
+    return acc + (+(curr[key as keyof typeof curr]) || 0);
+  }, 0);
+}
+
 
 function RenderTable({
   mobileItems,
@@ -228,7 +326,10 @@ function mergeData(auditData?: PageSpeedInsights) {
 const TitleMap: Record<string, { label: string; sortOrder: number }> = {
   // Core Web Vitals
   cumulativeLayoutShift: { label: 'Cumulative Layout Shift', sortOrder: 1 },
-  cumulativeLayoutShiftMainFrame: {label: 'Cumulative Layout Shift (Main Frame)', sortOrder: 2 },
+  cumulativeLayoutShiftMainFrame: {
+    label: 'Cumulative Layout Shift (Main Frame)',
+    sortOrder: 2,
+  },
   firstContentfulPaint: { label: 'First Contentful Paint', sortOrder: 3 },
   largestContentfulPaint: { label: 'Largest Contentful Paint', sortOrder: 4 },
   interactive: { label: 'Interactive', sortOrder: 5 },

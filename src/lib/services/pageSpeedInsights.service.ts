@@ -95,8 +95,16 @@ export const requestPageSpeedData = async (
   }
 };
 
-async function savePageSpeedData(url: string) {
+function createRequestDate() {
+  // round current time to nearest 15 min 
   const date = new Date(Date.now());
+  date.setMinutes(Math.ceil(date.getMinutes() / 15) * 15, 0, 0);
+  return date;
+
+}
+
+async function savePageSpeedData(url: string) {
+  const date = createRequestDate();
   try {
     await insertPendingMeasurement(url, date);
 
