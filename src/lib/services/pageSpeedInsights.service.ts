@@ -3,36 +3,8 @@ import { PageSpeedInsightsTable } from '@/db/schema';
 import { db } from '@/db';
 import { PageSpeedInsights } from '../schema';
 import { and, eq } from 'drizzle-orm';
-import { UTApi, UTFile } from 'uploadthing/server';
 import { stringify, parse } from 'zipson';
 
-export async function uploadJSONData(
-  url: string,
-  resultArray: (PageSpeedInsights | null)[],
-) {
-  // // Convert object to string and then to Uint8Array
-  // const jsonString = JSON.stringify(resultArray);
-  // const bytes = new TextEncoder().encode(jsonString);
-
-  // // Create compressed stream
-  // const cs = new CompressionStream('gzip');
-  // const writer = cs.writable.getWriter();
-  // const compressed = cs.readable;
-
-  // // Write and close
-  // writer.write(bytes);
-  // writer.close();
-
-  // Convert stream to blob
-  const blob = await new Response(stringify(resultArray)).blob();
-
-  const utapi = new UTApi();
-  const file = new UTFile([blob], `${url.replace(/[^a-zA-Z]/g, '')}.gz`, {
-    customId: Math.random().toString(),
-  });
-  const uploadResponse = await utapi.uploadFiles([file]);
-  return uploadResponse;
-}
 
 type formFactor = 'DESKTOP' | 'MOBILE';
 
@@ -100,7 +72,6 @@ function createRequestDate() {
   const date = new Date(Date.now());
   date.setMinutes(Math.ceil(date.getMinutes() / 15) * 15, 0, 0);
   return date;
-
 }
 
 async function savePageSpeedData(url: string) {
@@ -113,7 +84,6 @@ async function savePageSpeedData(url: string) {
       fetchPageSpeedData(url, 'DESKTOP'),
     ]);
     console.log('data fetched', data)
-    // const uploadResponse = await uploadJSONData(url, data);
     await handleMeasurementSuccess(url, date, data);
     return data;
   } catch (error) {
