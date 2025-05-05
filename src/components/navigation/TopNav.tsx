@@ -21,6 +21,10 @@ export function TopNav() {
         <Link href="/page-speed" className="">
           <span className="text-md break-keep font-bold">Insights</span>
         </Link>
+        <span className="text-xl font-bold"> | </span>
+        <Link href="/viewer" className="">
+          <span className="text-md break-keep font-bold">Viewer</span>
+        </Link>
       {/* <ModeToggle /> */}
       </div>
     </nav>

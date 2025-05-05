@@ -12,17 +12,23 @@ import { NullablePageSpeedInsights } from '@/lib/schema';
 export function PageSpeedInsightsDashboard({
   data,
   labels,
+  hideReport,
 }: {
   data: NullablePageSpeedInsights[];
   labels: string[];
+  hideReport?: boolean;
 }) {
   const [desktopData, mobileData] = data || [];
 
-  const categoryGroups = data.map((d) => d?.lighthouseResult?.categoryGroups ?? null);
-  const audits = data.map((d) => d?.lighthouseResult?.audits ??null);
+  const categoryGroups = data.map(
+    (d) => d?.lighthouseResult?.categoryGroups ?? null,
+  );
+  const audits = data.map((d) => d?.lighthouseResult?.audits ?? null);
 
   const titleLabels = labels;
-  const timestamp = data.find((d) => d?.analysisUTCTimestamp)?.analysisUTCTimestamp
+  const timestamp = data.find(
+    (d) => d?.analysisUTCTimestamp,
+  )?.analysisUTCTimestamp;
   return (
     <fullPageScreenshotContext.Provider
       value={{
@@ -32,38 +38,46 @@ export function PageSpeedInsightsDashboard({
           mobileData?.lighthouseResult.fullPageScreenshot,
       }}
     >
-      <h2 className="text-center text-2xl font-bold">
-        {`Report for ${timestamp ? new Date(
-          timestamp|| 0,
-        ).toLocaleDateString() : ''}`}
-      </h2>
-      <LoadingExperience
-        title="Page Loading Experience"
-        experiences={data.map((d) => d?.loadingExperience || null)}
-        labels={titleLabels}
-      />
-      <LoadingExperience
-        title="Origin Loading Experience"
-        experiences={data.map((d) => d?.originLoadingExperience || null)}
-        labels={titleLabels}
-      />
+      {hideReport ? null : (
+        <h2 className="text-center text-2xl font-bold">
+          {`Report for ${
+            timestamp ? new Date(timestamp || 0).toLocaleDateString() : ''
+          }`}
+        </h2>
+      )}
+      {hideReport ? null : (
+        <LoadingExperience
+          title="Page Loading Experience"
+          experiences={data.map((d) => d?.loadingExperience || null)}
+          labels={titleLabels}
+        />
+      )}
+      {hideReport ? null : (
+        <LoadingExperience
+          title="Origin Loading Experience"
+          experiences={data.map((d) => d?.originLoadingExperience || null)}
+          labels={titleLabels}
+        />
+      )}
+      <RenderFilmStrip data={data} labels={titleLabels} />
       <CWVMetricsComponent
         categoryGroups={categoryGroups}
         audits={audits}
         labels={titleLabels}
       />
       <CWVMetricsSummary data={data} labels={titleLabels} />
-      <RenderFilmStrip data={data} labels={titleLabels} />
-      <PageSpeedCategorySection
-        desktopCategories={desktopData?.lighthouseResult?.categories}
-        mobileCategories={mobileData?.lighthouseResult?.categories}
-        desktopAuditRecords={desktopData?.lighthouseResult?.audits}
-        mobileAuditRecords={mobileData?.lighthouseResult?.audits}
-      />
+      {hideReport ? null : (
+        <PageSpeedCategorySection
+          desktopCategories={desktopData?.lighthouseResult?.categories}
+          mobileCategories={mobileData?.lighthouseResult?.categories}
+          desktopAuditRecords={desktopData?.lighthouseResult?.audits}
+          mobileAuditRecords={mobileData?.lighthouseResult?.audits}
+        />
+      )}
       <EntitiesTable
         entities={
-          desktopData?.lighthouseResult?.entities ||
-          mobileData?.lighthouseResult?.entities
+          data.find((e) => e?.lighthouseResult?.entities)?.lighthouseResult
+            ?.entities
         }
       />
     </fullPageScreenshotContext.Provider>

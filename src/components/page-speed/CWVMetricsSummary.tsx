@@ -25,12 +25,12 @@ import { groupBy } from '@/lib/utils';
 import { toTitleCase } from './toTitleCase';
 
 const CWV = [
-  'cumulativeLayoutShift',
-  'cumulativeLayoutShiftMainFrame',
   'firstContentfulPaint',
   'largestContentfulPaint',
-  'interactive',
   'totalBlockingTime',
+  'cumulativeLayoutShift',
+  'cumulativeLayoutShiftMainFrame',
+  'speedIndex'
 ];
 
 const taskKeys = [
@@ -113,7 +113,7 @@ export function CWVMetricsSummary({
               'cumulativeLayoutShift',
               'cumulativeLayoutShiftMainFrame',
             ].includes(k as string)
-              ? `${v}`
+              ? `${+(v as number).toFixed(4)}`
               : RenderMSValue({ value: v })
           }
         />
@@ -121,7 +121,7 @@ export function CWVMetricsSummary({
           items={items}
           labels={labels}
           keys={taskKeys}
-          title={'Number of tasks'}
+          title={'Number of Tasks'}
           formatter={(v) => `${v}`}
         />
 

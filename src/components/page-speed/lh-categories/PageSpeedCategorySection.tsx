@@ -7,11 +7,13 @@ export function PageSpeedCategorySection({
   mobileCategories,
   desktopAuditRecords,
   mobileAuditRecords,
+  // labels,
 }: {
   desktopCategories?: Record<string, CategoryResult>;
   mobileCategories?: Record<string, CategoryResult>;
   desktopAuditRecords?: AuditResultsRecord | undefined;
   mobileAuditRecords?: AuditResultsRecord | undefined;
+  labels?: string[];
 }) {
   const categoryKeys = [
     ...new Set<string>([

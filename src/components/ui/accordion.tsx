@@ -78,7 +78,7 @@ export const Details = (({ className, children, ref, ...props }: React.JSX.Intri
   <details
     ref={ref}
     open
-    className={cn('rounded-2 mb-2 rounded-md border-4 p-2 min-w-full w-full overflow-hidden', className)}
+    className={cn('rounded-2 mb-2 rounded-md border-4 p-2 min-w-full w-full overflow-hidden content-visibility-auto', className)}
     {...props}
   >
     {children}

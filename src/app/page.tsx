@@ -11,7 +11,7 @@ export default function Home() {
           {`Comprehensive insights into your website's performance using Chrome UX Report (CrUX) data and PageSpeed metrics`}
         </p>
       </div>
-      <div className="grid md:grid-cols-3 gap-6 mb-12">
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         <HomeCard
           title="Latest CrUX Metrics"
           description="Analyze actual user experience data from Chrome UX Report"
@@ -34,6 +34,14 @@ export default function Home() {
           content="Get detailed performance audits and actionable recommendations to improve your site."
           url="/page-speed"
           linkText="Run PageSpeed Analysis"
+        />
+        
+        <HomeCard
+          title="Lighthouse report viewer"
+          description="View Lighthouse reports from your Experiments"
+          content="Visualize LCP, FID, CLS, and INP metrics with detailed breakdowns and pass/fail indicators."
+          url="/viewer"
+          linkText="Go to Lighthouse Report Viewer"
         />
       </div>
 

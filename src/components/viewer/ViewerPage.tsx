@@ -40,7 +40,7 @@ export default function ViewerPage() {
           Show Report
         </Button>
       </Details>
-      <PageSpeedInsightsDashboard data={data} labels={[]} />
+      <PageSpeedInsightsDashboard data={data} labels={[]} hideReport />
     </>
   );
 }
