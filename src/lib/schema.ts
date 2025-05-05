@@ -810,6 +810,7 @@ export const pageSpeedInsightsSchema = z.object({
 });
 
 export type PageSpeedInsights = z.infer<typeof pageSpeedInsightsSchema>;
+export type NullablePageSpeedInsights = PageSpeedInsights | null | undefined;
 
 export const cruxHistoryItemSchema = z.object({
   url: z.string(),

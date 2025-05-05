@@ -3,7 +3,7 @@ import { updateURl } from '@/lib/utils';
 import { requestPageSpeedData } from '@/lib/services/pageSpeedInsights.service';
 import { PageSpeedInsightsDashboard } from '@/components/page-speed/pageSpeedInsightsDashboard';
 import { Suspense } from 'react';
-import { LoadingMessage } from './LoadingMessage';
+import { LoadingMessage } from './Loading';
 
 export default async function Home({
   searchParams,
@@ -38,7 +38,7 @@ async function PageSpeedInsightsDashboardWrapper({
 }) {
   const data = await requestPageSpeedData(url);
   return <PageSpeedInsightsDashboard
-  mobileDataPrams={data[0] ?? undefined}
-  desktopDataPrams={data[1] ?? undefined}
+    data={data}
+    labels={['Mobile', 'Desktop']}
 />
 }

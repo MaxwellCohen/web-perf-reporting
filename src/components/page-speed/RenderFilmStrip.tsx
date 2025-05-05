@@ -1,34 +1,31 @@
-'use client';
-import { PageSpeedInsights, AuditDetailFilmstripSchema } from '@/lib/schema';
+import {  AuditDetailFilmstripSchema, NullablePageSpeedInsights } from '@/lib/schema';
 import { Details } from '../ui/accordion';
 import { Timeline } from './Timeline';
 
 export function RenderFilmStrip({
-  desktopData, mobileData,
+  data,
+  labels,
 }: {
-  desktopData?: PageSpeedInsights | null;
-  mobileData?: PageSpeedInsights | null;
+  data: NullablePageSpeedInsights[];
+  labels: string[];
 }) {
-  const DesktopTimeline = AuditDetailFilmstripSchema.safeParse(
-    desktopData?.lighthouseResult?.audits?.['screenshot-thumbnails'].details
-  ).data;
-  const MobileTimeline = AuditDetailFilmstripSchema.safeParse(
-    mobileData?.lighthouseResult?.audits?.['screenshot-thumbnails'].details
-  ).data;
-
-  if (!DesktopTimeline && !MobileTimeline) return null;
+  const timeLines = data.map((item, index) => {
+    const timeline = AuditDetailFilmstripSchema.safeParse(
+      item?.lighthouseResult?.audits?.['screenshot-thumbnails'].details
+    ).data;
+    if (!timeline) return null;
+    return (
+      <Timeline key={index} timeline={timeline} device={labels[index]} />
+    )
+  }).filter(Boolean);
+  if (!timeLines.length) return null;
 
   return (
     <Details className="flex flex-col flex-wrap gap-2">
       <summary className="flex flex-col gap-2 overflow-auto">
         <h3 className="text-lg font-bold">Screenshots</h3>
       </summary>
-      {MobileTimeline ? (
-        <Timeline timeline={MobileTimeline} device="Mobile" />
-      ) : null}
-      {DesktopTimeline ? (
-        <Timeline timeline={DesktopTimeline} device="Desktop" />
-      ) : null}
+      {timeLines}
     </Details>
   );
 }

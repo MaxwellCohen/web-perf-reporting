@@ -1,5 +1,9 @@
 'use client';
-import { AuditDetailTable, DebugData, PageSpeedInsights } from '@/lib/schema';
+import {
+  AuditDetailTable,
+  DebugData,
+  NullablePageSpeedInsights,
+} from '@/lib/schema';
 import {
   Table,
   TableBody,
@@ -18,6 +22,7 @@ import {
 } from './lh-categories/table/RenderTableValue';
 import { Fragment, JSX } from 'react';
 import { groupBy } from '@/lib/utils';
+import { toTitleCase } from './toTitleCase';
 
 const CWV = [
   'cumulativeLayoutShift',
@@ -68,17 +73,17 @@ const ObservedEvents = [
 ];
 
 export function CWVMetricsSummary({
-  desktopData,
-  mobileData,
+  data,
+  labels,
 }: {
-  desktopData?: PageSpeedInsights;
-  mobileData?: PageSpeedInsights;
+  data: NullablePageSpeedInsights[];
+  labels: string[];
 }) {
-  const desktopItems = mergeData(desktopData);
-  const mobileItems = mergeData(mobileData);
-  const mobileKeys = Object.keys(mobileItems);
-  const desktopKeys = Object.keys(desktopItems);
-  const keys = [...new Set([...mobileKeys, ...desktopKeys])]
+  const items = data.map(mergeData);
+  const itemKeys = items.map((d) => Object.keys(d));
+  const keys = [
+    ...new Set(itemKeys.reduce((acc, curr) => [...acc, ...curr], [])),
+  ]
     .filter((k) => k !== 'type')
     .filter((k) => !k.endsWith('Ts'))
     .sort((a, b) => {
@@ -99,8 +104,8 @@ export function CWVMetricsSummary({
       </summary>
       <div className="grid grid-cols-1 gap-3 py-3 sm:grid-cols-2 lg:grid-cols-3">
         <RenderTable
-          mobileItems={mobileItems}
-          desktopItems={desktopItems}
+          items={items}
+          labels={labels}
           keys={CWV}
           title={'Core Web Vitals'}
           formatter={(v, k) =>
@@ -108,21 +113,21 @@ export function CWVMetricsSummary({
               'cumulativeLayoutShift',
               'cumulativeLayoutShiftMainFrame',
             ].includes(k as string)
-            ? `${v}`
-            : RenderMSValue({ value: v })
+              ? `${v}`
+              : RenderMSValue({ value: v })
           }
         />
         <RenderTable
-          mobileItems={mobileItems}
-          desktopItems={desktopItems}
+          items={items}
+          labels={labels}
           keys={taskKeys}
           title={'Number of tasks'}
           formatter={(v) => `${v}`}
         />
 
         <RenderTable
-          mobileItems={mobileItems}
-          desktopItems={desktopItems}
+          items={items}
+          labels={labels}
           keys={LCPInfo}
           title={'LCP info'}
           formatter={(v) => {
@@ -132,8 +137,8 @@ export function CWVMetricsSummary({
           }}
         />
         <RenderTable
-          mobileItems={mobileItems}
-          desktopItems={desktopItems}
+          items={items}
+          labels={labels}
           keys={timingInfo}
           title={'Timings info'}
           formatter={(v) => {
@@ -141,18 +146,18 @@ export function CWVMetricsSummary({
           }}
         />
         <RenderTable
-          mobileItems={mobileItems}
-          desktopItems={desktopItems}
+          items={items}
+          labels={labels}
           keys={ObservedEvents}
           title={'Observed Events'}
           formatter={(v) => {
             return RenderMSValue({ value: v });
           }}
         />
-                <RenderNetworkRequestsSummary desktopData={desktopData} mobileData={mobileData} />
+        <RenderNetworkRequestsSummary data={data} labels={labels} />
         <RenderTable
-          mobileItems={mobileItems}
-          desktopItems={desktopItems}
+          items={items}
+          labels={labels}
           keys={resourceKeys}
           title={'Resource Info'}
           formatter={(v, key) =>
@@ -169,22 +174,34 @@ export function CWVMetricsSummary({
 }
 
 function RenderNetworkRequestsSummary({
-  mobileData,
-  desktopData,
+  data,
+  labels,
 }: {
-  mobileData?: PageSpeedInsights;
-  desktopData?: PageSpeedInsights;
+  data: NullablePageSpeedInsights[];
+  labels: string[];
 }) {
-  const mobileNetworkData = (mobileData?.lighthouseResult?.audits?.['network-requests']?.details as AuditDetailTable) 
-  const desktopNetworkData = (desktopData?.lighthouseResult?.audits?.['network-requests']?.details as AuditDetailTable)
-  const mobileGroupItems = groupBy(mobileNetworkData.items, (item) => `${item?.resourceType}` || '');
-  const desktopGroupItems = groupBy(desktopNetworkData.items, (item) => `${item?.resourceType}` || '');
-  const mobileKeys = Object.keys(mobileGroupItems).filter((k) => !!k);
-  const desktopKeys = Object.keys(desktopGroupItems).filter((k) => !!k);
-  const keys = [...new Set([...mobileKeys,...desktopKeys])]
+  const networkData = data.map(
+    (d) =>
+      d?.lighthouseResult?.audits?.['network-requests']
+        ?.details as AuditDetailTable,
+  );
+  const groupedNetworkData = networkData.map((d) => {
+    if (!d) return {};
+    return groupBy(d?.items || {}, (e) => `${e?.resourceType}` || '');
+  });
+  const displayKeys = groupedNetworkData
+    .map((d) => Object.keys(d))
+    .reduce((acc, curr) => [...acc, ...curr], [])
+    .filter((k) => !!k);
+  const keys = [...new Set(displayKeys)];
   if (!keys.length) {
     return null;
   }
+  keys.push('Total');
+  groupedNetworkData.map(
+    (nd, i) => (nd['Total'] = networkData[i]?.items || []),
+  );
+
   return (
     <Card className="col-span-2">
       <CardHeader className="text-center text-2xl font-bold">
@@ -194,49 +211,54 @@ function RenderNetworkRequestsSummary({
         <TableHeader>
           <TableRow>
             <TableHead> Request Type</TableHead>
-            <TableHead> Device</TableHead>
+            {labels.length > 1? <TableHead> Device</TableHead> : null }
             <TableHead> Count</TableHead>
             <TableHead> Total Transfer Size</TableHead>
             <TableHead> Total Resource Size</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {keys.map((key, i) => {
-          
-            return (
-              <Fragment key={`${i}-${key}`}>
-              <TableRow>
-                <TableCell rowSpan={2}> {key} </TableCell>
-                <TableCell > Mobile </TableCell>
-                <TableCell > {mobileGroupItems[key].length} </TableCell>
-                <TableCell > {RenderBytesValue({ value: sumOn(mobileGroupItems[key], 'transferSize') })} </TableCell>
-                <TableCell > {RenderBytesValue({ value: sumOn(mobileGroupItems[key], 'resourceSize') })}</TableCell>
-              </TableRow>
-              <TableRow >
-              <TableCell > Desktop </TableCell>
-                <TableCell > {desktopGroupItems[key].length} </TableCell>
-                <TableCell > {RenderBytesValue({ value: sumOn(desktopGroupItems[key], 'transferSize') })} </TableCell>
-                <TableCell > {RenderBytesValue({ value: sumOn(desktopGroupItems[key], 'resourceSize') })}</TableCell>
-              </TableRow>
-              </Fragment>
-            );
-          })}
-              <Fragment>
-              <TableRow >
-                <TableCell rowSpan={2}> Total </TableCell>
-                <TableCell > Mobile </TableCell>
-                <TableCell > {mobileNetworkData.items.length} </TableCell>
-                <TableCell > {RenderBytesValue({ value: sumOn(mobileNetworkData.items, 'transferSize') })} </TableCell>
-                <TableCell > {RenderBytesValue({ value: sumOn(mobileNetworkData.items, 'resourceSize') })}</TableCell>
-                
-              </TableRow>
-              <TableRow >
-                <TableCell > Desktop </TableCell>
-                <TableCell > {desktopNetworkData.items.length} </TableCell>
-                <TableCell > {RenderBytesValue({ value: sumOn(mobileNetworkData.items, 'transferSize') })} </TableCell>
-                <TableCell > {RenderBytesValue({ value: sumOn(mobileNetworkData.items, 'resourceSize') })}</TableCell>
-              </TableRow>
-              </Fragment>
+          {keys
+            .map((key, i) => {
+              const data = groupedNetworkData.map((d, i) => ({
+                item: d[key] || [],
+                labelIndex: i,
+              }));
+              const filteredData = data.filter((d) => d.item.length > 0);
+              if (!filteredData.length) {
+                return null;
+              }
+              return (
+                <Fragment key={`${i}-${key}`}>
+                  {filteredData.map(({ item, labelIndex }, idx) => {
+                    return (
+                      <TableRow key={`${i}-${key}-${labelIndex}`}>
+                        {idx === 0 ? (
+                          <TableCell rowSpan={filteredData.length}>
+                            {toTitleCase(key)}
+                          </TableCell>
+                        ) : null}
+                        {labels.length > 1 ? <TableCell> {labels[labelIndex] || ''} </TableCell> : null }
+                        <TableCell> {item.length} </TableCell>
+                        <TableCell>
+                          {' '}
+                          {RenderBytesValue({
+                            value: sumOn(item, 'transferSize'),
+                          })}{' '}
+                        </TableCell>
+                        <TableCell>
+                          {' '}
+                          {RenderBytesValue({
+                            value: sumOn(item, 'resourceSize'),
+                          })}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </Fragment>
+              );
+            })
+            .filter(Boolean)}
         </TableBody>
       </Table>
     </Card>
@@ -245,26 +267,26 @@ function RenderNetworkRequestsSummary({
 
 function sumOn<T>(items: T[], key: string) {
   return items.reduce((acc, curr) => {
-    return acc + (+(curr[key as keyof typeof curr]) || 0);
+    return acc + (+curr[key as keyof typeof curr] || 0);
   }, 0);
 }
 
-
 function RenderTable({
-  mobileItems,
-  desktopItems,
+  items,
+  labels,
   keys,
   title,
   formatter,
 }: {
-  mobileItems: Record<string, string | number>;
-  desktopItems: Record<string, string | number>;
+  items: Record<string, string | number>[];
+  labels: string[];
   keys: string[];
   title: string;
   formatter: (item: unknown, key?: string) => string | JSX.Element;
 }) {
-  const mobileKeys = Object.keys(mobileItems).filter((k) => keys.includes(k));
-  const desktopKeys = Object.keys(desktopItems).filter((k) => keys.includes(k));
+  const itemKeys = items.map((d) =>
+    Object.keys(d).filter((k) => keys.includes(k)),
+  );
 
   return (
     <Card className="min-w-1/3">
@@ -275,8 +297,13 @@ function RenderTable({
         <TableHeader>
           <TableRow>
             <TableHead></TableHead>
-            {mobileKeys.length ? <TableHead>Mobile</TableHead> : null}
-            {desktopKeys?.length ? <TableHead>Desktop</TableHead> : null}
+            {itemKeys
+              .map((itemKey , idx) =>
+                itemKey?.length ? (
+                  <TableHead key={`${idx}-${labels[idx]}`}>{labels[idx] || ''}</TableHead>
+                ) : null,
+              )
+              .filter(Boolean)}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -284,16 +311,16 @@ function RenderTable({
             return (
               <TableRow key={`${i}-${key}`}>
                 <TableCell rowSpan={1}> {RenderTitle(key)} </TableCell>
-                {mobileKeys?.length ? (
-                  <TableCell rowSpan={1}>
-                    {formatter(mobileItems?.[key], key)}
-                  </TableCell>
-                ) : null}
-                {desktopKeys?.length ? (
-                  <TableCell rowSpan={1}>
-                    {formatter(desktopItems?.[key], key)}
-                  </TableCell>
-                ) : null}
+                {items
+                  .map((item, idx) => {
+                    if (item?.[key] === undefined) return null;
+                    return (
+                      <TableCell key={`${i}-${keys}-${idx}`}>
+                        {formatter(item?.[key], key)}
+                      </TableCell>
+                    );
+                  })
+                  .filter(Boolean)}
               </TableRow>
             );
           })}
@@ -303,7 +330,10 @@ function RenderTable({
   );
 }
 
-function mergeData(auditData?: PageSpeedInsights) {
+function mergeData(auditData?: NullablePageSpeedInsights) {
+  if (!auditData) {
+    return {};
+  }
   const metrics =
     (auditData?.lighthouseResult?.audits?.['metrics'] as unknown as DebugData)
       ?.details?.items || [];

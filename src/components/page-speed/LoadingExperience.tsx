@@ -2,20 +2,29 @@ import { HorizontalGaugeChart } from '@/components/common/PageSpeedGaugeChart';
 import { PageSpeedApiLoadingExperience } from '@/lib/schema';
 import { Details } from '@/components/ui/accordion';
 import { Card, CardTitle } from '../ui/card';
+import { Fragment } from 'react';
 
 interface LoadingExperienceProps {
   title: string;
-  experienceDesktop?: PageSpeedApiLoadingExperience;
-  experienceMobile?: PageSpeedApiLoadingExperience;
+  experiences: (PageSpeedApiLoadingExperience | undefined | null)[];
+  labels: string[];
 }
 
 export function LoadingExperience({
   title,
-  experienceDesktop,
-  experienceMobile,
+  experiences,
+  labels,
 }: LoadingExperienceProps) {
-  if (!experienceDesktop && !experienceMobile) return null;
-
+  const hasData = experiences?.some((experience) => !!experience);
+  if (!hasData) {
+    return null;
+  }
+  const extraTitle = experiences
+    .map((experience, idx) => {
+      if (!experience?.overall_category) return null;
+      return `${ labels[idx] ? `${labels[idx]} - ` : ''}${experience.overall_category}`;
+    })
+    .join(' \n');
   const metrics = [
     { metric: 'First Contentful Paint', key: 'FIRST_CONTENTFUL_PAINT_MS' },
     { metric: 'Largest Contentful Paint', key: 'LARGEST_CONTENTFUL_PAINT_MS' },
@@ -28,39 +37,31 @@ export function LoadingExperience({
       <Details className="&:not([open])]:none flex flex-col gap-2 print:border-0">
         <summary className="flex flex-col gap-2">
           <div className="text-lg font-bold group-hover:underline">
-            {title}:{' '}
-            {experienceMobile?.overall_category
-              ? `Mobile -  ${experienceMobile?.overall_category} `
-              : ''}{' '}
-            {experienceDesktop?.overall_category
-              ? `Desktop - ${experienceDesktop?.overall_category}`
-              : ''}
+            {title}: {extraTitle}
           </div>
         </summary>
         <div className="-mx-2 grid max-w-full grid-cols-[repeat(auto-fit,_minmax(14rem,_1fr))] gap-2">
           {metrics.map(({ metric, key }) => {
-            const mobileMetric = experienceMobile?.metrics[key];
-            const desktopMetric = experienceDesktop?.metrics[key];
             return (
               <Card
                 key={key}
                 className="flex w-full min-w-64 flex-col gap-2 px-4 py-4"
               >
-                {mobileMetric && desktopMetric ? (
-                  <CardTitle className="text-sm font-bold">{metric}</CardTitle>
-                ) : null}
-                {mobileMetric ? (
-                  <HorizontalGaugeChart
-                    metric={`${mobileMetric.percentile} - ${mobileMetric.category} - Mobile`}
-                    data={mobileMetric}
-                  />
-                ) : null}
-                {desktopMetric ? (
-                  <HorizontalGaugeChart
-                    metric={`${desktopMetric.percentile} - ${desktopMetric.category} - Desktop`}
-                    data={desktopMetric}
-                  />
-                ) : null}
+                <CardTitle className="text-sm font-bold">{metric}</CardTitle>
+                {experiences.map((experience, idx) => {
+                  const metricValue = experience?.metrics[key];
+                  return (
+                    <Fragment key={`${key}_${idx}`}>
+                      {!metricValue ? null : (
+                        <HorizontalGaugeChart
+                          key={key}
+                          metric={`${metricValue.percentile} - ${metricValue.category} ${labels[idx] ? `(${labels[idx]})`: ''}`}
+                          data={metricValue}
+                        />
+                      )}
+                    </Fragment>
+                  );
+                })}
               </Card>
             );
           })}

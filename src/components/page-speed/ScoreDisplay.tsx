@@ -89,11 +89,12 @@ export function ScoreDisplay({
   if (audit.score === null || audit.scoreDisplayMode === undefined) {
     return null;
   }
+  const labelText = device ? `${device} - `: ''
   if (audit.scoreDisplayMode === ScoreDisplayModes.NUMERIC) {
     return (
       <>
         <div className="text-xs">
-          {device ? `${device} - ` : ''}{' '}
+          {labelText}
           {audit.displayValue ? `${audit.displayValue} - ` : ''}
           Score: {Math.round(audit.score * 100)} / 100 
           {audit.displayValue ? ` - ${audit.displayValue}` : ''}
@@ -104,19 +105,19 @@ export function ScoreDisplay({
   if (audit.scoreDisplayMode === ScoreDisplayModes.BINARY) {
     return (
       <div className="text-xs">
-        {device} - {audit.score ? '✅ - Passed' : '❌ - Failed'}
+        {labelText}{audit.score ? '✅ - Passed' : '❌ - Failed'}
       </div>
     );
   }
 
   if (audit.scoreDisplayMode === ScoreDisplayModes.MANUAL) {
-    return <div className="text-xs">{device} - Manual</div>;
+    return <div className="text-xs">{labelText}Manual</div>;
   }
   if (audit.scoreDisplayMode === ScoreDisplayModes.INFORMATIVE) {
     return null;
   }
   if (audit.scoreDisplayMode === ScoreDisplayModes.NOT_APPLICABLE) {
-    return <div className="text-xs">{device} - Not Applicable</div>;
+    return <div className="text-xs">{labelText}Not Applicable</div>;
   }
   if (audit.scoreDisplayMode === ScoreDisplayModes.ERROR) {
     return <div className="text-xs">Error: {audit.errorMessage}</div>;
@@ -124,7 +125,7 @@ export function ScoreDisplay({
 
   return (
     <div className="text-xs whitespace-nowrap">
-      {device} {audit.displayValue ? ` | ${audit.displayValue} | Score ${Math.round(audit.score * 100)} / 100` : ` | Score ${Math.round(audit.score * 100)} / 100`}
+      {device || ''} {audit.displayValue ? ` | ${audit.displayValue} | Score ${Math.round(audit.score * 100)} / 100` : ` | Score ${Math.round(audit.score * 100)} / 100`}
       {/* Score: {Math.round(audit.score * 100)} / 100 */}
     </div>
   );

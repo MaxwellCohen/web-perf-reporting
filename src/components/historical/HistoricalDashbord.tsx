@@ -1,5 +1,4 @@
-'use client';
-
+"use client";
 import { CruxReport } from '@/lib/schema';
 import { formatCruxReport, formatDate, groupBy } from '@/lib/utils';
 import { CurrentPerformanceChartContext } from '@/components/latest-crux/PerformanceCard';
