@@ -122,7 +122,7 @@ async function handleMeasurementSuccess(
       url,
       date,
       status: 'COMPLETED',
-      data: stringify(data),
+      data: stringify(data, {}),
     })
     .where(
       and(

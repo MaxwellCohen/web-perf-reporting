@@ -15,37 +15,41 @@ import { RenderDebugData } from './RenderDebugdata';
 import { RenderCriticalChainData } from './table/renderCricticalChain';
 
 export function RenderDetails({
-  desktopAuditData,
-  mobileAuditData,
+  auditData,
+  labels,
 }: {
-  desktopAuditData?: AuditResultsRecord[string];
-  mobileAuditData?: AuditResultsRecord[string];
+  auditData: (AuditResultsRecord[string] | null)[];
+  labels: string[];
 }) {
-  
-  const desktopDetails = desktopAuditData?.details;
-  const mobileDetails = mobileAuditData?.details;
-  const detailType = desktopDetails?.type || mobileDetails?.type;
-  const typesSet = new Set([desktopDetails?.type, mobileDetails?.type].filter(Boolean));
-  if (typesSet.size !== 1 ) {
+  const details = auditData.map((a) => a?.details);
+  const types = [...new Set(details.map((a) => a?.type).filter(Boolean))];
+  const detailType = types[0];
+  if (types.length !== 1 || !detailType) {
     return null;
   }
-  const title = desktopAuditData?.title || mobileAuditData?.title || '';
+  const title = auditData.find((a) => a?.title)?.title || '';
 
   switch (detailType) {
     case 'filmstrip':
-      return <Timeline timeline={desktopDetails as AuditDetailFilmstrip} device={'Desktop'} />;
-    case 'list':
       return (
-        <RenderList
-          desktopAuditData={desktopAuditData}
-          mobileAuditData={mobileAuditData}
-        />
+        <>
+          {details.map((ad, i) => (
+            <Timeline
+              key={`${i}_${labels[i]}`}
+              timeline={ad as AuditDetailFilmstrip}
+              device={labels[i]}
+            />
+          ))}
+        </>
       );
+    case 'list':
+      //labels={labels}
+      return <RenderList auditData={auditData}  />;
     case 'checklist':
       return (
         <RenderChecklist
-          desktopAuditData={desktopAuditData}
-          mobileAuditData={mobileAuditData}
+          desktopAuditData={auditData[1] as AuditResultsRecord['checklist']}
+          mobileAuditData={auditData[0] as AuditResultsRecord['checklist']}
           title={title}
         />
       );
@@ -53,8 +57,12 @@ export function RenderDetails({
     case 'opportunity':
       return (
         <DetailTable
-          desktopDetails={desktopDetails as AuditDetailTable | AuditDetailOpportunity}
-          mobileDetails={mobileDetails as AuditDetailTable | AuditDetailOpportunity}
+          desktopDetails={
+            details[1]  as AuditDetailTable | AuditDetailOpportunity
+          }
+          mobileDetails={
+            details[0] as AuditDetailTable | AuditDetailOpportunity
+          }
           title={title}
         />
       );
@@ -62,64 +70,79 @@ export function RenderDetails({
       return (
         <div>
           Critical Request Chain
-          <RenderCriticalChainData desktopDetails={desktopDetails as CriticalRequestChain} mobileDetails={mobileDetails as CriticalRequestChain} />
+          <RenderCriticalChainData
+            desktopDetails={details[1]as CriticalRequestChain}
+            mobileDetails={details[2] as CriticalRequestChain}
+          />
         </div>
       );
     // Internal-only details, not for rendering.
     case 'screenshot':
       return null;
     case 'debugdata':
-      return <RenderDebugData desktopDebugData={desktopDetails as DebugData} mobileDebugData={mobileDetails as DebugData} />;
+      return (
+        <RenderDebugData
+          desktopDebugData={details[1]as DebugData}
+          mobileDebugData={details[0] as DebugData}
+        />
+      );
     case 'treemap-data':
       return (
         <RenderJSONDetails
           title={`${detailType} Data`}
-          data={desktopAuditData}
-          data2={mobileAuditData}
+          data={details[0]}
+          data2={details[1]}
         />
       );
 
     default:
       return null;
-      // return <RenderUnknown details={desktopDetails} />;
+    // return <RenderUnknown details={desktopDetails} />;
   }
 }
 
 function RenderList({
-  desktopAuditData,
-  mobileAuditData,
+  auditData,
+  // labels,
 }: {
-  desktopAuditData?: AuditResultsRecord[string];
-  mobileAuditData?: AuditResultsRecord[string];
+  auditData: (AuditResultsRecord[string] | null)[];
+  // labels: string[];
 }) {
-  if (desktopAuditData?.details?.type !== 'list') {
+  const details = auditData.map((a) => a?.details);
+
+  // Check if all details are of type 'list'
+  if (!details.every((d) => d?.type === 'list')) {
     return null;
   }
-  if (mobileAuditData?.details?.type !== 'list') {
-    return null;
-  }
-  const DesktopDetails = desktopAuditData?.details;
-  const MobileDetails = mobileAuditData?.details;
+
+  // Get the first non-null details to use as reference
+  const referenceDetails = details.find((d) => d !== null);
+  if (!referenceDetails) return null;
+
   return (
     <div>
-      {DesktopDetails.items.map((item, index: number) => {
+      {referenceDetails.items.map((item, index: number) => {
         switch (item.type) {
           case 'table':
             return (
               <DetailTable
                 key={index}
-                desktopDetails={item}
-                mobileDetails={
-                  MobileDetails.items?.[index] as
+                desktopDetails={
+                  details[0]?.items?.[index] as
                     | AuditDetailTable
                     | AuditDetailOpportunity
                 }
-                title={desktopAuditData.title || mobileAuditData.title}
+                mobileDetails={
+                  details[1]?.items?.[index] as
+                    | AuditDetailTable
+                    | AuditDetailOpportunity
+                }
+                title={auditData.find((a) => a?.title)?.title || ''}
               />
             );
 
           default:
-            return <RenderUnknown key={index} details={DesktopDetails} />;
+            return <RenderUnknown key={index} details={item[0]} />;
         }
       })}
     </div>

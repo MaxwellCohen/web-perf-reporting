@@ -1,6 +1,4 @@
-import {
-  Details,
-} from '../../ui/accordion';
+import { Details } from '../../ui/accordion';
 import { RenderJSONDetails } from '../RenderJSONDetails';
 import { AuditRef, AuditResultsRecord } from '@/lib/schema';
 import { AuditDetailsSummary } from './AuditDetailsSummary';
@@ -12,25 +10,25 @@ const doNotRenderDetails = ['screenshot-thumbnails', 'main-thread-tasks'];
 
 export function AuditDetailsSection({
   auditRef,
-  desktopAuditRecords,
-  mobileAuditRecords,
+  auditsRecords,
+  labels,
   acronym,
 }: {
   auditRef?: AuditRef;
+  auditsRecords: (AuditResultsRecord | null)[];
+  labels: string[];
   desktopAuditRecords?: AuditResultsRecord;
   mobileAuditRecords?: AuditResultsRecord;
   acronym?: string;
 }) {
-  const auditRefId = auditRef?.id || 'NOT_FOUND_ID!!!!';
-  const desktopAuditData = desktopAuditRecords?.[auditRefId];
-  const mobileAuditData = mobileAuditRecords?.[auditRefId];
-  const scoreDisplayMode =
-    desktopAuditData?.scoreDisplayMode ||
-    mobileAuditData?.scoreDisplayMode ||
-    'bottom';
+  const auditRefId = auditRef?.id;
+  if (!auditRefId) return null;
+  const auditData = auditsRecords.map((d) => d?.[auditRefId] || null);
 
-  const emptyTable =
-    isEmptyResult(desktopAuditData) && isEmptyResult(mobileAuditData);
+  const scoreDisplayMode =
+    auditData.find((d) => d?.scoreDisplayMode)?.scoreDisplayMode || 'bottom';
+
+  const emptyTable = auditData.every((d) => isEmptyResult(d));
 
   const doNotRender = doNotRenderDetails.includes(auditRefId);
   const disabled =
@@ -43,14 +41,15 @@ export function AuditDetailsSection({
       <div className="rounded-2 mb-4 rounded-md border-4 p-2">
         <div className="flex flex-col gap-4">
           <AuditDetailsSummary
-            desktopAuditData={desktopAuditData}
-            mobileAuditData={mobileAuditData}
+            auditData={auditData}
+            labels={labels}
             acronym={acronym}
           />
+
           <RenderJSONDetails
             className="text-right"
-            data={desktopAuditData}
-            data2={mobileAuditData}
+            data={auditData[0]}
+            data2={auditData[1]}
             title={`All Data for ${auditRef?.id}`}
           />
         </div>
@@ -59,33 +58,24 @@ export function AuditDetailsSection({
   }
 
   return (
-    <Details
-      id={desktopAuditData?.id || mobileAuditData?.id}
-      className="rounded-2 mb-4 rounded-md border-4 p-2"
-    >
+    <Details id={auditRefId} className="rounded-2 mb-4 rounded-md border-4 p-2">
       <summary className="flex flex-col gap-4">
         <AuditDetailsSummary
-          desktopAuditData={desktopAuditData}
-          mobileAuditData={mobileAuditData}
-          acronym={acronym}
+          auditData={auditData}
+          labels={labels}
+          acronym={auditRef?.acronym}
         />
         <RenderJSONDetails
           className="text-right"
-          data={desktopAuditData}
-          data2={mobileAuditData}
+          data={auditData[0]}
+          data2={auditData[1]}
           title={`All Data for ${auditRef?.id}`}
         />
       </summary>
       {!disabled ? (
         <>
-          <RenderMetricSavings
-            desktopAuditData={desktopAuditData}
-            mobileAuditData={mobileAuditData}
-          />
-          <RenderDetails
-            desktopAuditData={desktopAuditData}
-            mobileAuditData={mobileAuditData}
-          />
+          <RenderMetricSavings auditData={auditData} labels={labels} />
+          <RenderDetails auditData={auditData} labels={labels} />
         </>
       ) : null}
     </Details>

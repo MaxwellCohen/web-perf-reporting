@@ -18,7 +18,7 @@ export function PageSpeedInsightsDashboard({
   labels: string[];
   hideReport?: boolean;
 }) {
-  const [desktopData, mobileData] = data || [];
+  const [ mobileData, desktopData] = data || [];
 
   const categoryGroups = data.map(
     (d) => d?.lighthouseResult?.categoryGroups ?? null,
@@ -68,10 +68,9 @@ export function PageSpeedInsightsDashboard({
       <CWVMetricsSummary data={data} labels={titleLabels} />
       {hideReport ? null : (
         <PageSpeedCategorySection
-          desktopCategories={desktopData?.lighthouseResult?.categories}
-          mobileCategories={mobileData?.lighthouseResult?.categories}
-          desktopAuditRecords={desktopData?.lighthouseResult?.audits}
-          mobileAuditRecords={mobileData?.lighthouseResult?.audits}
+          data={data}
+          labels={titleLabels}
+          
         />
       )}
       <EntitiesTable

@@ -10,30 +10,40 @@ import {
 import { AuditResultsRecord } from '@/lib/schema';
 
 export function RenderMetricSavings({
-  mobileAuditData,
-  desktopAuditData,
+  auditData,
+  labels,
 }: {
-  mobileAuditData?: AuditResultsRecord[string];
-  desktopAuditData?: AuditResultsRecord[string];
+  auditData?: (AuditResultsRecord[string] | null)[];
+
+  labels: string[];
 }) {
-  if (!mobileAuditData?.metricSavings && !desktopAuditData?.metricSavings) {
+  const metricSavings =
+    auditData
+      ?.map((a, i) => ({ metricSavings: a?.metricSavings, label: labels[i] }))
+      .filter((a) => a.metricSavings) || [];
+
+  if (!metricSavings.length) {
     return null;
   }
 
   const keys = [
-    ...new Set([
-      ...Object.keys(mobileAuditData?.metricSavings || {}),
-      ...Object.keys(desktopAuditData?.metricSavings || {}),
-    ]),
+    ...new Set(
+      metricSavings?.reduce(
+        (acc: string[], a) => [...acc, ...Object.keys(a.metricSavings || {})],
+        [],
+      ),
+    ),
   ];
 
-  const mobileTotalSavings = Object.values(
-    mobileAuditData?.metricSavings || {},
-  ).reduce((acc, savings) => acc + savings, 0);
-  const desktopTotalSavings = Object.values(
-    desktopAuditData?.metricSavings || {},
-  ).reduce((acc, savings) => acc + savings, 0);
-  if (mobileTotalSavings === 0 && desktopTotalSavings === 0) {
+  const totalSavings = metricSavings.map((m) =>
+    Object.values(m.metricSavings || {}).reduce(
+      (acc, savings) => acc + savings,
+      0,
+    ),
+  );
+  const sum = totalSavings.reduce((a, b) => a + Math.abs(b), 0);
+
+  if (sum === 0) {
     return null;
   }
 
@@ -46,24 +56,22 @@ export function RenderMetricSavings({
         <TableHeader>
           <TableRow>
             <TableHead>Metric</TableHead>
-            {mobileTotalSavings ? (
-              <TableHead>Possible Mobile Savings</TableHead>
-            ) : null}
-            {desktopTotalSavings ? (
-              <TableHead>Possible Desktop Savings</TableHead>
-            ) : null}
+            {metricSavings.map((ms, i) => (
+              <TableHead key={`${i}_${ms.label}`}>
+                Possible {ms.label || ''} Savings
+              </TableHead>
+            ))}
           </TableRow>
         </TableHeader>
         <TableBody>
           {keys.map((metric) => (
             <TableRow key={metric}>
               <TableCell>{metric}</TableCell>
-              { mobileTotalSavings ?<TableCell>
-                {mobileAuditData?.metricSavings?.[metric] ?? 0}
-              </TableCell> : null}
-              {desktopTotalSavings ?<TableCell>
-                {desktopAuditData?.metricSavings?.[metric] ?? 0}
-              </TableCell> : null}
+              {metricSavings.map((ms, i) => (
+                <TableCell key={`${i}_${ms.label}`}>
+                  {ms?.metricSavings?.[metric] ?? 0}
+                </TableCell>
+              ))}
             </TableRow>
           ))}
         </TableBody>

@@ -36,7 +36,10 @@ export const ScoreDisplayModesRanking: Record<
   notApplicable: 8,
 } as const;
 
-export function isEmptyResult(auditData?: AuditResultsRecord[string]) {
+export function isEmptyResult(auditData?: AuditResultsRecord[string] | null) {
+  if (!auditData) {
+    return true;
+  }
   if (
     auditData?.details?.type === 'table' &&
     auditData?.details.items?.length === 0

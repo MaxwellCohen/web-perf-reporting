@@ -1,43 +1,39 @@
 "use client";
-import { AuditResultsRecord, CategoryResult } from '@/lib/schema';
+import { NullablePageSpeedInsights } from '@/lib/schema';
 import { CategoryAuditSection } from './CategoryAuditSection';
 
 export function PageSpeedCategorySection({
-  desktopCategories,
-  mobileCategories,
-  desktopAuditRecords,
-  mobileAuditRecords,
+  data,
+  labels,
   // labels,
 }: {
-  desktopCategories?: Record<string, CategoryResult>;
-  mobileCategories?: Record<string, CategoryResult>;
-  desktopAuditRecords?: AuditResultsRecord | undefined;
-  mobileAuditRecords?: AuditResultsRecord | undefined;
-  labels?: string[];
+  data: NullablePageSpeedInsights[];
+  labels: string[];
 }) {
+  const categories = data.map((d) => d?.lighthouseResult?.categories || null);
+  const audits = data.map((d) => d?.lighthouseResult?.audits || null);
   const categoryKeys = [
-    ...new Set<string>([
-      ...Object.keys(desktopCategories || {}),
-      ...Object.keys(mobileCategories || {}),
-    ]),
+    ...new Set<string>(
+      categories.reduce((acc, curr) => {
+        if (!curr) return acc;
+        return [...acc, ...Object.keys(curr)];
+      }, [] as string[])
+    ),
   ];
   const categoryData = categoryKeys
     .map((key) => ({
       key,
-      desktopCategory: desktopCategories?.[key],
-      mobileCategory: mobileCategories?.[key],
+      categoryArr: categories.map((category) => category?.[key] || null),
     }))
 
   return (
     <>
-      {categoryData.map(({ key, desktopCategory, mobileCategory }) => (
+      {categoryData.map(({ key, categoryArr }) => (
         <CategoryAuditSection
           key={key}
-          categoryKey={key}
-          desktopCategory={desktopCategory}
-          mobileCategory={mobileCategory}
-          desktopAuditRecords={desktopAuditRecords}
-          mobileAuditRecords={mobileAuditRecords}
+          category={categoryArr}
+          labels={labels}
+          auditsRecords={audits}
         />
       ))}
     </>

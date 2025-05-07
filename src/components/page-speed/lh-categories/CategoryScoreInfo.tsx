@@ -6,7 +6,7 @@ export function CategoryScoreInfo({
     device,
   }: {
     category?: CategoryResult | null;
-    device: 'Mobile' | 'Desktop';
+    device?: string;
   }) {
     if (!category?.score) {
       return null;
@@ -14,7 +14,7 @@ export function CategoryScoreInfo({
     return (
       <div className="flex-0 flex w-64 flex-col gap-2 align-top hover:no-underline">
         <div className="text-center text-xs hover:no-underline">
-          {device} - {Math.round(category.score * 100)}
+          {device ? `${device} - ` : ''}{Math.round(category.score * 100)}
         </div>
         <HorizontalScoreChart
           score={category.score || 0}
