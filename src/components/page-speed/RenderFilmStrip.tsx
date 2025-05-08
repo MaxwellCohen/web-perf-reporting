@@ -10,8 +10,8 @@ export function RenderFilmStrip() {
     .map((i, index) => {
       const timeline = i.item?.lighthouseResult?.audits?.[
         'screenshot-thumbnails'
-      ].details as AuditDetailFilmstrip;
-      if (timeline.type !== 'filmstrip') return null;
+      ]?.details as AuditDetailFilmstrip;
+      if (timeline?.type !== 'filmstrip') return null;
       return <Timeline key={index} timeline={timeline} device={i.label} />;
     })
     .filter(Boolean);

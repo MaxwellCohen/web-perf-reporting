@@ -60,7 +60,7 @@ export function RenderTableValue({
       text: () => <RenderTextValue value={value as TextValue} {...props} />,
     } as const;
     return (
-      valueTypeMap[value.type as keyof typeof valueTypeMap]?.() || (
+      valueTypeMap[value?.type as keyof typeof valueTypeMap]?.() || (
         <RenderDefault value={value} {...props} />
       )
     );
