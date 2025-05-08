@@ -34,7 +34,7 @@ export function PageSpeedInsightsDashboard({
           desktopFullPageScreenshot:
             desktopData?.lighthouseResult?.fullPageScreenshot,
           mobileFullPageScreenshot:
-            mobileData?.lighthouseResult.fullPageScreenshot,
+            mobileData?.lighthouseResult?.fullPageScreenshot,
         }}
       >
         {hideReport ? null : (
