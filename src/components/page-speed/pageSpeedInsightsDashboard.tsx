@@ -21,12 +21,17 @@ export function PageSpeedInsightsDashboard({
   const [mobileData, desktopData] = data || [];
   const items = data
     .map((item, i) => ({
-      item: item as PageSpeedInsights,
+      item: (item?.lighthouseResult
+        ? (item as PageSpeedInsights)
+        : (item as PageSpeedInsights['lighthouseResult'])?.lighthouseVersion
+          ? ({ lighthouseResult: item } as unknown as PageSpeedInsights)
+          : null) as unknown as PageSpeedInsights,
       label: labels[i] || '',
     }))
     .filter(({ item }) => !!item);
   const titleLabels = labels;
-  const timestamp = items.find((d) => d.item.analysisUTCTimestamp)?.item.analysisUTCTimestamp;
+  const timestamp = items.find((d) => d.item?.analysisUTCTimestamp)?.item
+    ?.analysisUTCTimestamp;
   return (
     <InsightsContext.Provider value={items}>
       <fullPageScreenshotContext.Provider
@@ -47,19 +52,18 @@ export function PageSpeedInsightsDashboard({
         {hideReport ? null : (
           <LoadingExperience
             title="Page Loading Experience"
-            experienceKey='loadingExperience'
-            
+            experienceKey="loadingExperience"
           />
         )}
         {hideReport ? null : (
           <LoadingExperience
             title="Origin Loading Experience"
-            experienceKey='originLoadingExperience'
+            experienceKey="originLoadingExperience"
           />
         )}
         <RenderFilmStrip />
-        <CWVMetricsComponent/>
-        <CWVMetricsSummary/>
+        <CWVMetricsComponent />
+        <CWVMetricsSummary />
         {hideReport ? null : (
           <PageSpeedCategorySection data={data} labels={titleLabels} />
         )}
