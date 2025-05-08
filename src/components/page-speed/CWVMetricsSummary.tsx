@@ -283,7 +283,7 @@ export function RenderJSUsageSummary() {
             <CardHeader className="text-center text-2xl font-bold">
               {label ? `JS Usage Summary for ${label}` : `JS Usage Summary`}
             </CardHeader>
-            <Table className='border-2'>
+            <Table className="border-2">
               <TableHeader>
                 <TableRow>
                   <TableHead className="min-w-[18rem] max-w-[75vw] whitespace-nowrap">
@@ -295,8 +295,13 @@ export function RenderJSUsageSummary() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {treeData.nodes.map((node, idx) => <JSUsageTable key={`${idx}-${node.name}`} node={node} depth={0} />
-                )}
+                {treeData.nodes.map((node, idx) => (
+                  <JSUsageTable
+                    key={`${idx}-${node.name}`}
+                    node={node}
+                    depth={0}
+                  />
+                ))}
               </TableBody>
             </Table>
           </Card>
@@ -306,33 +311,41 @@ export function RenderJSUsageSummary() {
   );
 }
 
-function JSUsageTable({node,  depth = 0}: {node: TreeMapNode, depth: number }) {
+function JSUsageTable({
+  node,
+  depth = 0,
+}: {
+  node: TreeMapNode;
+  depth: number;
+}) {
   const [open, setOpen] = useState(true);
   const handleClick = () => {
     setOpen(!open);
   };
-  const unusedBytes = node.unusedBytes || 0; 
+  const unusedBytes = node.unusedBytes || 0;
   const resourceBytes = node.resourceBytes || 0;
-  const percent = ((unusedBytes / resourceBytes) * 100);
+  const percent = (unusedBytes / resourceBytes) * 100;
   const isLarge = unusedBytes > 51200;
   return (
-    <Fragment >
+    <Fragment>
       <TableRow onClick={handleClick} suppressHydrationWarning>
         <TableCell
-          className={`min-w-[12rem] max-w-[75vw] overflow-scroll whitespace-nowrap ${depth ? 'border-l border-b' : ''}`}
+          className={`min-w-[12rem] max-w-[75vw] overflow-scroll whitespace-nowrap ${depth ? 'border-b border-l' : ''}`}
           style={{ width: `calc(75vw - ${0.5 * depth}rem) ` }}
-        > 
-          <div className='flex flex-row align-middle'>
-          {isLarge || percent > 50 ? <div className={'w-3 h-3 rounded-ful bg-red-500 mr-2 self-center'}><span className='sr-only'> warning this function could have extra JS</span></div> : null}
-          <div>{node.name} {node.duplicatedNormalizedModuleName}</div>
+        >
+          <div className="flex flex-row align-middle">
+            {isLarge || percent > 50 ? <WarningSquare /> : null}
+            <div>
+              {`${node.name}${node.duplicatedNormalizedModuleName ? ` - ${node.duplicatedNormalizedModuleName}` : ''}`}
+            </div>
           </div>
         </TableCell>
-        <TableCell className='w-20 border'>
+        <TableCell className="w-20 border">
           {RenderBytesValue({
             value: resourceBytes || 0,
           })}
         </TableCell>
-        <TableCell className='w-20 border'>
+        <TableCell className="w-20 border">
           {RenderBytesValue({
             value: unusedBytes || 0,
           })}
@@ -342,15 +355,31 @@ function JSUsageTable({node,  depth = 0}: {node: TreeMapNode, depth: number }) {
         </TableCell>
       </TableRow>
       {node.children && open ? (
-        <TableCell className="border-x border-b-2 pr-0 py-0" colSpan={4} suppressHydrationWarning>
+        <TableCell
+          className="border-x border-b-2 py-0 pr-0"
+          colSpan={4}
+          suppressHydrationWarning
+        >
           <Table className="pr-0 pt-0" suppressHydrationWarning>
-            {node.children.map((child, idx) =>
-              <JSUsageTable key={`${idx}-${child.name}`} node={child} depth={depth + 1}/>,
-            )}
+            {node.children.map((child, idx) => (
+              <JSUsageTable
+                key={`${idx}-${child.name}`}
+                node={child}
+                depth={depth + 1}
+              />
+            ))}
           </Table>
         </TableCell>
       ) : null}
     </Fragment>
+  );
+}
+
+function WarningSquare() {
+  return (
+    <div className={'rounded-ful mr-2 h-3 w-3 self-center bg-yellow-500'}>
+      <span className="sr-only">warning this function could have extra JS</span>
+    </div>
   );
 }
 
