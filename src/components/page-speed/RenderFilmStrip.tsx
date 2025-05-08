@@ -14,7 +14,7 @@ export function RenderFilmStrip() {
       if (timeline?.type !== 'filmstrip') return null;
       return <Timeline key={index} timeline={timeline} device={i.label} />;
     })
-    .filter(Boolean);
+    .filter(Boolean); 
   if (!timeLines.length) return null;
 
   return (
