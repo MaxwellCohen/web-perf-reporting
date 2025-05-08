@@ -311,29 +311,34 @@ function JSUsageTable({node,  depth = 0}: {node: TreeMapNode, depth: number }) {
   const handleClick = () => {
     setOpen(!open);
   };
+  const unusedBytes = node.unusedBytes || 0; 
+  const resourceBytes = node.resourceBytes || 0;
+  const percent = ((unusedBytes / resourceBytes) * 100);
+  const isLarge = unusedBytes > 51200;
   return (
     <Fragment >
       <TableRow onClick={handleClick} suppressHydrationWarning>
         <TableCell
           className={`min-w-[12rem] max-w-[75vw] overflow-scroll whitespace-nowrap ${depth ? 'border-l border-b' : ''}`}
           style={{ width: `calc(75vw - ${0.5 * depth}rem) ` }}
-        >
-          {node.duplicatedNormalizedModuleName || node.name}
+        > 
+          <div className='flex flex-row align-middle'>
+          {isLarge || percent > 50 ? <div className={'w-3 h-3 rounded-ful bg-red-500 mr-2 self-center'}><span className='sr-only'> warning this function could have extra JS</span></div> : null}
+          <div>{node.name} {node.duplicatedNormalizedModuleName}</div>
+          </div>
         </TableCell>
         <TableCell className='w-20 border'>
           {RenderBytesValue({
-            value: node.resourceBytes || 0,
+            value: resourceBytes || 0,
           })}
         </TableCell>
         <TableCell className='w-20 border'>
           {RenderBytesValue({
-            value: node.unusedBytes || 0,
+            value: unusedBytes || 0,
           })}
         </TableCell>
         <TableCell className={`w-20 ${depth ? 'border' : ''}`}>
-          {`${(((node.unusedBytes || 0) / node.resourceBytes) * 100).toFixed(
-            2,
-          )} %`}
+          {`${percent.toFixed(2)} %`}
         </TableCell>
       </TableRow>
       {node.children && open ? (
