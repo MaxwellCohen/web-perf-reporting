@@ -1,28 +1,27 @@
 import { HorizontalGaugeChart } from '@/components/common/PageSpeedGaugeChart';
-import { PageSpeedApiLoadingExperience } from '@/lib/schema';
 import { Details } from '@/components/ui/accordion';
 import { Card, CardTitle } from '../ui/card';
-import { Fragment } from 'react';
+import { Fragment, useContext } from 'react';
+import { InsightsContext } from './PageSpeedContext';
 
 interface LoadingExperienceProps {
-  title: string;
-  experiences: (PageSpeedApiLoadingExperience | undefined | null)[];
-  labels: string[];
+  title: string,
+  experienceKey: 'loadingExperience'| 'originLoadingExperience'
 }
 
 export function LoadingExperience({
   title,
-  experiences,
-  labels,
+  experienceKey
 }: LoadingExperienceProps) {
-  const hasData = experiences?.some((experience) => !!experience);
-  if (!hasData) {
+  const items = useContext(InsightsContext);
+  if (!items.length) {
     return null;
   }
+  const experiences = items.map(({item, label}) => ({item: item[experienceKey], label}))
+
   const extraTitle = experiences
-    .map((experience, idx) => {
-      if (!experience?.overall_category) return null;
-      return `${ labels[idx] ? `${labels[idx]} - ` : ''}${experience.overall_category}`;
+    .map((experience) => {
+      return `${ experience.label ? `${experience.label} - ` : ''}${experience.item.overall_category}`;
     })
     .join(' \n');
   const metrics = [
@@ -49,13 +48,13 @@ export function LoadingExperience({
               >
                 <CardTitle className="text-sm font-bold">{metric}</CardTitle>
                 {experiences.map((experience, idx) => {
-                  const metricValue = experience?.metrics[key];
+                  const metricValue = experience?.item.metrics[key];
                   return (
                     <Fragment key={`${key}_${idx}`}>
                       {!metricValue ? null : (
                         <HorizontalGaugeChart
                           key={key}
-                          metric={`${metricValue.percentile} - ${metricValue.category} ${labels[idx] ? `(${labels[idx]})`: ''}`}
+                          metric={`${metricValue.percentile} - ${metricValue.category} ${experience.label ? `(${experience.label})`: ''}`}
                           data={metricValue}
                         />
                       )}

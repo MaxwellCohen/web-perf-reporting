@@ -1,23 +1,20 @@
-import {  AuditDetailFilmstripSchema, NullablePageSpeedInsights } from '@/lib/schema';
+import { AuditDetailFilmstrip } from '@/lib/schema';
 import { Details } from '../ui/accordion';
 import { Timeline } from './Timeline';
+import { useContext } from 'react';
+import { InsightsContext } from './PageSpeedContext';
 
-export function RenderFilmStrip({
-  data,
-  labels,
-}: {
-  data: NullablePageSpeedInsights[];
-  labels: string[];
-}) {
-  const timeLines = data.map((item, index) => {
-    const timeline = AuditDetailFilmstripSchema.safeParse(
-      item?.lighthouseResult?.audits?.['screenshot-thumbnails'].details
-    ).data;
-    if (!timeline) return null;
-    return (
-      <Timeline key={index} timeline={timeline} device={labels[index]} />
-    )
-  }).filter(Boolean);
+export function RenderFilmStrip() {
+  const items = useContext(InsightsContext);
+  const timeLines = items
+    .map((i, index) => {
+      const timeline = i.item?.lighthouseResult?.audits?.[
+        'screenshot-thumbnails'
+      ].details as AuditDetailFilmstrip;
+      if (timeline.type !== 'filmstrip') return null;
+      return <Timeline key={index} timeline={timeline} device={i.label} />;
+    })
+    .filter(Boolean);
   if (!timeLines.length) return null;
 
   return (

@@ -3,6 +3,8 @@ import {
   AuditDetailTable,
   DebugData,
   NullablePageSpeedInsights,
+  TreeMapData,
+  TreeMapNode,
 } from '@/lib/schema';
 import {
   Table,
@@ -20,9 +22,10 @@ import {
   RenderBytesValue,
   RenderMSValue,
 } from './lh-categories/table/RenderTableValue';
-import { Fragment, JSX } from 'react';
+import { Fragment, JSX, useContext, useState } from 'react';
 import { groupBy } from '@/lib/utils';
 import { toTitleCase } from './toTitleCase';
+import { InsightsContext } from './PageSpeedContext';
 
 const CWV = [
   'firstContentfulPaint',
@@ -30,7 +33,7 @@ const CWV = [
   'totalBlockingTime',
   'cumulativeLayoutShift',
   'cumulativeLayoutShiftMainFrame',
-  'speedIndex'
+  'speedIndex',
 ];
 
 const taskKeys = [
@@ -72,14 +75,10 @@ const ObservedEvents = [
   'observedDomContentLoaded',
 ];
 
-export function CWVMetricsSummary({
-  data,
-  labels,
-}: {
-  data: NullablePageSpeedInsights[];
-  labels: string[];
-}) {
-  const items = data.map(mergeData);
+export function CWVMetricsSummary() {
+  const data = useContext(InsightsContext);
+  const labels = data.map((d) => d.label);
+  const items = data.map(({ item }) => mergeData(item));
   const itemKeys = items.map((d) => Object.keys(d));
   const keys = [
     ...new Set(itemKeys.reduce((acc, curr) => [...acc, ...curr], [])),
@@ -154,7 +153,8 @@ export function CWVMetricsSummary({
             return RenderMSValue({ value: v });
           }}
         />
-        <RenderNetworkRequestsSummary data={data} labels={labels} />
+        <RenderNetworkRequestsSummary />
+        <RenderJSUsageSummary />
         <RenderTable
           items={items}
           labels={labels}
@@ -173,15 +173,11 @@ export function CWVMetricsSummary({
   );
 }
 
-function RenderNetworkRequestsSummary({
-  data,
-  labels,
-}: {
-  data: NullablePageSpeedInsights[];
-  labels: string[];
-}) {
-  const networkData = data.map(
-    (d) =>
+function RenderNetworkRequestsSummary() {
+  const items = useContext(InsightsContext);
+  const labels = items.map((d) => d.label);
+  const networkData = items.map(
+    ({ item: d }) =>
       d?.lighthouseResult?.audits?.['network-requests']
         ?.details as AuditDetailTable,
   );
@@ -211,7 +207,7 @@ function RenderNetworkRequestsSummary({
         <TableHeader>
           <TableRow>
             <TableHead> Request Type</TableHead>
-            {labels.length > 1? <TableHead> Device</TableHead> : null }
+            {labels.length > 1 ? <TableHead> Device</TableHead> : null}
             <TableHead> Count</TableHead>
             <TableHead> Total Transfer Size</TableHead>
             <TableHead> Total Resource Size</TableHead>
@@ -238,7 +234,9 @@ function RenderNetworkRequestsSummary({
                             {toTitleCase(key)}
                           </TableCell>
                         ) : null}
-                        {labels.length > 1 ? <TableCell> {labels[labelIndex] || ''} </TableCell> : null }
+                        {labels.length > 1 ? (
+                          <TableCell> {labels[labelIndex] || ''} </TableCell>
+                        ) : null}
                         <TableCell> {item.length} </TableCell>
                         <TableCell>
                           {' '}
@@ -262,6 +260,92 @@ function RenderNetworkRequestsSummary({
         </TableBody>
       </Table>
     </Card>
+  );
+}
+
+export function RenderJSUsageSummary() {
+  const items = useContext(InsightsContext);
+  const treeData = items
+    .map(({ item, label }) => ({
+      treeData: item.lighthouseResult?.audits?.['script-treemap-data']
+        ?.details as TreeMapData,
+      label,
+    }))
+    .filter(({ treeData }) => treeData?.type === 'treemap-data');
+  console.log('hi', treeData);
+  if (treeData.length === 0) return null;
+
+  return (
+    <>
+      {treeData.map(({ treeData, label }, idx) => {
+        return (
+          <Card className="sm:col-span-2 lg:col-span-full" key={`${idx}_label`}>
+            <CardHeader className="text-center text-2xl font-bold">
+              {label ? `JS Usage Summary for ${label}` : `JS Usage Summary`}
+            </CardHeader>
+            <Table className='border-2'>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[18rem] max-w-[75vw] whitespace-nowrap">
+                    Name
+                  </TableHead>
+                  <TableHead> Resource Size</TableHead>
+                  <TableHead> Unused Bytes</TableHead>
+                  <TableHead> % of Unused Bytes</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {treeData.nodes.map((node, idx) => <JSUsageTable key={`${idx}-${node.name}`} node={node} depth={0} />
+                )}
+              </TableBody>
+            </Table>
+          </Card>
+        );
+      })}
+    </>
+  );
+}
+
+function JSUsageTable({node,  depth = 0}: {node: TreeMapNode, depth: number }) {
+  const [open, setOpen] = useState(true);
+  const handleClick = () => {
+    setOpen(!open);
+  };
+  return (
+    <Fragment >
+      <TableRow onClick={handleClick} suppressHydrationWarning>
+        <TableCell
+          className={`min-w-[12rem] max-w-[75vw] overflow-scroll whitespace-nowrap ${depth ? 'border-l border-b' : ''}`}
+          style={{ width: `calc(75vw - ${0.5 * depth}rem) ` }}
+        >
+          {node.duplicatedNormalizedModuleName || node.name}
+        </TableCell>
+        <TableCell className='w-20 border'>
+          {RenderBytesValue({
+            value: node.resourceBytes || 0,
+          })}
+        </TableCell>
+        <TableCell className='w-20 border'>
+          {RenderBytesValue({
+            value: node.unusedBytes || 0,
+          })}
+        </TableCell>
+        <TableCell className={`w-20 ${depth ? 'border' : ''}`}>
+          {`${(((node.unusedBytes || 0) / node.resourceBytes) * 100).toFixed(
+            2,
+          )} %`}
+        </TableCell>
+      </TableRow>
+      {node.children && open ? (
+        <TableCell className="border-x border-b-2 pr-0 py-0" colSpan={4} suppressHydrationWarning>
+          <Table className="pr-0 pt-0" suppressHydrationWarning>
+            {node.children.map((child, idx) =>
+              <JSUsageTable key={`${idx}-${child.name}`} node={child} depth={depth + 1}/>,
+            )}
+          </Table>
+        </TableCell>
+      ) : null}
+    </Fragment>
   );
 }
 
@@ -298,9 +382,11 @@ function RenderTable({
           <TableRow>
             <TableHead></TableHead>
             {itemKeys
-              .map((itemKey , idx) =>
+              .map((itemKey, idx) =>
                 itemKey?.length ? (
-                  <TableHead key={`${idx}-${labels[idx]}`}>{labels[idx] || ''}</TableHead>
+                  <TableHead key={`${idx}-${labels[idx]}`}>
+                    {labels[idx] || ''}
+                  </TableHead>
                 ) : null,
               )
               .filter(Boolean)}
