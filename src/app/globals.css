@@ -109,3 +109,20 @@ body {
     @apply underline;
   }
 }
+
+
+*::-webkit-scrollbar {
+  width: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background-color: transparent;
+  border: 1.5px solid hsl(var(--muted-foreground));
+  border-radius: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border: 2px solid hsl(var(--muted-foreground));
+  border-radius: 9999px;
+}
