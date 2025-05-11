@@ -61,8 +61,8 @@ export function PageSpeedInsightsDashboard({
             experienceKey="originLoadingExperience"
           />
         )}
-        <RenderFilmStrip />
-        <CWVMetricsComponent />
+       { hideReport ?  (<><RenderFilmStrip />
+        <CWVMetricsComponent /></>) : null}
         <CWVMetricsSummary />
         {hideReport ? null : (
           <PageSpeedCategorySection data={data} labels={titleLabels} />

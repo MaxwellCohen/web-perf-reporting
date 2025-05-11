@@ -24,7 +24,7 @@ import { Fragment, JSX, useContext } from 'react';
 import { groupBy } from '@/lib/utils';
 import { toTitleCase } from './toTitleCase';
 import { InsightsContext } from './PageSpeedContext';
-import { JSUsageSummary } from './JSUsageSummary';
+import { JSUsageSection } from './JSUsageSection';
 
 const CWV = [
   'firstContentfulPaint',
@@ -100,7 +100,7 @@ export function CWVMetricsSummary() {
       <summary className="flex flex-col gap-2">
         <h3 className="text-xl font-semibold">Summary Metrics</h3>
       </summary>
-      <div className="grid grid-cols-1 gap-3 py-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 py-3  md:grid-cols-2 lg:grid-cols-3">
         <RenderTable
           items={items}
           labels={labels}
@@ -153,7 +153,7 @@ export function CWVMetricsSummary() {
           }}
         />
         <RenderNetworkRequestsSummary />
-        <JSUsageSummary />
+        <JSUsageSection />
         <RenderTable
           items={items}
           labels={labels}

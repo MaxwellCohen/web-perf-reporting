@@ -37,7 +37,8 @@ export default function ViewerPage() {
 
   const handleJsonSubmit = async (jsonString: string) => {
     try {
-      const rawData = JSON.parse(jsonString) as unknown;
+      let rawData = JSON.parse(jsonString) as unknown;
+      rawData = (rawData as PageSpeedInsights).lighthouseResult ? {lighthouseResult: (rawData as PageSpeedInsights).lighthouseResult } : rawData;
       setData(
         Array.isArray(rawData)
           ? rawData
