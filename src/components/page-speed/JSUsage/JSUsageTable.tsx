@@ -144,7 +144,7 @@ export function makeSortingHeading(
           </Button>
         </div>
         {filterType === 'string' ? (
-          <StringFilterHeader column={column} />
+          <StringFilterHeader column={column} name={name}/>
         ) : null}
         {filterType === 'range' ? <RangeFilter column={column} /> : null}
       </div>
@@ -154,7 +154,8 @@ export function makeSortingHeading(
 
 export function StringFilterHeader<T>({
   column,
-}: Pick<HeaderContext<T, unknown>, 'column'>) {
+  name
+}: Pick<HeaderContext<T, unknown>, 'column'> & {name: string}) {
   const id = useId();
   const uniqueValues = column.getFacetedUniqueValues();
   const sortedUniqueValues = useMemo(
