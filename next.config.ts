@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     dynamicIO: false,
-    reactCompiler: true,
+    reactCompiler: false,
   },
 };
 

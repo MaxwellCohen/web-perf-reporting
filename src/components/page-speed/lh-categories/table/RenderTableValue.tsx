@@ -296,6 +296,7 @@ function RenderDefault({
 
 export function RenderBytesValue({
   value,
+  children,
   ...props
 }: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
   const bytes = Number(value);
@@ -303,6 +304,7 @@ export function RenderBytesValue({
   const mb = kb / 1024;
   return (
     <div title="bytes" {...props} className={cn('', props.className)}>
+      {children}
       {mb > 1
         ? `${mb.toFixed(2)} MB`
         : kb > 1

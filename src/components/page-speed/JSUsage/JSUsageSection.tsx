@@ -1,10 +1,10 @@
 'use client';
 import { TreeMapData } from '@/lib/schema';
 import { useContext, useMemo } from 'react';
-import { InsightsContext } from './PageSpeedContext';
-import { flattenTreeMapNode } from './flattenTreeMapNode';
-import { Card, CardHeader } from '../ui/card';
-import {JSUsageTable} from './JSUsageTable'
+import { InsightsContext } from '../PageSpeedContext';
+import { flattenTreeMapNode } from '../flattenTreeMapNode';
+import { Card, CardHeader } from '../../ui/card';
+import {JSUsageTableWithControls} from './JSUsageTable'
 
 export function JSUsageSection() {
   const items = useContext(InsightsContext);
@@ -46,7 +46,7 @@ export function JSUsageCard({
         {`JS Usage Table`}
         {label ? ` for ${label}` : ` `}
       </CardHeader>
-      <JSUsageTable data={nodes} depth={0} />
+      <JSUsageTableWithControls data={nodes} />
     </Card>
   );
 }

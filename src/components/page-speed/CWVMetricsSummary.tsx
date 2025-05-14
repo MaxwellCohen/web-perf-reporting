@@ -24,7 +24,7 @@ import { Fragment, JSX, useContext } from 'react';
 import { groupBy } from '@/lib/utils';
 import { toTitleCase } from './toTitleCase';
 import { InsightsContext } from './PageSpeedContext';
-import { JSUsageSection } from './JSUsageSection';
+import { JSUsageSection } from './JSUsage/JSUsageSection';
 
 const CWV = [
   'firstContentfulPaint',
