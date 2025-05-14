@@ -252,7 +252,7 @@ export function RangeFilter<T>({
         {/* Min thumb label */}
         <RenderBytesValue
           value={fMin}
-          style={{ left: `${((fMin - minValue) / maxValue) * 100}%` }}
+          style={{ right: `60%` }}
           className={
             'absolute -top-8 inline-block translate-y-1/2 whitespace-nowrap text-xs font-medium'
           }
@@ -264,7 +264,7 @@ export function RangeFilter<T>({
         {/* Max thumb label */}
         <RenderBytesValue
           value={fMax}
-          style={{ right: `${(1 - fMax / maxValue) * 100}%` }}
+           style={{ left: `60%` }}
           className={
             'break-none absolute top-8 translate-y-1/2 whitespace-nowrap text-right text-xs font-medium'
           }

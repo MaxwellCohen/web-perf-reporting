@@ -1,4 +1,4 @@
-import { TableCell, TableRow } from "@/components/ui/tableDiv";
+import { TableCell, TableRow } from "@/components/ui/table";
 
 export function NoResultsRow() {
     return (
