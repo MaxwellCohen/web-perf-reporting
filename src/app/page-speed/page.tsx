@@ -13,31 +13,24 @@ export default async function Home({
   const url = updateURl(params.url as string);
 
   return (
-    <div className='max-w-screen-2xl mx-auto'>
+    <div className="mx-auto max-w-screen-2xl">
       <h1 className="mx-auto text-center text-2xl font-extrabold">
-        Page Speed Insights {url ? ` for ${url}` : ''}
+        Page Speed Insights
       </h1>
       {!url ? (
         <UrlLookupForm />
       ) : (
-        <Suspense >
+        <Suspense>
           <PageSpeedInsightsDashboardWrapper url={url} />
         </Suspense>
-
       )}
     </div>
   );
 }
 
-
-async function PageSpeedInsightsDashboardWrapper({
-  url,
-}: {
-  url : string;
-}) {
+async function PageSpeedInsightsDashboardWrapper({ url }: { url: string }) {
   const data = await requestPageSpeedData(url);
-  return <PageSpeedInsightsDashboard
-    data={data}
-    labels={['Mobile', 'Desktop']}
-/>
+  return (
+    <PageSpeedInsightsDashboard data={data} labels={['Mobile', 'Desktop']} />
+  );
 }

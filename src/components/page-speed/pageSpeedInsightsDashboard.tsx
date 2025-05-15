@@ -8,6 +8,7 @@ import { fullPageScreenshotContext, InsightsContext } from './PageSpeedContext';
 import { RenderFilmStrip } from './RenderFilmStrip';
 import { CWVMetricsSummary } from './CWVMetricsSummary';
 import { NullablePageSpeedInsights, PageSpeedInsights } from '@/lib/schema';
+import { toTitleCase } from './toTitleCase';
 
 export function PageSpeedInsightsDashboard({
   data,
@@ -30,8 +31,53 @@ export function PageSpeedInsightsDashboard({
     }))
     .filter(({ item }) => !!item);
   const titleLabels = labels;
-  const timestamp = items.find((d) => d.item?.analysisUTCTimestamp)?.item
-    ?.analysisUTCTimestamp;
+
+// type TableDataItem = {
+//   _category: {
+//     id?: string;
+//     title?: string;
+//     score?: number;
+//   };
+//   _userLabel: string;
+//   id?: string;
+//   weight: number;
+//   group?: string;
+//   title?: string;
+//   description?: string;
+//   score?: number;
+//   displayValue?: string;
+//   details?: Record<string, unknown>;
+// };
+
+// const tableDataArr: TableDataItem[] = items
+//    .map(({ item, label }) => {
+//      // flaten the categories
+//      return Object.values(item.lighthouseResult?.categories || {}).map((category) => {
+//       if (!category?.auditRefs?.length ) {return null;}
+//       const {auditRefs = [], ..._category } = category;
+//       return auditRefs.map((ar) => {
+//         if(!ar.id) return null;
+//         return {
+//           _category,
+//           _userLabel: label,
+//           ...ar,
+//           ...(item.lighthouseResult?.audits?.[ar.id] || {}),
+//         }
+//       });
+//     });
+//   }).flat(2)
+    
+
+  //  console.log(tableDataArr)
+
+  const messages = items.map((d) => {
+     return [d.item?.lighthouseResult?.finalDisplayedUrl || 'unknown url',
+      d.item.lighthouseResult?.configSettings?.formFactor ? `on ${toTitleCase(d.item.lighthouseResult?.configSettings?.formFactor)}` : '',
+      d.item?.analysisUTCTimestamp ? ` at ${new Date(d.item?.analysisUTCTimestamp).toLocaleDateString()}` : ''].join(' ').trim();
+  });
+  
+  
+
   return (
     <InsightsContext.Provider value={items}>
       <fullPageScreenshotContext.Provider
@@ -42,13 +88,15 @@ export function PageSpeedInsightsDashboard({
             mobileData?.lighthouseResult?.fullPageScreenshot,
         }}
       >
-        {hideReport ? null : (
+        
           <h2 className="text-center text-2xl font-bold">
             {`Report for ${
-              timestamp ? new Date(timestamp || 0).toLocaleDateString() : ''
+             messages.length > 1
+              ? messages.join(', ')
+              : messages[0] || 'unknown url'
             }`}
           </h2>
-        )}
+   
         {hideReport ? null : (
           <LoadingExperience
             title="Page Loading Experience"
@@ -61,8 +109,8 @@ export function PageSpeedInsightsDashboard({
             experienceKey="originLoadingExperience"
           />
         )}
-       { hideReport ?  (<><RenderFilmStrip />
-        <CWVMetricsComponent /></>) : null}
+        <RenderFilmStrip />
+        <CWVMetricsComponent /> 
         <CWVMetricsSummary />
         {hideReport ? null : (
           <PageSpeedCategorySection data={data} labels={titleLabels} />

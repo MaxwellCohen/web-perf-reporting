@@ -532,7 +532,6 @@ export function JSUsageTableWithControls({
   'use no memo';
   const table = useUseJSUsageTable(data);
   const rows = table.getRowModel().rows;
-
   return (
     <>
       {depth === 0 ? <TableControls table={table} /> : null}
@@ -680,24 +679,3 @@ function JSUsageTableRow({ row, i }: { row: Row<TreeMapNode>; i: number }) {
     </>
   );
 }
-
-// function JSUsageTableSubRow({
-//   data,
-//   depth = 0,
-// }: {
-//   data: Row<TreeMapNode>[];
-//   depth: number;
-// }) {
-//   'use no memo';
-//   return (
-//     <>
-//       {data?.map((row, i) => (
-//         <JSUsageTableRow
-//           key={`${row.id}_${i}_${depth}`}
-//           row={row}
-//           i={i}
-//         />
-//       ))}
-//     </>
-//   );
-// }

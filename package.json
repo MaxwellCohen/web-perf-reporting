@@ -26,6 +26,7 @@
     "@radix-ui/react-slot": "^1.1.2",
     "@radix-ui/react-tabs": "^1.1.11",
     "@sentry/nextjs": "^9.1.0",
+    "@tanstack/react-form": "^1.11.1",
     "@tanstack/react-table": "^8.21.3",
     "@types/pako": "^2.0.3",
     "@vercel/functions": "^2.0.0",
