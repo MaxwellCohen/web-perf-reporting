@@ -13,10 +13,7 @@ export default async function Home({
   const url = updateURl(params.url as string);
 
   return (
-    <div className="mx-auto max-w-screen-2xl">
-      <h1 className="mx-auto text-center text-2xl font-extrabold">
-        Page Speed Insights
-      </h1>
+    <>
       {!url ? (
         <UrlLookupForm />
       ) : (
@@ -24,7 +21,7 @@ export default async function Home({
           <PageSpeedInsightsDashboardWrapper url={url} />
         </Suspense>
       )}
-    </div>
+    </>
   );
 }
 

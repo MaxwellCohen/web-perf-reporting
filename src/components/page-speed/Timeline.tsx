@@ -18,7 +18,7 @@ import {
   CarouselPrevious,
 } from '../ui/carousel';
 import { CarouselContent } from '../ui/carousel';
-import { Details } from '../ui/accordion';
+// import { Details } from '../ui/accordion'; 
 
 interface TimelineProps {
   timeline?: AuditDetailFilmstrip;
@@ -38,10 +38,11 @@ export function Timeline({ timeline, device }: TimelineProps) {
   if (!timeline?.items?.length) return null;
 
   return (
-    <Details className="mt-3 flex flex-col">
-      <summary className="flex flex-col gap-2 overflow-auto">
+    <div className='px-4'>
+    {/* <Details className="mt-3 flex flex-col"> */}
+      {/* <summary className="flex flex-col gap-2 overflow-auto"> */}
         <h3 className="text-lg font-bold">{device ? `${device} - ` : ''} Timeline</h3>
-      </summary>
+      {/* </summary> */}
       <Dialog>
         <div className="mt-3 flex flex-row gap-2 align-top">
           {timeline.items.map((item, i) => (
@@ -83,6 +84,7 @@ export function Timeline({ timeline, device }: TimelineProps) {
           </DialogContent>
         </div>
       </Dialog>
-    </Details>
+    {/* </Details> */}
+    </div>
   );
 }

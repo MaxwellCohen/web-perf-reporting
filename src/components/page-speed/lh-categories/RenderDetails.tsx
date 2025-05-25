@@ -1,32 +1,36 @@
-import { RenderJSONDetails } from '../RenderJSONDetails';
 import { Timeline } from '../Timeline';
 import {
   AuditDetailFilmstrip,
-  AuditDetailOpportunity,
-  AuditDetailTable,
+  AuditDetailList,
   AuditResultsRecord,
   CriticalRequestChain,
   DebugData,
+  TreeMapData,
 } from '@/lib/schema';
 import { RenderChecklist } from './RenderChecklist';
-import { RenderUnknown } from './RenderUnknown';
-import { DetailTable } from './table/RenderTable';
+import { DetailTable2 } from './table/RenderTable';
 import { RenderDebugData } from './RenderDebugdata';
 import { RenderCriticalChainData } from './table/renderCricticalChain';
+import { TableDataItem } from '../tsTable/TableDataItem';
+import { JSUsageAccordion } from '../JSUsage/JSUsageSection';
 
 export function RenderDetails({
-  auditData,
-  labels,
+  // auditData,
+  // labels,
+  items,
 }: {
-  auditData: (AuditResultsRecord[string] | null)[];
-  labels: string[];
+  // auditData?: (AuditResultsRecord[string] | null)[];
+  // labels?: string[];
+  items: TableDataItem[];
 }) {
-  const details = auditData.map((a) => a?.details);
+  const details = items.map((a) => a?.auditResult.details);
   const types = [...new Set(details.map((a) => a?.type).filter(Boolean))];
   const detailType = types[0];
   if (types.length !== 1 || !detailType) {
     return null;
   }
+  const auditData = items.map((a) => a?.auditResult);
+  const labels= items.map((a) => a?._userLabel);
   const title = auditData.find((a) => a?.title)?.title || '';
 
   switch (detailType) {
@@ -43,8 +47,7 @@ export function RenderDetails({
         </>
       );
     case 'list':
-      //labels={labels}
-      return <RenderList auditData={auditData}  />;
+      return <RenderList rows={items} />;
     case 'checklist':
       return (
         <RenderChecklist
@@ -55,23 +58,14 @@ export function RenderDetails({
       );
     case 'table':
     case 'opportunity':
-      return (
-        <DetailTable
-          desktopDetails={
-            details[1]  as AuditDetailTable | AuditDetailOpportunity
-          }
-          mobileDetails={
-            details[0] as AuditDetailTable | AuditDetailOpportunity
-          }
-          title={title}
-        />
-      );
+      // @ts-expect-error need better type narrowing
+      return <DetailTable2 rows={items} />;
     case 'criticalrequestchain':
       return (
         <div>
           Critical Request Chain
           <RenderCriticalChainData
-            desktopDetails={details[1]as CriticalRequestChain}
+            desktopDetails={details[1] as CriticalRequestChain}
             mobileDetails={details[2] as CriticalRequestChain}
           />
         </div>
@@ -82,18 +76,18 @@ export function RenderDetails({
     case 'debugdata':
       return (
         <RenderDebugData
-          desktopDebugData={details[1]as DebugData}
+          desktopDebugData={details[1] as DebugData}
           mobileDebugData={details[0] as DebugData}
         />
       );
     case 'treemap-data':
-      return (
-        <RenderJSONDetails
-          title={`${detailType} Data`}
-          data={details[0]}
-          data2={details[1]}
+      return items.map((r, i) => (
+        <JSUsageAccordion
+          key={`${r.auditResult.id}_${i}`}
+          treeData={r.auditResult?.details as TreeMapData}
+          label={r._userLabel}
         />
-      );
+      ));
 
     default:
       return null;
@@ -101,14 +95,9 @@ export function RenderDetails({
   }
 }
 
-function RenderList({
-  auditData,
-  // labels,
-}: {
-  auditData: (AuditResultsRecord[string] | null)[];
-  // labels: string[];
-}) {
-  const details = auditData.map((a) => a?.details);
+function RenderList({ rows }: { rows: TableDataItem[] }) {
+  // const auditData = rows.map((a) => a?.auditResult);
+  const details = rows.map((a) => a?.auditResult?.details);
 
   // Check if all details are of type 'list'
   if (!details.every((d) => d?.type === 'list')) {
@@ -119,32 +108,35 @@ function RenderList({
   const referenceDetails = details.find((d) => d !== null);
   if (!referenceDetails) return null;
 
+const items: TableDataItem[][] = rows
+.map((r) => {
+  const details = r?.auditResult?.details as AuditDetailList;
+  return details?.items?.map((i) => ({
+    ...r,
+    auditResult: {
+      ...r.auditResult,
+      details: {
+        ...details,
+        ...i,
+      },
+    },
+      
+  })) || [];
+}).reduce((acc: TableDataItem[][], c ) => {
+  c.forEach((i, idx) => {
+    acc[idx] = acc[idx] || [];
+    if(Array.isArray(acc[idx])) {
+      acc[idx].push(i);
+    }
+  })
+  return acc;
+}, [])
+
   return (
     <div>
-      {referenceDetails.items.map((item, index: number) => {
-        switch (item.type) {
-          case 'table':
-            return (
-              <DetailTable
-                key={index}
-                desktopDetails={
-                  details[0]?.items?.[index] as
-                    | AuditDetailTable
-                    | AuditDetailOpportunity
-                }
-                mobileDetails={
-                  details[1]?.items?.[index] as
-                    | AuditDetailTable
-                    | AuditDetailOpportunity
-                }
-                title={auditData.find((a) => a?.title)?.title || ''}
-              />
-            );
-
-          default:
-            return <RenderUnknown key={index} details={item[0]} />;
-        }
-      })}
+      {items.map((item, index: number) => 
+      <RenderDetails key={index} items={item} />
+      )}
     </div>
   );
 }

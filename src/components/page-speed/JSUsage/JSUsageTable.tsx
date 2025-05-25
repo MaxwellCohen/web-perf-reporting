@@ -45,6 +45,7 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
   getFacetedMinMaxValues,
+  Table as ReactTable,
 } from '@tanstack/react-table';
 import { Button } from '../../ui/button';
 import { cn } from '@/lib/utils';
@@ -61,12 +62,12 @@ import { toTitleCase } from '../toTitleCase';
 declare module '@tanstack/react-table' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ColumnMeta<TData extends RowData, TValue> {
-    className: string;
+    className?: string;
     // doNotShowInGroup?: boolean;
   }
 }
 
-export function ExpanderCell<T>({
+export function ExpandRow<T>({
   row,
   children,
 }: Pick<Partial<CellContext<T, unknown>>, 'row'> & {
@@ -76,10 +77,10 @@ export function ExpanderCell<T>({
   const isExpanded = row?.getIsExpanded();
   return (
     <>
-      {row?.getCanExpand() || row?.getIsGrouped() ? (
+      { (row?.getCanExpand()) ? (
         <Button
           variant={'ghost'}
-          size={'icon'}
+          size={children ? 'default' :'icon'}
           onClick={row.getToggleExpandedHandler()}
           style={{ cursor: 'pointer' }}
         >
@@ -93,7 +94,7 @@ export function ExpanderCell<T>({
             {isExpanded ? 'collapse row ' : 'expand row'}
           </span>
         </Button>
-      ) : null}
+      ) : <div className={'h-9 w-9'} />}
     </>
   );
 }
@@ -314,15 +315,32 @@ const getHostName = (row: TreeMapNode) => {
 };
 
 const columnHelper = createColumnHelper<TreeMapNode>();
+export function ExpandAll<T>({table}:{table: ReactTable<T>}) {
+  const isExpanded =  table.getIsAllRowsExpanded()
+  return (<Button
+  variant={'ghost'}
+  size={'icon'}
+  onClick={() => table.toggleAllRowsExpanded()}
+  style={{ cursor: 'pointer' }}
+>
+  <ChevronRightIcon
+    className={cn('transform transition-all duration-300', {
+      'rotate-90':isExpanded,
+    })}
+  />
+  <span className="sr-only">
+    {isExpanded ? 'collapse row ' : 'expand row'}
+  </span>
+</Button>)}
 const expanderColumn = columnHelper.display({
   id: 'expander',
-  header: () => <div className=""></div>,
-  cell: ExpanderCell,
+  header: ExpandAll,
+  cell: ExpandRow,
   size: 56,
   meta: {
     className: '',
   },
-});
+})
 const makeStatusColumn = (
   cell: (info: CellContext<TreeMapNode, unknown>) => JSX.Element,
 ) =>

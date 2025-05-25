@@ -408,7 +408,7 @@ export const AuditDetailFilmstripSchema = z.object({
 
 export type AuditDetailFilmstrip = z.infer<typeof AuditDetailFilmstripSchema>;
 
-interface OpportunityItem extends TableItem {
+export interface OpportunityItem extends TableItem {
   url: string;
   wastedBytes?: number;
   totalBytes?: number;
@@ -652,38 +652,42 @@ export const AuditDetailCriticalRequestChainSchema =
     return null;
   });
 
+
+const AuditResultSchema =   z.object({
+  description: z.string().optional(),
+  details: AuditDetailTableSchema.or(AuditDetailFilmstripSchema)
+    .or(AuditDetailOpportunitySchema)
+    .or(AuditDetailChecklistSchema)
+    .or(AuditDetailListSchema)
+    .or(TreeMapDataSchema)
+    .or(AuditDetailCriticalRequestChainSchema)
+    .or(AuditDetailScreenshotSchema)
+    .or(DebugDataSchema)
+    .optional(),
+  errorMessage: z.string().optional(),
+  explanation: z.string().optional(),
+  id: z.string(),
+  numericValue: z.number().optional(),
+  // sore is 0 to 1 where 0-.49 is bad and .50-.89 is needs improvement and .90-1 is good
+  score: z.number().nullable(),
+  scoreDisplayMode: z
+    .literal('numeric')
+    .or(z.literal('binary'))
+    .or(z.literal('metricSavings'))
+    .or(z.literal('manual'))
+    .or(z.literal('informative'))
+    .or(z.literal('notApplicable'))
+    .or(z.literal('error')),
+  title: z.string(),
+  warnings: z.array(z.any()).optional(),
+  numericUnit: z.string().optional(),
+  displayValue: z.string().optional(),
+  metricSavings: z.record(z.number()).optional(),
+})
+
+export type AuditResult = z.infer<typeof AuditResultSchema>;
 const auditResultsRecordSchema = z.record(
-  z.object({
-    description: z.string().optional(),
-    details: AuditDetailTableSchema.or(AuditDetailFilmstripSchema)
-      .or(AuditDetailOpportunitySchema)
-      .or(AuditDetailChecklistSchema)
-      .or(AuditDetailListSchema)
-      .or(TreeMapDataSchema)
-      .or(AuditDetailCriticalRequestChainSchema)
-      .or(AuditDetailScreenshotSchema)
-      .or(DebugDataSchema)
-      .optional(),
-    errorMessage: z.string().optional(),
-    explanation: z.string().optional(),
-    id: z.string(),
-    numericValue: z.number().optional(),
-    // sore is 0 to 1 where 0-.49 is bad and .50-.89 is needs improvement and .90-1 is good
-    score: z.number().nullable(),
-    scoreDisplayMode: z
-      .literal('numeric')
-      .or(z.literal('binary'))
-      .or(z.literal('metricSavings'))
-      .or(z.literal('manual'))
-      .or(z.literal('informative'))
-      .or(z.literal('notApplicable'))
-      .or(z.literal('error')),
-    title: z.string(),
-    warnings: z.array(z.any()).optional(),
-    numericUnit: z.string().optional(),
-    displayValue: z.string().optional(),
-    metricSavings: z.record(z.number()).optional(),
-  }),
+  AuditResultSchema
 );
 
 export type AuditResultsRecord = z.infer<typeof auditResultsRecordSchema>;
@@ -691,9 +695,9 @@ export type AuditResultsRecord = z.infer<typeof auditResultsRecordSchema>;
 const categoryResultSchema = z
   .object({
     auditRefs: z.array(auditRefSchema),
-    description: z.string(),
-    id: z.string(),
-    title: z.string(),
+    description: z.string().optional(),
+    id: z.string().optional(),
+    title: z.string().optional(),
     manualDescription: z.string().optional(),
     score: z.number(),
   })

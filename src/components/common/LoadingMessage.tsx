@@ -1,4 +1,4 @@
-'use client'
+
 export function LoadingMessage() {
   return (
     <div className="flex flex-col items-center justify-center">

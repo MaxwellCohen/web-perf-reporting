@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils';
 import { NodeComponent } from './RenderNode';
 import {
   CodeValue,
-  DeviceType,
   ItemValue,
   LinkValue,
   NodeValue,
@@ -31,7 +30,7 @@ export function RenderTableValue({
 }: {
   value?: ItemValue;
   heading?: TableColumnHeading | null;
-  device: DeviceType;
+  device: string;
 } & React.HTMLAttributes<HTMLElement>) {
   if (value === undefined || value === null) {
     return <div className="col-span-1"></div>;
@@ -115,7 +114,7 @@ function RenderLinkValue({
       title={value.text}
       {...props}
       className={cn(
-        'block overflow-hidden break-words break-all px-6',
+        'block overflow-auto break-words break-all px-6 max-h-16',
         props.className,
       )}
     >
@@ -132,10 +131,10 @@ function RenderNumericValue({
   value: NumericValue;
   heading?: TableColumnHeading | null;
 } & React.HTMLAttributes<HTMLElement>) {
-  if (heading?.granularity) {
+  if (heading?.granularity && typeof value.value === 'number') {
     return (
       <div title="numeric" {...props} className={cn('', props.className)}>
-        {value.value.toFixed(-Math.log10(heading.granularity))}
+        {(value.value || 0).toFixed(-Math.log10(heading.granularity))}
       </div>
     );
   }
@@ -263,7 +262,7 @@ function RenderUrlValue({
       title={value.value}
       {...props}
       className={cn(
-        'block overflow-hidden break-words break-all px-6',
+        'block overflow-auto break-words break-all px-6 max-h-16',
         props.className,
       )}
     >
@@ -400,14 +399,14 @@ function RenderNumberValue({
   value: unknown;
   heading?: TableColumnHeading | null;
 } & React.HTMLAttributes<HTMLElement>) {
-  if (heading?.granularity && value) {
+  if (heading?.granularity && typeof value === 'number') {
     return (
       <div
         title="numeric"
         {...props}
         className={cn('align-right', props.className)}
       >
-        {(value as number).toFixed(-Math.log10(heading.granularity || 1))}
+        {(+value as number || 0).toFixed(-Math.log10(+heading.granularity || 1))}
       </div>
     );
   }
@@ -418,7 +417,7 @@ function RenderNumberValue({
       {...props}
       className={cn('align-right', props.className)}
     >
-      {(value as number).toFixed(-Math.log10(heading?.granularity || 1))}
+      {(+(value as number)   || 0).toFixed(-Math.log10(heading?.granularity || 1))}
     </div>
   );
 }
@@ -454,7 +453,7 @@ function RenderUrl({
         title={strValue}
         {...props}
         className={cn(
-          'block overflow-hidden break-words break-all px-6',
+          'block overflow-auto break-words break-all px-6 max-h-16',
           props.className,
         )}
       >
@@ -468,7 +467,7 @@ function RenderUrl({
         title="url"
         {...props}
         className={cn(
-          'block overflow-hidden break-words break-all px-6',
+          'block overflow-auto break-words break-all px-6 max-h-16',
           props.className,
         )}
       >

@@ -2,7 +2,7 @@ import { Card, CardTitle } from '../ui/card';
 import { ScoreDisplay } from './ScoreDisplay';
 import ReactMarkdown from 'react-markdown';
 import { HorizontalScoreChart } from '../common/PageSpeedGaugeChart';
-import { Details } from '../ui/accordion';
+import { AccordionItem, AccordionTrigger, AccordionContent } from '../ui/accordion';
 import { Fragment, useContext } from 'react';
 import { InsightsContext } from './PageSpeedContext';
 const metricAuditRefId = [
@@ -41,11 +41,11 @@ export function CWVMetricsComponent() {
   }
   
   return (
-    <Details className="flex flex-col gap-2 print:border-0">
-      <summary className="flex flex-col gap-2">
+    <AccordionItem value={'cwv'} className="flex flex-col gap-2 print:border-0">
+      <AccordionTrigger className="">
         {title ? <h3 className="text-lg font-bold">{title}</h3> : null}
-      </summary>
-      <div className="-mx-2 grid grid-cols-[repeat(auto-fit,_minmax(14rem,_1fr))] gap-2">
+      </AccordionTrigger>
+      <AccordionContent className="-mx-2 grid grid-cols-[repeat(auto-fit,_minmax(14rem,_1fr))] gap-2">
         {metricItems.map(({ auditName, title, auditItems, description }) => {
           return (
             <Card
@@ -72,7 +72,7 @@ export function CWVMetricsComponent() {
             </Card>
           );
         }) || null}
-      </div>
-    </Details>
+      </AccordionContent>
+    </AccordionItem>
   );
 }

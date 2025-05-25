@@ -33,7 +33,7 @@ export function AuditDetailsSummary({
               />
             ) : null,
           )
-          .filter(Boolean)} 
+          .filter(Boolean)}
         <SmallText
           text={
             scoreDisplayMode === 'notApplicable'
@@ -53,7 +53,7 @@ export function AuditDetailsSummary({
   );
 }
 
-function SmallText({ text }: { text: string | null }) {
+export function SmallText({ text }: { text: string | null }) {
   if (!text) return null;
   return <div className="text-xs">{text}</div>;
 }

@@ -1,8 +1,8 @@
 import { HorizontalGaugeChart } from '@/components/common/PageSpeedGaugeChart';
-import { Details } from '@/components/ui/accordion';
-import { Card, CardTitle } from '../ui/card';
+import { AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { Fragment, useContext } from 'react';
 import { InsightsContext } from './PageSpeedContext';
+import { Card, CardTitle } from '../ui/card';
 
 interface LoadingExperienceProps {
   title: string,
@@ -33,13 +33,13 @@ export function LoadingExperience({
   ] as const;
   return (
     <>
-      <Details className="&:not([open])]:none flex flex-col gap-2 print:border-0">
-        <summary className="flex flex-col gap-2">
+      <AccordionItem value={experienceKey}>
+        <AccordionTrigger>
           <div className="text-lg font-bold group-hover:underline">
             {title}: {extraTitle}
           </div>
-        </summary>
-        <div className="-mx-2 grid max-w-full grid-cols-[repeat(auto-fit,_minmax(14rem,_1fr))] gap-2">
+        </AccordionTrigger>
+        <AccordionContent className="-mx-2 grid max-w-full grid-cols-[repeat(auto-fit,_minmax(14rem,_1fr))] gap-2">
           {metrics.map(({ metric, key }) => {
             return (
               <Card
@@ -64,8 +64,8 @@ export function LoadingExperience({
               </Card>
             );
           })}
-        </div>
-      </Details>
+        </AccordionContent>
+      </AccordionItem>
       <div className="screen:hidden print:break-before-page"></div>
     </>
   );

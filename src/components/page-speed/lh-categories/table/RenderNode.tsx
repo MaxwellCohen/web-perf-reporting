@@ -2,7 +2,7 @@
 import { memo, useContext, useEffect, useRef, useState } from 'react';
 import { fullPageScreenshotContext } from '../../PageSpeedContext';
 import { RenderJSONDetails } from '../../RenderJSONDetails';
-import { NodeValue, FullPageScreenshot, Rect, DeviceType } from '@/lib/schema';
+import { NodeValue, FullPageScreenshot, Rect } from '@/lib/schema';
 import {
   Dialog,
   DialogClose,
@@ -21,7 +21,7 @@ export function NodeComponent({
   device,
 }: {
   item: NodeValue;
-  device: DeviceType;
+  device: string;
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -50,7 +50,7 @@ export function RenderNodeImage({
   imageSize = 150,
 }: {
   item: NodeValue;
-  device: DeviceType;
+  device: string;
   imageSize?: number;
 }) {
   const screenshotData = useContext(fullPageScreenshotContext);

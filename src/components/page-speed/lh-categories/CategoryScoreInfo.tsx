@@ -8,9 +8,9 @@ export function CategoryScoreInfo({
     category?: CategoryResult | null;
     device?: string;
   }) {
-    if (!category?.score) {
-      return null;
-    }
+    // if (!category?.score) {
+    //   return null;
+    // }
     return (
       <div className="flex-0 flex w-64 flex-col gap-2 align-top hover:no-underline">
         <div className="text-center text-xs hover:no-underline">

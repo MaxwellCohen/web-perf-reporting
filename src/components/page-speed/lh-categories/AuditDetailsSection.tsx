@@ -3,7 +3,7 @@ import { RenderJSONDetails } from '../RenderJSONDetails';
 import { AuditRef, AuditResultsRecord } from '@/lib/schema';
 import { AuditDetailsSummary } from './AuditDetailsSummary';
 import { RenderMetricSavings } from './RenderMetricSavings';
-import { RenderDetails } from './RenderDetails';
+// import { RenderDetails } from './RenderDetails';
 import { isEmptyResult } from '../ScoreDisplay';
 
 const doNotRenderDetails = ['screenshot-thumbnails', 'main-thread-tasks'];
@@ -75,7 +75,7 @@ export function AuditDetailsSection({
       {!disabled ? (
         <>
           <RenderMetricSavings auditData={auditData} labels={labels} />
-          <RenderDetails auditData={auditData} labels={labels} />
+          {/* <RenderDetails auditData={auditData} labels={labels} /> */}
         </>
       ) : null}
     </Details>

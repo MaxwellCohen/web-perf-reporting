@@ -14,7 +14,7 @@ const AccordionItem = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AccordionPrimitive.Item
     ref={ref}
-    className={cn('border-b', className)}
+    className={cn('border-b border-1 border border-x-4 border-gray-400 py-2', className)}
     {...props}
   />
 ));
@@ -28,7 +28,7 @@ const AccordionTrigger = React.forwardRef<
     <AccordionPrimitive.Trigger
       ref={ref}
       className={cn(
-        'group flex flex-1 items-center justify-between py-4 text-left text-sm font-medium transition-all hover:cursor-pointer hover:bg-muted disabled:hover:no-underline [&[data-state=open]>svg]:rotate-180 [&[disabled]>svg]:hidden',
+        'group flex flex-1 flex-row items-center justify-between gap-2 py-4 pl-4 pr-2 text-left text-sm font-medium transition-all hover:cursor-pointer hover:bg-muted disabled:hover:no-underline [&[data-state=open]>svg]:rotate-180 [&[disabled]>svg]:hidden',
         className,
       )}
       {...props}
@@ -74,17 +74,24 @@ const AccordionContent = React.forwardRef<
 ));
 AccordionContent.displayName = AccordionPrimitive.Content.displayName;
 
-export const Details = (({ className, children, ref, ...props }: React.JSX.IntrinsicElements['details']) => (
+export const Details = ({
+  className,
+  children,
+  ref,
+  ...props
+}: React.JSX.IntrinsicElements['details']) => (
   <details
     ref={ref}
     open
-    className={cn('rounded-2 mb-2 rounded-md border-4 p-2 min-w-full w-full overflow-hidden content-visibility-auto', className)}
+    className={cn(
+      'rounded-2 content-visibility-auto mb-2 w-full min-w-full overflow-hidden rounded-md border-4 p-2',
+      className,
+    )}
     {...props}
   >
     {children}
   </details>
-));
-
+);
 
 export const AccordionContentSubgrid = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Content>,

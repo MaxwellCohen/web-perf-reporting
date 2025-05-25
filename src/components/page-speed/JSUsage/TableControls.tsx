@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ChevronDown } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { useMemo } from 'react';
 
 export function TableControls<T>({ table }: { table: TableType<T> }) {
   'use no memo';
@@ -84,6 +85,73 @@ export function ColumnSelector<T>({ table }: { table: TableType<T> }) {
               </DropdownMenuCheckboxItem>
             );
           })}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+export function DropdownFilter<T>({
+  table,
+  columnId,
+}: {
+  table: TableType<T>;
+  columnId: string;
+}) {
+  'use no memo';
+  const col = table.getColumn(columnId);
+  const sortedUniqueValues = useMemo(
+    () =>
+      Array.from(col?.getFacetedUniqueValues()?.keys() || [])
+        .sort()
+        .slice(0, 5000),
+    [col],
+  );
+  if (!col) {
+    return null;
+  }
+  const filterValue = (col.getFilterValue() as string[]) || [
+    ...sortedUniqueValues,
+  ];
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          className="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
+        >
+          Filter {(col?.columnDef.header as string) || ''} <ChevronDown />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {sortedUniqueValues.map((v) => {
+          return (
+            <DropdownMenuCheckboxItem
+              key={v}
+              checked={!!filterValue?.find((a) => a === v)}
+              onCheckedChange={(checked) => {
+                col.setFilterValue((oldValue: string[]) => {
+                  let previousValue = oldValue ||[];
+                  if (!previousValue?.length) {
+                    previousValue = [
+                      ...sortedUniqueValues,
+                    ]
+                  }
+                  const newFilter = checked
+                    ? [...new Set([...previousValue, v])]
+                    : previousValue?.filter((a) => a !== v);
+                  if (!newFilter?.length) {
+                    return [...sortedUniqueValues];
+                  }
+                  console.log('oldValue', oldValue);
+                  return newFilter;
+                });
+              }}
+            >
+              {v}
+            </DropdownMenuCheckboxItem>
+          );
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   );

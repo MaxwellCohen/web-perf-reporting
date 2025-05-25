@@ -35,22 +35,10 @@ export function RenderMetricSavings({
     ),
   ];
 
-  const totalSavings = metricSavings.map((m) =>
-    Object.values(m.metricSavings || {}).reduce(
-      (acc, savings) => acc + savings,
-      0,
-    ),
-  );
-  const sum = totalSavings.reduce((a, b) => a + Math.abs(b), 0);
-
-  if (sum === 0) {
-    return null;
-  }
-
   return (
     <Details>
       <summary className="flex flex-col gap-2">
-        <h4 className="text-md font-bold">CWV Possible Metric Savings</h4>
+        <h4 className="text-md font-bold">Possible Metric Savings</h4>
       </summary>
       <Table>
         <TableHeader>
