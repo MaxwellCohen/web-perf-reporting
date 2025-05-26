@@ -128,22 +128,14 @@ export function DropdownFilter<T>({
           return (
             <DropdownMenuCheckboxItem
               key={v}
-              checked={!!filterValue?.find((a) => a === v)}
+              checked={!filterValue || !!filterValue?.find((a) => a === v)}
               onCheckedChange={(checked) => {
                 col.setFilterValue((oldValue: string[]) => {
-                  let previousValue = oldValue ||[];
-                  if (!previousValue?.length) {
-                    previousValue = [
-                      ...sortedUniqueValues,
-                    ]
-                  }
+                  const previousValue = oldValue || [...sortedUniqueValues];
+        
                   const newFilter = checked
                     ? [...new Set([...previousValue, v])]
                     : previousValue?.filter((a) => a !== v);
-                  if (!newFilter?.length) {
-                    return [...sortedUniqueValues];
-                  }
-                  console.log('oldValue', oldValue);
                   return newFilter;
                 });
               }}

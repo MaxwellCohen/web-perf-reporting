@@ -156,27 +156,31 @@ export function makeSortingHeading(
 export function StringFilterHeader<T>({
   column,
   name
-}: Pick<HeaderContext<T, unknown>, 'column'> & {name: string}) {
+}: Partial<Pick<HeaderContext<T, unknown>, 'column'>> & {name: string}) {
   const id = useId();
-  const uniqueValues = column.getFacetedUniqueValues();
+  const uniqueValues = column?.getFacetedUniqueValues();
   const sortedUniqueValues = useMemo(
-    () => Array.from(uniqueValues.keys()).sort().slice(0, 5000),
+    () => Array.from(uniqueValues?.keys() || []).sort().slice(0, 5000),
     [uniqueValues],
   );
 
-  const columnFilterValue = column.getFilterValue();
-
+  const columnFilterValue = column?.getFilterValue();
+  if (!column) {
+    return null;
+  }
   return (
-    <div className="flex flex-row my-2">
-      <Label htmlFor={`filter_${id}`} className="sr-only">
-        Filter
+    <div className="flex flex-col my-2">
+      <Label htmlFor={`filter_${id}`} className='mb-2'>
+        {name} Filter
       </Label>
-      <datalist id={column.id + 'list'}>
+      <datalist id={column.id + 'list'+ id}>
         {sortedUniqueValues.map((value: any) => (
           <option value={value} key={value} />
         ))}
       </datalist>
+      <div className="flex flex-row">
       <DebouncedInput
+        id={`filter_${id}`} 
         type="text"
         value={(columnFilterValue ?? '') as string}
         onChange={(value) => column.setFilterValue(value)}
@@ -195,6 +199,7 @@ export function StringFilterHeader<T>({
         <span className="sr-only">Clear filter</span>
         <span aria-hidden="true">×</span>
       </Button>
+      </div>
     </div>
   );
 }

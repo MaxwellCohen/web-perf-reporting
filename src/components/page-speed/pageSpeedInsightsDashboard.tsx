@@ -15,7 +15,7 @@ import { Fragment, useId, useMemo } from 'react';
 import { Button } from '../ui/button';
 import { Ghost } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import { ExpandAll, ExpandRow } from './JSUsage/JSUsageTable';
+import { ExpandAll, ExpandRow, StringFilterHeader } from './JSUsage/JSUsageTable';
 import { Accordion } from '../ui/accordion';
 import clsx from 'clsx';
 import { flexRender } from '@tanstack/react-table';
@@ -111,34 +111,15 @@ export function PageSpeedInsightsDashboard({
           <CWVMetricsComponent />
           <RenderFilmStrip />
         </Accordion>
-        <div className="items-bottom flex flex-row  justify-between gap-4 px-3 py-4">
+        <div className="items-bottom flex flex-row justify-between gap-4 px-3 py-4">
           <div className="flex flex-col">
-            <Label htmlFor={`filter_${id}`} className='mb-3'>Audit Filter</Label>
-            <Input
-              placeholder="Filter Audits..."
-              id={`filter_${id}`}
-              value={
-                (table.getColumn('auditTitle')?.getFilterValue() as string) ??
-                ''
-              }
-              onChange={(event) =>
-                table
-                  .getColumn('auditTitle')
-                  ?.setFilterValue(event.target.value)
-              }
-              className="max-w-sm"
-            />
+          <StringFilterHeader column={table.getColumn('auditTitle')} name={'Audit'} />
           </div>
-          <div className="self-end justify-self-end">
-          
+          <div className="self-end justify-self-end flex mb-2">
             <Button variant="ghost" onClick={() => table.resetColumnFilters()}>
               Reset filters
             </Button>
-            {/* <Button variant="ghost" onClick={() => table.resetSorting()}>
-              Reset Sorting Order
-            </Button> */}
             <DropdownFilter table={table} columnId={'userLabel'} />
-          
           </div>
         </div>
         <Accordion type="multiple">

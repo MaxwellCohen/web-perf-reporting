@@ -78,14 +78,7 @@ const columns = [
     id: 'userLabel',
     enableGrouping: true,
     enableColumnFilter: true,
-    filterFn: (row, columnId, values) => {
-      // If no options are selected, show all rows (or implement "All" logic).
-      if (values.length === 0) {
-        return true; // Show all
-      }
-      // Check if the row's value is included in the selected values.
-      return values.includes(row.getValue(columnId));
-    },
+    filterFn: 'arrIncludesSome',
     sortingFn: 'alphanumeric',
     header: 'User Label',
   }),
