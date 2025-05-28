@@ -308,19 +308,17 @@ const isUniqueAgg = (type: string) => {
 };
 
 const setSizeSetting = (type: string) => {
-  if(isUniqueAgg(type)) {
+  if (isUniqueAgg(type)) {
     return {
       size: 400,
-      minSize: 200,
-    }
+
+    };
   }
 
-  return ({
-    size: 75,
-    minSize: 50,
-    maxSize: 250,
-  })
-}
+  return {
+    size: 100,
+  };
+};
 
 const customSum = (aggregationKey: string, rows: Row<DetailTableDataRow>[]) => {
   const aggregationObj = rows.reduce((acc: Record<string, number>, r) => {
@@ -392,7 +390,7 @@ export const makeColumnDef = (h: {
         aggregatedCell: cell,
         enableGrouping: canGroup(h.heading.valueType),
         enableHiding: true,
-        ...(setSizeSetting(h.heading.valueType)),
+        ...setSizeSetting(h.heading.valueType),
         aggregationFn: isUniqueAgg(h.heading.valueType)
           ? 'unique'
           : (h.skipSumming || []).includes(key)
@@ -422,7 +420,7 @@ export const makeColumnDef = (h: {
           header: `${subItemsHeading.label}${_userLabel ? ` (${_userLabel})` : ''}`,
           cell: cell,
           enableGrouping: canGroup(subItemsHeading.valueType),
-          ...(setSizeSetting(subItemsHeading.valueType)),
+          ...setSizeSetting(subItemsHeading.valueType),
           enableHiding: true,
           aggregationFn,
           aggregatedCell(info) {
@@ -560,9 +558,7 @@ export function DetailTable2({
         header: ExpandAll,
         cell: ExpandRow,
         aggregatedCell: ExpandRow,
-        size: 36,
-        minSize: 36,
-        maxSize: 36,
+        size: 56,
         enableHiding: false,
         enableGrouping: false,
         enablePinning: true,
@@ -597,7 +593,7 @@ export function DetailTable2({
         enableHiding: true,
         enableGrouping: false,
         aggregationFn: 'unique',
-      ...(setSizeSetting('undefined')),
+        size: 110,
         cell: DeviceCell,
         aggregatedCell: DeviceCell,
         meta: {
@@ -688,6 +684,9 @@ export function DetailTable2({
 
     onColumnVisibilityChange: setColumnVisibility,
 
+    //columnResizing
+    columnResizeMode: 'onChange',
+
     manualPagination: true, // prevents ssr issues
     // manualExpanding: true,
     // manualGrouping: true,
@@ -703,14 +702,39 @@ export function DetailTable2({
     },
   });
 
+  console.log('table', table);
   console.log('columnVisibility', columnVisibility);
   console.log('visible rows', table.getRowModel().rows);
+
+  /**
+   * Instead of calling `column.getSize()` on every render for every header
+   * and especially every data cell (very expensive),
+   * we will calculate all column sizes at once at the root table level in a useMemo
+   * and pass the column sizes down as CSS variables to the <table> element.
+   */
+  const flatHeaders = table.getFlatHeaders();
+  const columnSizeVars = useMemo(() => {
+    const colSizes: { [key: string]: number } = {};
+    for (let i = 0; i < flatHeaders.length; i++) {
+      const header = flatHeaders[i]!;
+      colSizes[`--header-${header.id}-size`] = header.getSize();
+      colSizes[`--col-${header.column.id}-size`] = header.column.getSize();
+    }
+    return colSizes;
+  }, [flatHeaders]);
+
   if (data.length === 0) {
     return null;
   }
 
   return (
-    <Table className='table-fixed'>
+    <Table
+      className="table-fixed"
+      style={{
+        ...columnSizeVars, //Define column sizes on the <table> element
+        width: table.getTotalSize(),
+      }}
+    >
       <TableHeader>
         {table
           .getHeaderGroups()
@@ -725,20 +749,27 @@ export function DetailTable2({
                     return (
                       <TableHead
                         key={header.id}
-                        style={
-                          header.column.columnDef.size
-                            ? {
-                              width: `${header.column.columnDef.size}px`,
-                              minWidth: `${header.column.columnDef.minSize}px`,
-                              maxWidth: `${header.column.columnDef.maxSize}px`,
-                            }
-                            : undefined
-                        }
+                        className="relative"
+                        style={{
+                          width: `calc(var(--header-${header?.id}-size) * 1px)`,
+                        }}
                       >
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext(),
                         )}
+                        {header.column.columnDef.enableResizing !== false  ? <div
+                          onDoubleClick={() => header.column.resetSize()}
+                          onMouseDown={header.getResizeHandler()}
+                          onTouchStart={header.getResizeHandler()}
+                          className={clsx(
+                            `absolute right-0 top-0 h-full w-[5px] cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200`,
+                            {
+                              'bg-muted':
+                                header.column.getIsResizing(),
+                            },
+                          )}
+                        /> : null}
                       </TableHead>
                     );
                   })
@@ -752,7 +783,9 @@ export function DetailTable2({
         {table
           .getRowModel()
           .rows.map((row) => {
-            
+            const depth = row.depth;
+            const groupsList = table.getState().grouping;
+
             // if (rows.length === 1 &&  row.depth > 0 && row.getParentRow()?.original === row.original) {
             //   return null;
             // }
@@ -784,31 +817,19 @@ export function DetailTable2({
                       );
                     } else if (cell.getIsAggregated()) {
                       let cellType = cell.column.columnDef.cell;
-                      if (row.getCanExpand()) {
-                        cellType =
-                          cell.column.columnDef.aggregatedCell;
+                      if (row.getCanExpand() && (groupsList.length > 1 && depth < 1)) {
+                        cellType = cell.column.columnDef.aggregatedCell;
                       }
                       cellEl = (
-                        <div>
-                          {flexRender(
-                            cellType,
-                            cell.getContext(),
-                          )}
-                        </div>
+                        <div>{flexRender(cellType, cell.getContext())}</div>
                       );
                     } else if (cell.getIsPlaceholder()) {
                       let cellType = cell.column.columnDef.cell;
                       if (row.getCanExpand()) {
-                        cellType =
-                          cell.column.columnDef.aggregatedCell;
+                        cellType = cell.column.columnDef.aggregatedCell;
                       }
                       cellEl = (
-                        <div>
-                          {flexRender(
-                            cellType,
-                            cell.getContext(),
-                          )}
-                        </div>
+                        <div>{flexRender(cellType, cell.getContext())}</div>
                       );
                     } else {
                       cellEl = (
