@@ -80,6 +80,7 @@ export function ExpandRow<T>({
       { (row?.getCanExpand()) ? (
         <Button
           variant={'ghost'}
+          role='checkbox'
           size={children ? 'default' :'icon'}
           onClick={row.getToggleExpandedHandler()}
           style={{ cursor: 'pointer' }}
@@ -327,6 +328,7 @@ export function ExpandAll<T>({table}:{table: ReactTable<T>}) {
   size={'icon'}
   onClick={() => table.toggleAllRowsExpanded()}
   style={{ cursor: 'pointer' }}
+  role='checkbox'
 >
   <ChevronRightIcon
     className={cn('transform transition-all duration-300', {

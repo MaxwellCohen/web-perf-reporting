@@ -95,7 +95,7 @@ function RenderCodeValue({
       title="code"
       {...props}
       className={cn(
-        'overflow-hidden break-all px-6 font-mono text-xs',
+        'overflow-hidden break-all font-mono text-xs',
         props.className,
       )}
     >
@@ -114,7 +114,7 @@ function RenderLinkValue({
       title={value.text}
       {...props}
       className={cn(
-        'block overflow-auto break-words break-all px-6 max-h-16',
+        'block overflow-auto break-words break-all',
         props.className,
       )}
     >
@@ -262,7 +262,7 @@ function RenderUrlValue({
       title={value.value}
       {...props}
       className={cn(
-        'block overflow-auto break-words break-all px-6 max-h-16',
+        'block overflow-auto break-words break-all',
         props.className,
       )}
     >
@@ -323,7 +323,7 @@ function RenderCode({
       title="code"
       {...props}
       className={cn(
-        'overflow-hidden break-all px-6 font-mono text-xs',
+        'overflow-hidden break-all font-mono text-xs',
         props.className,
       )}
     >
@@ -453,7 +453,7 @@ function RenderUrl({
         title={strValue}
         {...props}
         className={cn(
-          'block overflow-auto break-words break-all px-6 max-h-16',
+          'block overflow-auto break-words break-all',
           props.className,
         )}
       >
@@ -467,7 +467,7 @@ function RenderUrl({
         title="url"
         {...props}
         className={cn(
-          'block overflow-auto break-words break-all px-6 max-h-16',
+          'block overflow-auto break-words break-all',
           props.className,
         )}
       >

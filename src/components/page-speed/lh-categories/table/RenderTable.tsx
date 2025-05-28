@@ -18,7 +18,7 @@ import { RenderBasicTable } from './RenderBasicTable';
 import { RenderEntityTable } from './RenderEntityTable';
 import { RenderNodeTable } from './RenderNodeTable';
 import { mergedTable } from './utils';
-import { Fragment, useMemo, useState } from 'react';
+import { CSSProperties, Fragment, useMemo, useState } from 'react';
 import {
   ColumnDef,
   useReactTable,
@@ -33,6 +33,7 @@ import {
   CellContext,
   RowData,
   Row,
+  createColumnHelper,
 } from '@tanstack/react-table';
 import { TableDataItem } from '../../tsTable/TableDataItem';
 import {
@@ -120,12 +121,12 @@ export function DetailTable({
 }
 
 declare module '@tanstack/react-table' {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ColumnMeta<TData extends RowData, TValue> {
     heading?: { heading: TableColumnHeading; _userLabel: string };
-    hideFromSubRow?: boolean;
+    defaultVisibility?: boolean;
     rowType?: 'main' | 'sub';
     headerType?: 'group' | 'sub';
+
     // childrenOnly?: boolean;
     // doNotShowInGroup?: boolean;
   }
@@ -306,8 +307,22 @@ const isUniqueAgg = (type: string) => {
   ].includes(type);
 };
 
+const setSizeSetting = (type: string) => {
+  if(isUniqueAgg(type)) {
+    return {
+      size: 400,
+      minSize: 200,
+    }
+  }
+
+  return ({
+    size: 75,
+    minSize: 50,
+    maxSize: 250,
+  })
+}
+
 const customSum = (aggregationKey: string, rows: Row<DetailTableDataRow>[]) => {
-  console.log('agg', aggregationKey, rows);
   const aggregationObj = rows.reduce((acc: Record<string, number>, r) => {
     // const parentValue = r?.getParentRow()?.getValue(aggregationKey);
     let v = r.getValue(aggregationKey);
@@ -332,9 +347,10 @@ const customSum = (aggregationKey: string, rows: Row<DetailTableDataRow>[]) => {
     return acc;
   }, {});
   const aggregationArr = Object.entries(aggregationObj);
-  console.log('agg', aggregationArr);
   return aggregationArr;
 };
+
+const columnHelper = createColumnHelper<DetailTableDataRow>();
 
 export const makeColumnDef = (h: {
   heading: TableColumnHeading;
@@ -353,53 +369,113 @@ export const makeColumnDef = (h: {
   if (!key) {
     return columnDefs;
   }
-  const hideFromSubRow = subItemsHeadingKey
-    ? canGroup(h.heading.valueType)
-    : undefined;
-
-  columnDefs.push({
-    id: `${key}${_userLabel ? `_${_userLabel}` : ''}`,
-    header: `${h.heading.label || toTitleCase(h.heading.key || '')}${_userLabel ? ` (${_userLabel})` : ''}`,
-    accessorFn: accessorFnMainItems(_userLabel, key, subItemsHeadingKey),
-    cell: cell,
-    enableGrouping: canGroup(h.heading.valueType),
-    enableHiding: true,
-    aggregationFn: isUniqueAgg(h.heading.valueType)
-      ? 'unique'
-      : (h.skipSumming || []).includes(key)
-        ? 'unique'
-        : customSum,
-    meta: {
-      heading: h,
-      className: '',
-      hideFromSubRow: hideFromSubRow,
-      rowType: subItemsHeadingKey ? 'main' : undefined,
-      headerType: 'group',
-    },
-  });
-  if (subItemsHeadingKey) {
-    columnDefs.push({
-      id: `${key}${subItemsHeadingKey}${_userLabel ? `_${_userLabel}` : ''}`,
-      header: `${subItemsHeading.label}${_userLabel ? ` (${_userLabel})` : ''}`,
-      accessorFn: accessorFnSubItems(_userLabel, key, subItemsHeadingKey),
-      cell: cell,
-      enableGrouping: canGroup(subItemsHeading.valueType),
-      enableHiding: true,
-      aggregationFn: isUniqueAgg(h.heading.valueType)
-        ? 'unique'
-        : (h.skipSumming || []).includes(subItemsHeadingKey)
+  let defaultVisibility = true;
+  if (_userLabel) {
+    defaultVisibility = false;
+  } else if (subItemsHeadingKey) {
+    defaultVisibility = false;
+  }
+  console.log(
+    'defaultVisibility',
+    defaultVisibility,
+    key,
+    _userLabel,
+    subItemsHeadingKey,
+  );
+  columnDefs.push(
+    columnHelper.accessor(
+      accessorFnMainItems(_userLabel, key, subItemsHeadingKey),
+      {
+        id: `${key}${_userLabel ? `_${_userLabel}` : ''}`,
+        header: `${h.heading.label || toTitleCase(h.heading.key || '')}${_userLabel ? ` (${_userLabel})` : ''}`,
+        cell: cell,
+        aggregatedCell: cell,
+        enableGrouping: canGroup(h.heading.valueType),
+        enableHiding: true,
+        ...(setSizeSetting(h.heading.valueType)),
+        aggregationFn: isUniqueAgg(h.heading.valueType)
           ? 'unique'
-          : customSum,
-      meta: {
-        heading: {
-          heading: subItemsHeading,
-          _userLabel: h._userLabel,
+          : (h.skipSumming || []).includes(key)
+            ? 'unique'
+            : customSum,
+        meta: {
+          heading: h,
+          className: '',
+          defaultVisibility,
+          rowType: subItemsHeadingKey ? 'main' : undefined,
+          headerType: 'group',
         },
-        className: '',
-        hideFromSubRow: false,
-        rowType: 'sub',
       },
-    });
+    ),
+  );
+  if (subItemsHeadingKey) {
+    const aggregationFn =
+      isUniqueAgg(subItemsHeading.valueType) ||
+      (h.skipSumming || []).includes(subItemsHeadingKey)
+        ? 'unique'
+        : customSum;
+    columnDefs.push(
+      columnHelper.accessor(
+        accessorFnSubItems(_userLabel, key, subItemsHeadingKey),
+        {
+          id: `${key}${subItemsHeadingKey}${_userLabel ? `_${_userLabel}` : ''}`,
+          header: `${subItemsHeading.label}${_userLabel ? ` (${_userLabel})` : ''}`,
+          cell: cell,
+          enableGrouping: canGroup(subItemsHeading.valueType),
+          ...(setSizeSetting(subItemsHeading.valueType)),
+          enableHiding: true,
+          aggregationFn,
+          aggregatedCell(info) {
+            const value = accessorFnMainItems(
+              _userLabel,
+              key,
+              subItemsHeadingKey,
+            )(info.row.original);
+            // const depth = info.row.depth;
+            const heading = h.heading;
+            if (Array.isArray(value) && value.every((v) => v?.length === 2)) {
+              return value.map((v, i) => (
+                <div
+                  key={JSON.stringify(v)}
+                  data-info={JSON.stringify(v[1])}
+                  data-key={key}
+                  data-row={JSON.stringify(info.row.original)}
+                >
+                  <RenderTableValue
+                    value={v[1] as ItemValue}
+                    heading={heading}
+                    device={v[0]}
+                  />
+                </div>
+              ));
+            }
+
+            return (
+              <div
+                data-info={JSON.stringify(value)}
+                data-key={key}
+                data-row={JSON.stringify(info.row.original)}
+              >
+                <RenderTableValue
+                  value={value as ItemValue}
+                  heading={heading}
+                  device={_userLabel}
+                />
+              </div>
+            );
+          },
+          meta: {
+            heading: {
+              heading: subItemsHeading,
+              _userLabel: h._userLabel,
+            },
+            className: '',
+            defaultVisibility: !_userLabel,
+            rowType: 'sub',
+          },
+        },
+      ),
+    );
   }
   return columnDefs;
 };
@@ -409,6 +485,17 @@ type DetailTableDataRow = {
   subitem?: TableItem | undefined;
   _userLabel: string;
 };
+
+function DeviceCell(info: CellContext<DetailTableDataRow, any>) {
+  const value = info.getValue();
+
+  if (Array.isArray(value)) {
+    return value
+      .filter((v) => v != null && v !== '')
+      .map((v, i) => <div key={i}>{v}</div>);
+  }
+  return value as string;
+}
 
 export function DetailTable2({
   rows,
@@ -467,15 +554,24 @@ export function DetailTable2({
         );
       })
       .flat(2);
-    const acc: Record<string, ColumnDef<DetailTableDataRow, unknown>> = {
-      expander: {
+    const acc: Record<string, ColumnDef<DetailTableDataRow, any>> = {
+      expander: columnHelper.display({
         id: 'expander',
         header: ExpandAll,
         cell: ExpandRow,
+        aggregatedCell: ExpandRow,
+        size: 36,
+        minSize: 36,
+        maxSize: 36,
         enableHiding: false,
         enableGrouping: false,
         enablePinning: true,
-      },
+        enableSorting: false,
+        enableResizing: false,
+        meta: {
+          defaultVisibility: true,
+        },
+      }),
     };
 
     allHeadings.forEach((h) => {
@@ -493,28 +589,21 @@ export function DetailTable2({
       }),
     );
 
-    let columnDefs: ColumnDef<any, unknown>[] = Object.values(acc);
+    let columnDefs: ColumnDef<DetailTableDataRow, any>[] = Object.values(acc);
     columnDefs = columnDefs.concat([
-      {
+      columnHelper.accessor((r) => r?._userLabel ?? '', {
         id: 'device',
         header: 'Report type(s)',
         enableHiding: true,
         enableGrouping: false,
-        accessorFn: (r) => r._userLabel,
         aggregationFn: 'unique',
-        cell: (info) => {
-          const value = info.getValue();
-          if (Array.isArray(value)) {
-            return value.map((v, i) => {
-              if (v === undefined || v === '') {
-                return null;
-              }
-              return <div key={i}>{v}</div>;
-            });
-          }
-          return value;
+      ...(setSizeSetting('undefined')),
+        cell: DeviceCell,
+        aggregatedCell: DeviceCell,
+        meta: {
+          defaultVisibility: true,
         },
-      },
+      }),
     ]);
 
     return columnDefs.filter((v) => v);
@@ -574,16 +663,16 @@ export function DetailTable2({
       ...(columns.reduce((acc: VisibilityState, v) => {
         const id = v.id;
         if (id) {
-          acc[id] = !id?.includes('_');
+          // v.meta?.defaultVisibility && (acc[id] = false);
+          acc[id] = !!v.meta?.defaultVisibility;
         }
         return acc;
       }, {}) as VisibilityState),
-      expander: true,
     }),
   );
 
   const table = useReactTable({
-    columns,
+    columns, // define the columns (required  )
     data,
     getCoreRowModel: getCoreRowModel(), // core model all data
     onSortingChange: setSorting, // get updates of sorting state
@@ -593,8 +682,9 @@ export function DetailTable2({
     onGroupingChange: setGrouping,
     getGroupedRowModel: getGroupedRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
+    groupedColumnMode: false,
     // only expand if there is more than one row
-    getRowCanExpand: (row) => row.getLeafRows().length > 1,
+    getRowCanExpand: (row) => row.subRows.length > 1,
 
     onColumnVisibilityChange: setColumnVisibility,
 
@@ -613,13 +703,14 @@ export function DetailTable2({
     },
   });
 
-
+  console.log('columnVisibility', columnVisibility);
+  console.log('visible rows', table.getRowModel().rows);
   if (data.length === 0) {
     return null;
   }
 
   return (
-    <Table>
+    <Table className='table-fixed'>
       <TableHeader>
         {table
           .getHeaderGroups()
@@ -630,12 +721,20 @@ export function DetailTable2({
             return (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers
-                  .filter(
-                    (header) => header.column.columnDef.meta?.rowType !== 'sub',
-                  )
                   .map((header) => {
                     return (
-                      <TableHead key={header.id}>
+                      <TableHead
+                        key={header.id}
+                        style={
+                          header.column.columnDef.size
+                            ? {
+                              width: `${header.column.columnDef.size}px`,
+                              minWidth: `${header.column.columnDef.minSize}px`,
+                              maxWidth: `${header.column.columnDef.maxSize}px`,
+                            }
+                            : undefined
+                        }
+                      >
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext(),
@@ -649,91 +748,99 @@ export function DetailTable2({
           })
           .filter((v) => v)}
       </TableHeader>
-      <TableBody className='[&_tr:last-child]:border-[length:var(--border-width)]'>
+      <TableBody className="[&_tr:last-child]:border-[length:var(--border-width)]">
         {table
           .getRowModel()
           .rows.map((row) => {
+            
+            // if (rows.length === 1 &&  row.depth > 0 && row.getParentRow()?.original === row.original) {
+            //   return null;
+            // }
             return (
               <Fragment key={row.id}>
                 <TableRow
-                className={clsx(
-                  'border-x-[length:var(--border-width)] bg-muted-foreground/10 bg-slate-600 bg-[opacity:var(--border-opacity)]',
-                  {},
-                )}
-                // @ts-expect-error --border-width
-                style={{ '--border-width': `${row.depth / 4}rem`, backgroundColor: `hsl(var(--muted-foreground) / ${ (row.depth /10)})`  }}
+                  className={clsx(
+                    'bg-[opacity:var(--border-opacity)] border-x-[length:var(--border-width)] bg-muted-foreground/10 bg-slate-600',
+                    {},
+                  )}
+                  style={
+                    {
+                      '--border-width': `${row.depth / 4}rem`,
+                      backgroundColor: `hsl(var(--muted-foreground) / ${row.depth / 10})`,
+                    } as CSSProperties
+                  }
                 >
                   {row.getVisibleCells().map((cell) => {
-                    const cellEl = (
+                    let cellEl = null;
+
+                    if (cell.getIsGrouped()) {
+                      cellEl = (
+                        <div>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </div>
+                      );
+                    } else if (cell.getIsAggregated()) {
+                      let cellType = cell.column.columnDef.cell;
+                      if (row.getCanExpand()) {
+                        cellType =
+                          cell.column.columnDef.aggregatedCell;
+                      }
+                      cellEl = (
+                        <div>
+                          {flexRender(
+                            cellType,
+                            cell.getContext(),
+                          )}
+                        </div>
+                      );
+                    } else if (cell.getIsPlaceholder()) {
+                      let cellType = cell.column.columnDef.cell;
+                      if (row.getCanExpand()) {
+                        cellType =
+                          cell.column.columnDef.aggregatedCell;
+                      }
+                      cellEl = (
+                        <div>
+                          {flexRender(
+                            cellType,
+                            cell.getContext(),
+                          )}
+                        </div>
+                      );
+                    } else {
+                      cellEl = (
+                        <div>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </div>
+                      );
+                    }
+                    if (!cellEl) {
+                      return null;
+                    }
+                    return (
                       <TableCell
                         key={cell.id}
+                        data-cell-id={cell.id}
+                        data-column-id={cell.column.id}
+                        data-can-expand={row.getCanExpand()}
+                        data-depth={row.depth}
+                        data-expanded={row.getIsExpanded}
+                        data-grouped={cell.getIsGrouped()}
+                        data-aggregated={cell.getIsAggregated()}
+                        data-placeholder={cell.getIsPlaceholder()}
                         className="max-w-96 overflow-x-auto whitespace-pre-wrap"
                       >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
+                        {cellEl}
                       </TableCell>
                     );
-                    if (cell.column.columnDef.meta?.rowType === undefined) {
-                      return cellEl;
-                    }
-                    if (
-                      cell.column.columnDef.meta?.rowType === 'main' &&
-                      row.depth === 0
-                    ) {
-                      return cellEl;
-                    }
-                    if (
-                      cell.column.columnDef.meta?.rowType === 'sub' &&
-                      row.depth > 0
-                    ) {
-                      return cellEl;
-                    }
-                    return null;
                   })}
                 </TableRow>
-
-                {/* {row.getIsExpanded() && row.subRows.map((sr, i, arr) => {
-                // console.log('sr', sr);
-                return (
-                  <TableRow
-                    key={sr.id}
-                    className={clsx('border-x-4 border-x-blue-600', {
-                      'border-b-4 border-b-blue-600': i === arr.length - 1,
-                      'border-b-none': !(i === arr.length - 1),
-                      
-                      'border-t-none': !(i === 0),
-                    })}
-                  >
-                    {sr
-                      .getVisibleCells()
-                      .map((cell) => {
-                        if (cell.column.columnDef.meta?.rowType === 'main') {
-                          return null;
-                          // return (
-                          //   <TableCell
-                          //     key={cell.id}
-                          //     className="max-w-96 overflow-x-auto whitespace-pre-wrap"
-                          //   ></TableCell>
-                          // );
-                        }
-                        return (
-                          <TableCell
-                            key={cell.id}
-                            className="max-w-96 overflow-x-auto whitespace-pre-wrap"
-                          >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
-                          </TableCell>
-                        );
-                      })
-                      .filter((v) => v)}
-                  </TableRow>
-                );
-              })} */}
               </Fragment>
             );
           })
