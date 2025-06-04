@@ -176,7 +176,7 @@ const cell = (info: CellContext<any, unknown>) => {
             heading={heading}
             device={ul}
           />
-          {ul && value.length > 1 ? `(${ul})` : null}
+          {ul && value.length > 1 ? ` (${ul}) ` : null}
         </div>
       );
     });
@@ -235,25 +235,6 @@ const cell = (info: CellContext<any, unknown>) => {
         data-row={JSON.stringify(info.row.original)}
       ></div>
     );
-    // return value.map((v, i) => `
-    //   if (v === undefined || v === '') {
-    //     return null;
-    //   }
-    //   if(info.column?.columnDef?.meta?.heading?.heading.valueType === 'node' ) {
-    //     return null;
-    //   }
-
-    //   return (
-    //     <div key={i}>
-    //       <RenderTableValue
-    //         value={v}
-    //         heading={info.column?.columnDef?.meta?.heading?.heading}
-    //         device={info.column?.columnDef?.meta?.heading?._userLabel || ''}
-    //       />
-    //       {_userLabel ? `(${_userLabel})` : null}
-    //     </div>
-    //   );
-    // });
   }
 };
 
@@ -283,13 +264,7 @@ const accessorFnSubItems =
     if (typeof subItem !== 'undefined') {
       return subItem;
     }
-
-    const mainItem = r?.item?.[key];
-    if (typeof mainItem !== 'undefined') {
-      return mainItem;
-    }
-
-    return undefined;
+    return r?.item?.[key];
   };
 // "code" |  "node" | "text" | "source-location" | "url" | "link" | "numeric" |  "bytes" | "ms" | "thumbnail" | "timespanMs" | "multi"
 const canGroup = (type: string) => {
@@ -311,12 +286,11 @@ const setSizeSetting = (type: string) => {
   if (isUniqueAgg(type)) {
     return {
       size: 400,
-
     };
   }
 
   return {
-    size: 100,
+    size: 125,
   };
 };
 
@@ -373,13 +347,6 @@ export const makeColumnDef = (h: {
   } else if (subItemsHeadingKey) {
     defaultVisibility = false;
   }
-  console.log(
-    'defaultVisibility',
-    defaultVisibility,
-    key,
-    _userLabel,
-    subItemsHeadingKey,
-  );
   columnDefs.push(
     columnHelper.accessor(
       accessorFnMainItems(_userLabel, key, subItemsHeadingKey),
@@ -678,9 +645,14 @@ export function DetailTable2({
     onGroupingChange: setGrouping,
     getGroupedRowModel: getGroupedRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
-    groupedColumnMode: false,
+    // groupedColumnMode: false,
     // only expand if there is more than one row
-    getRowCanExpand: (row) => row.subRows.length > 1,
+    getRowCanExpand: (row) => {
+      // if (row.getIsGrouped() ) {
+      //   return row.subRows.length > 1;
+      // }
+      return !!row.subRows.length
+    },
 
     onColumnVisibilityChange: setColumnVisibility,
 
@@ -758,18 +730,19 @@ export function DetailTable2({
                           header.column.columnDef.header,
                           header.getContext(),
                         )}
-                        {header.column.columnDef.enableResizing !== false  ? <div
-                          onDoubleClick={() => header.column.resetSize()}
-                          onMouseDown={header.getResizeHandler()}
-                          onTouchStart={header.getResizeHandler()}
-                          className={clsx(
-                            `absolute right-0 top-0 h-full w-[5px] cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200`,
-                            {
-                              'bg-muted':
-                                header.column.getIsResizing(),
-                            },
-                          )}
-                        /> : null}
+                        {header.column.columnDef.enableResizing !== false ? (
+                          <div
+                            onDoubleClick={() => header.column.resetSize()}
+                            onMouseDown={header.getResizeHandler()}
+                            onTouchStart={header.getResizeHandler()}
+                            className={clsx(
+                              `absolute right-0 top-0 h-full w-[5px] cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200`,
+                              {
+                                'bg-muted': header.column.getIsResizing(),
+                              },
+                            )}
+                          />
+                        ) : null}
                       </TableHead>
                     );
                   })
@@ -807,38 +780,30 @@ export function DetailTable2({
                     let cellEl = null;
 
                     if (cell.getIsGrouped()) {
-                      cellEl = (
-                        <div>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </div>
+                      cellEl = flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
                       );
                     } else if (cell.getIsAggregated()) {
                       let cellType = cell.column.columnDef.cell;
-                      if (row.getCanExpand() && (groupsList.length > 1 && depth < 1)) {
+                      if (
+                        row.getCanExpand() &&
+                        groupsList.length > 1 &&
+                        depth < groupsList.length - 1
+                      ) {
                         cellType = cell.column.columnDef.aggregatedCell;
                       }
-                      cellEl = (
-                        <div>{flexRender(cellType, cell.getContext())}</div>
-                      );
+                      cellEl = flexRender(cellType, cell.getContext());
                     } else if (cell.getIsPlaceholder()) {
                       let cellType = cell.column.columnDef.cell;
                       if (row.getCanExpand()) {
                         cellType = cell.column.columnDef.aggregatedCell;
                       }
-                      cellEl = (
-                        <div>{flexRender(cellType, cell.getContext())}</div>
-                      );
+                      cellEl = flexRender(cellType, cell.getContext());
                     } else {
-                      cellEl = (
-                        <div>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </div>
+                      cellEl = flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
                       );
                     }
                     if (!cellEl) {
@@ -849,12 +814,12 @@ export function DetailTable2({
                         key={cell.id}
                         data-cell-id={cell.id}
                         data-column-id={cell.column.id}
-                        data-can-expand={row.getCanExpand()}
+                        data-can-expand={`${row.getCanExpand()}`}
                         data-depth={row.depth}
-                        data-expanded={row.getIsExpanded}
-                        data-grouped={cell.getIsGrouped()}
-                        data-aggregated={cell.getIsAggregated()}
-                        data-placeholder={cell.getIsPlaceholder()}
+                        data-row-expanded={`${row.getIsExpanded}`}
+                        data-grouped={`${cell.getIsGrouped()}`}
+                        data-aggregated={`${cell.getIsAggregated()}`}
+                        data-placeholder={`${cell.getIsPlaceholder()}`}
                         className="max-w-96 overflow-x-auto whitespace-pre-wrap"
                       >
                         {cellEl}

@@ -6,29 +6,31 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { AuditDetailChecklistSchema, AuditResultsRecord } from '@/lib/schema';
+import { AuditDetailChecklist } from '@/lib/schema';
 import { renderBoolean } from './renderBoolean';
 import { Details } from '@/components/ui/accordion';
+import { TableDataItem } from '../tsTable/TableDataItem';
+import { useMemo } from 'react';
 
 export function RenderChecklist({
-  desktopAuditData,
-  mobileAuditData,
+  items,
   title,
 }: {
-  desktopAuditData?: AuditResultsRecord[string];
-  mobileAuditData?: AuditResultsRecord[string];
+  items: TableDataItem[];
   title: string;
 }) {
-  const desktopDetails = AuditDetailChecklistSchema.safeParse(
-    desktopAuditData?.details,
-  ).data;
-  const mobileDetails = AuditDetailChecklistSchema.safeParse(
-    mobileAuditData?.details,
-  ).data;
-  
-  const checklistItems = Object.keys(desktopDetails?.items || {});
-  const mobileChecklistItems = Object.keys(mobileDetails?.items || {});
-  const allKeys = [...new Set([...checklistItems, ...mobileChecklistItems])];
+  const auditItems = useMemo(
+    () =>
+      items.map(
+        (a) => (a?.auditResult.details as AuditDetailChecklist)?.items || {},
+      ),
+    [items],
+  );
+
+  const keys = useMemo(
+    () => Object.keys(auditItems.reduce((acc, a) => ({ ...acc, ...a }), {})),
+    [auditItems],
+  );
 
   return (
     <Details>
@@ -40,24 +42,26 @@ export function RenderChecklist({
         <TableHeader>
           <TableRow>
             <TableHead>Checklist Item</TableHead>
-            <TableHead>Mobile</TableHead>
-            <TableHead>Desktop</TableHead>
+            {items.map((a, i) => {
+              const label = a?._userLabel || '';
+              return <TableHead key={`${label}_${i}`}>{label}</TableHead>;
+            })}
           </TableRow>
         </TableHeader>
         <TableBody>
-          {allKeys.map((key) => {
-            const desktopItem = desktopDetails?.items[key];
-            const mobileItem = mobileDetails?.items[key];
-            const label = desktopItem?.label || mobileItem?.label || '';
+          {keys.map((key) => {
+            const items = auditItems.map((a) => a[key]);
+
             return (
               <TableRow key={key}>
-                <TableCell>{label}</TableCell>
-                <TableCell>
-                  {mobileItem ? renderBoolean(mobileItem.value) : null}{' '}
-                </TableCell>
-                <TableCell>
-                  {desktopItem ? renderBoolean(desktopItem.value) : null}{' '}
-                </TableCell>
+                <TableCell>{items.find((a) => a.label)?.label || ''}</TableCell>
+                {items.map((a, i) => {
+                  return (
+                    <TableCell key={`${a}_${i}`}>
+                      {a ? renderBoolean(a.value) : null}
+                    </TableCell>
+                  );
+                })}
               </TableRow>
             );
           })}

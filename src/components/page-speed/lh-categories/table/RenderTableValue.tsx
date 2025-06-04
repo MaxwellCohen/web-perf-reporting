@@ -33,7 +33,7 @@ export function RenderTableValue({
   device: string;
 } & React.HTMLAttributes<HTMLElement>) {
   if (value === undefined || value === null) {
-    return <div className="col-span-1"></div>;
+    return (<span className="col-span-1" data-info="no data"></span>);
   }
 
   // First deal with the possible object forms of value.
@@ -133,16 +133,16 @@ function RenderNumericValue({
 } & React.HTMLAttributes<HTMLElement>) {
   if (heading?.granularity && typeof value.value === 'number') {
     return (
-      <div title="numeric" {...props} className={cn('', props.className)}>
+      <span title="numeric" {...props} className={cn('', props.className)}>
         {(value.value || 0).toFixed(-Math.log10(heading.granularity))}
-      </div>
+      </span>
     );
   }
 
   return (
-    <div title="numeric" {...props} className={cn('', props.className)}>
+    <span title="numeric" {...props} className={cn('', props.className)}>
       {value.value}
-    </div>
+    </span>
   );
 }
 
@@ -151,7 +151,7 @@ function RenderSourceLocation({
   ...props
 }: { value: SourceLocationValue } & React.HTMLAttributes<HTMLElement>) {
   if (!value.url) {
-    return <div {...props}></div>;
+    return <span {...props}></span>;
   }
 
   // Lines are shown as one-indexed
@@ -203,12 +203,12 @@ function RenderSourceLocation({
     }
 
     return (
-      <div className="flex flex-wrap items-center">
+      <span className="flex flex-wrap items-center">
         {renderLink(textUrl, displayedPath)}
         {displayedHost && (
           <span className="ml-1 text-gray-600">{displayedHost}</span>
         )}
-      </div>
+      </span>
     );
   };
 
@@ -222,12 +222,12 @@ function RenderSourceLocation({
     );
   } else if (value.urlProvider === 'network' && !sourceMappedOriginalLocation) {
     content = (
-      <div className="flex flex-wrap items-center">
+      <span className="flex flex-wrap items-center">
         {renderTextURL(value.url)}
         <span className="ml-0">
           :{value.line + 1}:{value.column}
         </span>
-      </div>
+      </span>
     );
   } else if (value.urlProvider === 'comment' && sourceMappedOriginalLocation) {
     content = renderText(
@@ -241,14 +241,14 @@ function RenderSourceLocation({
   }
 
   return (
-    <div
+    <span
       className="py-1 font-mono text-sm"
       data-source-url={value.url}
       data-source-line={value.line.toString()}
       data-source-column={value.column.toString()}
     >
       {content}
-    </div>
+    </span>
   );
 }
 
@@ -276,9 +276,9 @@ function RenderTextValue({
   ...props
 }: { value: TextValue } & React.HTMLAttributes<HTMLElement>) {
   return (
-    <div title="text" {...props}>
+    <span title="text" {...props}>
       {value.value}
-    </div>
+    </span>
   );
 }
 
@@ -298,18 +298,18 @@ export function RenderBytesValue({
   children,
   ...props
 }: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
-  const bytes = Number(value);
+  const bytes = Math.floor(Number(value));
   const kb = bytes / 1024;
   const mb = kb / 1024;
   return (
-    <div title="bytes" {...props} className={cn('', props.className)}>
+    <span title="bytes" {...props} className={cn('', props.className)}>
       {children}
       {mb > 1
         ? `${mb.toFixed(2)} MB`
         : kb > 1
           ? `${kb.toFixed(2)} KB`
           : `${bytes} bytes`}
-    </div>
+    </span>
   );
 }
 
@@ -374,21 +374,21 @@ export function renderTimeValue(ms: number) {
 export function RenderMSValue({ value, ...props }: { value: unknown }& React.HTMLAttributes<HTMLElement>) {
   const ms = Number(value);
   if(Number.isNaN(ms)) {
-    return <div title="ms" {...props} className={cn('', props.className)}>N/A</div>;
+    return <span title="ms" {...props} className={cn('', props.className)}>N/A</span>;
   }
   if (ms < 1000) {
-    return <div title="ms" {...props} className={cn('', props.className)}>{ms.toFixed(0)} ms</div>;
+    return <span title="ms" {...props} className={cn('', props.className)}>{ms.toFixed(0)} ms</span>;
   }
   const seconds = ms / 1000;
   if (seconds < 60) {
-    return <div title="ms" {...props} className={cn('', props.className)}>{seconds.toFixed(2)} s</div>;
+    return <span title="ms" {...props} className={cn('', props.className)}>{seconds.toFixed(2)} s</span>;
   }
   const minutes = seconds / 60;
   if (minutes < 60) {
-    return <div title="ms" {...props} className={cn('', props.className)}>{minutes.toFixed(2)} min</div>;
+    return <span title="ms" {...props} className={cn('', props.className)}>{minutes.toFixed(2)} min</span>;
   }
   const hours = minutes / 60;
-  return <div title="ms" {...props} className={cn('', props.className)}>{hours.toFixed(2)} h</div>;
+  return <span title="ms" {...props} className={cn('', props.className)}>{hours.toFixed(2)} h</span>;
 }
 
 function RenderNumberValue({
@@ -401,24 +401,24 @@ function RenderNumberValue({
 } & React.HTMLAttributes<HTMLElement>) {
   if (heading?.granularity && typeof value === 'number') {
     return (
-      <div
+      <span
         title="numeric"
         {...props}
         className={cn('align-right', props.className)}
       >
         {(+value as number || 0).toFixed(-Math.log10(+heading.granularity || 1))}
-      </div>
+      </span>
     );
   }
 
   return (
-    <div
+    <span
       title="numeric"
       {...props}
       className={cn('align-right', props.className)}
     >
       {(+(value as number)   || 0).toFixed(-Math.log10(heading?.granularity || 1))}
-    </div>
+    </span>
   );
 }
 
@@ -429,15 +429,15 @@ function RenderText({
   const strValue = String(value);
   if (strValue.length < 10) {
     return (
-      <div title="text" {...props} className={cn('', props.className)}>
+      <span title="text" {...props} className={cn('', props.className)}>
         {strValue}
-      </div>
+      </span>
     );
   }
   return (
-    <div title="text" {...props}>
+    <span title="text" {...props}>
       {strValue}
-    </div>
+    </span>
   );
 }
 
@@ -463,7 +463,7 @@ function RenderUrl({
   } else {
     // Fall back to <pre> rendering if not actually a URL.
     return (
-      <div
+      <span
         title="url"
         {...props}
         className={cn(
@@ -472,7 +472,7 @@ function RenderUrl({
         )}
       >
         {strValue}
-      </div>
+      </span>
     );
   }
 }

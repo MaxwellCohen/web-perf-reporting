@@ -1,5 +1,5 @@
 export function camelCaseToSentenceCase(str: string) {
-    if (!str) {
+    if (typeof str !== 'string') {
         return '';
     }
     const result = str
