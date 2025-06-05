@@ -308,7 +308,12 @@ const customSum = (aggregationKey: string, rows: Row<DetailTableDataRow>[]) => {
     }
 
     if (typeof v === 'number') {
-      const userLabel = r.getValue('device') as string;
+      let userLabel;
+      try {
+        userLabel = r.getValue('device') as string;
+      } catch (e) {
+        userLabel = '';
+      }
       const c = r.getAllCells().find((c) => c.column.id === aggregationKey);
       if (c?.column?.columnDef?.meta?.rowType !== 'sub') {
         acc[userLabel] = v;
@@ -328,7 +333,7 @@ export const makeColumnDef = (h: {
   heading: TableColumnHeading;
   _userLabel: string;
   skipSumming?: string[];
-}): ColumnDef<DetailTableDataRow, unknown>[] => {
+}, settings : {showUserLabel: boolean}): ColumnDef<DetailTableDataRow, unknown>[] => {
   const key = h.heading.key;
   const _userLabel = h._userLabel;
   const subItemsHeadingKey = h.heading.subItemsHeading?.key;
@@ -362,7 +367,7 @@ export const makeColumnDef = (h: {
           ? 'unique'
           : (h.skipSumming || []).includes(key)
             ? 'unique'
-            : customSum,
+            : settings.showUserLabel ? customSum : 'sum',
         meta: {
           heading: h,
           className: '',
@@ -378,7 +383,7 @@ export const makeColumnDef = (h: {
       isUniqueAgg(subItemsHeading.valueType) ||
       (h.skipSumming || []).includes(subItemsHeadingKey)
         ? 'unique'
-        : customSum;
+        : settings.showUserLabel ? customSum : 'sum' ;
     columnDefs.push(
       columnHelper.accessor(
         accessorFnSubItems(_userLabel, key, subItemsHeadingKey),
@@ -472,7 +477,7 @@ export function DetailTable2({
   })[];
 }) {
   console.log('raw rows', rows);
-
+  const showUserLabel = rows.length > 1;
   const data: DetailTableDataRow[] = useMemo(
     () =>
       rows
@@ -538,39 +543,41 @@ export function DetailTable2({
     };
 
     allHeadings.forEach((h) => {
-      makeColumnDef({ ...h, _userLabel: '' }).forEach((v) => {
+      makeColumnDef({ ...h, _userLabel: '' }, {showUserLabel}).forEach((v) => {
         if (v?.id && !acc[v.id]) {
           acc[v.id] = v;
         }
       });
     });
-    allHeadings.forEach((h) =>
-      makeColumnDef(h).forEach((v) => {
-        if (v?.id && !acc[v.id]) {
-          acc[v.id] = v;
-        }
-      }),
-    );
-
+    if (showUserLabel) {
+      allHeadings.forEach((h) =>
+        makeColumnDef(h, {showUserLabel}).forEach((v) => {
+          if (v?.id && !acc[v.id]) {
+            acc[v.id] = v;
+          }
+        }),
+      );
+    }
     let columnDefs: ColumnDef<DetailTableDataRow, any>[] = Object.values(acc);
-    columnDefs = columnDefs.concat([
-      columnHelper.accessor((r) => r?._userLabel ?? '', {
-        id: 'device',
-        header: 'Report type(s)',
-        enableHiding: true,
-        enableGrouping: false,
-        aggregationFn: 'unique',
-        size: 110,
-        cell: DeviceCell,
-        aggregatedCell: DeviceCell,
-        meta: {
-          defaultVisibility: true,
-        },
-      }),
-    ]);
-
+    if (showUserLabel) {
+      columnDefs = columnDefs.concat([
+        columnHelper.accessor((r) => r?._userLabel ?? '', {
+          id: 'device',
+          header: 'Report type(s)',
+          enableHiding: true,
+          enableGrouping: false,
+          aggregationFn: 'unique',
+          size: 110,
+          cell: DeviceCell,
+          aggregatedCell: DeviceCell,
+          meta: {
+            defaultVisibility: true,
+          },
+        }),
+      ]);
+    }
     return columnDefs.filter((v) => v);
-  }, [rows]);
+  }, [rows, showUserLabel]);
 
   console.log('columns', columns);
 
@@ -616,7 +623,7 @@ export function DetailTable2({
         return [groupingVal[0].id];
       }
     }
-    return ['device'];
+    return showUserLabel ? ['device'] : [];
   });
   // const [grouping, setGrouping] = useState<string[]>(['url']);
 
@@ -651,7 +658,8 @@ export function DetailTable2({
       // if (row.getIsGrouped() ) {
       //   return row.subRows.length > 1;
       // }
-      return !!row.subRows.length
+      // return !!row.subRows.length;
+      return row.getLeafRows().length > 1;
     },
 
     onColumnVisibilityChange: setColumnVisibility,
@@ -758,10 +766,10 @@ export function DetailTable2({
           .rows.map((row) => {
             const depth = row.depth;
             const groupsList = table.getState().grouping;
-
-            // if (rows.length === 1 &&  row.depth > 0 && row.getParentRow()?.original === row.original) {
-            //   return null;
-            // }
+            const parent = row.getParentRow();
+            if (parent && !parent.getCanExpand()) {
+              return null;
+            }
             return (
               <Fragment key={row.id}>
                 <TableRow
@@ -816,13 +824,13 @@ export function DetailTable2({
                         data-column-id={cell.column.id}
                         data-can-expand={`${row.getCanExpand()}`}
                         data-depth={row.depth}
-                        data-row-expanded={`${row.getIsExpanded}`}
+                        data-row-expanded={`${row.getIsExpanded()}`}
                         data-grouped={`${cell.getIsGrouped()}`}
                         data-aggregated={`${cell.getIsAggregated()}`}
                         data-placeholder={`${cell.getIsPlaceholder()}`}
                         className="max-w-96 overflow-x-auto whitespace-pre-wrap"
                       >
-                        {cellEl}
+                        {cellEl} 
                       </TableCell>
                     );
                   })}
