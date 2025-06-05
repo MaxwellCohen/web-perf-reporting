@@ -1,36 +1,50 @@
 import { HorizontalGaugeChart } from '@/components/common/PageSpeedGaugeChart';
-import { AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
+import {
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@/components/ui/accordion';
 import { Fragment, useContext } from 'react';
 import { InsightsContext } from './PageSpeedContext';
 import { Card, CardTitle } from '../ui/card';
 
 interface LoadingExperienceProps {
-  title: string,
-  experienceKey: 'loadingExperience'| 'originLoadingExperience'
+  title: string;
+  experienceKey: 'loadingExperience' | 'originLoadingExperience';
 }
+
+const metrics = [
+  { metric: 'First Contentful Paint', key: 'FIRST_CONTENTFUL_PAINT_MS' },
+  { metric: 'Largest Contentful Paint', key: 'LARGEST_CONTENTFUL_PAINT_MS' },
+  { metric: 'Cumulative Layout Shift', key: 'CUMULATIVE_LAYOUT_SHIFT_SCORE' },
+  { metric: 'Time to First Byte', key: 'EXPERIMENTAL_TIME_TO_FIRST_BYTE' },
+  { metric: 'Interaction to Next Paint', key: 'INTERACTION_TO_NEXT_PAINT' },
+] as const;
 
 export function LoadingExperience({
   title,
-  experienceKey
+  experienceKey,
 }: LoadingExperienceProps) {
   const items = useContext(InsightsContext);
   if (!items.length) {
     return null;
   }
-  const experiences = items.map(({item, label}) => ({item: item[experienceKey], label}))
+  const experiences = items
+    .filter(({ item }) => item[experienceKey])
+    .map(({ item, label }) => ({ item: item[experienceKey], label }));
+
+  if (!experiences.length) {
+    return null;
+  }
 
   const extraTitle = experiences
-    .map((experience) => {
-      return `${ experience.label ? `${experience.label} - ` : ''}${experience.item.overall_category}`;
+    ?.map((experience) => {
+      return `${experience.label ? `${experience.label} - ` : ''}${experience?.item?.overall_category}`;
     })
     .join(' \n');
-  const metrics = [
-    { metric: 'First Contentful Paint', key: 'FIRST_CONTENTFUL_PAINT_MS' },
-    { metric: 'Largest Contentful Paint', key: 'LARGEST_CONTENTFUL_PAINT_MS' },
-    { metric: 'Cumulative Layout Shift', key: 'CUMULATIVE_LAYOUT_SHIFT_SCORE' },
-    { metric: 'Time to First Byte', key: 'EXPERIMENTAL_TIME_TO_FIRST_BYTE' },
-    { metric: 'Interaction to Next Paint', key: 'INTERACTION_TO_NEXT_PAINT' },
-  ] as const;
+
+  if (!extraTitle) return null;
+
   return (
     <>
       <AccordionItem value={experienceKey}>
@@ -48,13 +62,16 @@ export function LoadingExperience({
               >
                 <CardTitle className="text-sm font-bold">{metric}</CardTitle>
                 {experiences.map((experience, idx) => {
-                  const metricValue = experience?.item.metrics[key];
+                  const metricValue = experience?.item?.metrics?.[key];
+                  if (!metricValue) {
+                    return null;
+                  }
                   return (
                     <Fragment key={`${key}_${idx}`}>
                       {!metricValue ? null : (
                         <HorizontalGaugeChart
                           key={key}
-                          metric={`${metricValue.percentile} - ${metricValue.category} ${experience.label ? `(${experience.label})`: ''}`}
+                          metric={`${metricValue.percentile} - ${metricValue.category} ${experience.label ? `(${experience.label})` : ''}`}
                           data={metricValue}
                         />
                       )}
