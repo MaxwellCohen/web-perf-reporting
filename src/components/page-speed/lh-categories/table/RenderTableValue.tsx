@@ -332,8 +332,9 @@ function RenderCode({
   );
 }
 
-export function renderTimeValue(ms: number) {
-  if (ms <= 0) {
+export function renderTimeValue(msU: unknown) {
+  const ms = Number(msU)
+  if (Number.isNaN(ms) || ms <= 0 ) {
     return "0 ms";
   }
 
@@ -358,7 +359,8 @@ export function renderTimeValue(ms: number) {
   }
 
   if (seconds > 0) {
-    parts.push(`${seconds} s`);
+    parts.push(`${seconds}.${milliseconds || 0} s`);
+    return `${parts.join(" ")}`;
   }
 
   if (milliseconds > 0 || parts.length === 0) {
@@ -491,4 +493,13 @@ function RenderTimespanMs({
 }: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
   const numValue = Number(value);
   return <RenderMSValue value={numValue} {...props} />;
+}
+
+
+export function RenderCountNumber(v: unknown) {
+  const numValue = Number(v);
+  if (Number.isNaN(numValue)) {
+    return 'N/A';
+  }
+  return `${numValue}`;
 }

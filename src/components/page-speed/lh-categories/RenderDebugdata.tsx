@@ -10,7 +10,7 @@ import { DebugData } from '@/lib/schema';
 import { renderBoolean } from './renderBoolean';
 import { camelCaseToSentenceCase } from './camelCaseToSentenceCase';
 import { TableDataItem } from '../tsTable/TableDataItem';
-import {  useMemo } from 'react';
+import { useMemo } from 'react';
 import {
   createColumnHelper,
   flexRender,
@@ -19,6 +19,7 @@ import {
   getGroupedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
+import { RenderBytesValue, RenderCountNumber, renderTimeValue } from './table/RenderTableValue';
 
 type DebugDataTableItem = {
   key: string;
@@ -28,11 +29,7 @@ type DebugDataTableItem = {
 
 const columnHelper = createColumnHelper<DebugDataTableItem>();
 
-export function RenderDebugData({
-  items,
-}: {
-  items: TableDataItem[];
-}) {
+export function RenderDebugData({ items }: { items: TableDataItem[] }) {
   const data = useMemo(
     () =>
       items?.reduce((acc: Array<DebugDataTableItem>, i) => {
@@ -52,7 +49,7 @@ export function RenderDebugData({
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor((r) => RenderTitle(r.key) , {
+      columnHelper.accessor('key', {
         id: 'key',
         enableGrouping: true,
         header: 'Item',
@@ -67,7 +64,8 @@ export function RenderDebugData({
         aggregationFn: 'unique', // unique values for each column
         cell: (props) => {
           const val = props.getValue();
-          return renderItem(val);
+          const key = props.row.getValue('key') as string;
+          return renderItem(val, key);
         },
       }),
       columnHelper.accessor('label', {
@@ -77,31 +75,36 @@ export function RenderDebugData({
     [],
   );
 
-  const table = useReactTable(useMemo(() => ({
-    // core items
-    data, // in the form of an  array
-    columns, // column definitions
-    getCoreRowModel: getCoreRowModel(), // basic layout
+  const table = useReactTable(
+    useMemo(
+      () => ({
+        // core items
+        data, // in the form of an  array
+        columns, // column definitions
+        getCoreRowModel: getCoreRowModel(), // basic layout
 
-    // grouping
-    manualPagination: true, // prevents ssr issues with grouping in Next js
+        // grouping
+        manualPagination: true, // prevents ssr issues with grouping in Next js
 
-    getGroupedRowModel: getGroupedRowModel(), // enable grouping 
-    getExpandedRowModel: getExpandedRowModel(),
+        getGroupedRowModel: getGroupedRowModel(), // enable grouping
+        getExpandedRowModel: getExpandedRowModel(),
 
-    // column pinning
-    enableColumnPinning: true,
+        // column pinning
+        enableColumnPinning: true,
 
-    state: {
-      // expanded: true,
-      grouping: ['key'],
-      columnPinning: {
-        left: ['key', 'value', 'label']
-      }
-    }
-  }), [columns, data]));
+        state: {
+          // expanded: true,
+          grouping: ['key'],
+          columnPinning: {
+            left: ['key', 'value', 'label'],
+          },
+        },
+      }),
+      [columns, data],
+    ),
+  );
 
-  console.log('table', table)  
+  console.log('table', table);
 
   return (
     <Table>
@@ -125,26 +128,38 @@ export function RenderDebugData({
       </TableHeader>
       <TableBody>
         {table.getRowModel().rows.map((row) => {
-          if(row.subRows.length) {
-            return row.subRows.map((sr, i) => {
-              return(<TableRow key={sr.id}>
-                {sr.getVisibleCells().map((cell) => {
-                  if(cell.id.includes('key') ) {
-                    if (i !== 0) {return null }
-                    return (
-                      <TableCell key={cell.id} rowSpan={row.subRows.length }>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    );
-                  }
-                  return (
-                    <TableCell key={cell.id} rowSpan={1 }>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  );
-                })}
-              </TableRow>
-            );}).filter(Boolean);  
+          if (row.subRows.length) {
+            return row.subRows
+              .map((sr, i) => {
+                return (
+                  <TableRow key={sr.id}>
+                    {sr.getVisibleCells().map((cell) => {
+                      if (cell.id.includes('key')) {
+                        if (i !== 0) {
+                          return null;
+                        }
+                        return (
+                          <TableCell key={cell.id} rowSpan={row.subRows.length}>
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </TableCell>
+                        );
+                      }
+                      return (
+                        <TableCell key={cell.id} rowSpan={1}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                );
+              })
+              .filter(Boolean);
           }
           return (
             <TableRow key={row.id}>
@@ -161,19 +176,6 @@ export function RenderDebugData({
       </TableBody>
     </Table>
   );
-}
-
-function renderItem(item: unknown) {
-  if (typeof item === 'string') {
-    return item;
-  }
-  if (typeof item === 'number') {
-    return item.toFixed(2);
-  }
-  if (typeof item === 'boolean') {
-    return renderBoolean(item);
-  }
-  return '';
 }
 
 function cleanDebugData(data: DebugData | undefined) {
@@ -195,53 +197,104 @@ function cleanDebugData(data: DebugData | undefined) {
     {},
   );
 }
-const TitleMap: Record<string, { label: string; sortOrder: number }> = {
+const renderBytesValue = (v: unknown) => <RenderBytesValue value={v} />;
+const renderTSValue = RenderCountNumber; //(v: unknown) =>  RenderCountNumber(v)// renderTimeValue( v as number / 1_000_000);
+
+const TitleMap: Record<
+  string,
+  { label: string; sortOrder: number; renderFn?: (v: unknown) => unknown }
+> = {
   // Core Web Vitals
   cumulativeLayoutShift: { label: 'Cumulative Layout Shift', sortOrder: 1 },
   cumulativeLayoutShiftMainFrame: {
     label: 'Cumulative Layout Shift (Main Frame)',
     sortOrder: 2,
   },
-  firstContentfulPaint: { label: 'First Contentful Paint', sortOrder: 3 },
-  largestContentfulPaint: { label: 'Largest Contentful Paint', sortOrder: 4 },
-  interactive: { label: 'Interactive', sortOrder: 5 },
-  totalBlockingTime: { label: 'Total Blocking Time', sortOrder: 6 },
+  firstContentfulPaint: { label: 'First Contentful Paint', sortOrder: 3, renderFn: renderTimeValue },
+  largestContentfulPaint: { label: 'Largest Contentful Paint', sortOrder: 4, renderFn: renderTimeValue },
+  interactive: { label: 'Interactive', sortOrder: 5, renderFn: renderTimeValue },
+  totalBlockingTime: { label: 'Total Blocking Time', sortOrder: 6, renderFn: renderTimeValue },
 
   // LCP Details
-  lcpLoadStart: { label: 'LCP Load Start', sortOrder: 7 },
-  lcpLoadEnd: { label: 'LCP Load End', sortOrder: 8 },
-  lcpInvalidated: { label: 'LCP Invalidated', sortOrder: 9 },
+  lcpLoadStart: { label: 'LCP Load Start', sortOrder: 7, renderFn: renderTimeValue },
+  lcpLoadEnd: { label: 'LCP Load End', sortOrder: 8, renderFn: renderTimeValue },
+  lcpInvalidated: { label: 'LCP Invalidated', sortOrder: 9, renderFn: renderTimeValue },
 
   // Performance Metrics
-  speedIndex: { label: 'Speed Index', sortOrder: 10 },
-  maxPotentialFID: { label: 'Max Potential FID', sortOrder: 11 },
-  timeToFirstByte: { label: 'Time To First Byte', sortOrder: 12 },
+  speedIndex: { label: 'Speed Index', sortOrder: 10, renderFn: renderTimeValue },
+  maxPotentialFID: { label: 'Max Potential FID', sortOrder: 11, renderFn: renderTimeValue },
+  timeToFirstByte: { label: 'Time To First Byte', sortOrder: 12, renderFn: renderTimeValue },
 
   // Network Statistics
-  rtt: { label: 'Round Trip Time (RTT)', sortOrder: 13 },
-  maxRtt: { label: 'Maximum Round Trip Time', sortOrder: 14 },
-  maxServerLatency: { label: 'Maximum Server Latency', sortOrder: 15 },
+  rtt: { label: 'Round Trip Time (RTT)', sortOrder: 13, renderFn: renderTimeValue },
+  maxRtt: { label: 'Maximum Round Trip Time', sortOrder: 14, renderFn: renderTimeValue },
+  maxServerLatency: { label: 'Maximum Server Latency', sortOrder: 15, renderFn: renderTimeValue },
   throughput: { label: 'Throughput', sortOrder: 16 },
   mainDocumentTransferSize: {
     label: 'Main Document Transfer Size',
     sortOrder: 17,
+    renderFn: renderBytesValue,
   },
-  totalByteWeight: { label: 'Total Byte Weight', sortOrder: 18 },
+  totalByteWeight: {
+    label: 'Total Byte Weight',
+    sortOrder: 18,
+    renderFn: renderBytesValue,
+  },
 
   // Resource Counts
-  numRequests: { label: 'Number of Requests', sortOrder: 19 },
-  numFonts: { label: 'Number of Fonts', sortOrder: 20 },
-  numScripts: { label: 'Number of Scripts', sortOrder: 21 },
-  numStylesheets: { label: 'Number of Stylesheets', sortOrder: 22 },
+  numRequests: {
+    label: 'Number of Requests',
+    sortOrder: 19,
+    renderFn: RenderCountNumber,
+  },
+  numFonts: {
+    label: 'Number of Fonts',
+    sortOrder: 20,
+    renderFn: RenderCountNumber,
+  },
+  numScripts: {
+    label: 'Number of Scripts',
+    sortOrder: 21,
+    renderFn: RenderCountNumber,
+  },
+  numStylesheets: {
+    label: 'Number of Stylesheets',
+    sortOrder: 22,
+    renderFn: RenderCountNumber,
+  },
 
   // Task Timing
-  numTasks: { label: 'Number of Tasks', sortOrder: 23 },
-  numTasksOver10ms: { label: 'Number of Tasks over 10ms', sortOrder: 24 },
-  numTasksOver25ms: { label: 'Number of Tasks over 25ms', sortOrder: 25 },
-  numTasksOver50ms: { label: 'Number of Tasks over 50ms', sortOrder: 26 },
-  numTasksOver100ms: { label: 'Number of Tasks over 100ms', sortOrder: 27 },
-  numTasksOver500ms: { label: 'Number of Tasks over 500ms', sortOrder: 28 },
-  totalTaskTime: { label: 'Total Task Time', sortOrder: 29 },
+  numTasks: {
+    label: 'Number of Tasks',
+    sortOrder: 23,
+    renderFn: RenderCountNumber,
+  },
+  numTasksOver10ms: {
+    label: 'Number of Tasks over 10ms',
+    sortOrder: 24,
+    renderFn: RenderCountNumber,
+  },
+  numTasksOver25ms: {
+    label: 'Number of Tasks over 25ms',
+    sortOrder: 25,
+    renderFn: RenderCountNumber,
+  },
+  numTasksOver50ms: {
+    label: 'Number of Tasks over 50ms',
+    sortOrder: 26,
+    renderFn: RenderCountNumber,
+  },
+  numTasksOver100ms: {
+    label: 'Number of Tasks over 100ms',
+    sortOrder: 27,
+    renderFn: RenderCountNumber,
+  },
+  numTasksOver500ms: {
+    label: 'Number of Tasks over 500ms',
+    sortOrder: 28,
+    renderFn: RenderCountNumber,
+  },
+  totalTaskTime: { label: 'Total Task Time', sortOrder: 29, renderFn: renderTimeValue },
 
   // Observed Metrics
   observedCumulativeLayoutShift: {
@@ -253,7 +306,7 @@ const TitleMap: Record<string, { label: string; sortOrder: number }> = {
     sortOrder: 31,
   },
   observedFirstPaint: { label: 'Observed First Paint', sortOrder: 32 },
-  observedFirstPaintTs: { label: 'Observed First Paint Ts', sortOrder: 33 },
+  observedFirstPaintTs: { label: 'Observed First Paint Ts', sortOrder: 33, renderFn: renderTSValue },
   observedFirstContentfulPaint: {
     label: 'Observed First Contentful Paint',
     sortOrder: 34,
@@ -261,6 +314,7 @@ const TitleMap: Record<string, { label: string; sortOrder: number }> = {
   observedFirstContentfulPaintTs: {
     label: 'Observed First Contentful Paint Ts',
     sortOrder: 35,
+    renderFn: renderTSValue
   },
   observedFirstContentfulPaintAllFrames: {
     label: 'Observed First Contentful Paint All Frames',
@@ -269,6 +323,7 @@ const TitleMap: Record<string, { label: string; sortOrder: number }> = {
   observedFirstContentfulPaintAllFramesTs: {
     label: 'Observed First Contentful Paint All Frames Ts',
     sortOrder: 37,
+    renderFn: renderTSValue
   },
   observedLargestContentfulPaint: {
     label: 'Observed Largest Contentful Paint',
@@ -277,6 +332,7 @@ const TitleMap: Record<string, { label: string; sortOrder: number }> = {
   observedLargestContentfulPaintTs: {
     label: 'Observed Largest Contentful Paint Ts',
     sortOrder: 39,
+    renderFn: renderTSValue
   },
   observedLargestContentfulPaintAllFrames: {
     label: 'Observed Largest Contentful Paint All Frames',
@@ -285,6 +341,7 @@ const TitleMap: Record<string, { label: string; sortOrder: number }> = {
   observedLargestContentfulPaintAllFramesTs: {
     label: 'Observed Largest Contentful Paint All Frames Ts',
     sortOrder: 41,
+    renderFn: renderTSValue
   },
 
   // Page Load Events
@@ -295,9 +352,10 @@ const TitleMap: Record<string, { label: string; sortOrder: number }> = {
   observedDomContentLoadedTs: {
     label: 'Observed Dom Content Loaded Ts',
     sortOrder: 43,
+    renderFn: renderTSValue
   },
   observedLoad: { label: 'Observed Load', sortOrder: 44 },
-  observedLoadTs: { label: 'Observed Load Ts', sortOrder: 45 },
+  observedLoadTs: { label: 'Observed Load Ts', sortOrder: 45, renderFn: renderTSValue },
 
   // Visual Change Events
   observedFirstVisualChange: {
@@ -307,6 +365,7 @@ const TitleMap: Record<string, { label: string; sortOrder: number }> = {
   observedFirstVisualChangeTs: {
     label: 'Observed First Visual Change Ts',
     sortOrder: 47,
+    renderFn: renderTSValue
   },
   observedLastVisualChange: {
     label: 'Observed Last Visual Change',
@@ -315,6 +374,7 @@ const TitleMap: Record<string, { label: string; sortOrder: number }> = {
   observedLastVisualChangeTs: {
     label: 'Observed Last Visual Change Ts',
     sortOrder: 49,
+    renderFn: renderTSValue
   },
 
   // Navigation and Timing
@@ -325,14 +385,33 @@ const TitleMap: Record<string, { label: string; sortOrder: number }> = {
   observedNavigationStartTs: {
     label: 'Observed Navigation Start Ts',
     sortOrder: 51,
+    renderFn: renderTSValue
   },
   observedSpeedIndex: { label: 'Observed Speed Index', sortOrder: 52 },
-  observedSpeedIndexTs: { label: 'Observed Speed Index Ts', sortOrder: 53 },
+  observedSpeedIndexTs: { label: 'Observed Speed Index Ts', sortOrder: 53, renderFn: renderTSValue},
   observedTimeOrigin: { label: 'Observed Time Origin', sortOrder: 54 },
-  observedTimeOriginTs: { label: 'Observed Time Origin Ts', sortOrder: 55 },
+  observedTimeOriginTs: { label: 'Observed Time Origin Ts', sortOrder: 55, renderFn: renderTSValue },
   observedTraceEnd: { label: 'Observed Trace End', sortOrder: 56 },
-  observedTraceEndTs: { label: 'Observed Trace End Ts', sortOrder: 57 },
+  observedTraceEndTs: { label: 'Observed Trace End Ts', sortOrder: 57, renderFn: renderTSValue },
 };
+
+function renderItem(item: unknown, key: string) {
+  const renderFn = TitleMap[key as keyof typeof TitleMap]?.renderFn;
+  if (renderFn) {
+    return renderFn(item);
+  }
+
+  if (typeof item === 'string') {
+    return item;
+  }
+  if (typeof item === 'number') {
+    return item.toFixed(2);
+  }
+  if (typeof item === 'boolean') {
+    return renderBoolean(item);
+  }
+  return '';
+}
 
 function RenderTitle(s: string) {
   return (

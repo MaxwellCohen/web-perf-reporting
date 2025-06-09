@@ -126,9 +126,6 @@ declare module '@tanstack/react-table' {
     defaultVisibility?: boolean;
     rowType?: 'main' | 'sub';
     headerType?: 'group' | 'sub';
-
-    // childrenOnly?: boolean;
-    // doNotShowInGroup?: boolean;
   }
 }
 

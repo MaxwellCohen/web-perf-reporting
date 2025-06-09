@@ -15,7 +15,11 @@ import { Fragment, useId, useMemo } from 'react';
 import { Button } from '../ui/button';
 import { Ghost } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import { ExpandAll, ExpandRow, StringFilterHeader } from './JSUsage/JSUsageTable';
+import {
+  ExpandAll,
+  ExpandRow,
+  StringFilterHeader,
+} from './JSUsage/JSUsageTable';
 import { Accordion } from '../ui/accordion';
 import clsx from 'clsx';
 import { flexRender } from '@tanstack/react-table';
@@ -110,12 +114,21 @@ export function PageSpeedInsightsDashboard({
           ))}
           <CWVMetricsComponent />
           <RenderFilmStrip />
+          <EntitiesTable
+            entities={
+              data.find((e) => e?.lighthouseResult?.entities)?.lighthouseResult
+                ?.entities
+            }
+          />
         </Accordion>
         <div className="items-bottom flex flex-row justify-between gap-4 px-3 py-4">
           <div className="flex flex-col">
-          <StringFilterHeader column={table.getColumn('auditTitle')} name={'Audit'} />
+            <StringFilterHeader
+              column={table.getColumn('auditTitle')}
+              name={'Audit'}
+            />
           </div>
-          <div className="self-end justify-self-end flex mb-2">
+          <div className="mb-2 flex self-end justify-self-end">
             <Button variant="ghost" onClick={() => table.resetColumnFilters()}>
               Reset filters
             </Button>
