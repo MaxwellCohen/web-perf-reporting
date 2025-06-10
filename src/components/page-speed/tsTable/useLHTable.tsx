@@ -170,6 +170,10 @@ export function useLHTable(
     manualExpanding: true,
     enableColumnFilters: true,
     enableColumnPinning: true,
+
+    filterFns: {
+      'booleanFilterFn': () => true,
+    },
     state: {
       grouping,
     },
@@ -177,6 +181,7 @@ export function useLHTable(
 }
 
 export function CategoryRow({ row }: { row: Row<TableDataItem> }) {
+  'use no memo'
   return (
     <AccordionItem value={row.id} key={row.id}>
       <AccordionTrigger

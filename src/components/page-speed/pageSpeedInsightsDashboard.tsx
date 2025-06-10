@@ -44,6 +44,7 @@ export function PageSpeedInsightsDashboard({
   labels: string[];
   hideReport?: boolean;
 }) {
+  'use no memo'
   const [mobileData, desktopData] = data || [];
   const items = useMemo(
     () =>

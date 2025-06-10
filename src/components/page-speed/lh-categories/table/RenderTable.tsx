@@ -34,6 +34,7 @@ import {
   RowData,
   Row,
   createColumnHelper,
+  Header,
 } from '@tanstack/react-table';
 import { TableDataItem } from '../../tsTable/TableDataItem';
 import {
@@ -48,77 +49,8 @@ import { RenderTableValue } from './RenderTableValue';
 import clsx from 'clsx';
 import { ExpandAll, ExpandRow } from '../../JSUsage/JSUsageTable';
 import { toTitleCase } from '../../toTitleCase';
+import {ColumnResizer, useColumnSizeVars} from './columnResizer';
 
-export function DetailTable({
-  mobileDetails,
-  desktopDetails,
-  title,
-}: {
-  mobileDetails?: AuditDetailOpportunity | AuditDetailTable;
-  desktopDetails?: AuditDetailOpportunity | AuditDetailTable;
-  title: string;
-}) {
-  const { items, headings, device, sortedBy, hasNode } = useMemo(() => {
-    const [_headings, _items, _device, _hasNode] = mergedTable(
-      desktopDetails?.items,
-      mobileDetails?.items,
-      mobileDetails?.headings,
-      desktopDetails?.headings,
-    );
-    const _sortedBy = combineAndDedupe(
-      desktopDetails?.sortedBy,
-      mobileDetails?.sortedBy,
-    );
-    if (_sortedBy.length && !_hasNode) {
-      _items.sort(getTableItemSortComparator(_sortedBy));
-    }
-    return {
-      items: _items,
-      headings: _headings,
-      device: _device,
-      sortedBy: _sortedBy,
-      hasNode: _hasNode,
-    };
-  }, [desktopDetails, mobileDetails]);
-  const isEntityGrouped =
-    !!desktopDetails?.isEntityGrouped || !!mobileDetails?.isEntityGrouped;
-  const shouldRenderEntityTable = shouldGroupEntity(items, isEntityGrouped);
-  const skipSumming = combineAndDedupe(
-    desktopDetails?.skipSumming,
-    mobileDetails?.skipSumming,
-  );
-
-  if (shouldRenderEntityTable) {
-    <RenderEntityTable
-      headings={headings}
-      device={device}
-      items={items}
-      isEntityGrouped={isEntityGrouped}
-      skipSumming={skipSumming}
-      sortedBy={sortedBy}
-    />;
-  }
-
-  if (hasNode) {
-    return (
-      <RenderNodeTable
-        headings={headings}
-        items={items}
-        device={device}
-        title={title}
-      />
-    );
-  }
-
-  return (
-    <RenderBasicTable
-      headings={headings}
-      items={items}
-      device={device}
-      title={title}
-    />
-  );
-}
 
 declare module '@tanstack/react-table' {
   interface ColumnMeta<TData extends RowData, TValue> {
@@ -473,6 +405,7 @@ export function DetailTable2({
     };
   })[];
 }) {
+  "use no memo"
   console.log('raw rows', rows);
   const showUserLabel = rows.length > 1;
   const data: DetailTableDataRow[] = useMemo(
@@ -669,6 +602,12 @@ export function DetailTable2({
     // manualGrouping: true,
     enableColumnFilters: true,
     enableColumnPinning: true,
+
+    filterFns: {
+      'booleanFilterFn': () => true,
+    },
+
+
     state: {
       sorting, // set initial sorting state
       grouping,
@@ -683,22 +622,7 @@ export function DetailTable2({
   console.log('columnVisibility', columnVisibility);
   console.log('visible rows', table.getRowModel().rows);
 
-  /**
-   * Instead of calling `column.getSize()` on every render for every header
-   * and especially every data cell (very expensive),
-   * we will calculate all column sizes at once at the root table level in a useMemo
-   * and pass the column sizes down as CSS variables to the <table> element.
-   */
-  const flatHeaders = table.getFlatHeaders();
-  const columnSizeVars = useMemo(() => {
-    const colSizes: { [key: string]: number } = {};
-    for (let i = 0; i < flatHeaders.length; i++) {
-      const header = flatHeaders[i]!;
-      colSizes[`--header-${header.id}-size`] = header.getSize();
-      colSizes[`--col-${header.column.id}-size`] = header.column.getSize();
-    }
-    return colSizes;
-  }, [flatHeaders]);
+  const columnSizeVars = useColumnSizeVars(table);
 
   if (data.length === 0) {
     return null;
@@ -735,19 +659,7 @@ export function DetailTable2({
                           header.column.columnDef.header,
                           header.getContext(),
                         )}
-                        {header.column.columnDef.enableResizing !== false ? (
-                          <div
-                            onDoubleClick={() => header.column.resetSize()}
-                            onMouseDown={header.getResizeHandler()}
-                            onTouchStart={header.getResizeHandler()}
-                            className={clsx(
-                              `absolute right-0 top-0 h-full w-[5px] cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200`,
-                              {
-                                'bg-muted': header.column.getIsResizing(),
-                              },
-                            )}
-                          />
-                        ) : null}
+                        <ColumnResizer header={header} />
                       </TableHead>
                     );
                   })
@@ -841,6 +753,3 @@ export function DetailTable2({
   );
 }
 
-function combineAndDedupe<T>(a?: T[], b?: T[]): T[] {
-  return [...new Set([...(a || []), ...(b || [])])];
-}

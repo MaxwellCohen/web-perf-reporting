@@ -529,6 +529,9 @@ export function useUseJSUsageTable(data: TreeMapData['nodes']) {
     filterFromLeafRows: true,
     maxLeafRowFilterDepth: 5,
     enableSorting: true,
+    filterFns: {
+      'booleanFilterFn': () => true,
+    },
     // rowCount: data.length,
     state: {
       columnPinning: {
