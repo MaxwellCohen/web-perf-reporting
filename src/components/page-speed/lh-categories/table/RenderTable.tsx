@@ -49,7 +49,6 @@ import { RenderTableValue } from './RenderTableValue';
 import clsx from 'clsx';
 import { ExpandAll, ExpandRow } from '../../JSUsage/JSUsageTable';
 import { toTitleCase } from '../../toTitleCase';
-import { ColumnResizer, useColumnSizeVars } from './columnResizer';
 import { DataTableHeader } from './DataTableHeader';
 
 declare module '@tanstack/react-table' {
@@ -294,6 +293,7 @@ export const makeColumnDef = (
         aggregatedCell: cell,
         enableGrouping: canGroup(h.heading.valueType),
         enableHiding: true,
+        enableSorting: false,
         ...setSizeSetting(h.heading.valueType),
         aggregationFn: isUniqueAgg(h.heading.valueType)
           ? 'unique'
@@ -330,6 +330,7 @@ export const makeColumnDef = (
           enableGrouping: canGroup(subItemsHeading.valueType),
           ...setSizeSetting(subItemsHeading.valueType),
           enableHiding: true,
+          enableSorting: false,
           aggregationFn,
           aggregatedCell(info) {
             const value = accessorFnMainItems(
@@ -505,6 +506,7 @@ export function DetailTable2({
           header: 'Report type(s)',
           enableHiding: true,
           enableGrouping: false,
+          enableSorting: false,
           aggregationFn: 'unique',
           size: 110,
           cell: DeviceCell,
