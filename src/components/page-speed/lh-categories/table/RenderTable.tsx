@@ -49,8 +49,8 @@ import { RenderTableValue } from './RenderTableValue';
 import clsx from 'clsx';
 import { ExpandAll, ExpandRow } from '../../JSUsage/JSUsageTable';
 import { toTitleCase } from '../../toTitleCase';
-import {ColumnResizer, useColumnSizeVars} from './columnResizer';
-
+import { ColumnResizer, useColumnSizeVars } from './columnResizer';
+import { DataTableHeader } from './DataTableHeader';
 
 declare module '@tanstack/react-table' {
   interface ColumnMeta<TData extends RowData, TValue> {
@@ -258,11 +258,14 @@ const customSum = (aggregationKey: string, rows: Row<DetailTableDataRow>[]) => {
 
 const columnHelper = createColumnHelper<DetailTableDataRow>();
 
-export const makeColumnDef = (h: {
-  heading: TableColumnHeading;
-  _userLabel: string;
-  skipSumming?: string[];
-}, settings : {showUserLabel: boolean}): ColumnDef<DetailTableDataRow, unknown>[] => {
+export const makeColumnDef = (
+  h: {
+    heading: TableColumnHeading;
+    _userLabel: string;
+    skipSumming?: string[];
+  },
+  settings: { showUserLabel: boolean },
+): ColumnDef<DetailTableDataRow, unknown>[] => {
   const key = h.heading.key;
   const _userLabel = h._userLabel;
   const subItemsHeadingKey = h.heading.subItemsHeading?.key;
@@ -296,7 +299,9 @@ export const makeColumnDef = (h: {
           ? 'unique'
           : (h.skipSumming || []).includes(key)
             ? 'unique'
-            : settings.showUserLabel ? customSum : 'sum',
+            : settings.showUserLabel
+              ? customSum
+              : 'sum',
         meta: {
           heading: h,
           className: '',
@@ -312,7 +317,9 @@ export const makeColumnDef = (h: {
       isUniqueAgg(subItemsHeading.valueType) ||
       (h.skipSumming || []).includes(subItemsHeadingKey)
         ? 'unique'
-        : settings.showUserLabel ? customSum : 'sum' ;
+        : settings.showUserLabel
+          ? customSum
+          : 'sum';
     columnDefs.push(
       columnHelper.accessor(
         accessorFnSubItems(_userLabel, key, subItemsHeadingKey),
@@ -405,7 +412,7 @@ export function DetailTable2({
     };
   })[];
 }) {
-  "use no memo"
+  'use no memo';
   console.log('raw rows', rows);
   const showUserLabel = rows.length > 1;
   const data: DetailTableDataRow[] = useMemo(
@@ -473,15 +480,17 @@ export function DetailTable2({
     };
 
     allHeadings.forEach((h) => {
-      makeColumnDef({ ...h, _userLabel: '' }, {showUserLabel}).forEach((v) => {
-        if (v?.id && !acc[v.id]) {
-          acc[v.id] = v;
-        }
-      });
+      makeColumnDef({ ...h, _userLabel: '' }, { showUserLabel }).forEach(
+        (v) => {
+          if (v?.id && !acc[v.id]) {
+            acc[v.id] = v;
+          }
+        },
+      );
     });
     if (showUserLabel) {
       allHeadings.forEach((h) =>
-        makeColumnDef(h, {showUserLabel}).forEach((v) => {
+        makeColumnDef(h, { showUserLabel }).forEach((v) => {
           if (v?.id && !acc[v.id]) {
             acc[v.id] = v;
           }
@@ -604,9 +613,8 @@ export function DetailTable2({
     enableColumnPinning: true,
 
     filterFns: {
-      'booleanFilterFn': () => true,
+      booleanFilterFn: () => true,
     },
-
 
     state: {
       sorting, // set initial sorting state
@@ -622,8 +630,6 @@ export function DetailTable2({
   console.log('columnVisibility', columnVisibility);
   console.log('visible rows', table.getRowModel().rows);
 
-  const columnSizeVars = useColumnSizeVars(table);
-
   if (data.length === 0) {
     return null;
   }
@@ -632,43 +638,10 @@ export function DetailTable2({
     <Table
       className="table-fixed"
       style={{
-        ...columnSizeVars, //Define column sizes on the <table> element
         width: table.getTotalSize(),
       }}
     >
-      <TableHeader>
-        {table
-          .getHeaderGroups()
-          .map((headerGroup, i) => {
-            if (i !== 0) {
-              return null;
-            }
-            return (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers
-                  .map((header) => {
-                    return (
-                      <TableHead
-                        key={header.id}
-                        className="relative"
-                        style={{
-                          width: `calc(var(--header-${header?.id}-size) * 1px)`,
-                        }}
-                      >
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                        <ColumnResizer header={header} />
-                      </TableHead>
-                    );
-                  })
-                  .filter((v) => v)}
-              </TableRow>
-            );
-          })
-          .filter((v) => v)}
-      </TableHeader>
+      <DataTableHeader table={table} />
       <TableBody className="[&_tr:last-child]:border-[length:var(--border-width)]">
         {table
           .getRowModel()
@@ -737,9 +710,9 @@ export function DetailTable2({
                         data-grouped={`${cell.getIsGrouped()}`}
                         data-aggregated={`${cell.getIsAggregated()}`}
                         data-placeholder={`${cell.getIsPlaceholder()}`}
-                        className="max-w-96 overflow-x-auto whitespace-pre-wrap"
+                        className="overflow-x-auto whitespace-pre-wrap"
                       >
-                        {cellEl} 
+                        {cellEl}
                       </TableCell>
                     );
                   })}
@@ -752,4 +725,3 @@ export function DetailTable2({
     </Table>
   );
 }
-
