@@ -4,8 +4,8 @@ import useSWR from 'swr';
 
 export function useFetchPageSpeedData(
   defaultData?: (PageSpeedInsights | null | undefined)[],
-){
-  const hasDefaultData = defaultData?.filter(Boolean).length;
+) {
+  const hasDefaultData = !!defaultData?.filter(Boolean).length;
   const searchParams = useSearchParams();
   const url = encodeURI(searchParams?.get('url') ?? '');
   const { data, isLoading } = useSWR<(PageSpeedInsights | undefined | null)[]>(
@@ -16,10 +16,17 @@ export function useFetchPageSpeedData(
       revalidateOnReconnect: false,
       revalidateIfStale: false,
       isPaused: () => !!hasDefaultData,
-      onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
-        console.log(error.message);
+      onErrorRetry: (
+        error: { message: string },
+        key,
+        config,
+        revalidate,
+        { retryCount },
+      ) => {
+        console.log(error?.message);
         if (error.message === 'Data is not yet ready') {
           // Retry after 5 seconds.
+          console.log('hi');
           setTimeout(() => revalidate({ retryCount }), 5000);
         }
         // Only retry up to 10 times.
@@ -29,12 +36,13 @@ export function useFetchPageSpeedData(
   );
 
   if (hasDefaultData) {
-    return {data: defaultData, isLoading: false};
+    return { data: defaultData, isLoading: false };
   }
-return { data,  isLoading };
+
+  return { data, isLoading };
 }
 
-async function fetcher(url: string): Promise<(PageSpeedInsights | null | undefined)[]> {
+async function fetcher(url: string) {
   const res = await fetch('/api/pagespeed', {
     mode: 'no-cors',
     method: 'POST',
@@ -55,28 +63,9 @@ async function fetcher(url: string): Promise<(PageSpeedInsights | null | undefin
       message,
     };
   }
-  const urlObj = await res.json();
-  if (!urlObj?.url) {
-    throw new Error('No data found');
+  const urlObj: (PageSpeedInsights | null | undefined)[] = await res.json();
+  if (Array.isArray(urlObj)) {
+    return urlObj;
   }
-  return fetchAndDecompress(urlObj?.url);
-  
-}
-
-async function fetchAndDecompress(url: string): Promise<(PageSpeedInsights | null | undefined)[]> {
-  const compressedFetch = await fetch(url ?? '');
-  if (!compressedFetch.ok) {
-    return [null, null];
-  }
-
-  const compressedStream = compressedFetch.body;
-  if (!compressedStream) {
-    return [null, null];
-  }
-  const decompressionStream = new DecompressionStream('gzip');
-  const decompressedStream = compressedStream.pipeThrough(decompressionStream);
-  return JSON.parse(
-    await new Response(decompressedStream).text(),
-  );
-
+  return [];
 }

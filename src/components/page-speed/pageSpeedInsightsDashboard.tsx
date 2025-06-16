@@ -3,7 +3,6 @@ import { LoadingExperience } from './LoadingExperience';
 import { EntitiesTable } from './lh-categories/table/EntitiesTable';
 import { CWVMetricsComponent } from './CWVMetricsComponent';
 import { fullPageScreenshotContext, InsightsContext } from './PageSpeedContext';
-// import { useFetchPageSpeedData } from './useFetchPageSpeedData';
 import { RenderFilmStrip } from './RenderFilmStrip';
 import { NullablePageSpeedInsights, PageSpeedInsights } from '@/lib/schema';
 import { toTitleCase } from './toTitleCase';
@@ -16,6 +15,7 @@ import {
 import { Accordion } from '../ui/accordion';
 import { DropdownFilter } from './JSUsage/TableControls';
 import { useFetchPageSpeedData } from './useFetchPageSpeedData';
+import { boolean } from 'drizzle-orm/mysql-core';
 
 const loadingExperiences = [
   { title: 'Page Loading Experience', experienceKey: 'loadingExperience' },
@@ -73,7 +73,7 @@ export function PageSpeedInsightsDashboard({
   const tableState = table.getState();
   console.log('expanded', tableState.expanded);
 
-  if (isLoading) {
+  if (isLoading || !data?.filter(boolean).length) {
     return <div> loading</div>;
   }
 
