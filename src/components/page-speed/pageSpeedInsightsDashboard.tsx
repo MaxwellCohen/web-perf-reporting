@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import { LoadingExperience } from './LoadingExperience';
-import { EntitiesTable } from './EntitiesTable';
+import { EntitiesTable } from './lh-categories/table/EntitiesTable';
 import { CWVMetricsComponent } from './CWVMetricsComponent';
 import { PageSpeedCategorySection } from './lh-categories/PageSpeedCategorySection';
 import { fullPageScreenshotContext, InsightsContext } from './PageSpeedContext';

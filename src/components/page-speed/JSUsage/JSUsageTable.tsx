@@ -10,7 +10,7 @@ import {
   TableCell,
   TableHead,
 } from '@/components/ui/table';
-import { RenderBytesValue } from '../lh-categories/table/RenderTableValue';
+import { RenderBytesValue, RenderTableValue } from '../lh-categories/table/RenderTableValue';
 import {
   JSX,
   memo,
@@ -255,11 +255,13 @@ export function RangeFilter<T>({
     column.setFilterValue(value);
   }, 500);
   return (
-    <div className="m-2 h-20">
+    <div className="m-2 h-20 w-40">
       <div className="relative py-8">
         {/* Min thumb label */}
-        <RenderBytesValue
+        <RenderTableValue
           value={fMin}
+          device='header'
+          heading={column.columnDef.meta?.heading?.heading || null}
           style={{ right: `60%` }}
           className={
             'absolute -top-8 inline-block translate-y-1/2 whitespace-nowrap text-xs font-medium'
@@ -267,11 +269,13 @@ export function RangeFilter<T>({
         >
           {'Min: '}
           <br />
-        </RenderBytesValue>
+        </RenderTableValue>
 
         {/* Max thumb label */}
-        <RenderBytesValue
+        <RenderTableValue
           value={fMax}
+          device='header'
+          heading={column.columnDef.meta?.heading?.heading || null}
            style={{ left: `60%` }}
           className={
             'break-none absolute top-8 translate-y-1/2 whitespace-nowrap text-right text-xs font-medium'
@@ -279,7 +283,7 @@ export function RangeFilter<T>({
         >
           {'Max: '}
           <br />
-        </RenderBytesValue>
+        </RenderTableValue>
 
         <Slider2
           id={`range-slider_${id}`}
@@ -524,7 +528,7 @@ export function useUseJSUsageTable(data: TreeMapData['nodes']) {
     getGroupedRowModel: getGroupedRowModel(),
     getFacetedRowModel: getFacetedRowModel(), // client-side faceting
     getFacetedUniqueValues: getFacetedUniqueValues(), // generate unique values for select filter/autocomplete
-    getFacetedMinMaxValues: getFacetedMinMaxValues(),
+    getFacetedMinMaxValues: getFacetedMinMaxValues(), //
     enableExpanding: true,
     filterFromLeafRows: true,
     maxLeafRowFilterDepth: 5,

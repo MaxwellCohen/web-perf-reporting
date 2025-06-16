@@ -33,7 +33,7 @@ export function RenderTableValue({
   device: string;
 } & React.HTMLAttributes<HTMLElement>) {
   if (value === undefined || value === null) {
-    return (<span className="col-span-1" data-info="no data"></span>);
+    return (null);
   }
 
   // First deal with the possible object forms of value.

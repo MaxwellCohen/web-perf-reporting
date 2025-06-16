@@ -1,5 +1,5 @@
-"use client"
-import { useMemo,  ReactNode } from 'react';
+'use client';
+import { useMemo, ReactNode } from 'react';
 import { TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { flexRender, Header, Table as TableType } from '@tanstack/react-table';
 
@@ -9,13 +9,13 @@ import { Popover } from '@/components/ui/popover';
 import { PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
 import { ListFilter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { StringFilterHeader } from '@/components/page-speed/JSUsage/JSUsageTable';
+import { RangeFilter, StringFilterHeader } from '@/components/page-speed/JSUsage/JSUsageTable';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ColumnResizer } from '@/components/page-speed/lh-categories/table/columnResizer';
 
 export function DataTableHeader<T>({ table }: { table: TableType<T> }) {
-    "use no memo"
+  'use no memo';
   return (
     <TableHeader>
       {table.getHeaderGroups().map((headerGroup) => {
@@ -31,8 +31,8 @@ export function DataTableHeader<T>({ table }: { table: TableType<T> }) {
   );
 }
 
-function DataTableHead<T>({ header }: { header: Header<T, unknown> }) {
-  "use no memo"
+export function DataTableHead<T>({ header }: { header: Header<T, unknown> }) {
+  'use no memo';
   return (
     <TableHead
       key={header.id}
@@ -53,22 +53,24 @@ function DataTableHead<T>({ header }: { header: Header<T, unknown> }) {
   );
 }
 
-
 function FilterPopover<T>({ header }: { header: Header<T, unknown> }) {
-  'use no memo'
+  'use no memo';
   if (!header.column.getCanFilter()) {
     return null;
   }
   const filterType = header.column.columnDef.filterFn as string;
   const map: Record<string, () => ReactNode> = {
-    'includesString': () => <StringFilterHeader column={header.column} name={''} />,
-    'booleanFilterFn': () => <CheckBoxFilter header={header} />,
-  }
+    includesString: () => (
+      <StringFilterHeader column={header.column} name={''} />
+    ),
+    booleanFilterFn: () => <CheckBoxFilter header={header} />,
+    inNumberRange: () => <RangeFilter column={header.column} />
+  };
   if (!(filterType in map)) {
     return null;
   }
 
-  const filterComponent = map[filterType]; 
+  const filterComponent = map[filterType];
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -111,14 +113,13 @@ function CheckBoxFilter<T>({ header }: { header: Header<T, unknown> }) {
               }
               onCheckedChange={(checked: unknown) => {
                 col.setFilterValue((oldValue: string[]) => {
-                    console.log(oldValue)
-                 let previousValue = oldValue;
+                  console.log(oldValue);
+                  let previousValue = oldValue;
                   if (oldValue?.length) {
                     previousValue = oldValue;
                   } else {
                     previousValue = [...sortedUniqueValues];
                   }
-              
 
                   const newFilter = checked
                     ? [...new Set([...previousValue, !!v])]

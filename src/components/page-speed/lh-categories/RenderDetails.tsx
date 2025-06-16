@@ -6,7 +6,7 @@ import {
   TreeMapData,
 } from '@/lib/schema';
 import { RenderChecklist } from './RenderChecklist';
-import { DetailTable2 } from './table/RenderTable';
+import { DetailTable } from './table/RenderTable';
 import { RenderDebugData } from './RenderDebugdata';
 import { RenderCriticalChainData } from './table/renderCricticalChain';
 import { TableDataItem } from '../tsTable/TableDataItem';
@@ -44,7 +44,7 @@ export function RenderDetails({ items }: { items: TableDataItem[] }) {
     case 'table':
     case 'opportunity':
       // @ts-expect-error need better type narrowing
-      return <DetailTable2 rows={items} />;
+      return <DetailTable rows={items} title={title} />;
     case 'criticalrequestchain':
       return (
         <div>
