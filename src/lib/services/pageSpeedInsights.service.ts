@@ -4,6 +4,7 @@ import { db } from '@/db';
 import { PageSpeedInsights } from '../schema';
 import { and, eq } from 'drizzle-orm';
 import { stringify, parse } from 'zipson';
+import {waitUntil} from '@vercel/functions'
 
 
 type formFactor = 'DESKTOP' | 'MOBILE';
@@ -58,9 +59,11 @@ export const requestPageSpeedData = async (
     if (savedData?.status === 'COMPLETED' && Array.isArray(savedData.data)) {
       return savedData.data ?? [null, null];
     }
-    const pageSpeedSaveProcess = await savePageSpeedData(testURL);
-    console.log('data loaded', pageSpeedSaveProcess)
-    return pageSpeedSaveProcess;
+    waitUntil((async () => {
+      const pageSpeedSaveProcess = await savePageSpeedData(testURL);
+      console.log('data loaded', pageSpeedSaveProcess)
+    })())
+    return [null, null];
   } catch (error) {
     Sentry.captureException(error);
     return [null, null];

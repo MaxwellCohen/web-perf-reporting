@@ -1,31 +1,21 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import { LoadingExperience } from './LoadingExperience';
 import { EntitiesTable } from './lh-categories/table/EntitiesTable';
 import { CWVMetricsComponent } from './CWVMetricsComponent';
-import { PageSpeedCategorySection } from './lh-categories/PageSpeedCategorySection';
 import { fullPageScreenshotContext, InsightsContext } from './PageSpeedContext';
 // import { useFetchPageSpeedData } from './useFetchPageSpeedData';
 import { RenderFilmStrip } from './RenderFilmStrip';
-import { CWVMetricsSummary } from './CWVMetricsSummary';
 import { NullablePageSpeedInsights, PageSpeedInsights } from '@/lib/schema';
 import { toTitleCase } from './toTitleCase';
-import { AuditSummaryRow, CategoryRow, useLHTable } from './tsTable/useLHTable';
-import { Fragment, useId, useMemo } from 'react';
+import { CategoryRow, useLHTable } from './tsTable/useLHTable';
+import { useMemo } from 'react';
 import { Button } from '../ui/button';
-import { Ghost } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
 import {
-  ExpandAll,
-  ExpandRow,
   StringFilterHeader,
 } from './JSUsage/JSUsageTable';
 import { Accordion } from '../ui/accordion';
-import clsx from 'clsx';
-import { flexRender } from '@tanstack/react-table';
-import { Label } from '../ui/label';
-import { Input } from '../ui/input';
 import { DropdownFilter } from './JSUsage/TableControls';
+import { useFetchPageSpeedData } from './useFetchPageSpeedData';
 
 const loadingExperiences = [
   { title: 'Page Loading Experience', experienceKey: 'loadingExperience' },
@@ -36,20 +26,20 @@ const loadingExperiences = [
 ] as const;
 
 export function PageSpeedInsightsDashboard({
-  data,
+  data : defaultData,
   labels,
-  hideReport,
 }: {
   data: NullablePageSpeedInsights[];
   labels: string[];
   hideReport?: boolean;
 }) {
-  'use no memo'
-  const [mobileData, desktopData] = data || [];
+  'use no memo';
+  const { data, isLoading } = useFetchPageSpeedData(defaultData);
+  const [mobileData = null, desktopData = null] = data || [];
   const items = useMemo(
     () =>
       data
-        .map((item, i) => ({
+        ?.map((item, i) => ({
           item: (item?.lighthouseResult
             ? (item as PageSpeedInsights)
             : (item as PageSpeedInsights['lighthouseResult'])?.lighthouseVersion
@@ -57,7 +47,7 @@ export function PageSpeedInsightsDashboard({
               : null) as unknown as PageSpeedInsights,
           label: labels[i] || '',
         }))
-        .filter(({ item }) => !!item),
+        .filter(({ item }) => !!item) || [],
     [data, labels],
   );
 
@@ -81,8 +71,11 @@ export function PageSpeedInsightsDashboard({
   });
 
   const tableState = table.getState();
-  const id = useId();
   console.log('expanded', tableState.expanded);
+
+  if (isLoading) {
+    return <div> loading</div>;
+  }
 
   return (
     <fullPageScreenshotContext.Provider
@@ -117,7 +110,7 @@ export function PageSpeedInsightsDashboard({
           <RenderFilmStrip />
           <EntitiesTable
             entities={
-              data.find((e) => e?.lighthouseResult?.entities)?.lighthouseResult
+              data?.find((e) => e?.lighthouseResult?.entities)?.lighthouseResult
                 ?.entities
             }
           />

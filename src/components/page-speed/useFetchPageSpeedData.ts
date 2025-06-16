@@ -4,11 +4,11 @@ import useSWR from 'swr';
 
 export function useFetchPageSpeedData(
   defaultData?: (PageSpeedInsights | null | undefined)[],
-): (PageSpeedInsights | null | undefined)[]  {
+){
   const hasDefaultData = defaultData?.filter(Boolean).length;
   const searchParams = useSearchParams();
   const url = encodeURI(searchParams?.get('url') ?? '');
-  const { data } = useSWR<(PageSpeedInsights | undefined | null)[]>(
+  const { data, isLoading } = useSWR<(PageSpeedInsights | undefined | null)[]>(
     [`/api/pagespeed`, url],
     () => fetcher(url),
     {
@@ -29,9 +29,9 @@ export function useFetchPageSpeedData(
   );
 
   if (hasDefaultData) {
-    return defaultData;
+    return {data: defaultData, isLoading: false};
   }
-return data ?? [null, null];
+return { data,  isLoading };
 }
 
 async function fetcher(url: string): Promise<(PageSpeedInsights | null | undefined)[]> {
