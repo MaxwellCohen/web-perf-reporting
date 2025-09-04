@@ -349,6 +349,11 @@ export const makeColumnDef = (
             : settings.showUserLabel
               ? customSum
               : 'sum',
+              filterFn: canGroup(h.heading.valueType)
+              ? 'includesString'
+              : isNumberColumn(h.heading.valueType)
+                ? 'inNumberRange'
+                : undefined,
         meta: {
           heading: h,
           className: '',
@@ -379,6 +384,11 @@ export const makeColumnDef = (
           enableHiding: true,
           enableSorting: false,
           aggregationFn,
+          filterFn: canGroup(subItemsHeading.valueType)
+          ? 'includesString'
+          : isNumberColumn(subItemsHeading.valueType)
+            ? 'inNumberRange'
+            : undefined,
           aggregatedCell(info) {
             const value = accessorFnMainItems(
               _userLabel,
@@ -496,7 +506,7 @@ export function DetailTable({
       console.log('2+ report no subitems');
     } else {
       console.log('2+ report with subitems');
-      // return <DetailTableAndWithSubitem rows={rows} title={title} />;
+      //  return <DetailTableAndWithSubitem rows={rows} title={title} />;
     }
   }
 
@@ -519,7 +529,6 @@ function DetailTableAndWithSubitem({
 
   const data = useMemo(() => {
     const d: Item[] = [];
-
     rows.forEach((r) => {
       return (r.auditResult?.details?.items || []).forEach((item) => {
         if (item.subItems?.items?.length) {
@@ -590,7 +599,6 @@ function DetailTableAndWithSubitem({
                 : isNumberColumn(h.valueType)
                   ? 'inNumberRange'
                   : undefined,
-
               getGroupingValue: (r) => {
                 const val = r.item[key];
                 if (typeof val === 'string') {

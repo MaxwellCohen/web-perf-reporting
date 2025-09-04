@@ -28,6 +28,6 @@ export default async function Home({
 async function PageSpeedInsightsDashboardWrapper({ url }: { url: string }) {
   const data = await requestPageSpeedData(url);
   return (
-    <PageSpeedInsightsDashboard data={data} labels={['Mobile', 'Desktop']} />
+    <PageSpeedInsightsDashboard data={data} labels={['Mobile', 'Desktop']} url={'url'} />
   );
 }

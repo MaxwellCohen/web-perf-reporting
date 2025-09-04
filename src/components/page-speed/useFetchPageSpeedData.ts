@@ -1,13 +1,11 @@
 import { PageSpeedInsights } from '@/lib/schema';
-import { useSearchParams } from 'next/navigation';
 import useSWR from 'swr';
 
 export function useFetchPageSpeedData(
+  url: string,
   defaultData?: (PageSpeedInsights | null | undefined)[],
 ) {
   const hasDefaultData = !!defaultData?.filter(Boolean).length;
-  const searchParams = useSearchParams();
-  const url = encodeURI(searchParams?.get('url') ?? '');
   const { data, isLoading } = useSWR<(PageSpeedInsights | undefined | null)[]>(
     [`/api/pagespeed`, url],
     () => fetcher(url),
@@ -15,7 +13,7 @@ export function useFetchPageSpeedData(
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
       revalidateIfStale: false,
-      isPaused: () => !!hasDefaultData,
+      isPaused: () => !!hasDefaultData || !url,
       onErrorRetry: (
         error: { message: string },
         key,

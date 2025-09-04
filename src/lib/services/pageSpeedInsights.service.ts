@@ -1,3 +1,4 @@
+"use server"
 import * as Sentry from '@sentry/nextjs';
 import { PageSpeedInsightsTable } from '@/db/schema';
 import { db } from '@/db';
@@ -9,7 +10,7 @@ import {waitUntil} from '@vercel/functions'
 
 type formFactor = 'DESKTOP' | 'MOBILE';
 
-export function getPageSpeedDataURl(testURL: string, formFactor: formFactor) {
+export async function getPageSpeedDataURl(testURL: string, formFactor: formFactor) {
   const baseurl = new URL(
     'https://www.googleapis.com/pagespeedonline/v5/runPagespeed',
   );
@@ -37,7 +38,6 @@ export const getSavedPageSpeedData = async (url: string) => {
           ),
         ),
     });
-    console.log(result?.status);
     if (typeof result?.data === 'string') {
       result.data = parse(result.data);
     }
@@ -106,7 +106,7 @@ async function insertPendingMeasurement(url: string, date: Date) {
 }
 
 async function fetchPageSpeedData(url: string, formFactor: formFactor) {
-  const pageSpeedDataUrl = getPageSpeedDataURl(url, formFactor);
+  const pageSpeedDataUrl = await getPageSpeedDataURl(url, formFactor);
   const response = await fetch(pageSpeedDataUrl);
   if (!response.ok) {
     return null;

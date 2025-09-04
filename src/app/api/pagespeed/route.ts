@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   );
 
   if (!data) {
-    return new Response('No data found', { status: 404 });
+    return new Response('Data is not yet ready', { status: 404 });
   }
   if (data.status !== 'COMPLETED') {
     return new Response('Data is not yet ready', { status: 404 });
@@ -25,5 +25,5 @@ export async function POST(request: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
     });
   }
-  return new Response('Everything failed', { status: 404 });
+  return new Response('Everything failed', { status: 500 });
 }

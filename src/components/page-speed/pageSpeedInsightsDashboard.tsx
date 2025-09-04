@@ -27,14 +27,16 @@ const loadingExperiences = [
 
 export function PageSpeedInsightsDashboard({
   data : defaultData,
+  url,
   labels,
 }: {
   data: NullablePageSpeedInsights[];
   labels: string[];
   hideReport?: boolean;
+  url?: string;
 }) {
   'use no memo';
-  const { data, isLoading } = useFetchPageSpeedData(defaultData);
+  const { data, isLoading } = useFetchPageSpeedData(url || '', defaultData);
   const [mobileData = null, desktopData = null] = data || [];
   const items = useMemo(
     () =>
@@ -54,7 +56,6 @@ export function PageSpeedInsightsDashboard({
   const table = useLHTable(items);
   console.log(table);
 
-  //  console.log(tableDataArr)
 
   const messages = items.map((d) => {
     return [
