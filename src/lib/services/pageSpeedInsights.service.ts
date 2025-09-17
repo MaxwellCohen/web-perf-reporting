@@ -4,7 +4,6 @@ import { PageSpeedInsightsTable } from '@/db/schema';
 import { db } from '@/db';
 import { PageSpeedInsights } from '../schema';
 import { and, eq } from 'drizzle-orm';
-import { stringify, parse } from 'zipson';
 import {waitUntil} from '@vercel/functions'
 
 
@@ -38,8 +37,10 @@ export const getSavedPageSpeedData = async (url: string) => {
           ),
         ),
     });
+    debugger;
     if (typeof result?.data === 'string') {
-      result.data = parse(result.data);
+      result.data = result.data;
+      console.log('result', result, url)
     }
     return result;
   } catch (error) {
@@ -60,6 +61,7 @@ export const requestPageSpeedData = async (
       return savedData.data ?? [null, null];
     }
     waitUntil((async () => {
+      console.log('starting api request')
       const pageSpeedSaveProcess = await savePageSpeedData(testURL);
       console.log('data loaded', pageSpeedSaveProcess)
     })())
@@ -125,7 +127,7 @@ async function handleMeasurementSuccess(
       url,
       date,
       status: 'COMPLETED',
-      data: stringify(data, {}),
+      data: data,
     })
     .where(
       and(

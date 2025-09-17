@@ -10,15 +10,17 @@ export async function POST(request: NextRequest) {
   if (!testURL) {
     return new Response('No testURL provided', { status: 400 });
   }
+  console.log('requesting data for', testURL)
   const data = await getSavedPageSpeedData(
     testURL,
   );
+  console.log('requesting data for', data)
 
   if (!data) {
-    return new Response('Data is not yet ready', { status: 404 });
+    return new Response('Data is not yet ready no data', { status: 404 });
   }
   if (data.status !== 'COMPLETED') {
-    return new Response('Data is not yet ready', { status: 404 });
+    return new Response(`Data is not yet ready! ${data.status}`, { status: 404 });
   }
   if (data.data) {
     return new Response(JSON.stringify(data.data), {

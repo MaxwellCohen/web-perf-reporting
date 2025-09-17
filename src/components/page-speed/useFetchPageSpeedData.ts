@@ -21,11 +21,11 @@ export function useFetchPageSpeedData(
         revalidate,
         { retryCount },
       ) => {
-        console.log(error?.message);
-        if (error.message === 'Data is not yet ready') {
+        if (error.message.includes('Data is not yet ready')) {
           // Retry after 5 seconds.
-          console.log('hi');
-          setTimeout(() => revalidate({ retryCount }), 5000);
+          setTimeout(() =>{
+            revalidate({ retryCount 
+            })}, 5000);
         }
         // Only retry up to 10 times.
         if (retryCount >= 10) return;
