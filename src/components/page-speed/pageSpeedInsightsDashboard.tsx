@@ -7,7 +7,7 @@ import { RenderFilmStrip } from './RenderFilmStrip';
 import { NullablePageSpeedInsights, PageSpeedInsights } from '@/lib/schema';
 import { toTitleCase } from './toTitleCase';
 import { CategoryRow, useLHTable } from './tsTable/useLHTable';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '../ui/button';
 import {
   StringFilterHeader,
@@ -75,7 +75,7 @@ export function PageSpeedInsightsDashboard({
   console.log('expanded', tableState.expanded);
 
   if (isLoading || !data?.filter(boolean).length) {
-    return <div> loading</div>;
+    return <Loading />;
   }
 
   return (
@@ -178,4 +178,23 @@ export function PageSpeedInsightsDashboard({
   //     </fullPageScreenshotContext.Provider>
   //   </InsightsContext.Provider>
   // );
+}
+
+
+function Loading() {
+  const [time, setTime] = useState(0);
+
+   useEffect(() => {
+    const interval = setInterval(() => {
+      setTime((t) => {return ( t || 0 ) + 1});
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [time])
+  
+  return (
+    <div className="flex flex-col items-center justify-center">
+      Loading Page Speed Insights data is loading...please wait we have lots of
+      tests to run. it has been running for {time} seconds.
+    </div>
+  );
 }
