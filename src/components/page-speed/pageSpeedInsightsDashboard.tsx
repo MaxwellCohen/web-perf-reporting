@@ -75,7 +75,7 @@ export function PageSpeedInsightsDashboard({
   console.log('expanded', tableState.expanded);
 
   if (isLoading || !data?.filter(boolean).length) {
-    return <Loading />;
+    return <LoadingMessage />;
   }
 
   return (
@@ -181,7 +181,7 @@ export function PageSpeedInsightsDashboard({
 }
 
 
-function Loading() {
+function LoadingMessage() {
   const [time, setTime] = useState(0);
 
    useEffect(() => {
@@ -194,7 +194,7 @@ function Loading() {
   return (
     <div className="flex flex-col items-center justify-center">
       Loading Page Speed Insights data is loading...please wait we have lots of
-      tests to run. it has been running for {time} seconds.
+      tests to run. It has been running for {time} seconds.
     </div>
   );
 }
