@@ -4,7 +4,6 @@
 import {
   AuditDetailOpportunity,
   AuditDetailTable,
-  AuditResult,
   ItemValue,
   OpportunityItem,
   TableColumnHeading,
@@ -93,7 +92,23 @@ const cell = (info: CellContext<any, unknown>) => {
       typeof v[1] === 'number',
   );
   if (isSumRowArray) {
-    return (value as [string, number][]).map(([ul, val], i) => {
+    if (value[0][1] === value[0][1]) {
+      return (
+        <div
+          data-info={JSON.stringify(value[0][1])}
+          data-key={key}
+          data-row={JSON.stringify(info.row.original)}
+        >
+          <RenderTableValue
+            value={value[0][1] as ItemValue}
+            heading={heading}
+            device={value[0][0]}
+          />
+          {` (All Devices)`}
+        </div>
+      );
+    }
+    return (value as [string, number][]).map(([device, val], i) => {
       return (
         <div
           key={i}
@@ -104,9 +119,9 @@ const cell = (info: CellContext<any, unknown>) => {
           <RenderTableValue
             value={val as ItemValue}
             heading={heading}
-            device={ul}
+            device={device}
           />
-          {ul && value.length > 1 ? ` (${ul}) ` : null}
+          {device && value.length > 1 ? ` (${device}) ` : null}
         </div>
       );
     });
@@ -186,23 +201,6 @@ export const simpleTableCell = (info: CellContext<any, unknown>) => {
   return value;
 };
 
-const cell2 = (info: CellContext<any, unknown>) => {
-  const value = info.getValue();
-  const heading = info?.column?.columnDef?.meta?.heading?.heading;
-  const _userLabel = info?.column?.columnDef?.meta?.heading?._userLabel || '';
-  const isArray = Array.isArray(value);
-
-  if (!isArray) {
-    return (
-      <RenderTableValue
-        value={value as ItemValue}
-        heading={heading}
-        device={_userLabel}
-      />
-    );
-  }
-  return value;
-};
 
 const accessorFnMainItems =
   (_userLabel: string, key: string, subItemsHeadingKey?: string) =>
@@ -705,12 +703,6 @@ function DetailTableAndWithSubitem({
       grouping,
     },
   });
-  console.log('1 item with group');
-  console.log('raw rows', rows);
-  console.log('table data', data);
-  console.log('columns', columns);
-  console.log('table', table);
-  console.log('visible rows', table.getRowModel().rows);
   return (
     <AccordionItem value={title}>
       <AccordionTrigger>
