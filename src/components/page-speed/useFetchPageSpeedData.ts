@@ -61,9 +61,16 @@ async function fetcher(url: string) {
       message,
     };
   }
-  const urlObj: (PageSpeedInsights | null | undefined)[] = await res.json();
-  if (Array.isArray(urlObj)) {
-    return urlObj;
+  const urlObj = await res.text();
+  try {
+    const parsedData = JSON.parse(urlObj);
+     if (Array.isArray(parsedData)) {
+    return parsedData as (PageSpeedInsights | null | undefined)[];
   }
+  } catch (error) {
+    console.error('Error parsing PageSpeed Insights data:', error);
+    return [];
+  }
+ 
   return [];
 }

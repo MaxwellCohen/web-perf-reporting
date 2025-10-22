@@ -83,14 +83,18 @@ async function savePageSpeedData(url: string) {
   const date = createRequestDate();
   try {
     await insertPendingMeasurement(url, date);
-
-    const data = await Promise.all([
-      fetchPageSpeedData(url, 'MOBILE'),
-      fetchPageSpeedData(url, 'DESKTOP'),
-    ]);
-    console.log('data fetched', data)
-    await handleMeasurementSuccess(url, date, data);
-    return data;
+    const requestUrl = new URL('https://web-perf-report-cf.to-email-max.workers.dev');
+    requestUrl.searchParams.append('url', (url));
+    requestUrl.searchParams.append('key', process.env.PAGESPEED_INSIGHTS_API ?? '');
+    fetch(requestUrl.toString());
+    return [null, null];
+    // const data =  Promise.all([
+    //   fetchPageSpeedData(url, 'MOBILE'),
+    //   fetchPageSpeedData(url, 'DESKTOP'),
+    // ]);
+    // console.log('data fetched', data)
+    // await handleMeasurementSuccess(url, date, data);
+    // return data;
   } catch (error) {
     console.log('error', error);
     await handleMeasurementFailure(error, url, date);
@@ -107,37 +111,37 @@ async function insertPendingMeasurement(url: string, date: Date) {
     .execute();
 }
 
-async function fetchPageSpeedData(url: string, formFactor: formFactor) {
-  const pageSpeedDataUrl = await getPageSpeedDataURl(url, formFactor);
-  const response = await fetch(pageSpeedDataUrl);
-  if (!response.ok) {
-    return null;
-  }
-  return response.json() as Promise<PageSpeedInsights>;
-}
+// async function fetchPageSpeedData(url: string, formFactor: formFactor) {
+//   const pageSpeedDataUrl = await getPageSpeedDataURl(url, formFactor);
+//   const response = await fetch(pageSpeedDataUrl);
+//   if (!response.ok) {
+//     return null;
+//   }
+//   return response.json() as Promise<PageSpeedInsights>;
+// }
 
-async function handleMeasurementSuccess(
-  url: string,
-  date: Date,
-  data: (PageSpeedInsights | null | null)[],
-) {
-  await db
-    .update(PageSpeedInsightsTable)
-    .set({
-      url,
-      date,
-      status: 'COMPLETED',
-      data: data,
-    })
-    .where(
-      and(
-        eq(PageSpeedInsightsTable.url, url),
-        eq(PageSpeedInsightsTable.status, 'PENDING'),
-        eq(PageSpeedInsightsTable.date, date),
-      ),
-    )
-    .execute();
-}
+// async function handleMeasurementSuccess(
+//   url: string,
+//   date: Date,
+//   data: (PageSpeedInsights | null | null)[],
+// ) {
+//   await db
+//     .update(PageSpeedInsightsTable)
+//     .set({
+//       url,
+//       date,
+//       status: 'COMPLETED',
+//       data: data,
+//     })
+//     .where(
+//       and(
+//         eq(PageSpeedInsightsTable.url, url),
+//         eq(PageSpeedInsightsTable.status, 'PENDING'),
+//         eq(PageSpeedInsightsTable.date, date),
+//       ),
+//     )
+//     .execute();
+// }
 
 async function handleMeasurementFailure(
   error: unknown,
