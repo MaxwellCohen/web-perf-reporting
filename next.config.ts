@@ -6,13 +6,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  experimental: {
-    dynamicIO: false,
-    reactCompiler: true,
-  },
+  reactCompiler: true,
 };
 
 export default withSentryConfig(nextConfig, {

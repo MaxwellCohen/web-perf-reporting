@@ -18,6 +18,9 @@ export async function POST(request: NextRequest) {
       const requestUrl = new URL('https://web-perf-report-cf.to-email-max.workers.dev');
       requestUrl.searchParams.append('url', (testURL));
       const req = await fetch(requestUrl);
+      if (!req.ok) {
+        return new Response('Error fetching data', { status: req.status });
+      }
       const data = await req.json() as { status: string, data?: string };
       
       console.log('requesting data for', data)
