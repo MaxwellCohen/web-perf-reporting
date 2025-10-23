@@ -56,10 +56,10 @@ export const requestPageSpeedData = async (
     if (!testURL) {
       return [null, null];
     }
-    const savedData = await getSavedPageSpeedData(testURL);
-    if (savedData?.status === 'COMPLETED' && Array.isArray(savedData.data)) {
-      return savedData.data ?? [null, null];
-    }
+    // const savedData = await getSavedPageSpeedData(testURL);
+    // if (savedData?.status === 'COMPLETED' && Array.isArray(savedData.data)) {
+    //   return savedData.data ?? [null, null];
+    // }
     waitUntil((async () => {
       console.log('starting api request')
       const pageSpeedSaveProcess = await savePageSpeedData(testURL);
@@ -82,7 +82,7 @@ function createRequestDate() {
 async function savePageSpeedData(url: string) {
   const date = createRequestDate();
   try {
-    await insertPendingMeasurement(url, date);
+    // await insertPendingMeasurement(url, date);
     const requestUrl = new URL('https://web-perf-report-cf.to-email-max.workers.dev');
     requestUrl.searchParams.append('url', (url));
     requestUrl.searchParams.append('key', process.env.PAGESPEED_INSIGHTS_API ?? '');
@@ -102,14 +102,13 @@ async function savePageSpeedData(url: string) {
   }
 }
 
-// New helper functions
-async function insertPendingMeasurement(url: string, date: Date) {
-  await db
-    .insert(PageSpeedInsightsTable)
-    .values({ url, date, status: 'PENDING' })
-    .onConflictDoNothing()
-    .execute();
-}
+// async function insertPendingMeasurement(url: string, date: Date) {
+//   await db
+//     .insert(PageSpeedInsightsTable)
+//     .values({ url, date, status: 'PENDING' })
+//     .onConflictDoNothing()
+//     .execute();
+// }
 
 // async function fetchPageSpeedData(url: string, formFactor: formFactor) {
 //   const pageSpeedDataUrl = await getPageSpeedDataURl(url, formFactor);
