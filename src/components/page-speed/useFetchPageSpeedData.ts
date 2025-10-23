@@ -14,19 +14,35 @@ export function useFetchPageSpeedData(
   const [tryCount, setTryCount] = useState(0);
 
   useEffect(() => {
+    let skip = false;
     const controller = new AbortController();
     setInitialLoad(false)
     startTransition(async () => {
       try {
         console.log('fetching data');
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        if (skip) {
+          return;
+        }
         const res = await fetcher(url, controller.signal);
+        if (skip) {
+          return;
+        }
         setData(res);
       } catch (e) {
         console.log('Error fetching PageSpeed Insights data:', e);
-        setTimeout(() => setTryCount((tryCount) => tryCount + 1), 3000);
+        setTimeout(() => {
+          if (skip) {
+            return;
+          }
+          setTryCount((tryCount) => tryCount + 1)
+        }, 3000);
       }
     });
-    return () => controller.abort();
+    return () => {
+      skip = true;
+      controller.abort();
+    }
   }, [url, tryCount]);
 
   if (hasDefaultData) {
