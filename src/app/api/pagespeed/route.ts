@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
           headers: { 'Content-Type': 'application/json' },
         });
       }
-      return new Response('Everything failed', { status: 500 });
+      return new Response(data.data, { status: 500 });
     } catch (error) {
       console.error('Error fetching PageSpeed Insights data:', error);
       return new Response('Internal server error', { status: 500 });

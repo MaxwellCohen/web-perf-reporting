@@ -60,9 +60,10 @@ export const requestPageSpeedData = async (
     // if (savedData?.status === 'COMPLETED' && Array.isArray(savedData.data)) {
     //   return savedData.data ?? [null, null];
     // }
+    const p = savePageSpeedData(testURL);
     waitUntil((async () => {
       console.log('starting api request')
-      const pageSpeedSaveProcess = await savePageSpeedData(testURL);
+      const pageSpeedSaveProcess = await p;
       console.log('data loaded', pageSpeedSaveProcess)
     })())
     return [null, null];
@@ -86,7 +87,7 @@ async function savePageSpeedData(url: string) {
     const requestUrl = new URL('https://web-perf-report-cf.to-email-max.workers.dev');
     requestUrl.searchParams.append('url', (url));
     requestUrl.searchParams.append('key', process.env.PAGESPEED_INSIGHTS_API ?? '');
-    fetch(requestUrl.toString());
+    await fetch(requestUrl.toString());
     return [null, null];
     // const data =  Promise.all([
     //   fetchPageSpeedData(url, 'MOBILE'),
