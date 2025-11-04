@@ -50,7 +50,9 @@ export function HistoricalPerformanceCard({
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [histogramData]);
   const Chart = ChartMap[ChartType] ?? HistoricalPerformanceAreaChart;
-
+  if(!chartData.length) {
+    return null;
+  }
   return (
     <Card className="grid h-full grid-rows-[2.5rem_1fr_1fr_4rem] gap-3">
       <h3 className="text-md self-center justify-self-center text-center font-bold">
