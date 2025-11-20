@@ -34,7 +34,7 @@ export function PerformanceStackedBarChart({
         <CartesianGrid vertical={false} />
         <ChartTooltip
           cursor={false}
-          content={<ChartTooltipContent indicator="dot" />}
+          content={<ChartTooltipContent indicator="dot" labelFormatter={() =>  ''} />}
         />
         <Bar
           dataKey="good_density"

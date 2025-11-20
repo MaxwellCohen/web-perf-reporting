@@ -134,8 +134,8 @@ function P75barChart({ histogramData }: { histogramData: CruxHistoryItem }) {
   const p75Location = `${(histogramData.P75 / maxValue) * 100}% `;
 
   return (
-    <div className="m h-8 w-full">
-      <svg viewBox="0 0 100 7">
+    <div className="w-full overflow-hidden rounded-[4px]">
+      <svg viewBox="0 0 100 7" className="m-auto w-[calc(100%-2px)]">
         <g className="flex flex-row">
           <rect width={goodPercent} height="10" fill="hsl(var(--chart-1))" />
           <rect
@@ -174,14 +174,20 @@ function P75barChart({ histogramData }: { histogramData: CruxHistoryItem }) {
   );
 }
 
-export function HorizontalScoreChart({ score, className }: { score: number, className?: string }) {
+export function HorizontalScoreChart({
+  score,
+  className,
+}: {
+  score: number;
+  className?: string;
+}) {
   const goodPercent = `10%`;
   const niPercent = `50%`;
   const poorPercent = `40%`;
   const Marker = score <= 1 ? `${(score / 1) * 100}% ` : `${score}% `;
 
   return (
-    <div className={cn("h-8 w-full", className)}>
+    <div className={cn('h-8 w-full', className)}>
       <svg viewBox="0 0 100 7">
         <g className="flex flex-row">
           <rect width={poorPercent} height="10" fill="hsl(var(--chart-3))" />
@@ -221,7 +227,6 @@ export function HorizontalScoreChart({ score, className }: { score: number, clas
   );
 }
 
-
 function CurrentGaugeChart({
   histogramData,
 }: {
@@ -252,6 +257,15 @@ function CurrentGaugeChart({
   return <GaugeChart metric={''} data={data} />;
 }
 
+
+const labelMap: Record<string, string> = {
+  
+                    good: 'Good',
+                    ni: 'Needs Improvement',
+                    poor: 'Poor',
+  
+}
+
 function Histogram({ histogramData }: { histogramData: CruxHistoryItem }) {
   const { chartData } = useMemo(
     () => makeHistogramData(histogramData),
@@ -271,7 +285,26 @@ function Histogram({ histogramData }: { histogramData: CruxHistoryItem }) {
               chartConfig[value as keyof typeof chartConfig]?.label || ''
             }
           />
-          <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+          <ChartTooltip
+            cursor={true}
+            content={
+              <ChartTooltipContent
+                labelFormatter={(value) => labelMap[value as keyof typeof labelMap] || ''}
+                formatter={(value, _label, payload) => {
+                  return (
+                    <div className="flex items-center gap-1">
+                      <div
+                        className="size-2 rounded-full"
+                        style={{ backgroundColor: payload.payload.fill }}
+                      >
+                      </div>
+                       {Math.round((+value || 0) * 100)}%
+                    </div>
+                  );
+                }}
+              /> 
+            }
+          />
           <Bar
             dataKey="density"
             strokeWidth={2}
