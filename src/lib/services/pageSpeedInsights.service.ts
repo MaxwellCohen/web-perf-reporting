@@ -33,7 +33,7 @@ export const getSavedPageSpeedData = async (url: string) => {
           eq(PageSpeedInsightsTable.url, url),
           gt(
             PageSpeedInsightsTable.date,
-            new Date(Date.now() - 6 * 60 * 60 * 1000),
+            new Date(Date.now() - 21_600_000),
           ),
         ),
     });
@@ -56,10 +56,6 @@ export const requestPageSpeedData = async (
     if (!testURL) {
       return [null, null];
     }
-    // const savedData = await getSavedPageSpeedData(testURL);
-    // if (savedData?.status === 'COMPLETED' && Array.isArray(savedData.data)) {
-    //   return savedData.data ?? [null, null];
-    // }
     const p = savePageSpeedData(testURL);
     waitUntil((async () => {
       console.log('starting api request')
@@ -89,59 +85,12 @@ async function savePageSpeedData(url: string) {
     requestUrl.searchParams.append('key', process.env.PAGESPEED_INSIGHTS_API ?? '');
     await fetch(requestUrl.toString());
     return [null, null];
-    // const data =  Promise.all([
-    //   fetchPageSpeedData(url, 'MOBILE'),
-    //   fetchPageSpeedData(url, 'DESKTOP'),
-    // ]);
-    // console.log('data fetched', data)
-    // await handleMeasurementSuccess(url, date, data);
-    // return data;
   } catch (error) {
     console.log('error', error);
     await handleMeasurementFailure(error, url, date);
     return [null, null];
   }
 }
-
-// async function insertPendingMeasurement(url: string, date: Date) {
-//   await db
-//     .insert(PageSpeedInsightsTable)
-//     .values({ url, date, status: 'PENDING' })
-//     .onConflictDoNothing()
-//     .execute();
-// }
-
-// async function fetchPageSpeedData(url: string, formFactor: formFactor) {
-//   const pageSpeedDataUrl = await getPageSpeedDataURl(url, formFactor);
-//   const response = await fetch(pageSpeedDataUrl);
-//   if (!response.ok) {
-//     return null;
-//   }
-//   return response.json() as Promise<PageSpeedInsights>;
-// }
-
-// async function handleMeasurementSuccess(
-//   url: string,
-//   date: Date,
-//   data: (PageSpeedInsights | null | null)[],
-// ) {
-//   await db
-//     .update(PageSpeedInsightsTable)
-//     .set({
-//       url,
-//       date,
-//       status: 'COMPLETED',
-//       data: data,
-//     })
-//     .where(
-//       and(
-//         eq(PageSpeedInsightsTable.url, url),
-//         eq(PageSpeedInsightsTable.status, 'PENDING'),
-//         eq(PageSpeedInsightsTable.date, date),
-//       ),
-//     )
-//     .execute();
-// }
 
 async function handleMeasurementFailure(
   error: unknown,

@@ -8,6 +8,12 @@ import { CruxHistoryItem } from '@/lib/schema';
 import { CartesianGrid, Bar, BarChart } from 'recharts';
 import { chartConfig } from '@/components/common/ChartSettings';
 
+
+const margin = {
+  left: 12,
+  right: 12,
+};
+
 export function PerformanceStackedBarChart({
   histogramData,
 }: {
@@ -26,15 +32,12 @@ export function PerformanceStackedBarChart({
       <BarChart
         accessibilityLayer
         data={chartData}
-        margin={{
-          left: 12,
-          right: 12,
-        }}
+        margin={margin}
       >
         <CartesianGrid vertical={false} />
         <ChartTooltip
           cursor={false}
-          content={<ChartTooltipContent indicator="dot" labelFormatter={() =>  ''} />}
+          content={<ChartTooltipContent indicator="dot" labelFormatter={() =>  null} />}
         />
         <Bar
           dataKey="good_density"
