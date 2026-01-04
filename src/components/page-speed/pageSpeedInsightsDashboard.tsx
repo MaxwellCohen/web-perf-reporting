@@ -16,6 +16,7 @@ import { Accordion } from '../ui/accordion';
 import { DropdownFilter } from './JSUsage/TableControls';
 import { useFetchPageSpeedData } from './useFetchPageSpeedData';
 import { boolean } from 'drizzle-orm/mysql-core';
+import { CopyButton } from '../ui/copy-button';
 
 const loadingExperiences = [
   { title: 'Page Loading Experience', experienceKey: 'loadingExperience' },
@@ -37,7 +38,6 @@ export function PageSpeedInsightsDashboard({
 }) {
   'use no memo';
   const { data, isLoading } = useFetchPageSpeedData(url || '', defaultData);
-  const [mobileData = null, desktopData = null] = data || [];
   const items = useMemo(
     () =>
       data
@@ -57,7 +57,7 @@ export function PageSpeedInsightsDashboard({
   console.log(table);
 
 
-  const messages = items.map((d) => {
+  const titleStrings = items.map((d) => {
     return [
       d.item?.lighthouseResult?.finalDisplayedUrl || 'unknown url',
       d.item.lighthouseResult?.configSettings?.formFactor
@@ -80,23 +80,22 @@ export function PageSpeedInsightsDashboard({
 
   return (
     <fullPageScreenshotContext.Provider
-      value={{
-        desktopFullPageScreenshot:
-          desktopData?.lighthouseResult?.fullPageScreenshot,
-        DesktopFullPageScreenshot:
-          desktopData?.lighthouseResult?.fullPageScreenshot,
-        mobileFullPageScreenshot:
-          mobileData?.lighthouseResult?.fullPageScreenshot,
-        MobileFullPageScreenshot:
-          mobileData?.lighthouseResult?.fullPageScreenshot,
-      }}
+      value={items.reduce((acc, d) => ({
+        ...acc,
+        [d.label]: d.item?.lighthouseResult?.fullPageScreenshot,
+      }), {})}
     >
       <InsightsContext.Provider value={items}>
+      <div className="flex flex-row justify-end gap-4">
+        { items.map((d,i) => (
+          <CopyButton key={i} size="lg" text={JSON.stringify(d.item) || ''} > {d.label} </CopyButton>
+        )) }
+      </div>
         <h2 className="text-center text-2xl font-bold">
           {`Report for ${
-            messages.length > 1
-              ? messages.join(', ')
-              : messages[0] || 'unknown url'
+            titleStrings.length > 1
+              ? titleStrings.join(', ')
+              : titleStrings[0] || 'unknown url'
           }`}
         </h2>
         <Accordion type="multiple">
@@ -138,46 +137,6 @@ export function PageSpeedInsightsDashboard({
       </InsightsContext.Provider>
     </fullPageScreenshotContext.Provider>
   );
-
-  // return (
-  //
-  //
-
-  //         <h2 className="text-center text-2xl font-bold">
-  //           {`Report for ${
-  //            messages.length > 1
-  //             ? messages.join(', ')
-  //             : messages[0] || 'unknown url'
-  //           }`}
-  //         </h2>
-
-  //       {hideReport ? null : (
-  //         <LoadingExperience
-  //           title="Page Loading Experience"
-  //           experienceKey="loadingExperience"
-  //         />
-  //       )}
-  //       {hideReport ? null : (
-  //         <LoadingExperience
-  //           title="Origin Loading Experience"
-  //           experienceKey="originLoadingExperience"
-  //         />
-  //       )}
-  //       <RenderFilmStrip />
-  //       <CWVMetricsComponent />
-  //       <CWVMetricsSummary />
-  //       {hideReport ? null : (
-  //         <PageSpeedCategorySection data={data} labels={titleLabels} />
-  //       )}
-  //       <EntitiesTable
-  //         entities={
-  //           data.find((e) => e?.lighthouseResult?.entities)?.lighthouseResult
-  //             ?.entities
-  //         }
-  //       />
-  //     </fullPageScreenshotContext.Provider>
-  //   </InsightsContext.Provider>
-  // );
 }
 
 

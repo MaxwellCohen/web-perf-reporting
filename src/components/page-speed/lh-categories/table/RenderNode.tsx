@@ -54,10 +54,8 @@ export function RenderNodeImage({
   imageSize?: number;
 }) {
   const screenshotData = useContext(fullPageScreenshotContext);
-  const fullPageScreenshot =
-    device === 'Desktop'
-      ? screenshotData?.desktopFullPageScreenshot
-      : screenshotData?.mobileFullPageScreenshot;
+  console.log(screenshotData, device);
+  const fullPageScreenshot = screenshotData?.[device];
 
   if (!fullPageScreenshot || !item?.boundingRect || !item?.lhId) {
     return null;

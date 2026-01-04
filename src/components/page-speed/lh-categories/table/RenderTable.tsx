@@ -65,7 +65,14 @@ const cell = (info: CellContext<any, unknown>) => {
   const value = info.getValue();
   const key = info.column.id;
   const heading = info?.column?.columnDef?.meta?.heading?.heading;
-  const _userLabel = info?.column?.columnDef?.meta?.heading?._userLabel || '';
+  let _userLabel = info?.column?.columnDef?.meta?.heading?._userLabel || '';
+  if (!_userLabel) {
+    const original = info.row.original as any;
+    if (original && original._userLabel) {
+      _userLabel = original._userLabel;
+    }
+  }
+
   const isArray = Array.isArray(value);
 
   if (!isArray) {
@@ -621,7 +628,7 @@ function DetailTableAndWithSubitem({
                     <RenderTableValue
                       value={val as ItemValue}
                       heading={subItem}
-                      device={''}
+                      device={r._userLabel || 'pizza'}
                     />
                   </div>
                 );
@@ -632,7 +639,7 @@ function DetailTableAndWithSubitem({
                   <RenderTableValue
                     value={value as ItemValue}
                     heading={h}
-                    device={''}
+                    device={r._userLabel || 'pizza2 '}
                   />
                 );
               },
