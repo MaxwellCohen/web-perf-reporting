@@ -1,5 +1,5 @@
 'use client';
-import * as React from 'react';
+
 import { Label, Pie, PieChart } from 'recharts';
 
 import { ChartContainer } from '@/components/ui/chart';
@@ -45,7 +45,7 @@ export function GaugeChart({
   ];
 
   return (
-    <ChartContainer config={chartConfig} className="aspect-[2/1] w-full">
+    <ChartContainer config={chartConfig} className="aspect-2/1 w-full">
       <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
         <Pie
           data={chartData}
@@ -254,10 +254,15 @@ export function LineChart({
         y="12"
         z={1000}
         fontSize="8"
+        fontWeight="700"
         textAnchor="middle"
-        fill="hsl(var(--secondary-foreground))"
+        fill="#ffffff"
+        stroke="#000000"
+        strokeWidth="0.5"
+        strokeLinejoin="round"
         style={{
-          textShadow: '1px 1px 2px rgba(0,0,0,0.7)',
+          paintOrder: 'stroke fill',
+          textShadow: '0 0 3px rgba(0,0,0,0.8), 0 0 1px rgba(0,0,0,0.8)',
         }}
       >
         {chartData[0].value > 1
@@ -269,11 +274,15 @@ export function LineChart({
         y="12"
         z={1000}
         fontSize="8"
+        fontWeight="700"
         textAnchor="middle"
-        fill="hsl(var(--secondary-foreground))"
-        className="text-shadow-lg"
+        fill="#ffffff"
+        stroke="#000000"
+        strokeWidth="0.5"
+        strokeLinejoin="round"
         style={{
-          textShadow: '1px 1px 2px rgba(0,0,0,0.7)',
+          paintOrder: 'stroke fill',
+          textShadow: '0 0 3px rgba(0,0,0,0.8), 0 0 1px rgba(0,0,0,0.8)',
         }}
       >
         {chartData[1].value > 1
