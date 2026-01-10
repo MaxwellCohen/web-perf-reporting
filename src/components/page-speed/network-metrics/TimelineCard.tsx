@@ -1,12 +1,12 @@
 "use client";
 import { useMemo } from "react";
 import { createColumnHelper, ColumnDef } from "@tanstack/react-table";
-import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table } from "@/components/ui/table";
-import { RenderMSValue } from "../lh-categories/table/RenderTableValue";
-import { DataTableHeader } from "../lh-categories/table/DataTableHeader";
-import { DataTableBody } from "../lh-categories/table/DataTableBody";
-import { useStandardTable } from "../shared/tableConfigHelpers";
+import { RenderMSValue } from "@/components/page-speed/lh-categories/table/RenderTableValue";
+import { DataTableHeader } from "@/components/page-speed/lh-categories/table/DataTableHeader";
+import { DataTableBody } from "@/components/page-speed/lh-categories/table/DataTableBody";
+import { useStandardTable } from "@/components/page-speed/shared/tableConfigHelpers";
 
 type TimelineRow = {
   event: string;

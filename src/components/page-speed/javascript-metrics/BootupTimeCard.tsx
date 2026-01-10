@@ -1,16 +1,16 @@
 "use client";
-import { RenderMSValue } from "../lh-categories/table/RenderTableValue";
+import { RenderMSValue } from "@/components/page-speed/lh-categories/table/RenderTableValue";
 import { TableItem } from "@/lib/schema";
 import { useMemo } from "react";
 import {
   ColumnDef,
   createColumnHelper,
 } from "@tanstack/react-table";
-import { createNumericAggregatedCell } from "../shared/aggregatedCellHelpers";
-import { sortByMaxValue } from "../shared/dataSortingHelpers";
-import { useStandardTable } from "../shared/tableConfigHelpers";
-import { createURLColumn, createReportColumn } from "../shared/tableColumnHelpers";
-import { TableCard } from "../shared/TableCard";
+import { createNumericAggregatedCell } from "@/components/page-speed/shared/aggregatedCellHelpers";
+import { sortByMaxValue } from "@/components/page-speed/shared/dataSortingHelpers";
+import { useStandardTable } from "@/components/page-speed/shared/tableConfigHelpers";
+import { createURLColumn, createReportColumn } from "@/components/page-speed/shared/tableColumnHelpers";
+import { TableCard } from "@/components/page-speed/shared/TableCard";
 
 type BootupTimeData = {
   label: string;

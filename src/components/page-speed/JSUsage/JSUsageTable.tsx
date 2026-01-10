@@ -10,7 +10,7 @@ import {
   TableCell,
   TableHead,
 } from '@/components/ui/table';
-import { RenderBytesValue, RenderMSValue, RenderTableValue } from '../lh-categories/table/RenderTableValue';
+import { RenderBytesValue, RenderMSValue, RenderTableValue } from '@/components/page-speed/lh-categories/table/RenderTableValue';
 import {
   JSX,
   memo,
@@ -48,17 +48,17 @@ import {
   getFacetedMinMaxValues,
   Table as ReactTable,
 } from '@tanstack/react-table';
-import { Button } from '../../ui/button';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { renderBoolean } from '../lh-categories/renderBoolean';
-import { StatusCircle } from './StatusCircle';
-import { NoResultsRow } from './NoResultsRow';
-import { TableControls } from './TableControls';
+import { renderBoolean } from '@/components/page-speed/lh-categories/renderBoolean';
+import { StatusCircle } from '@/components/page-speed/JSUsage/StatusCircle';
+import { NoResultsRow } from '@/components/page-speed/JSUsage/NoResultsRow';
+import { TableControls } from '@/components/page-speed/JSUsage/TableControls';
 import { Label } from '@/components/ui/label';
 import { DebouncedInput } from '@/components/ui/input';
 import { Slider2 } from '@/components/ui/slider';
 import { ArrowUp, ChevronRightIcon, MinusIcon } from 'lucide-react';
-import { toTitleCase } from '../toTitleCase';
+import { toTitleCase } from '@/components/page-speed/toTitleCase';
 
 declare module '@tanstack/react-table' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

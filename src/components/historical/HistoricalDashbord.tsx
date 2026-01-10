@@ -8,13 +8,13 @@ import {
   DeviceType,
   PerformanceOptions,
   Scope,
-} from '../latest-crux/PerformanceOptions';
+} from '@/components/latest-crux/PerformanceOptions';
 import {
   ChartMap,
   HistoricalPerformanceCard,
-} from './HistoricalPerformanceCard';
-import { PercentTable } from '../common/FormFactorPercentPieChart';
-import { Details } from '../ui/accordion';
+} from '@/components/historical/HistoricalPerformanceCard';
+import { PercentTable } from '@/components/common/FormFactorPercentPieChart';
+import { Details } from '@/components/ui/accordion';
 
 export function HistoricalDashboard({
   reportMap,

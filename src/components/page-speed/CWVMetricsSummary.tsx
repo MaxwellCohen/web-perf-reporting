@@ -12,19 +12,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { renderBoolean } from './lh-categories/renderBoolean';
-import { camelCaseToSentenceCase } from './lh-categories/camelCaseToSentenceCase';
-import { Card, CardHeader } from '../ui/card';
-import { Details } from '../ui/accordion';
+import { renderBoolean } from '@/components/page-speed/lh-categories/renderBoolean';
+import { camelCaseToSentenceCase } from '@/components/page-speed/lh-categories/camelCaseToSentenceCase';
+import { Card, CardHeader } from '@/components/ui/card';
+import { Details } from '@/components/ui/accordion';
 import {
   RenderBytesValue,
   RenderMSValue,
-} from './lh-categories/table/RenderTableValue';
+} from '@/components/page-speed/lh-categories/table/RenderTableValue';
 import { Fragment, JSX, useContext } from 'react';
 import { groupBy } from '@/lib/utils';
-import { toTitleCase } from './toTitleCase';
-import { InsightsContext } from './PageSpeedContext';
-import { JSUsageSection } from './JSUsage/JSUsageSection';
+import { toTitleCase } from '@/components/page-speed/toTitleCase';
+import { InsightsContext } from '@/components/page-speed/PageSpeedContext';
+import { JSUsageSection } from '@/components/page-speed/JSUsage/JSUsageSection';
 
 const CWV = [
   'firstContentfulPaint',

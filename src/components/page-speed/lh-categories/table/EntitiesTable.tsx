@@ -6,8 +6,8 @@ import {
   createColumnHelper,
   FilterFn,
 } from '@tanstack/react-table';
-import { renderBoolean } from '../renderBoolean';
-import { DataTableNoGrouping } from './DataTableNoGrouping';
+import { renderBoolean } from '@/components/page-speed/lh-categories/renderBoolean';
+import { DataTableNoGrouping } from '@/components/page-speed/lh-categories/table/DataTableNoGrouping';
 
 declare module '@tanstack/react-table' {
   interface FilterFns {

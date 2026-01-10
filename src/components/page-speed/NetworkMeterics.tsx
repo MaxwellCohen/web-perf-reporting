@@ -1,16 +1,16 @@
 "use client";
 import { useContext, useMemo } from "react";
-import { InsightsContext } from "./PageSpeedContext";
-import { AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
+import { InsightsContext } from "@/components/page-speed/PageSpeedContext";
+import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { groupBy } from "@/lib/utils";
 import { AuditDetailTable, TableItem } from "@/lib/schema";
-import { TimingMetricsCard } from "./network-metrics/TimingMetricsCard";
-import { TimelineCard } from "./network-metrics/TimelineCard";
-import { NetworkRequestsSummaryCard } from "./network-metrics/NetworkRequestsSummaryCard";
-import { NetworkRTTCard } from "./network-metrics/NetworkRTTCard";
-import { ServerLatencyCard } from "./network-metrics/ServerLatencyCard";
-import { ResourceTypeBreakdownCard } from "./network-metrics/ResourceTypeBreakdownCard";
-import { TopResourcesCard } from "./network-metrics/TopResourcesCard";
+import { TimingMetricsCard } from "@/components/page-speed/network-metrics/TimingMetricsCard";
+import { TimelineCard } from "@/components/page-speed/network-metrics/TimelineCard";
+import { NetworkRequestsSummaryCard } from "@/components/page-speed/network-metrics/NetworkRequestsSummaryCard";
+import { NetworkRTTCard } from "@/components/page-speed/network-metrics/NetworkRTTCard";
+import { ServerLatencyCard } from "@/components/page-speed/network-metrics/ServerLatencyCard";
+import { ResourceTypeBreakdownCard } from "@/components/page-speed/network-metrics/ResourceTypeBreakdownCard";
+import { TopResourcesCard } from "@/components/page-speed/network-metrics/TopResourcesCard";
 
 export function NetworkMetricsComponent() {
   const items = useContext(InsightsContext);

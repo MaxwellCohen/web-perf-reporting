@@ -2,10 +2,10 @@
 import { Card } from '@/components/ui/card';
 import { CruxHistoryItem } from '@/lib/schema';
 import { useContext, useMemo } from 'react';
-import { HistoricalPerformanceChartData } from '../../components/common/ChartSettings';
+import { HistoricalPerformanceChartData } from '@/components/common/ChartSettings';
 import dynamic from 'next/dynamic';
-import { CurrentPerformanceChartContext } from '../latest-crux/PerformanceCard';
-import { HistoricalP75Chart } from './HistoricalPerformanceAreaChart';
+import { CurrentPerformanceChartContext } from '@/components/latest-crux/PerformanceCard';
+import { HistoricalP75Chart } from '@/components/historical/HistoricalPerformanceAreaChart';
 
 const HistoricalPerformanceBarChart = dynamic(() =>
   import('./HistoricalPerformanceBarChart').then(

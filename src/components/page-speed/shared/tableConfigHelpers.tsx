@@ -16,8 +16,8 @@ import {
   VisibilityState,
 } from '@tanstack/react-table';
 import { useState } from 'react';
-import { booleanFilterFn } from '../lh-categories/table/DataTableNoGrouping';
-import { ExpandAll, ExpandRow } from '../JSUsage/JSUsageTable';
+import { booleanFilterFn } from '@/components/page-speed/lh-categories/table/DataTableNoGrouping';
+import { ExpandAll, ExpandRow } from '@/components/page-speed/JSUsage/JSUsageTable';
 
 export type TableConfigOptions<T> = {
   data: T[];

@@ -5,10 +5,10 @@ import {
   ColumnDef,
   createColumnHelper,
 } from "@tanstack/react-table";
-import { sortByMaxValue } from "../shared/dataSortingHelpers";
-import { useStandardTable } from "../shared/tableConfigHelpers";
-import { createURLColumn, createBytesColumn, createReportColumn } from "../shared/tableColumnHelpers";
-import { TableCard } from "../shared/TableCard";
+import { sortByMaxValue } from "@/components/page-speed/shared/dataSortingHelpers";
+import { useStandardTable } from "@/components/page-speed/shared/tableConfigHelpers";
+import { createURLColumn, createBytesColumn, createReportColumn } from "@/components/page-speed/shared/tableColumnHelpers";
+import { TableCard } from "@/components/page-speed/shared/TableCard";
 
 type LegacyJavaScriptData = {
   label: string;

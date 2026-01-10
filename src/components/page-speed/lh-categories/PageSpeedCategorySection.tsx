@@ -1,6 +1,6 @@
 "use client";
 import { NullablePageSpeedInsights } from '@/lib/schema';
-import { CategoryAuditSection } from './CategoryAuditSection';
+import { CategoryAuditSection } from '@/components/page-speed/lh-categories/CategoryAuditSection';
 
 export function PageSpeedCategorySection({
   data,

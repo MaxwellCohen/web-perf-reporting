@@ -2,9 +2,9 @@
 import { PageSpeedInsightsDashboard } from '@/components/page-speed/pageSpeedInsightsDashboard';
 import { PageSpeedInsights } from '@/lib/schema';
 import { useEffect, useRef, useState } from 'react';
-import { Details } from '../ui/accordion';
-import { Textarea } from '../ui/textarea';
-import { Button } from '../ui/button';
+import { Details } from '@/components/ui/accordion';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 import { TextEncoding } from 'lighthouse/report/renderer/text-encoding';
 import pako from 'pako';
 if (globalThis.window !== undefined) {

@@ -1,8 +1,8 @@
 import { Details } from '@/components/ui/accordion';
-import { sortByScoreDisplayModes } from '../ScoreDisplay';
+import { sortByScoreDisplayModes } from '@/components/page-speed/ScoreDisplay';
 import { AuditResultsRecord, CategoryResult } from '@/lib/schema';
-import { CategoryScoreInfo } from './CategoryScoreInfo';
-import { AuditDetailsSection } from './AuditDetailsSection';
+import { CategoryScoreInfo } from '@/components/page-speed/lh-categories/CategoryScoreInfo';
+import { AuditDetailsSection } from '@/components/page-speed/lh-categories/AuditDetailsSection';
 import { useMemo } from 'react';
 
 const AuditRefsToHide = ['final-screenshot', 'script-treemap-data'];

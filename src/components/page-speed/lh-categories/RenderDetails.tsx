@@ -1,16 +1,16 @@
-import { Timeline } from '../Timeline';
+import { Timeline } from '@/components/page-speed/Timeline';
 import {
   AuditDetailFilmstrip,
   AuditDetailList,
   CriticalRequestChain,
   TreeMapData,
 } from '@/lib/schema';
-import { RenderChecklist } from './RenderChecklist';
-import { DetailTable } from './table/RenderTable';
-import { RenderDebugData } from './RenderDebugdata';
-import { RenderCriticalChainData } from './table/renderCricticalChain';
-import { TableDataItem } from '../tsTable/TableDataItem';
-import { JSUsageAccordion } from '../JSUsage/JSUsageSection';
+import { RenderChecklist } from '@/components/page-speed/lh-categories/RenderChecklist';
+import { DetailTable } from '@/components/page-speed/lh-categories/table/RenderTable';
+import { RenderDebugData } from '@/components/page-speed/lh-categories/RenderDebugdata';
+import { RenderCriticalChainData } from '@/components/page-speed/lh-categories/table/renderCricticalChain';
+import { TableDataItem } from '@/components/page-speed/tsTable/TableDataItem';
+import { JSUsageAccordion } from '@/components/page-speed/JSUsage/JSUsageSection';
 import { useMemo } from 'react';
 
 export function RenderDetails({ items }: { items: TableDataItem[] }) {

@@ -3,7 +3,7 @@ import {
 
 } from '@/lib/services';
 
-import { HistoricalDashboard } from './HistoricalDashbord';
+import { HistoricalDashboard } from '@/components/historical/HistoricalDashbord';
 
 export async function HistoricalChartsSection({
   url,

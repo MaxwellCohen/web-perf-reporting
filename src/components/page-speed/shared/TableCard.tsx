@@ -1,10 +1,10 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table } from '@/components/ui/table';
-import { DataTableHeader } from '../lh-categories/table/DataTableHeader';
-import { DataTableBody } from '../lh-categories/table/DataTableBody';
+import { DataTableHeader } from '@/components/page-speed/lh-categories/table/DataTableHeader';
+import { DataTableBody } from '@/components/page-speed/lh-categories/table/DataTableBody';
 import { Table as TableType } from '@tanstack/react-table';
-import { PaginationCard } from '../JSUsage/TableControls';
+import { PaginationCard } from '@/components/page-speed/JSUsage/TableControls';
 
 type TableCardProps<T = unknown> = {
   title: string;

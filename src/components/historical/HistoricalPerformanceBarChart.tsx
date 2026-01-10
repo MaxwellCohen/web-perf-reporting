@@ -5,7 +5,7 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 import { CartesianGrid, XAxis, Bar, BarChart } from 'recharts';
-import { HistoricalPerformanceChartData, chartConfig } from '../../components/common/ChartSettings';
+import { HistoricalPerformanceChartData, chartConfig } from '@/components/common/ChartSettings';
 
 export function HistoricalPerformanceBarChart({
   chartData,

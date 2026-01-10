@@ -1,7 +1,7 @@
 "use client";
 import { memo, useContext, useEffect, useRef, useState } from 'react';
-import { fullPageScreenshotContext } from '../../PageSpeedContext';
-import { RenderJSONDetails } from '../../RenderJSONDetails';
+import { fullPageScreenshotContext } from '@/components/page-speed/PageSpeedContext';
+import { RenderJSONDetails } from '@/components/page-speed/RenderJSONDetails';
 import { NodeValue, FullPageScreenshot, Rect } from '@/lib/schema';
 import {
   Dialog,

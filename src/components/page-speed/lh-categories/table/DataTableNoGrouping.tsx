@@ -5,7 +5,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '../../../ui/accordion';
+} from '@/components/ui/accordion';
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -19,9 +19,9 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table';
-import { DataTableHeader } from './DataTableHeader';
-import { DataTableBody } from './DataTableBody';
-import { toTitleCase } from '../../toTitleCase';
+import { DataTableHeader } from '@/components/page-speed/lh-categories/table/DataTableHeader';
+import { DataTableBody } from '@/components/page-speed/lh-categories/table/DataTableBody';
+import { toTitleCase } from '@/components/page-speed/toTitleCase';
 
 export const booleanFilterFn: FilterFn<unknown> = (row, columnId, filterValue) => {
   if (!filterValue || !filterValue.length) {

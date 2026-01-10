@@ -1,6 +1,6 @@
 import React from 'react';
-import { RenderMSValue } from '../lh-categories/table/RenderTableValue';
-import { RenderBytesValue } from '../lh-categories/table/RenderTableValue';
+import { RenderMSValue } from '@/components/page-speed/lh-categories/table/RenderTableValue';
+import { RenderBytesValue } from '@/components/page-speed/lh-categories/table/RenderTableValue';
 import { Row } from '@tanstack/react-table';
 
 type ValueLabelPair<T> = {

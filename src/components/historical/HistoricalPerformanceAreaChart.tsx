@@ -12,7 +12,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { chartConfig } from '../../components/common/ChartSettings';
+import { chartConfig } from '@/components/common/ChartSettings';
 import { CruxHistoryItem } from '@/lib/schema';
 
 export function HistoricalPerformanceAreaChart({

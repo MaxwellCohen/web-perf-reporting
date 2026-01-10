@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { cn } from '@/lib/utils';
-import { NodeComponent } from './RenderNode';
+import { NodeComponent } from '@/components/page-speed/lh-categories/table/RenderNode';
 import {
   CodeValue,
   ItemValue,

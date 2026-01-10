@@ -1,6 +1,6 @@
 import { TableColumnHeading } from '@/lib/schema';
-import { RenderHeading } from './RenderHeading';
-import { RenderTableRowContainer } from './RenderTableRowContainer';
+import { RenderHeading } from '@/components/page-speed/lh-categories/table/RenderHeading';
+import { RenderTableRowContainer } from '@/components/page-speed/lh-categories/table/RenderTableRowContainer';
 
 export function RenderTableHeader({
   headings,

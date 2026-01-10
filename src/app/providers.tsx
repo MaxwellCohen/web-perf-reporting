@@ -3,7 +3,7 @@
 import posthog from 'posthog-js';
 import { PostHogProvider as PHProvider } from 'posthog-js/react';
 import { useEffect, useState } from 'react';
-import PostHogPageView from './PostHogPageView';
+import PostHogPageView from '@/app/PostHogPageView';
 import { ThemeProvider as NextThemesProvider } from "next-themes"
 import { SWRConfig } from 'swr'
 

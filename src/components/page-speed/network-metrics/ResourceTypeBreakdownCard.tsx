@@ -1,19 +1,19 @@
 "use client";
-import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table } from "@/components/ui/table";
-import { RenderBytesValue } from "../lh-categories/table/RenderTableValue";
-import { toTitleCase } from "../toTitleCase";
+import { RenderBytesValue } from "@/components/page-speed/lh-categories/table/RenderTableValue";
+import { toTitleCase } from "@/components/page-speed/toTitleCase";
 import { TableItem } from "@/lib/schema";
 import { useMemo } from "react";
 import {
   ColumnDef,
   createColumnHelper,
 } from "@tanstack/react-table";
-import { DataTableHeader } from "../lh-categories/table/DataTableHeader";
-import { DataTableBody } from "../lh-categories/table/DataTableBody";
-import { createNumericAggregatedCell, createBytesAggregatedCell, createStringAggregatedCell, createReportLabelAggregatedCell } from "../shared/aggregatedCellHelpers";
-import { sortByMaxValue } from "../shared/dataSortingHelpers";
-import { useStandardTable } from "../shared/tableConfigHelpers";
+import { DataTableHeader } from "@/components/page-speed/lh-categories/table/DataTableHeader";
+import { DataTableBody } from "@/components/page-speed/lh-categories/table/DataTableBody";
+import { createNumericAggregatedCell, createBytesAggregatedCell, createStringAggregatedCell, createReportLabelAggregatedCell } from "@/components/page-speed/shared/aggregatedCellHelpers";
+import { sortByMaxValue } from "@/components/page-speed/shared/dataSortingHelpers";
+import { useStandardTable } from "@/components/page-speed/shared/tableConfigHelpers";
 
 type ResourceTypeBreakdown = {
   label: string;

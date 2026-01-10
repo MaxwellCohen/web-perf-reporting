@@ -30,7 +30,7 @@ import {
   getFacetedMinMaxValues,
   ColumnFiltersState,
 } from '@tanstack/react-table';
-import { TableDataItem } from '../../tsTable/TableDataItem';
+import { TableDataItem } from '@/components/page-speed/tsTable/TableDataItem';
 import {
   Table,
   TableBody,
@@ -38,19 +38,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { RenderTableValue } from './RenderTableValue';
+import { RenderTableValue } from '@/components/page-speed/lh-categories/table/RenderTableValue';
 import clsx from 'clsx';
-import { ExpandAll, ExpandRow } from '../../JSUsage/JSUsageTable';
-import { toTitleCase } from '../../toTitleCase';
-import { DataTableHeader, DataTableHead } from './DataTableHeader';
-import { booleanFilterFn } from './DataTableNoGrouping';
+import { ExpandAll, ExpandRow } from '@/components/page-speed/JSUsage/JSUsageTable';
+import { toTitleCase } from '@/components/page-speed/toTitleCase';
+import { DataTableHeader, DataTableHead } from '@/components/page-speed/lh-categories/table/DataTableHeader';
+import { booleanFilterFn } from '@/components/page-speed/lh-categories/table/DataTableNoGrouping';
 import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { DataTableBody } from './DataTableBody';
-import { DetailTableWith1ReportAndNoSubitem } from './DetailTableWith1ReportAndNoSubitem';
+import { DataTableBody } from '@/components/page-speed/lh-categories/table/DataTableBody';
+import { DetailTableWith1ReportAndNoSubitem } from '@/components/page-speed/lh-categories/table/DetailTableWith1ReportAndNoSubitem';
 
 declare module '@tanstack/react-table' {
   interface ColumnMeta<TData extends RowData, TValue> {

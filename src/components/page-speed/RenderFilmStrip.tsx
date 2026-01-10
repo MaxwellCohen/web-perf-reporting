@@ -1,12 +1,12 @@
 import { AuditDetailFilmstrip } from '@/lib/schema';
-import { Timeline } from './Timeline';
+import { Timeline } from '@/components/page-speed/Timeline';
 import { useContext } from 'react';
-import { InsightsContext } from './PageSpeedContext';
+import { InsightsContext } from '@/components/page-speed/PageSpeedContext';
 import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '../ui/accordion';
+} from '@/components/ui/accordion';
 
 export function RenderFilmStrip() {
   const items = useContext(InsightsContext);

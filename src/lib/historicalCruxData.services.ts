@@ -1,10 +1,10 @@
 import { db } from '@/db';
-import { CruxHistoryReportSchema } from './schema';
-import { convertCruxHistoryToReports, formatDate } from './utils';
+import { CruxHistoryReportSchema } from '@/lib/schema';
+import { convertCruxHistoryToReports, formatDate } from '@/lib/utils';
 import * as Sentry from '@sentry/nextjs';
 import { historicalMetrics } from '@/db/schema';
 import { eq, and, asc } from 'drizzle-orm';
-import { formFactor } from './services';
+import { formFactor } from '@/lib/services';
 
 export const getHistoricalCruxData = async ({
   url,

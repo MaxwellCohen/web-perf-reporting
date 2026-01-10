@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
-import { RenderBytesValue } from '../lh-categories/table/RenderTableValue';
-import { createBytesAggregatedCell, createStringAggregatedCell, createReportLabelAggregatedCell } from './aggregatedCellHelpers';
+import { RenderBytesValue } from '@/components/page-speed/lh-categories/table/RenderTableValue';
+import { createBytesAggregatedCell, createStringAggregatedCell, createReportLabelAggregatedCell } from '@/components/page-speed/shared/aggregatedCellHelpers';
 
 /**
  * Creates a standard URL column definition

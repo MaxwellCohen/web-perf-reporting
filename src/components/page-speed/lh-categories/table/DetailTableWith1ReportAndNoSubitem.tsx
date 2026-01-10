@@ -2,9 +2,9 @@
 import { TableItem, OpportunityItem } from '@/lib/schema';
 import { createColumnHelper } from '@tanstack/react-table';
 import { useMemo } from 'react';
-import { toTitleCase } from '../../toTitleCase';
-import { DataTableNoGrouping } from './DataTableNoGrouping';
-import { DetailTableItem, canSort, canGroup, isNumberColumn, simpleTableCell } from './RenderTable';
+import { toTitleCase } from '@/components/page-speed/toTitleCase';
+import { DataTableNoGrouping } from '@/components/page-speed/lh-categories/table/DataTableNoGrouping';
+import { DetailTableItem, canSort, canGroup, isNumberColumn, simpleTableCell } from '@/components/page-speed/lh-categories/table/RenderTable';
 
 export function DetailTableWith1ReportAndNoSubitem({
   rows, title,

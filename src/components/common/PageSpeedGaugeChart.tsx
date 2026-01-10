@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Label, Pie, PieChart } from 'recharts';
 
 import { ChartContainer } from '@/components/ui/chart';
-import { chartConfig } from './ChartSettings';
+import { chartConfig } from '@/components/common/ChartSettings';
 import { UserPageLoadMetricV5 } from '@/lib/schema';
 
 const RADIAN = Math.PI / 180;

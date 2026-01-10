@@ -1,5 +1,5 @@
 "use client";
-import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { RenderMSValue } from "../lh-categories/table/RenderTableValue";
+import { RenderMSValue } from "@/components/page-speed/lh-categories/table/RenderTableValue";
 
 type TimingMetrics = {
   label: string;

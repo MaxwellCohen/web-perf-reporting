@@ -1,5 +1,5 @@
 // import * as Sentry from "@sentry/nextjs";
-import { CruxReport, cruxReportSchema } from './schema';
+import { CruxReport, cruxReportSchema } from '@/lib/schema';
 import * as Sentry from '@sentry/nextjs';
 
 export { getHistoricalCruxData } from './historicalCruxData.services';

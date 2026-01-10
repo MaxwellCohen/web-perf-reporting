@@ -11,17 +11,17 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { Fragment, useMemo, useState } from 'react';
-import { HorizontalScoreChart } from '../../common/PageSpeedGaugeChart';
+import { HorizontalScoreChart } from '@/components/common/PageSpeedGaugeChart';
 import ReactMarkdown from 'react-markdown';
 import clsx from 'clsx';
-import { AccordionItem, AccordionTrigger } from '../../ui/accordion';
+import { AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { AccordionContent } from '@radix-ui/react-accordion';
-import { AuditDetailsSummary } from '../lh-categories/AuditDetailsSummary';
-import { RenderMetricSavings } from '../lh-categories/RenderMetricSavings';
-import { RenderDetails } from '../lh-categories/RenderDetails';
-import { RenderJSONDetails } from '../RenderJSONDetails';
-import { TableDataItem } from './TableDataItem';
-import { categorySortFn } from './categorySortFn';
+import { AuditDetailsSummary } from '@/components/page-speed/lh-categories/AuditDetailsSummary';
+import { RenderMetricSavings } from '@/components/page-speed/lh-categories/RenderMetricSavings';
+import { RenderDetails } from '@/components/page-speed/lh-categories/RenderDetails';
+import { RenderJSONDetails } from '@/components/page-speed/RenderJSONDetails';
+import { TableDataItem } from '@/components/page-speed/tsTable/TableDataItem';
+import { categorySortFn } from '@/components/page-speed/tsTable/categorySortFn';
 
 const columnHelper = createColumnHelper<TableDataItem>();
 const columns = [

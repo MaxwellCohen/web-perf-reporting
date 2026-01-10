@@ -1,10 +1,10 @@
-import { Card, CardTitle } from '../ui/card';
-import { ScoreDisplay } from './ScoreDisplay';
+import { Card, CardTitle } from '@/components/ui/card';
+import { ScoreDisplay } from '@/components/page-speed/ScoreDisplay';
 import ReactMarkdown from 'react-markdown';
-import { HorizontalScoreChart } from '../common/PageSpeedGaugeChart';
-import { AccordionItem, AccordionTrigger, AccordionContent } from '../ui/accordion';
+import { HorizontalScoreChart } from '@/components/common/PageSpeedGaugeChart';
+import { AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { Fragment, useContext } from 'react';
-import { InsightsContext } from './PageSpeedContext';
+import { InsightsContext } from '@/components/page-speed/PageSpeedContext';
 const metricAuditRefId = [
   'first-contentful-paint',
   'largest-contentful-paint',

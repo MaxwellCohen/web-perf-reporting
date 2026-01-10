@@ -1,5 +1,5 @@
 import ReactMarkdown from 'react-markdown';
-import { ScoreDisplay } from '../ScoreDisplay';
+import { ScoreDisplay } from '@/components/page-speed/ScoreDisplay';
 import { AuditResultsRecord } from '@/lib/schema';
 
 export function AuditDetailsSummary({

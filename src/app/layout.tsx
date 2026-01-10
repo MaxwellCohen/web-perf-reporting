@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
-import { PostHogProvider /*ThemeProvider */ } from './providers';
+import { PostHogProvider /*ThemeProvider */ } from '@/app/providers';
 import { TopNav } from '@/components/navigation/TopNav';
 
 const geistSans = Geist({

@@ -5,8 +5,8 @@ import {
   AccordionContent,
 } from '@/components/ui/accordion';
 import { Fragment, useContext } from 'react';
-import { InsightsContext } from './PageSpeedContext';
-import { Card, CardTitle } from '../ui/card';
+import { InsightsContext } from '@/components/page-speed/PageSpeedContext';
+import { Card, CardTitle } from '@/components/ui/card';
 
 interface LoadingExperienceProps {
   title: string;

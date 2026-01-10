@@ -2,22 +2,22 @@
 /* eslint-disable @next/next/no-img-element */
 import { AuditDetailFilmstrip } from '@/lib/schema';
 import { useEffect, useState } from 'react';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogClose,
   DialogContent,
   DialogTitle,
   DialogTrigger,
-} from '../ui/dialog';
+} from '@/components/ui/dialog';
 import {
   Carousel,
   CarouselApi,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from '../ui/carousel';
-import { CarouselContent } from '../ui/carousel';
+} from '@/components/ui/carousel';
+import { CarouselContent } from '@/components/ui/carousel';
 // import { Details } from '../ui/accordion'; 
 
 interface TimelineProps {

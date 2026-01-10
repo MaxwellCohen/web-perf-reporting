@@ -1,10 +1,10 @@
 import { TableItem, TableColumnHeading, DeviceType } from '@/lib/schema';
 import { Fragment, useMemo } from 'react';
-import { getDerivedSubItemsHeading } from './utils';
-import { RenderTableRowContainer } from './RenderTableRowContainer';
-import { RenderTableHeader } from './RenderTableHeader';
-import { RenderTableCell } from './RenderTableCell';
-import { getEntityGroupItems } from './getEntityGroupItems';
+import { getDerivedSubItemsHeading } from '@/components/page-speed/lh-categories/table/utils';
+import { RenderTableRowContainer } from '@/components/page-speed/lh-categories/table/RenderTableRowContainer';
+import { RenderTableHeader } from '@/components/page-speed/lh-categories/table/RenderTableHeader';
+import { RenderTableCell } from '@/components/page-speed/lh-categories/table/RenderTableCell';
+import { getEntityGroupItems } from '@/components/page-speed/lh-categories/table/getEntityGroupItems';
 
 
 export function RenderEntityTable({

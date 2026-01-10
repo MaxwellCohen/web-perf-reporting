@@ -1,14 +1,14 @@
 "use client";
 import { useContext, useMemo } from "react";
-import { InsightsContext } from "../PageSpeedContext";
-import { AccordionContent, AccordionItem, AccordionTrigger } from "../../ui/accordion";
+import { InsightsContext } from "@/components/page-speed/PageSpeedContext";
+import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { AuditDetailTable, TableItem } from "@/lib/schema";
-import { BootupTimeCard } from "./BootupTimeCard";
-import { MainThreadWorkCard } from "./MainThreadWorkCard";
-import { UnusedJavaScriptCard } from "./UnusedJavaScriptCard";
-import { UnminifiedJavaScriptCard } from "./UnminifiedJavaScriptCard";
-import { LegacyJavaScriptCard } from "./LegacyJavaScriptCard";
-import { JavaScriptSummaryCard } from "./JavaScriptSummaryCard";
+import { BootupTimeCard } from "@/components/page-speed/javascript-metrics/BootupTimeCard";
+import { MainThreadWorkCard } from "@/components/page-speed/javascript-metrics/MainThreadWorkCard";
+import { UnusedJavaScriptCard } from "@/components/page-speed/javascript-metrics/UnusedJavaScriptCard";
+import { UnminifiedJavaScriptCard } from "@/components/page-speed/javascript-metrics/UnminifiedJavaScriptCard";
+import { LegacyJavaScriptCard } from "@/components/page-speed/javascript-metrics/LegacyJavaScriptCard";
+import { JavaScriptSummaryCard } from "@/components/page-speed/javascript-metrics/JavaScriptSummaryCard";
 
 export function JavaScriptPerformanceComponent() {
   const items = useContext(InsightsContext);

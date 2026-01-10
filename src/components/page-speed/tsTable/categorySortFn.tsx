@@ -1,4 +1,4 @@
-import { TableDataItem } from './TableDataItem';
+import { TableDataItem } from '@/components/page-speed/tsTable/TableDataItem';
 
 const categoryOrder: Record<string, number> = {
   'Core Web Vitals': 1,

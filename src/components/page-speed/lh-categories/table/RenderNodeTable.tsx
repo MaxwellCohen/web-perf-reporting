@@ -5,8 +5,8 @@ import {
   DeviceType,
 } from '@/lib/schema';
 import { Card } from '@/components/ui/card';
-import { RenderNodeImage } from './RenderNode';
-import { RenderTableCell } from './RenderTableCell';
+import { RenderNodeImage } from '@/components/page-speed/lh-categories/table/RenderNode';
+import { RenderTableCell } from '@/components/page-speed/lh-categories/table/RenderTableCell';
 import { Details } from '@/components/ui/accordion';
 import { cn } from '@/lib/utils';
 

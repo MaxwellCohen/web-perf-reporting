@@ -1,10 +1,10 @@
-import { Details } from '../../ui/accordion';
-import { RenderJSONDetails } from '../RenderJSONDetails';
+import { Details } from '@/components/ui/accordion';
+import { RenderJSONDetails } from '@/components/page-speed/RenderJSONDetails';
 import { AuditRef, AuditResultsRecord } from '@/lib/schema';
-import { AuditDetailsSummary } from './AuditDetailsSummary';
-import { RenderMetricSavings } from './RenderMetricSavings';
+import { AuditDetailsSummary } from '@/components/page-speed/lh-categories/AuditDetailsSummary';
+import { RenderMetricSavings } from '@/components/page-speed/lh-categories/RenderMetricSavings';
 // import { RenderDetails } from './RenderDetails';
-import { isEmptyResult } from '../ScoreDisplay';
+import { isEmptyResult } from '@/components/page-speed/ScoreDisplay';
 
 const doNotRenderDetails = ['screenshot-thumbnails', 'main-thread-tasks'];
 

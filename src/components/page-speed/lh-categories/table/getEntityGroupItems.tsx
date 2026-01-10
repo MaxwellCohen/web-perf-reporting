@@ -1,5 +1,5 @@
 import { TableItem, TableColumnHeading, ItemValueType } from '@/lib/schema';
-import { SUMMABLE_VALUETYPES } from './utils';
+import { SUMMABLE_VALUETYPES } from '@/components/page-speed/lh-categories/table/utils';
 
 export function getTableItemSortComparator(sortedBy: string[]) {
   return (a: TableItem, b: TableItem) => {

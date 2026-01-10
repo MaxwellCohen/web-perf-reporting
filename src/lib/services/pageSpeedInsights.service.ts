@@ -2,7 +2,7 @@
 import * as Sentry from '@sentry/nextjs';
 import { PageSpeedInsightsTable } from '@/db/schema';
 import { db } from '@/db';
-import { PageSpeedInsights } from '../schema';
+import { PageSpeedInsights } from '@/lib/schema';
 import { and, eq } from 'drizzle-orm';
 import {waitUntil} from '@vercel/functions'
 

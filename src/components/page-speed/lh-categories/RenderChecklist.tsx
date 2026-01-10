@@ -7,9 +7,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { AuditDetailChecklist } from '@/lib/schema';
-import { renderBoolean } from './renderBoolean';
+import { renderBoolean } from '@/components/page-speed/lh-categories/renderBoolean';
 import { Details } from '@/components/ui/accordion';
-import { TableDataItem } from '../tsTable/TableDataItem';
+import { TableDataItem } from '@/components/page-speed/tsTable/TableDataItem';
 import { useMemo } from 'react';
 
 export function RenderChecklist({

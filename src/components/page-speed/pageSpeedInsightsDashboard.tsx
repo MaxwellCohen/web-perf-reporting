@@ -1,24 +1,24 @@
 'use client';
-import { LoadingExperience } from './LoadingExperience';
-import { EntitiesTable } from './lh-categories/table/EntitiesTable';
-import { CWVMetricsComponent } from './CWVMetricsComponent';
-import { fullPageScreenshotContext, InsightsContext } from './PageSpeedContext';
-import { RenderFilmStrip } from './RenderFilmStrip';
+import { LoadingExperience } from '@/components/page-speed/LoadingExperience';
+import { EntitiesTable } from '@/components/page-speed/lh-categories/table/EntitiesTable';
+import { CWVMetricsComponent } from '@/components/page-speed/CWVMetricsComponent';
+import { fullPageScreenshotContext, InsightsContext } from '@/components/page-speed/PageSpeedContext';
+import { RenderFilmStrip } from '@/components/page-speed/RenderFilmStrip';
 import { NullablePageSpeedInsights, PageSpeedInsights } from '@/lib/schema';
-import { toTitleCase } from './toTitleCase';
-import { CategoryRow, useLHTable } from './tsTable/useLHTable';
+import { toTitleCase } from '@/components/page-speed/toTitleCase';
+import { CategoryRow, useLHTable } from '@/components/page-speed/tsTable/useLHTable';
 import { useEffect, useMemo, useState } from 'react';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import {
   StringFilterHeader,
-} from './JSUsage/JSUsageTable';
-import { Accordion } from '../ui/accordion';
-import { DropdownFilter } from './JSUsage/TableControls';
-import { useFetchPageSpeedData } from './useFetchPageSpeedData';
+} from '@/components/page-speed/JSUsage/JSUsageTable';
+import { Accordion } from '@/components/ui/accordion';
+import { DropdownFilter } from '@/components/page-speed/JSUsage/TableControls';
+import { useFetchPageSpeedData } from '@/components/page-speed/useFetchPageSpeedData';
 import { boolean } from 'drizzle-orm/mysql-core';
-import { CopyButton } from '../ui/copy-button';
-import { NetworkMetricsComponent } from './NetworkMeterics';
-import { JavaScriptPerformanceComponent } from './javascript-metrics/JavaScriptPerformanceComponent';
+import { CopyButton } from '@/components/ui/copy-button';
+import { NetworkMetricsComponent } from '@/components/page-speed/NetworkMeterics';
+import { JavaScriptPerformanceComponent } from '@/components/page-speed/javascript-metrics/JavaScriptPerformanceComponent';
 
 const loadingExperiences = [
   { title: 'Page Loading Experience', experienceKey: 'loadingExperience' },

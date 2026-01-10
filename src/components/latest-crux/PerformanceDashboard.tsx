@@ -10,7 +10,7 @@ import {
 import {  useState } from 'react';
 import { PercentTable } from '@/components/common/FormFactorPercentPieChart';
 
-import { PerformanceOptions } from './PerformanceOptions';
+import { PerformanceOptions } from '@/components/latest-crux/PerformanceOptions';
 
 
 type Scope = 'origin' | 'url';

@@ -1,14 +1,14 @@
 import { TableItem, TableColumnHeading, DeviceType } from '@/lib/schema';
 
-import { getDerivedSubItemsHeading, showBothDevices } from './utils';
+import { getDerivedSubItemsHeading, showBothDevices } from '@/components/page-speed/lh-categories/table/utils';
 import {
   RenderTableRowContainer,
   renderTableRowContainerCss,
-} from './RenderTableRowContainer';
-import { RenderTableHeader } from './RenderTableHeader';
-import { RenderHeading } from './RenderHeading';
-import { RenderTableCell } from './RenderTableCell';
-import { RenderTableValue } from './RenderTableValue';
+} from '@/components/page-speed/lh-categories/table/RenderTableRowContainer';
+import { RenderTableHeader } from '@/components/page-speed/lh-categories/table/RenderTableHeader';
+import { RenderHeading } from '@/components/page-speed/lh-categories/table/RenderHeading';
+import { RenderTableCell } from '@/components/page-speed/lh-categories/table/RenderTableCell';
+import { RenderTableValue } from '@/components/page-speed/lh-categories/table/RenderTableValue';
 import { Fragment, JSX } from 'react';
 import { cn } from '@/lib/utils';
 import { Details } from '@/components/ui/accordion';
