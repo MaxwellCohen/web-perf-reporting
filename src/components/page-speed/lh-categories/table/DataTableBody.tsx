@@ -32,6 +32,9 @@ export function DataTableBody<T>({ table }: { table: TableType<T> }) {
                   <TableCell
                     key={cell.id}
                     className="overflow-x-auto"
+                    style={{
+                      width: `${cell.column.getSize()}px`,
+                    }}
                     data-cell-id={cell.id}
                     data-column-id={cell.column.id}
                     data-can-expand={`${row.getCanExpand()}`}

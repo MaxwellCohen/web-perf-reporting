@@ -17,6 +17,8 @@ import { DropdownFilter } from './JSUsage/TableControls';
 import { useFetchPageSpeedData } from './useFetchPageSpeedData';
 import { boolean } from 'drizzle-orm/mysql-core';
 import { CopyButton } from '../ui/copy-button';
+import { NetworkMetricsComponent } from './NetworkMeterics';
+import { JavaScriptPerformanceComponent } from './javascript-metrics/JavaScriptPerformanceComponent';
 
 const loadingExperiences = [
   { title: 'Page Loading Experience', experienceKey: 'loadingExperience' },
@@ -114,6 +116,8 @@ export function PageSpeedInsightsDashboard({
                 ?.entities
             }
           />
+          <NetworkMetricsComponent />
+          <JavaScriptPerformanceComponent />
         </Accordion>
         <div className="items-bottom flex flex-row justify-between gap-4 px-3 py-4">
           <div className="flex flex-col">

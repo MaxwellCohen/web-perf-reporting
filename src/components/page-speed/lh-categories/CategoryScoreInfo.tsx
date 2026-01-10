@@ -8,17 +8,17 @@ export function CategoryScoreInfo({
     category?: CategoryResult | null;
     device?: string;
   }) {
-    // if (!category?.score) {
-    //   return null;
-    // }
+    if (!category?.score) {
+      return null;
+    }
     return (
-      <div className="flex-0 flex w-64 flex-col gap-2 align-top hover:no-underline">
+      <div className="flex-0 grow flex w-64 flex-col gap-2 align-top hover:no-underline">
         <div className="text-center text-xs hover:no-underline">
           {device ? `${device} - ` : ''}{Math.round(category.score * 100)}
         </div>
         <HorizontalScoreChart
           score={category.score || 0}
-          className="h-2 min-w-11 flex-1 overflow-hidden"
+          className="h-2 min-w-11 w-full flex-1 overflow-hidden"
         />
       </div>
     );

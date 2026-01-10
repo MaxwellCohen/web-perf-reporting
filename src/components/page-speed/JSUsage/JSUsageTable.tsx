@@ -10,7 +10,7 @@ import {
   TableCell,
   TableHead,
 } from '@/components/ui/table';
-import { RenderBytesValue, RenderTableValue } from '../lh-categories/table/RenderTableValue';
+import { RenderBytesValue, RenderMSValue, RenderTableValue } from '../lh-categories/table/RenderTableValue';
 import {
   JSX,
   memo,
@@ -20,6 +20,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ReactNode,
 } from 'react';
 import {
   CellContext,
@@ -188,6 +189,7 @@ export function StringFilterHeader<T>({
         placeholder={`Search... (${column.getFacetedUniqueValues().size})`}
         className="rounded border shadow"
         list={column.id + 'list'}
+        debounce={300}
       />
       <Button
         variant="ghost"
@@ -239,6 +241,31 @@ function useDebouncedCallback(callback: (...arg: any[]) => any, delay = 100) {
   return debouncedCallback;
 }
 
+// Helper function to format numbers based on column context
+function formatFilterValue(value: number, columnId: string, header?: string): ReactNode {
+  const columnIdLower = columnId.toLowerCase();
+  const headerLower = (header || '').toLowerCase();
+  
+  // Check if it's bytes
+  if (columnIdLower.includes('size') || columnIdLower.includes('bytes') || 
+      headerLower.includes('size') || headerLower.includes('bytes')) {
+    return <RenderBytesValue value={value} />;
+  }
+  
+  // Check if it's milliseconds/time
+  if (columnIdLower.includes('time') || columnIdLower.includes('duration') || 
+      columnIdLower.includes('rtt') || columnIdLower.includes('latency') ||
+      columnIdLower.includes('total') || columnIdLower.includes('scripting') ||
+      columnIdLower.includes('parse') || columnIdLower.includes('compile') ||
+      headerLower.includes('time') || headerLower.includes('duration') ||
+      headerLower.includes('ms')) {
+    return <RenderMSValue value={value} />;
+  }
+  
+  // Default: format with commas
+  return <span>{value.toLocaleString('en-US')}</span>;
+}
+
 export function RangeFilter<T>({
   column,
 }: Pick<HeaderContext<T, unknown>, 'column'>) {
@@ -253,47 +280,63 @@ export function RangeFilter<T>({
   ];
   const updateFilter = useDebouncedCallback((value: [number, number]) => {
     column.setFilterValue(value);
-  }, 500);
+  }, 300);
+  
+  const columnId = column.id;
+  const header = typeof column.columnDef.header === 'string' 
+    ? column.columnDef.header 
+    : undefined;
+  
+  // Try to use RenderTableValue if heading metadata exists, otherwise use our formatter
+  const hasHeadingMeta = !!column.columnDef.meta?.heading?.heading;
+  
   return (
-    <div className="m-2 h-20 w-40">
-      <div className="relative py-8">
-        {/* Min thumb label */}
-        <RenderTableValue
-          value={fMin}
-          device='header'
-          heading={column.columnDef.meta?.heading?.heading || null}
-          style={{ right: `60%` }}
-          className={
-            'absolute -top-8 inline-block translate-y-1/2 whitespace-nowrap text-xs font-medium'
-          }
-        >
-          {'Min: '}
-          <br />
-        </RenderTableValue>
+    <div className="w-64 p-4">
+      <div className="relative space-y-4">
+        {/* Min value display */}
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium text-muted-foreground">Min</span>
+          <div className="text-sm font-semibold">
+            {hasHeadingMeta ? (
+              <RenderTableValue
+                value={fMin}
+                device='header'
+                heading={column.columnDef.meta?.heading?.heading || null}
+              />
+            ) : (
+              formatFilterValue(fMin, columnId, header)
+            )}
+          </div>
+        </div>
 
-        {/* Max thumb label */}
-        <RenderTableValue
-          value={fMax}
-          device='header'
-          heading={column.columnDef.meta?.heading?.heading || null}
-           style={{ left: `60%` }}
-          className={
-            'break-none absolute top-8 translate-y-1/2 whitespace-nowrap text-right text-xs font-medium'
-          }
-        >
-          {'Max: '}
-          <br />
-        </RenderTableValue>
+        {/* Slider */}
+        <div className="px-2">
+          <Slider2
+            id={`range-slider_${id}`}
+            defaultValue={[minValue, maxValue]}
+            value={[fMin, fMax]}
+            onValueChange={updateFilter}
+            min={minValue}
+            max={maxValue}
+            className={cn('w-full')}
+          />
+        </div>
 
-        <Slider2
-          id={`range-slider_${id}`}
-          defaultValue={[minValue, maxValue]}
-          value={[fMin, fMax]}
-          onValueChange={updateFilter}
-          min={minValue}
-          max={maxValue}
-          className={cn('w-full')}
-        />
+        {/* Max value display */}
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium text-muted-foreground">Max</span>
+          <div className="text-sm font-semibold">
+            {hasHeadingMeta ? (
+              <RenderTableValue
+                value={fMax}
+                device='header'
+                heading={column.columnDef.meta?.heading?.heading || null}
+              />
+            ) : (
+              formatFilterValue(fMax, columnId, header)
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

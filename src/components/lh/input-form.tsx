@@ -20,11 +20,15 @@ import { AlertCircle, FileJson, Globe, Code } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export function LhInputForm() {
-  const [jsonInputs, ] = useState<
+  const [jsonInputs, setJsonInputs] = useState<
     Array<{ name: string; content: string }>
   >([{ name: '', content: '' }]);
 
-  const [jsonUrl, ] = useState('');
+  const [jsonFiles, setJsonFiles] = useState<
+    Array<{ name: string; file: File }>
+  >([]);
+
+  const [jsonUrl, setJsonUrl] = useState('');
   const [activeTab, setActiveTab] = useState('text');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -137,9 +141,9 @@ export function LhInputForm() {
         <form onSubmit={handleSubmit}>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <LhTabList />
-            <LhTextInput />
-            <LhFileInput />
-            <LhUrlInput />
+            <LhTextInput jsonInputs={jsonInputs} setJsonInputs={setJsonInputs} />
+            <LhFileInput jsonFiles={jsonFiles} setJsonFiles={setJsonFiles} />
+            <LhUrlInput jsonUrl={jsonUrl} setJsonUrl={setJsonUrl} />
           </Tabs>
 
           {error && (
@@ -193,10 +197,13 @@ function LhTabList() {
   );
 }
 
-function LhTextInput({}) {
-  const [jsonInputs, setJsonInputs] = useState<
-    Array<{ name: string; content: string }>
-  >([{ name: '', content: '' }]);
+function LhTextInput({
+  jsonInputs,
+  setJsonInputs,
+}: {
+  jsonInputs: Array<{ name: string; content: string }>;
+  setJsonInputs: React.Dispatch<React.SetStateAction<Array<{ name: string; content: string }>>>;
+}) {
   const addJsonInput = () => {
     setJsonInputs((prev) => [...prev, { name: '', content: '' }]);
   };
@@ -286,10 +293,13 @@ function LhTextInput({}) {
   );
 }
 
-function LhFileInput({}) {
-  const [jsonFiles, setJsonFiles] = useState<
-    Array<{ name: string; file: File }>
-  >([]);
+function LhFileInput({
+  jsonFiles,
+  setJsonFiles,
+}: {
+  jsonFiles: Array<{ name: string; file: File }>;
+  setJsonFiles: React.Dispatch<React.SetStateAction<Array<{ name: string; file: File }>>>;
+}) {
 
   const [error, setError] = useState<string | null>(null);
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -394,8 +404,13 @@ function LhFileInput({}) {
   );
 }
 
-function LhUrlInput({}) {
-  const [jsonUrl, setJsonUrl] = useState('');
+function LhUrlInput({
+  jsonUrl,
+  setJsonUrl,
+}: {
+  jsonUrl: string;
+  setJsonUrl: React.Dispatch<React.SetStateAction<string>>;
+}) {
   return (
     <TabsContent value="url">
       <div className="space-y-2">

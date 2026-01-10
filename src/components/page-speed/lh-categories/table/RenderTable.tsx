@@ -718,24 +718,12 @@ function DetailTableAndWithSubitem({
         </div>
       </AccordionTrigger>
       <AccordionContent>
-        <Table
-          style={{
-            width: table.getTotalSize(),
-          }}
-        >
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => {
-              return (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <DataTableHead key={header.id} header={header} />
-                  ))}
-                </TableRow>
-              );
-            })}
-          </TableHeader>
-          <DataTableBody table={table} />
-        </Table>
+        <div className="w-full overflow-x-auto">
+          <Table className="w-full" style={{ width: '100%' }}>
+            <DataTableHeader table={table} />
+            <DataTableBody table={table} />
+          </Table>
+        </div>
       </AccordionContent>
     </AccordionItem>
   );
@@ -950,24 +938,10 @@ function DetailTableFull({
   // console.log('visible rows', table.getRowModel().rows);
 
   return (
-    <Table
-      className="table-fixed"
-      style={{
-        width: table.getTotalSize(),
-      }}
-    >
-      <TableHeader>
-        {table.getHeaderGroups().map((headerGroup) => {
-          return (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <DataTableHead key={header.id} header={header} />
-              ))}
-            </TableRow>
-          );
-        })}
-      </TableHeader>
-      <TableBody className="[&_tr:last-child]:border-[length:var(--border-width)]">
+    <div className="w-full overflow-x-auto">
+      <Table className="w-full" style={{ width: '100%' }}>
+        <DataTableHeader table={table} />
+        <TableBody className="[&_tr:last-child]:border-(length:--border-width)">
         {table
           .getRowModel()
           .rows.map((row) => {
@@ -981,7 +955,7 @@ function DetailTableFull({
               <Fragment key={row.id}>
                 <TableRow
                   className={clsx(
-                    'bg-[opacity:var(--border-opacity)] border-x-[length:var(--border-width)] bg-muted-foreground/10 bg-slate-600',
+                    'border-x-(length:--border-width) bg-muted-foreground/10',
                     {},
                   )}
                   style={
@@ -1048,6 +1022,7 @@ function DetailTableFull({
           .filter((v) => v)}
       </TableBody>
     </Table>
+    </div>
   );
 }
 

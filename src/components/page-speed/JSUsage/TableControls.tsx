@@ -160,7 +160,7 @@ export function PageSizeSelector<T>({ table }: { table: TableType<T> }) {
       }}
       defaultValue={`${table.getState().pagination.pageSize}`}
     >
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger className="w-45">
         <SelectValue placeholder="Page Size" />
       </SelectTrigger>
       <SelectContent>

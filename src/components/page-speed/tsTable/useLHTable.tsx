@@ -53,7 +53,7 @@ const columns = [
         const score = +scoreStr;
         return (
           <div key={v} className="flex flex-row items-center gap-2">
-            <div className="flex-0 flex w-64 flex-col gap-2 align-top hover:no-underline">
+            <div className="flex-0 flex grow w-64 flex-col gap-2 align-top hover:no-underline">
               <div className="text-center text-xs hover:no-underline">
                 {label ? `${label} - ` : ''}
                 {Math.round(score * 100)}
@@ -219,8 +219,8 @@ export function AuditSummaryRow({ row }: { row: Row<TableDataItem> }) {
   return (
     <AccordionItem
       value={row.id}
-      className={clsx(
-        'border-1 items-center gap-4 border border-x-4 border-gray-400 py-2',
+        className={clsx(
+        'items-center gap-4 border border-x-4 border-gray-400 py-2',
       )}
     >
       <AccordionTrigger

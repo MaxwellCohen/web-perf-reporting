@@ -84,14 +84,12 @@ export function DataTableNoGrouping<T>({
         <div className="text-lg font-bold group-hover:underline">{toTitleCase(title)}</div>
       </AccordionTrigger>
       <AccordionContent>
-        <Table
-          style={{
-            width: table.getTotalSize(),
-          }}
-        >
-          <DataTableHeader table={table} />
-          <DataTableBody table={table} />
-        </Table>
+        <div className="w-full overflow-x-auto">
+          <Table className="w-full" style={{ width: '100%' }}>
+            <DataTableHeader table={table} />
+            <DataTableBody table={table} />
+          </Table>
+        </div>
       </AccordionContent>
     </AccordionItem>
   );
@@ -155,14 +153,12 @@ export function DataTableWithSubRows<T>({
           <div className="text-lg font-bold group-hover:underline">{toTitleCase(title)}</div>
         </AccordionTrigger>
         <AccordionContent>
-          <Table
-            style={{
-              width: table.getTotalSize(),
-            }}
-          >
-            <DataTableHeader table={table} />
-            <DataTableBody table={table} />
-          </Table>
+          <div className="w-full overflow-x-auto">
+            <Table className="w-full" style={{ width: '100%' }}>
+              <DataTableHeader table={table} />
+              <DataTableBody table={table} />
+            </Table>
+          </div>
         </AccordionContent>
       </AccordionItem>
     );
