@@ -35,7 +35,6 @@ export function CWVMetricsComponent() {
     };
   });
 
-  const title = items.find(({ cg }) => cg?.metrics?.title)?.cg?.metrics?.title;
   if(!items.length) {
     return null;
   }
@@ -43,9 +42,9 @@ export function CWVMetricsComponent() {
   return (
     <AccordionItem value={'cwv'} className="flex flex-col gap-2 print:border-0">
       <AccordionTrigger className="">
-        {title ? <h3 className="text-lg font-bold">{title}</h3> : null}
+        <h3 className="text-lg font-bold">Core Web Vitals Summary</h3>
       </AccordionTrigger>
-      <AccordionContent className="-mx-2 grid grid-cols-[repeat(auto-fit,_minmax(14rem,_1fr))] gap-2">
+      <AccordionContent className="-mx-2 grid grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] gap-2">
         {metricItems.map(({ auditName, title, auditItems, description }) => {
           return (
             <Card

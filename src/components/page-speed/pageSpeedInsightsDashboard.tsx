@@ -19,6 +19,7 @@ import { boolean } from 'drizzle-orm/mysql-core';
 import { CopyButton } from '@/components/ui/copy-button';
 import { NetworkMetricsComponent } from '@/components/page-speed/NetworkMeterics';
 import { JavaScriptPerformanceComponent } from '@/components/page-speed/javascript-metrics/JavaScriptPerformanceComponent';
+import { RecommendationsSection } from '@/components/page-speed/RecommendationsSection';
 
 const loadingExperiences = [
   { title: 'Page Loading Experience', experienceKey: 'loadingExperience' },
@@ -113,6 +114,7 @@ export function PageSpeedInsightsDashboard({
           <EntitiesTable />
           <NetworkMetricsComponent />
           <JavaScriptPerformanceComponent />
+          <RecommendationsSection />
         </Accordion>
         <div className="items-bottom flex flex-row justify-between gap-4 px-3 py-4">
           <div className="flex flex-col">
