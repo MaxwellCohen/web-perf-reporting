@@ -50,16 +50,41 @@ export function TimelineCard({ metrics }: TimelineCardProps) {
     const rows: TimelineRow[] = [];
     const eventDataMap = new Map<string, { [reportLabel: string]: number | undefined }>();
     
-    // Collect all event data
+    // Events that should account for TTFB (show time after first byte)
+    const eventsWithTTFB = new Set([
+      'DOM Content Loaded',
+      'Load',
+      'First Paint',
+      'FCP (Observed)',
+      'LCP (Observed)',
+    ]);
+    
+    // Collect all event data, adjusting times relative to Navigation Start
     metrics.forEach((metric) => {
+      const ttfb = metric.ttfb ?? 0;
+      
       Object.entries(eventMap).forEach(([eventLabel, propKey]) => {
-        const value = metric[propKey as keyof typeof metric] as number | undefined;
-        if (value !== undefined) {
+        const rawValue = metric[propKey as keyof typeof metric] as number | undefined;
+        if (rawValue !== undefined) {
           if (!eventDataMap.has(eventLabel)) {
             eventDataMap.set(eventLabel, {});
           }
           const eventData = eventDataMap.get(eventLabel)!;
-          eventData[metric.label] = value;
+          
+          // Navigation Start is always 0
+          if (eventLabel === 'Navigation Start') {
+            eventData[metric.label] = 0;
+          } else if (eventLabel === 'TTFB') {
+            // TTFB is already a relative value (duration from navigation start), so use it as-is
+            eventData[metric.label] = rawValue;
+          } else if (eventsWithTTFB.has(eventLabel)) {
+            // These events account for TTFB: show time after first byte was received
+            // Subtract both navigation start and TTFB to get time after first byte
+            eventData[metric.label] = rawValue + ttfb;
+          } else {
+            // All other events are absolute timestamps, subtract navigation start to get relative time
+            eventData[metric.label] = rawValue;
+          }
         }
       });
     });
