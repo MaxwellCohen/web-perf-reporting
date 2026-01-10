@@ -110,12 +110,7 @@ export function PageSpeedInsightsDashboard({
           ))}
           <CWVMetricsComponent />
           <RenderFilmStrip />
-          <EntitiesTable
-            entities={
-              data?.find((e) => e?.lighthouseResult?.entities)?.lighthouseResult
-                ?.entities
-            }
-          />
+          <EntitiesTable />
           <NetworkMetricsComponent />
           <JavaScriptPerformanceComponent />
         </Accordion>
