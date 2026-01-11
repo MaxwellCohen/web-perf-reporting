@@ -20,6 +20,7 @@ import { CopyButton } from '@/components/ui/copy-button';
 import { NetworkMetricsComponent } from '@/components/page-speed/NetworkMeterics';
 import { JavaScriptPerformanceComponent } from '@/components/page-speed/javascript-metrics/JavaScriptPerformanceComponent';
 import { RecommendationsSection } from '@/components/page-speed/RecommendationsSection';
+import { RenderNetworkDependencyTree } from '@/components/page-speed/lh-categories/table/RenderNetworkDependencyTree';
 
 const loadingExperiences = [
   { title: 'Page Loading Experience', experienceKey: 'loadingExperience' },
@@ -113,6 +114,7 @@ export function PageSpeedInsightsDashboard({
           <RenderFilmStrip />
           <EntitiesTable />
           <NetworkMetricsComponent />
+          <RenderNetworkDependencyTree />
           <JavaScriptPerformanceComponent />
           <RecommendationsSection />
         </Accordion>

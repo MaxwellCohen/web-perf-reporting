@@ -7,9 +7,51 @@ import { ChevronRight } from 'lucide-react';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
-const treeVariants = cva(
-  'group hover:before:opacity-100 before:absolute before:rounded-lg before:left-0 px-2 before:w-full before:opacity-0 before:bg-accent/70 before:h-[2rem] before:-z-10 before:[bg] relative',
-);
+// Tree marker SVG components matching Lighthouse style
+// Each marker is 12px wide (w-3 = 12px) and 26px tall
+const TreeMarker = {
+  horizDown: () => (
+    <span 
+      className="inline-block w-3 h-6.5 bg-no-repeat bg-top-left float-left"
+      style={{
+        backgroundImage: `url("data:image/svg+xml;utf8,<svg width='16' height='26' viewBox='0 0 16 26' xmlns='http://www.w3.org/2000/svg'><g fill='%23D8D8D8' fill-rule='evenodd'><path d='M16 12v2H-2v-2z'/><path d='M9 12v14H7V12z'/></g></svg>")`,
+      }}
+    />
+  ),
+  right: () => (
+    <span 
+      className="inline-block w-3 h-6.5 bg-no-repeat bg-top-left float-left"
+      style={{
+        backgroundImage: `url("data:image/svg+xml;utf8,<svg width='16' height='26' viewBox='0 0 16 26' xmlns='http://www.w3.org/2000/svg'><path d='M16 12v2H0v-2z' fill='%23D8D8D8' fill-rule='evenodd'/></svg>")`,
+      }}
+    />
+  ),
+  upRight: () => (
+    <span 
+      className="inline-block w-3 h-6.5 bg-no-repeat bg-top-left float-left"
+      style={{
+        backgroundImage: `url("data:image/svg+xml;utf8,<svg width='16' height='26' viewBox='0 0 16 26' xmlns='http://www.w3.org/2000/svg'><path d='M7 0h2v14H7zm2 12h7v2H9z' fill='%23D8D8D8' fill-rule='evenodd'/></svg>")`,
+      }}
+    />
+  ),
+  vertRight: () => (
+    <span 
+      className="inline-block w-3 h-6.5 bg-no-repeat bg-top-left float-left"
+      style={{
+        backgroundImage: `url("data:image/svg+xml;utf8,<svg width='16' height='26' viewBox='0 0 16 26' xmlns='http://www.w3.org/2000/svg'><path d='M7 0h2v27H7zm2 12h7v2H9z' fill='%23D8D8D8' fill-rule='evenodd'/></svg>")`,
+      }}
+    />
+  ),
+  vert: () => (
+    <span 
+      className="inline-block w-3 h-6.5 bg-no-repeat bg-top-left float-left"
+      style={{
+        backgroundImage: `url("data:image/svg+xml;utf8,<svg width='16' height='26' viewBox='0 0 16 26' xmlns='http://www.w3.org/2000/svg'><path d='M7 0h2v26H7z' fill='%23D8D8D8' fill-rule='evenodd'/></svg>")`,
+      }}
+    />
+  ),
+  empty: () => <span className="inline-block w-3 h-6.5 float-left" />,
+};
 
 const selectedTreeVariants = cva(
   'before:opacity-100 before:bg-accent/70 text-accent-foreground',
@@ -30,6 +72,7 @@ interface TreeDataItem {
   onClick?: () => void;
   draggable?: boolean;
   droppable?: boolean;
+  isRoot?: boolean;
 }
 
 type TreeProps = React.HTMLAttributes<HTMLDivElement> & {
@@ -90,6 +133,26 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
     );
 
     const expandedItemIds = React.useMemo(() => {
+      if (expandAll) {
+        // Collect all item IDs when expandAll is true
+        const ids: string[] = [];
+        function collectAllIds(items: TreeDataItem[] | TreeDataItem) {
+          if (items instanceof Array) {
+            items.forEach((item) => {
+              if (item.children) {
+                ids.push(item.id);
+                collectAllIds(item.children);
+              }
+            });
+          } else if (items.children) {
+            ids.push(items.id);
+            collectAllIds(items.children);
+          }
+        }
+        collectAllIds(data);
+        return ids;
+      }
+
       if (!initialSelectedItemId) {
         return [] as string[];
       }
@@ -103,12 +166,12 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
         if (items instanceof Array) {
           for (let i = 0; i < items.length; i++) {
             ids.push(items[i]!.id);
-            if (walkTreeItems(items[i]!, targetId) && !expandAll) {
+            if (walkTreeItems(items[i]!, targetId)) {
               return true;
             }
-            if (!expandAll) ids.pop();
+            ids.pop();
           }
-        } else if (!expandAll && items.id === targetId) {
+        } else if (items.id === targetId) {
           return true;
         } else if (items.children) {
           return walkTreeItems(items.children, targetId);
@@ -134,7 +197,7 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
           draggedItem={draggedItem}
           {...props}
         />
-        <div className="h-[48px] w-full"></div>
+        <div className="h-12 w-full"></div>
       </div>
     );
   },
@@ -152,6 +215,51 @@ type TreeItemProps = TreeProps & {
   draggedItem: TreeDataItem | null;
 };
 
+// Helper function to generate tree markers based on Lighthouse pattern
+// treeMarkers: boolean array where true = parent has siblings after (needs vertical line)
+// This matches the Lighthouse crc-details-renderer.js pattern exactly
+function generateTreeMarkers(
+  treeMarkers: boolean[],
+  isLast: boolean,
+  hasChildren: boolean,
+): React.ReactNode[] {
+  const markers: React.ReactNode[] = [];
+  
+  // For each parent level: add vert (if has siblings) or empty, then always add empty spacer
+  // This creates the vertical lines that continue through parent levels
+  treeMarkers.forEach((separator, i) => {
+    if (separator) {
+      // Parent has siblings after it, so we need vertical continuation line
+      markers.push(<TreeMarker.vert key={`vert-${i}`} />);
+    } else {
+      // No siblings after parent, so empty space (no vertical line needed)
+      markers.push(<TreeMarker.empty key={`empty-${i}`} />);
+    }
+    // Always add an empty spacer marker after each level (matches Lighthouse pattern)
+    markers.push(<TreeMarker.empty key={`spacer-${i}`} />);
+  });
+  
+  // Add the connecting marker for this level
+  // Last child uses up-right (L shape), middle child uses vert-right (vertical then right)
+  if (isLast) {
+    markers.push(<TreeMarker.upRight key="connector" />);
+  } else {
+    markers.push(<TreeMarker.vertRight key="connector" />);
+  }
+  
+  // Always add horizontal right marker
+  markers.push(<TreeMarker.right key="right" />);
+  
+  // Add horiz-down if has children (shows vertical line continues), otherwise another right
+  if (hasChildren) {
+    markers.push(<TreeMarker.horizDown key="end" />);
+  } else {
+    markers.push(<TreeMarker.right key="end" />);
+  }
+  
+  return markers;
+}
+
 const TreeItem = React.forwardRef<HTMLDivElement, TreeItemProps>(
   (
     {
@@ -160,8 +268,6 @@ const TreeItem = React.forwardRef<HTMLDivElement, TreeItemProps>(
       selectedItemId,
       handleSelectChange,
       expandedItemIds,
-      defaultNodeIcon,
-      defaultLeafIcon,
       handleDragStart,
       handleDrop,
       draggedItem,
@@ -174,34 +280,36 @@ const TreeItem = React.forwardRef<HTMLDivElement, TreeItemProps>(
     }
     return (
       <div ref={ref} role="tree" className={className} {...props}>
-        <ul>
-          {data.map((item) => (
-            <li key={item.id}>
-              {item.children ? (
-                <TreeNode
-                  item={item}
-                  selectedItemId={selectedItemId}
-                  expandedItemIds={expandedItemIds}
-                  handleSelectChange={handleSelectChange}
-                  defaultNodeIcon={defaultNodeIcon}
-                  defaultLeafIcon={defaultLeafIcon}
-                  handleDragStart={handleDragStart}
-                  handleDrop={handleDrop}
-                  draggedItem={draggedItem}
-                />
-              ) : (
-                <TreeLeaf
-                  item={item}
-                  selectedItemId={selectedItemId}
-                  handleSelectChange={handleSelectChange}
-                  defaultLeafIcon={defaultLeafIcon}
-                  handleDragStart={handleDragStart}
-                  handleDrop={handleDrop}
-                  draggedItem={draggedItem}
-                />
-              )}
-            </li>
-          ))}
+        <ul className="list-none m-0 p-0">
+          {data.map((item, index) => {
+            const isLast = index === data.length - 1;
+            return item.children ? (
+              <TreeNode
+                key={item.id}
+                item={item}
+                selectedItemId={selectedItemId}
+                expandedItemIds={expandedItemIds}
+                handleSelectChange={handleSelectChange}
+                handleDragStart={handleDragStart}
+                handleDrop={handleDrop}
+                draggedItem={draggedItem}
+                treeMarkers={[]}
+                isLast={isLast}
+              />
+            ) : (
+              <TreeLeaf
+                key={item.id}
+                item={item}
+                selectedItemId={selectedItemId}
+                handleSelectChange={handleSelectChange}
+                handleDragStart={handleDragStart}
+                handleDrop={handleDrop}
+                draggedItem={draggedItem}
+                treeMarkers={[]}
+                isLast={isLast}
+              />
+            );
+          })}
         </ul>
       </div>
     );
@@ -214,50 +322,71 @@ const TreeNode = ({
   handleSelectChange,
   expandedItemIds,
   selectedItemId,
-  defaultNodeIcon,
-  defaultLeafIcon,
   handleDragStart,
   handleDrop,
   draggedItem,
+  treeMarkers = [],
+  isLast = false,
 }: {
   item: TreeDataItem;
   handleSelectChange: (item: TreeDataItem | undefined) => void;
   expandedItemIds: string[];
   selectedItemId?: string;
-  defaultNodeIcon?: any;
-  defaultLeafIcon?: any;
   handleDragStart?: (item: TreeDataItem) => void;
   handleDrop?: (item: TreeDataItem) => void;
   draggedItem: TreeDataItem | null;
+  treeMarkers?: boolean[];
+  isLast?: boolean;
 }) => {
-  const value = expandedItemIds.includes(item.id) ? [item.id] : [];
+  const isExpanded = expandedItemIds.includes(item.id);
+  const isLongest = item.name.includes("(Longest Chain)");
+  const hasChildren = !!(item.children && item.children.length > 0);
+  const markers = generateTreeMarkers(treeMarkers, isLast, hasChildren && isExpanded);
 
   return (
-    <>
-      <TreeIcon
-        item={item}
-        isSelected={selectedItemId === item.id}
-        isOpen={value.includes(item.id)}
-        default={defaultNodeIcon}
-      />
-      <span className="wrap-break-word text-sm">{item.name}</span>
-      <TreeActions isSelected={selectedItemId === item.id}>
-        {item.actions}
-      </TreeActions>
-      <div className="ml-4 border-l pl-1 overflow-hidden text-sm ">
-        <TreeItem
-          data={item.children ? item.children : item}
-          selectedItemId={selectedItemId}
-          handleSelectChange={handleSelectChange}
-          expandedItemIds={expandedItemIds}
-          defaultLeafIcon={defaultLeafIcon}
-          defaultNodeIcon={defaultNodeIcon}
-          handleDragStart={handleDragStart}
-          handleDrop={handleDrop}
-          draggedItem={draggedItem}
-        />
+    <div className="relative">
+      <div className={cn(
+        "flex items-center h-6.5 leading-6.5 whitespace-nowrap scroll-auto",
+        isLongest && "text-red-600 dark:text-red-400"
+      )}>
+        <span className="shrink-0">
+          {markers}
+        </span>
+        <span className={cn(
+          "ml-2.5 text-sm",
+          isLongest ? "font-bold" : ""
+        )}>
+          {item.name.replace("| (Longest Chain)", "")}
+        </span>
       </div>
-    </>
+      {item.children && isExpanded && (
+        <div className="relative">
+          <ul className="list-none m-0 p-0">
+            {item.children.map((child, index) => {
+              const ChildComponent = child.children ? TreeNode : TreeLeaf;
+              const childIsLast = index === item.children!.length - 1;
+              // Build new treeMarkers array: copy existing, add !isLast (true if has siblings after)
+              const newTreeMarkers = [...treeMarkers, !isLast];
+              return (
+                <li key={child.id} className="relative">
+                  <ChildComponent
+                    item={child}
+                    selectedItemId={selectedItemId}
+                    expandedItemIds={expandedItemIds}
+                    handleSelectChange={handleSelectChange}
+                    handleDragStart={handleDragStart}
+                    handleDrop={handleDrop}
+                    draggedItem={draggedItem}
+                    treeMarkers={newTreeMarkers}
+                    isLast={childIsLast}
+                  />
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -267,10 +396,11 @@ const TreeLeaf = React.forwardRef<
     item: TreeDataItem;
     selectedItemId?: string;
     handleSelectChange: (item: TreeDataItem | undefined) => void;
-    defaultLeafIcon?: any;
     handleDragStart?: (item: TreeDataItem) => void;
     handleDrop?: (item: TreeDataItem) => void;
     draggedItem: TreeDataItem | null;
+    treeMarkers?: boolean[];
+    isLast?: boolean;
   }
 >(
   (
@@ -279,15 +409,18 @@ const TreeLeaf = React.forwardRef<
       item,
       selectedItemId,
       handleSelectChange,
-      defaultLeafIcon,
       handleDragStart,
       handleDrop,
       draggedItem,
+      treeMarkers = [],
+      isLast = false,
       ...props
     },
     ref,
   ) => {
     const [isDragOver, setIsDragOver] = React.useState(false);
+    const isLongest = item.name.includes("(Longest Chain)");
+    const markers = generateTreeMarkers(treeMarkers, isLast, false);
 
     const onDragStart = (e: React.DragEvent) => {
       if (!item.draggable) {
@@ -323,12 +456,10 @@ const TreeLeaf = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          'ml-5 flex cursor-pointer items-center py-2 text-left before:right-1',
-          treeVariants(),
+          'flex items-center h-6.5 leading-6.5 whitespace-nowrap cursor-pointer',
           className,
           selectedItemId === item.id && selectedTreeVariants(),
           isDragOver && dragOverVariants(),
-          'after:absolute after:left-[-2rem] after:right-[100%] after:h-[2px] after:bg-muted/70',
         )}
         onClick={() => {
           handleSelectChange(item);
@@ -341,15 +472,15 @@ const TreeLeaf = React.forwardRef<
         onDrop={onDrop}
         {...props}
       >
-        <TreeIcon
-          item={item}
-          isSelected={selectedItemId === item.id}
-          default={defaultLeafIcon}
-        />
-        <span className="flex-grow truncate text-sm">{item.name}</span>
-        <TreeActions isSelected={selectedItemId === item.id}>
-          {item.actions}
-        </TreeActions>
+        <span className="shrink-0">
+          {markers}
+        </span>
+        <span className={cn(
+          "ml-2.5 text-xs",
+          isLongest ? "text-red-600 dark:text-red-400 font-bold" : ""
+        )}>
+          {item.name}
+        </span>
       </div>
     );
   },
@@ -393,45 +524,6 @@ const AccordionContent = React.forwardRef<
 ));
 AccordionContent.displayName = AccordionPrimitive.Content.displayName;
 
-const TreeIcon = ({
-  item,
-  isOpen,
-  isSelected,
-  default: defaultIcon,
-}: {
-  item: TreeDataItem;
-  isOpen?: boolean;
-  isSelected?: boolean;
-  default?: any;
-}) => {
-  let Icon = defaultIcon;
-  if (isSelected && item.selectedIcon) {
-    Icon = item.selectedIcon;
-  } else if (isOpen && item.openIcon) {
-    Icon = item.openIcon;
-  } else if (item.icon) {
-    Icon = item.icon;
-  }
-  return Icon ? <Icon className="mr-2 h-4 w-4 shrink-0" /> : <></>;
-};
-
-const TreeActions = ({
-  children,
-  isSelected,
-}: {
-  children: React.ReactNode;
-  isSelected: boolean;
-}) => {
-  return (
-    <div
-      className={cn(
-        isSelected ? 'block' : 'hidden',
-        'absolute right-3 group-hover:block',
-      )}
-    >
-      {children}
-    </div>
-  );
-};
+// TreeIcon and TreeActions removed - not used in Lighthouse-style tree
 
 export { TreeView, type TreeDataItem };

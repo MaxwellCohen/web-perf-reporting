@@ -12,6 +12,7 @@ import { RenderCriticalChainData } from '@/components/page-speed/lh-categories/t
 import { TableDataItem } from '@/components/page-speed/tsTable/TableDataItem';
 import { JSUsageAccordion } from '@/components/page-speed/JSUsage/JSUsageSection';
 import { useMemo } from 'react';
+import { RenderNetworkDependencyTree } from '@/components/page-speed/lh-categories/table/RenderNetworkDependencyTree';
 
 export function RenderDetails({ items }: { items: TableDataItem[] }) {
   const details = items.map((a) => a?.auditResult.details);
@@ -83,6 +84,25 @@ function RenderList({ rows }: { rows: TableDataItem[] }) {
       return null;
     }
 
+    // Check if any item contains a network-tree value
+    const hasNetworkTree = rows.some((row) => {
+      const details = row?.auditResult?.details as AuditDetailList;
+      const listItems = details?.items;
+      return listItems?.some(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (item: any) =>
+          item?.value &&
+          typeof item.value === 'object' &&
+          'type' in item.value &&
+          item.value.type === 'network-tree'
+      );
+    });
+
+    // If network-tree is found, render it directly
+    if (hasNetworkTree) {
+      return 'network-tree';
+    }
+
     // Transform and group items in a single pass
     const groupedItems: TableDataItem[][] = [];
 
@@ -109,7 +129,13 @@ function RenderList({ rows }: { rows: TableDataItem[] }) {
 
     return groupedItems;
   }, [rows]);
+  
   if (!items) return null;
+  
+  // Render network dependency tree if detected
+  if (items === 'network-tree') {
+    return <RenderNetworkDependencyTree />;
+  }
 
   return (
     <div>
