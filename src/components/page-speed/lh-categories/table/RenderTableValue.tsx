@@ -38,6 +38,17 @@ export function RenderTableValue({
 
   // First deal with the possible object forms of value.
   if (typeof value === 'object' && 'type' in value) {
+    // Log device validation for node types
+    if (value.type === 'node' && process.env.NODE_ENV === 'development') {
+      console.debug('[RenderTableValue] Passing device to NodeComponent:', {
+        device,
+        deviceType: typeof device,
+        hasDevice: !!device,
+        valueType: value.type,
+        lhId: (value as NodeValue).lhId,
+      });
+    }
+    
     // The value's type overrides the heading's for this column.
     const valueTypeMap = {
       code: () => <RenderCodeValue value={value as CodeValue} {...props} />,

@@ -8,7 +8,7 @@ import {
   TableColumnHeading,
   TableItem,
 } from '@/lib/schema';
-import { CSSProperties, Fragment, useMemo, useState, type ReactElement } from 'react';
+import { CSSProperties, Fragment, useMemo, useState, startTransition, type ReactElement } from 'react';
 import {
   ColumnDef,
   useReactTable,
@@ -19,6 +19,7 @@ import {
   getFilteredRowModel,
   getGroupedRowModel,
   getExpandedRowModel,
+  getFacetedMinMaxValues,
   VisibilityState,
   CellContext,
   RowData,
@@ -39,8 +40,10 @@ import {
 } from '@/components/ui/accordion';
 import { DataTableBody } from '@/components/page-speed/lh-categories/table/DataTableBody';
 import { DetailTableWith1ReportAndNoSubitem } from '@/components/page-speed/lh-categories/table/DetailTableWith1ReportAndNoSubitem';
+import { DetailTableSeparatePerReport } from '@/components/page-speed/lh-categories/table/DetailTableSeparatePerReport';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { useStandardTable } from '@/components/page-speed/shared/tableConfigHelpers';
+import { shouldShowSeparateTablesPerReport } from '@/components/page-speed/auditTableConfig';
 
 // Constants
 const GROUPABLE_VALUE_TYPES: ItemValueType[] = [
@@ -160,11 +163,29 @@ const renderDeviceValuePairs = (
   pairs: DeviceValuePair[],
   heading: TableColumnHeading | undefined,
 ): ReactElement => {
+  if (pairs.length === 0) {
+    return <></>;
+  }
+
+  // If there's only one device, show that device's name
+  if (pairs.length === 1) {
+    return (
+      <>
+        <RenderTableValue
+          value={pairs[0][1] as ItemValue}
+          heading={heading}
+          device={pairs[0][0]}
+        />
+        <span className="text-xs text-muted-foreground"> ({pairs[0][0]})</span>
+      </>
+    );
+  }
+
   // If all devices have the same value, show "All Devices"
   const firstValue = pairs[0]?.[1];
   const allSameValue = pairs.every(([, val]) => val === firstValue);
 
-  if (allSameValue && pairs.length > 0) {
+  if (allSameValue) {
     return (
       <>
         <RenderTableValue
@@ -236,9 +257,15 @@ const cell = (info: CellContext<DetailTableDataRow, unknown>) => {
   const key = info.column.id;
   const heading = info.column.columnDef.meta?.heading?.heading;
   const _userLabel = getUserLabel(info);
+  const rowDepth = info.row.depth;
+  // Show device label for sub-rows (depth > 0) in grouped tables, but not for the device column itself
+  const showDeviceLabel = rowDepth > 0 && _userLabel && key !== 'device';
 
   // Handle non-array values
   if (!Array.isArray(value)) {
+    if (showDeviceLabel) {
+      return renderValueWithLabel(value as ItemValue, heading, _userLabel, true);
+    }
     return (
       <RenderTableValue
         value={value as ItemValue}
@@ -255,6 +282,9 @@ const cell = (info: CellContext<DetailTableDataRow, unknown>) => {
 
   // Handle single-item arrays
   if (value.length === 1) {
+    if (showDeviceLabel) {
+      return renderValueWithLabel(value[0] as ItemValue, heading, _userLabel, true);
+    }
     return (
       <RenderTableValue
         value={value[0] as ItemValue}
@@ -468,7 +498,7 @@ export const makeColumnDef = (
         aggregatedCell: cell,
         enableGrouping: canGroup(valueType),
         enableHiding: true,
-        enableSorting: false,
+        enableSorting: canSort(valueType),
         ...setSizeSetting(valueType),
         aggregationFn: getAggregationFn(
           valueType,
@@ -501,7 +531,7 @@ export const makeColumnDef = (
           enableGrouping: canGroup(subValueType),
           ...setSizeSetting(subValueType),
           enableHiding: true,
-          enableSorting: false,
+          enableSorting: canSort(subValueType),
           aggregationFn: getAggregationFn(
             subValueType,
             subItemsHeadingKey,
@@ -577,7 +607,7 @@ function DeviceCell(info: CellContext<DetailTableDataRow, unknown>) {
 
 /**
  * Main component that routes to the appropriate table implementation
- * based on the data structure
+ * based on the data structure and audit configuration
  */
 export function DetailTable({
   rows,
@@ -593,6 +623,13 @@ export function DetailTable({
 
   if (!hasItems) {
     return null;
+  }
+
+  // Check if this audit should show separate tables per report
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const auditId = (rows[0]?.auditResult as any)?.id;
+  if (auditId && shouldShowSeparateTablesPerReport(auditId)) {
+    return <DetailTableSeparatePerReport rows={rows} title={title} />;
   }
 
   const showUserLabel = rows.length > 1;
@@ -885,13 +922,13 @@ const createColumnsFromHeadings = (
         header: 'Report type(s)',
         enableHiding: true,
         enableGrouping: false,
-        enableSorting: false,
+        enableSorting: true,
         aggregationFn: 'unique',
         size: DEVICE_COLUMN_SIZE,
         cell: DeviceCell,
         aggregatedCell: DeviceCell,
         meta: {
-          defaultVisibility: true,
+          defaultVisibility: false,
         },
       },
     );
@@ -949,7 +986,10 @@ const calculateDefaultGrouping = (
     }));
 
   if (groupingCandidates.length === 0) {
-    return showUserLabel ? ['device'] : [];
+    // Don't default to 'device' grouping if device column is hidden by default
+    const deviceColumn = columns.find((c) => c.id === 'device');
+    const deviceIsVisible = deviceColumn?.meta?.defaultVisibility !== false;
+    return showUserLabel && deviceIsVisible ? ['device'] : [];
   }
 
   const main = groupingCandidates.find((v) => v.rowType === 'main');
@@ -1024,9 +1064,10 @@ const renderTableCell = (
       data-grouped={`${cell.getIsGrouped()}`}
       data-aggregated={`${cell.getIsAggregated()}`}
       data-placeholder={`${cell.getIsPlaceholder()}`}
-      className="overflow-x-auto whitespace-pre-wrap"
+      className="overflow-x-auto whitespace-pre-wrap transition-all duration-300 ease-in-out"
       style={{
         width: `${cell.column.getSize()}px`,
+        viewTransitionName: `table-cell-${cell.id}`,
       }}
     >
       {cellEl}
@@ -1083,20 +1124,142 @@ function DetailTableFull({
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(defaultColumnVisibility);
 
+  // Wrap state updates in startTransition for smooth animations
+  const handleSortingChange = (updater: SortingState | ((old: SortingState) => SortingState)) => {
+    startTransition(() => {
+      setSorting(updater);
+    });
+  };
+
+  const handleGroupingChange = (updater: string[] | ((old: string[]) => string[])) => {
+    startTransition(() => {
+      setGrouping(updater);
+    });
+  };
+
+  const handleColumnVisibilityChange = (
+    updater: VisibilityState | ((old: VisibilityState) => VisibilityState),
+  ) => {
+    startTransition(() => {
+      setColumnVisibility(updater);
+    });
+  };
+
+  // Helper function to extract the actual value from a leaf row
+  // Leaf rows are not aggregated, so getValue should return the actual value
+  const getOriginalValue = (
+    leafRow: Row<DetailTableDataRow>,
+    columnId: string,
+  ): unknown => {
+    if (!columnId || columnId === 'expander' || columnId === 'device') {
+      return undefined;
+    }
+
+    try {
+      // For leaf rows, getValue should return the actual value (not aggregated)
+      return leafRow.getValue(columnId);
+    } catch {
+      return undefined;
+    }
+  };
+
+  // Create a memoized function to check if rows can expand
+  // This checks if leaf rows have different values
+  const getRowCanExpandFn = useMemo(() => {
+    return (row: Row<DetailTableDataRow>) => {
+      const leafRows = row.getLeafRows();
+      
+      // If there's only one or zero leaf rows, no expansion needed
+      if (leafRows.length <= 1) {
+        return false;
+      }
+
+      // Get all visible columns (excluding the expander and device columns)
+      const visibleColumns = columns.filter((col) => {
+        const colId = col.id;
+        if (!colId || colId === 'expander' || colId === 'device') return false;
+        // Column is visible if visibility is not explicitly set to false
+        return columnVisibility[colId] !== false;
+      });
+
+      // If no visible columns to compare, don't allow expansion
+      if (visibleColumns.length === 0) {
+        return false;
+      }
+
+      // Compare values across all visible columns using original data
+      for (const column of visibleColumns) {
+        const columnId = column.id;
+        if (!columnId) continue;
+        
+        const values = leafRows.map((leafRow) => {
+          try {
+            const value = getOriginalValue(leafRow, columnId);
+            // Normalize values for comparison (handle arrays, objects, etc.)
+            if (value === undefined || value === null) {
+              return null; // Normalize undefined and null to null for comparison
+            }
+            if (Array.isArray(value)) {
+              return JSON.stringify(value);
+            }
+            if (typeof value === 'object') {
+              return JSON.stringify(value);
+            }
+            return value;
+          } catch {
+            // If extraction fails, treat as null
+            return null;
+          }
+        });
+
+        // Check if all values are the same
+        if (values.length === 0) continue;
+        
+        const firstValue = values[0];
+        const allSame = values.every((val) => {
+          // Handle null cases (normalized undefined/null)
+          if (firstValue === null) {
+            return val === null;
+          }
+          if (val === null) {
+            return false;
+          }
+          // Deep equality check for objects/arrays (already stringified)
+          if (typeof firstValue === 'string' && typeof val === 'string') {
+            // Could be stringified objects/arrays, so compare directly
+            return firstValue === val;
+          }
+          // Direct comparison for primitives
+          return firstValue === val;
+        });
+
+        // If any column has different values, allow expansion
+        if (!allSame) {
+          return true;
+        }
+      }
+
+      // All columns have the same values across all leaf rows
+      return false;
+    };
+  }, [columns, columnVisibility]);
+
   const table = useReactTable({
     columns,
     data,
     getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
+    onSortingChange: handleSortingChange,
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onGroupingChange: setGrouping,
+    getFacetedMinMaxValues: getFacetedMinMaxValues(),
+    onGroupingChange: handleGroupingChange,
     getGroupedRowModel: getGroupedRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
-    getRowCanExpand: (row) => row.getLeafRows().length > 1,
-    onColumnVisibilityChange: setColumnVisibility,
+    getRowCanExpand: getRowCanExpandFn,
+    onColumnVisibilityChange: handleColumnVisibilityChange,
     columnResizeMode: 'onChange',
     manualPagination: true,
+    enableSorting: true,
     enableColumnFilters: true,
     enableColumnPinning: true,
     filterFns: {
@@ -1130,12 +1293,13 @@ function DetailTableFull({
                 <Fragment key={row.id}>
                   <TableRow
                     className={clsx(
-                      'border-x-(length:--border-width) bg-muted-foreground/10',
+                      'border-x-(length:--border-width) bg-muted-foreground/10 transition-all duration-300 ease-in-out',
                     )}
                     style={
                       {
                         '--border-width': `${row.depth / 4}rem`,
                         backgroundColor: `hsl(var(--muted-foreground) / ${row.depth / 10})`,
+                        viewTransitionName: `table-row-${row.id}`,
                       } as CSSProperties
                     }
                   >

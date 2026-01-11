@@ -10,6 +10,7 @@ import { ActionableStepsTable } from '@/components/page-speed/RecommendationsSec
 import { IssuesFoundTable } from '@/components/page-speed/RecommendationsSection/IssuesFoundTable';
 import { ResourcesTable } from '@/components/page-speed/RecommendationsSection/ResourcesTable';
 import type { Recommendation } from '@/components/page-speed/RecommendationsSection/types';
+import { shouldShowSeparateTablesPerReport } from '@/components/page-speed/auditTableConfig';
 
 interface RecommendationItemProps {
   rec: Recommendation;
@@ -74,41 +75,50 @@ export function RecommendationItem({ rec, items, priorityColors }: Recommendatio
             <h4 className="font-semibold text-sm mb-2">
               Issues Found:
             </h4>
-            {rec.tableData.itemsByReport && rec.tableData.itemsByReport.size > 0 ? (
-              // Render separate table for each report
-              Array.from(rec.tableData.itemsByReport.entries())
-                .sort(([labelA], [labelB]) => {
-                  // Sort: All Devices first, then Mobile, then Desktop
-                  if (labelA === 'All Devices' && labelB !== 'All Devices') return -1;
-                  if (labelA !== 'All Devices' && labelB === 'All Devices') return 1;
-                  const order = ['Mobile', 'Desktop'];
-                  const aIndex = order.findIndex(l => labelA.includes(l));
-                  const bIndex = order.findIndex(l => labelB.includes(l));
-                  if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
-                  if (aIndex !== -1) return -1;
-                  if (bIndex !== -1) return 1;
-                  return labelA.localeCompare(labelB);
-                })
-                .map(([reportLabel, reportItems]) => (
-                  <div key={reportLabel} className="mb-4">
-                    <h5 className="font-semibold text-xs mb-2 text-muted-foreground">
-                      {reportLabel}
-                    </h5>
-                    <IssuesFoundTable
-                      headings={rec.tableData!.headings}
-                      items={reportItems}
-                      device={reportLabel}
-                    />
-                  </div>
-                ))
-            ) : (
-              // Fallback to single table if itemsByReport is not available
-              <IssuesFoundTable
-                headings={rec.tableData.headings}
-                items={rec.tableData.items}
-                device={items[0]?.label || ''}
-              />
-            )}
+            {(() => {
+              // Extract audit ID from recommendation ID (format: `${auditId}-${metric}` or `${auditId}-failed`)
+              const auditId = rec.id.split('-').slice(0, -1).join('-');
+              const shouldShowSeparate = shouldShowSeparateTablesPerReport(auditId);
+              
+              // Only show separate tables per report if this audit is configured for it
+              if (shouldShowSeparate && rec.tableData.itemsByReport && rec.tableData.itemsByReport.size > 0) {
+                // Render separate table for each report
+                return Array.from(rec.tableData.itemsByReport.entries())
+                  .sort(([labelA], [labelB]) => {
+                    // Sort: All Devices first, then Mobile, then Desktop
+                    if (labelA === 'All Devices' && labelB !== 'All Devices') return -1;
+                    if (labelA !== 'All Devices' && labelB === 'All Devices') return 1;
+                    const order = ['Mobile', 'Desktop'];
+                    const aIndex = order.findIndex(l => labelA.includes(l));
+                    const bIndex = order.findIndex(l => labelB.includes(l));
+                    if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+                    if (aIndex !== -1) return -1;
+                    if (bIndex !== -1) return 1;
+                    return labelA.localeCompare(labelB);
+                  })
+                  .map(([reportLabel, reportItems]) => (
+                    <div key={reportLabel} className="mb-4">
+                      <h5 className="font-semibold text-xs mb-2 text-muted-foreground">
+                        {reportLabel}
+                      </h5>
+                      <IssuesFoundTable
+                        headings={rec.tableData!.headings}
+                        items={reportItems}
+                        device={reportLabel}
+                      />
+                    </div>
+                  ));
+              }
+              
+              // Fallback to single combined table
+              return (
+                <IssuesFoundTable
+                  headings={rec.tableData.headings}
+                  items={rec.tableData.items}
+                  device={items[0]?.label || ''}
+                />
+              );
+            })()}
           </div>
         )}
         {rec.items && rec.items.length > 0 && (

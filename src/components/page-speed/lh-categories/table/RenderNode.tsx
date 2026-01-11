@@ -23,6 +23,15 @@ export function NodeComponent({
   item: NodeValue;
   device: string;
 }) {
+  
+    console.debug('[NodeComponent] Received device:', {
+      device,
+      deviceType: typeof device,
+      hasDevice: !!device,
+      lhId: item?.lhId,
+      nodeLabel: item?.nodeLabel,
+    });
+  
   return (
     <div className="flex flex-col gap-2">
       <div className="grid gap-2 md:grid-cols-[auto_auto]">
@@ -54,16 +63,168 @@ export function RenderNodeImage({
   imageSize?: number;
 }) {
   const screenshotData = useContext(fullPageScreenshotContext);
-  console.log(screenshotData, device);
-  const fullPageScreenshot = screenshotData?.[device];
+  
+  // Validate device prop and log available options
+    const availableKeys = Object.keys(screenshotData || {});
+    console.debug('[RenderNodeImage] Device validation:', {
+      receivedDevice: device,
+      deviceType: typeof device,
+      deviceLength: device?.length,
+      availableScreenshotKeys: availableKeys,
+      hasScreenshotData: !!screenshotData,
+      screenshotDataKeys: screenshotData ? Object.keys(screenshotData) : [],
+      directMatch: device ? !!screenshotData?.[device] : false,
+    });
+  
+  // Try to find the screenshot by matching device label
+  // Device might be "Mobile", "Desktop", or a full label like "Mobile Report"
+  let fullPageScreenshot = screenshotData?.[device];
+  let matchedDeviceKey = device;
+  
+  // If not found, try to find by partial match
+  if (!fullPageScreenshot && device) {
+    const deviceKey = Object.keys(screenshotData || {}).find((key) => {
+      // Check if device is contained in key or vice versa
+      const normalizedDevice = device.toLowerCase().trim();
+      const normalizedKey = key.toLowerCase().trim();
+      // Also try matching just the first word (e.g., "Mobile" from "Mobile Report")
+      const deviceFirstWord = normalizedDevice.split(/\s+/)[0];
+      const keyFirstWord = normalizedKey.split(/\s+/)[0];
+      return (
+        normalizedKey.includes(normalizedDevice) ||
+        normalizedDevice.includes(normalizedKey) ||
+        deviceFirstWord === keyFirstWord
+      );
+    });
+    if (deviceKey) {
+      fullPageScreenshot = screenshotData?.[deviceKey];
+      matchedDeviceKey = deviceKey;
+      
+        console.debug('[RenderNodeImage] Found partial match:', {
+          originalDevice: device,
+          matchedKey: deviceKey,
+        });
+        
+    } else {
+      console.debug('[RenderNodeImage] No partial match found:', {
+        device,
+        availableKeys: Object.keys(screenshotData || {}),
+      });
+    }
+  }
+  
+  // If still not found, try to get the first available screenshot
+  if (!fullPageScreenshot && screenshotData) {
+    const firstKey = Object.keys(screenshotData)[0];
+    fullPageScreenshot = screenshotData[firstKey];
+    matchedDeviceKey = firstKey;
+    if (true) {
+      console.debug('[RenderNodeImage] Using first available screenshot as fallback:', {
+        originalDevice: device,
+        fallbackKey: firstKey,
+      });
+    }
+  }
 
-  if (!fullPageScreenshot || !item?.boundingRect || !item?.lhId) {
+  // Check if we have the required data
+  if (!fullPageScreenshot || !item?.lhId) {
+    if (true) {
+      console.debug('[RenderNodeImage] Missing data:', {
+        hasScreenshot: !!fullPageScreenshot,
+        hasLhId: !!item?.lhId,
+        device,
+        matchedDeviceKey,
+        availableKeys: Object.keys(screenshotData || {}),
+      });
+    }
     return null;
   }
+
+  // Check if screenshot data exists
+  if (!fullPageScreenshot.screenshot || !fullPageScreenshot.screenshot.data) {
+    if (true) {
+      console.debug('[RenderNodeImage] Missing screenshot data:', {
+        hasScreenshot: !!fullPageScreenshot.screenshot,
+        hasData: !!fullPageScreenshot.screenshot?.data,
+      });
+    }
+    return null;
+  }
+
+  // Get the node rect from the fullPageScreenshot
+  let nodeRect = fullPageScreenshot.nodes?.[item.lhId];
+  
+  // If node rect doesn't exist in screenshot data, try to use boundingRect from item as fallback
+  if ((!nodeRect || nodeRect.width === 0 || nodeRect.height === 0) && item.boundingRect) {
+    if (true) {
+      console.debug('[RenderNodeImage] Using boundingRect from item as fallback:', {
+        hasNodeRect: !!nodeRect,
+        hasBoundingRect: !!item.boundingRect,
+        lhId: item.lhId,
+      });
+    }
+    nodeRect = item.boundingRect;
+  }
+  
+  // If node rect still doesn't exist or has invalid dimensions, show full screenshot as fallback
+  if (!nodeRect || nodeRect.width === 0 || nodeRect.height === 0) {
+    if (true) {
+      console.debug('[RenderNodeImage] Node rect missing or invalid, showing full screenshot fallback:', {
+        hasNodeRect: !!nodeRect,
+        nodeRectWidth: nodeRect?.width,
+        nodeRectHeight: nodeRect?.height,
+        hasBoundingRect: !!item.boundingRect,
+        lhId: item.lhId,
+        availableNodeIds: Object.keys(fullPageScreenshot.nodes || {}),
+      });
+    }
+    // Fallback: show full screenshot thumbnail if node rect is missing
+    const screenshot = fullPageScreenshot.screenshot;
+    const aspectRatio = screenshot.width / screenshot.height;
+    const displayHeight = Math.min(imageSize, screenshot.height);
+    const displayWidth = displayHeight * aspectRatio;
+    
+    return (
+      <Dialog>
+        <DialogTrigger>
+          <div className="flex cursor-pointer items-center justify-center overflow-hidden rounded border border-gray-300 transition-transform hover:scale-110 hover:shadow-md">
+            <img
+              src={screenshot.data}
+              alt="Screenshot"
+              style={{
+                width: `${displayWidth}px`,
+                height: `${displayHeight}px`,
+                objectFit: 'contain',
+              }}
+            />
+          </div>
+        </DialogTrigger>
+        <DialogContent className="h-full w-screen max-w-none justify-center md:w-[74vw]">
+          <DialogTitle>Screenshot</DialogTitle>
+          <div className="flex items-center justify-center">
+            <img
+              src={screenshot.data}
+              alt="Full screenshot"
+              style={{
+                maxWidth: '100%',
+                height: 'auto',
+              }}
+            />
+          </div>
+          <DialogClose asChild>
+            <Button className="w-17" autoFocus>
+              close
+            </Button>
+          </DialogClose>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <ElementScreenshotRenderer
       screenshot={fullPageScreenshot.screenshot}
-      elementRects={[fullPageScreenshot.nodes[item.lhId]]}
+      elementRects={[nodeRect]}
       maxThumbnailSize={{ width: imageSize, height: imageSize }}
     />
   );
@@ -388,18 +549,64 @@ const RenderThumbnails = memo(function RThumbnails({
   elementRects = [],
   maxThumbnailSize = { width: 120, height: 80 },
 }: ElementScreenshotRendererProps) {
-  return elementRects.map((rect, index) => (
-    <div
-      key={index}
-      className="overflow-hidden rounded border border-gray-300 transition-transform"
-    >
-      <ElementScreenshot
-        screenshot={screenshot}
-        elementRect={rect}
-        maxRenderSize={maxThumbnailSize}
-      />
-    </div>
-  ));
+  const aspectRatio = screenshot.width / screenshot.height;
+  const displayHeight = Math.min(maxThumbnailSize.height, screenshot.height);
+  const displayWidth = displayHeight * aspectRatio;
+  
+  const thumbnails = elementRects.map((rect, index) => {
+    // Check if the rect overlaps with the screenshot before trying to render
+    if (!screenshotOverlapsRect(screenshot, rect)) {
+      // Show full screenshot as fallback when rect doesn't overlap
+      return (
+        <div
+          key={index}
+          className="overflow-hidden rounded border border-gray-300 transition-transform"
+        >
+          <img
+            src={screenshot.data}
+            alt="Screenshot"
+            style={{
+              width: `${displayWidth}px`,
+              height: `${displayHeight}px`,
+              objectFit: 'contain',
+            }}
+          />
+        </div>
+      );
+    }
+    
+    return (
+      <div
+        key={index}
+        className="overflow-hidden rounded border border-gray-300 transition-transform"
+      >
+        <ElementScreenshot
+          screenshot={screenshot}
+          elementRect={rect}
+          maxRenderSize={maxThumbnailSize}
+        />
+      </div>
+    );
+  });
+  
+  // If no element rects provided, show at least the full screenshot
+  if (elementRects.length === 0) {
+    return (
+      <div className="overflow-hidden rounded border border-gray-300 transition-transform">
+        <img
+          src={screenshot.data}
+          alt="Screenshot"
+          style={{
+            width: `${displayWidth}px`,
+            height: `${displayHeight}px`,
+            objectFit: 'contain',
+          }}
+        />
+      </div>
+    );
+  }
+  
+  return <>{thumbnails}</>;
 });
 
 /**
