@@ -145,8 +145,10 @@ export function NetworkMetricsComponent() {
           <NetworkRequestsSummaryCard stats={networkStats} />
           <TimingMetricsCard metrics={networkMetrics} />
           <TimelineCard metrics={networkMetrics} />
-          <NetworkRTTCard metrics={networkMetrics.map(({ label, networkRTT }) => ({ label, networkRTT }))} />
-          <ServerLatencyCard metrics={networkMetrics.map(({ label, serverLatency }) => ({ label, serverLatency }))} />
+          <div className="w-full md:col-span-2 lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <NetworkRTTCard metrics={networkMetrics.map(({ label, networkRTT }) => ({ label, networkRTT }))} />
+            <ServerLatencyCard metrics={networkMetrics.map(({ label, serverLatency }) => ({ label, serverLatency }))} />
+          </div>
           <ResourceTypeBreakdownCard stats={networkStats.map(({ label, byResourceType }) => ({ label, byResourceType }))} />
           <TopResourcesCard stats={networkStats.map(({ label, topResources }) => ({ label, topResources: topResources || [] }))} />
         </div>
