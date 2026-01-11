@@ -53,6 +53,13 @@ export function NetworkMetricsComponent() {
       const observedFirstContentfulPaint = typeof metricsDetails?.observedFirstContentfulPaint === 'number' ? metricsDetails.observedFirstContentfulPaint : undefined;
       const observedLargestContentfulPaint = typeof metricsDetails?.observedLargestContentfulPaint === 'number' ? metricsDetails.observedLargestContentfulPaint : undefined;
       
+      // Extract additional metrics for timeline
+      const observedFirstContentfulPaintAllFrames = typeof metricsDetails?.observedFirstContentfulPaintAllFrames === 'number' ? metricsDetails.observedFirstContentfulPaintAllFrames : undefined;
+      const observedFirstVisualChange = typeof metricsDetails?.observedFirstVisualChange === 'number' ? metricsDetails.observedFirstVisualChange : undefined;
+      const observedLargestContentfulPaintAllFrames = typeof metricsDetails?.observedLargestContentfulPaintAllFrames === 'number' ? metricsDetails.observedLargestContentfulPaintAllFrames : undefined;
+      const observedLastVisualChange = typeof metricsDetails?.observedLastVisualChange === 'number' ? metricsDetails.observedLastVisualChange : undefined;
+      const observedTraceEnd = typeof metricsDetails?.observedTraceEnd === 'number' ? metricsDetails.observedTraceEnd : undefined;
+      
       return {
         label,
         ttfb: ttfbFromMetrics || ttfb?.percentile,
@@ -72,6 +79,11 @@ export function NetworkMetricsComponent() {
         observedFirstPaint,
         observedFirstContentfulPaint,
         observedLargestContentfulPaint,
+        observedFirstContentfulPaintAllFrames,
+        observedFirstVisualChange,
+        observedLargestContentfulPaintAllFrames,
+        observedLastVisualChange,
+        observedTraceEnd,
         networkRequests: networkRequestsDetails?.items || [],
         networkRTT: networkRTTDetails?.items || [],
         serverLatency: serverLatencyDetails?.items || [],

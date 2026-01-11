@@ -37,8 +37,7 @@ type TimingMetricsCardProps = {
 
 export function TimingMetricsCard({ metrics }: TimingMetricsCardProps) {
   const validMetrics = metrics.filter(m => m.ttfb !== undefined || m.fcp !== undefined || m.lcp !== undefined || 
-    m.speedIndex !== undefined || m.totalBlockingTime !== undefined ||
-    m.domContentLoaded !== undefined || m.loadTime !== undefined || m.interactive !== undefined);
+    m.speedIndex !== undefined || m.totalBlockingTime !== undefined || m.inp !== undefined);
   
   if (!validMetrics.length) {
     return null;
@@ -49,13 +48,15 @@ export function TimingMetricsCard({ metrics }: TimingMetricsCardProps) {
   const renderValue = (value: number | undefined, category?: string) => {
     if (value === undefined) return <span className="text-muted-foreground">N/A</span>;
     return (
-      <div className="flex items-center gap-2">
-        <RenderMSValue value={value} />
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="whitespace-nowrap">
+          <RenderMSValue value={value} />
+        </span>
         {category && (
-          <span className={`text-xs px-2 py-0.5 rounded ${
-            category === 'FAST' ? 'bg-green-100 text-green-800' :
-            category === 'AVERAGE' ? 'bg-yellow-100 text-yellow-800' :
-            'bg-red-100 text-red-800'
+          <span className={`text-xs px-2 py-0.5 rounded-full ${
+            category === 'FAST' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+            category === 'AVERAGE' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+            'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
           }`}>
             {category}
           </span>
@@ -72,19 +73,16 @@ export function TimingMetricsCard({ metrics }: TimingMetricsCardProps) {
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
-          <Table>
+          <Table className="table-auto">
             <TableHeader>
               <TableRow>
-                {showReportColumn && <TableHead>Report</TableHead>}
-                <TableHead>TTFB</TableHead>
-                <TableHead>FCP</TableHead>
-                <TableHead>LCP</TableHead>
-                <TableHead>INP</TableHead>
-                <TableHead>Speed Index</TableHead>
-                <TableHead>TBT</TableHead>
-                <TableHead>DOM Content Loaded</TableHead>
-                <TableHead>Load Time</TableHead>
-                <TableHead>Time to Interactive</TableHead>
+                {showReportColumn && <TableHead className="min-w-20">Report</TableHead>}
+                <TableHead className="min-w-35">TTFB</TableHead>
+                <TableHead className="min-w-35">FCP</TableHead>
+                <TableHead className="min-w-35">LCP</TableHead>
+                <TableHead className="min-w-35">INP</TableHead>
+                <TableHead className="min-w-35">Speed Index</TableHead>
+                <TableHead className="min-w-30">TBT</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -99,10 +97,7 @@ export function TimingMetricsCard({ metrics }: TimingMetricsCardProps) {
                 inp,
                 inpCategory,
                 speedIndex,
-                totalBlockingTime,
-                domContentLoaded,
-                loadTime,
-                interactive
+                totalBlockingTime
               }) => (
                 <TableRow key={label}>
                   {showReportColumn && <TableCell className="font-medium">{label || 'Unknown'}</TableCell>}
@@ -112,9 +107,6 @@ export function TimingMetricsCard({ metrics }: TimingMetricsCardProps) {
                   <TableCell>{renderValue(inp, inpCategory)}</TableCell>
                   <TableCell>{renderValue(speedIndex)}</TableCell>
                   <TableCell>{renderValue(totalBlockingTime)}</TableCell>
-                  <TableCell>{renderValue(domContentLoaded)}</TableCell>
-                  <TableCell>{renderValue(loadTime)}</TableCell>
-                  <TableCell>{renderValue(interactive)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

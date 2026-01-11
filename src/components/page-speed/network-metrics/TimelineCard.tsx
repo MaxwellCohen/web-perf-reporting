@@ -26,6 +26,11 @@ type TimelineCardProps = {
     observedFirstPaint?: number;
     observedFirstContentfulPaint?: number;
     observedLargestContentfulPaint?: number;
+    observedFirstContentfulPaintAllFrames?: number;
+    observedFirstVisualChange?: number;
+    observedLargestContentfulPaintAllFrames?: number;
+    observedLastVisualChange?: number;
+    observedTraceEnd?: number;
   }>;
 };
 
@@ -37,13 +42,18 @@ export function TimelineCard({ metrics }: TimelineCardProps) {
       'Navigation Start': 'observedNavigationStart',
       'TTFB': 'ttfb',
       'First Paint': 'observedFirstPaint',
+      'First Visual Change': 'observedFirstVisualChange',
       'FCP': 'fcp',
       'FCP (Observed)': 'observedFirstContentfulPaint',
+      'FCP (All Frames)': 'observedFirstContentfulPaintAllFrames',
       'LCP': 'lcp',
       'LCP (Observed)': 'observedLargestContentfulPaint',
+      'LCP (All Frames)': 'observedLargestContentfulPaintAllFrames',
       'DOM Content Loaded': 'domContentLoaded',
       'Load': 'loadTime',
+      'Last Visual Change': 'observedLastVisualChange',
       'Interactive': 'interactive',
+      'Trace End': 'observedTraceEnd',
     };
     
     const reportLabels = metrics.map(m => m.label);
@@ -55,12 +65,18 @@ export function TimelineCard({ metrics }: TimelineCardProps) {
       'DOM Content Loaded',
       'Load',
       'First Paint',
+      'First Visual Change',
       'FCP (Observed)',
+      'FCP (All Frames)',
       'LCP (Observed)',
+      'LCP (All Frames)',
+      'Last Visual Change',
+      'Trace End',
     ]);
     
     // Collect all event data, adjusting times relative to Navigation Start
     metrics.forEach((metric) => {
+      // const navigationStart = metric.observedNavigationStart ?? 0;
       const ttfb = metric.ttfb ?? 0;
       
       Object.entries(eventMap).forEach(([eventLabel, propKey]) => {
@@ -98,18 +114,36 @@ export function TimelineCard({ metrics }: TimelineCardProps) {
       rows.push(row);
     });
     
+    // Sort rows by first report's time value
+    if (reportLabels.length > 0) {
+      const firstReportLabel = reportLabels[0];
+      rows.sort((a, b) => {
+        const aValue = a[firstReportLabel] as number | undefined;
+        const bValue = b[firstReportLabel] as number | undefined;
+        if (aValue === undefined && bValue === undefined) return 0;
+        if (aValue === undefined) return 1;
+        if (bValue === undefined) return -1;
+        return aValue - bValue;
+      });
+    }
+    
     // Event descriptions for tooltips
     const eventDescriptions: { [key: string]: string } = {
       'Navigation Start': 'The time when the browser starts navigating to the page. This is the earliest timestamp in the navigation timing API.',
       'TTFB': 'Time to First Byte - The time between when the user requests a page and when the first byte of the response is received from the server.',
       'First Paint': 'The time when the browser first renders any visual content (pixels) to the screen. This includes background colors, borders, or any visual change.',
+      'First Visual Change': 'The time when the first visual change occurs on the page, marking the beginning of visual rendering.',
       'FCP': 'First Contentful Paint - The time when the browser renders the first bit of content from the DOM, such as text, an image, or a canvas element.',
       'FCP (Observed)': 'First Contentful Paint (Observed) - The observed FCP value from the Performance Observer API, which may differ slightly from the calculated FCP.',
+      'FCP (All Frames)': 'First Contentful Paint (All Frames) - The observed FCP value across all frames, including iframes.',
       'LCP': 'Largest Contentful Paint - The render time of the largest image or text block visible within the viewport.',
       'LCP (Observed)': 'Largest Contentful Paint (Observed) - The observed LCP value from the Performance Observer API, which tracks the largest content element as it loads.',
+      'LCP (All Frames)': 'Largest Contentful Paint (All Frames) - The observed LCP value across all frames, including iframes.',
       'DOM Content Loaded': 'The time when the HTML document has been completely loaded and parsed, without waiting for stylesheets, images, and subframes to finish loading.',
       'Load': 'The time when the page and all its resources (images, stylesheets, scripts) have finished loading.',
+      'Last Visual Change': 'The time when the last visual change occurs on the page, marking the end of visual rendering.',
       'Interactive': 'Time to Interactive - The time when the page becomes fully interactive, meaning the main thread is idle enough to handle user input.',
+      'Trace End': 'The time when the performance trace ends, marking the completion of the performance measurement.',
     };
     
     // Create columns
@@ -118,7 +152,11 @@ export function TimelineCard({ metrics }: TimelineCardProps) {
     const tableColumns: ColumnDef<TimelineRow, any>[] = [
       columnHelper.accessor('event', {
         id: 'event',
-        header: 'Event',
+        header: () => (
+          <span title="Performance events observed during page load, sorted by time">
+            Event
+          </span>
+        ),
         enableSorting: true,
         enableResizing: true,
         cell: (info) => {

@@ -9,6 +9,7 @@ import { UnusedJavaScriptCard } from "@/components/page-speed/javascript-metrics
 import { UnminifiedJavaScriptCard } from "@/components/page-speed/javascript-metrics/UnminifiedJavaScriptCard";
 import { LegacyJavaScriptCard } from "@/components/page-speed/javascript-metrics/LegacyJavaScriptCard";
 import { JavaScriptSummaryCard } from "@/components/page-speed/javascript-metrics/JavaScriptSummaryCard";
+import { TaskSummaryCard } from "@/components/page-speed/javascript-metrics/TaskSummaryCard";
 
 export function JavaScriptPerformanceComponent() {
   const items = useContext(InsightsContext);
@@ -35,6 +36,14 @@ export function JavaScriptPerformanceComponent() {
       const legacyJSAudit = item?.lighthouseResult?.audits?.['legacy-javascript-insight'];
       const legacyJSDetails = legacyJSAudit?.details as AuditDetailTable;
       
+      // Get diagnostics audit
+      const diagnosticsAudit = item?.lighthouseResult?.audits?.['diagnostics'];
+      const diagnosticsDetails = diagnosticsAudit?.details as AuditDetailTable;
+      
+      // Get main-thread-tasks audit
+      const mainThreadTasksAudit = item?.lighthouseResult?.audits?.['main-thread-tasks'];
+      const mainThreadTasksDetails = mainThreadTasksAudit?.details as AuditDetailTable;
+      
       // Get network requests to filter JavaScript resources
       const networkRequestsAudit = item?.lighthouseResult?.audits?.['network-requests'];
       const networkRequestsDetails = networkRequestsAudit?.details as AuditDetailTable;
@@ -50,6 +59,8 @@ export function JavaScriptPerformanceComponent() {
         unusedJS: unusedJSDetails?.items || [],
         unminifiedJS: unminifiedJSDetails?.items || [],
         legacyJS: legacyJSDetails?.items || [],
+        diagnostics: diagnosticsDetails?.items || [],
+        mainThreadTasks: mainThreadTasksDetails?.items || [],
         jsResources: jsResources,
       };
     });
@@ -98,6 +109,7 @@ export function JavaScriptPerformanceComponent() {
       <AccordionContent>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <JavaScriptSummaryCard stats={jsStats} />
+          <TaskSummaryCard metrics={jsMetrics.map(({ label, diagnostics, mainThreadTasks }) => ({ label, diagnostics, mainThreadTasks }))} />
           <BootupTimeCard metrics={jsMetrics.map(({ label, bootupTime }) => ({ label, bootupTime }))} />
           <MainThreadWorkCard metrics={jsMetrics.map(({ label, mainThreadWork }) => ({ label, mainThreadWork }))} />
           <UnusedJavaScriptCard metrics={jsMetrics.map(({ label, unusedJS }) => ({ label, unusedJS }))} />
