@@ -1,4 +1,4 @@
-import type { ActionableStep } from './types';
+import type { ActionableStep } from '@/components/page-speed/RecommendationsSection/types';
 
 export function getCategoryFromAuditId(auditId: string): string {
   if (auditId.includes('render-blocking') || auditId.includes('render-blocking-resources')) {

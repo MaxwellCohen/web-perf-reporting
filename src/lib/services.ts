@@ -2,7 +2,7 @@
 import { CruxReport, cruxReportSchema } from '@/lib/schema';
 import * as Sentry from '@sentry/nextjs';
 
-export { getHistoricalCruxData } from './historicalCruxData.services';
+export { getHistoricalCruxData } from '@/lib/historicalCruxData.services';
 
 export type formFactor =
   | 'PHONE'

@@ -1,5 +1,6 @@
 "use client";
 import { TableItem } from "@/lib/schema";
+import { getUrlString, getNumber } from "@/lib/utils";
 import { useMemo } from "react";
 import {
   ColumnDef,
@@ -7,7 +8,8 @@ import {
 } from "@tanstack/react-table";
 import { sortByMaxValue } from "@/components/page-speed/shared/dataSortingHelpers";
 import { useStandardTable } from "@/components/page-speed/shared/tableConfigHelpers";
-import { createURLColumn, createBytesColumn, createReportColumn } from "@/components/page-speed/shared/tableColumnHelpers";
+import { createURLColumn, createBytesColumn } from "@/components/page-speed/shared/tableColumnHelpers";
+import { useTableColumns } from "@/components/page-speed/shared/useTableColumns";
 import { TableCard } from "@/components/page-speed/shared/TableCard";
 
 type LegacyJavaScriptData = {
@@ -26,6 +28,14 @@ type LegacyJavaScriptCardProps = {
   metrics: LegacyJavaScriptData[];
 };
 
+const columnHelper = createColumnHelper<LegacyJSTableRow>();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const cols: ColumnDef<LegacyJSTableRow, any>[] = [
+  createURLColumn(columnHelper),
+  createBytesColumn(columnHelper, 'wastedBytes', 'Wasted Bytes'),
+  createBytesColumn(columnHelper, 'totalBytes', 'Total Bytes'),
+];
+
 export function LegacyJavaScriptCard({ metrics }: LegacyJavaScriptCardProps) {
   "use no memo";
   const validMetrics = useMemo(() => metrics.filter(m => m.legacyJS.length > 0), [metrics]);
@@ -35,9 +45,9 @@ export function LegacyJavaScriptCard({ metrics }: LegacyJavaScriptCardProps) {
   const data = useMemo<LegacyJSTableRow[]>(() => {
     const allRows = validMetrics.flatMap(({ label, legacyJS }) =>
       legacyJS.map((item: TableItem) => {
-        const url = typeof item.url === 'string' ? item.url : '';
-        const wastedBytes = typeof item.wastedBytes === 'number' ? item.wastedBytes : undefined;
-        const totalBytes = typeof item.totalBytes === 'number' ? item.totalBytes : undefined;
+        const url = getUrlString(item.url);
+        const wastedBytes = getNumber(item.wastedBytes);
+        const totalBytes = getNumber(item.totalBytes);
         return {
           label,
           url: url.replace(/^https?:\/\//, '') || 'Unknown',
@@ -55,24 +65,7 @@ export function LegacyJavaScriptCard({ metrics }: LegacyJavaScriptCardProps) {
     );
   }, [validMetrics]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const columns = useMemo<ColumnDef<LegacyJSTableRow, any>[]>(() => {
-    const columnHelper = createColumnHelper<LegacyJSTableRow>();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const cols: ColumnDef<LegacyJSTableRow, any>[] = [];
-    
-    cols.push(
-      createURLColumn(columnHelper),
-      createBytesColumn(columnHelper, 'wastedBytes', 'Wasted Bytes'),
-      createBytesColumn(columnHelper, 'totalBytes', 'Total Bytes'),
-    );
-    
-    if (showReportColumn) {
-      cols.push(createReportColumn(columnHelper));
-    }
-    
-    return cols;
-  }, [showReportColumn]);
+  const columns = useTableColumns<LegacyJSTableRow>(cols, columnHelper, showReportColumn);
 
   const table = useStandardTable({
     data,

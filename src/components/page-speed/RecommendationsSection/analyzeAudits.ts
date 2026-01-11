@@ -1,16 +1,17 @@
 import { PageSpeedInsights, TableColumnHeading, TableItem } from '@/lib/schema';
-import type { Recommendation } from './types';
-import type { AuditEntry } from './auditTypes';
+import type { Recommendation } from '@/components/page-speed/RecommendationsSection/types';
 import {
   collectAuditData,
   getWorstScore,
   combineMetricSavings,
   combineAuditItems,
-} from './auditProcessing';
+} from '@/components/page-speed/RecommendationsSection/auditProcessing';
 import {
   processMetricSavingsAudit,
   processFailedAudit,
-} from './recommendationProcessing';
+} from '@/components/page-speed/RecommendationsSection/recommendationProcessing';
+
+const hideAuditId = [ "main-thread-tasks", "screenshot-thumbnails" ];
 
 function hasActionableDetails(
   allTableDataItems: TableItem[],
@@ -42,10 +43,10 @@ export function analyzeAudits(items: Array<{ item: PageSpeedInsights; label: str
     const scoreDisplayMode = baseAudit.scoreDisplayMode;
     const explanation = baseAudit.explanation;
 
-    if (scoreDisplayMode === 'notApplicable' || scoreDisplayMode === 'manual') {
+    if (scoreDisplayMode === 'notApplicable' || scoreDisplayMode === 'manual' || hideAuditId.includes(auditId)) {
       return;
     }
-
+    
     const combinedMetricSavings = combineMetricSavings(auditEntries);
     const { allItems, allTableDataItems, tableHeadings, itemsByReport } = combineAuditItems(auditEntries);
 
@@ -103,7 +104,7 @@ export function analyzeAudits(items: Array<{ item: PageSpeedInsights; label: str
   return sortRecommendations(recommendations);
 }
 
-export function hasDetails(rec: Recommendation): boolean {
+
   const metricOnlyTitles = [
     'Speed Index',
     'Time to Interactive',
@@ -112,6 +113,8 @@ export function hasDetails(rec: Recommendation): boolean {
     'Cumulative Layout Shift',
     'Total Blocking Time',
   ];
+
+export function hasDetails(rec: Recommendation): boolean {
   if (metricOnlyTitles.some((title) => rec.title.includes(title) && !rec.title.includes('Reduce'))) {
     return false;
   }
@@ -127,16 +130,16 @@ export function hasDetails(rec: Recommendation): boolean {
   }
 
   const hasActionableSteps =
-    rec.actionableSteps.length > 0 &&
-    !rec.actionableSteps.every(
-      ({ step }) =>
-        step === 'Review the audit details for specific recommendations' ||
-        step === 'Test changes in a staging environment' ||
-        step === 'Monitor performance metrics after implementation' ||
-        step.trim().length === 0 ||
-        step.toLowerCase().includes('shows how') ||
-        step.toLowerCase().includes('learn more about'),
-    );
+    rec.actionableSteps.length > 0
+    // !rec.actionableSteps.every(
+    //   ({ step }) =>
+    //     step === 'Review the audit details for specific recommendations' ||
+    //     step === 'Test changes in a staging environment' ||
+    //     step === 'Monitor performance metrics after implementation' ||
+    //     step.trim().length === 0 ||
+    //     step.toLowerCase().includes('shows how') ||
+    //     step.toLowerCase().includes('learn more about'),
+    // );
   
   return hasActionableSteps || hasTableData || hasItems;
 }

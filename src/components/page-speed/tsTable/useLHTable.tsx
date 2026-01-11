@@ -185,7 +185,7 @@ export function CategoryRow({ row }: { row: Row<TableDataItem> }) {
   return (
     <AccordionItem value={row.id} key={row.id}>
       <AccordionTrigger
-        className=""
+        className="flex flex-wrap"
         disabled={!row.getCanExpand()}
         onClick={row.getToggleExpandedHandler()}
       >

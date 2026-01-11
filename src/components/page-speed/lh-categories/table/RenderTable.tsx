@@ -1,15 +1,14 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 import {
   AuditDetailOpportunity,
   AuditDetailTable,
   ItemValue,
+  ItemValueType,
   OpportunityItem,
   TableColumnHeading,
   TableItem,
 } from '@/lib/schema';
-import { CSSProperties, Fragment, useMemo, useState } from 'react';
+import { CSSProperties, Fragment, useMemo, useState, type ReactElement } from 'react';
 import {
   ColumnDef,
   useReactTable,
@@ -25,24 +24,13 @@ import {
   RowData,
   Row,
   createColumnHelper,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFacetedMinMaxValues,
-  ColumnFiltersState,
+  Cell,
 } from '@tanstack/react-table';
-import { TableDataItem } from '@/components/page-speed/tsTable/TableDataItem';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { RenderTableValue } from '@/components/page-speed/lh-categories/table/RenderTableValue';
 import clsx from 'clsx';
 import { ExpandAll, ExpandRow } from '@/components/page-speed/JSUsage/JSUsageTable';
 import { toTitleCase } from '@/components/page-speed/toTitleCase';
-import { DataTableHeader, DataTableHead } from '@/components/page-speed/lh-categories/table/DataTableHeader';
+import { DataTableHeader } from '@/components/page-speed/lh-categories/table/DataTableHeader';
 import { booleanFilterFn } from '@/components/page-speed/lh-categories/table/DataTableNoGrouping';
 import {
   AccordionContent,
@@ -51,8 +39,61 @@ import {
 } from '@/components/ui/accordion';
 import { DataTableBody } from '@/components/page-speed/lh-categories/table/DataTableBody';
 import { DetailTableWith1ReportAndNoSubitem } from '@/components/page-speed/lh-categories/table/DetailTableWith1ReportAndNoSubitem';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
+import { useStandardTable } from '@/components/page-speed/shared/tableConfigHelpers';
+
+// Constants
+const GROUPABLE_VALUE_TYPES: ItemValueType[] = [
+  'code',
+  'text',
+  'source-location',
+  'url',
+  'link',
+];
+
+const UNIQUE_AGG_VALUE_TYPES: ItemValueType[] = [
+  'code',
+  'text',
+  'source-location',
+  'url',
+  'link',
+  'thumbnail',
+  'node',
+];
+
+const NUMERIC_VALUE_TYPES: ItemValueType[] = ['numeric', 'bytes', 'ms', 'timespanMs'];
+
+const COLUMN_SIZE_DEFAULT = 125;
+const COLUMN_SIZE_LARGE = 400;
+const EXPANDER_COLUMN_SIZE = 56;
+const DEVICE_COLUMN_SIZE = 110;
+
+const DEVICE_LABEL_SEPARATOR = '😠😠';
+
+// Type definitions
+type DetailTableDataRow = {
+  item: TableItem | OpportunityItem;
+  subitem?: TableItem | undefined;
+  _userLabel: string;
+};
+
+export type DetailTableItem = {
+  auditResult: {
+    details: AuditDetailTable | AuditDetailOpportunity;
+  };
+  _userLabel: string;
+};
+
+type ColumnHeadingConfig = {
+  heading: TableColumnHeading;
+  _userLabel: string;
+  skipSumming?: string[];
+};
+
+type DeviceValuePair = [string, number];
 
 declare module '@tanstack/react-table' {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ColumnMeta<TData extends RowData, TValue> {
     heading?: { heading: TableColumnHeading; _userLabel?: string };
     defaultVisibility?: boolean;
@@ -61,142 +102,188 @@ declare module '@tanstack/react-table' {
   }
 }
 
-const cell = (info: CellContext<any, unknown>) => {
-  const value = info.getValue();
-  const key = info.column.id;
-  const heading = info?.column?.columnDef?.meta?.heading?.heading;
-  let _userLabel = info?.column?.columnDef?.meta?.heading?._userLabel || '';
-  if (!_userLabel) {
-    const original = info.row.original as any;
-    if (original && original._userLabel) {
-      _userLabel = original._userLabel;
-    }
+/**
+ * Gets the user label from column meta or row original data
+ */
+const getUserLabel = (
+  info: CellContext<DetailTableDataRow, unknown>,
+): string => {
+  const metaLabel = info.column.columnDef.meta?.heading?._userLabel;
+  if (metaLabel) {
+    return metaLabel;
   }
-
-  const isArray = Array.isArray(value);
-
-  if (!isArray) {
-    return (
-      <div
-        data-info={JSON.stringify(value)}
-        data-key={key}
-        data-row={JSON.stringify(info.row.original)}
-      >
-        <RenderTableValue
-          value={value as ItemValue}
-          heading={heading}
-          device={_userLabel}
-        />
-      </div>
-    );
-  }
-
-  const isSumRowArray = value.every(
-    (v) =>
-      Array.isArray(v) &&
-      v.length === 2 &&
-      typeof v[0] === 'string' &&
-      typeof v[1] === 'number',
-  );
-  if (isSumRowArray) {
-    if (value[0][1] === value[0][1]) {
-      return (
-        <div
-          data-info={JSON.stringify(value[0][1])}
-          data-key={key}
-          data-row={JSON.stringify(info.row.original)}
-        >
-          <RenderTableValue
-            value={value[0][1] as ItemValue}
-            heading={heading}
-            device={value[0][0]}
-          />
-          {` (All Devices)`}
-        </div>
-      );
-    }
-    return (value as [string, number][]).map(([device, val], i) => {
-      return (
-        <div
-          key={i}
-          data-info={JSON.stringify(val)}
-          data-key={key}
-          data-row={JSON.stringify(info.row.original)}
-        >
-          <RenderTableValue
-            value={val as ItemValue}
-            heading={heading}
-            device={device}
-          />
-          {device && value.length > 1 ? ` (${device}) ` : null}
-        </div>
-      );
-    });
-  }
-
-  // one item display it with no label
-  if (isArray && value.length === 1) {
-    return (
-      <div
-        data-info={JSON.stringify(value[0])}
-        data-key={key}
-        data-row={JSON.stringify(info.row.original)}
-      >
-        <RenderTableValue
-          value={value[0] as ItemValue}
-          heading={heading}
-          device={_userLabel}
-        />
-      </div>
-    );
-  }
-
-  if (isArray && value.length < 2) {
-    return info.row.subRows.map((sr, i) => {
-      const srItem = sr.getValue(key);
-      const srUserLabel = (sr.getValue('device') as string) || '';
-      if (srItem === undefined || srItem === '') {
-        return null;
-      }
-      if (heading?.valueType === 'node') {
-        return null;
-      }
-      return (
-        <div
-          key={i}
-          data-info={JSON.stringify(srItem)}
-          data-key={key}
-          data-row={JSON.stringify(info.row.original)}
-        >
-          <RenderTableValue
-            value={srItem as ItemValue}
-            heading={heading}
-            device={srUserLabel}
-          />
-          ({srUserLabel})
-        </div>
-      );
-    });
-  }
-  // in more
-  if (Array.isArray(value)) {
-    return (
-      <div
-        data-info={JSON.stringify(value)}
-        data-key={key}
-        data-row={JSON.stringify(info.row.original)}
-      ></div>
-    );
-  }
+  return info.row.original._userLabel || '';
 };
 
-export const simpleTableCell = (info: CellContext<any, unknown>) => {
-  const value = info.getValue();
-  const heading = info?.column?.columnDef?.meta?.heading?.heading;
-  const _userLabel = info?.column?.columnDef?.meta?.heading?._userLabel || '';
-  const isArray = Array.isArray(value);
+/**
+ * Checks if value is an array of device-value pairs
+ */
+const isDeviceValuePairArray = (
+  value: unknown,
+): value is DeviceValuePair[] => {
+  return (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.every(
+      (v): v is DeviceValuePair =>
+        Array.isArray(v) &&
+        v.length === 2 &&
+        typeof v[0] === 'string' &&
+        typeof v[1] === 'number',
+    )
+  );
+};
 
-  if (!isArray) {
+/**
+ * Renders a single value with optional device label
+ */
+const renderValueWithLabel = (
+  value: ItemValue,
+  heading: TableColumnHeading | undefined,
+  device: string,
+  showLabel = false,
+): ReactElement => {
+  return (
+    <>
+      <RenderTableValue value={value} heading={heading} device={device} />
+      {showLabel && device && (
+        <span className="text-xs text-muted-foreground"> ({device})</span>
+      )}
+    </>
+  );
+};
+
+/**
+ * Renders device-value pairs (aggregated data from multiple devices)
+ */
+const renderDeviceValuePairs = (
+  pairs: DeviceValuePair[],
+  heading: TableColumnHeading | undefined,
+): ReactElement => {
+  // If all devices have the same value, show "All Devices"
+  const firstValue = pairs[0]?.[1];
+  const allSameValue = pairs.every(([, val]) => val === firstValue);
+
+  if (allSameValue && pairs.length > 0) {
+    return (
+      <>
+        <RenderTableValue
+          value={firstValue as ItemValue}
+          heading={heading}
+          device={pairs[0][0]}
+        />
+        <span className="text-xs text-muted-foreground"> (All Devices)</span>
+      </>
+    );
+  }
+
+  // Render each device-value pair with line breaks between them
+  return (
+    <>
+      {pairs.map(([device, val], i) => (
+        <Fragment key={i}>
+          {i > 0 && <br />}
+          {renderValueWithLabel(
+            val as ItemValue,
+            heading,
+            device,
+            pairs.length > 1,
+          )}
+        </Fragment>
+      ))}
+    </>
+  );
+};
+
+/**
+ * Renders sub-rows values when array has less than 2 items
+ */
+const renderSubRowValues = (
+  info: CellContext<DetailTableDataRow, unknown>,
+  key: string,
+  heading: TableColumnHeading | undefined,
+): (ReactElement | null)[] => {
+  return info.row.subRows.map((sr, i) => {
+    const srItem = sr.getValue(key);
+    const srUserLabel = (sr.getValue('device') as string) || '';
+
+    if (srItem === undefined || srItem === '') {
+      return null;
+    }
+
+    if (heading?.valueType === 'node') {
+      return null;
+    }
+
+    return (
+      <Fragment key={i}>
+        {renderValueWithLabel(
+          srItem as ItemValue,
+          heading,
+          srUserLabel,
+          true,
+        )}
+      </Fragment>
+    );
+  });
+};
+
+/**
+ * Main cell renderer for table cells
+ */
+const cell = (info: CellContext<DetailTableDataRow, unknown>) => {
+  const value = info.getValue();
+  const key = info.column.id;
+  const heading = info.column.columnDef.meta?.heading?.heading;
+  const _userLabel = getUserLabel(info);
+
+  // Handle non-array values
+  if (!Array.isArray(value)) {
+    return (
+      <RenderTableValue
+        value={value as ItemValue}
+        heading={heading}
+        device={_userLabel}
+      />
+    );
+  }
+
+  // Handle device-value pair arrays (aggregated data)
+  if (isDeviceValuePairArray(value)) {
+    return renderDeviceValuePairs(value, heading);
+  }
+
+  // Handle single-item arrays
+  if (value.length === 1) {
+    return (
+      <RenderTableValue
+        value={value[0] as ItemValue}
+        heading={heading}
+        device={_userLabel}
+      />
+    );
+  }
+
+  // Handle arrays with sub-rows (length < 2 means empty or single, but check subRows)
+  if (value.length < 2 && info.row.subRows.length > 0) {
+    return renderSubRowValues(info, key, heading);
+  }
+
+  // For other array cases, return null
+  return null;
+};
+
+/**
+ * Simple cell renderer that doesn't handle complex array cases
+ */
+export const simpleTableCell = (
+  info: CellContext<DetailTableDataRow, unknown>,
+) => {
+  const value = info.getValue();
+  const heading = info.column.columnDef.meta?.heading?.heading;
+  const _userLabel = getUserLabel(info);
+
+  if (!Array.isArray(value)) {
     return (
       <RenderTableValue
         value={value as ItemValue}
@@ -209,93 +296,101 @@ export const simpleTableCell = (info: CellContext<any, unknown>) => {
 };
 
 
+/**
+ * Accessor function for main items in a table row
+ */
 const accessorFnMainItems =
-  (_userLabel: string, key: string, subItemsHeadingKey?: string) =>
-  (r: any) => {
+  (_userLabel: string, key: string) =>
+  (r: DetailTableDataRow): unknown => {
     if (_userLabel && r._userLabel !== _userLabel) {
       return undefined;
     }
-    const mainItem = r?.item?.[key];
+    const mainItem = r.item?.[key];
     if (typeof mainItem !== 'undefined') {
       return mainItem;
     }
-    // if (subItemsHeadingKey) {
-    //   const subItem = r?.subitem?.[subItemsHeadingKey];
-    //   return subItem;
-    // }
     return undefined;
   };
 
+/**
+ * Accessor function for sub-items in a table row
+ */
 const accessorFnSubItems =
-  (_userLabel: string, key: string, subItemsHeadingKey: string) => (r: any) => {
+  (_userLabel: string, key: string, subItemsHeadingKey: string) =>
+  (r: DetailTableDataRow): unknown => {
     if (_userLabel && r._userLabel !== _userLabel) {
       return undefined;
     }
-    const subItem = r?.subitem?.[subItemsHeadingKey];
+    const subItem = r.subitem?.[subItemsHeadingKey];
     if (typeof subItem !== 'undefined') {
       return subItem;
     }
-    return r?.item?.[key];
+    return r.item?.[key];
   };
-// "code" |  "node" | "text" | "source-location" | "url" | "link" | "numeric" |  "bytes" | "ms" | "thumbnail" | "timespanMs" | "multi"
-export const canGroup = (type: string) => {
-  return ['code', 'text', 'source-location', 'url', 'link'].includes(type);
+
+/**
+ * Checks if a value type can be grouped
+ */
+export const canGroup = (type: ItemValueType | string): boolean => {
+  return GROUPABLE_VALUE_TYPES.includes(type as ItemValueType);
 };
 
-export const canSort = (type: string) => {
-  return !['node'].includes(type);
+/**
+ * Checks if a value type can be sorted
+ */
+export const canSort = (type: ItemValueType | string): boolean => {
+  return type !== 'node';
 };
 
-export const isNumberColumn = (type: string) => {
-  return ['numeric', 'bytes', 'ms', 'timespanMs'].includes(type);
+/**
+ * Checks if a value type represents a number column
+ */
+export const isNumberColumn = (type: ItemValueType | string): boolean => {
+  return NUMERIC_VALUE_TYPES.includes(type as ItemValueType);
 };
 
-const isUniqueAgg = (type: string) => {
-  return [
-    'code',
-    'text',
-    'source-location',
-    'url',
-    'link',
-    'thumbnail',
-    'node',
-  ].includes(type);
+/**
+ * Checks if a value type should use unique aggregation
+ */
+const isUniqueAgg = (type: ItemValueType | string): boolean => {
+  return UNIQUE_AGG_VALUE_TYPES.includes(type as ItemValueType);
 };
 
-const setSizeSetting = (type: string) => {
-  if (isUniqueAgg(type)) {
-    return {
-      size: 400,
-    };
-  }
-
+/**
+ * Returns size settings based on value type
+ */
+const setSizeSetting = (type: ItemValueType | string) => {
   return {
-    size: 125,
+    size: isUniqueAgg(type) ? COLUMN_SIZE_LARGE : COLUMN_SIZE_DEFAULT,
   };
 };
 
-const customSum = (aggregationKey: string, rows: Row<DetailTableDataRow>[]) => {
+/**
+ * Custom aggregation function that sums values by device/user label
+ */
+const customSum = (
+  aggregationKey: string,
+  rows: Row<DetailTableDataRow>[],
+): DeviceValuePair[] => {
   const aggregationObj = rows.reduce((acc: Record<string, number>, r) => {
-    // const parentValue = r?.getParentRow()?.getValue(aggregationKey);
     let v = r.getValue(aggregationKey);
+
+    // Extract numeric value from object if needed
     if (
       v &&
       typeof v === 'object' &&
       'value' in v &&
-      typeof v?.value === 'number'
+      typeof (v as { value: unknown }).value === 'number'
     ) {
-      v = v?.value;
+      v = (v as { value: number }).value;
     }
 
     if (typeof v === 'number') {
-      let userLabel;
-      try {
-        userLabel = r.getValue('device') as string;
-      } catch (e) {
-        userLabel = '';
-      }
-      const c = r.getAllCells().find((c) => c.column.id === aggregationKey);
-      if (c?.column?.columnDef?.meta?.rowType !== 'sub') {
+      const userLabel = (r.getValue('device') as string) || '';
+      const cell = r.getAllCells().find((c) => c.column.id === aggregationKey);
+      const rowType = cell?.column?.columnDef?.meta?.rowType;
+
+      if (rowType !== 'sub') {
         acc[userLabel] = v;
       } else {
         acc[userLabel] = (acc[userLabel] || 0) + v;
@@ -303,18 +398,47 @@ const customSum = (aggregationKey: string, rows: Row<DetailTableDataRow>[]) => {
     }
     return acc;
   }, {});
-  const aggregationArr = Object.entries(aggregationObj);
-  return aggregationArr;
+
+  return Object.entries(aggregationObj) as DeviceValuePair[];
 };
 
 const columnHelper = createColumnHelper<DetailTableDataRow>();
 
+/**
+ * Determines the aggregation function to use for a column
+ */
+const getAggregationFn = (
+  valueType: ItemValueType | string,
+  key: string,
+  skipSumming: string[] | undefined,
+  showUserLabel: boolean,
+): 'unique' | 'sum' | typeof customSum => {
+  if (isUniqueAgg(valueType) || (skipSumming || []).includes(key)) {
+    return 'unique';
+  }
+  return showUserLabel ? customSum : 'sum';
+};
+
+/**
+ * Determines the filter function to use for a column
+ */
+const getFilterFn = (
+  valueType: ItemValueType | string,
+): 'includesString' | 'inNumberRange' | undefined => {
+  if (canGroup(valueType)) {
+    return 'includesString';
+  }
+  if (isNumberColumn(valueType)) {
+    return 'inNumberRange';
+  }
+  return undefined;
+};
+
+/**
+ * Creates column definitions for a table heading
+ */
 export const makeColumnDef = (
-  h: {
-    heading: TableColumnHeading;
-    _userLabel: string;
-    skipSumming?: string[];
-  },
+  h: ColumnHeadingConfig,
   settings: { showUserLabel: boolean },
 ): ColumnDef<DetailTableDataRow, unknown>[] => {
   const key = h.heading.key;
@@ -329,36 +453,30 @@ export const makeColumnDef = (
   if (!key) {
     return columnDefs;
   }
-  let defaultVisibility = true;
-  if (_userLabel) {
-    defaultVisibility = false;
-  } else if (subItemsHeadingKey) {
-    defaultVisibility = false;
-  }
+
+  const defaultVisibility = !_userLabel && !subItemsHeadingKey;
+  const valueType = h.heading.valueType || 'text';
+
+  // Main column definition
   columnDefs.push(
     columnHelper.accessor(
-      accessorFnMainItems(_userLabel, key, subItemsHeadingKey),
+      accessorFnMainItems(_userLabel, key),
       {
         id: `${key}${_userLabel ? `_${_userLabel}` : ''}`,
-        header: `${h.heading.label || toTitleCase(h.heading.key || '')}${_userLabel ? ` (${_userLabel})` : ''}`,
-        cell: cell,
+        header: `${h.heading.label || toTitleCase(key)}${_userLabel ? ` (${_userLabel})` : ''}`,
+        cell,
         aggregatedCell: cell,
-        enableGrouping: canGroup(h.heading.valueType),
+        enableGrouping: canGroup(valueType),
         enableHiding: true,
         enableSorting: false,
-        ...setSizeSetting(h.heading.valueType),
-        aggregationFn: isUniqueAgg(h.heading.valueType)
-          ? 'unique'
-          : (h.skipSumming || []).includes(key)
-            ? 'unique'
-            : settings.showUserLabel
-              ? customSum
-              : 'sum',
-              filterFn: canGroup(h.heading.valueType)
-              ? 'includesString'
-              : isNumberColumn(h.heading.valueType)
-                ? 'inNumberRange'
-                : undefined,
+        ...setSizeSetting(valueType),
+        aggregationFn: getAggregationFn(
+          valueType,
+          key,
+          h.skipSumming,
+          settings.showUserLabel,
+        ),
+        filterFn: getFilterFn(valueType),
         meta: {
           heading: h,
           className: '',
@@ -369,68 +487,55 @@ export const makeColumnDef = (
       },
     ),
   );
+
+  // Sub-items column definition (if applicable)
   if (subItemsHeadingKey) {
-    const aggregationFn =
-      isUniqueAgg(subItemsHeading.valueType) ||
-      (h.skipSumming || []).includes(subItemsHeadingKey)
-        ? 'unique'
-        : settings.showUserLabel
-          ? customSum
-          : 'sum';
+    const subValueType = subItemsHeading.valueType || 'text';
     columnDefs.push(
       columnHelper.accessor(
         accessorFnSubItems(_userLabel, key, subItemsHeadingKey),
         {
           id: `${key}${subItemsHeadingKey}${_userLabel ? `_${_userLabel}` : ''}`,
-          header: `${subItemsHeading.label}${_userLabel ? ` (${_userLabel})` : ''}`,
-          cell: cell,
-          enableGrouping: canGroup(subItemsHeading.valueType),
-          ...setSizeSetting(subItemsHeading.valueType),
+          header: `${subItemsHeading.label || ''}${_userLabel ? ` (${_userLabel})` : ''}`,
+          cell,
+          enableGrouping: canGroup(subValueType),
+          ...setSizeSetting(subValueType),
           enableHiding: true,
           enableSorting: false,
-          aggregationFn,
-          filterFn: canGroup(subItemsHeading.valueType)
-          ? 'includesString'
-          : isNumberColumn(subItemsHeading.valueType)
-            ? 'inNumberRange'
-            : undefined,
+          aggregationFn: getAggregationFn(
+            subValueType,
+            subItemsHeadingKey,
+            h.skipSumming,
+            settings.showUserLabel,
+          ),
+          filterFn: getFilterFn(subValueType),
           aggregatedCell(info) {
-            const value = accessorFnMainItems(
-              _userLabel,
-              key,
-              subItemsHeadingKey,
-            )(info.row.original);
-            // const depth = info.row.depth;
-            const heading = h.heading;
-            if (Array.isArray(value) && value.every((v) => v?.length === 2)) {
-              return value.map((v, i) => (
-                <div
-                  key={JSON.stringify(v)}
-                  data-info={JSON.stringify(v[1])}
-                  data-key={key}
-                  data-row={JSON.stringify(info.row.original)}
-                >
-                  <RenderTableValue
-                    value={v[1] as ItemValue}
-                    heading={heading}
-                    device={v[0]}
-                  />
-                </div>
-              ));
+            const value = accessorFnMainItems(_userLabel, key)(
+              info.row.original,
+            );
+
+            if (isDeviceValuePairArray(value)) {
+              return (
+                <>
+                  {value.map((v, i) => (
+                    <Fragment key={i}>
+                      <RenderTableValue
+                        value={v[1] as ItemValue}
+                        heading={h.heading}
+                        device={v[0]}
+                      />
+                    </Fragment>
+                  ))}
+                </>
+              );
             }
 
             return (
-              <div
-                data-info={JSON.stringify(value)}
-                data-key={key}
-                data-row={JSON.stringify(info.row.original)}
-              >
-                <RenderTableValue
-                  value={value as ItemValue}
-                  heading={heading}
-                  device={_userLabel}
-                />
-              </div>
+              <RenderTableValue
+                value={value as ItemValue}
+                heading={h.heading}
+                device={_userLabel}
+              />
             );
           },
           meta: {
@@ -446,32 +551,34 @@ export const makeColumnDef = (
       ),
     );
   }
+
   return columnDefs;
 };
 
-type DetailTableDataRow = {
-  item: TableItem | OpportunityItem;
-  subitem?: TableItem | undefined;
-  _userLabel: string;
-};
-
-function DeviceCell(info: CellContext<DetailTableDataRow, any>) {
+/**
+ * Cell renderer for device/user label column
+ */
+function DeviceCell(info: CellContext<DetailTableDataRow, unknown>) {
   const value = info.getValue();
 
   if (Array.isArray(value)) {
-    return value
-      .filter((v) => v != null && v !== '')
-      .map((v, i) => <div key={i}>{v}</div>);
+    return (
+      <>
+        {value
+          .filter((v) => v != null && v !== '')
+          .map((v, i) => (
+            <div key={i}>{String(v)}</div>
+          ))}
+      </>
+    );
   }
-  return value as string;
+  return <>{String(value)}</>;
 }
-export type DetailTableItem = {
-  auditResult: {
-    details: AuditDetailTable | AuditDetailOpportunity;
-  };
-  _userLabel: string;
-};
 
+/**
+ * Main component that routes to the appropriate table implementation
+ * based on the data structure
+ */
 export function DetailTable({
   rows,
   title,
@@ -479,44 +586,54 @@ export function DetailTable({
   rows: DetailTableItem[];
   title: string;
 }) {
-  /*
- types of data table
- simple table (1D  no sub item  but having grouping )
- subitems 
- having grouping 
-  */
-
-  const hasItems = rows.some(
-    (r) => !!(r.auditResult?.details?.items || []).length,
+  const hasItems = useMemo(
+    () => rows.some((r) => !!(r.auditResult?.details?.items || []).length),
+    [rows],
   );
+
   if (!hasItems) {
     return null;
   }
 
   const showUserLabel = rows.length > 1;
   const hasSubitems = rows.some((r) =>
-    (r.auditResult?.details?.items).some((sr) => sr.subItems?.items?.length),
+    (r.auditResult?.details?.items || []).some(
+      (item) => item.subItems?.items?.length,
+    ),
   );
 
+  // Route to appropriate table component based on data structure
   if (!showUserLabel) {
     if (!hasSubitems) {
-      console.log('1 report no subitems');
       return <DetailTableWith1ReportAndNoSubitem rows={rows} title={title} />;
-    } else {
-      console.log('1 report with subitems');
-      return <DetailTableAndWithSubitem rows={rows} title={title} />;
     }
-  } else {
-    if (!hasSubitems) {
-      console.log('2+ report no subitems');
-    } else {
-      console.log('2+ report with subitems');
-      //  return <DetailTableAndWithSubitem rows={rows} title={title} />;
-    }
+    return <DetailTableAndWithSubitem rows={rows} title={title} />;
   }
 
   return <DetailTableFull rows={rows} title={title} />;
 }
+
+/**
+ * Combines item and subitem values for sorting/comparison
+ */
+const combineItemSubItemValue = (
+  itemVal: unknown,
+  subItemVal: unknown,
+): unknown => {
+  if (typeof subItemVal === 'number' && typeof itemVal === 'number') {
+    // Combine numbers: item.subitem format (e.g., 123.45)
+    const itemNum = Number(itemVal.toString().replace(/[^0-9]/g, '')) || 0;
+    const subNum = Number(subItemVal.toString().replace(/[^0-9]/g, '')) || 0;
+    return Number(`${itemNum}.${subNum}`);
+  }
+
+  if (typeof subItemVal === 'string' && typeof itemVal === 'string') {
+    // Combine strings with separator for sorting
+    return `${itemVal}${DEVICE_LABEL_SEPARATOR}${subItemVal}`;
+  }
+
+  return subItemVal ?? itemVal;
+};
 
 function DetailTableAndWithSubitem({
   rows,
@@ -525,17 +642,17 @@ function DetailTableAndWithSubitem({
   rows: DetailTableItem[];
   title: string;
 }) {
-  'use no memo';
-  type Item = {
+  // Transform data
+  type DetailTableAndWithSubitemRow = {
     item: TableItem;
     subitem?: TableItem;
     _userLabel: string;
   };
 
-  const data = useMemo(() => {
-    const d: Item[] = [];
+  const data = useMemo<DetailTableAndWithSubitemRow[]>(() => {
+    const d: DetailTableAndWithSubitemRow[] = [];
     rows.forEach((r) => {
-      return (r.auditResult?.details?.items || []).forEach((item) => {
+      (r.auditResult?.details?.items || []).forEach((item) => {
         if (item.subItems?.items?.length) {
           item.subItems.items.forEach((subitem) => {
             d.push({
@@ -552,168 +669,115 @@ function DetailTableAndWithSubitem({
         }
       });
     });
-
     return d;
   }, [rows]);
+
+  // Create columns
   const columns = useMemo(() => {
-    const sColumnHelper = createColumnHelper<Item>();
-    const columnDef: ColumnDef<Item, any>[] = [getExpandingControlColumn()];
+    const sColumnHelper = createColumnHelper<DetailTableAndWithSubitemRow>();
+    const columnDef: ColumnDef<DetailTableAndWithSubitemRow, unknown>[] = [
+      getExpandingControlColumn(),
+    ];
 
-    rows.forEach((r, idx) =>{
-      if(idx > 0) {
-        return
+    const firstRow = rows[0];
+    if (!firstRow) {
+      return columnDef;
+    }
+
+    firstRow.auditResult.details.headings.forEach((h) => {
+      if (!h.key) {
+        return;
       }
-      r.auditResult.details.headings.forEach((h, i) => {
-        if (!h.key) {
-          return;
-        }
-        const key = h.key;
-        const subItemKey = h.subItemsHeading?.key;
-        const subItem = {
-          ...h,
-          ...h.subItemsHeading,
-        };
-        columnDef.push(
-          sColumnHelper.accessor(
-            (r) => {
-              const subItemVal = r.subitem?.[subItemKey as string];
+
+      const key = h.key;
+      const subItemKey = h.subItemsHeading?.key;
+      if (!subItemKey) {
+        return;
+      }
+
+      const subItem = {
+        ...h,
+        ...h.subItemsHeading,
+      };
+      const valueType = h.valueType || 'text';
+
+      columnDef.push(
+        sColumnHelper.accessor(
+          (r) => {
+            const subItemVal = r.subitem?.[subItemKey];
+            const itemVal = r.item[key];
+            return combineItemSubItemValue(itemVal, subItemVal);
+          },
+          {
+            id: `${key}_${subItemKey}`,
+            header: (subItem.label as string) || '',
+            enableGrouping: canGroup(valueType),
+            enableHiding: true,
+            enableSorting: true,
+            enableMultiSort: true,
+            filterFn: getFilterFn(valueType),
+            getGroupingValue: (r) => {
+              const val = r.item[key];
+              return typeof val === 'string' ? val : undefined;
+            },
+            ...setSizeSetting(valueType),
+            cell: (info) => {
+              const r = info.row.original;
+              const subItemVal = r.subitem?.[subItemKey];
               const itemVal = r.item[key];
-              if (
-                typeof subItemVal === 'number' &&
-                typeof itemVal === 'number'
-              ) {
-                return +`${itemVal.toString().replace(/[^0-9]/g, '') || 0}.${subItemVal.toString().replace(/[^0-9]/g, '') || 0}`;
-              }
-              if (
-                typeof subItemVal === 'string' &&
-                typeof itemVal === 'string'
-              ) {
-                return `${itemVal}😠😠${subItemVal}`;
-              }
-              return subItemVal ?? itemVal;
-            },
-            {
-              id: `${key}_${subItemKey}`,
-              header: subItem.label as string,
-              enableGrouping: canGroup(h.valueType),
-              enableHiding: true,
-              enableSorting: true,
-              enableMultiSort: true,
-              filterFn: canGroup(h.valueType)
-                ? 'includesString'
-                : isNumberColumn(h.valueType)
-                  ? 'inNumberRange'
-                  : undefined,
-              getGroupingValue: (r) => {
-                const val = r.item[key];
-                if (typeof val === 'string') {
-                  return val;
-                }
-                return undefined;
-              },
-              ...setSizeSetting(h.valueType),
-              cell: (info) => {
-                const r = info.row.original;
-                const subItemVal = r.subitem?.[subItemKey as string];
-                const itemVal = r.item[key];
-                const val = subItemVal ?? itemVal;
+              const val = subItemVal ?? itemVal;
 
-                return (
-                  <div
-                    key={JSON.stringify(val)}
-                    data-info={JSON.stringify(val)}
-                    data-key={key}
-                    data-row={JSON.stringify(info.row.original)}
-                  >
-                    <RenderTableValue
-                      value={val as ItemValue}
-                      heading={subItem}
-                      device={r._userLabel || 'pizza'}
-                    />
-                  </div>
-                );
-              },
-              aggregatedCell(props) {
-                const value = props.row.original.item[key as string];
-                return (
-                  <RenderTableValue
-                    value={value as ItemValue}
-                    heading={h}
-                    device={r._userLabel || 'pizza2 '}
-                  />
-                );
-              },
-              meta: {
-                heading: {
-                  heading: subItem,
-                },
+              return (
+                <RenderTableValue
+                  key={JSON.stringify(val)}
+                  value={val as ItemValue}
+                  heading={subItem}
+                  device={r._userLabel || ''}
+                />
+              );
+            },
+            aggregatedCell(props) {
+              const value = props.row.original.item[key];
+              return (
+                <RenderTableValue
+                  value={value as ItemValue}
+                  heading={h}
+                  device={firstRow._userLabel || ''}
+                />
+              );
+            },
+            meta: {
+              heading: {
+                heading: subItem,
               },
             },
-          ),
-        );
-      })},
-    );
+          },
+        ),
+      );
+    });
 
-    columnDef.push();
     return columnDef;
   }, [rows]);
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [grouping, setGrouping] = useState<string[]>(() =>
-    columns
-      .filter((c) => c.id && c.enableGrouping)
-      .map((c) => c.id as string)
-      .slice(0, 1),
-  );
-  const table = useReactTable({
-    // required items
-    columns, // column definitions array
-    data, // data array
-    getCoreRowModel: getCoreRowModel(), // core row model
 
-    // sub rows and expanding
-    // getSubRows: (row) => row?.subItems?.items || [],
-    getExpandedRowModel: getExpandedRowModel(),
-    enableExpanding: true,
+  // Calculate default grouping
+  const defaultGrouping = useMemo(() => {
+    const groupableColumn = columns.find(
+      (c) => c.id && c.enableGrouping,
+    )?.id;
+    return groupableColumn ? [groupableColumn] : [];
+  }, [columns]);
 
-    // grouping
-    getGroupedRowModel: getGroupedRowModel(),
-    onGroupingChange: setGrouping,
-    groupedColumnMode: false,
-
-    // sorting,
-    enableSorting: true,
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-
-    // filtering,
-    enableColumnFilters: true,
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(), // needed for client-side filtering
-
-    // facet filtering
-    getFacetedRowModel: getFacetedRowModel(), // client-side faceting
-    getFacetedUniqueValues: getFacetedUniqueValues(), // for facet values
-    getFacetedMinMaxValues: getFacetedMinMaxValues(),
-
-    // column resizing
-    enableColumnResizing: true,
-    columnResizeMode: 'onChange',
-
-    filterFns: {
-      booleanFilterFn,
-    },
-
-    state: {
-      sorting,
-      columnFilters,
-      grouping,
-    },
+  const table = useStandardTable({
+    data,
+    columns,
+    grouping: defaultGrouping,
+    enablePagination: false,
   });
+
   return (
     <AccordionItem value={title}>
       <AccordionTrigger>
-        <div className="text-lg font-bold group-hover:underline">
+        <div className="min-w-0 flex-1 truncate text-lg font-bold group-hover:underline">
           {toTitleCase(title)}
         </div>
       </AccordionTrigger>
@@ -729,199 +793,317 @@ function DetailTableAndWithSubitem({
   );
 }
 
+/**
+ * Transforms audit result items into table data rows
+ */
+const transformTableData = (
+  rows: DetailTableItem[],
+): DetailTableDataRow[] => {
+  return rows
+    .flatMap((r) =>
+      (r.auditResult?.details?.items || []).map((item) => {
+        if (item.subItems?.items?.length) {
+          return item.subItems.items.map((subitem) => ({
+            item,
+            subitem,
+            _userLabel: r._userLabel,
+          }));
+        }
+        return [
+          {
+            item,
+            _userLabel: r._userLabel,
+          },
+        ];
+      }),
+    )
+    .flat(2);
+};
+
+/**
+ * Extracts all unique headings from all rows
+ */
+const extractAllHeadings = (
+  rows: DetailTableItem[],
+): ColumnHeadingConfig[] => {
+  return rows
+    .flatMap((r) =>
+      (r.auditResult?.details?.headings || []).map((h) =>
+        !h.key
+          ? []
+          : [
+              {
+                heading: h,
+                skipSumming: r.auditResult?.details?.skipSumming,
+                _userLabel: r._userLabel,
+              },
+            ],
+      ),
+    )
+    .flat(2);
+};
+
+/**
+ * Creates column definitions from headings
+ */
+const createColumnsFromHeadings = (
+  allHeadings: ColumnHeadingConfig[],
+  showUserLabel: boolean,
+): ColumnDef<DetailTableDataRow, unknown>[] => {
+  const columnMap: Record<string, ColumnDef<DetailTableDataRow, unknown>> = {
+    expander: columnHelper.display(getExpandingControlColumn()),
+  };
+
+  // Add base columns (without user label)
+  allHeadings.forEach((h) => {
+    makeColumnDef({ ...h, _userLabel: '' }, { showUserLabel }).forEach(
+      (col) => {
+        if (col?.id && !columnMap[col.id]) {
+          columnMap[col.id] = col;
+        }
+      },
+    );
+  });
+
+  // Add user-label specific columns if needed
+  if (showUserLabel) {
+    allHeadings.forEach((h) => {
+      makeColumnDef(h, { showUserLabel }).forEach((col) => {
+        if (col?.id && !columnMap[col.id]) {
+          columnMap[col.id] = col;
+        }
+      });
+    });
+  }
+
+  // Add device column if showing user labels
+  if (showUserLabel) {
+    const deviceColumn = columnHelper.accessor(
+      (r) => r?._userLabel ?? '',
+      {
+        id: 'device',
+        header: 'Report type(s)',
+        enableHiding: true,
+        enableGrouping: false,
+        enableSorting: false,
+        aggregationFn: 'unique',
+        size: DEVICE_COLUMN_SIZE,
+        cell: DeviceCell,
+        aggregatedCell: DeviceCell,
+        meta: {
+          defaultVisibility: true,
+        },
+      },
+    );
+    columnMap.device = deviceColumn as ColumnDef<DetailTableDataRow, unknown>;
+  }
+
+  return Object.values(columnMap).filter(Boolean);
+};
+
+/**
+ * Calculates default sorting from audit results
+ * Only includes columns that actually exist in the table
+ */
+const calculateDefaultSorting = (
+  rows: DetailTableItem[],
+  availableColumnIds: Set<string>,
+): SortingState => {
+  const sortedByKeys = rows
+    .flatMap(
+      (r) => (r.auditResult?.details as AuditDetailTable).sortedBy || [],
+    )
+    .filter((v, i, a): v is string => !!(v && i === a.indexOf(v)));
+
+  // Map sortedBy keys to actual column IDs that exist
+  return sortedByKeys
+    .map((key) => {
+      // First try exact match
+      if (availableColumnIds.has(key)) {
+        return { id: key, desc: true };
+      }
+
+      // Try to find a column that starts with the key (for user label suffixes)
+      // Format: key or key_userLabel
+      const matchingId = Array.from(availableColumnIds).find(
+        (id) => id === key || id.startsWith(`${key}_`),
+      );
+
+      return matchingId ? { id: matchingId, desc: true } : null;
+    })
+    .filter((v): v is { id: string; desc: boolean } => v !== null);
+};
+
+/**
+ * Calculates default grouping from columns
+ */
+const calculateDefaultGrouping = (
+  columns: ColumnDef<DetailTableDataRow, unknown>[],
+  showUserLabel: boolean,
+): string[] => {
+  const groupingCandidates = columns
+    .filter((c) => c.enableGrouping && c.id && !c.id.includes('_'))
+    .map((c) => ({
+      id: c.id as string,
+      rowType: c.meta?.rowType,
+    }));
+
+  if (groupingCandidates.length === 0) {
+    return showUserLabel ? ['device'] : [];
+  }
+
+  const main = groupingCandidates.find((v) => v.rowType === 'main');
+  const sub = groupingCandidates.find((v) => v.rowType === 'sub');
+
+  if (main || sub) {
+    return [main?.id, sub?.id].filter(Boolean) as string[];
+  }
+
+  return [groupingCandidates[0].id];
+};
+
+/**
+ * Calculates default column visibility
+ */
+const calculateDefaultColumnVisibility = (
+  columns: ColumnDef<DetailTableDataRow, unknown>[],
+): VisibilityState => {
+  return columns.reduce((acc: VisibilityState, col) => {
+    const id = col.id;
+    if (id) {
+      acc[id] = !!col.meta?.defaultVisibility;
+    }
+    return acc;
+  }, {});
+};
+
+/**
+ * Renders a table cell based on its state
+ */
+const renderTableCell = (
+  cell: Cell<DetailTableDataRow, unknown>,
+  row: Row<DetailTableDataRow>,
+  groupsList: string[],
+): ReactElement | null => {
+  let cellEl: React.ReactNode = null;
+
+  if (cell.getIsGrouped()) {
+    cellEl = flexRender(cell.column.columnDef.cell, cell.getContext());
+  } else if (cell.getIsAggregated()) {
+    let cellType = cell.column.columnDef.cell;
+    if (
+      row.getCanExpand() &&
+      groupsList.length > 1 &&
+      row.depth < groupsList.length - 1
+    ) {
+      cellType = cell.column.columnDef.aggregatedCell;
+    }
+    cellEl = flexRender(cellType, cell.getContext());
+  } else if (cell.getIsPlaceholder()) {
+    let cellType = cell.column.columnDef.cell;
+    if (row.getCanExpand()) {
+      cellType = cell.column.columnDef.aggregatedCell;
+    }
+    cellEl = flexRender(cellType, cell.getContext());
+  } else {
+    cellEl = flexRender(cell.column.columnDef.cell, cell.getContext());
+  }
+
+  if (!cellEl || (typeof cellEl === 'object' && !('type' in cellEl))) {
+    return null;
+  }
+
+  return (
+    <TableCell
+      key={cell.id}
+      data-cell-id={cell.id}
+      data-column-id={cell.column.id}
+      data-can-expand={`${row.getCanExpand()}`}
+      data-depth={row.depth}
+      data-row-expanded={`${row.getIsExpanded()}`}
+      data-grouped={`${cell.getIsGrouped()}`}
+      data-aggregated={`${cell.getIsAggregated()}`}
+      data-placeholder={`${cell.getIsPlaceholder()}`}
+      className="overflow-x-auto whitespace-pre-wrap"
+      style={{
+        width: `${cell.column.getSize()}px`,
+      }}
+    >
+      {cellEl}
+    </TableCell>
+  );
+};
+
 function DetailTableFull({
   rows,
-  title,
 }: {
   rows: DetailTableItem[];
   title: string;
 }) {
-  'use no memo';
   const showUserLabel = rows.length > 1;
-  const data: DetailTableDataRow[] = useMemo(
-    () =>
-      rows
-        .flatMap((r) =>
-          r.auditResult?.details?.items.map((i) => {
-            if (i.subItems?.items?.length) {
-              return i.subItems?.items.map((v) => {
-                return [
-                  {
-                    item: i,
-                    subitem: v,
-                    _userLabel: r._userLabel,
-                  },
-                ];
-              });
-            }
-            return [
-              {
-                item: i,
-                _userLabel: r._userLabel,
-              },
-            ];
-          }),
-        )
-        .flat(3),
+
+  // Transform data
+  const data = useMemo<DetailTableDataRow[]>(
+    () => transformTableData(rows),
     [rows],
   );
+  // Create columns
   const columns = useMemo(() => {
-    // get heading from all the rows
-    const allHeadings = rows
-      .flatMap((r) => {
-        return (r.auditResult?.details?.headings || []).map((h) =>
-          !h.key
-            ? []
-            : [
-                {
-                  heading: h,
-                  skipSumming: r.auditResult?.details?.skipSumming,
-                  _userLabel: r._userLabel,
-                },
-              ],
-        );
-      })
-      .flat(2);
-    const acc: Record<string, ColumnDef<DetailTableDataRow, any>> = {
-      expander: columnHelper.display(getExpandingControlColumn()),
-    };
-
-    allHeadings.forEach((h) => {
-      makeColumnDef({ ...h, _userLabel: '' }, { showUserLabel }).forEach(
-        (v) => {
-          if (v?.id && !acc[v.id]) {
-            acc[v.id] = v;
-          }
-        },
-      );
-    });
-    if (showUserLabel) {
-      allHeadings.forEach((h) =>
-        makeColumnDef(h, { showUserLabel }).forEach((v) => {
-          if (v?.id && !acc[v.id]) {
-            acc[v.id] = v;
-          }
-        }),
-      );
-    }
-    let columnDefs: ColumnDef<DetailTableDataRow, any>[] = Object.values(acc);
-    if (showUserLabel) {
-      columnDefs = columnDefs.concat([
-        columnHelper.accessor((r) => r?._userLabel ?? '', {
-          id: 'device',
-          header: 'Report type(s)',
-          enableHiding: true,
-          enableGrouping: false,
-          enableSorting: false,
-          aggregationFn: 'unique',
-          size: 110,
-          cell: DeviceCell,
-          aggregatedCell: DeviceCell,
-          meta: {
-            defaultVisibility: true,
-          },
-        }),
-      ]);
-    }
-    return columnDefs.filter((v) => v);
+    const allHeadings = extractAllHeadings(rows);
+    return createColumnsFromHeadings(allHeadings, showUserLabel);
   }, [rows, showUserLabel]);
 
+  // Get available column IDs for validation
+  const availableColumnIds = useMemo(
+    () => new Set(columns.map((c) => c.id).filter(Boolean) as string[]),
+    [columns],
+  );
+
+  // Calculate default sorting - only use columns that exist
   const sortbyDefault = useMemo(
-    () =>
-      rows
-        .flatMap(
-          (r) => (r.auditResult?.details as AuditDetailTable).sortedBy || [],
-        )
-        .filter((v, i, a): v is string => !!(v || i === a.indexOf(v)))
-        .map((v) => {
-          return {
-            id: v as string,
-            desc: true,
-          };
-        }),
-    [rows],
+    () => calculateDefaultSorting(rows, availableColumnIds),
+    [rows, availableColumnIds],
   );
 
-  // see and control sorting value
+  // Calculate default grouping
+  const defaultGrouping = useMemo(
+    () => calculateDefaultGrouping(columns, showUserLabel),
+    [columns, showUserLabel],
+  );
+
+  // Calculate column visibility
+  const defaultColumnVisibility = useMemo(
+    () => calculateDefaultColumnVisibility(columns),
+    [columns],
+  );
+
+  // Use standard table hook with custom configuration
   const [sorting, setSorting] = useState<SortingState>(sortbyDefault);
-  // set up the grouping values
-  const [grouping, setGrouping] = useState<string[]>(() => {
-    const groupingVal = columns.reduce(
-      (acc: { id: string; rowType?: string }[], v) => {
-        if (!v.enableGrouping) {
-          return acc;
-        }
-        const id = v.id;
-        if (id && !id.includes('_')) {
-          acc.push({ id, rowType: v.meta?.rowType });
-        }
-        return acc;
-      },
-      [],
-    );
-    if (groupingVal.length) {
-      const main = groupingVal.find((v) => v.rowType === 'main');
-      const sub = groupingVal.find((v) => v.rowType === 'sub');
-      if (main || sub) {
-        return [main?.id, sub?.id].filter(Boolean) as string[];
-      } else {
-        return [groupingVal[0].id];
-      }
-    }
-    return showUserLabel ? ['device'] : [];
-  });
-  // const [grouping, setGrouping] = useState<string[]>(['url']);
-
-  // hide columns if needed note grouping
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
-    () => ({
-      ...(columns.reduce((acc: VisibilityState, v) => {
-        const id = v.id;
-        if (id) {
-          // v.meta?.defaultVisibility && (acc[id] = false);
-          acc[id] = !!v.meta?.defaultVisibility;
-        }
-        return acc;
-      }, {}) as VisibilityState),
-    }),
-  );
+  const [grouping, setGrouping] = useState<string[]>(defaultGrouping);
+  const [columnVisibility, setColumnVisibility] =
+    useState<VisibilityState>(defaultColumnVisibility);
 
   const table = useReactTable({
-    columns, // define the columns (required  )
+    columns,
     data,
-    getCoreRowModel: getCoreRowModel(), // core model all data
-    onSortingChange: setSorting, // get updates of sorting state
-    getSortedRowModel: getSortedRowModel(), // enable sorting
-
+    getCoreRowModel: getCoreRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onGroupingChange: setGrouping,
     getGroupedRowModel: getGroupedRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
-    // groupedColumnMode: false,
-    // only expand if there is more than one row
-    getRowCanExpand: (row) => {
-      // if (row.getIsGrouped() ) {
-      //   return row.subRows.length > 1;
-      // }
-      // return !!row.subRows.length;
-      return row.getLeafRows().length > 1;
-    },
-
+    getRowCanExpand: (row) => row.getLeafRows().length > 1,
     onColumnVisibilityChange: setColumnVisibility,
-
-    //columnResizing
     columnResizeMode: 'onChange',
-
-    manualPagination: true, // prevents ssr issues
+    manualPagination: true,
     enableColumnFilters: true,
     enableColumnPinning: true,
-
     filterFns: {
-      booleanFilterFn: booleanFilterFn,
+      booleanFilterFn,
     },
-
     state: {
-      sorting, // set initial sorting state
+      sorting,
       grouping,
       columnVisibility,
       columnPinning: {
@@ -930,109 +1112,60 @@ function DetailTableFull({
     },
   });
 
-  // console.log('raw rows', rows);
-  // console.log('table data', data);
-  // console.log('columns', columns);
-  // console.log('table', table);
-  // console.log('columnVisibility', columnVisibility);
-  // console.log('visible rows', table.getRowModel().rows);
-
   return (
     <div className="w-full overflow-x-auto">
       <Table className="w-full" style={{ width: '100%' }}>
         <DataTableHeader table={table} />
         <TableBody className="[&_tr:last-child]:border-(length:--border-width)">
-        {table
-          .getRowModel()
-          .rows.map((row) => {
-            const depth = row.depth;
-            const groupsList = table.getState().grouping;
-            const parent = row.getParentRow();
-            if (parent && !parent.getCanExpand()) {
-              return null;
-            }
-            return (
-              <Fragment key={row.id}>
-                <TableRow
-                  className={clsx(
-                    'border-x-(length:--border-width) bg-muted-foreground/10',
-                    {},
-                  )}
-                  style={
-                    {
-                      '--border-width': `${row.depth / 4}rem`,
-                      backgroundColor: `hsl(var(--muted-foreground) / ${row.depth / 10})`,
-                    } as CSSProperties
-                  }
-                >
-                  {row.getVisibleCells().map((cell) => {
-                    let cellEl = null;
+          {table
+            .getRowModel()
+            .rows.map((row) => {
+              const groupsList = table.getState().grouping;
+              const parent = row.getParentRow();
+              if (parent && !parent.getCanExpand()) {
+                return null;
+              }
 
-                    if (cell.getIsGrouped()) {
-                      cellEl = flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      );
-                    } else if (cell.getIsAggregated()) {
-                      let cellType = cell.column.columnDef.cell;
-                      if (
-                        row.getCanExpand() &&
-                        groupsList.length > 1 &&
-                        depth < groupsList.length - 1
-                      ) {
-                        cellType = cell.column.columnDef.aggregatedCell;
-                      }
-                      cellEl = flexRender(cellType, cell.getContext());
-                    } else if (cell.getIsPlaceholder()) {
-                      let cellType = cell.column.columnDef.cell;
-                      if (row.getCanExpand()) {
-                        cellType = cell.column.columnDef.aggregatedCell;
-                      }
-                      cellEl = flexRender(cellType, cell.getContext());
-                    } else {
-                      cellEl = flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      );
+              return (
+                <Fragment key={row.id}>
+                  <TableRow
+                    className={clsx(
+                      'border-x-(length:--border-width) bg-muted-foreground/10',
+                    )}
+                    style={
+                      {
+                        '--border-width': `${row.depth / 4}rem`,
+                        backgroundColor: `hsl(var(--muted-foreground) / ${row.depth / 10})`,
+                      } as CSSProperties
                     }
-                    if (!cellEl) {
-                      return null;
-                    }
-                    return (
-                      <TableCell
-                        key={cell.id}
-                        data-cell-id={cell.id}
-                        data-column-id={cell.column.id}
-                        data-can-expand={`${row.getCanExpand()}`}
-                        data-depth={row.depth}
-                        data-row-expanded={`${row.getIsExpanded()}`}
-                        data-grouped={`${cell.getIsGrouped()}`}
-                        data-aggregated={`${cell.getIsAggregated()}`}
-                        data-placeholder={`${cell.getIsPlaceholder()}`}
-                        className="overflow-x-auto whitespace-pre-wrap"
-                      >
-                        {cellEl}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              </Fragment>
-            );
-          })
-          .filter((v) => v)}
-      </TableBody>
-    </Table>
+                  >
+                    {row
+                      .getVisibleCells()
+                      .map((cell) =>
+                        renderTableCell(cell, row, groupsList),
+                      )
+                      .filter(Boolean)}
+                  </TableRow>
+                </Fragment>
+              );
+            })
+            .filter(Boolean)}
+        </TableBody>
+      </Table>
     </div>
   );
 }
 
+/**
+ * Returns the column definition for the expand/collapse control column
+ */
 function getExpandingControlColumn() {
   return {
     id: 'expander',
     header: ExpandAll,
     cell: ExpandRow,
     aggregatedCell: ExpandRow,
-    size: 56,
+    size: EXPANDER_COLUMN_SIZE,
     enableHiding: false,
     enableGrouping: false,
     enablePinning: true,

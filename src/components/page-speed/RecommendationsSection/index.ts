@@ -1,2 +1,2 @@
-export { RecommendationsSection } from './RecommendationsSection';
+export { RecommendationsSection } from '@/components/page-speed/RecommendationsSection/RecommendationsSection';
 

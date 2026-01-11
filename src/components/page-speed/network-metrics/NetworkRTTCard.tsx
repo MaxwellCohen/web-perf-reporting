@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table } from "@/components/ui/table";
 import { RenderMSValue } from "@/components/page-speed/lh-categories/table/RenderTableValue";
 import { TableItem } from "@/lib/schema";
+import { getNumber } from "@/lib/utils";
 import { useMemo } from "react";
 import {
   ColumnDef,
@@ -10,9 +11,10 @@ import {
 } from "@tanstack/react-table";
 import { DataTableHeader } from "@/components/page-speed/lh-categories/table/DataTableHeader";
 import { DataTableBody } from "@/components/page-speed/lh-categories/table/DataTableBody";
-import { createNumericAggregatedCell, createReportLabelAggregatedCell } from "@/components/page-speed/shared/aggregatedCellHelpers";
+import { createNumericAggregatedCell } from "@/components/page-speed/shared/aggregatedCellHelpers";
 import { sortByMaxValue } from "@/components/page-speed/shared/dataSortingHelpers";
 import { useStandardTable } from "@/components/page-speed/shared/tableConfigHelpers";
+import { useTableColumns } from "@/components/page-speed/shared/useTableColumns";
 
 type NetworkRTTData = {
   label: string;
@@ -29,6 +31,36 @@ type NetworkRTTCardProps = {
   metrics: NetworkRTTData[];
 };
 
+const columnHelper = createColumnHelper<RTTTableRow>();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const cols: ColumnDef<RTTTableRow, any>[] = [
+  columnHelper.accessor('origin', {
+    id: 'origin',
+    header: 'Origin',
+    enableSorting: true,
+    enableGrouping: true,
+    enableResizing: true,
+    filterFn: 'includesString',
+    cell: (info) => (
+      <div className="truncate max-w-50" title={info.getValue()}>
+        {info.getValue()}
+      </div>
+    ),
+  }),
+  columnHelper.accessor('rtt', {
+    id: 'rtt',
+    header: 'RTT',
+    enableSorting: true,
+    enableResizing: true,
+    filterFn: 'inNumberRange',
+    cell: (info) => {
+      const value = info.getValue();
+      return value !== undefined ? <RenderMSValue value={value} /> : 'N/A';
+    },
+    aggregatedCell: createNumericAggregatedCell('rtt'),
+  }),
+];
+
 export function NetworkRTTCard({ metrics }: NetworkRTTCardProps) {
   "use no memo";
   const validMetrics = useMemo(() => metrics.filter(m => m.networkRTT.length > 0), [metrics]);
@@ -41,7 +73,7 @@ export function NetworkRTTCard({ metrics }: NetworkRTTCardProps) {
     const allRows = validMetrics.flatMap(({ label, networkRTT }) =>
       networkRTT.map((item: TableItem) => {
         const origin = typeof item.origin === 'string' ? item.origin : '';
-        const rtt = typeof item.rtt === 'number' ? item.rtt : undefined;
+        const rtt = getNumber(item.rtt);
         return {
           label,
           origin: origin.replace(/^https?:\/\//, '') || 'Unknown',
@@ -58,55 +90,7 @@ export function NetworkRTTCard({ metrics }: NetworkRTTCardProps) {
     );
   }, [validMetrics]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const columns = useMemo<ColumnDef<RTTTableRow, any>[]>(() => {
-    const columnHelper = createColumnHelper<RTTTableRow>();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const cols: ColumnDef<RTTTableRow, any>[] = [];
-    
-    cols.push(
-      columnHelper.accessor('origin', {
-        id: 'origin',
-        header: 'Origin',
-        enableSorting: true,
-        enableGrouping: true,
-        enableResizing: true,
-        filterFn: 'includesString',
-        cell: (info) => (
-          <div className="truncate max-w-50" title={info.getValue()}>
-            {info.getValue()}
-          </div>
-        ),
-      }),
-      columnHelper.accessor('rtt', {
-        id: 'rtt',
-        header: 'RTT',
-        enableSorting: true,
-        enableResizing: true,
-        filterFn: 'inNumberRange',
-        cell: (info) => {
-          const value = info.getValue();
-          return value !== undefined ? <RenderMSValue value={value} /> : 'N/A';
-        },
-        aggregatedCell: createNumericAggregatedCell('rtt'),
-      })
-    );
-    
-    if (showReportColumn) {
-      cols.push(
-        columnHelper.accessor('label', {
-          id: 'label',
-          header: 'Report',
-          enableSorting: true,
-          enableResizing: true,
-          filterFn: 'includesString',
-          aggregatedCell: createReportLabelAggregatedCell('label'),
-        })
-      );
-    }
-    
-    return cols;
-  }, [showReportColumn]);
+  const columns = useTableColumns<RTTTableRow>(cols, columnHelper, showReportColumn);
 
   const table = useStandardTable({
     data,

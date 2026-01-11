@@ -1,5 +1,5 @@
-import { formatBytes, formatTime } from './utils';
-import type { ActionableStep } from './types';
+import { formatBytes, formatTime } from '@/components/page-speed/RecommendationsSection/utils';
+import type { ActionableStep } from '@/components/page-speed/RecommendationsSection/types';
 
 function getResourceName(url: string): string {
   try {

@@ -8,10 +8,10 @@ import {
   AccordionContent,
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { analyzeAudits, hasDetails } from './analyzeAudits';
-import { FilterControls } from './FilterControls';
-import { RecommendationItem } from './RecommendationItem';
-import type { Recommendation } from './types';
+import { analyzeAudits, hasDetails } from '@/components/page-speed/RecommendationsSection/analyzeAudits';
+import { FilterControls } from '@/components/page-speed/RecommendationsSection/FilterControls';
+import { RecommendationItem } from '@/components/page-speed/RecommendationsSection/RecommendationItem';
+import type { Recommendation } from '@/components/page-speed/RecommendationsSection/types';
 
 
 
@@ -79,7 +79,7 @@ export function RecommendationsSection() {
     <AccordionItem value="recommendations">
       <AccordionTrigger>
         <div className="flex items-center gap-2 text-lg font-bold group-hover:underline">
-          <span>Performance Recommendations</span>
+          <span>Recommendations</span>
           <Badge variant="outline" className="no-underline hover:no-underline">{recommendations.length}</Badge>
         </div>
       </AccordionTrigger>

@@ -291,6 +291,14 @@ export function groupBy<T>(list: T[], keyGetter: (item: T) => string) {
   return Object.fromEntries(map.entries());
 }
 
+export function getUrlString(url: unknown): string {
+  return typeof url === 'string' ? url : '';
+}
+
+export function getNumber(value: unknown): number | undefined {
+  return typeof value === 'number' ? value : undefined;
+}
+
 export function updateURl(url?: string) {
   if (!url) {
     return '';

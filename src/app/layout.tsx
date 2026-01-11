@@ -39,7 +39,7 @@ export default function RootLayout({
           suppressHydrationWarning={true}
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <div className="grid h-screen grid-rows-[auto,1fr]">
+          <div className="grid min-h-screen grid-rows-[auto,1fr]">
             <TopNav />
             <div className="overflow-y-scroll">
               <main className="mx-auto min-h-screen p-4 print:min-h-0">

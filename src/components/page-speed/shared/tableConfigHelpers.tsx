@@ -15,9 +15,12 @@ import {
   PaginationState,
   VisibilityState,
 } from '@tanstack/react-table';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { booleanFilterFn } from '@/components/page-speed/lh-categories/table/DataTableNoGrouping';
-import { ExpandAll, ExpandRow } from '@/components/page-speed/JSUsage/JSUsageTable';
+import {
+  ExpandAll,
+  ExpandRow,
+} from '@/components/page-speed/JSUsage/JSUsageTable';
 
 export type TableConfigOptions<T> = {
   data: T[];
@@ -49,7 +52,8 @@ export function useStandardTable<T>({
     label: false,
   });
 
-  const tableColumns: ColumnDef<T, unknown>[] = [
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const tableColumns = useMemo<ColumnDef<T, any>[]>(() => [
     {
       id: 'expander',
       header: (props) => <ExpandAll table={props.table} />,
@@ -63,7 +67,7 @@ export function useStandardTable<T>({
       enableResizing: true,
     },
     ...columns,
-  ];
+  ], [columns]);
 
   const table = useReactTable({
     data,
@@ -76,7 +80,6 @@ export function useStandardTable<T>({
     getFacetedMinMaxValues: getFacetedMinMaxValues(),
     getGroupedRowModel: getGroupedRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
-    ...(enablePagination && { getPaginationRowModel: getPaginationRowModel() }),
     enableExpanding: true,
     getRowCanExpand: () => false, // Disable expansion for grouped rows
     groupedColumnMode: false, // Allow sorting on grouped columns
@@ -87,7 +90,10 @@ export function useStandardTable<T>({
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onGroupingChange: setGrouping,
-    ...(enablePagination && { onPaginationChange: setPagination }),
+    ...(enablePagination && {
+      getPaginationRowModel: getPaginationRowModel(),
+      onPaginationChange: setPagination,
+    }),
     onColumnVisibilityChange: setColumnVisibility,
     filterFns: {
       booleanFilterFn,
@@ -103,4 +109,3 @@ export function useStandardTable<T>({
 
   return table;
 }
-

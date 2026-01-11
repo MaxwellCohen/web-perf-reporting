@@ -1,6 +1,7 @@
 "use client";
 import { RenderMSValue } from "@/components/page-speed/lh-categories/table/RenderTableValue";
 import { TableItem } from "@/lib/schema";
+import { getNumber } from "@/lib/utils";
 import { useMemo } from "react";
 import {
   ColumnDef,
@@ -10,7 +11,7 @@ import { toTitleCase } from "@/components/page-speed/toTitleCase";
 import { createNumericAggregatedCell, createStringAggregatedCell } from "@/components/page-speed/shared/aggregatedCellHelpers";
 import { sortByMaxValue } from "@/components/page-speed/shared/dataSortingHelpers";
 import { useStandardTable } from "@/components/page-speed/shared/tableConfigHelpers";
-import { createReportColumn } from "@/components/page-speed/shared/tableColumnHelpers";
+import { useTableColumns } from "@/components/page-speed/shared/useTableColumns";
 import { TableCard } from "@/components/page-speed/shared/TableCard";
 
 type MainThreadWorkData = {
@@ -29,6 +30,35 @@ type MainThreadWorkCardProps = {
   metrics: MainThreadWorkData[];
 };
 
+const columnHelper = createColumnHelper<MainThreadWorkTableRow>();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const cols: ColumnDef<MainThreadWorkTableRow, any>[] = [
+  columnHelper.accessor('groupLabel', {
+    id: 'groupLabel',
+    header: 'Category',
+    enableSorting: true,
+    enableGrouping: true,
+    enableResizing: true,
+    filterFn: 'includesString',
+    aggregationFn: 'unique',
+    cell: (info) => info.getValue(),
+    aggregatedCell: createStringAggregatedCell('groupLabel', undefined, false),
+  }),
+  columnHelper.accessor('duration', {
+    id: 'duration',
+    header: 'Time Spent',
+    enableSorting: true,
+    enableResizing: true,
+    filterFn: 'inNumberRange',
+    aggregationFn: 'unique',
+    cell: (info) => {
+      const value = info.getValue();
+      return value !== undefined ? <RenderMSValue value={value} /> : 'N/A';
+    },
+    aggregatedCell: createNumericAggregatedCell('duration'),
+  })
+];
+
 export function MainThreadWorkCard({ metrics }: MainThreadWorkCardProps) {
   "use no memo";
   const validMetrics = useMemo(() => metrics.filter(m => m.mainThreadWork.length > 0), [metrics]);
@@ -40,7 +70,7 @@ export function MainThreadWorkCard({ metrics }: MainThreadWorkCardProps) {
       mainThreadWork.map((item: TableItem) => {
         const group = typeof item.group === 'string' ? item.group : '';
         const groupLabel = typeof item.groupLabel === 'string' ? item.groupLabel : group;
-        const duration = typeof item.duration === 'number' ? item.duration : undefined;
+        const duration = getNumber(item.duration);
         return {
           label,
           group,
@@ -58,45 +88,7 @@ export function MainThreadWorkCard({ metrics }: MainThreadWorkCardProps) {
     );
   }, [validMetrics]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const columns = useMemo<ColumnDef<MainThreadWorkTableRow, any>[]>(() => {
-    const columnHelper = createColumnHelper<MainThreadWorkTableRow>();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const cols: ColumnDef<MainThreadWorkTableRow, any>[] = [];
-    
-    cols.push(
-      columnHelper.accessor('groupLabel', {
-        id: 'groupLabel',
-        header: 'Category',
-        enableSorting: true,
-        enableGrouping: true,
-        enableResizing: true,
-        filterFn: 'includesString',
-        aggregationFn: 'unique',
-        cell: (info) => info.getValue(),
-        aggregatedCell: createStringAggregatedCell('groupLabel', undefined, false),
-      }),
-      columnHelper.accessor('duration', {
-        id: 'duration',
-        header: 'Time Spent',
-        enableSorting: true,
-        enableResizing: true,
-        filterFn: 'inNumberRange',
-        aggregationFn: 'unique',
-        cell: (info) => {
-          const value = info.getValue();
-          return value !== undefined ? <RenderMSValue value={value} /> : 'N/A';
-        },
-        aggregatedCell: createNumericAggregatedCell('duration'),
-      })
-    );
-    
-    if (showReportColumn) {
-      cols.push(createReportColumn(columnHelper));
-    }
-    
-    return cols;
-  }, [showReportColumn]);
+  const columns = useTableColumns<MainThreadWorkTableRow>(cols, columnHelper, showReportColumn);
 
   const table = useStandardTable({
     data,

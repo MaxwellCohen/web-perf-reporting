@@ -6,7 +6,7 @@ import {
   TableItem,
   PageSpeedInsights,
 } from '@/lib/schema';
-import type { AuditEntry, AuditDataMap } from './auditTypes';
+import type { AuditEntry, AuditDataMap } from '@/components/page-speed/RecommendationsSection/auditTypes';
 
 export function collectAuditData(
   items: Array<{ item: PageSpeedInsights; label: string }>

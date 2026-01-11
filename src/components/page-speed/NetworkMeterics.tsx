@@ -2,7 +2,7 @@
 import { useContext, useMemo } from "react";
 import { InsightsContext } from "@/components/page-speed/PageSpeedContext";
 import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { groupBy } from "@/lib/utils";
+import { groupBy, getNumber } from "@/lib/utils";
 import { AuditDetailTable, TableItem } from "@/lib/schema";
 import { TimingMetricsCard } from "@/components/page-speed/network-metrics/TimingMetricsCard";
 import { TimelineCard } from "@/components/page-speed/network-metrics/TimelineCard";
@@ -26,14 +26,14 @@ export function NetworkMetricsComponent() {
       // Get timing metrics from metrics audit (more accurate)
       const metricsAudit = item?.lighthouseResult?.audits?.metrics;
       const metricsDetails = (metricsAudit as { details?: { items?: Array<Record<string, unknown>> } })?.details?.items?.[0];
-      const ttfbFromMetrics = typeof metricsDetails?.timeToFirstByte === 'number' ? metricsDetails.timeToFirstByte : undefined;
-      const fcpFromMetrics = typeof metricsDetails?.firstContentfulPaint === 'number' ? metricsDetails.firstContentfulPaint : undefined;
-      const lcpFromMetrics = typeof metricsDetails?.largestContentfulPaint === 'number' ? metricsDetails.largestContentfulPaint : undefined;
-      const speedIndex = typeof metricsDetails?.speedIndex === 'number' ? metricsDetails.speedIndex : undefined;
-      const totalBlockingTime = typeof metricsDetails?.totalBlockingTime === 'number' ? metricsDetails.totalBlockingTime : undefined;
-      const domContentLoaded = typeof metricsDetails?.observedDomContentLoaded === 'number' ? metricsDetails.observedDomContentLoaded : undefined;
-      const loadTime = typeof metricsDetails?.observedLoad === 'number' ? metricsDetails.observedLoad : undefined;
-      const interactive = typeof metricsDetails?.interactive === 'number' ? metricsDetails.interactive : undefined;
+      const ttfbFromMetrics = getNumber(metricsDetails?.timeToFirstByte);
+      const fcpFromMetrics = getNumber(metricsDetails?.firstContentfulPaint);
+      const lcpFromMetrics = getNumber(metricsDetails?.largestContentfulPaint);
+      const speedIndex = getNumber(metricsDetails?.speedIndex);
+      const totalBlockingTime = getNumber(metricsDetails?.totalBlockingTime);
+      const domContentLoaded = getNumber(metricsDetails?.observedDomContentLoaded);
+      const loadTime = getNumber(metricsDetails?.observedLoad);
+      const interactive = getNumber(metricsDetails?.interactive);
       
       // Get network requests audit
       const networkRequestsAudit = item?.lighthouseResult?.audits?.['network-requests'];
@@ -49,16 +49,16 @@ export function NetworkMetricsComponent() {
       
       // Get observed events from metrics
       const observedNavigationStart = typeof metricsDetails?.observedNavigationStart === 'number' ? metricsDetails.observedNavigationStart : 0;
-      const observedFirstPaint = typeof metricsDetails?.observedFirstPaint === 'number' ? metricsDetails.observedFirstPaint : undefined;
-      const observedFirstContentfulPaint = typeof metricsDetails?.observedFirstContentfulPaint === 'number' ? metricsDetails.observedFirstContentfulPaint : undefined;
-      const observedLargestContentfulPaint = typeof metricsDetails?.observedLargestContentfulPaint === 'number' ? metricsDetails.observedLargestContentfulPaint : undefined;
+      const observedFirstPaint = getNumber(metricsDetails?.observedFirstPaint);
+      const observedFirstContentfulPaint = getNumber(metricsDetails?.observedFirstContentfulPaint);
+      const observedLargestContentfulPaint = getNumber(metricsDetails?.observedLargestContentfulPaint);
       
       // Extract additional metrics for timeline
-      const observedFirstContentfulPaintAllFrames = typeof metricsDetails?.observedFirstContentfulPaintAllFrames === 'number' ? metricsDetails.observedFirstContentfulPaintAllFrames : undefined;
-      const observedFirstVisualChange = typeof metricsDetails?.observedFirstVisualChange === 'number' ? metricsDetails.observedFirstVisualChange : undefined;
-      const observedLargestContentfulPaintAllFrames = typeof metricsDetails?.observedLargestContentfulPaintAllFrames === 'number' ? metricsDetails.observedLargestContentfulPaintAllFrames : undefined;
-      const observedLastVisualChange = typeof metricsDetails?.observedLastVisualChange === 'number' ? metricsDetails.observedLastVisualChange : undefined;
-      const observedTraceEnd = typeof metricsDetails?.observedTraceEnd === 'number' ? metricsDetails.observedTraceEnd : undefined;
+      const observedFirstContentfulPaintAllFrames = getNumber(metricsDetails?.observedFirstContentfulPaintAllFrames);
+      const observedFirstVisualChange = getNumber(metricsDetails?.observedFirstVisualChange);
+      const observedLargestContentfulPaintAllFrames = getNumber(metricsDetails?.observedLargestContentfulPaintAllFrames);
+      const observedLastVisualChange = getNumber(metricsDetails?.observedLastVisualChange);
+      const observedTraceEnd = getNumber(metricsDetails?.observedTraceEnd);
       
       return {
         label,

@@ -17,7 +17,6 @@ import { Table } from '@/components/ui/table';
 import { DataTableHeader } from '@/components/page-speed/lh-categories/table/DataTableHeader';
 import { DataTableBody } from '@/components/page-speed/lh-categories/table/DataTableBody';
 import { booleanFilterFn } from '@/components/page-speed/lh-categories/table/DataTableNoGrouping';
-import { formatBytes, formatTime } from './utils';
 import { RenderBytesValue, RenderMSValue } from '@/components/page-speed/lh-categories/table/RenderTableValue';
 
 interface ResourceItem {

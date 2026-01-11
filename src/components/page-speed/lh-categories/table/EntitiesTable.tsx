@@ -8,7 +8,7 @@ import {
   FilterFn,
 } from '@tanstack/react-table';
 import { useStandardTable } from '@/components/page-speed/shared/tableConfigHelpers';
-import { createReportColumn } from '@/components/page-speed/shared/tableColumnHelpers';
+import { useTableColumns } from '@/components/page-speed/shared/useTableColumns';
 import { TableCard } from '@/components/page-speed/shared/TableCard';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { extractValueLabelPairs, createStringAggregatedCell } from '@/components/page-speed/shared/aggregatedCellHelpers';
@@ -27,6 +27,137 @@ type EntityTableRow = {
   isUnrecognized: boolean;
   origins: string[];
 };
+
+// Create aggregated cell for boolean values
+const createBooleanAggregatedCell = (columnId: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, react/display-name
+  return (info: any): React.ReactNode => {
+    const row = info.row;
+    const valueLabelPairs = extractValueLabelPairs<boolean>(row, columnId);
+
+    if (valueLabelPairs.length === 0) return 'N/A';
+
+    const uniqueValues = [...new Set(valueLabelPairs.map((p) => p.value))];
+    const uniqueLabels = [...new Set(valueLabelPairs.map((p) => p.label))];
+    
+    if (uniqueValues.length === 1) {
+      const value = uniqueValues[0];
+      if (uniqueLabels.length > 1) {
+        return (
+          <div className="flex items-center gap-2">
+            {renderBoolean(value)}
+            <span className="text-xs text-muted-foreground">(All Devices)</span>
+          </div>
+        );
+      }
+      return renderBoolean(value);
+    }
+
+    const valueGroups = new Map<boolean, string[]>();
+    valueLabelPairs.forEach(({ value, label }) => {
+      if (!valueGroups.has(value)) {
+        valueGroups.set(value, []);
+      }
+      valueGroups.get(value)!.push(label);
+    });
+
+    return (
+      <div className="flex flex-col gap-1 max-h-24 overflow-y-auto">
+        {Array.from(valueGroups.entries()).map(([value, labels], i) => {
+          const uniqueLabelsForValue = [...new Set(labels)];
+          return (
+            <div key={i} className="flex items-center gap-2">
+              {renderBoolean(value)}
+              {uniqueLabelsForValue.length === 1 && (
+                <span className="text-xs text-muted-foreground">({uniqueLabelsForValue[0]})</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+};
+
+// Create aggregated cell for origins array
+const createOriginsAggregatedCell = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, react/display-name
+  return (info: any): React.ReactNode => {
+    const row = info.row;
+    const leafRows = row.getLeafRows();
+    const allOrigins: string[] = [];
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    leafRows.forEach((r: any) => {
+      const origins = r.getValue('origins') as string[];
+      if (Array.isArray(origins)) {
+        allOrigins.push(...origins);
+      }
+    });
+
+    if (allOrigins.length === 0) return 'N/A';
+
+    const uniqueOrigins = [...new Set(allOrigins)];
+    
+    return (
+      <div className="flex flex-col gap-1 max-h-24 overflow-y-auto">
+        {uniqueOrigins.map((origin, i) => (
+          <div key={`${i}-${origin}`}>{origin}</div>
+        ))}
+      </div>
+    );
+  };
+};
+
+const columnHelper = createColumnHelper<EntityTableRow>();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const cols: ColumnDef<EntityTableRow, any>[] = [
+  columnHelper.accessor('name', {
+    id: 'name',
+    header: 'Name',
+    enableSorting: true,
+    enableGrouping: true,
+    enableResizing: true,
+    filterFn: 'includesString',
+    aggregationFn: 'unique',
+    aggregatedCell: createStringAggregatedCell('name', undefined, false),
+  }),
+  columnHelper.accessor('isFirstParty', {
+    id: 'isFirstParty',
+    header: 'Is First Party',
+    enableSorting: true,
+    enableResizing: true,
+    filterFn: 'booleanFilterFn',
+    cell: (info) => renderBoolean(!!info.getValue()),
+    aggregatedCell: createBooleanAggregatedCell('isFirstParty'),
+  }),
+  columnHelper.accessor('isUnrecognized', {
+    id: 'isUnrecognized',
+    header: 'Is Unrecognized',
+    enableSorting: true,
+    enableResizing: true,
+    filterFn: 'booleanFilterFn',
+    cell: (info) => renderBoolean(!!info.getValue()),
+    aggregatedCell: createBooleanAggregatedCell('isUnrecognized'),
+  }),
+  columnHelper.accessor('origins', {
+    id: 'origins',
+    header: 'Origins',
+    enableSorting: false,
+    enableResizing: true,
+    cell: (info) => {
+      const origins = info.getValue();
+      return (
+        <div>
+          {origins.map((origin: string, i: number) => (
+            <div key={`${i}-${origin}`}>{origin}</div>
+          ))}
+        </div>
+      );
+    },
+    aggregatedCell: createOriginsAggregatedCell(),
+  }),
+];
 
 export function EntitiesTable() {
   "use no memo";
@@ -60,147 +191,7 @@ export function EntitiesTable() {
     });
   }, [validItems]);
 
-  // Create aggregated cell for boolean values
-  const createBooleanAggregatedCell = (columnId: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, react/display-name
-    return (info: any): React.ReactNode => {
-      const row = info.row;
-      const valueLabelPairs = extractValueLabelPairs<boolean>(row, columnId);
-
-      if (valueLabelPairs.length === 0) return 'N/A';
-
-      const uniqueValues = [...new Set(valueLabelPairs.map((p) => p.value))];
-      const uniqueLabels = [...new Set(valueLabelPairs.map((p) => p.label))];
-      
-      if (uniqueValues.length === 1) {
-        const value = uniqueValues[0];
-        if (uniqueLabels.length > 1) {
-          return (
-            <div className="flex items-center gap-2">
-              {renderBoolean(value)}
-              <span className="text-xs text-muted-foreground">(All Devices)</span>
-            </div>
-          );
-        }
-        return renderBoolean(value);
-      }
-
-      const valueGroups = new Map<boolean, string[]>();
-      valueLabelPairs.forEach(({ value, label }) => {
-        if (!valueGroups.has(value)) {
-          valueGroups.set(value, []);
-        }
-        valueGroups.get(value)!.push(label);
-      });
-
-      return (
-        <div className="flex flex-col gap-1 max-h-24 overflow-y-auto">
-          {Array.from(valueGroups.entries()).map(([value, labels], i) => {
-            const uniqueLabelsForValue = [...new Set(labels)];
-            return (
-              <div key={i} className="flex items-center gap-2">
-                {renderBoolean(value)}
-                {uniqueLabelsForValue.length === 1 && (
-                  <span className="text-xs text-muted-foreground">({uniqueLabelsForValue[0]})</span>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      );
-    };
-  };
-
-  // Create aggregated cell for origins array
-  const createOriginsAggregatedCell = () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, react/display-name
-    return (info: any): React.ReactNode => {
-      const row = info.row;
-      const leafRows = row.getLeafRows();
-      const allOrigins: string[] = [];
-      
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      leafRows.forEach((r: any) => {
-        const origins = r.getValue('origins') as string[];
-        if (Array.isArray(origins)) {
-          allOrigins.push(...origins);
-        }
-      });
-
-      if (allOrigins.length === 0) return 'N/A';
-
-      const uniqueOrigins = [...new Set(allOrigins)];
-      
-      return (
-        <div className="flex flex-col gap-1 max-h-24 overflow-y-auto">
-          {uniqueOrigins.map((origin, i) => (
-            <div key={`${i}-${origin}`}>{origin}</div>
-          ))}
-        </div>
-      );
-    };
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const columns = useMemo<ColumnDef<EntityTableRow, any>[]>(() => {
-    const columnHelper = createColumnHelper<EntityTableRow>();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const cols: ColumnDef<EntityTableRow, any>[] = [];
-    
-    cols.push(
-      columnHelper.accessor('name', {
-        id: 'name',
-        header: 'Name',
-        enableSorting: true,
-        enableGrouping: true,
-        enableResizing: true,
-        filterFn: 'includesString',
-        aggregationFn: 'unique',
-        aggregatedCell: createStringAggregatedCell('name', undefined, false),
-      }),
-      columnHelper.accessor('isFirstParty', {
-        id: 'isFirstParty',
-        header: 'Is First Party',
-        enableSorting: true,
-        enableResizing: true,
-        filterFn: 'booleanFilterFn',
-        cell: (info) => renderBoolean(!!info.getValue()),
-        aggregatedCell: createBooleanAggregatedCell('isFirstParty'),
-      }),
-      columnHelper.accessor('isUnrecognized', {
-        id: 'isUnrecognized',
-        header: 'Is Unrecognized',
-        enableSorting: true,
-        enableResizing: true,
-        filterFn: 'booleanFilterFn',
-        cell: (info) => renderBoolean(!!info.getValue()),
-        aggregatedCell: createBooleanAggregatedCell('isUnrecognized'),
-      }),
-      columnHelper.accessor('origins', {
-        id: 'origins',
-        header: 'Origins',
-        enableSorting: false,
-        enableResizing: true,
-        cell: (info) => {
-          const origins = info.getValue();
-          return (
-            <div>
-              {origins.map((origin: string, i: number) => (
-                <div key={`${i}-${origin}`}>{origin}</div>
-              ))}
-            </div>
-          );
-        },
-        aggregatedCell: createOriginsAggregatedCell(),
-      }),
-    );
-    
-    if (showReportColumn) {
-      cols.push(createReportColumn(columnHelper));
-    }
-    
-    return cols;
-  }, [showReportColumn]);
+  const columns = useTableColumns<EntityTableRow>(cols, columnHelper, showReportColumn);
 
   const table = useStandardTable({
     data,

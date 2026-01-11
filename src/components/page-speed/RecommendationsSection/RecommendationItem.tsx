@@ -5,11 +5,11 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from '@/components/ui/accordion';
-import { formatTime } from './utils';
-import { ActionableStepsTable } from './ActionableStepsTable';
-import { IssuesFoundTable } from './IssuesFoundTable';
-import { ResourcesTable } from './ResourcesTable';
-import type { Recommendation } from './types';
+import { formatTime } from '@/components/page-speed/RecommendationsSection/utils';
+import { ActionableStepsTable } from '@/components/page-speed/RecommendationsSection/ActionableStepsTable';
+import { IssuesFoundTable } from '@/components/page-speed/RecommendationsSection/IssuesFoundTable';
+import { ResourcesTable } from '@/components/page-speed/RecommendationsSection/ResourcesTable';
+import type { Recommendation } from '@/components/page-speed/RecommendationsSection/types';
 
 interface RecommendationItemProps {
   rec: Recommendation;

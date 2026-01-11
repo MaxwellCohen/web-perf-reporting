@@ -3,13 +3,13 @@ import {
   TableColumnHeading,
   TableItem,
 } from '@/lib/schema';
-import type { AuditEntry } from './auditTypes';
-import type { Recommendation, ActionableStep } from './types';
-import { METRIC_NAMES } from './constants';
-import { getRecommendationPriority } from './utils';
-import { extractSpecificRecommendations } from './extractRecommendations';
-import { getCategoryAndGenericSteps } from './categorySteps';
-import { deduplicateResourcesByUrl } from './deduplicateResources';
+import type { AuditEntry } from '@/components/page-speed/RecommendationsSection/auditTypes';
+import type { Recommendation, ActionableStep } from '@/components/page-speed/RecommendationsSection/types';
+import { METRIC_NAMES } from '@/components/page-speed/RecommendationsSection/constants';
+import { getRecommendationPriority } from '@/components/page-speed/RecommendationsSection/utils';
+import { extractSpecificRecommendations } from '@/components/page-speed/RecommendationsSection/extractRecommendations';
+import { getCategoryAndGenericSteps } from '@/components/page-speed/RecommendationsSection/categorySteps';
+import { deduplicateResourcesByUrl } from '@/components/page-speed/RecommendationsSection/deduplicateResources';
 
 export function collectSpecificRecommendations(
   auditId: string,

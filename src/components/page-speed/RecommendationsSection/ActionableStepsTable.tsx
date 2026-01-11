@@ -7,8 +7,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import type { Recommendation } from './types';
-import type { ActionableStep } from './types';
+import type { Recommendation } from '@/components/page-speed/RecommendationsSection/types';
+import type { ActionableStep } from '@/components/page-speed/RecommendationsSection/types';
 
 interface ActionableStepsTableProps {
   rec: Recommendation;

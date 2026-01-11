@@ -88,43 +88,45 @@ export function TaskSummaryCard({ metrics }: TaskSummaryCardProps) {
   const showReportColumn = validStats.length > 1;
 
   return (
-    <Card>
+    <Card className="md:col-span-2 lg:col-span-3">
       <CardHeader>
         <CardTitle>Task Summary</CardTitle>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {showReportColumn && <TableHead>Report</TableHead>}
-              <TableHead>Total Tasks</TableHead>
-              <TableHead>Total Time</TableHead>
-              <TableHead>Avg Duration</TableHead>
-              <TableHead>Longest Task</TableHead>
-              <TableHead>&gt;10ms</TableHead>
-              <TableHead>&gt;25ms</TableHead>
-              <TableHead>&gt;50ms</TableHead>
-              <TableHead>&gt;100ms</TableHead>
-              <TableHead>&gt;500ms</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {validStats.map((stat) => (
-              <TableRow key={stat.label}>
-                {showReportColumn && <TableCell className="font-medium">{stat.label || 'Unknown'}</TableCell>}
-                <TableCell>{stat.totalTasks}</TableCell>
-                <TableCell><RenderMSValue value={stat.totalTaskTime} /></TableCell>
-                <TableCell><RenderMSValue value={stat.averageTaskDuration} /></TableCell>
-                <TableCell><RenderMSValue value={stat.longestTaskDuration} /></TableCell>
-                <TableCell>{stat.numTasksOver10ms}</TableCell>
-                <TableCell>{stat.numTasksOver25ms}</TableCell>
-                <TableCell>{stat.numTasksOver50ms}</TableCell>
-                <TableCell>{stat.numTasksOver100ms}</TableCell>
-                <TableCell>{stat.numTasksOver500ms}</TableCell>
+        <div className="overflow-x-auto">
+          <Table className="table-auto min-w-full">
+            <TableHeader>
+              <TableRow>
+                {showReportColumn && <TableHead className="min-w-24 whitespace-nowrap px-3">Report</TableHead>}
+                <TableHead className="min-w-28 whitespace-nowrap px-3">Total Tasks</TableHead>
+                <TableHead className="min-w-24 whitespace-nowrap px-3">Total Time</TableHead>
+                <TableHead className="min-w-28 whitespace-nowrap px-3">Avg Duration</TableHead>
+                <TableHead className="min-w-28 whitespace-nowrap px-3">Longest Task</TableHead>
+                <TableHead className="min-w-20 whitespace-nowrap px-3 text-center">&gt;10ms</TableHead>
+                <TableHead className="min-w-20 whitespace-nowrap px-3 text-center">&gt;25ms</TableHead>
+                <TableHead className="min-w-20 whitespace-nowrap px-3 text-center">&gt;50ms</TableHead>
+                <TableHead className="min-w-24 whitespace-nowrap px-3 text-center">&gt;100ms</TableHead>
+                <TableHead className="min-w-24 whitespace-nowrap px-3 text-center">&gt;500ms</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {validStats.map((stat) => (
+                <TableRow key={stat.label}>
+                  {showReportColumn && <TableCell className="font-medium px-3">{stat.label || 'Unknown'}</TableCell>}
+                  <TableCell className="px-3">{stat.totalTasks}</TableCell>
+                  <TableCell className="px-3"><RenderMSValue value={stat.totalTaskTime} /></TableCell>
+                  <TableCell className="px-3"><RenderMSValue value={stat.averageTaskDuration} /></TableCell>
+                  <TableCell className="px-3"><RenderMSValue value={stat.longestTaskDuration} /></TableCell>
+                  <TableCell className="px-3 text-center">{stat.numTasksOver10ms}</TableCell>
+                  <TableCell className="px-3 text-center">{stat.numTasksOver25ms}</TableCell>
+                  <TableCell className="px-3 text-center">{stat.numTasksOver50ms}</TableCell>
+                  <TableCell className="px-3 text-center">{stat.numTasksOver100ms}</TableCell>
+                  <TableCell className="px-3 text-center">{stat.numTasksOver500ms}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );

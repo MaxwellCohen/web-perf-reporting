@@ -1,5 +1,4 @@
 'use client';
-
 import { CruxReport } from '@/lib/schema';
 import { formatCruxReport, formatDate, groupBy } from '@/lib/utils';
 import {
@@ -48,7 +47,7 @@ export function CurrentPerformanceDashboard({
           <PercentTable
             title={'Form Factors'}
             data={form_factors}
-            className='md:grid md:grid-cols-[auto,1fr] gap-2 pl-2 justify-between items-center flex-row flex-1 min-w-full md:min-w-[300px] '
+            className='md:grid md:grid-cols-[auto,1fr] gap-2 pl-2 justify-between items-center flex-row flex-1 min-w-full md:min-w-75 '
           />
         ) : null}
       </PerformanceOptions>

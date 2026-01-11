@@ -54,7 +54,7 @@ export function RenderChecklist({
 
             return (
               <TableRow key={key}>
-                <TableCell>{items.find((a) => a.label)?.label || ''}</TableCell>
+                <TableCell>{items.find((a) => a?.label)?.label || ''}</TableCell>
                 {items.map((a, i) => {
                   return (
                     <TableCell key={`${a}_${i}`}>

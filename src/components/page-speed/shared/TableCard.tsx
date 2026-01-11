@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import { DataTableHeader } from '@/components/page-speed/lh-categories/table/DataTableHeader';
 import { DataTableBody } from '@/components/page-speed/lh-categories/table/DataTableBody';
 import { Table as TableType } from '@tanstack/react-table';
@@ -11,7 +12,8 @@ type TableCardProps<T = unknown> = {
   table: TableType<T>;
   showPagination?: boolean;
   className?: string;
-  maxHeight?: string;
+  // maxHeight?: string;
+  pageSize?: number;
 };
 
 /**
@@ -22,24 +24,61 @@ export function TableCard<T = unknown>({
   table,
   showPagination = false,
   className = 'md:col-span-2 lg:col-span-3',
-  maxHeight,
+  // maxHeight,
+  pageSize = 10,
 }: TableCardProps<T>) {
-  "use no memo";
+  'use no memo';
+  const [showAllResults, setShowAllResults] = useState(false);
+  const rowCount = table.getRowCount();
+  const canShowAllResults = rowCount > pageSize;
+  const showPaginationControls =
+    showPagination && canShowAllResults && !showAllResults;
+
   return (
     <Card className={className}>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className={`w-full overflow-x-auto ${maxHeight || ''}`} style={maxHeight ? { maxHeight } : undefined}>
+        <div
+          className={`w-full overflow-x-auto `}
+        >
           <Table className="w-full" style={{ width: '100%' }}>
             <DataTableHeader table={table} />
             <DataTableBody table={table} />
           </Table>
         </div>
-        {showPagination && <PaginationCard table={table} showManualControls />}
+        {showPagination && (
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+            {showPaginationControls && (
+              <PaginationCard table={table} showManualControls />
+            )}
+            {canShowAllResults && !showAllResults && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const rowCount = table.getRowCount();
+                  table.setPageSize(rowCount);
+                  setShowAllResults(true);
+                }}
+              >
+                Show all results
+              </Button>
+            )}
+            {showAllResults && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  table.setPageSize(pageSize);
+                  setShowAllResults(false);
+                }}
+              >
+                Show less results
+              </Button>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
 }
-

@@ -11,9 +11,10 @@ import {
 } from "@tanstack/react-table";
 import { DataTableHeader } from "@/components/page-speed/lh-categories/table/DataTableHeader";
 import { DataTableBody } from "@/components/page-speed/lh-categories/table/DataTableBody";
-import { createNumericAggregatedCell, createBytesAggregatedCell, createStringAggregatedCell, createReportLabelAggregatedCell } from "@/components/page-speed/shared/aggregatedCellHelpers";
+import { createNumericAggregatedCell, createBytesAggregatedCell, createStringAggregatedCell } from "@/components/page-speed/shared/aggregatedCellHelpers";
 import { sortByMaxValue } from "@/components/page-speed/shared/dataSortingHelpers";
 import { useStandardTable } from "@/components/page-speed/shared/tableConfigHelpers";
+import { useTableColumns } from "@/components/page-speed/shared/useTableColumns";
 
 type ResourceTypeBreakdown = {
   label: string;
@@ -38,6 +39,48 @@ function sumOn<T extends Record<string, unknown>>(items: T[], key: string): numb
     return acc + (typeof value === 'number' ? value : 0);
   }, 0);
 }
+
+const columnHelper = createColumnHelper<ResourceTypeTableRow>();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const cols: ColumnDef<ResourceTypeTableRow, any>[] = [
+  columnHelper.accessor('resourceType', {
+    id: 'resourceType',
+    header: 'Resource Type',
+    enableSorting: true,
+    enableGrouping: true,
+    enableResizing: true,
+    filterFn: 'includesString',
+    cell: (info) => toTitleCase(info.getValue()),
+    aggregatedCell: createStringAggregatedCell('resourceType', toTitleCase),
+  }),
+  columnHelper.accessor('count', {
+    id: 'count',
+    header: 'Count',
+    enableSorting: true,
+    enableResizing: true,
+    filterFn: 'inNumberRange',
+    cell: (info) => <span>{info.getValue()}</span>,
+    aggregatedCell: createNumericAggregatedCell('count', (value) => <span>{value}</span>),
+  }),
+  columnHelper.accessor('transferSize', {
+    id: 'transferSize',
+    header: 'Total Transfer Size',
+    enableSorting: true,
+    enableResizing: true,
+    filterFn: 'inNumberRange',
+    cell: (info) => <RenderBytesValue value={info.getValue()} />,
+    aggregatedCell: createBytesAggregatedCell('transferSize'),
+  }),
+  columnHelper.accessor('resourceSize', {
+    id: 'resourceSize',
+    header: 'Total Resource Size',
+    enableSorting: true,
+    enableResizing: true,
+    filterFn: 'inNumberRange',
+    cell: (info) => <RenderBytesValue value={info.getValue()} />,
+    aggregatedCell: createBytesAggregatedCell('resourceSize'),
+  }),
+];
 
 export function ResourceTypeBreakdownCard({ stats }: ResourceTypeBreakdownCardProps) {
   "use no memo";
@@ -69,67 +112,7 @@ export function ResourceTypeBreakdownCard({ stats }: ResourceTypeBreakdownCardPr
     );
   }, [validStats]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const columns = useMemo<ColumnDef<ResourceTypeTableRow, any>[]>(() => {
-    const columnHelper = createColumnHelper<ResourceTypeTableRow>();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const cols: ColumnDef<ResourceTypeTableRow, any>[] = [];
-    
-    cols.push(
-      columnHelper.accessor('resourceType', {
-        id: 'resourceType',
-        header: 'Resource Type',
-        enableSorting: true,
-        enableGrouping: true,
-        enableResizing: true,
-        filterFn: 'includesString',
-        cell: (info) => toTitleCase(info.getValue()),
-        aggregatedCell: createStringAggregatedCell('resourceType', toTitleCase),
-      }),
-      columnHelper.accessor('count', {
-        id: 'count',
-        header: 'Count',
-        enableSorting: true,
-        enableResizing: true,
-        filterFn: 'inNumberRange',
-        cell: (info) => <span>{info.getValue()}</span>,
-        aggregatedCell: createNumericAggregatedCell('count', (value) => <span>{value}</span>),
-      }),
-      columnHelper.accessor('transferSize', {
-        id: 'transferSize',
-        header: 'Total Transfer Size',
-        enableSorting: true,
-        enableResizing: true,
-        filterFn: 'inNumberRange',
-        cell: (info) => <RenderBytesValue value={info.getValue()} />,
-        aggregatedCell: createBytesAggregatedCell('transferSize'),
-      }),
-      columnHelper.accessor('resourceSize', {
-        id: 'resourceSize',
-        header: 'Total Resource Size',
-        enableSorting: true,
-        enableResizing: true,
-        filterFn: 'inNumberRange',
-        cell: (info) => <RenderBytesValue value={info.getValue()} />,
-        aggregatedCell: createBytesAggregatedCell('resourceSize'),
-      })
-    );
-    
-    if (showReportColumn) {
-      cols.push(
-        columnHelper.accessor('label', {
-          id: 'label',
-          header: 'Report',
-          enableSorting: true,
-          enableResizing: true,
-          filterFn: 'includesString',
-          aggregatedCell: createReportLabelAggregatedCell('label'),
-        })
-      );
-    }
-    
-    return cols;
-  }, [showReportColumn]);
+  const columns = useTableColumns<ResourceTypeTableRow>(cols, columnHelper, showReportColumn);
 
   const table = useStandardTable({
     data,

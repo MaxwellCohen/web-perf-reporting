@@ -23,7 +23,7 @@ import {
   RenderBytesValue,
   RenderCountNumber,
   renderTimeValue,
-} from './table/RenderTableValue';
+} from '@/components/page-speed/lh-categories/table/RenderTableValue';
 
 type DebugDataTableItem = {
   key: string;
