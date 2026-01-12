@@ -69,7 +69,6 @@ const extraInfo = (
       if (!heading.key) return null;
       if (heading?.valueType === 'node') return null;
       if (!item[heading.key]) return null;
-      // if (!heading.key.includes(getItemDevice(item, device))) return null;
       return (
         <div
           className="flex flex-row justify-between pb-4 align-middle"

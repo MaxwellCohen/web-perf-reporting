@@ -9,6 +9,32 @@ type ValueLabelPair<T> = {
 };
 
 /**
+ * Component to display a value with an optional device label
+ */
+function ValueWithLabel({
+  value,
+  label,
+  showAllDevices = false,
+}: {
+  value: React.ReactNode;
+  label?: string;
+  showAllDevices?: boolean;
+}) {
+  const labelText = showAllDevices ? 'All Devices' : label;
+  
+  if (!labelText) {
+    return <>{value}</>;
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      {value}
+      <span className="text-xs text-muted-foreground">({labelText})</span>
+    </div>
+  );
+}
+
+/**
  * Extracts value and label pairs from leaf rows for a given column
  */
 export function extractValueLabelPairs<T>(
@@ -54,21 +80,52 @@ export function createNumericAggregatedCell(
 
     if (validPairs.length === 0) return 'N/A';
 
-    const uniqueValues = [...new Set(validPairs.map((p) => p.value))];
     const uniqueLabels = [...new Set(validPairs.map((p) => p.label))];
+    const uniqueValues = [...new Set(validPairs.map((p) => p.value))];
     
+    // Check if all values are exactly the same
     if (uniqueValues.length === 1) {
       // If value is same for all reports, show "(All Devices)"
       if (uniqueLabels.length > 1) {
         return (
-          <div className="flex items-center gap-2">
-            {renderValue(uniqueValues[0])}
-            <span className="text-xs text-muted-foreground">(All Devices)</span>
-          </div>
+          <ValueWithLabel
+            value={renderValue(uniqueValues[0])}
+            showAllDevices
+          />
         );
       }
-      // Single report, just show the value
-      return renderValue(uniqueValues[0]);
+      // Single report, show the value with device label
+      return (
+        <ValueWithLabel
+          value={renderValue(uniqueValues[0])}
+          label={uniqueLabels[0]}
+        />
+      );
+    }
+    
+    // If values are not exactly the same, check if they round to the same value
+    // This handles cases where values like 4.0 and 4.1 both display as "4 ms"
+    const roundedValues = validPairs.map((p) => Math.round(p.value));
+    const uniqueRoundedValues = [...new Set(roundedValues)];
+    
+    if (uniqueRoundedValues.length === 1) {
+      // All values round to the same number
+      if (uniqueLabels.length > 1) {
+        // Multiple devices, show "(All Devices)"
+        return (
+          <ValueWithLabel
+            value={renderValue(uniqueRoundedValues[0])}
+            showAllDevices
+          />
+        );
+      }
+      // Single device, show device label
+      return (
+        <ValueWithLabel
+          value={renderValue(uniqueRoundedValues[0])}
+          label={uniqueLabels[0]}
+        />
+      );
     }
 
     const valueGroups = new Map<number, string[]>();
@@ -84,12 +141,11 @@ export function createNumericAggregatedCell(
         {Array.from(valueGroups.entries()).map(([value, labels], i) => {
           const uniqueLabelsForValue = [...new Set(labels)];
           return (
-            <div key={i} className="flex items-center gap-2">
-              {renderValue(value)}
-              {uniqueLabelsForValue.length === 1 && (
-                <span className="text-xs text-muted-foreground">({uniqueLabelsForValue[0]})</span>
-              )}
-            </div>
+            <ValueWithLabel
+              key={i}
+              value={renderValue(value)}
+              label={uniqueLabelsForValue.length === 1 ? uniqueLabelsForValue[0] : undefined}
+            />
           );
         })}
       </div>
@@ -130,10 +186,10 @@ export function createStringAggregatedCell(
       // If value is same for all reports, show "(All Devices)" if enabled
       if (showAllDevicesLabel && uniqueLabels.length > 1) {
         return (
-          <div className="flex items-center gap-2">
-            <span>{value}</span>
-            <span className="text-xs text-muted-foreground">(All Devices)</span>
-          </div>
+          <ValueWithLabel
+            value={<span>{value}</span>}
+            showAllDevices
+          />
         );
       }
       // Single report or label disabled, just show the value
@@ -154,12 +210,11 @@ export function createStringAggregatedCell(
           const uniqueLabelsForValue = [...new Set(labels)];
           const displayValue = transformValue ? transformValue(value) : value;
           return (
-            <div key={i} className="flex items-center gap-2">
-              <span>{displayValue}</span>
-              {showAllDevicesLabel && uniqueLabelsForValue.length === 1 && (
-                <span className="text-xs text-muted-foreground">({uniqueLabelsForValue[0]})</span>
-              )}
-            </div>
+            <ValueWithLabel
+              key={i}
+              value={<span>{displayValue}</span>}
+              label={showAllDevicesLabel && uniqueLabelsForValue.length === 1 ? uniqueLabelsForValue[0] : undefined}
+            />
           );
         })}
       </div>
@@ -185,10 +240,10 @@ export function createPercentageAggregatedCell(columnId: string, precision: numb
       // If value is same for all reports, show "(All Devices)"
       if (uniqueLabels.length > 1) {
         return (
-          <div className="flex items-center gap-2">
-            <span>{`${uniqueValues[0].toFixed(2)}%`}</span>
-            <span className="text-xs text-muted-foreground">(All Devices)</span>
-          </div>
+          <ValueWithLabel
+            value={<span>{`${uniqueValues[0].toFixed(2)}%`}</span>}
+            showAllDevices
+          />
         );
       }
       // Single report, just show the value
@@ -208,12 +263,11 @@ export function createPercentageAggregatedCell(columnId: string, precision: numb
         {Array.from(valueGroups.entries()).map(([value, labels], i) => {
           const uniqueLabelsForValue = [...new Set(labels)];
           return (
-            <div key={i} className="flex items-center gap-2">
-              <span>{`${value.toFixed(precision)}%`}</span>
-              {uniqueLabelsForValue.length === 1 && (
-                <span className="text-xs text-muted-foreground">({uniqueLabelsForValue[0]})</span>
-              )}
-            </div>
+            <ValueWithLabel
+              key={i}
+              value={<span>{`${value.toFixed(precision)}%`}</span>}
+              label={uniqueLabelsForValue.length === 1 ? uniqueLabelsForValue[0] : undefined}
+            />
           );
         })}
       </div>

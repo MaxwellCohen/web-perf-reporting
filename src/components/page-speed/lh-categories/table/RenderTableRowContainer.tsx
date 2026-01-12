@@ -1,7 +1,4 @@
-
 import { cn } from '@/lib/utils';
-
-
 
 export const renderTableRowContainerCss = 'grid grid-cols-subgrid border-b-2 items-center col-span-full hover:bg-muted/50';
 

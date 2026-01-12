@@ -113,7 +113,6 @@ function CheckBoxFilter<T>({ header }: { header: Header<T, unknown> }) {
               }
               onCheckedChange={(checked: unknown) => {
                 col.setFilterValue((oldValue: string[]) => {
-                  console.log(oldValue);
                   let previousValue = oldValue;
                   if (oldValue?.length) {
                     previousValue = oldValue;

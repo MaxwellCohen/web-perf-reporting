@@ -12,19 +12,14 @@ export function DataTableBody<T>({ table }: { table: TableType<T> }) {
             {row
               .getVisibleCells()
               .map((cell) => {
-                let cellRender = (
-                  <>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </>
+                let cellRender = flexRender(
+                  cell.column.columnDef.cell,
+                  cell.getContext(),
                 );
                 if (cell.getIsAggregated() || cell.getIsGrouped()) {
-                  cellRender = (
-                    <>
-                      {flexRender(
-                        cell.column.columnDef.aggregatedCell,
-                        cell.getContext(),
-                      )}
-                    </>
+                  cellRender = flexRender(
+                    cell.column.columnDef.aggregatedCell,
+                    cell.getContext(),
                   );
                 }
 

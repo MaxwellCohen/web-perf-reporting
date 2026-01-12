@@ -99,7 +99,7 @@ export function DetailTableSeparatePerReport({
     } else if (reportLabel.includes('All Devices')) {
       formattedLabel = 'All Devices';
     }
-    return `${auditTitle} - ${formattedLabel} (${itemCount} ${itemCount === 1 ? 'item' : 'items'})`;
+    return `${auditTitle} Table for ${formattedLabel} (${itemCount} ${itemCount === 1 ? 'item' : 'items'})`;
   };
 
   // Render one accordion per report table

@@ -6,6 +6,8 @@ import {
   ColumnDef,
   createColumnHelper,
   FilterFn,
+  CellContext,
+  Row,
 } from '@tanstack/react-table';
 import { useStandardTable } from '@/components/page-speed/shared/tableConfigHelpers';
 import { useTableColumns } from '@/components/page-speed/shared/useTableColumns';
@@ -30,8 +32,8 @@ type EntityTableRow = {
 
 // Create aggregated cell for boolean values
 const createBooleanAggregatedCell = (columnId: string) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, react/display-name
-  return (info: any): React.ReactNode => {
+  // eslint-disable-next-line react/display-name
+  return (info: CellContext<EntityTableRow, unknown>): React.ReactNode => {
     const row = info.row;
     const valueLabelPairs = extractValueLabelPairs<boolean>(row, columnId);
 
@@ -81,14 +83,13 @@ const createBooleanAggregatedCell = (columnId: string) => {
 
 // Create aggregated cell for origins array
 const createOriginsAggregatedCell = () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, react/display-name
-  return (info: any): React.ReactNode => {
+  // eslint-disable-next-line react/display-name
+  return (info: CellContext<EntityTableRow, unknown>): React.ReactNode => {
     const row = info.row;
     const leafRows = row.getLeafRows();
     const allOrigins: string[] = [];
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    leafRows.forEach((r: any) => {
+    leafRows.forEach((r: Row<EntityTableRow>) => {
       const origins = r.getValue('origins') as string[];
       if (Array.isArray(origins)) {
         allOrigins.push(...origins);
@@ -110,8 +111,7 @@ const createOriginsAggregatedCell = () => {
 };
 
 const columnHelper = createColumnHelper<EntityTableRow>();
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const cols: ColumnDef<EntityTableRow, any>[] = [
+const cols: ColumnDef<EntityTableRow, unknown>[] = [
   columnHelper.accessor('name', {
     id: 'name',
     header: 'Name',
@@ -160,7 +160,7 @@ const cols: ColumnDef<EntityTableRow, any>[] = [
 ];
 
 export function EntitiesTable() {
-  "use no memo";
+  'use no memo';
   const items = useContext(InsightsContext);
 
   const validItems = useMemo(() => {

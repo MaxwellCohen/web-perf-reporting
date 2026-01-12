@@ -38,17 +38,6 @@ export function RenderTableValue({
 
   // First deal with the possible object forms of value.
   if (typeof value === 'object' && 'type' in value) {
-    // Log device validation for node types
-    if (value.type === 'node' && process.env.NODE_ENV === 'development') {
-      console.debug('[RenderTableValue] Passing device to NodeComponent:', {
-        device,
-        deviceType: typeof device,
-        hasDevice: !!device,
-        valueType: value.type,
-        lhId: (value as NodeValue).lhId,
-      });
-    }
-    
     // The value's type overrides the heading's for this column.
     const valueTypeMap = {
       code: () => <RenderCodeValue value={value as CodeValue} {...props} />,
@@ -344,11 +333,11 @@ function RenderCode({
 }
 
 export function renderTimeValue(msU: unknown) {
-  const ms = Number(msU)
+  const ms = Number(msU);
   // Normalize values very close to zero to avoid "-0 ms" display
   const normalizedMs = Math.abs(ms) < 0.001 ? 0 : ms;
-  if (Number.isNaN(normalizedMs) || normalizedMs <= 0 ) {
-    return "0 ms";
+  if (Number.isNaN(normalizedMs) || normalizedMs <= 0) {
+    return '0 ms';
   }
 
   const milliseconds = Math.floor(normalizedMs % 1000);
@@ -373,41 +362,61 @@ export function renderTimeValue(msU: unknown) {
 
   if (seconds > 0) {
     parts.push(`${seconds}.${milliseconds || 0} s`);
-    return `${parts.join(" ")}`;
+    return `${parts.join(' ')}`;
   }
 
   if (milliseconds > 0 || parts.length === 0) {
     parts.push(`${milliseconds} ms`);
   }
 
-  // Join parts with commas and "and" for the last separator
-
-    return `${parts.join(" ")}`;
-
+  return `${parts.join(' ')}`;
 }
 
-export function RenderMSValue({ value, ...props }: { value: unknown }& React.HTMLAttributes<HTMLElement>) {
+export function RenderMSValue({
+  value,
+  ...props
+}: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
   const ms = Number(value);
-  if(Number.isNaN(ms)) {
-    return <span title="ms" {...props} className={cn('', props.className)}>N/A</span>;
+  if (Number.isNaN(ms)) {
+    return (
+      <span title="ms" {...props} className={cn('', props.className)}>
+        N/A
+      </span>
+    );
   }
   // Normalize values very close to zero to avoid "-0 ms" display
   const normalizedMs = Math.abs(ms) < 0.001 ? 0 : ms;
   if (normalizedMs < 1000) {
     // Use Math.abs to ensure we never display "-0"
     const displayMs = Math.abs(normalizedMs) < 0.5 ? 0 : normalizedMs;
-    return <span title="ms" {...props} className={cn('', props.className)}>{displayMs.toFixed(0)} ms</span>;
+    return (
+      <span title="ms" {...props} className={cn('', props.className)}>
+        {displayMs.toFixed(0)} ms
+      </span>
+    );
   }
   const seconds = normalizedMs / 1000;
   if (seconds < 60) {
-    return <span title="ms" {...props} className={cn('', props.className)}>{seconds.toFixed(2)} s</span>;
+    return (
+      <span title="ms" {...props} className={cn('', props.className)}>
+        {seconds.toFixed(2)} s
+      </span>
+    );
   }
   const minutes = seconds / 60;
   if (minutes < 60) {
-    return <span title="ms" {...props} className={cn('', props.className)}>{minutes.toFixed(2)} min</span>;
+    return (
+      <span title="ms" {...props} className={cn('', props.className)}>
+        {minutes.toFixed(2)} min
+      </span>
+    );
   }
   const hours = minutes / 60;
-  return <span title="ms" {...props} className={cn('', props.className)}>{hours.toFixed(2)} h</span>;
+  return (
+    <span title="ms" {...props} className={cn('', props.className)}>
+      {hours.toFixed(2)} h
+    </span>
+  );
 }
 
 function RenderNumberValue({
@@ -435,9 +444,9 @@ function RenderNumberValue({
       title="numeric"
       {...props}
       className={cn('align-right', props.className)}
-    >
-      {(+(value as number)   || 0).toFixed(-Math.log10(heading?.granularity || 1))}
-    </span>
+      >
+        {(Number(value) || 0).toFixed(-Math.log10(heading?.granularity || 1))}
+      </span>
   );
 }
 

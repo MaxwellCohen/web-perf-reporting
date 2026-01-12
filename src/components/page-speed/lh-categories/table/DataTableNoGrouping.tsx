@@ -37,34 +37,25 @@ export function DataTableNoGrouping<T>({
   title,
 }: {
   data: T[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  columns: ColumnDef<T, any>[];
+  columns: ColumnDef<T, unknown>[];
   title: string;
 }) {
   'use no memo';
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const table = useReactTable({
-    // required items
-    columns, // column definitions array
-    data, // data array
-    getCoreRowModel: getCoreRowModel(), // core row model
-
-    // sorting,
+    columns,
+    data,
+    getCoreRowModel: getCoreRowModel(),
     enableSorting: true,
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-
-    // filtering,
     enableColumnFilters: true,
     onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(), // needed for client-side filtering
-    // facet filtering
-    getFacetedRowModel: getFacetedRowModel(), // client-side faceting
-    getFacetedUniqueValues: getFacetedUniqueValues(), // for facet values
-    getFacetedMinMaxValues: getFacetedMinMaxValues(), 
-
-    // column resizing
+    getFilteredRowModel: getFilteredRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    getFacetedMinMaxValues: getFacetedMinMaxValues(),
     enableColumnResizing: true,
     columnResizeMode: 'onChange',
 
@@ -94,73 +85,4 @@ export function DataTableNoGrouping<T>({
     </AccordionItem>
   );
 }
-
-
-export function DataTableWithSubRows<T>({
-    data,
-    columns,
-    title,
-  }: {
-    data: T[];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    columns: ColumnDef<T, any>[];
-    title: string;
-  }) {
-    'use no memo';
-    const [sorting, setSorting] = useState<SortingState>([]);
-    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-    const table = useReactTable({
-      // required items
-      columns, // column definitions array
-      data, // data array
-      getCoreRowModel: getCoreRowModel(), // core row model
-  
-      // sub rows
-    //   getSubRows: (row) => row.Sub,
-
-      // sorting,
-      enableSorting: true,
-      onSortingChange: setSorting,
-      getSortedRowModel: getSortedRowModel(),
-  
-      // filtering,
-      enableColumnFilters: true,
-      onColumnFiltersChange: setColumnFilters,
-      getFilteredRowModel: getFilteredRowModel(), // needed for client-side filtering
-      
-      // facet filtering
-      getFacetedRowModel: getFacetedRowModel(), // client-side faceting
-      getFacetedUniqueValues: getFacetedUniqueValues(), // for facet values
-      getFacetedMinMaxValues: getFacetedMinMaxValues(), 
-  
-      // column resizing
-      enableColumnResizing: true,
-      columnResizeMode: 'onChange',
-  
-      filterFns: {
-        booleanFilterFn,
-      },
-  
-      state: {
-        sorting,
-        columnFilters,
-      },
-    });
-  
-    return (
-      <AccordionItem value={title}>
-        <AccordionTrigger>
-          <div className="text-lg font-bold group-hover:underline">{toTitleCase(title)}</div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <div className="w-full overflow-x-auto">
-            <Table className="w-full" style={{ width: '100%' }}>
-              <DataTableHeader table={table} />
-              <DataTableBody table={table} />
-            </Table>
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    );
-  }
   

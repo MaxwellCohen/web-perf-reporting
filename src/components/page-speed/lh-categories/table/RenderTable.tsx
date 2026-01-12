@@ -44,34 +44,16 @@ import { DetailTableSeparatePerReport } from '@/components/page-speed/lh-categor
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { useStandardTable } from '@/components/page-speed/shared/tableConfigHelpers';
 import { shouldShowSeparateTablesPerReport } from '@/components/page-speed/auditTableConfig';
-
-// Constants
-const GROUPABLE_VALUE_TYPES: ItemValueType[] = [
-  'code',
-  'text',
-  'source-location',
-  'url',
-  'link',
-];
-
-const UNIQUE_AGG_VALUE_TYPES: ItemValueType[] = [
-  'code',
-  'text',
-  'source-location',
-  'url',
-  'link',
-  'thumbnail',
-  'node',
-];
-
-const NUMERIC_VALUE_TYPES: ItemValueType[] = ['numeric', 'bytes', 'ms', 'timespanMs'];
-
-const COLUMN_SIZE_DEFAULT = 125;
-const COLUMN_SIZE_LARGE = 400;
-const EXPANDER_COLUMN_SIZE = 56;
-const DEVICE_COLUMN_SIZE = 110;
-
-const DEVICE_LABEL_SEPARATOR = '😠😠';
+import {
+  GROUPABLE_VALUE_TYPES,
+  UNIQUE_AGG_VALUE_TYPES,
+  NUMERIC_VALUE_TYPES,
+  COLUMN_SIZE_DEFAULT,
+  COLUMN_SIZE_LARGE,
+  EXPANDER_COLUMN_SIZE,
+  DEVICE_COLUMN_SIZE,
+  DEVICE_LABEL_SEPARATOR,
+} from '@/components/page-speed/lh-categories/table/constants';
 
 // Type definitions
 type DetailTableDataRow = {
@@ -626,8 +608,7 @@ export function DetailTable({
   }
 
   // Check if this audit should show separate tables per report
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const auditId = (rows[0]?.auditResult as any)?.id;
+  const auditId = (rows[0]?.auditResult as { id?: string })?.id;
   if (auditId && shouldShowSeparateTablesPerReport(auditId)) {
     return <DetailTableSeparatePerReport rows={rows} title={title} />;
   }

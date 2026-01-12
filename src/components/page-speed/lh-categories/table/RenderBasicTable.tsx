@@ -29,7 +29,9 @@ export function RenderBasicTable({
     <Details className="@container">
       <summary className="flex flex-col gap-2">
         <div className="flex flex-col gap-2">
-          <div className="text-lg font-bold"> {toSentenceCase(`${title} details`.trim()) } </div>
+          <div className="text-lg font-bold">
+            {toSentenceCase(`${title} details`.trim())}
+          </div>
         </div>
       </summary>
       <TableContainer headings={headings} className="">
@@ -75,7 +77,13 @@ export function TableContainer({
       style={{
         ...(props.style || {}),
         gridTemplateColumns: headings
-          .map((h) => (showBothDevices(h) ? '140px': h.label === 'Protocol' ? '140px' : 'minmax(300px, 1fr)' ))
+          .map((h) =>
+            showBothDevices(h)
+              ? '140px'
+              : h.label === 'Protocol'
+                ? '140px'
+                : 'minmax(300px, 1fr)',
+          )
           .join(' '),
       }}
     >
@@ -107,7 +115,6 @@ export function NestedTableNoCollapse({
           <RenderSubItems item={item} headings={headings} device={device} />
         </div>
       ) : null}
-      {/* <div className="mb-2 w-full"></div> */}
     </Fragment>
   );
 }
@@ -141,15 +148,11 @@ export function NestedTable({
             .filter(Boolean)}
         </TableContainer>
       </summary>
-      <TableContainer headings={headings} className="col-span-full ">
-        {item.subItems?.items?.length ? (
-          <>
-            {/* <RenderSubItemsHeader headings={headings} /> */}
+        <TableContainer headings={headings} className="col-span-full ">
+          {item.subItems?.items?.length ? (
             <RenderSubItems item={item} headings={headings} device={device} />
-          </>
-        ) : null}
+          ) : null}
       </TableContainer>
-      {/* <div className="mb-2 w-full"></div> */}
     </Details>
   );
 }

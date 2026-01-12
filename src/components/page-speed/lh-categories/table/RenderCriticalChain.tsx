@@ -21,7 +21,7 @@ export function RenderCriticalChainData({
         <CriticalRequestChainSection details={mobileDetails} device="Mobile" />
       ) : null}
       {desktopDetails?.chains ? (
-                <CriticalRequestChainSection details={desktopDetails} device="Desktop" />
+        <CriticalRequestChainSection details={desktopDetails} device="Desktop" />
       ) : null}
     </Details>
   );
@@ -70,3 +70,4 @@ function chainToTree(node: CriticalRequestChain['chains']): TreeDataItem[] {
     };
   });
 }
+

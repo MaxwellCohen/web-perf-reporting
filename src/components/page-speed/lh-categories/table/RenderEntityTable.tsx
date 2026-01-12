@@ -40,7 +40,7 @@ export function RenderEntityTable({
         <Fragment key={index}>
           <RenderTableRowContainer>
             {headings.map((heading, colIndex) => {
-              // if (!heading.key) return null;
+              if (!heading.key) return null;
               return (
                 <RenderTableCell
                   key={`${index}-${colIndex}`}

@@ -45,13 +45,15 @@ export function mergedTable(
   if (!desktopItems && !mobileItems) {
     return [[], [], 'Desktop', false] as const;
   }
-  const hasNode = [...mobileHeadings || [], ...desktopHeadings || []].some((h) => h.valueType === 'node');
+  const hasNode = [...(mobileHeadings || []), ...(desktopHeadings || [])].some(
+    (h) => h.valueType === 'node',
+  );
   const mItems = (mobileItems || []).map((i) => renameKeys(i, 'Mobile'));
   const dItems = (desktopItems || []).map((i) => renameKeys(i, 'Desktop'));
   if (hasNode) {
-    headings = [...mobileHeadings || [], ...desktopHeadings || []].filter(
+    headings = [...(mobileHeadings || []), ...(desktopHeadings || [])].filter(
       (heading, i, Arr) => Arr.findIndex((t) => t.key === heading.key) === i,
-    );;
+    );
     items = [...mItems, ...dItems];
   } else if (!desktopItems?.length && mItems?.length) {
     headings = mergeHeadings(mobileHeadings);
@@ -78,7 +80,6 @@ export function mergeHeadings(
 const dHeadings = (desktopHeadings || []).map((heading) =>
   updateTableHeading(heading, 'Desktop'),
 );
-// const headings: TableColumnHeading[] = [...mHeadings, ...dHeadings];
 const headings: TableColumnHeading[] = [];
   while (mHeadings.length || dHeadings.length) {
     let i = mHeadings.shift();
