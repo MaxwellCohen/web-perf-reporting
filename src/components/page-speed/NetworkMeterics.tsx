@@ -11,82 +11,44 @@ import { NetworkRTTCard } from "@/components/page-speed/network-metrics/NetworkR
 import { ServerLatencyCard } from "@/components/page-speed/network-metrics/ServerLatencyCard";
 import { ResourceTypeBreakdownCard } from "@/components/page-speed/network-metrics/ResourceTypeBreakdownCard";
 import { TopResourcesCard } from "@/components/page-speed/network-metrics/TopResourcesCard";
+import { LCPBreakdownCard } from "@/components/page-speed/network-metrics/LCPBreakdownCard";
+
+type MetricsAuditDetails = {
+  details?: {
+    items?: Array<Record<string, unknown>>;
+  };
+};
 
 export function NetworkMetricsComponent() {
   const items = useContext(InsightsContext);
   
   const networkMetrics = useMemo(() => {
     return items.map(({ item, label }) => {
-      // Get TTFB from loading experience
-      const ttfb = item?.loadingExperience?.metrics?.EXPERIMENTAL_TIME_TO_FIRST_BYTE;
-      const fcp = item?.loadingExperience?.metrics?.FIRST_CONTENTFUL_PAINT_MS;
-      const lcp = item?.loadingExperience?.metrics?.LARGEST_CONTENTFUL_PAINT_MS;
-      const inp = item?.loadingExperience?.metrics?.INTERACTION_TO_NEXT_PAINT;
-      
-      // Get timing metrics from metrics audit (more accurate)
-      const metricsAudit = item?.lighthouseResult?.audits?.metrics;
-      const metricsDetails = (metricsAudit as { details?: { items?: Array<Record<string, unknown>> } })?.details?.items?.[0];
-      const ttfbFromMetrics = getNumber(metricsDetails?.timeToFirstByte);
-      const fcpFromMetrics = getNumber(metricsDetails?.firstContentfulPaint);
-      const lcpFromMetrics = getNumber(metricsDetails?.largestContentfulPaint);
-      const speedIndex = getNumber(metricsDetails?.speedIndex);
-      const totalBlockingTime = getNumber(metricsDetails?.totalBlockingTime);
-      const domContentLoaded = getNumber(metricsDetails?.observedDomContentLoaded);
-      const loadTime = getNumber(metricsDetails?.observedLoad);
-      const interactive = getNumber(metricsDetails?.interactive);
-      
-      // Get network requests audit
-      const networkRequestsAudit = item?.lighthouseResult?.audits?.['network-requests'];
-      const networkRequestsDetails = networkRequestsAudit?.details as AuditDetailTable;
-      
-      // Get network RTT audit
-      const networkRTTAudit = item?.lighthouseResult?.audits?.['network-rtt'];
-      const networkRTTDetails = networkRTTAudit?.details as AuditDetailTable;
-      
-      // Get server latency audit
-      const serverLatencyAudit = item?.lighthouseResult?.audits?.['network-server-latency'];
-      const serverLatencyDetails = serverLatencyAudit?.details as AuditDetailTable;
-      
-      // Get observed events from metrics
-      const observedNavigationStart = typeof metricsDetails?.observedNavigationStart === 'number' ? metricsDetails.observedNavigationStart : 0;
-      const observedFirstPaint = getNumber(metricsDetails?.observedFirstPaint);
-      const observedFirstContentfulPaint = getNumber(metricsDetails?.observedFirstContentfulPaint);
-      const observedLargestContentfulPaint = getNumber(metricsDetails?.observedLargestContentfulPaint);
-      
-      // Extract additional metrics for timeline
-      const observedFirstContentfulPaintAllFrames = getNumber(metricsDetails?.observedFirstContentfulPaintAllFrames);
-      const observedFirstVisualChange = getNumber(metricsDetails?.observedFirstVisualChange);
-      const observedLargestContentfulPaintAllFrames = getNumber(metricsDetails?.observedLargestContentfulPaintAllFrames);
-      const observedLastVisualChange = getNumber(metricsDetails?.observedLastVisualChange);
-      const observedTraceEnd = getNumber(metricsDetails?.observedTraceEnd);
+      const metricsAudit = item?.lighthouseResult?.audits?.metrics as MetricsAuditDetails | undefined;
+      const metricsDetails = metricsAudit?.details?.items?.[0];
       
       return {
         label,
-        ttfb: ttfbFromMetrics || ttfb?.percentile,
-        ttfbCategory: ttfb?.category,
-        fcp: fcpFromMetrics || fcp?.percentile,
-        fcpCategory: fcp?.category,
-        lcp: lcpFromMetrics || lcp?.percentile,
-        lcpCategory: lcp?.category,
-        inp: inp?.percentile,
-        inpCategory: inp?.category,
-        speedIndex,
-        totalBlockingTime,
-        domContentLoaded,
-        loadTime,
-        interactive,
-        observedNavigationStart,
-        observedFirstPaint,
-        observedFirstContentfulPaint,
-        observedLargestContentfulPaint,
-        observedFirstContentfulPaintAllFrames,
-        observedFirstVisualChange,
-        observedLargestContentfulPaintAllFrames,
-        observedLastVisualChange,
-        observedTraceEnd,
-        networkRequests: networkRequestsDetails?.items || [],
-        networkRTT: networkRTTDetails?.items || [],
-        serverLatency: serverLatencyDetails?.items || [],
+        ttfb: getNumber(metricsDetails?.timeToFirstByte),
+        fcp: getNumber(metricsDetails?.firstContentfulPaint),
+        lcp: getNumber(metricsDetails?.largestContentfulPaint),
+        speedIndex: getNumber(metricsDetails?.speedIndex),
+        totalBlockingTime: getNumber(metricsDetails?.totalBlockingTime),
+        domContentLoaded: getNumber(metricsDetails?.observedDomContentLoaded),
+        loadTime: getNumber(metricsDetails?.observedLoad),
+        interactive: getNumber(metricsDetails?.interactive),
+        observedNavigationStart: (typeof metricsDetails?.observedNavigationStart === 'number' ? metricsDetails.observedNavigationStart : 0),
+        observedFirstPaint: getNumber(metricsDetails?.observedFirstPaint),
+        observedFirstContentfulPaint: getNumber(metricsDetails?.observedFirstContentfulPaint),
+        observedLargestContentfulPaint: getNumber(metricsDetails?.observedLargestContentfulPaint),
+        observedFirstContentfulPaintAllFrames: getNumber(metricsDetails?.observedFirstContentfulPaintAllFrames),
+        observedFirstVisualChange: getNumber(metricsDetails?.observedFirstVisualChange),
+        observedLargestContentfulPaintAllFrames: getNumber(metricsDetails?.observedLargestContentfulPaintAllFrames),
+        observedLastVisualChange: getNumber(metricsDetails?.observedLastVisualChange),
+        observedTraceEnd: getNumber(metricsDetails?.observedTraceEnd),
+        networkRequests: ((item?.lighthouseResult?.audits?.['network-requests']?.details as AuditDetailTable)?.items) || [],
+        networkRTT: ((item?.lighthouseResult?.audits?.['network-rtt']?.details as AuditDetailTable)?.items) || [],
+        serverLatency: ((item?.lighthouseResult?.audits?.['network-server-latency']?.details as AuditDetailTable)?.items) || [],
       };
     });
   }, [items]);
@@ -145,6 +107,7 @@ export function NetworkMetricsComponent() {
           <NetworkRequestsSummaryCard stats={networkStats} />
           <TimingMetricsCard metrics={networkMetrics} />
           <TimelineCard metrics={networkMetrics} />
+          <LCPBreakdownCard metrics={items} />
           <div className="w-full md:col-span-2 lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
             <NetworkRTTCard metrics={networkMetrics.map(({ label, networkRTT }) => ({ label, networkRTT }))} />
             <ServerLatencyCard metrics={networkMetrics.map(({ label, serverLatency }) => ({ label, serverLatency }))} />

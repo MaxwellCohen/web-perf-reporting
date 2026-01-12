@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import { memo, useContext, useEffect, useRef, useState } from 'react';
 import { fullPageScreenshotContext } from '@/components/page-speed/PageSpeedContext';
@@ -118,36 +119,30 @@ export function RenderNodeImage({
     const firstKey = Object.keys(screenshotData)[0];
     fullPageScreenshot = screenshotData[firstKey];
     matchedDeviceKey = firstKey;
-    if (true) {
-      console.debug('[RenderNodeImage] Using first available screenshot as fallback:', {
-        originalDevice: device,
-        fallbackKey: firstKey,
-      });
-    }
+    console.debug('[RenderNodeImage] Using first available screenshot as fallback:', {
+      originalDevice: device,
+      fallbackKey: firstKey,
+    });
   }
 
   // Check if we have the required data
   if (!fullPageScreenshot || !item?.lhId) {
-    if (true) {
-      console.debug('[RenderNodeImage] Missing data:', {
-        hasScreenshot: !!fullPageScreenshot,
-        hasLhId: !!item?.lhId,
-        device,
-        matchedDeviceKey,
-        availableKeys: Object.keys(screenshotData || {}),
-      });
-    }
+    console.debug('[RenderNodeImage] Missing data:', {
+      hasScreenshot: !!fullPageScreenshot,
+      hasLhId: !!item?.lhId,
+      device,
+      matchedDeviceKey,
+      availableKeys: Object.keys(screenshotData || {}),
+    });
     return null;
   }
 
   // Check if screenshot data exists
   if (!fullPageScreenshot.screenshot || !fullPageScreenshot.screenshot.data) {
-    if (true) {
-      console.debug('[RenderNodeImage] Missing screenshot data:', {
-        hasScreenshot: !!fullPageScreenshot.screenshot,
-        hasData: !!fullPageScreenshot.screenshot?.data,
-      });
-    }
+    console.debug('[RenderNodeImage] Missing screenshot data:', {
+      hasScreenshot: !!fullPageScreenshot.screenshot,
+      hasData: !!fullPageScreenshot.screenshot?.data,
+    });
     return null;
   }
 
@@ -156,28 +151,24 @@ export function RenderNodeImage({
   
   // If node rect doesn't exist in screenshot data, try to use boundingRect from item as fallback
   if ((!nodeRect || nodeRect.width === 0 || nodeRect.height === 0) && item.boundingRect) {
-    if (true) {
-      console.debug('[RenderNodeImage] Using boundingRect from item as fallback:', {
-        hasNodeRect: !!nodeRect,
-        hasBoundingRect: !!item.boundingRect,
-        lhId: item.lhId,
-      });
-    }
+    console.debug('[RenderNodeImage] Using boundingRect from item as fallback:', {
+      hasNodeRect: !!nodeRect,
+      hasBoundingRect: !!item.boundingRect,
+      lhId: item.lhId,
+    });
     nodeRect = item.boundingRect;
   }
   
   // If node rect still doesn't exist or has invalid dimensions, show full screenshot as fallback
   if (!nodeRect || nodeRect.width === 0 || nodeRect.height === 0) {
-    if (true) {
-      console.debug('[RenderNodeImage] Node rect missing or invalid, showing full screenshot fallback:', {
-        hasNodeRect: !!nodeRect,
-        nodeRectWidth: nodeRect?.width,
-        nodeRectHeight: nodeRect?.height,
-        hasBoundingRect: !!item.boundingRect,
-        lhId: item.lhId,
-        availableNodeIds: Object.keys(fullPageScreenshot.nodes || {}),
-      });
-    }
+    console.debug('[RenderNodeImage] Node rect missing or invalid, showing full screenshot fallback:', {
+      hasNodeRect: !!nodeRect,
+      nodeRectWidth: nodeRect?.width,
+      nodeRectHeight: nodeRect?.height,
+      hasBoundingRect: !!item.boundingRect,
+      lhId: item.lhId,
+      availableNodeIds: Object.keys(fullPageScreenshot.nodes || {}),
+    });
     // Fallback: show full screenshot thumbnail if node rect is missing
     const screenshot = fullPageScreenshot.screenshot;
     const aspectRatio = screenshot.width / screenshot.height;

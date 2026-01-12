@@ -18,8 +18,6 @@ type TimingMetrics = {
   fcpCategory?: string;
   lcp?: number;
   lcpCategory?: string;
-  inp?: number;
-  inpCategory?: string;
   speedIndex?: number;
   totalBlockingTime?: number;
   domContentLoaded?: number;
@@ -37,7 +35,7 @@ type TimingMetricsCardProps = {
 
 export function TimingMetricsCard({ metrics }: TimingMetricsCardProps) {
   const validMetrics = metrics.filter(m => m.ttfb !== undefined || m.fcp !== undefined || m.lcp !== undefined || 
-    m.speedIndex !== undefined || m.totalBlockingTime !== undefined || m.inp !== undefined);
+    m.speedIndex !== undefined || m.totalBlockingTime !== undefined);
   
   if (!validMetrics.length) {
     return null;
@@ -80,7 +78,6 @@ export function TimingMetricsCard({ metrics }: TimingMetricsCardProps) {
                 <TableHead className="min-w-35">TTFB</TableHead>
                 <TableHead className="min-w-35">FCP</TableHead>
                 <TableHead className="min-w-35">LCP</TableHead>
-                <TableHead className="min-w-35">INP</TableHead>
                 <TableHead className="min-w-35">Speed Index</TableHead>
                 <TableHead className="min-w-30">TBT</TableHead>
               </TableRow>
@@ -94,8 +91,6 @@ export function TimingMetricsCard({ metrics }: TimingMetricsCardProps) {
                 fcpCategory,
                 lcp,
                 lcpCategory,
-                inp,
-                inpCategory,
                 speedIndex,
                 totalBlockingTime
               }) => (
@@ -104,7 +99,6 @@ export function TimingMetricsCard({ metrics }: TimingMetricsCardProps) {
                   <TableCell>{renderValue(ttfb, ttfbCategory)}</TableCell>
                   <TableCell>{renderValue(fcp, fcpCategory)}</TableCell>
                   <TableCell>{renderValue(lcp, lcpCategory)}</TableCell>
-                  <TableCell>{renderValue(inp, inpCategory)}</TableCell>
                   <TableCell>{renderValue(speedIndex)}</TableCell>
                   <TableCell>{renderValue(totalBlockingTime)}</TableCell>
                 </TableRow>

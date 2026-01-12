@@ -125,7 +125,7 @@ function RenderLinkValue({
       title={value.text}
       {...props}
       className={cn(
-        'block overflow-auto break-words break-all',
+        'block overflow-auto wrap-break-word break-all',
         props.className,
       )}
     >
@@ -273,7 +273,7 @@ function RenderUrlValue({
       title={value.value}
       {...props}
       className={cn(
-        'block overflow-auto break-words break-all',
+        'block overflow-auto wrap-break-word break-all',
         props.className,
       )}
     >
@@ -345,15 +345,17 @@ function RenderCode({
 
 export function renderTimeValue(msU: unknown) {
   const ms = Number(msU)
-  if (Number.isNaN(ms) || ms <= 0 ) {
+  // Normalize values very close to zero to avoid "-0 ms" display
+  const normalizedMs = Math.abs(ms) < 0.001 ? 0 : ms;
+  if (Number.isNaN(normalizedMs) || normalizedMs <= 0 ) {
     return "0 ms";
   }
 
-  const milliseconds = Math.floor(ms % 1000);
-  const seconds = Math.floor((ms / 1000) % 60);
-  const minutes = Math.floor((ms / (1000 * 60)) % 60);
-  const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
-  const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+  const milliseconds = Math.floor(normalizedMs % 1000);
+  const seconds = Math.floor((normalizedMs / 1000) % 60);
+  const minutes = Math.floor((normalizedMs / (1000 * 60)) % 60);
+  const hours = Math.floor((normalizedMs / (1000 * 60 * 60)) % 24);
+  const days = Math.floor(normalizedMs / (1000 * 60 * 60 * 24));
 
   const parts = [];
 
@@ -389,10 +391,14 @@ export function RenderMSValue({ value, ...props }: { value: unknown }& React.HTM
   if(Number.isNaN(ms)) {
     return <span title="ms" {...props} className={cn('', props.className)}>N/A</span>;
   }
-  if (ms < 1000) {
-    return <span title="ms" {...props} className={cn('', props.className)}>{ms.toFixed(0)} ms</span>;
+  // Normalize values very close to zero to avoid "-0 ms" display
+  const normalizedMs = Math.abs(ms) < 0.001 ? 0 : ms;
+  if (normalizedMs < 1000) {
+    // Use Math.abs to ensure we never display "-0"
+    const displayMs = Math.abs(normalizedMs) < 0.5 ? 0 : normalizedMs;
+    return <span title="ms" {...props} className={cn('', props.className)}>{displayMs.toFixed(0)} ms</span>;
   }
-  const seconds = ms / 1000;
+  const seconds = normalizedMs / 1000;
   if (seconds < 60) {
     return <span title="ms" {...props} className={cn('', props.className)}>{seconds.toFixed(2)} s</span>;
   }
@@ -466,7 +472,7 @@ function RenderUrl({
         title={strValue}
         {...props}
         className={cn(
-          'block overflow-auto break-words break-all',
+          'block overflow-auto wrap-break-word break-all',
           props.className,
         )}
       >
@@ -480,7 +486,7 @@ function RenderUrl({
         title="url"
         {...props}
         className={cn(
-          'block overflow-auto break-words break-all',
+          'block overflow-auto wrap-break-word break-all',
           props.className,
         )}
       >
