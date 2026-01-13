@@ -408,6 +408,7 @@ function ClipPath({
 
 /**
  * ElementScreenshot component for rendering a screenshot with highlighted element
+ * Matches the structure from Lighthouse's element-screenshot-renderer.js
  */
 function ElementScreenshot({
   screenshot,
@@ -476,51 +477,69 @@ function ElementScreenshot({
     height: screenshot.height,
   });
 
-  // Styles for the image element
+  // Styles for the image element (matches Lighthouse's lh-element-screenshot__image)
   const imageStyle: React.CSSProperties = {
+    position: 'relative',
     width: `${elementPreviewSizeDC.width}px`,
     height: `${elementPreviewSizeDC.height}px`,
-    backgroundImage: `url(${screenshot.data})`,
-    backgroundPositionY: `${-(positions.screenshot.top * zoomFactor)}px`,
-    backgroundPositionX: `${-(positions.screenshot.left * zoomFactor)}px`,
+    backgroundImage: `url('${screenshot.data}')`,
+    backgroundPosition: `${-(positions.screenshot.left * zoomFactor)}px ${-(positions.screenshot.top * zoomFactor)}px`,
     backgroundSize: `${screenshot.width * zoomFactor}px ${screenshot.height * zoomFactor}px`,
+    backgroundRepeat: 'no-repeat',
+    outline: '2px solid #777',
+    backgroundColor: 'white',
   };
 
-  // Styles for the marker element
+  // Styles for the marker element (matches Lighthouse's lh-element-screenshot__element-marker)
   const markerStyle: React.CSSProperties = {
+    position: 'absolute',
     width: `${elementRect.width * zoomFactor}px`,
     height: `${elementRect.height * zoomFactor}px`,
     left: `${positions.clip.left * zoomFactor}px`,
     top: `${positions.clip.top * zoomFactor}px`,
+    outline: '2px solid #84cc16', // var(--color-lime-400)
   };
 
-  // Styles for the mask element
+  // Styles for the mask element (matches Lighthouse's lh-element-screenshot__mask)
   const maskStyle: React.CSSProperties = {
+    position: 'absolute',
     width: `${elementPreviewSizeDC.width}px`,
     height: `${elementPreviewSizeDC.height}px`,
+    background: '#555',
+    opacity: 0.8,
     clipPath: `url(#${clipId})`,
+  };
+
+  // Styles for the content wrapper (matches Lighthouse's lh-element-screenshot__content)
+  const contentStyle: React.CSSProperties = {
+    overflow: 'hidden',
+    minWidth: '110px',
+    display: 'flex',
+    justifyContent: 'center',
+    backgroundColor: 'var(--report-background-color, #fff)',
   };
 
   return (
     <div
-      className="relative overflow-hidden"
+      className="lh-element-screenshot"
       ref={containerRef}
       data-rect-width={elementRect.width}
       data-rect-height={elementRect.height}
       data-rect-left={elementRect.left}
       data-rect-top={elementRect.top}
+      style={{ float: 'left', marginRight: '20px' }}
     >
-      <div className="relative">
-        {/* Hidden img to detect load errors for background-image */}
-        <img
-          src={screenshot.data}
-          alt=""
-          onError={() => setImageError(true)}
-          style={{ display: 'none' }}
-          aria-hidden="true"
-        />
-        <div className="relative bg-no-repeat" style={imageStyle}>
-          <div className="absolute inset-0 bg-black/50" style={maskStyle}>
+      {/* Hidden img to detect load errors for background-image */}
+      <img
+        src={screenshot.data}
+        alt=""
+        onError={() => setImageError(true)}
+        style={{ display: 'none' }}
+        aria-hidden="true"
+      />
+      <div className="lh-element-screenshot__content" style={contentStyle}>
+        <div className="lh-element-screenshot__image" style={imageStyle}>
+          <div className="lh-element-screenshot__mask" style={maskStyle}>
             <svg height="0" width="0">
               <defs>
                 <ClipPath
@@ -532,10 +551,7 @@ function ElementScreenshot({
               </defs>
             </svg>
           </div>
-          <div
-            className="pointer-events-none absolute border-2 border-orange-500 shadow-[0_0_0_2px_rgba(255,255,255,0.8)]"
-            style={markerStyle}
-          ></div>
+          <div className="lh-element-screenshot__element-marker" style={markerStyle}></div>
         </div>
       </div>
     </div>

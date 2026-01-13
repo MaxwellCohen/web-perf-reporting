@@ -7,7 +7,8 @@
 export const AUDITS_WITH_SEPARATE_TABLES_PER_REPORT: string[] = [
   'dom-size-insight',
   'cls-culprits-insight',
-  'network-metrics'
+  'network-metrics',
+  'lcp-breakdown-insight'
   // Add more audit IDs here as needed
 ];
 

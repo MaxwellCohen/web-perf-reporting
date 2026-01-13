@@ -74,12 +74,12 @@ export function TimingMetricsCard({ metrics }: TimingMetricsCardProps) {
           <Table className="table-auto">
             <TableHeader>
               <TableRow>
-                {showReportColumn && <TableHead className="min-w-20">Report</TableHead>}
-                <TableHead className="min-w-35">TTFB</TableHead>
-                <TableHead className="min-w-35">FCP</TableHead>
-                <TableHead className="min-w-35">LCP</TableHead>
-                <TableHead className="min-w-35">Speed Index</TableHead>
-                <TableHead className="min-w-30">TBT</TableHead>
+                {showReportColumn && <TableHead className="min-w-20 whitespace-nowrap">Report</TableHead>}
+                <TableHead className="min-w-25 whitespace-nowrap">TTFB</TableHead>
+                <TableHead className="min-w-25 whitespace-nowrap">FCP</TableHead>
+                <TableHead className="min-w-25 whitespace-nowrap">LCP</TableHead>
+                <TableHead className="min-w-30 whitespace-nowrap">Speed Index</TableHead>
+                <TableHead className="min-w-25 whitespace-nowrap">TBT</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -95,12 +95,12 @@ export function TimingMetricsCard({ metrics }: TimingMetricsCardProps) {
                 totalBlockingTime
               }) => (
                 <TableRow key={label}>
-                  {showReportColumn && <TableCell className="font-medium">{label || 'Unknown'}</TableCell>}
-                  <TableCell>{renderValue(ttfb, ttfbCategory)}</TableCell>
-                  <TableCell>{renderValue(fcp, fcpCategory)}</TableCell>
-                  <TableCell>{renderValue(lcp, lcpCategory)}</TableCell>
-                  <TableCell>{renderValue(speedIndex)}</TableCell>
-                  <TableCell>{renderValue(totalBlockingTime)}</TableCell>
+                  {showReportColumn && <TableCell className="font-medium min-w-20">{label || 'Unknown'}</TableCell>}
+                  <TableCell className="min-w-25">{renderValue(ttfb, ttfbCategory)}</TableCell>
+                  <TableCell className="min-w-25">{renderValue(fcp, fcpCategory)}</TableCell>
+                  <TableCell className="min-w-25">{renderValue(lcp, lcpCategory)}</TableCell>
+                  <TableCell className="min-w-30">{renderValue(speedIndex)}</TableCell>
+                  <TableCell className="min-w-25">{renderValue(totalBlockingTime)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
