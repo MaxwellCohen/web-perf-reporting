@@ -38,24 +38,32 @@ export function analyzeAudits(items: Array<{ item: PageSpeedInsights; label: str
   const auditDataMap = collectAuditData(items);
 
   auditDataMap.forEach((auditEntries, auditId) => {
-    const baseAudit = auditEntries[0].audit;
-    const worstScore = getWorstScore(auditEntries);
-    const scoreDisplayMode = baseAudit.scoreDisplayMode;
-    const explanation = baseAudit.explanation;
+    // Filter out notApplicable and manual audits from entries
+    const applicableEntries = auditEntries.filter(
+      (entry) => 
+        entry.audit.scoreDisplayMode.toLocaleLowerCase() !== 'notapplicable' && 
+        entry.audit.scoreDisplayMode.toLocaleLowerCase() !== 'manual'
+    );
 
-    if (scoreDisplayMode === 'notApplicable' || scoreDisplayMode === 'manual' || hideAuditId.includes(auditId)) {
+    // Skip if all entries are notApplicable or manual, or if auditId is in hide list
+    if (applicableEntries.length === 0 || hideAuditId.includes(auditId)) {
       return;
     }
+
+    const baseAudit = applicableEntries[0].audit;
+    const worstScore = getWorstScore(applicableEntries);
+    const scoreDisplayMode = baseAudit.scoreDisplayMode;
+    const explanation = baseAudit.explanation;
     
-    const combinedMetricSavings = combineMetricSavings(auditEntries);
-    const { allItems, allTableDataItems, tableHeadings, itemsByReport } = combineAuditItems(auditEntries);
+    const combinedMetricSavings = combineMetricSavings(applicableEntries);
+    const { allItems, allTableDataItems, tableHeadings, itemsByReport } = combineAuditItems(applicableEntries);
 
     if (scoreDisplayMode === 'metricSavings' && Object.keys(combinedMetricSavings).length > 0) {
       Object.entries(combinedMetricSavings).forEach(([metric, savings]) => {
         const recommendation = processMetricSavingsAudit(
           auditId,
           baseAudit,
-          auditEntries,
+          applicableEntries,
           metric,
           savings,
           worstScore,
@@ -65,11 +73,20 @@ export function analyzeAudits(items: Array<{ item: PageSpeedInsights; label: str
       });
     }
 
+    // For audits with metricSavings but scoreDisplayMode is not 'metricSavings',
+    // only include if there are actual savings (> 0)
+    const hasNonZeroSavings = Object.values(combinedMetricSavings).some(savings => savings > 0);
+    
     if ((worstScore === 0 || worstScore === null) && scoreDisplayMode !== 'metricSavings') {
+      // Skip audits that have metricSavings but all are 0 (no actual impact)
+      if (Object.keys(combinedMetricSavings).length > 0 && !hasNonZeroSavings) {
+        return;
+      }
+      
       const recommendation = processFailedAudit(
         auditId,
         baseAudit,
-        auditEntries,
+        applicableEntries,
         worstScore,
         allTableDataItems,
         tableHeadings,
@@ -88,7 +105,7 @@ export function analyzeAudits(items: Array<{ item: PageSpeedInsights; label: str
       const recommendation = processFailedAudit(
         auditId,
         baseAudit,
-        auditEntries,
+        applicableEntries,
         worstScore,
         allTableDataItems,
         tableHeadings,

@@ -75,29 +75,38 @@ export function ExpandRow<T>({
   children?: React.ReactNode;
 }) {
   'use no memo';
-  const isExpanded = row?.getIsExpanded();
+  if (!row) {
+    return <div className={'h-9 w-9'} />;
+  }
+  
+  const isExpanded = row.getIsExpanded();
+  const canExpand = row.getCanExpand();
+  
+  if (!canExpand) {
+    return <div className={'h-9 w-9'} />;
+  }
+  
   return (
-    <>
-      { (row?.getCanExpand()) ? (
-        <Button
-          variant={'ghost'}
-          role='checkbox'
-          size={children ? 'default' :'icon'}
-          onClick={row.getToggleExpandedHandler()}
-          style={{ cursor: 'pointer' }}
-        >
-          {children}
-          <ChevronRightIcon
-            className={cn('transform transition-all duration-300', {
-              'rotate-90': isExpanded,
-            })}
-          />
-          <span className="sr-only">
-            {isExpanded ? 'collapse row ' : 'expand row'}
-          </span>
-        </Button>
-      ) : <div className={'h-9 w-9'} />}
-    </>
+    <Button
+      variant={'ghost'}
+      role='button'
+      size={children ? 'default' :'icon'}
+      onClick={row.getToggleExpandedHandler()}
+      style={{ cursor: 'pointer', margin: 0 }}
+      aria-label={isExpanded ? 'Collapse row' : 'Expand row'}
+      aria-expanded={isExpanded}
+      className="h-8 w-8 m-0"
+    >
+      {children}
+      <ChevronRightIcon
+        className={cn('h-4 w-4 transform transition-all duration-300', {
+          'rotate-90': isExpanded,
+        })}
+      />
+      <span className="sr-only">
+        {isExpanded ? 'Collapse row' : 'Expand row'}
+      </span>
+    </Button>
   );
 }
 
@@ -370,27 +379,32 @@ const getHostName = (row: TreeMapNode) => {
 const columnHelper = createColumnHelper<TreeMapNode>();
 export function ExpandAll<T>({table}:{table: ReactTable<T>}) {
   const isExpanded =  table.getIsAllRowsExpanded()
-  return (<Button
-  variant={'ghost'}
-  size={'icon'}
-  onClick={() => table.toggleAllRowsExpanded()}
-  style={{ cursor: 'pointer' }}
-  role='checkbox'
->
-  <ChevronRightIcon
-    className={cn('transform transition-all duration-300', {
-      'rotate-90':isExpanded,
-    })}
-  />
-  <span className="sr-only">
-    {isExpanded ? 'collapse row ' : 'expand row'}
-  </span>
-</Button>)}
+  return (
+    <Button
+      variant={'ghost'}
+      size={'icon'}
+      onClick={() => table.toggleAllRowsExpanded()}
+      style={{ cursor: 'pointer', margin: 0 }}
+      role='button'
+      aria-label={isExpanded ? 'Collapse all rows' : 'Expand all rows'}
+      className="h-8 w-8 m-0"
+    >
+      <ChevronRightIcon
+        className={cn('h-4 w-4 transform transition-all duration-300', {
+          'rotate-90':isExpanded,
+        })}
+      />
+      <span className="sr-only">
+        {isExpanded ? 'Collapse all rows' : 'Expand all rows'}
+      </span>
+    </Button>
+  )
+}
 const expanderColumn = columnHelper.display({
   id: 'expander',
   header: ExpandAll,
   cell: ExpandRow,
-  size: 56,
+  size: 40,
   meta: {
     className: '',
   },
@@ -728,6 +742,14 @@ function JSUsageTableRow({ row, i }: { row: Row<TreeMapNode>; i: number }) {
               <TableCell
                 key={`${cell.id}_${i}_${depth}`}
                 data-key={`${cell.id}_${i}_${depth}`}
+                data-cell-id={cell.id}
+                data-column-id={cell.column.id}
+                data-can-expand={`${row.getCanExpand()}`}
+                data-depth={row.depth}
+                data-row-expanded={`${row.getIsExpanded()}`}
+                data-grouped={`${cell.getIsGrouped()}`}
+                data-aggregated={`${cell.getIsAggregated()}`}
+                data-placeholder={`${cell.getIsPlaceholder()}`}
                 className={cn(
                   `flex flex-row`,
                   {

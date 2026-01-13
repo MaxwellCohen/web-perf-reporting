@@ -1,6 +1,7 @@
 'use client';
 import { TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { flexRender, Table as TableType } from '@tanstack/react-table';
+import { cn } from '@/lib/utils';
 
 export function DataTableBody<T>({ table }: { table: TableType<T> }) {
   'use no memo';
@@ -23,12 +24,21 @@ export function DataTableBody<T>({ table }: { table: TableType<T> }) {
                   );
                 }
 
+                const isExpanderColumn = cell.column.id === 'expander';
+                
                 return (
                   <TableCell
                     key={cell.id}
-                    className="overflow-x-auto"
+                    className={cn("overflow-x-auto", {
+                      "!p-0 flex items-center justify-center overflow-hidden": isExpanderColumn,
+                    })}
                     style={{
                       width: `${cell.column.getSize()}px`,
+                      ...(isExpanderColumn && {
+                        minWidth: `${cell.column.getSize()}px`,
+                        maxWidth: `${cell.column.getSize()}px`,
+                        boxSizing: 'border-box',
+                      }),
                     }}
                     data-cell-id={cell.id}
                     data-column-id={cell.column.id}

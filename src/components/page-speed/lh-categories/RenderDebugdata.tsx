@@ -143,7 +143,18 @@ export function RenderDebugData({ items }: { items: TableDataItem[] }) {
                           return null;
                         }
                         return (
-                          <TableCell key={cell.id} rowSpan={row.subRows.length}>
+                          <TableCell
+                            key={cell.id}
+                            rowSpan={row.subRows.length}
+                            data-cell-id={cell.id}
+                            data-column-id={cell.column.id}
+                            data-can-expand={`${sr.getCanExpand()}`}
+                            data-depth={sr.depth}
+                            data-row-expanded={`${sr.getIsExpanded()}`}
+                            data-grouped={`${cell.getIsGrouped()}`}
+                            data-aggregated={`${cell.getIsAggregated()}`}
+                            data-placeholder={`${cell.getIsPlaceholder()}`}
+                          >
                             {flexRender(
                               cell.column.columnDef.cell,
                               cell.getContext(),
@@ -152,7 +163,18 @@ export function RenderDebugData({ items }: { items: TableDataItem[] }) {
                         );
                       }
                       return (
-                        <TableCell key={cell.id} rowSpan={1}>
+                        <TableCell
+                          key={cell.id}
+                          rowSpan={1}
+                          data-cell-id={cell.id}
+                          data-column-id={cell.column.id}
+                          data-can-expand={`${sr.getCanExpand()}`}
+                          data-depth={sr.depth}
+                          data-row-expanded={`${sr.getIsExpanded()}`}
+                          data-grouped={`${cell.getIsGrouped()}`}
+                          data-aggregated={`${cell.getIsAggregated()}`}
+                          data-placeholder={`${cell.getIsPlaceholder()}`}
+                        >
                           {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext(),
@@ -169,7 +191,17 @@ export function RenderDebugData({ items }: { items: TableDataItem[] }) {
             <TableRow key={row.id}>
               {row.getVisibleCells().map((cell) => {
                 return (
-                  <TableCell key={cell.id}>
+                  <TableCell
+                    key={cell.id}
+                    data-cell-id={cell.id}
+                    data-column-id={cell.column.id}
+                    data-can-expand={`${row.getCanExpand()}`}
+                    data-depth={row.depth}
+                    data-row-expanded={`${row.getIsExpanded()}`}
+                    data-grouped={`${cell.getIsGrouped()}`}
+                    data-aggregated={`${cell.getIsAggregated()}`}
+                    data-placeholder={`${cell.getIsPlaceholder()}`}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 );

@@ -24,6 +24,11 @@ export function NodeComponent({
   item: NodeValue;
   device: string;
 }) {
+  // Validate item is an object
+  if (!item || typeof item !== 'object') {
+    return null;
+  }
+  
   return (
     <div className="flex flex-col gap-2">
       <div className="grid gap-2 md:grid-cols-[auto_auto]">
@@ -39,7 +44,7 @@ export function NodeComponent({
       </div>
       <RenderJSONDetails
         data={item}
-        title={`Node Data for ${item.lhId} on ${device}`}
+        title={`Node Data for ${item.lhId || 'unknown'} on ${device}`}
       />
     </div>
   );
@@ -56,6 +61,11 @@ export function RenderNodeImage({
 }) {
   const screenshotData = useContext(fullPageScreenshotContext);
   const [imageError, setImageError] = useState(false);
+  
+  // Validate item is an object
+  if (!item || typeof item !== 'object') {
+    return null;
+  }
   
   // Try to find the screenshot by matching device label
   // Device might be "Mobile", "Desktop", or a full label like "Mobile Report"
@@ -88,12 +98,19 @@ export function RenderNodeImage({
   }
 
   // Check if we have the required data
-  if (!fullPageScreenshot || !item?.lhId) {
+  if (!fullPageScreenshot) {
+    // No screenshot data available - return null to hide image
+    return null;
+  }
+  
+  if (!item?.lhId) {
+    // No lhId in item - can't render node-specific screenshot
     return null;
   }
 
   // Check if screenshot data exists
   if (!fullPageScreenshot.screenshot || !fullPageScreenshot.screenshot.data) {
+    // Screenshot data is missing
     return null;
   }
 
@@ -556,15 +573,21 @@ const RenderThumbnails = memo(function RThumbnails({
       return (
         <div
           key={index}
-          className="overflow-hidden rounded border border-gray-300 transition-transform"
+          className="flex items-center justify-center overflow-hidden rounded border border-gray-300 transition-transform"
+          style={{
+            width: `${displayWidth}px`,
+            height: `${displayHeight}px`,
+            minWidth: `${displayWidth}px`,
+            minHeight: `${displayHeight}px`,
+          }}
         >
           <img
             src={screenshot.data}
             alt="Screenshot"
             onError={() => setImageError(true)}
             style={{
-              width: `${displayWidth}px`,
-              height: `${displayHeight}px`,
+              width: '100%',
+              height: '100%',
               objectFit: 'contain',
             }}
           />
@@ -575,7 +598,11 @@ const RenderThumbnails = memo(function RThumbnails({
     return (
       <div
         key={index}
-        className="overflow-hidden rounded border border-gray-300 transition-transform"
+        className="flex items-center justify-center overflow-hidden rounded border border-gray-300 transition-transform"
+        style={{
+          minWidth: `${maxThumbnailSize.width}px`,
+          minHeight: `${maxThumbnailSize.height}px`,
+        }}
       >
         <ElementScreenshot
           screenshot={screenshot}
@@ -599,14 +626,22 @@ const RenderThumbnails = memo(function RThumbnails({
       );
     }
     return (
-      <div className="overflow-hidden rounded border border-gray-300 transition-transform">
+      <div 
+        className="flex items-center justify-center overflow-hidden rounded border border-gray-300 transition-transform"
+        style={{
+          width: `${displayWidth}px`,
+          height: `${displayHeight}px`,
+          minWidth: `${displayWidth}px`,
+          minHeight: `${displayHeight}px`,
+        }}
+      >
         <img
           src={screenshot.data}
           alt="Screenshot"
           onError={() => setImageError(true)}
           style={{
-            width: `${displayWidth}px`,
-            height: `${displayHeight}px`,
+            width: '100%',
+            height: '100%',
             objectFit: 'contain',
           }}
         />
@@ -633,8 +668,8 @@ function ElementScreenshotRenderer({
   if (!screenshot) return null;
   return (
     <Dialog>
-      <DialogTrigger>
-        <div className="flex cursor-pointer flex-wrap place-content-center gap-2.5 hover:scale-110 hover:shadow-md">
+      <DialogTrigger asChild>
+        <div className="flex cursor-pointer items-center justify-center hover:scale-110 hover:shadow-md">
         {isClient ? <RenderThumbnails
             maxThumbnailSize={maxThumbnailSize}
             elementRects={elementRects}

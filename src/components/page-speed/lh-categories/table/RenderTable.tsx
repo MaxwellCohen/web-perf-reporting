@@ -29,6 +29,7 @@ import {
 } from '@tanstack/react-table';
 import { RenderTableValue } from '@/components/page-speed/lh-categories/table/RenderTableValue';
 import clsx from 'clsx';
+import { cn } from '@/lib/utils';
 import { ExpandAll, ExpandRow } from '@/components/page-speed/JSUsage/JSUsageTable';
 import { toTitleCase } from '@/components/page-speed/toTitleCase';
 import { DataTableHeader } from '@/components/page-speed/lh-categories/table/DataTableHeader';
@@ -129,12 +130,12 @@ const renderValueWithLabel = (
   showLabel = false,
 ): ReactElement => {
   return (
-    <>
+    <div>
       <RenderTableValue value={value} heading={heading} device={device} />
       {showLabel && device && (
         <span className="text-xs text-muted-foreground"> ({device})</span>
       )}
-    </>
+    </div>
   );
 };
 
@@ -163,38 +164,20 @@ const renderDeviceValuePairs = (
     );
   }
 
-  // If all devices have the same value, show "All Devices"
-  const firstValue = pairs[0]?.[1];
-  const allSameValue = pairs.every(([, val]) => val === firstValue);
-
-  if (allSameValue) {
-    return (
-      <>
-        <RenderTableValue
-          value={firstValue as ItemValue}
-          heading={heading}
-          device={pairs[0][0]}
-        />
-        <span className="text-xs text-muted-foreground"> (All Devices)</span>
-      </>
-    );
-  }
-
-  // Render each device-value pair with line breaks between them
+  // Render each device-value pair on separate lines
   return (
-    <>
+    <div className="flex flex-col gap-1">
       {pairs.map(([device, val], i) => (
-        <Fragment key={i}>
-          {i > 0 && <br />}
+        <div key={i}>
           {renderValueWithLabel(
             val as ItemValue,
             heading,
             device,
             pairs.length > 1,
           )}
-        </Fragment>
+        </div>
       ))}
-    </>
+    </div>
   );
 };
 
@@ -1034,6 +1017,8 @@ const renderTableCell = (
     return null;
   }
 
+  // const isExpanderColumn = cell.column.id === 'expander';
+  
   return (
     <TableCell
       key={cell.id}
@@ -1045,9 +1030,19 @@ const renderTableCell = (
       data-grouped={`${cell.getIsGrouped()}`}
       data-aggregated={`${cell.getIsAggregated()}`}
       data-placeholder={`${cell.getIsPlaceholder()}`}
-      className="overflow-x-auto whitespace-pre-wrap transition-all duration-300 ease-in-out"
+      className={cn(
+        "overflow-x-auto whitespace-pre-wrap transition-all duration-300 ease-in-out",
+        // {
+        //   "!p-0 flex items-center justify-center overflow-hidden": isExpanderColumn,
+        // }
+      )}
       style={{
         width: `${cell.column.getSize()}px`,
+        // ...(isExpanderColumn && {
+        //   minWidth: `${cell.column.getSize()}px`,
+        //   maxWidth: `${cell.column.getSize()}px`,
+        //   boxSizing: 'border-box',
+        // }),
         viewTransitionName: `table-cell-${cell.id}`,
       }}
     >

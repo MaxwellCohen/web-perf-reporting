@@ -59,7 +59,7 @@ export function useStandardTable<T>({
       header: (props) => <ExpandAll table={props.table} />,
       cell: ExpandRow,
       aggregatedCell: ExpandRow,
-      size: 56,
+      size: 40,
       enableHiding: true,
       enableGrouping: false,
       enablePinning: true,

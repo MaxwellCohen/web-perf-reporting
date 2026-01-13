@@ -39,7 +39,7 @@ export const NUMERIC_VALUE_TYPES: ItemValueType[] = [
  */
 export const COLUMN_SIZE_DEFAULT = 125;
 export const COLUMN_SIZE_LARGE = 400;
-export const EXPANDER_COLUMN_SIZE = 56;
+export const EXPANDER_COLUMN_SIZE = 40;
 export const DEVICE_COLUMN_SIZE = 110;
 
 /**

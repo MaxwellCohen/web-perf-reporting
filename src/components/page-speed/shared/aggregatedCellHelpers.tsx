@@ -27,7 +27,7 @@ function ValueWithLabel({
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 basis-full">
       {value}
       <span className="text-xs text-muted-foreground">({labelText})</span>
     </div>
@@ -85,13 +85,18 @@ export function createNumericAggregatedCell(
     
     // Check if all values are exactly the same
     if (uniqueValues.length === 1) {
-      // If value is same for all reports, show "(All Devices)"
+      // If value is same for all reports, show each device on separate lines
       if (uniqueLabels.length > 1) {
         return (
-          <ValueWithLabel
-            value={renderValue(uniqueValues[0])}
-            showAllDevices
-          />
+          <div className="flex flex-col gap-1">
+            {uniqueLabels.map((label, i) => (
+              <ValueWithLabel
+                key={i}
+                value={renderValue(uniqueValues[0])}
+                label={label}
+              />
+            ))}
+          </div>
         );
       }
       // Single report, show the value with device label
@@ -111,12 +116,17 @@ export function createNumericAggregatedCell(
     if (uniqueRoundedValues.length === 1) {
       // All values round to the same number
       if (uniqueLabels.length > 1) {
-        // Multiple devices, show "(All Devices)"
+        // Multiple devices, show each device on separate lines
         return (
-          <ValueWithLabel
-            value={renderValue(uniqueRoundedValues[0])}
-            showAllDevices
-          />
+          <div className="flex flex-col gap-1">
+            {uniqueLabels.map((label, i) => (
+              <ValueWithLabel
+                key={i}
+                value={renderValue(uniqueRoundedValues[0])}
+                label={label}
+              />
+            ))}
+          </div>
         );
       }
       // Single device, show device label
@@ -183,13 +193,18 @@ export function createStringAggregatedCell(
     
     if (uniqueValues.length === 1) {
       const value = transformValue ? transformValue(uniqueValues[0]) : uniqueValues[0];
-      // If value is same for all reports, show "(All Devices)" if enabled
+      // If value is same for all reports, show each device on separate lines
       if (showAllDevicesLabel && uniqueLabels.length > 1) {
         return (
-          <ValueWithLabel
-            value={<span>{value}</span>}
-            showAllDevices
-          />
+          <div className="flex flex-col gap-1">
+            {uniqueLabels.map((label, i) => (
+              <ValueWithLabel
+                key={i}
+                value={<span>{value}</span>}
+                label={label}
+              />
+            ))}
+          </div>
         );
       }
       // Single report or label disabled, just show the value
@@ -237,13 +252,18 @@ export function createPercentageAggregatedCell(columnId: string, precision: numb
     const uniqueLabels = [...new Set(valueLabelPairs.map((p) => p.label))];
     
     if (uniqueValues.length === 1) {
-      // If value is same for all reports, show "(All Devices)"
+      // If value is same for all reports, show each device on separate lines
       if (uniqueLabels.length > 1) {
         return (
-          <ValueWithLabel
-            value={<span>{`${uniqueValues[0].toFixed(2)}%`}</span>}
-            showAllDevices
-          />
+          <div className="flex flex-col gap-1">
+            {uniqueLabels.map((label, i) => (
+              <ValueWithLabel
+                key={i}
+                value={<span>{`${uniqueValues[0].toFixed(precision)}%`}</span>}
+                label={label}
+              />
+            ))}
+          </div>
         );
       }
       // Single report, just show the value

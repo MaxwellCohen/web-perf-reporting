@@ -35,9 +35,9 @@ const columnHelper = createColumnHelper<BootupTimeTableRow>();
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const cols: ColumnDef<BootupTimeTableRow, any>[] = [
   createURLColumn(columnHelper),
-  columnHelper.accessor('total', {
-    id: 'total',
-    header: 'Total Time',
+  columnHelper.accessor('scriptParseCompile', {
+    id: 'scriptParseCompile',
+    header: 'Parse & Compile',
     enableSorting: true,
     enableResizing: true,
     filterFn: 'inNumberRange',
@@ -46,7 +46,7 @@ const cols: ColumnDef<BootupTimeTableRow, any>[] = [
       const value = info.getValue();
       return value !== undefined ? <RenderMSValue value={value} /> : 'N/A';
     },
-    aggregatedCell: createNumericAggregatedCell('total'),
+    aggregatedCell: createNumericAggregatedCell('scriptParseCompile'),
   }),
   columnHelper.accessor('scripting', {
     id: 'scripting',
@@ -61,9 +61,9 @@ const cols: ColumnDef<BootupTimeTableRow, any>[] = [
     },
     aggregatedCell: createNumericAggregatedCell('scripting'),
   }),
-  columnHelper.accessor('scriptParseCompile', {
-    id: 'scriptParseCompile',
-    header: 'Parse & Compile',
+  columnHelper.accessor('total', {
+    id: 'total',
+    header: 'Total Time',
     enableSorting: true,
     enableResizing: true,
     filterFn: 'inNumberRange',
@@ -72,7 +72,7 @@ const cols: ColumnDef<BootupTimeTableRow, any>[] = [
       const value = info.getValue();
       return value !== undefined ? <RenderMSValue value={value} /> : 'N/A';
     },
-    aggregatedCell: createNumericAggregatedCell('scriptParseCompile'),
+    aggregatedCell: createNumericAggregatedCell('total'),
   })
 ];
 

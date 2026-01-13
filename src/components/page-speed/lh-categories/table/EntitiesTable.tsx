@@ -111,7 +111,8 @@ const createOriginsAggregatedCell = () => {
 };
 
 const columnHelper = createColumnHelper<EntityTableRow>();
-const cols: ColumnDef<EntityTableRow, unknown>[] = [
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const cols: ColumnDef<EntityTableRow, any>[] = [
   columnHelper.accessor('name', {
     id: 'name',
     header: 'Name',

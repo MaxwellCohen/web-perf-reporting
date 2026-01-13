@@ -33,22 +33,36 @@ export function DataTableHeader<T>({ table }: { table: TableType<T> }) {
 
 export function DataTableHead<T>({ header }: { header: Header<T, unknown> }) {
   'use no memo';
+  const isExpanderColumn = header.column.id === 'expander';
+  
   return (
     <TableHead
       key={header.id}
       className="relative"
       style={{
         width: `${header.getSize()}px`,
+        ...(isExpanderColumn && {
+          minWidth: `${header.getSize()}px`,
+          maxWidth: `${header.getSize()}px`,
+        }),
       }}
     >
-      <div className="flex flex-row items-center justify-between py-2">
-        {flexRender(header.column.columnDef.header, header.getContext())}
-        <div>
-          <SortingButton header={header} />
-          <FilterPopover header={header} />
+      {isExpanderColumn ? (
+        <div className="flex items-center justify-center py-2">
+          {flexRender(header.column.columnDef.header, header.getContext())}
         </div>
-      </div>
-      <ColumnResizer header={header} />
+      ) : (
+        <>
+          <div className="flex flex-row items-center justify-between py-2">
+            {flexRender(header.column.columnDef.header, header.getContext())}
+            <div>
+              <SortingButton header={header} />
+              <FilterPopover header={header} />
+            </div>
+          </div>
+          <ColumnResizer header={header} />
+        </>
+      )}
     </TableHead>
   );
 }

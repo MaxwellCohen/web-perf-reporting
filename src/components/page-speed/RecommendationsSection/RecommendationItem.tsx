@@ -11,14 +11,143 @@ import { IssuesFoundTable } from '@/components/page-speed/RecommendationsSection
 import { ResourcesTable } from '@/components/page-speed/RecommendationsSection/ResourcesTable';
 import type { Recommendation } from '@/components/page-speed/RecommendationsSection/types';
 import { shouldShowSeparateTablesPerReport } from '@/components/page-speed/auditTableConfig';
+import { useContext, useMemo } from 'react';
+import { InsightsContext, InsightsContextItem } from '@/components/page-speed/PageSpeedContext';
+import { TreeDataItem, TreeView } from '@/components/ui/tree-view';
+import { renderTimeValue } from '@/components/page-speed/lh-categories/table/RenderTableValue';
+import { Details } from '@/components/ui/accordion';
 
 interface RecommendationItemProps {
   rec: Recommendation;
-  items: Array<{ label: string }>;
+  items: InsightsContextItem[];
   priorityColors: Record<string, string>;
 }
 
+// Type definitions for network dependency tree
+type NetworkTreeNode = {
+  url: string;
+  transferSize?: number;
+  navStartToEndTime?: number;
+  isLongest?: boolean;
+  children?: NetworkTreeChains;
+};
+
+type NetworkTreeChains = {
+  [id: string]: NetworkTreeNode;
+};
+
+type NetworkTreeValue = {
+  type: 'network-tree';
+  longestChain?: {
+    duration: number;
+  };
+  chains: NetworkTreeChains;
+};
+
+function extractNetworkTreeFromAudit(item: InsightsContextItem): {
+  tree: NetworkTreeValue | null;
+  label: string;
+} {
+  const audit = item.item?.lighthouseResult?.audits?.['network-dependency-tree-insight'];
+  if (!audit?.details || audit.details.type !== 'list') {
+    return { tree: null, label: item.label };
+  }
+
+  // Find the network-tree value in the list items
+  const listItems = (audit.details as { items?: Array<{ value?: unknown }> })?.items || [];
+  const networkTreeItem = listItems.find(
+    (item) =>
+      item.value &&
+      typeof item.value === 'object' &&
+      'type' in item.value &&
+      item.value.type === 'network-tree'
+  );
+
+  if (!networkTreeItem?.value) {
+    return { tree: null, label: item.label };
+  }
+
+  return {
+    tree: networkTreeItem.value as NetworkTreeValue,
+    label: item.label,
+  };
+}
+
+function networkTreeToTreeData(
+  chains: NetworkTreeChains,
+  isRoot = false
+): TreeDataItem[] {
+  return Object.entries(chains).map(([id, node]) => {
+    const parts: string[] = [];
+    
+    // Add URL
+    parts.push(node.url);
+    
+    // Add transfer size if available
+    if (node.transferSize !== undefined) {
+      parts.push(`Transfer: ${formatBytes(node.transferSize)}`);
+    }
+    
+    // Add nav start to end time if available
+    if (node.navStartToEndTime !== undefined) {
+      parts.push(`Time: ${renderTimeValue(node.navStartToEndTime)}`);
+    }
+    
+    // Mark longest chain
+    if (node.isLongest) {
+      parts.push('(Longest Chain)');
+    }
+
+    return {
+      id,
+      name: parts.join(' | '),
+      icon: undefined,
+      selectedIcon: undefined,
+      openIcon: undefined,
+      draggable: false,
+      droppable: false,
+      isRoot: isRoot,
+      children: node.children
+        ? networkTreeToTreeData(node.children, false)
+        : undefined,
+    };
+  });
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return '0 bytes';
+  const kb = bytes / 1024;
+  const mb = kb / 1024;
+  if (mb >= 1) {
+    return `${mb.toFixed(2)} MB`;
+  }
+  if (kb >= 1) {
+    return `${kb.toFixed(2)} KB`;
+  }
+  return `${bytes} bytes`;
+}
+
 export function RecommendationItem({ rec, items, priorityColors }: RecommendationItemProps) {
+  const insightsContextItems = useContext(InsightsContext);
+  
+  // Check if this is a network dependency tree recommendation
+  const isNetworkDependencyTree = rec.id.startsWith('network-dependency-tree-insight');
+  
+  // Extract network trees for reports that have issues
+  const networkTrees = useMemo(() => {
+    if (!isNetworkDependencyTree) return [];
+    
+    // Get reports that have actionable steps (indicating issues)
+    const reportsWithIssues = new Set(
+      rec.actionableSteps.flatMap(step => step.reports)
+    );
+    
+    // Extract network trees only for reports with issues
+    return insightsContextItems
+      .filter(item => reportsWithIssues.has(item.label))
+      .map(extractNetworkTreeFromAudit)
+      .filter(({ tree }) => tree !== null);
+  }, [isNetworkDependencyTree, rec.actionableSteps, insightsContextItems]);
   return (
     <AccordionItem key={rec.id} value={rec.id} className="border rounded-lg">
       <AccordionTrigger className="px-4 py-3 hover:no-underline">
@@ -127,6 +256,41 @@ export function RecommendationItem({ rec, items, priorityColors }: Recommendatio
               Resources to Optimize:
             </h4>
             <ResourcesTable items={rec.items} />
+          </div>
+        )}
+        {isNetworkDependencyTree && networkTrees.length > 0 && (
+          <div className="mt-4">
+            <h4 className="font-semibold text-sm mb-2">
+              Network Dependency Tree:
+            </h4>
+            {networkTrees.map(({ tree, label }) => {
+              if (!tree || !tree.chains || Object.keys(tree.chains).length === 0) {
+                return null;
+              }
+              
+              const treeData = networkTreeToTreeData(tree.chains, true);
+              
+              return (
+                <Details key={label} className="flex flex-col gap-2 mb-4 border rounded-lg p-4">
+                  <summary className="flex flex-col gap-2 cursor-pointer">
+                    <div className="font-semibold text-sm">
+                      {label}
+                    </div>
+                    {tree.longestChain && (
+                      <div className="text-xs text-muted-foreground">
+                        Longest Chain Duration: {renderTimeValue(tree.longestChain.duration)}
+                      </div>
+                    )}
+                  </summary>
+                  <div className="lh-crc overflow-x-auto w-full mt-2">
+                    <div className="lh-crc-initial-nav text-gray-500 italic mb-2 text-xs">
+                      Initial Navigation
+                    </div>
+                    <TreeView data={treeData} expandAll />
+                  </div>
+                </Details>
+              );
+            })}
           </div>
         )}
       </AccordionContent>
