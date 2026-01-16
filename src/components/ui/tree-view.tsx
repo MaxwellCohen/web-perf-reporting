@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
@@ -261,25 +262,27 @@ function generateTreeMarkers(
 }
 
 const TreeItem = React.forwardRef<HTMLDivElement, TreeItemProps>(
-  (
-    {
-      className,
-      data,
-      selectedItemId,
-      handleSelectChange,
-      expandedItemIds,
-      handleDragStart,
-      handleDrop,
-      draggedItem,
-      ...props
-    },
-    ref,
-  ) => {
+	(
+		{
+			className,
+			data,
+			selectedItemId,
+			handleSelectChange,
+			expandedItemIds,
+			handleDragStart,
+			handleDrop,
+			draggedItem,
+			defaultNodeIcon,
+			defaultLeafIcon,
+			...props
+		},
+		ref,
+	) => {
     if (!(data instanceof Array)) {
       data = [data];
     }
-    return (
-      <div ref={ref} role="tree" className={className} {...props}>
+		return (
+			<div ref={ref} role="tree" className={className} {...props}>
         <ul className="list-none m-0 p-0">
           {data.map((item, index) => {
             const isLast = index === data.length - 1;

@@ -82,17 +82,36 @@ const cols: ColumnDef<ResourceTypeTableRow, any>[] = [
   }),
 ];
 
-export function ResourceTypeBreakdownCard({ stats }: ResourceTypeBreakdownCardProps) {
+function ResourceTypeTable({ label, data }: { label: string; data: ResourceTypeTableRow[] }) {
   "use no memo";
+  const columns = useTableColumns<ResourceTypeTableRow>(cols, columnHelper, false);
+  const table = useStandardTable({
+    data,
+    columns,
+  });
+
+  return (
+    <div>
+      <h5 className="font-semibold text-sm mb-2 text-muted-foreground">
+        {label}
+      </h5>
+      <div className="w-full overflow-x-auto">
+        <Table className="w-full" style={{ width: '100%' }}>
+          <DataTableHeader table={table} />
+          <DataTableBody table={table} />
+        </Table>
+      </div>
+    </div>
+  );
+}
+
+export function ResourceTypeBreakdownCard({ stats }: ResourceTypeBreakdownCardProps) {
   const validStats = useMemo(() => stats.filter(s => s.byResourceType && Object.keys(s.byResourceType).length > 0), [stats]);
 
-
-  const showReportColumn = validStats.length > 1;
-
-  // Combine all resource type data with labels
-  const data = useMemo<ResourceTypeTableRow[]>(() => {
-    const allRows = validStats.flatMap(({ label, byResourceType }) =>
-      Object.entries(byResourceType).map(([type, items]) => {
+  // Create data for each report separately
+  const dataByReport = useMemo(() => {
+    return validStats.map(({ label, byResourceType }) => {
+      const rows = Object.entries(byResourceType).map(([type, items]) => {
         const typedItems = Array.isArray(items) ? items as TableItem[] : [];
         return {
           label,
@@ -101,40 +120,34 @@ export function ResourceTypeBreakdownCard({ stats }: ResourceTypeBreakdownCardPr
           transferSize: sumOn(typedItems, 'transferSize'),
           resourceSize: sumOn(typedItems, 'resourceSize'),
         };
-      })
-    );
-    
-    return sortByMaxValue(
-      allRows,
-      (row) => row.resourceType,
-      (row) => row.transferSize || 0,
-      validStats.length
-    );
+      });
+      
+      return {
+        label,
+        data: sortByMaxValue(
+          rows,
+          (row) => row.resourceType,
+          (row) => row.transferSize || 0,
+          1
+        ),
+      };
+    });
   }, [validStats]);
-
-  const columns = useTableColumns<ResourceTypeTableRow>(cols, columnHelper, showReportColumn);
-
-  const table = useStandardTable({
-    data,
-    columns,
-    grouping: ['resourceType'],
-  });
-
 
   if (!validStats.length) {
     return null;
   }
+  
   return (
     <Card className="md:col-span-2 lg:col-span-3">
       <CardHeader>
         <CardTitle>Resource Type Breakdown</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="w-full overflow-x-auto">
-          <Table className="w-full" style={{ width: '100%' }}>
-            <DataTableHeader table={table} />
-            <DataTableBody table={table} />
-          </Table>
+        <div className="space-y-6">
+          {dataByReport.map(({ label, data }) => (
+            <ResourceTypeTable key={label} label={label} data={data} />
+          ))}
         </div>
       </CardContent>
     </Card>
