@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
         return new Response(`Data is not yet ready! ${data.status}`, { status: 404 });
       }
       if (data.data) {
-        return new Response(JSON.stringify(data.data), {
+        return new Response(data.data, {
           headers: { 'Content-Type': 'application/json' },
         });
       }
