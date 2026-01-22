@@ -29,6 +29,7 @@ export function CurrentPerformanceDashboard({
 
   const groupedMetics = data ? groupBy(data, ({ metric_name }) => metric_name || '') : {};
   const form_factors = reportMap[`${reportScope}All`]?.record?.metrics?.form_factors?.fractions;
+  const form_factors_date_range = reportMap[`${reportScope}All`]?.record?.collectionPeriod;
   const navigation_types = report?.record?.metrics?.navigation_types?.fractions;
   const collectionPeriod = report?.record?.collectionPeriod
   return (
@@ -47,6 +48,7 @@ export function CurrentPerformanceDashboard({
           <PercentTable
             title={'Form Factors'}
             data={form_factors}
+            dateRange={form_factors_date_range ? `${formatDate(form_factors_date_range.firstDate)} - ${formatDate(form_factors_date_range.lastDate)}` : undefined}
             className='md:grid md:grid-cols-[auto,1fr] gap-2 pl-2 justify-between items-center flex-row flex-1 min-w-full md:min-w-75 '
           />
         ) : null}

@@ -96,15 +96,22 @@ export function PercentTable({
   title,
   data,
   className,
+  dateRange,
 }: {
   title: string;
   data: Record<string, number>;
   className?: string;
+  dateRange?: string;
 }) {
   const entries = Object.entries(data);
   return (
     <Card className={cn('flex-1', className)}>
       <div className="text-md text-center font-bold">{title}</div>
+      {dateRange && (
+        <div className="text-xs text-center text-muted-foreground mb-1">
+          {dateRange}
+        </div>
+      )}
       <Table>
         <TableHeader className="pt-2">
           {entries.map(([label]) => {
