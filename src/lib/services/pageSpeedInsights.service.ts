@@ -4,7 +4,6 @@ import { PageSpeedInsightsTable } from '@/db/schema';
 import { db } from '@/db';
 import { PageSpeedInsights } from '@/lib/schema';
 import { and, eq } from 'drizzle-orm';
-import {waitUntil} from '@vercel/functions'
 
 
 type formFactor = 'DESKTOP' | 'MOBILE';
@@ -57,10 +56,6 @@ export const requestPageSpeedData = async (
       return null;
     }
     const result = await savePageSpeedData(testURL);
-    waitUntil((async () => {
-      console.log('starting api request')
-      console.log('data loaded', result)
-    })())
     return result.publicId;
   } catch (error) {
     Sentry.captureException(error);
