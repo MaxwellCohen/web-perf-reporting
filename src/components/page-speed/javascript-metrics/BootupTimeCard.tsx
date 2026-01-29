@@ -1,18 +1,16 @@
-"use client";
-import { RenderMSValue } from "@/components/page-speed/lh-categories/table/RenderTableValue";
-import { TableItem } from "@/lib/schema";
-import { getUrlString, getNumber } from "@/lib/utils";
-import { useMemo } from "react";
-import {
-  ColumnDef,
-  createColumnHelper,
-} from "@tanstack/react-table";
-import { createNumericAggregatedCell } from "@/components/page-speed/shared/aggregatedCellHelpers";
-import { sortByMaxValue } from "@/components/page-speed/shared/dataSortingHelpers";
-import { useStandardTable } from "@/components/page-speed/shared/tableConfigHelpers";
-import { createURLColumn } from "@/components/page-speed/shared/tableColumnHelpers";
-import { useTableColumns } from "@/components/page-speed/shared/useTableColumns";
-import { TableCard } from "@/components/page-speed/shared/TableCard";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+'use client';
+import { RenderMSValue } from '@/components/page-speed/lh-categories/table/RenderTableValue';
+import { TableItem } from '@/lib/schema';
+import { getUrlString, getNumber } from '@/lib/utils';
+import { useMemo } from 'react';
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
+import { createNumericAggregatedCell } from '@/components/page-speed/shared/aggregatedCellHelpers';
+import { sortByMaxValue } from '@/components/page-speed/shared/dataSortingHelpers';
+import { useStandardTable } from '@/components/page-speed/shared/tableConfigHelpers';
+import { createURLColumn } from '@/components/page-speed/shared/tableColumnHelpers';
+import { useTableColumns } from '@/components/page-speed/shared/useTableColumns';
+import { TableCard } from '@/components/page-speed/shared/TableCard';
 
 type BootupTimeData = {
   label: string;
@@ -32,7 +30,7 @@ type BootupTimeCardProps = {
 };
 
 const columnHelper = createColumnHelper<BootupTimeTableRow>();
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 const cols: ColumnDef<BootupTimeTableRow, any>[] = [
   createURLColumn(columnHelper),
   columnHelper.accessor('scriptParseCompile', {
@@ -73,13 +71,15 @@ const cols: ColumnDef<BootupTimeTableRow, any>[] = [
       return value !== undefined ? <RenderMSValue value={value} /> : 'N/A';
     },
     aggregatedCell: createNumericAggregatedCell('total'),
-  })
+  }),
 ];
 
-
 export function BootupTimeCard({ metrics }: BootupTimeCardProps) {
-  "use no memo";
-  const validMetrics = useMemo(() => metrics.filter(m => m.bootupTime.length > 0), [metrics]);
+  
+  const validMetrics = useMemo(
+    () => metrics.filter((m) => m.bootupTime.length > 0),
+    [metrics],
+  );
   const showReportColumn = validMetrics.length > 1;
 
   // Combine all bootup time data with labels
@@ -93,19 +93,38 @@ export function BootupTimeCard({ metrics }: BootupTimeCardProps) {
           scripting: getNumber(item.scripting),
           scriptParseCompile: getNumber(item.scriptParseCompile),
         };
-      })
+      }),
     );
-    
+
     return sortByMaxValue(
       allRows,
       (row) => row.url,
       (row) => row.total || 0,
-      validMetrics.length
+      validMetrics.length,
     );
   }, [validMetrics]);
 
-  const columns = useTableColumns<BootupTimeTableRow>(cols, columnHelper, showReportColumn);
+  const columns = useTableColumns<BootupTimeTableRow>(
+    cols,
+    columnHelper,
+    showReportColumn,
+  );
 
+  if (!validMetrics.length) {
+    return null;
+  }
+
+  return <BootupTimeTable data={data} columns={columns} />;
+}
+
+function BootupTimeTable({
+  data,
+  columns,
+}: {
+  data: BootupTimeTableRow[];
+  columns: ColumnDef<BootupTimeTableRow, any>[];
+}) {
+  'use no memo';
   const table = useStandardTable({
     data,
     columns,
@@ -113,10 +132,6 @@ export function BootupTimeCard({ metrics }: BootupTimeCardProps) {
     enablePagination: true,
     defaultPageSize: 10,
   });
-
-  if (!validMetrics.length) {
-    return null;
-  }
 
   return (
     <TableCard
@@ -126,4 +141,3 @@ export function BootupTimeCard({ metrics }: BootupTimeCardProps) {
     />
   );
 }
-

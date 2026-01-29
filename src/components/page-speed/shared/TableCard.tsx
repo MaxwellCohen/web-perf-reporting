@@ -35,50 +35,63 @@ export function TableCard<T = unknown>({
     showPagination && canShowAllResults && !showAllResults;
 
   return (
+    <TableCardWrapper title={title} className={className}>
+      <div className={`w-full overflow-x-auto`}>
+        <Table className="w-full" style={{ width: '100%' }}>
+          <DataTableHeader table={table} />
+          <DataTableBody table={table} />
+        </Table>
+      </div>
+      {showPagination && (
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+          {showPaginationControls && (
+            <PaginationCard table={table} showManualControls />
+          )}
+          {canShowAllResults && !showAllResults && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                const rowCount = table.getRowCount();
+                table.setPageSize(rowCount);
+                setShowAllResults(true);
+              }}
+            >
+              Show all results
+            </Button>
+          )}
+          {showAllResults && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                table.setPageSize(pageSize);
+                setShowAllResults(false);
+              }}
+            >
+              Show less results
+            </Button>
+          )}
+        </div>
+      )}
+    </TableCardWrapper>
+  );
+}
+
+function TableCardWrapper({
+  children,
+  title,
+  className,
+}: {
+  children: React.ReactNode;
+  title: string;
+  className?: string;
+}) {
+  "use no memo";
+  return (
     <Card className={className}>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div
-          className={`w-full overflow-x-auto `}
-        >
-          <Table className="w-full" style={{ width: '100%' }}>
-            <DataTableHeader table={table} />
-            <DataTableBody table={table} />
-          </Table>
-        </div>
-        {showPagination && (
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-            {showPaginationControls && (
-              <PaginationCard table={table} showManualControls />
-            )}
-            {canShowAllResults && !showAllResults && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  const rowCount = table.getRowCount();
-                  table.setPageSize(rowCount);
-                  setShowAllResults(true);
-                }}
-              >
-                Show all results
-              </Button>
-            )}
-            {showAllResults && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  table.setPageSize(pageSize);
-                  setShowAllResults(false);
-                }}
-              >
-                Show less results
-              </Button>
-            )}
-          </div>
-        )}
-      </CardContent>
+      <CardContent>{children}</CardContent>
     </Card>
   );
 }
