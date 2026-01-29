@@ -1,4 +1,7 @@
-import { PageSpeedInsightsDashboardWrapper } from './PageSpeedInsightsDashboardWrapper';
+import Dynamic from 'next/dynamic';
+const PageSpeedInsightsDashboardWrapper = Dynamic(() => import('./PageSpeedInsightsDashboardWrapper').then(mod => mod.PageSpeedInsightsDashboardWrapper), {
+  ssr: false,
+});
 
 export const dynamic = 'force-dynamic';
 
