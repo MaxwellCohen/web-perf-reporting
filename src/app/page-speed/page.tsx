@@ -1,7 +1,7 @@
 import { UrlLookupForm } from '@/components/common/UrlLookupForm';
 import { updateURl } from '@/lib/utils';
 import { requestPageSpeedData } from '@/lib/services/pageSpeedInsights.service';
-import { PageSpeedInsightsDashboard } from '@/components/page-speed/pageSpeedInsightsDashboard';
+import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,20 +13,12 @@ export default async function Home({
   const params = await searchParams;
   const url = updateURl(params.url as string);
 
-  return (
-    <>
-      {!url ? (
-        <UrlLookupForm />
-      ) : (
-          <PageSpeedInsightsDashboardWrapper url={url} />
-      )}
-    </>
-  );
-}
+  if (url) {
+    const publicId = await requestPageSpeedData(url);
+    if (publicId) {
+      redirect(`/page-speed/${publicId}`);
+    }
+  }
 
-async function PageSpeedInsightsDashboardWrapper({ url }: { url: string }) {
-  requestPageSpeedData(url);
-  return (
-    <PageSpeedInsightsDashboard data={[null, null]} labels={['Mobile', 'Desktop']} url={url} />
-  );
+  return <UrlLookupForm />;
 }

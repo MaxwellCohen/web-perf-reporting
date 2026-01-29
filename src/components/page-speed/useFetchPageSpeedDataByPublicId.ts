@@ -2,16 +2,13 @@
 import { PageSpeedInsights } from '@/lib/schema';
 import { useQuery } from '@tanstack/react-query';
 
-async function fetcher(url: string, signal: AbortSignal) {
-  const res = await fetch('/api/pagespeed', {
+async function fetcher(publicId: string, signal: AbortSignal) {
+  const res = await fetch(`/api/pagespeed/${publicId}`, {
     mode: 'no-cors',
-    method: 'POST',
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      testURL: url,
-    }),
     signal,
   });
 
@@ -36,16 +33,16 @@ async function fetcher(url: string, signal: AbortSignal) {
   return [];
 }
 
-export function useFetchPageSpeedData(
-  url: string,
+export function useFetchPageSpeedDataByPublicId(
+  publicId: string,
   defaultData?: (PageSpeedInsights | null | undefined)[],
 ) {
   const hasDefaultData = !!defaultData?.filter(Boolean).length;
 
   const { data, isLoading } = useQuery({
-    queryKey: ['pagespeed', url],
-    queryFn: ({ signal }) => fetcher(url, signal),
-    enabled: !!url && !hasDefaultData,
+    queryKey: ['pagespeed', 'publicId', publicId],
+    queryFn: ({ signal }) => fetcher(publicId, signal),
+    enabled: !!publicId && !hasDefaultData,
     initialData: hasDefaultData ? defaultData : undefined,
     retryDelay: 3000,
   });

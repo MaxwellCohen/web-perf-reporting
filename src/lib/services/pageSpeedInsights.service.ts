@@ -51,21 +51,20 @@ export const getSavedPageSpeedData = async (url: string) => {
 
 export const requestPageSpeedData = async (
   testURL: string | undefined,
-): Promise<(PageSpeedInsights | null | undefined)[]> => {
+): Promise<string | null> => {
   try {
     if (!testURL) {
-      return [null, null];
+      return null;
     }
-    const p = savePageSpeedData(testURL);
+    const result = await savePageSpeedData(testURL);
     waitUntil((async () => {
       console.log('starting api request')
-      const pageSpeedSaveProcess = await p;
-      console.log('data loaded', pageSpeedSaveProcess)
+      console.log('data loaded', result)
     })())
-    return [null, null];
+    return result.publicId;
   } catch (error) {
     Sentry.captureException(error);
-    return [null, null];
+    return null;
   }
 };
 
@@ -76,19 +75,30 @@ function createRequestDate() {
   return date;
 }
 
-async function savePageSpeedData(url: string) {
+type ApiResponse = {
+  publicId: string,
+  url: string,
+  status: 'pending' | 'completed' | 'error',
+  data: [PageSpeedInsights | null | undefined][] | Record<string, unknown>
+}
+
+async function savePageSpeedData(url: string): Promise<ApiResponse> {
   const date = createRequestDate();
   try {
     // await insertPendingMeasurement(url, date);
     const requestUrl = new URL('https://web-perf-report-cf.to-email-max.workers.dev');
     requestUrl.searchParams.append('url', (url));
     requestUrl.searchParams.append('key', process.env.PAGESPEED_INSIGHTS_API ?? '');
-    await fetch(requestUrl.toString());
-    return [null, null];
+    const x = await fetch(requestUrl.toString());
+    if (!x.ok) {
+      throw new Error(`Failed to fetch: ${x.status}`);
+    }
+    const response = (await x.json()) as ApiResponse;
+    return response;
   } catch (error) {
     console.log('error', error);
     await handleMeasurementFailure(error, url, date);
-    return [null, null];
+    throw error;
   }
 }
 
