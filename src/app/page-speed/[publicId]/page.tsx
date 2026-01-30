@@ -1,4 +1,4 @@
-import { PageSpeedInsightsDashboardWrapper } from './PageSpeedInsightsDashboardWrapper';
+// import { PageSpeedInsightsDashboardWrapper } from './PageSpeedInsightsDashboardWrapper';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,6 +8,7 @@ export default async function PageSpeedPublicIdPage({
   params: Promise<{ publicId: string }>;
 }) {
   const { publicId } = await params;
-
-  return <PageSpeedInsightsDashboardWrapper publicId={publicId} />;
+  console.log('publicId', publicId);
+  return <div>Hello {publicId}</div>;
+  // return <PageSpeedInsightsDashboardWrapper publicId={publicId} />;
 }
