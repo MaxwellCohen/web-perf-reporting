@@ -20,6 +20,7 @@ async function fetcher(publicId: string, signal: AbortSignal) {
     };
   }
   const urlObj = await res.text();
+  console.log('urlObj', urlObj);  
   try {
     const parsedData = JSON.parse(urlObj);
     if (Array.isArray(parsedData)) {
