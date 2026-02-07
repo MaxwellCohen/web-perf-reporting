@@ -23,9 +23,13 @@ export async function GET(
     console.log('data', data);
     
     if (!data) {
-      return new Response('Data is not yet ready no data', { status: 404 });
+      return new Response('Data is not yet ready no data!!', { status: 404 });
     }
     
+    if (data.status.toLowerCase() === 'failed') {
+      return new Response(`Data is not yet ready! ${data.status}`, { status: 500 });
+    }
+
     if (data.status.toLowerCase() !== 'completed') {
       return new Response(`Data is not yet ready! ${data.status}`, { status: 404 });
     }

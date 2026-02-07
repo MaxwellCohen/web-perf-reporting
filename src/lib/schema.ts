@@ -810,7 +810,7 @@ export const pageSpeedInsightsSchema = z.object({
   originLoadingExperience: PageSpeedApiLoadingExperienceV5schema,
   analysisUTCTimestamp: z.string(),
   lighthouseResult: lighthouseResultV5Schema,
-  
+  status: z.string().optional(),
   version: z.object({ major: z.string(), minor: z.string() }).optional(),
 });
 

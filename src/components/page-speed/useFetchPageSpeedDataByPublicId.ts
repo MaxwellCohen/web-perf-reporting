@@ -12,6 +12,10 @@ async function fetcher(publicId: string, signal: AbortSignal) {
     signal,
   });
 
+  if (res.status === 500) {
+    return { status: 'failed' };
+  }
+
   if (!res.ok) {
     const message = await res.text();
     throw {
@@ -19,8 +23,9 @@ async function fetcher(publicId: string, signal: AbortSignal) {
       message,
     };
   }
+  
   const urlObj = await res.text();
-  console.log('urlObj', urlObj);  
+
   try {
     const parsedData = JSON.parse(urlObj);
     if (Array.isArray(parsedData)) {
