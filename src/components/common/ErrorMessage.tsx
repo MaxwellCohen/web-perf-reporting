@@ -13,7 +13,7 @@ export function ErrorMessage({
   retryUrl?: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[400px] p-4">
+    <div className="flex flex-col items-center justify-center min-h-100 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
