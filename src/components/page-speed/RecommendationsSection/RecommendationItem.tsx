@@ -16,6 +16,7 @@ import { InsightsContext, InsightsContextItem } from '@/components/page-speed/Pa
 import { TreeDataItem, TreeView } from '@/components/ui/tree-view';
 import { renderTimeValue } from '@/components/page-speed/lh-categories/table/RenderTableValue';
 import { Details } from '@/components/ui/accordion';
+import { RenderJSONDetails } from '@/components/page-speed/RenderJSONDetails';
 
 interface RecommendationItemProps {
   rec: Recommendation;
@@ -148,6 +149,15 @@ export function RecommendationItem({ rec, items, priorityColors }: Recommendatio
       .map(extractNetworkTreeFromAudit)
       .filter(({ tree }) => tree !== null);
   }, [isNetworkDependencyTree, rec.actionableSteps, insightsContextItems]);
+
+  // Audit ID for this recommendation (rec.id is e.g. "lcp-request-discovery-LCP" or "lcp-request-discovery-failed")
+  const auditId = rec.id.split('-').slice(0, -1).join('-');
+  const auditDataForAllData = useMemo(
+    () => items.map((item) => item.item?.lighthouseResult?.audits?.[auditId] ?? null),
+    [items, auditId],
+  );
+  const hasAuditData = auditDataForAllData.some((d) => d != null);
+
   return (
     <AccordionItem key={rec.id} value={rec.id} className="border rounded-lg">
       <AccordionTrigger className="px-4 py-3 hover:no-underline">
@@ -239,13 +249,19 @@ export function RecommendationItem({ rec, items, priorityColors }: Recommendatio
                   ));
               }
               
-              // Fallback to single combined table
+              // Fallback to single combined table: label "All Devices" or the single report
+              const singleTableLabel = items.length === 1 ? (items[0]?.label ?? '') : 'All Devices';
               return (
-                <IssuesFoundTable
-                  headings={rec.tableData.headings}
-                  items={rec.tableData.items}
-                  device={items[0]?.label || ''}
-                />
+                <div className="mb-4">
+                  <h5 className="font-semibold text-xs mb-2 text-muted-foreground">
+                    {singleTableLabel}
+                  </h5>
+                  <IssuesFoundTable
+                    headings={rec.tableData.headings}
+                    items={rec.tableData.items}
+                    device={items[0]?.label || singleTableLabel}
+                  />
+                </div>
               );
             })()}
           </div>
@@ -291,6 +307,16 @@ export function RecommendationItem({ rec, items, priorityColors }: Recommendatio
                 </Details>
               );
             })}
+          </div>
+        )}
+        {hasAuditData && (
+          <div className="mt-4">
+            <RenderJSONDetails
+              className="text-right"
+              data={auditDataForAllData[0]}
+              data2={auditDataForAllData[1]}
+              title={`All Data for ${auditId}`}
+            />
           </div>
         )}
       </AccordionContent>

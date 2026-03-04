@@ -9,7 +9,10 @@ import { Popover } from '@/components/ui/popover';
 import { PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
 import { ListFilter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { RangeFilter, StringFilterHeader } from '@/components/page-speed/JSUsage/JSUsageTable';
+import {
+  RangeFilter,
+  StringFilterHeader,
+} from '@/components/page-speed/JSUsage/JSUsageTable';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ColumnResizer } from '@/components/page-speed/lh-categories/table/columnResizer';
@@ -34,11 +37,11 @@ export function DataTableHeader<T>({ table }: { table: TableType<T> }) {
 export function DataTableHead<T>({ header }: { header: Header<T, unknown> }) {
   'use no memo';
   const isExpanderColumn = header.column.id === 'expander';
-  
+
   return (
     <TableHead
       key={header.id}
-      className="relative"
+      className="relative min-w-0 overflow-hidden"
       style={{
         width: `${header.getSize()}px`,
         ...(isExpanderColumn && {
@@ -48,14 +51,16 @@ export function DataTableHead<T>({ header }: { header: Header<T, unknown> }) {
       }}
     >
       {isExpanderColumn ? (
-        <div className="flex items-center justify-center py-2">
+        <div className="flex items-center justify-center py-1">
           {flexRender(header.column.columnDef.header, header.getContext())}
         </div>
       ) : (
         <>
-          <div className="flex flex-row items-center justify-between py-2">
-            {flexRender(header.column.columnDef.header, header.getContext())}
-            <div>
+          <div className="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1">
+            <div className="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate">
+              {flexRender(header.column.columnDef.header, header.getContext())}
+            </div>
+            <div className="flex shrink-0 flex-row items-center gap-1">
               <SortingButton header={header} />
               <FilterPopover header={header} />
             </div>
@@ -78,7 +83,7 @@ function FilterPopover<T>({ header }: { header: Header<T, unknown> }) {
       <StringFilterHeader column={header.column} name={''} />
     ),
     booleanFilterFn: () => <CheckBoxFilter header={header} />,
-    inNumberRange: () => <RangeFilter column={header.column} />
+    inNumberRange: () => <RangeFilter column={header.column} />,
   };
   if (!(filterType in map)) {
     return null;
@@ -93,7 +98,7 @@ function FilterPopover<T>({ header }: { header: Header<T, unknown> }) {
         </Button>
       </PopoverTrigger>
       <PopoverContent>
-        <div className="flex max-h-72 flex-col overflow-y-auto rounded-sm border border-muted-foreground/30 bg-black p-4">
+        <div className="border-muted-foreground/30 flex max-h-72 flex-col overflow-y-auto rounded-sm border bg-black p-4">
           {filterComponent()}
         </div>
       </PopoverContent>

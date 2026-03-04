@@ -15,7 +15,7 @@ export function collectSpecificRecommendations(
   auditId: string,
   auditEntries: AuditEntry[]
 ): ActionableStep[] {
-  const stepsMap = new Map<string, { reports: Set<string>; url?: string }>();
+  const stepsMap = new Map<string, { reports: Set<string>; url?: string; host?: string }>();
   
   auditEntries.forEach(({ audit, label }) => {
     const details = audit.details;
@@ -34,23 +34,26 @@ export function collectSpecificRecommendations(
       label,
     );
     
-    specificRecs.forEach(({ step, reports, url }) => {
+    specificRecs.forEach(({ step, reports, url, host }) => {
       if (!stepsMap.has(step)) {
-        stepsMap.set(step, { reports: new Set(), url });
+        stepsMap.set(step, { reports: new Set(), url, host });
       }
       const entry = stepsMap.get(step)!;
       reports.forEach((r) => entry.reports.add(r));
-      // Preserve URL if it exists
       if (url && !entry.url) {
         entry.url = url;
+      }
+      if (host && !entry.host) {
+        entry.host = host;
       }
     });
   });
   
-  return Array.from(stepsMap.entries()).map(([step, { reports, url }]) => ({
+  return Array.from(stepsMap.entries()).map(([step, { reports, url, host }]) => ({
     step,
     reports: Array.from(reports),
     url,
+    host,
   }));
 }
 
@@ -58,24 +61,27 @@ export function combineAndDeduplicateSteps(
   specificRecs: ActionableStep[],
   genericSteps: ActionableStep[]
 ): ActionableStep[] {
-  const allStepsMap = new Map<string, { reports: Set<string>; url?: string }>();
+  const allStepsMap = new Map<string, { reports: Set<string>; url?: string; host?: string }>();
   
-  [...specificRecs, ...genericSteps].forEach(({ step, reports, url }) => {
+  [...specificRecs, ...genericSteps].forEach(({ step, reports, url, host }) => {
     if (!allStepsMap.has(step)) {
-      allStepsMap.set(step, { reports: new Set(), url });
+      allStepsMap.set(step, { reports: new Set(), url, host });
     }
     const entry = allStepsMap.get(step)!;
     reports.forEach((r) => entry.reports.add(r));
-    // Preserve URL if it exists
     if (url && !entry.url) {
       entry.url = url;
     }
+    if (host && !entry.host) {
+      entry.host = host;
+    }
   });
   
-  return Array.from(allStepsMap.entries()).map(([step, { reports, url }]) => ({
+  return Array.from(allStepsMap.entries()).map(([step, { reports, url, host }]) => ({
     step,
     reports: Array.from(reports),
     url,
+    host,
   }));
 }
 

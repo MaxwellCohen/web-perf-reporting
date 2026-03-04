@@ -33,5 +33,6 @@ export interface ActionableStep {
   step: string;
   reports: string[];
   url?: string; // URL of the resource if this step references a specific resource
+  host?: string; // Host/origin of the resource, for grouping steps by host
 }
 

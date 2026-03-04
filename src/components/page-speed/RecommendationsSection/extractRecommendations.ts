@@ -17,6 +17,18 @@ function getResourceName(url: string): string {
   }
 }
 
+function getHost(url: string | undefined): string {
+  if (!url || url.startsWith('data:') || url.startsWith('#')) return '';
+  try {
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return new URL(url).host;
+    }
+    return '';
+  } catch {
+    return '';
+  }
+}
+
 export function extractSpecificRecommendations(
   auditId: string,
   items: Array<Record<string, unknown>>,
@@ -86,33 +98,33 @@ export function extractSpecificRecommendations(
   const topResources = Array.from(resourceMap.entries())
     .map(([resourceName, item]) => {
       const url = item.url;
+      const host = getHost(url);
       // Create markdown link if URL exists
       const resourceLink = url ? `[${resourceName}](${url})` : resourceName;
       
       if (item.wastedBytes && item.wastedBytes > 0) {
-        return { step: `Remove ${formatBytes(item.wastedBytes)} of unused code from ${resourceLink}`, reports: reportLabels};
+        return { step: `Remove ${formatBytes(item.wastedBytes)} of unused code from ${resourceLink}`, reports: reportLabels, url, host };
       }
       if (item.wastedMs && item.wastedMs > 0) {
-        return { step: `Optimize ${resourceLink} to save ${formatTime(item.wastedMs)}`, reports: reportLabels};
+        return { step: `Optimize ${resourceLink} to save ${formatTime(item.wastedMs)}`, reports: reportLabels, url, host };
       }
       if (item.wastedPercent && item.wastedPercent > 50) {
-        return { step: `Remove ${item.wastedPercent.toFixed(0)}% of unused code from ${resourceLink}`, reports: reportLabels};
+        return { step: `Remove ${item.wastedPercent.toFixed(0)}% of unused code from ${resourceLink}`, reports: reportLabels, url, host };
       }
       if (item.scripting && item.scripting > 100) {
-        return { step: `Reduce JavaScript execution time in ${resourceLink} (${formatTime(item.scripting)} spent on scripting)`, reports: reportLabels};
+        return { step: `Reduce JavaScript execution time in ${resourceLink} (${formatTime(item.scripting)} spent on scripting)`, reports: reportLabels, url, host };
       }
       if (item.scriptParseCompile && item.scriptParseCompile > 100) {
-        return { step: `Optimize script parsing/compilation for ${resourceLink} (${formatTime(item.scriptParseCompile)} spent)`, reports: reportLabels};
+        return { step: `Optimize script parsing/compilation for ${resourceLink} (${formatTime(item.scriptParseCompile)} spent)`, reports: reportLabels, url, host };
       }
       if (item.total && item.total > 500) {
-        return { step: `Optimize ${resourceLink} (${formatTime(item.total)} total CPU time)`, reports: reportLabels};
+        return { step: `Optimize ${resourceLink} (${formatTime(item.total)} total CPU time)`, reports: reportLabels, url, host };
       }
       if (item.totalBytes && item.totalBytes > 0) {
-        return { step: `Optimize ${resourceLink} (${formatBytes(item.totalBytes)})`, reports: reportLabels};
+        return { step: `Optimize ${resourceLink} (${formatBytes(item.totalBytes)})`, reports: reportLabels, url, host };
       }
-      return { step: `Review and optimize ${resourceLink}`, reports: reportLabels};
-    })
-    .filter((r): r is ActionableStep => r !== null);
+      return { step: `Review and optimize ${resourceLink}`, reports: reportLabels, url, host };
+    });
 
   recommendations.push(...topResources);
 

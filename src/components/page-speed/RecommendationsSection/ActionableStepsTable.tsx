@@ -34,21 +34,48 @@ const markdownComponents = {
   ),
 };
 
+const OTHER_GROUP = '\u200bOther'; // zero-width space prefix so "Other" sorts last
+
 function renderStepsList(steps: ActionableStep[]) {
   if (steps.length === 0) {
     return <span className="text-muted-foreground">—</span>;
   }
-  
+
+  // Group steps by host
+  const byHost = new Map<string, ActionableStep[]>();
+  for (const s of steps) {
+    const key = (s.host && s.host.trim()) ? s.host : OTHER_GROUP;
+    if (!byHost.has(key)) byHost.set(key, []);
+    byHost.get(key)!.push(s);
+  }
+
+  const sortedGroups = Array.from(byHost.entries()).sort(([a], [b]) => {
+    if (a === OTHER_GROUP) return 1;
+    if (b === OTHER_GROUP) return -1;
+    return a.localeCompare(b);
+  });
+
   return (
-    <ul className="list-disc list-inside space-y-1">
-      {steps.map(({ step }, idx) => (
-        <li key={idx}>
-          <ReactMarkdown components={markdownComponents}>
-            {step}
-          </ReactMarkdown>
-        </li>
+    <div className="space-y-3">
+      {sortedGroups.map(([hostKey, groupSteps]) => (
+        <div key={hostKey}>
+          {hostKey !== OTHER_GROUP && (
+            <div className="text-xs font-medium text-muted-foreground mb-1.5">
+              {hostKey}
+            </div>
+          )}
+          <ul className="list-disc list-inside space-y-1">
+            {groupSteps.map(({ step }, idx) => (
+              <li key={idx}>
+                <ReactMarkdown components={markdownComponents}>
+                  {step}
+                </ReactMarkdown>
+              </li>
+            ))}
+          </ul>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }
 

@@ -1031,18 +1031,10 @@ const renderTableCell = (
       data-aggregated={`${cell.getIsAggregated()}`}
       data-placeholder={`${cell.getIsPlaceholder()}`}
       className={cn(
-        "overflow-x-auto whitespace-pre-wrap transition-all duration-300 ease-in-out",
-        // {
-        //   "!p-0 flex items-center justify-center overflow-hidden": isExpanderColumn,
-        // }
+        "min-w-0 wrap-break-word transition-all duration-300 ease-in-out",
       )}
       style={{
         width: `${cell.column.getSize()}px`,
-        // ...(isExpanderColumn && {
-        //   minWidth: `${cell.column.getSize()}px`,
-        //   maxWidth: `${cell.column.getSize()}px`,
-        //   boxSizing: 'border-box',
-        // }),
         viewTransitionName: `table-cell-${cell.id}`,
       }}
     >
@@ -1252,8 +1244,8 @@ function DetailTableFull({
   });
 
   return (
-    <div className="w-full overflow-x-auto">
-      <Table className="w-full" style={{ width: '100%' }}>
+    <div className="w-full min-w-0">
+      <Table className="w-full max-w-full" style={{ width: '100%' }}>
         <DataTableHeader table={table} />
         <TableBody className="[&_tr:last-child]:border-(length:--border-width)">
           {table
