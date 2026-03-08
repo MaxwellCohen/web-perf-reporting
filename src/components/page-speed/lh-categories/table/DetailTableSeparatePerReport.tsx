@@ -1,6 +1,5 @@
 'use client';
 import { TableItem, OpportunityItem, AuditDetailTable } from '@/lib/schema';
-import type { TableColumnHeading } from '@/lib/schema';
 import { createColumnHelper, useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel, getFacetedRowModel, getFacetedUniqueValues, getFacetedMinMaxValues, SortingState, ColumnFiltersState, ColumnDef } from '@tanstack/react-table';
 import { useMemo, useState } from 'react';
 import { toTitleCase } from '@/components/page-speed/toTitleCase';
@@ -18,44 +17,24 @@ import { Table } from '@/components/ui/table';
 import { DataTableHeader } from '@/components/page-speed/lh-categories/table/DataTableHeader';
 import { DataTableBody } from '@/components/page-speed/lh-categories/table/DataTableBody';
 import { booleanFilterFn } from '@/components/page-speed/lh-categories/table/DataTableNoGrouping';
-
-type TimeRange = { minStart: number; maxEnd: number };
-
-function getNetworkRequestsTimeRange(data: (TableItem | OpportunityItem)[]): TimeRange | null {
-  let minStart = Infinity;
-  let maxEnd = -Infinity;
-  for (const row of data) {
-    const item = row as TableItem & { networkRequestTime?: number; networkEndTime?: number };
-    const start = typeof item.networkRequestTime === 'number' ? item.networkRequestTime : NaN;
-    const end = typeof item.networkEndTime === 'number' ? item.networkEndTime : NaN;
-    if (!Number.isNaN(start)) minStart = Math.min(minStart, start);
-    if (!Number.isNaN(end)) maxEnd = Math.max(maxEnd, end);
-  }
-  if (minStart === Infinity || maxEnd === -Infinity || minStart >= maxEnd) return null;
-  return { minStart, maxEnd };
-}
-
-/** Column order for network-requests table: url, status, protocol, resource, mimeType, transfer, size, waterfall */
-const NETWORK_REQUESTS_COLUMN_ORDER = ['url', 'statusCode', 'protocol', 'resourceType', 'mimeType', 'transferSize', 'resourceSize'] as const;
-
-function sortHeadingsByOrder(headings: TableColumnHeading[], order: readonly string[]): TableColumnHeading[] {
-  const byKey = new Map(headings.map((h) => [h.key ?? '', h]));
-  const ordered: TableColumnHeading[] = [];
-  for (const key of order) {
-    const h = byKey.get(key);
-    if (h) ordered.push(h);
-  }
-  for (const h of headings) {
-    if (!order.includes(h.key ?? '')) ordered.push(h);
-  }
-  return ordered;
-}
+import {
+  getNetworkRequestsTimeRange,
+  isNetworkRequestsAudit,
+  NETWORK_REQUESTS_COLUMN_ORDER,
+  NetworkRequestTimeRange,
+  sortHeadingsByKeyOrder,
+  WATERFALL_REPLACED_NETWORK_REQUEST_KEYS,
+} from '@/components/page-speed/shared/networkRequestsTable';
+import {
+  compareReportLabels,
+  formatReportTableTitle,
+} from '@/components/page-speed/shared/reportLabels';
 
 function createColumns(
   rows: DetailTableItem[],
   deviceLabel: string,
   auditId: string | undefined,
-  timeRange: TimeRange | null
+  timeRange: NetworkRequestTimeRange | null
 ): ColumnDef<TableItem | OpportunityItem, ItemValue | undefined>[] {
   const firstRow = rows[0];
   if (!firstRow) {
@@ -64,13 +43,16 @@ function createColumns(
 
   const sColumnHelper = createColumnHelper<TableItem | OpportunityItem>();
 
-  const WATERFALL_REPLACES_KEYS = ['networkRequestTime', 'networkEndTime'];
   let headingsToUse =
-    auditId === 'network-requests'
-      ? firstRow.auditResult.details.headings.filter((h) => h.key != null && !WATERFALL_REPLACES_KEYS.includes(h.key))
+    isNetworkRequestsAudit(auditId)
+      ? firstRow.auditResult.details.headings.filter(
+          (heading) =>
+            heading.key != null &&
+            !WATERFALL_REPLACED_NETWORK_REQUEST_KEYS.includes(heading.key),
+        )
       : firstRow.auditResult.details.headings;
-  if (auditId === 'network-requests') {
-    headingsToUse = sortHeadingsByOrder(headingsToUse, [...NETWORK_REQUESTS_COLUMN_ORDER]);
+  if (isNetworkRequestsAudit(auditId)) {
+    headingsToUse = sortHeadingsByKeyOrder(headingsToUse, NETWORK_REQUESTS_COLUMN_ORDER);
   }
 
   const baseColumns = headingsToUse
@@ -109,7 +91,7 @@ function createColumns(
     })
     .filter((v) => !!v) as ColumnDef<TableItem | OpportunityItem, ItemValue | undefined>[];
 
-  if (auditId === 'network-requests' && timeRange) {
+  if (isNetworkRequestsAudit(auditId) && timeRange) {
     const waterfallCol = sColumnHelper.display({
       id: 'waterfall',
       header: 'Waterfall',
@@ -140,34 +122,11 @@ function createColumns(
   return baseColumns;
 }
 
-function getReportTitle(reportLabel: string, itemCount: number, title: string): string {
-  const auditTitle = toTitleCase(title);
-  let formattedLabel = reportLabel;
-  if (reportLabel.includes('Mobile')) {
-    formattedLabel = 'Mobile';
-  } else if (reportLabel.includes('Desktop')) {
-    formattedLabel = 'Desktop';
-  } else if (reportLabel.includes('All Devices')) {
-    formattedLabel = 'All Devices';
-  }
-  return `${auditTitle} Table for ${formattedLabel} (${itemCount} ${itemCount === 1 ? 'item' : 'items'})`;
-}
-
 function getSortedReports(
   rowsByReport: Map<string, DetailTableItem[]>
 ): Array<{ reportLabel: string; reportRows: DetailTableItem[]; data: (TableItem | OpportunityItem)[] }> {
   return Array.from(rowsByReport.entries())
-    .sort(([labelA], [labelB]) => {
-      if (labelA === 'All Devices' && labelB !== 'All Devices') return -1;
-      if (labelA !== 'All Devices' && labelB === 'All Devices') return 1;
-      const order = ['Mobile', 'Desktop'];
-      const aIndex = order.findIndex((l) => labelA.includes(l));
-      const bIndex = order.findIndex((l) => labelB.includes(l));
-      if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
-      if (aIndex !== -1) return -1;
-      if (bIndex !== -1) return 1;
-      return labelA.localeCompare(labelB);
-    })
+    .sort(([labelA], [labelB]) => compareReportLabels(labelA, labelB))
     .map(([reportLabel, reportRows]) => {
       const data = reportRows.flatMap((r) => {
         const details = r.auditResult?.details as AuditDetailTable;
@@ -213,7 +172,7 @@ export function DetailTableSeparatePerReport({
     <Accordion type="single" collapsible className="w-full">
       {sortedReports.map(({ reportLabel, data }) => {
         const accordionValue = `${title}-${reportLabel}`.replace(/\s+/g, '-').toLowerCase();
-        const reportTitle = getReportTitle(reportLabel, data.length, title);
+        const reportTitle = formatReportTableTitle(title, reportLabel, data.length);
         return (
           <AccordionItem key={accordionValue} value={accordionValue}>
             <AccordionTrigger>
@@ -234,7 +193,10 @@ function ReportTable({ reportLabel, data, rows, auditId }: { reportLabel: string
   "use no memo";
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const timeRange = useMemo(() => (auditId === 'network-requests' ? getNetworkRequestsTimeRange(data) : null), [auditId, data]);
+  const timeRange = useMemo(
+    () => (isNetworkRequestsAudit(auditId) ? getNetworkRequestsTimeRange(data) : null),
+    [auditId, data],
+  );
   const reportColumns = createColumns(rows, reportLabel, auditId, timeRange);
   const table = useReactTable({
     columns: reportColumns,

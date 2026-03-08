@@ -1,13 +1,13 @@
 'use client';
+import { useMemo } from 'react';
+import { LoadingMessage } from '@/components/common/LoadingMessage';
 import { LoadingExperience } from '@/components/page-speed/LoadingExperience';
 import { EntitiesTable } from '@/components/page-speed/lh-categories/table/EntitiesTable';
 import { CWVMetricsComponent } from '@/components/page-speed/CWVMetricsComponent';
 import { fullPageScreenshotContext, InsightsContext } from '@/components/page-speed/PageSpeedContext';
 import { RenderFilmStrip } from '@/components/page-speed/RenderFilmStrip';
-import { NullablePageSpeedInsights, PageSpeedInsights } from '@/lib/schema';
-import { toTitleCase } from '@/components/page-speed/toTitleCase';
+import { NullablePageSpeedInsights } from '@/lib/schema';
 import { CategoryRow, useLHTable } from '@/components/page-speed/tsTable/useLHTable';
-import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   StringFilterHeader,
@@ -15,11 +15,15 @@ import {
 import { Accordion } from '@/components/ui/accordion';
 import { DropdownFilter } from '@/components/page-speed/JSUsage/TableControls';
 import { useFetchPageSpeedData } from '@/components/page-speed/useFetchPageSpeedData';
-import { boolean } from 'drizzle-orm/mysql-core';
 import { CopyButton } from '@/components/ui/copy-button';
 import { NetworkMetricsComponent } from '@/components/page-speed/NetworkMeterics';
 import { JavaScriptPerformanceComponent } from '@/components/page-speed/javascript-metrics/JavaScriptPerformanceComponent';
 import { RecommendationsSection } from '@/components/page-speed/RecommendationsSection';
+import {
+  getDashboardItems,
+  getDashboardTitle,
+  getFullPageScreenshotMap,
+} from '@/components/page-speed/pageSpeedDashboardHelpers';
 
 const loadingExperiences = [
   { title: 'Page Loading Experience', experienceKey: 'loadingExperience' },
@@ -30,7 +34,7 @@ const loadingExperiences = [
 ] as const;
 
 export function PageSpeedInsightsDashboard({
-  data : defaultData,
+  data: defaultData,
   url,
   labels,
 }: {
@@ -41,65 +45,35 @@ export function PageSpeedInsightsDashboard({
 }) {
   'use no memo';
   const { data, isLoading } = useFetchPageSpeedData(url || '', defaultData);
-  const items = useMemo(
-    () =>
-      data
-        ?.map((item, i) => ({
-          item: (item?.lighthouseResult
-            ? (item as PageSpeedInsights)
-            : (item as PageSpeedInsights['lighthouseResult'])?.lighthouseVersion
-              ? ({ lighthouseResult: item } as unknown as PageSpeedInsights)
-              : null) as unknown as PageSpeedInsights,
-          label: labels[i] || '',
-        }))
-        .filter(({ item }) => !!item) || [],
-    [data, labels],
-  );
+  const items = useMemo(() => getDashboardItems(data, labels), [data, labels]);
 
   const table = useLHTable(items);
-  console.log(table);
 
-
-  const titleStrings = items.map((d) => {
-    return [
-      d.item?.lighthouseResult?.finalDisplayedUrl || 'unknown url',
-      d.item.lighthouseResult?.configSettings?.formFactor
-        ? `on ${toTitleCase(d.item.lighthouseResult?.configSettings?.formFactor)}`
-        : '',
-      d.item?.analysisUTCTimestamp
-        ? ` at ${new Date(d.item?.analysisUTCTimestamp).toLocaleDateString()}`
-        : '',
-    ]
-      .join(' ')
-      .trim();
-  });
-
-  const tableState = table.getState();
-  console.log('expanded', tableState.expanded);
-
-  if (isLoading || !data?.filter(boolean).length) {
+  if (isLoading || items.length === 0) {
     return <LoadingMessage />;
   }
 
+  const reportTitle = getDashboardTitle(items);
+  const fullPageScreenshots = getFullPageScreenshotMap(items);
+
   return (
     <fullPageScreenshotContext.Provider
-      value={items.reduce((acc, d) => ({
-        ...acc,
-        [d.label]: d.item?.lighthouseResult?.fullPageScreenshot,
-      }), {})}
+      value={fullPageScreenshots}
     >
       <InsightsContext.Provider value={items}>
-      <div className="flex flex-row justify-end gap-4">
-        { items.map((d,i) => (
-          <CopyButton key={i} size="lg" text={JSON.stringify(d.item) || ''} > {d.label} </CopyButton>
-        )) }
-      </div>
+        <div className="flex flex-row justify-end gap-4">
+          {items.map((item) => (
+            <CopyButton
+              key={item.label}
+              size="lg"
+              text={JSON.stringify(item.item) || ''}
+            >
+              {item.label}
+            </CopyButton>
+          ))}
+        </div>
         <h2 className="text-center text-2xl font-bold">
-          {`Report for ${
-            titleStrings.length > 1
-              ? titleStrings.join(', ')
-              : titleStrings[0] || 'unknown url'
-          }`}
+          {reportTitle}
         </h2>
         <Accordion type="multiple">
           {loadingExperiences.map(({ title, experienceKey }) => (
@@ -120,41 +94,22 @@ export function PageSpeedInsightsDashboard({
           <div className="flex flex-col">
             <StringFilterHeader
               column={table.getColumn('auditTitle')}
-              name={'Audit'}
+              name="Audit"
             />
           </div>
           <div className="mb-2 flex self-end justify-self-end">
             <Button variant="ghost" onClick={() => table.resetColumnFilters()}>
               Reset filters
             </Button>
-            <DropdownFilter table={table} columnId={'userLabel'} />
+            <DropdownFilter table={table} columnId="userLabel" />
           </div>
         </div>
         <Accordion type="multiple">
-          {table.getRowModel().rows.map((row, index) => (
-            <CategoryRow key={`${index}_${row.id}`} row={row}></CategoryRow>
+          {table.getRowModel().rows.map((row) => (
+            <CategoryRow key={row.id} row={row} />
           ))}
         </Accordion>
       </InsightsContext.Provider>
     </fullPageScreenshotContext.Provider>
-  );
-}
-
-
-function LoadingMessage() {
-  const [time, setTime] = useState(0);
-
-   useEffect(() => {
-    const interval = setInterval(() => {
-      setTime((t) => {return ( t || 0 ) + 1});
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [time])
-  
-  return (
-    <div className="flex flex-col items-center justify-center">
-      Loading Page Speed Insights data is loading...please wait we have lots of
-      tests to run. It has been running for {time} seconds.
-    </div>
   );
 }

@@ -10,32 +10,18 @@ import { getFilterFnForValueType, getColumnSize } from '@/components/page-speed/
 import { IssuesFoundTableCell } from '@/components/page-speed/RecommendationsSection/IssuesFoundTableCell';
 import { NetworkWaterfallCell } from '@/components/page-speed/lh-categories/table/NetworkWaterfallCell';
 import { cn } from '@/lib/utils';
+import {
+  getNetworkRequestsTimeRange,
+  isNetworkRequestsTable,
+  NETWORK_REQUESTS_COLUMN_ORDER,
+  sortHeadingsByKeyOrder,
+  WATERFALL_REPLACED_NETWORK_REQUEST_KEYS,
+} from '@/components/page-speed/shared/networkRequestsTable';
 
 interface IssuesFoundTableProps {
   headings: TableColumnHeading[];
   items: TableItem[];
   device: string;
-}
-
-const NETWORK_REQUEST_KEYS = ['networkRequestTime', 'networkEndTime'];
-
-/** Columns hidden when showing waterfall (timing shown on the bar instead) */
-const WATERFALL_REPLACES_COLUMN_KEYS = ['networkRequestTime', 'networkEndTime'];
-
-/** Column order for network-requests table: url, status, protocol, resource, mimeType, transfer, size, waterfall */
-const NETWORK_REQUESTS_COLUMN_ORDER = ['url', 'statusCode', 'protocol', 'resourceType', 'mimeType', 'transferSize', 'resourceSize'] as const;
-
-function sortHeadingsByOrder(headings: TableColumnHeading[], order: readonly string[]): TableColumnHeading[] {
-  const byKey = new Map(headings.map((h) => [h.key ?? '', h]));
-  const ordered: TableColumnHeading[] = [];
-  for (const key of order) {
-    const h = byKey.get(key);
-    if (h) ordered.push(h);
-  }
-  for (const h of headings) {
-    if (!order.includes(h.key ?? '')) ordered.push(h);
-  }
-  return ordered;
 }
 
 /** Compact column widths for network-requests table to reduce horizontal scroll */
@@ -67,25 +53,6 @@ function getHeaderLabel(key: string, fallback: string, isNetworkRequests: boolea
     return HEADER_LABEL_OVERRIDES[key];
   }
   return fallback;
-}
-
-function isNetworkRequestsTable(headings: TableColumnHeading[]): boolean {
-  const keys = new Set(headings.map((h) => h.key).filter((k): k is string => k != null));
-  return NETWORK_REQUEST_KEYS.every((k) => keys.has(k));
-}
-
-function getNetworkRequestsTimeRange(items: TableItem[]): { minStart: number; maxEnd: number } | null {
-  let minStart = Infinity;
-  let maxEnd = -Infinity;
-  for (const row of items) {
-    const item = row as TableItem & { networkRequestTime?: number; networkEndTime?: number };
-    const start = typeof item.networkRequestTime === 'number' ? item.networkRequestTime : NaN;
-    const end = typeof item.networkEndTime === 'number' ? item.networkEndTime : NaN;
-    if (!Number.isNaN(start)) minStart = Math.min(minStart, start);
-    if (!Number.isNaN(end)) maxEnd = Math.max(maxEnd, end);
-  }
-  if (minStart === Infinity || maxEnd === -Infinity || minStart >= maxEnd) return null;
-  return { minStart, maxEnd };
 }
 
 function deduplicateRowsByColumnValues(items: TableItem[], headings: TableColumnHeading[]): TableItem[] {
@@ -120,10 +87,17 @@ export function IssuesFoundTable({ headings, items, device }: IssuesFoundTablePr
   const columns = useMemo<ColumnDef<TableItem>[]>(() => {
     let headingsToUse =
       isNetworkRequests
-        ? headings.filter((h) => h.key != null && !WATERFALL_REPLACES_COLUMN_KEYS.includes(h.key))
+        ? headings.filter(
+            (heading) =>
+              heading.key != null &&
+              !WATERFALL_REPLACED_NETWORK_REQUEST_KEYS.includes(heading.key),
+          )
         : headings;
     if (isNetworkRequests) {
-      headingsToUse = sortHeadingsByOrder(headingsToUse, [...NETWORK_REQUESTS_COLUMN_ORDER]);
+      headingsToUse = sortHeadingsByKeyOrder(
+        headingsToUse,
+        NETWORK_REQUESTS_COLUMN_ORDER,
+      );
     }
 
     const baseColumns = headingsToUse.map((heading) => {

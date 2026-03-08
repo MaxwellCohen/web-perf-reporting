@@ -9,6 +9,11 @@ import {
 } from '@/components/ui/table';
 import type { Recommendation } from '@/components/page-speed/RecommendationsSection/types';
 import type { ActionableStep } from '@/components/page-speed/RecommendationsSection/types';
+import {
+  ALL_DEVICES_LABEL,
+  compareReportLabels,
+  formatReportLabelList,
+} from '@/components/page-speed/shared/reportLabels';
 
 interface ActionableStepsTableProps {
   rec: Recommendation;
@@ -36,7 +41,11 @@ const markdownComponents = {
 
 const OTHER_GROUP = '\u200bOther'; // zero-width space prefix so "Other" sorts last
 
-function renderStepsList(steps: ActionableStep[]) {
+function getActionableStepKey(step: ActionableStep): string {
+  return [step.host, step.url, step.step, formatReportLabelList(step.reports)].join('|');
+}
+
+function StepsList({ steps }: { steps: ActionableStep[] }) {
   if (steps.length === 0) {
     return <span className="text-muted-foreground">—</span>;
   }
@@ -65,10 +74,10 @@ function renderStepsList(steps: ActionableStep[]) {
             </div>
           )}
           <ul className="list-disc list-inside space-y-1">
-            {groupSteps.map(({ step }, idx) => (
-              <li key={idx}>
+            {groupSteps.map((step) => (
+              <li key={getActionableStepKey(step)}>
                 <ReactMarkdown components={markdownComponents}>
-                  {step}
+                  {step.step}
                 </ReactMarkdown>
               </li>
             ))}
@@ -81,65 +90,33 @@ function renderStepsList(steps: ActionableStep[]) {
 
 export function ActionableStepsTable({ rec, items }: ActionableStepsTableProps) {
   const reportLabels = items.map(({ label }) => label);
-  
+
   // Group steps by their reports
   const stepsByReport = new Map<string, ActionableStep[]>();
-  
+
   rec.actionableSteps.forEach((step) => {
     // Check if this step applies to all devices
-    const appliesToAll = step.reports.length === 0 || 
+    const appliesToAll = step.reports.length === 0 ||
       (step.reports.length === reportLabels.length &&
        step.reports.every((r) => reportLabels.includes(r)));
-    
-    // Normalize key: use 'all' for all devices, otherwise use sorted report names
-    const reportsKey = appliesToAll 
-      ? 'all'
-      : [...step.reports].sort().join(',');
-    
+
+    const reportsKey = appliesToAll
+      ? ALL_DEVICES_LABEL
+      : formatReportLabelList(step.reports);
+
     if (!stepsByReport.has(reportsKey)) {
       stepsByReport.set(reportsKey, []);
     }
     stepsByReport.get(reportsKey)!.push(step);
   });
-  
+
   // Convert to array of rows
   const rows = Array.from(stepsByReport.entries()).map(([reportsKey, steps]) => {
-    // Determine the report label
-    let reportLabel: string;
-    if (reportsKey === 'all') {
-      reportLabel = 'All Devices';
-    } else {
-      reportLabel = steps[0].reports.join(', ');
-    }
-    
-    return { reportLabel, steps, reportsKey };
+    return { reportLabel: reportsKey, steps };
   });
-  
-  // Sort rows: All Devices first, then Mobile, then Desktop
-  rows.sort((a, b) => {
-    // All Devices always comes first
-    if (a.reportLabel === 'All Devices' && b.reportLabel !== 'All Devices') return -1;
-    if (a.reportLabel !== 'All Devices' && b.reportLabel === 'All Devices') return 1;
-    if (a.reportLabel === 'All Devices' && b.reportLabel === 'All Devices') return 0;
-    
-    // Then sort by Mobile, then Desktop
-    // const order = ['Mobile', 'Desktop'];
-    // const aIndex = order.findIndex(label => a.reportLabel.includes(label));
-    // const bIndex = order.findIndex(label => b.reportLabel.includes(label));
-    
-    // // If both are in the order list, sort by their position
-    // if (aIndex !== -1 && bIndex !== -1) {
-    //   return aIndex - bIndex;
-    // }
-    // // If only one is in the order list, prioritize it
-    // if (aIndex !== -1) return -1;
-    // if (bIndex !== -1) return 1;
-    
-    // // Otherwise, sort alphabetically
-    // return a.reportLabel.localeCompare(b.reportLabel);
-    return 0;
-  });
-  
+
+  rows.sort((a, b) => compareReportLabels(a.reportLabel, b.reportLabel));
+
   return (
     <div className="w-full overflow-x-auto">
       <Table className="w-full">
@@ -154,13 +131,13 @@ export function ActionableStepsTable({ rec, items }: ActionableStepsTableProps) 
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rows.map(({ reportLabel, steps }, idx) => (
-            <TableRow key={idx} className="hover:bg-transparent">
+          {rows.map(({ reportLabel, steps }) => (
+            <TableRow key={reportLabel} className="hover:bg-transparent">
               <TableCell className="text-sm py-2 font-medium">
                 {reportLabel}
               </TableCell>
               <TableCell className="text-sm py-2">
-                {renderStepsList(steps)}
+                <StepsList steps={steps} />
               </TableCell>
             </TableRow>
           ))}
