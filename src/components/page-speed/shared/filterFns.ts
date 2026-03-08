@@ -1,5 +1,18 @@
 import { FilterFn } from '@tanstack/react-table';
 
+export const booleanFilterFn: FilterFn<unknown> = (
+  row,
+  columnId,
+  filterValue,
+) => {
+  if (!filterValue || !filterValue.length) {
+    return true;
+  }
+
+  const cellValue = row.getValue(columnId);
+  return filterValue.find((value: unknown) => !!value === !!cellValue) !== undefined;
+};
+
 /**
  * Standard filter function for string-based filtering (case-insensitive)
  */
@@ -24,6 +37,7 @@ export const inNumberRangeFilter: FilterFn<unknown> = (row, columnId, filterValu
  * Standard filter functions object for use in TanStack Table
  */
 export const standardFilterFns = {
+  booleanFilterFn,
   includesString: includesStringFilter,
   inNumberRange: inNumberRangeFilter,
 } as Record<string, FilterFn<unknown>>;

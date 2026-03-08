@@ -16,7 +16,7 @@ import {
   VisibilityState,
 } from '@tanstack/react-table';
 import { useMemo, useState } from 'react';
-import { booleanFilterFn } from '@/components/page-speed/lh-categories/table/DataTableNoGrouping';
+import { booleanFilterFn } from '@/components/page-speed/shared/filterFns';
 import {
   ExpandAll,
   ExpandRow,

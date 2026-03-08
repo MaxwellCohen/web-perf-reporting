@@ -1,12 +1,7 @@
 'use client';
-import { TableItem, OpportunityItem, AuditDetailTable } from '@/lib/schema';
-import { createColumnHelper, useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel, getFacetedRowModel, getFacetedUniqueValues, getFacetedMinMaxValues, SortingState, ColumnFiltersState, ColumnDef } from '@tanstack/react-table';
-import { useMemo, useState } from 'react';
-import { toTitleCase } from '@/components/page-speed/toTitleCase';
-import { DetailTableItem, canSort, canGroup, isNumberColumn } from '@/components/page-speed/lh-categories/table/RenderTable';
-import { RenderTableValue } from '@/components/page-speed/lh-categories/table/RenderTableValue';
-import { NetworkWaterfallCell } from '@/components/page-speed/lh-categories/table/NetworkWaterfallCell';
-import { ItemValue } from '@/lib/schema';
+import { OpportunityItem, TableItem } from '@/lib/schema';
+import { useMemo } from 'react';
+import { DetailTableItem } from '@/components/page-speed/lh-categories/table/detailTableShared';
 import {
   Accordion,
   AccordionContent,
@@ -16,111 +11,20 @@ import {
 import { Table } from '@/components/ui/table';
 import { DataTableHeader } from '@/components/page-speed/lh-categories/table/DataTableHeader';
 import { DataTableBody } from '@/components/page-speed/lh-categories/table/DataTableBody';
-import { booleanFilterFn } from '@/components/page-speed/lh-categories/table/DataTableNoGrouping';
-import {
-  getNetworkRequestsTimeRange,
-  isNetworkRequestsAudit,
-  NETWORK_REQUESTS_COLUMN_ORDER,
-  NetworkRequestTimeRange,
-  sortHeadingsByKeyOrder,
-  WATERFALL_REPLACED_NETWORK_REQUEST_KEYS,
-} from '@/components/page-speed/shared/networkRequestsTable';
 import {
   compareReportLabels,
   formatReportTableTitle,
 } from '@/components/page-speed/shared/reportLabels';
-
-function createColumns(
-  rows: DetailTableItem[],
-  deviceLabel: string,
-  auditId: string | undefined,
-  timeRange: NetworkRequestTimeRange | null
-): ColumnDef<TableItem | OpportunityItem, ItemValue | undefined>[] {
-  const firstRow = rows[0];
-  if (!firstRow) {
-    return [];
-  }
-
-  const sColumnHelper = createColumnHelper<TableItem | OpportunityItem>();
-
-  let headingsToUse =
-    isNetworkRequestsAudit(auditId)
-      ? firstRow.auditResult.details.headings.filter(
-          (heading) =>
-            heading.key != null &&
-            !WATERFALL_REPLACED_NETWORK_REQUEST_KEYS.includes(heading.key),
-        )
-      : firstRow.auditResult.details.headings;
-  if (isNetworkRequestsAudit(auditId)) {
-    headingsToUse = sortHeadingsByKeyOrder(headingsToUse, NETWORK_REQUESTS_COLUMN_ORDER);
-  }
-
-  const baseColumns = headingsToUse
-    .map((h, i) => {
-      if (!h.key) {
-        return null;
-      }
-      const key = h.key as keyof TableItem;
-      return sColumnHelper.accessor((r) => r[key] ?? undefined, {
-        id: `${i}_${key}`,
-        header: `${h.label || toTitleCase(key as string)}`,
-        enableSorting: canSort(h.valueType),
-        sortingFn: 'alphanumeric',
-        enableColumnFilter: canGroup(h.valueType) || isNumberColumn(h.valueType),
-        filterFn: canGroup(h.valueType)
-          ? 'includesString'
-          : isNumberColumn(h.valueType)
-            ? 'inNumberRange'
-            : undefined,
-        enableResizing: true,
-        minSize: 200,
-        cell: (info) => {
-          const value = info.getValue();
-          return (
-            <RenderTableValue
-              value={value as ItemValue}
-              heading={h}
-              device={deviceLabel}
-            />
-          );
-        },
-        meta: {
-          heading: { heading: h },
-        },
-      });
-    })
-    .filter((v) => !!v) as ColumnDef<TableItem | OpportunityItem, ItemValue | undefined>[];
-
-  if (isNetworkRequestsAudit(auditId) && timeRange) {
-    const waterfallCol = sColumnHelper.display({
-      id: 'waterfall',
-      header: 'Waterfall',
-      enableSorting: false,
-      enableColumnFilter: false,
-      enableResizing: true,
-      minSize: 120,
-      size: 300,
-      cell: (info) => {
-        const row = info.row.original as TableItem & { networkRequestTime?: number; networkEndTime?: number; resourceType?: string };
-        const start = typeof row.networkRequestTime === 'number' ? row.networkRequestTime : 0;
-        const end = typeof row.networkEndTime === 'number' ? row.networkEndTime : start;
-        return (
-          <NetworkWaterfallCell
-            requestTime={start}
-            endTime={end}
-            minStart={timeRange.minStart}
-            maxEnd={timeRange.maxEnd}
-            resourceType={typeof row.resourceType === 'string' ? row.resourceType : undefined}
-            showTimeLabels
-          />
-        );
-      },
-    });
-    return [...baseColumns, waterfallCol];
-  }
-
-  return baseColumns;
-}
+import { useSimpleTable } from '@/components/page-speed/shared/useSimpleTable';
+import {
+  flattenDetailItems,
+  getAuditId,
+  groupRowsByReportLabel,
+} from '@/components/page-speed/lh-categories/table/detailTableData';
+import {
+  createDetailItemColumns,
+  getDetailItemsTimeRange,
+} from '@/components/page-speed/lh-categories/table/detailItemColumns';
 
 function getSortedReports(
   rowsByReport: Map<string, DetailTableItem[]>
@@ -128,10 +32,7 @@ function getSortedReports(
   return Array.from(rowsByReport.entries())
     .sort(([labelA], [labelB]) => compareReportLabels(labelA, labelB))
     .map(([reportLabel, reportRows]) => {
-      const data = reportRows.flatMap((r) => {
-        const details = r.auditResult?.details as AuditDetailTable;
-        return details?.items || [];
-      });
+      const data = flattenDetailItems(reportRows);
 
       if (data.length === 0) {
         return null;
@@ -153,24 +54,14 @@ export function DetailTableSeparatePerReport({
   rows: DetailTableItem[];
   title: string;
 }) {
-  const rowsByReport = useMemo(() => {
-    const grouped = new Map<string, DetailTableItem[]>();
-    rows.forEach((row) => {
-      const label = row._userLabel || 'Unknown';
-      if (!grouped.has(label)) {
-        grouped.set(label, []);
-      }
-      grouped.get(label)!.push(row);
-    });
-    return grouped;
-  }, [rows]);
+  const rowsByReport = useMemo(() => groupRowsByReportLabel(rows), [rows]);
 
   const sortedReports = getSortedReports(rowsByReport);
-  const auditId = (rows[0]?.auditResult as { id?: string })?.id;
+  const auditId = getAuditId(rows);
 
   return (
     <Accordion type="single" collapsible className="w-full">
-      {sortedReports.map(({ reportLabel, data }) => {
+      {sortedReports.map(({ reportLabel, reportRows, data }) => {
         const accordionValue = `${title}-${reportLabel}`.replace(/\s+/g, '-').toLowerCase();
         const reportTitle = formatReportTableTitle(title, reportLabel, data.length);
         return (
@@ -181,7 +72,12 @@ export function DetailTableSeparatePerReport({
               </div>
             </AccordionTrigger>
             <AccordionContent>
-              <ReportTable reportLabel={reportLabel} data={data} rows={rows} auditId={auditId} />
+              <ReportTable
+                reportLabel={reportLabel}
+                data={data}
+                rows={reportRows}
+                auditId={auditId}
+              />
             </AccordionContent>
           </AccordionItem>
         );
@@ -189,38 +85,34 @@ export function DetailTableSeparatePerReport({
     </Accordion>
   );
 }
-function ReportTable({ reportLabel, data, rows, auditId }: { reportLabel: string; data: (TableItem | OpportunityItem)[]; rows: DetailTableItem[]; auditId?: string }) {
-  "use no memo";
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+function ReportTable({
+  reportLabel,
+  data,
+  rows,
+  auditId,
+}: {
+  reportLabel: string;
+  data: Array<TableItem | OpportunityItem>;
+  rows: DetailTableItem[];
+  auditId?: string;
+}) {
+  'use no memo';
   const timeRange = useMemo(
-    () => (isNetworkRequestsAudit(auditId) ? getNetworkRequestsTimeRange(data) : null),
+    () => getDetailItemsTimeRange(data, auditId),
     [auditId, data],
   );
-  const reportColumns = createColumns(rows, reportLabel, auditId, timeRange);
-  const table = useReactTable({
-    columns: reportColumns,
-    data,
-    getCoreRowModel: getCoreRowModel(),
-    enableSorting: true,
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    enableColumnFilters: true,
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFacetedMinMaxValues: getFacetedMinMaxValues(),
-    enableColumnResizing: true,
-    columnResizeMode: 'onChange',
-    filterFns: {
-      booleanFilterFn,
-    },
-    state: {
-      sorting,
-      columnFilters,
-    },
-  });
+  const reportColumns = useMemo(
+    () =>
+      createDetailItemColumns({
+        rows,
+        deviceLabel: reportLabel,
+        auditId,
+        timeRange,
+      }),
+    [auditId, reportLabel, rows, timeRange],
+  );
+  const table = useSimpleTable({ data, columns: reportColumns });
 
   return (
     <div className="w-full overflow-x-auto">
@@ -230,4 +122,4 @@ function ReportTable({ reportLabel, data, rows, auditId }: { reportLabel: string
       </Table>
     </div>
   );
-};
+}

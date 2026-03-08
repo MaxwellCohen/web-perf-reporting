@@ -9,6 +9,7 @@ import { RenderNodeImage } from '@/components/page-speed/lh-categories/table/Ren
 import { RenderTableCell } from '@/components/page-speed/lh-categories/table/RenderTableCell';
 import { Details } from '@/components/ui/accordion';
 import { cn } from '@/lib/utils';
+import { getItemDevice } from '@/components/page-speed/lh-categories/table/itemDevice';
 
 export function RenderNodeTable({
   headings,
@@ -44,7 +45,7 @@ export function RenderNodeTable({
               <div className="col-span-full p-2">
                 Form Factor: {getItemDevice(item, device)}
               </div>
-              <NodeComponent
+              <NodeSummary
                 item={item[nodeHeader.key || ''] as NodeValue}
                 device={getItemDevice(item, device)}
               />
@@ -74,7 +75,7 @@ const extraInfo = (
           className="flex flex-row justify-between pb-4 align-middle"
           key={`cell-${heading.key}-${colIndex}`}
         >
-          <span className="break-words">
+          <span className="wrap-break-word">
             {typeof heading.label === 'string'
               ? heading.label
               : heading.label?.formattedDefault || ''}
@@ -92,10 +93,7 @@ const extraInfo = (
     .filter(Boolean);
 };
 
-const getItemDevice = (item: TableItem, device: DeviceType): DeviceType =>
-  (item._device as DeviceType) || device;
-
-export function NodeComponent({
+export function NodeSummary({
   item,
   device,
 }: {

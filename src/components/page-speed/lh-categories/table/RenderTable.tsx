@@ -1,12 +1,9 @@
 'use client';
 import {
-  AuditDetailOpportunity,
   AuditDetailTable,
   ItemValue,
   ItemValueType,
-  OpportunityItem,
   TableColumnHeading,
-  TableItem,
 } from '@/lib/schema';
 import { CSSProperties, Fragment, useMemo, useState, startTransition, type ReactElement } from 'react';
 import {
@@ -46,29 +43,26 @@ import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { useStandardTable } from '@/components/page-speed/shared/tableConfigHelpers';
 import { shouldShowSeparateTablesPerReport } from '@/components/page-speed/auditTableConfig';
 import {
-  GROUPABLE_VALUE_TYPES,
   UNIQUE_AGG_VALUE_TYPES,
-  NUMERIC_VALUE_TYPES,
   COLUMN_SIZE_DEFAULT,
   COLUMN_SIZE_LARGE,
   EXPANDER_COLUMN_SIZE,
   DEVICE_COLUMN_SIZE,
-  DEVICE_LABEL_SEPARATOR,
+  SORT_VALUE_SEPARATOR,
 } from '@/components/page-speed/lh-categories/table/constants';
-
-// Type definitions
-type DetailTableDataRow = {
-  item: TableItem | OpportunityItem;
-  subitem?: TableItem | undefined;
-  _userLabel: string;
-};
-
-export type DetailTableItem = {
-  auditResult: {
-    details: AuditDetailTable | AuditDetailOpportunity;
-  };
-  _userLabel: string;
-};
+import {
+  DetailTableDataRow,
+  flattenDetailRows,
+  getAuditId,
+  hasDetailItems,
+  hasDetailSubitems,
+} from '@/components/page-speed/lh-categories/table/detailTableData';
+import {
+  canGroup,
+  canSort,
+  DetailTableItem,
+  isNumberColumn,
+} from '@/components/page-speed/lh-categories/table/detailTableShared';
 
 type ColumnHeadingConfig = {
   heading: TableColumnHeading;
@@ -324,27 +318,6 @@ const accessorFnSubItems =
   };
 
 /**
- * Checks if a value type can be grouped
- */
-export const canGroup = (type: ItemValueType | string): boolean => {
-  return GROUPABLE_VALUE_TYPES.includes(type as ItemValueType);
-};
-
-/**
- * Checks if a value type can be sorted
- */
-export const canSort = (type: ItemValueType | string): boolean => {
-  return type !== 'node';
-};
-
-/**
- * Checks if a value type represents a number column
- */
-export const isNumberColumn = (type: ItemValueType | string): boolean => {
-  return NUMERIC_VALUE_TYPES.includes(type as ItemValueType);
-};
-
-/**
  * Checks if a value type should use unique aggregation
  */
 const isUniqueAgg = (type: ItemValueType | string): boolean => {
@@ -581,34 +554,26 @@ export function DetailTable({
   rows: DetailTableItem[];
   title: string;
 }) {
-  const hasItems = useMemo(
-    () => rows.some((r) => !!(r.auditResult?.details?.items || []).length),
-    [rows],
-  );
+  const hasItems = useMemo(() => hasDetailItems(rows), [rows]);
 
   if (!hasItems) {
     return null;
   }
 
-  // Check if this audit should show separate tables per report
-  const auditId = (rows[0]?.auditResult as { id?: string })?.id;
+  const auditId = getAuditId(rows);
   if (auditId && shouldShowSeparateTablesPerReport(auditId)) {
     return <DetailTableSeparatePerReport rows={rows} title={title} />;
   }
 
   const showUserLabel = rows.length > 1;
-  const hasSubitems = rows.some((r) =>
-    (r.auditResult?.details?.items || []).some(
-      (item) => item.subItems?.items?.length,
-    ),
-  );
+  const hasSubitems = hasDetailSubitems(rows);
 
   // Route to appropriate table component based on data structure
   if (!showUserLabel) {
     if (!hasSubitems) {
       return <DetailTableWith1ReportAndNoSubitem rows={rows} title={title} />;
     }
-    return <DetailTableAndWithSubitem rows={rows} title={title} />;
+    return <DetailTableWithSubitems rows={rows} title={title} />;
   }
 
   return <DetailTableFull rows={rows} title={title} />;
@@ -630,53 +595,25 @@ const combineItemSubItemValue = (
 
   if (typeof subItemVal === 'string' && typeof itemVal === 'string') {
     // Combine strings with separator for sorting
-    return `${itemVal}${DEVICE_LABEL_SEPARATOR}${subItemVal}`;
+    return `${itemVal}${SORT_VALUE_SEPARATOR}${subItemVal}`;
   }
 
   return subItemVal ?? itemVal;
 };
 
-function DetailTableAndWithSubitem({
+function DetailTableWithSubitems({
   rows,
   title,
 }: {
   rows: DetailTableItem[];
   title: string;
 }) {
-  // Transform data
-  type DetailTableAndWithSubitemRow = {
-    item: TableItem;
-    subitem?: TableItem;
-    _userLabel: string;
-  };
-
-  const data = useMemo<DetailTableAndWithSubitemRow[]>(() => {
-    const d: DetailTableAndWithSubitemRow[] = [];
-    rows.forEach((r) => {
-      (r.auditResult?.details?.items || []).forEach((item) => {
-        if (item.subItems?.items?.length) {
-          item.subItems.items.forEach((subitem) => {
-            d.push({
-              item,
-              subitem,
-              _userLabel: r._userLabel,
-            });
-          });
-        } else {
-          d.push({
-            item,
-            _userLabel: r._userLabel,
-          });
-        }
-      });
-    });
-    return d;
-  }, [rows]);
+  const data = useMemo(() => flattenDetailRows(rows), [rows]);
 
   // Create columns
   const columns = useMemo(() => {
-    const sColumnHelper = createColumnHelper<DetailTableAndWithSubitemRow>();
-    const columnDef: ColumnDef<DetailTableAndWithSubitemRow, unknown>[] = [
+    const sColumnHelper = createColumnHelper<DetailTableDataRow>();
+    const columnDef: ColumnDef<DetailTableDataRow, unknown>[] = [
       getExpandingControlColumn(),
     ];
 
@@ -796,33 +733,6 @@ function DetailTableAndWithSubitem({
 
 /**
  * Transforms audit result items into table data rows
- */
-const transformTableData = (
-  rows: DetailTableItem[],
-): DetailTableDataRow[] => {
-  return rows
-    .flatMap((r) =>
-      (r.auditResult?.details?.items || []).map((item) => {
-        if (item.subItems?.items?.length) {
-          return item.subItems.items.map((subitem) => ({
-            item,
-            subitem,
-            _userLabel: r._userLabel,
-          }));
-        }
-        return [
-          {
-            item,
-            _userLabel: r._userLabel,
-          },
-        ];
-      }),
-    )
-    .flat(2);
-};
-
-/**
- * Extracts all unique headings from all rows
  */
 const extractAllHeadings = (
   rows: DetailTableItem[],
@@ -1052,10 +962,7 @@ function DetailTableFull({
   const showUserLabel = rows.length > 1;
 
   // Transform data
-  const data = useMemo<DetailTableDataRow[]>(
-    () => transformTableData(rows),
-    [rows],
-  );
+  const data = useMemo<DetailTableDataRow[]>(() => flattenDetailRows(rows), [rows]);
   // Create columns
   const columns = useMemo(() => {
     const allHeadings = extractAllHeadings(rows);

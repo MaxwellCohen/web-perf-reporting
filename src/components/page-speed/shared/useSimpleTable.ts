@@ -11,12 +11,15 @@ import {
   getFacetedUniqueValues,
   getFacetedMinMaxValues,
 } from '@tanstack/react-table';
-import { booleanFilterFn } from '@/components/page-speed/lh-categories/table/DataTableNoGrouping';
-import { standardFilterFns } from '@/components/page-speed/shared/filterFns';
+import {
+  booleanFilterFn,
+  standardFilterFns,
+} from '@/components/page-speed/shared/filterFns';
 
 export type SimpleTableOptions<T> = {
   data: T[];
-  columns: ColumnDef<T, unknown>[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  columns: ColumnDef<T, any>[];
 };
 
 /**

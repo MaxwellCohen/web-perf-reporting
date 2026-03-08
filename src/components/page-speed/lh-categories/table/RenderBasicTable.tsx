@@ -13,6 +13,7 @@ import { Fragment, JSX } from 'react';
 import { cn } from '@/lib/utils';
 import { Details } from '@/components/ui/accordion';
 import { toSentenceCase } from '@/components/common/FormFactorPercentPieChart';
+import { getItemDevice } from '@/components/page-speed/lh-categories/table/itemDevice';
 
 export function RenderBasicTable({
   headings,
@@ -68,10 +69,8 @@ export function TableContainer({
   className,
   ...props
 }: { headings: TableColumnHeading[] } & JSX.IntrinsicElements['div']) {
-  const Div = 'div';
-
   return (
-    <Div
+    <div
       {...props}
       className={cn('grid w-full overflow-x-auto', className)}
       style={{
@@ -88,7 +87,7 @@ export function TableContainer({
       }}
     >
       {children}
-    </Div>
+    </div>
   );
 }
 
@@ -156,11 +155,6 @@ export function NestedTable({
     </Details>
   );
 }
-
-const getItemDevice = (
-  item: { _device?: DeviceType },
-  device: DeviceType,
-): DeviceType => (item?._device as DeviceType) || device;
 
 function RenderSubItems({
   item,

@@ -45,5 +45,5 @@ export const DEVICE_COLUMN_SIZE = 110;
 /**
  * Separator used for combining item and subitem values
  */
-export const DEVICE_LABEL_SEPARATOR = '😠😠';
+export const SORT_VALUE_SEPARATOR = '::lh-subitem::';
 

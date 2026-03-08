@@ -1,35 +1,16 @@
 'use client';
-import { useState } from 'react';
 import { Table } from '@/components/ui/table';
 import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import {
-  ColumnDef,
-  ColumnFiltersState,
-  FilterFn,
-  getCoreRowModel,
-  getFacetedMinMaxValues,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  getSortedRowModel,
-  SortingState,
-  useReactTable,
-} from '@tanstack/react-table';
+import { ColumnDef } from '@tanstack/react-table';
 import { DataTableHeader } from '@/components/page-speed/lh-categories/table/DataTableHeader';
 import { DataTableBody } from '@/components/page-speed/lh-categories/table/DataTableBody';
 import { toTitleCase } from '@/components/page-speed/toTitleCase';
-
-export const booleanFilterFn: FilterFn<unknown> = (row, columnId, filterValue) => {
-  if (!filterValue || !filterValue.length) {
-    return true;
-  }
-  const cellValue = row.getValue(columnId);
-  return filterValue.find((a: unknown) => !!a === !!cellValue) !== undefined;
-};
+import { useSimpleTable } from '@/components/page-speed/shared/useSimpleTable';
+export { booleanFilterFn } from '@/components/page-speed/shared/filterFns';
 
 export function DataTableNoGrouping<T>({
   data,
@@ -37,37 +18,12 @@ export function DataTableNoGrouping<T>({
   title,
 }: {
   data: T[];
-  columns: ColumnDef<T, unknown>[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  columns: ColumnDef<T, any>[];
   title: string;
 }) {
   'use no memo';
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const table = useReactTable({
-    columns,
-    data,
-    getCoreRowModel: getCoreRowModel(),
-    enableSorting: true,
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    enableColumnFilters: true,
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFacetedMinMaxValues: getFacetedMinMaxValues(),
-    enableColumnResizing: true,
-    columnResizeMode: 'onChange',
-
-    filterFns: {
-      booleanFilterFn,
-    },
-
-    state: {
-      sorting,
-      columnFilters,
-    },
-  });
+  const table = useSimpleTable({ data, columns });
 
   return (
     <AccordionItem value={title}>
