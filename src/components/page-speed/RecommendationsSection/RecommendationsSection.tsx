@@ -1,6 +1,6 @@
 'use client';
-import { useContext, useMemo, useState } from 'react';
-import { InsightsContext } from '@/components/page-speed/PageSpeedContext';
+import { useMemo, useState } from 'react';
+import { usePageSpeedItems } from '@/components/page-speed/PageSpeedContext';
 import {
   Accordion,
   AccordionItem,
@@ -22,7 +22,7 @@ const priorityColors = {
 };
 
 export function RecommendationsSection() {
-  const items = useContext(InsightsContext);
+  const items = usePageSpeedItems();
   const allRecommendations = useMemo(() => analyzeAudits(items), [items]);
   
   const recommendations = useMemo(() => {

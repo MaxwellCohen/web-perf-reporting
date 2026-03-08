@@ -20,10 +20,10 @@ import {
   RenderBytesValue,
   RenderMSValue,
 } from '@/components/page-speed/lh-categories/table/RenderTableValue';
-import { Fragment, JSX, useContext } from 'react';
+import { Fragment, JSX } from 'react';
 import { groupBy } from '@/lib/utils';
 import { toTitleCase } from '@/components/page-speed/toTitleCase';
-import { InsightsContext } from '@/components/page-speed/PageSpeedContext';
+import { usePageSpeedItems } from '@/components/page-speed/PageSpeedContext';
 import { JSUsageSection } from '@/components/page-speed/JSUsage/JSUsageSection';
 
 const CWV = [
@@ -75,7 +75,7 @@ const ObservedEvents = [
 ];
 
 export function CWVMetricsSummary() {
-  const data = useContext(InsightsContext);
+  const data = usePageSpeedItems();
   const labels = data.map((d) => d.label);
   const items = data.map(({ item }) => mergeData(item));
   const itemKeys = items.map((d) => Object.keys(d));
@@ -173,7 +173,7 @@ export function CWVMetricsSummary() {
 }
 
 function RenderNetworkRequestsSummary() {
-  const items = useContext(InsightsContext);
+  const items = usePageSpeedItems();
   const labels = items.map((d) => d.label);
   const networkData = items.map(
     ({ item: d }) =>

@@ -3,7 +3,7 @@ import {
   NullablePageSpeedInsights,
   PageSpeedInsights,
 } from '@/lib/schema';
-import { InsightsContextItem } from '@/components/page-speed/PageSpeedContext';
+import type { PageSpeedDashboardItem } from '@/components/page-speed/pageSpeedInsightsTypes';
 import { toTitleCase } from '@/components/page-speed/toTitleCase';
 
 function normalizePageSpeedItem(
@@ -23,7 +23,7 @@ function normalizePageSpeedItem(
 export function getDashboardItems(
   data: NullablePageSpeedInsights[] | undefined,
   labels: string[],
-): InsightsContextItem[] {
+): PageSpeedDashboardItem[] {
   return (
     data
       ?.map((item, index) => {
@@ -38,11 +38,11 @@ export function getDashboardItems(
           label: labels[index] || '',
         };
       })
-      .filter((item): item is InsightsContextItem => item != null) || []
+      .filter((item): item is PageSpeedDashboardItem => item != null) || []
   );
 }
 
-export function getDashboardTitle(items: InsightsContextItem[]): string {
+export function getDashboardTitle(items: PageSpeedDashboardItem[]): string {
   const titleStrings = items.map(({ item }) =>
     [
       item?.lighthouseResult?.finalDisplayedUrl || 'unknown url',
@@ -64,7 +64,7 @@ export function getDashboardTitle(items: InsightsContextItem[]): string {
 }
 
 export function getFullPageScreenshotMap(
-  items: InsightsContextItem[],
+  items: PageSpeedDashboardItem[],
 ): Record<string, FullPageScreenshot | undefined | null> {
   return items.reduce<Record<string, FullPageScreenshot | undefined | null>>(
     (screenshotsByLabel, { item, label }) => {

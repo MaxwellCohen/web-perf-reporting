@@ -1,7 +1,6 @@
 import { AuditDetailFilmstrip } from '@/lib/schema';
 import { Timeline } from '@/components/page-speed/Timeline';
-import { useContext } from 'react';
-import { InsightsContext } from '@/components/page-speed/PageSpeedContext';
+import { usePageSpeedItems } from '@/components/page-speed/PageSpeedContext';
 import {
   AccordionContent,
   AccordionItem,
@@ -9,7 +8,7 @@ import {
 } from '@/components/ui/accordion';
 
 export function RenderFilmStrip() {
-  const items = useContext(InsightsContext);
+  const items = usePageSpeedItems();
   const timeLines = items
     .map((i, index) => {
       const timeline = i.item?.lighthouseResult?.audits?.[

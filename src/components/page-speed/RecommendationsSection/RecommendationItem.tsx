@@ -7,8 +7,11 @@ import {
 import { ActionableStepsTable } from '@/components/page-speed/RecommendationsSection/ActionableStepsTable';
 import { ResourcesTable } from '@/components/page-speed/RecommendationsSection/ResourcesTable';
 import type { Recommendation } from '@/components/page-speed/RecommendationsSection/types';
-import { useContext, useMemo } from 'react';
-import { InsightsContext, InsightsContextItem } from '@/components/page-speed/PageSpeedContext';
+import { useMemo } from 'react';
+import {
+  usePageSpeedItems,
+  type InsightsContextItem,
+} from '@/components/page-speed/PageSpeedContext';
 import { RecommendationHeader } from '@/components/page-speed/RecommendationsSection/RecommendationHeader';
 import { RecommendationIssuesSection } from '@/components/page-speed/RecommendationsSection/RecommendationIssuesSection';
 import { RecommendationNetworkTree } from '@/components/page-speed/RecommendationsSection/RecommendationNetworkTree';
@@ -22,7 +25,7 @@ interface RecommendationItemProps {
 }
 
 export function RecommendationItem({ rec, items, priorityColors }: RecommendationItemProps) {
-  const insightsContextItems = useContext(InsightsContext);
+  const insightsContextItems = usePageSpeedItems();
   const auditId = getRecommendationAuditId(rec.id);
   const auditDataForAllData = useMemo(
     () => items.map((item) => item.item?.lighthouseResult?.audits?.[auditId] ?? null),

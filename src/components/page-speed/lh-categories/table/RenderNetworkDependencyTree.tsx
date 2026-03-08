@@ -1,5 +1,7 @@
-import { useContext } from 'react';
-import { InsightsContext, InsightsContextItem } from '@/components/page-speed/PageSpeedContext';
+import {
+  usePageSpeedItems,
+  type InsightsContextItem,
+} from '@/components/page-speed/PageSpeedContext';
 import { AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { Details } from '@/components/ui/accordion';
 import { TreeDataItem, TreeView } from '@/components/ui/tree-view';
@@ -110,7 +112,7 @@ function formatBytes(bytes: number): string {
 }
 
 export function RenderNetworkDependencyTree() {
-  const items = useContext(InsightsContext);
+  const items = usePageSpeedItems();
   
   const networkTrees = items.map(extractNetworkTreeFromAudit).filter(
     ({ tree }) => tree !== null

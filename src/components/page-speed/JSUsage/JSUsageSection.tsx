@@ -1,7 +1,7 @@
 'use client';
 import { TreeMapData } from '@/lib/schema';
-import { useContext, useMemo } from 'react';
-import { InsightsContext } from '@/components/page-speed/PageSpeedContext';
+import { useMemo } from 'react';
+import { usePageSpeedItems } from '@/components/page-speed/PageSpeedContext';
 import { flattenTreeMapNode } from '@/components/page-speed/flattenTreeMapNode';
 import { Card, CardHeader } from '@/components/ui/card';
 import { JSUsageTableWithControls } from '@/components/page-speed/JSUsage/JSUsageTable';
@@ -9,7 +9,7 @@ import { ClientOnly } from '@/components/page-speed/JSUsage/ClientOnly';
 import { Details } from '@/components/ui/accordion';
 
 export function JSUsageSection() {
-  const items = useContext(InsightsContext);
+  const items = usePageSpeedItems();
   const treeDataArr = useMemo(
     () =>
       items
@@ -32,7 +32,7 @@ export function JSUsageSection() {
 }
 
 export function JSUsageCardSection() {
-  const items = useContext(InsightsContext);
+  const items = usePageSpeedItems();
   const treeDataArr = useMemo(
     () =>
       items

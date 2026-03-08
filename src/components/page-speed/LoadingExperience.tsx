@@ -4,8 +4,8 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from '@/components/ui/accordion';
-import { Fragment, useContext } from 'react';
-import { InsightsContext } from '@/components/page-speed/PageSpeedContext';
+import { Fragment } from 'react';
+import { usePageSpeedItems } from '@/components/page-speed/PageSpeedContext';
 import { Card, CardTitle } from '@/components/ui/card';
 
 interface LoadingExperienceProps {
@@ -25,7 +25,7 @@ export function LoadingExperience({
   title,
   experienceKey,
 }: LoadingExperienceProps) {
-  const items = useContext(InsightsContext);
+  const items = usePageSpeedItems();
   if (!items.length) {
     return null;
   }
@@ -53,7 +53,7 @@ export function LoadingExperience({
             {title}: {extraTitle}
           </div>
         </AccordionTrigger>
-        <AccordionContent className="-mx-2 grid max-w-full grid-cols-[repeat(auto-fit,_minmax(14rem,_1fr))] gap-2">
+        <AccordionContent className="-mx-2 grid max-w-full grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] gap-2">
           {metrics.map(({ metric, key }) => {
             return (
               <Card

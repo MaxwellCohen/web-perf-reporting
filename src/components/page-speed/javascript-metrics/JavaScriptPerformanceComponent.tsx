@@ -1,6 +1,5 @@
 'use client';
-import { useContext } from 'react';
-import { InsightsContext } from '@/components/page-speed/PageSpeedContext';
+import { usePageSpeedItems } from '@/components/page-speed/PageSpeedContext';
 import {
   AccordionContent,
   AccordionItem,
@@ -17,7 +16,7 @@ import { extractJSMetrics } from '@/components/page-speed/javascript-metrics/ext
 
 export function JavaScriptPerformanceComponent() {
   'use memo';
-  const items = useContext(InsightsContext);
+  const items = usePageSpeedItems();
 
   const jsMetrics = items.map(extractJSMetrics);
 

@@ -1,6 +1,6 @@
 "use client";
-import { useContext, useMemo } from "react";
-import { InsightsContext } from "@/components/page-speed/PageSpeedContext";
+import { useMemo } from "react";
+import { usePageSpeedItems } from "@/components/page-speed/PageSpeedContext";
 import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { groupBy, getNumber } from "@/lib/utils";
 import { AuditDetailTable, TableItem } from "@/lib/schema";
@@ -20,7 +20,7 @@ type MetricsAuditDetails = {
 };
 
 export function NetworkMetricsComponent() {
-  const items = useContext(InsightsContext);
+  const items = usePageSpeedItems();
   
   const networkMetrics = useMemo(() => {
     return items.map(({ item, label }) => {

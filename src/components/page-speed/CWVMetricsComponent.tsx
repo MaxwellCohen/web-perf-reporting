@@ -3,45 +3,99 @@ import { ScoreDisplay } from '@/components/page-speed/ScoreDisplay';
 import ReactMarkdown from 'react-markdown';
 import { HorizontalScoreChart } from '@/components/common/PageSpeedGaugeChart';
 import { AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
-import { Fragment, useContext } from 'react';
-import { InsightsContext } from '@/components/page-speed/PageSpeedContext';
+import { Fragment } from 'react';
+import {
+  type InsightsContextItem,
+  usePageSpeedItems,
+} from '@/components/page-speed/PageSpeedContext';
+import type { AuditResultsRecord } from '@/lib/schema';
+
 const metricAuditRefId = [
   'first-contentful-paint',
   'largest-contentful-paint',
   'total-blocking-time',
   'cumulative-layout-shift',
   'speed-index',
-];
-export function CWVMetricsComponent() {
-  const items = useContext(InsightsContext)
-    .map(({ item, label }) => ({
-      cg: item?.lighthouseResult?.categoryGroups,
-      a: item.lighthouseResult?.audits,
-      label,
-    }))
-    .filter(({ cg, a }) => cg && a);
+] as const;
 
-  const metricItems = metricAuditRefId.map((id) => {
-    const auditItems = items
-      .map(({ a, label }) => ({  audit: a?.[id], label }))
-      .filter(({ audit }) => !!audit);
+type MetricAuditId = (typeof metricAuditRefId)[number];
 
-    return {
-      auditName: id,
-      title: auditItems.find(({ audit }) => audit?.title)?.audit?.title,
-      description: auditItems.find(({ audit }) => audit?.description)?.audit
-        ?.description,
-      auditItems,
+type MetricAuditSource = {
+  audits: AuditResultsRecord;
+  label: string;
+};
+
+type MetricAuditEntry = {
+  audit: AuditResultsRecord[string];
+  label: string;
+};
+
+type MetricCard = {
+  auditName: MetricAuditId;
+  title?: string;
+  description?: string;
+  auditItems: MetricAuditEntry[];
+};
+
+type MetricAuditInsight = InsightsContextItem & {
+  item: InsightsContextItem['item'] & {
+    lighthouseResult: {
+      audits: AuditResultsRecord;
+      categoryGroups: NonNullable<
+        InsightsContextItem['item']['lighthouseResult']['categoryGroups']
+      >;
     };
+  };
+};
+
+function hasMetricAudits(insight: InsightsContextItem): insight is MetricAuditInsight {
+  return (
+    !!insight.item.lighthouseResult?.audits &&
+    !!insight.item.lighthouseResult?.categoryGroups
+  );
+}
+
+function createMetricCard(
+  auditName: MetricAuditId,
+  sources: MetricAuditSource[],
+): MetricCard {
+  const auditItems: MetricAuditEntry[] = sources.flatMap(({ audits, label }) => {
+    const audit = audits[auditName];
+
+    return audit ? [{ audit, label }] : [];
   });
 
-  if(!items.length) {
+  const primaryAudit = auditItems[0]?.audit;
+
+  return {
+    auditName,
+    title: primaryAudit?.title,
+    description: primaryAudit?.description,
+    auditItems,
+  };
+}
+
+export function CWVMetricsComponent() {
+  const items = usePageSpeedItems();
+
+  const metricAuditSources: MetricAuditSource[] = items
+    .filter(hasMetricAudits)
+    .map(({ item, label }: MetricAuditInsight) => ({
+      audits: item.lighthouseResult.audits,
+      label,
+    }));
+
+  const metricItems: MetricCard[] = metricAuditRefId.map((auditName) =>
+    createMetricCard(auditName, metricAuditSources),
+  );
+
+  if (!metricAuditSources.length) {
     return null;
   }
-  
+
   return (
-    <AccordionItem value={'cwv'} className="flex flex-col gap-2 print:border-0">
-      <AccordionTrigger className="">
+    <AccordionItem value="cwv" className="flex flex-col gap-2 print:border-0">
+      <AccordionTrigger>
         <h3 className="text-lg font-bold">Core Web Vitals Summary</h3>
       </AccordionTrigger>
       <AccordionContent className="-mx-2 grid grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] gap-2">
@@ -54,12 +108,11 @@ export function CWVMetricsComponent() {
               <div className="flex w-full flex-col gap-2">
                 <CardTitle className="text-md font-bold">{title}</CardTitle>
                 <div className="contents text-sm">
-                  {auditItems?.map(({ audit, label }, idx) => {
-                    if (!audit) return null;
+                  {auditItems.map(({ audit, label }: MetricAuditEntry) => {
                     return (
-                      <Fragment key={`${auditName}_${idx}_${label}`}>
+                      <Fragment key={`${auditName}_${label}`}>
                         <ScoreDisplay audit={audit} device={label} />{' '}
-                        <HorizontalScoreChart score={audit?.score || 0} />
+                        <HorizontalScoreChart score={audit.score ?? 0} />
                       </Fragment>
                     );
                   })}

@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
-import { memo, useContext, useEffect, useRef, useState } from 'react';
-import { fullPageScreenshotContext } from '@/components/page-speed/PageSpeedContext';
+import { memo, useEffect, useRef, useState } from 'react';
+import { useFullPageScreenshots } from '@/components/page-speed/PageSpeedContext';
 import { RenderJSONDetails } from '@/components/page-speed/RenderJSONDetails';
 import { NodeValue, FullPageScreenshot, Rect } from '@/lib/schema';
 import {
@@ -59,7 +59,7 @@ export function RenderNodeImage({
   device: string;
   imageSize?: number;
 }) {
-  const screenshotData = useContext(fullPageScreenshotContext);
+  const screenshotData = useFullPageScreenshots();
   const [imageError, setImageError] = useState(false);
   
   // Validate item is an object

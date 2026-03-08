@@ -65,6 +65,9 @@ importers:
       '@vercel/functions':
         specifier: ^2.2.13
         version: 2.2.13
+      '@xstate/store':
+        specifier: ^3.16.0
+        version: 3.16.0(react@19.2.4)
       babel-plugin-react-compiler:
         specifier: 19.1.0-rc.3
         version: 19.1.0-rc.3
@@ -2733,6 +2736,17 @@ packages:
 
   '@webassemblyjs/wast-printer@1.14.1':
     resolution: {integrity: sha512-kPSSXE6De1XOR820C90RIo2ogvZG+c3KiHzqUoO/F34Y2shGzesfqv7o57xrxovZJH/MetF5UjroJ/R/3isoiw==}
+
+  '@xstate/store@3.16.0':
+    resolution: {integrity: sha512-FWIapfCeTN99Nrhwe/r5qABcyDdeGM6gZ+SNL5IF50a2vgtEzhYthS9MYEz4HXjqxXdGN+WaMb+CIzv62jGRbA==}
+    peerDependencies:
+      react: ^18.2.0 || ^19.0.0
+      solid-js: ^1.7.6
+    peerDependenciesMeta:
+      react:
+        optional: true
+      solid-js:
+        optional: true
 
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
@@ -8113,6 +8127,10 @@ snapshots:
     dependencies:
       '@webassemblyjs/ast': 1.14.1
       '@xtuc/long': 4.2.2
+
+  '@xstate/store@3.16.0(react@19.2.4)':
+    optionalDependencies:
+      react: 19.2.4
 
   '@xtuc/ieee754@1.2.0': {}
 

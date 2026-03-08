@@ -1,6 +1,6 @@
 'use client';
-import { useContext, useMemo } from 'react';
-import { InsightsContext } from '@/components/page-speed/PageSpeedContext';
+import { useMemo } from 'react';
+import { usePageSpeedItems } from '@/components/page-speed/PageSpeedContext';
 import { renderBoolean } from '@/components/page-speed/lh-categories/renderBoolean';
 import {
   ColumnDef,
@@ -162,7 +162,7 @@ const cols: ColumnDef<EntityTableRow, any>[] = [
 
 export function EntitiesTable() {
   'use no memo';
-  const items = useContext(InsightsContext);
+  const items = usePageSpeedItems();
 
   const validItems = useMemo(() => {
     return items.filter(({ item }) => {
