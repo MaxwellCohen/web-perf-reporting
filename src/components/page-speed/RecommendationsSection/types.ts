@@ -18,10 +18,7 @@ export interface Recommendation {
     totalBytes?: number;
     [key: string]: unknown;
   }>;
-  actionableSteps: Array<{
-    step: string;
-    reports: string[];
-  }>;
+  actionableSteps: ActionableStep[];
   tableData?: {
     headings: TableColumnHeading[];
     items: TableItem[];

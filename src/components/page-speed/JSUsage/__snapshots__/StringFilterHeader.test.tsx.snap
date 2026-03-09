@@ -1,0 +1,105 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`StringFilterHeader > renders filter UI with column 1`] = `
+<div
+  class="flex flex-col my-2"
+>
+  <label
+    for="filter__r_0_"
+  >
+    Name
+     Filter
+  </label>
+  <datalist
+    id="name-list-_r_0_"
+  >
+    <option
+      value="a"
+    />
+    <option
+      value="b"
+    />
+    <option
+      value="c"
+    />
+  </datalist>
+  <div
+    class="flex flex-row"
+  >
+    <input
+      data-testid="filter-input"
+      id="filter__r_0_"
+      list="name-list-_r_0_"
+      placeholder="Search... (3)"
+      value=""
+    />
+    <button
+      aria-label="Clear filter for Name"
+      type="button"
+    >
+      <span
+        class="sr-only"
+      >
+        Clear filter
+      </span>
+      <span
+        aria-hidden="true"
+      >
+        ×
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`StringFilterHeader > renders with filter value 1`] = `
+<div
+  class="flex flex-col my-2"
+>
+  <label
+    for="filter__r_0_"
+  >
+    Host
+     Filter
+  </label>
+  <datalist
+    id="name-list-_r_0_"
+  >
+    <option
+      value="a"
+    />
+    <option
+      value="b"
+    />
+    <option
+      value="c"
+    />
+  </datalist>
+  <div
+    class="flex flex-row"
+  >
+    <input
+      data-testid="filter-input"
+      id="filter__r_0_"
+      list="name-list-_r_0_"
+      placeholder="Search... (3)"
+      value="test"
+    />
+    <button
+      aria-label="Clear filter for Host"
+      type="button"
+    >
+      <span
+        class="sr-only"
+      >
+        Clear filter
+      </span>
+      <span
+        aria-hidden="true"
+      >
+        ×
+      </span>
+    </button>
+  </div>
+</div>
+`;

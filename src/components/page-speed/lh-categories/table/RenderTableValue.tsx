@@ -12,7 +12,17 @@ import {
   TextValue,
   UrlValue,
 } from '@/lib/schema';
+import { parseUrlForDisplay } from '@/lib/urlDisplay';
 const URL_PREFIXES = ['http://', 'https://', 'data:'];
+
+export function formatBytes(value: unknown): string {
+  const bytes = Math.floor(Number(value));
+  const kb = bytes / 1024;
+  const mb = kb / 1024;
+  if (mb > 1) return `${mb.toFixed(2)} MB`;
+  if (kb > 1) return `${kb.toFixed(2)} KB`;
+  return `${bytes} bytes`;
+}
 
 /**
  * Render a details item value for embedding in a table. Renders the value
@@ -33,57 +43,68 @@ export function RenderTableValue({
   device: string;
 } & React.HTMLAttributes<HTMLElement>) {
   if (value === undefined || value === null) {
-    return (null);
+    return null;
   }
 
-  // First deal with the possible object forms of value.
+  // Object values: type overrides heading
   if (typeof value === 'object' && 'type' in value) {
-    // The value's type overrides the heading's for this column.
-    const valueTypeMap = {
-      code: () => <RenderCodeValue value={value as CodeValue} {...props} />,
-      link: () => <RenderLinkValue value={value as LinkValue} {...props} />,
-      node: () => (
-        <NodeComponent item={value as NodeValue} device={device} {...props} />
-      ),
-      numeric: () => (
-        <RenderNumericValue
-          value={value as NumericValue}
-          heading={heading}
-          {...props}
-        />
-      ),
-      'source-location': () => (
-        <RenderSourceLocation value={value as SourceLocationValue} {...props} />
-      ),
-      url: () => <RenderUrlValue value={value as UrlValue} {...props} />,
-      text: () => <RenderTextValue value={value as TextValue} {...props} />,
-    } as const;
-    return (
-      valueTypeMap[value?.type as keyof typeof valueTypeMap]?.() || (
-        <RenderDefault value={value} {...props} />
-      )
-    );
+    const type = (value as { type: string }).type;
+    switch (type) {
+      case 'code':
+        return <RenderCodeValue value={value as CodeValue} {...props} />;
+      case 'link':
+        return <RenderLinkValue value={value as LinkValue} {...props} />;
+      case 'node':
+        return (
+          <NodeComponent item={value as NodeValue} device={device} {...props} />
+        );
+      case 'numeric':
+        return (
+          <RenderNumericValue
+            value={value as NumericValue}
+            heading={heading}
+            {...props}
+          />
+        );
+      case 'source-location':
+        return (
+          <RenderSourceLocation
+            value={value as SourceLocationValue}
+            {...props}
+          />
+        );
+      case 'url':
+        return <RenderUrlValue value={value as UrlValue} {...props} />;
+      case 'text':
+        return <RenderTextValue value={value as TextValue} {...props} />;
+      default:
+        return <RenderDefault value={value} {...props} />;
+    }
   }
 
-  // Next, deal with primitives.
-  const valueTypeMap = {
-    bytes: () => <RenderBytesValue value={value} {...props} />,
-    code: () => <RenderCode value={value} {...props} />,
-    ms: () => <RenderMSValue value={value} {...props} />,
-    numeric: () => (
-      <RenderNumberValue value={value} heading={heading} {...props} />
-    ),
-    text: () => <RenderText value={value} {...props} />,
-    thumbnail: () => <RenderThumbnail value={value} {...props} />,
-    timespanMs: () => <RenderTimespanMs value={value} {...props} />,
-    url: () => <RenderUrl value={value} {...props} />,
-  } as const;
-
-  return (
-    valueTypeMap[heading?.valueType as keyof typeof valueTypeMap]?.() || (
-      <RenderDefault value={value} {...props} />
-    )
-  );
+  // Primitive values: use heading's valueType
+  switch (heading?.valueType) {
+    case 'bytes':
+      return <RenderBytesValue value={value} {...props} />;
+    case 'code':
+      return <RenderCode value={value} {...props} />;
+    case 'ms':
+      return <RenderMSValue value={value} {...props} />;
+    case 'numeric':
+      return (
+        <RenderNumberValue value={value} heading={heading} {...props} />
+      );
+    case 'text':
+      return <RenderText value={value} {...props} />;
+    case 'thumbnail':
+      return <RenderThumbnail value={value} {...props} />;
+    case 'timespanMs':
+      return <RenderTimespanMs value={value} {...props} />;
+    case 'url':
+      return <RenderUrl value={value} {...props} />;
+    default:
+      return <RenderDefault value={value} {...props} />;
+  }
 }
 
 function RenderCodeValue({
@@ -146,27 +167,18 @@ function RenderNumericValue({
   );
 }
 
-function RenderSourceLocation({
-  value,
+function SourceLocationLink({
+  href,
+  title,
+  children,
   ...props
-}: { value: SourceLocationValue } & React.HTMLAttributes<HTMLElement>) {
-  if (!value.url) {
-    return <span {...props}></span>;
-  }
-
-  // Lines are shown as one-indexed
-  const generatedLocation = `${value.url}:${value.line + 1}:${value.column}`;
-
-  let sourceMappedOriginalLocation: string | undefined;
-  if (value.original) {
-    const file = value.original.file || '<unmapped>';
-    sourceMappedOriginalLocation = `${file}:${value.original.line + 1}:${value.original.column}`;
-  }
-
-  // Helper function to render a link
-  const renderLink = (linkUrl: string, text: string, title?: string) => (
+}: React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+  href: string;
+  title?: string;
+}) {
+  return (
     <a
-      href={linkUrl}
+      href={href}
       rel="noopener"
       target="_blank"
       {...props}
@@ -176,67 +188,104 @@ function RenderSourceLocation({
       )}
       title={title}
     >
-      {text}
+      {children}
     </a>
   );
+}
 
-  // Helper function to render text
-  const renderText = (content: string, title?: string) => (
-    <span className="break-all" title={title}>
-      {content}
+function SourceLocationUrlDisplay({ url }: { url: string }) {
+  const parsed = parseUrlForDisplay(url);
+  const path = parsed?.path ?? url;
+  const hostLabel = parsed?.hostLabel ?? '';
+
+  return (
+    <span className="flex flex-wrap items-center">
+      <SourceLocationLink href={url} title={url}>
+        {path}
+      </SourceLocationLink>
+      {hostLabel ? (
+        <span className="ml-1 text-gray-600">{hostLabel}</span>
+      ) : null}
     </span>
   );
+}
 
-  // Helper function to render a text URL
-  const renderTextURL = (textUrl: string) => {
-    let displayedPath;
-    let displayedHost;
-
-    try {
-      const url = new URL(textUrl);
-      displayedPath = url.pathname === '/' ? url.origin : url.pathname;
-      displayedHost =
-        url.pathname === '/' || url.hostname === '' ? '' : `(${url.hostname})`;
-    } catch {
-      displayedPath = textUrl;
-      displayedHost = '';
-    }
-
-    return (
+function SourceLocationContent({
+  urlProvider,
+  url,
+  line,
+  column,
+  orig,
+  gen,
+  ...props
+}: {
+  urlProvider: 'network' | 'comment';
+  url: string;
+  line: number;
+  column: number;
+  orig: string | undefined;
+  gen: string;
+} & React.HTMLAttributes<HTMLElement>) {
+  if (urlProvider === 'network') {
+    return orig ? (
+      <SourceLocationLink
+        href={url}
+        title={`maps to generated location ${gen}`}
+        {...props}
+      >
+        {orig}
+      </SourceLocationLink>
+    ) : (
       <span className="flex flex-wrap items-center">
-        {renderLink(textUrl, displayedPath)}
-        {displayedHost && (
-          <span className="ml-1 text-gray-600">{displayedHost}</span>
-        )}
-      </span>
-    );
-  };
-
-  let content;
-
-  if (value.urlProvider === 'network' && sourceMappedOriginalLocation) {
-    content = renderLink(
-      value.url,
-      sourceMappedOriginalLocation,
-      `maps to generated location ${generatedLocation}`,
-    );
-  } else if (value.urlProvider === 'network' && !sourceMappedOriginalLocation) {
-    content = (
-      <span className="flex flex-wrap items-center">
-        {renderTextURL(value.url)}
+        <SourceLocationUrlDisplay url={url} />
         <span className="ml-0">
-          :{value.line + 1}:{value.column}
+          :{line + 1}:{column}
         </span>
       </span>
     );
-  } else if (value.urlProvider === 'comment' && sourceMappedOriginalLocation) {
-    content = renderText(
-      `${sourceMappedOriginalLocation} (from source map)`,
-      `${generatedLocation} (from sourceURL)`,
+  }
+
+  if (urlProvider === 'comment') {
+    return orig ? (
+      <span className="break-all" title={`${gen} (from sourceURL)`}>
+        {orig} (from source map)
+      </span>
+    ) : (
+      <span className="break-all" title={gen}>
+        {gen} (from sourceURL)
+      </span>
     );
-  } else if (value.urlProvider === 'comment' && !sourceMappedOriginalLocation) {
-    content = renderText(`${generatedLocation} (from sourceURL)`);
-  } else {
+  }
+
+  return null;
+}
+
+function RenderSourceLocation({
+  value,
+  ...props
+}: { value: SourceLocationValue } & React.HTMLAttributes<HTMLElement>) {
+  if (!value.url) {
+    return <span {...props} />;
+  }
+
+  const gen = `${value.url}:${value.line + 1}:${value.column}`;
+  const orig = value.original
+    ? `${value.original.file || '<unmapped>'}:${value.original.line + 1}:${value.original.column}`
+    : undefined;
+
+  const content = (
+    <SourceLocationContent
+      urlProvider={value.urlProvider}
+      url={value.url}
+      line={value.line}
+      column={value.column}
+      orig={orig}
+      gen={gen}
+      {...props}
+    />
+  );
+
+  if (content === null) {
     return null;
   }
 
@@ -298,17 +347,10 @@ export function RenderBytesValue({
   children,
   ...props
 }: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
-  const bytes = Math.floor(Number(value));
-  const kb = bytes / 1024;
-  const mb = kb / 1024;
   return (
     <span title="bytes" {...props} className={cn('', props.className)}>
       {children}
-      {mb > 1
-        ? `${mb.toFixed(2)} MB`
-        : kb > 1
-          ? `${kb.toFixed(2)} KB`
-          : `${bytes} bytes`}
+      {formatBytes(value)}
     </span>
   );
 }
@@ -372,49 +414,28 @@ export function renderTimeValue(msU: unknown) {
   return `${parts.join(' ')}`;
 }
 
+function formatMsValue(value: unknown): string {
+  const ms = Number(value);
+  if (Number.isNaN(ms)) return 'N/A';
+  const normalizedMs = Math.abs(ms) < 0.001 ? 0 : ms;
+  if (normalizedMs < 1000) {
+    const displayMs = Math.abs(normalizedMs) < 0.5 ? 0 : normalizedMs;
+    return `${displayMs.toFixed(0)} ms`;
+  }
+  const s = normalizedMs / 1000;
+  if (s < 60) return `${s.toFixed(2)} s`;
+  const m = s / 60;
+  if (m < 60) return `${m.toFixed(2)} min`;
+  return `${(m / 60).toFixed(2)} h`;
+}
+
 export function RenderMSValue({
   value,
   ...props
 }: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
-  const ms = Number(value);
-  if (Number.isNaN(ms)) {
-    return (
-      <span title="ms" {...props} className={cn('', props.className)}>
-        N/A
-      </span>
-    );
-  }
-  // Normalize values very close to zero to avoid "-0 ms" display
-  const normalizedMs = Math.abs(ms) < 0.001 ? 0 : ms;
-  if (normalizedMs < 1000) {
-    // Use Math.abs to ensure we never display "-0"
-    const displayMs = Math.abs(normalizedMs) < 0.5 ? 0 : normalizedMs;
-    return (
-      <span title="ms" {...props} className={cn('', props.className)}>
-        {displayMs.toFixed(0)} ms
-      </span>
-    );
-  }
-  const seconds = normalizedMs / 1000;
-  if (seconds < 60) {
-    return (
-      <span title="ms" {...props} className={cn('', props.className)}>
-        {seconds.toFixed(2)} s
-      </span>
-    );
-  }
-  const minutes = seconds / 60;
-  if (minutes < 60) {
-    return (
-      <span title="ms" {...props} className={cn('', props.className)}>
-        {minutes.toFixed(2)} min
-      </span>
-    );
-  }
-  const hours = minutes / 60;
   return (
     <span title="ms" {...props} className={cn('', props.className)}>
-      {hours.toFixed(2)} h
+      {formatMsValue(value)}
     </span>
   );
 }

@@ -1,0 +1,32 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`LhFileInput > renders file upload input when no files 1`] = `
+<div
+  data-value="file"
+  role="tabpanel"
+>
+  <div
+    class="space-y-4"
+  >
+    <div
+      class="space-y-2"
+    >
+      <label
+        for="json-file"
+      >
+        Upload JSON Files
+      </label>
+      <div
+        class="grid w-full max-w-sm items-center gap-1.5"
+      >
+        <input
+          accept=".json"
+          id="json-file"
+          multiple=""
+          type="file"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;

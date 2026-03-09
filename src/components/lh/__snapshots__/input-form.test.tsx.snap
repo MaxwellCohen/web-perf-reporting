@@ -1,0 +1,332 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`LhInputForm > renders card with title, description, tabs and submit button 1`] = `
+<div>
+  <div>
+    <div>
+      Lighthouse Report Viewer
+    </div>
+    <div>
+      View your Lighthouse Report
+    </div>
+  </div>
+  <div>
+    <form
+      action="javascript:throw new Error('A React form was unexpectedly submitted. If you called form.submit() manually, consider using form.requestSubmit() instead. If you\\'re trying to use event.stopPropagation() in a submit event handler, consider also calling event.preventDefault().')"
+      id="lh-input-form"
+    >
+      <div
+        data-orientation="horizontal"
+        dir="ltr"
+      >
+        <div
+          class="inline-flex h-9 mb-6 grid grid-cols-3"
+          role="tablist"
+        >
+          <button
+            class="flex items-center gap-2"
+            data-state="active"
+            role="tab"
+          >
+            <span
+              data-testid="code"
+            />
+            <span>
+              Paste Lighthouse JSON
+            </span>
+          </button>
+          <button
+            class="flex items-center gap-2"
+            data-state="inactive"
+            role="tab"
+          >
+            <span
+              data-testid="file-json"
+            />
+            <span>
+              Upload Lighthouse JSON File
+            </span>
+          </button>
+          <button
+            class="flex items-center gap-2"
+            data-state="inactive"
+            role="tab"
+          >
+            <span
+              data-testid="globe"
+            />
+            <span>
+              Fetch via PageSpeed Insights API
+            </span>
+          </button>
+        </div>
+        <div
+          role="tabpanel"
+        >
+          <div>
+            <label>
+              JSON Entries
+            </label>
+            <div>
+              <label
+                for="json-name-0"
+              >
+                Name:
+              </label>
+              <input
+                id="json-name-0"
+                placeholder="Entry name"
+                value=""
+              />
+              <button
+                type="button"
+              >
+                <span
+                  class="sr-only"
+                >
+                  Remove
+                </span>
+              </button>
+              <div>
+                <label
+                  for="json-text-0"
+                >
+                  JSON Content
+                </label>
+                <textarea
+                  id="json-text-0"
+                  placeholder="{"example": "Paste your JSON here"}"
+                />
+              </div>
+            </div>
+            <button
+              type="button"
+            >
+              Add Another JSON Entry
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div>
+    <button
+      class="w-full"
+      form="lh-input-form"
+      type="submit"
+    >
+      Submit
+    </button>
+  </div>
+</div>
+`;
+
+exports[`LhInputForm > shows JSON Entries section and add-entry button on text tab 1`] = `
+<div>
+  <div>
+    <div>
+      Lighthouse Report Viewer
+    </div>
+    <div>
+      View your Lighthouse Report
+    </div>
+  </div>
+  <div>
+    <form
+      action="javascript:throw new Error('A React form was unexpectedly submitted. If you called form.submit() manually, consider using form.requestSubmit() instead. If you\\'re trying to use event.stopPropagation() in a submit event handler, consider also calling event.preventDefault().')"
+      id="lh-input-form"
+    >
+      <div
+        data-orientation="horizontal"
+        dir="ltr"
+      >
+        <div
+          class="inline-flex h-9 mb-6 grid grid-cols-3"
+          role="tablist"
+        >
+          <button
+            class="flex items-center gap-2"
+            data-state="active"
+            role="tab"
+          >
+            <span
+              data-testid="code"
+            />
+            <span>
+              Paste Lighthouse JSON
+            </span>
+          </button>
+          <button
+            class="flex items-center gap-2"
+            data-state="inactive"
+            role="tab"
+          >
+            <span
+              data-testid="file-json"
+            />
+            <span>
+              Upload Lighthouse JSON File
+            </span>
+          </button>
+          <button
+            class="flex items-center gap-2"
+            data-state="inactive"
+            role="tab"
+          >
+            <span
+              data-testid="globe"
+            />
+            <span>
+              Fetch via PageSpeed Insights API
+            </span>
+          </button>
+        </div>
+        <div
+          role="tabpanel"
+        >
+          <div>
+            <label>
+              JSON Entries
+            </label>
+            <div>
+              <label
+                for="json-name-0"
+              >
+                Name:
+              </label>
+              <input
+                id="json-name-0"
+                placeholder="Entry name"
+                value=""
+              />
+              <button
+                type="button"
+              >
+                <span
+                  class="sr-only"
+                >
+                  Remove
+                </span>
+              </button>
+              <div>
+                <label
+                  for="json-text-0"
+                >
+                  JSON Content
+                </label>
+                <textarea
+                  id="json-text-0"
+                  placeholder="{"example": "Paste your JSON here"}"
+                />
+              </div>
+            </div>
+            <button
+              type="button"
+            >
+              Add Another JSON Entry
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div>
+    <button
+      class="w-full"
+      form="lh-input-form"
+      type="submit"
+    >
+      Submit
+    </button>
+  </div>
+</div>
+`;
+
+exports[`LhInputForm > text tab interactions > updates name and content and can remove entry 1`] = `
+<div>
+  <div>
+    <div>
+      Lighthouse Report Viewer
+    </div>
+    <div>
+      View your Lighthouse Report
+    </div>
+  </div>
+  <div>
+    <form
+      action="javascript:throw new Error('A React form was unexpectedly submitted. If you called form.submit() manually, consider using form.requestSubmit() instead. If you\\'re trying to use event.stopPropagation() in a submit event handler, consider also calling event.preventDefault().')"
+      id="lh-input-form"
+    >
+      <div
+        data-orientation="horizontal"
+        dir="ltr"
+      >
+        <div
+          class="inline-flex h-9 mb-6 grid grid-cols-3"
+          role="tablist"
+        >
+          <button
+            class="flex items-center gap-2"
+            data-state="active"
+            role="tab"
+          >
+            <span
+              data-testid="code"
+            />
+            <span>
+              Paste Lighthouse JSON
+            </span>
+          </button>
+          <button
+            class="flex items-center gap-2"
+            data-state="inactive"
+            role="tab"
+          >
+            <span
+              data-testid="file-json"
+            />
+            <span>
+              Upload Lighthouse JSON File
+            </span>
+          </button>
+          <button
+            class="flex items-center gap-2"
+            data-state="inactive"
+            role="tab"
+          >
+            <span
+              data-testid="globe"
+            />
+            <span>
+              Fetch via PageSpeed Insights API
+            </span>
+          </button>
+        </div>
+        <div
+          role="tabpanel"
+        >
+          <div>
+            <label>
+              JSON Entries
+            </label>
+            <button
+              type="button"
+            >
+              Add Another JSON Entry
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div>
+    <button
+      class="w-full"
+      form="lh-input-form"
+      type="submit"
+    >
+      Submit
+    </button>
+  </div>
+</div>
+`;

@@ -1,0 +1,42 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`LhTabList > renders snapshot 1`] = `
+<div
+  class="mb-6 grid grid-cols-3"
+  role="tablist"
+>
+  <button
+    data-value="text"
+    role="tab"
+  >
+    <span
+      data-testid="code"
+    />
+    <span>
+      Paste Lighthouse JSON
+    </span>
+  </button>
+  <button
+    data-value="file"
+    role="tab"
+  >
+    <span
+      data-testid="file-json"
+    />
+    <span>
+      Upload Lighthouse JSON File
+    </span>
+  </button>
+  <button
+    data-value="url"
+    role="tab"
+  >
+    <span
+      data-testid="globe"
+    />
+    <span>
+      Fetch via PageSpeed Insights API
+    </span>
+  </button>
+</div>
+`;

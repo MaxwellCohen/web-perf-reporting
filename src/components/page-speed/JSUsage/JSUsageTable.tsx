@@ -1,555 +1,39 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 'use no memo';
-import { TreeMapData, TreeMapNode } from '@/lib/schema';
+import { useState } from 'react';
 import {
   Table,
   TableBody,
   TableHeader,
-  TableRow,
-  TableCell,
-  TableHead,
 } from '@/components/ui/table';
-import { RenderBytesValue, RenderMSValue, RenderTableValue } from '@/components/page-speed/lh-categories/table/RenderTableValue';
 import {
-  JSX,
-  memo,
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react';
-import {
-  CellContext,
   ColumnFiltersState,
   ExpandedState,
-  flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  HeaderContext,
   PaginationState,
-  Row,
   SortingState,
   useReactTable,
   VisibilityState,
-  createColumnHelper,
-  RowData,
   getGroupedRowModel,
   getExpandedRowModel,
-  HeaderGroup,
-  ColumnFiltersColumnDef,
   getFacetedRowModel,
   getFacetedUniqueValues,
   getFacetedMinMaxValues,
-  Table as ReactTable,
 } from '@tanstack/react-table';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { renderBoolean } from '@/components/page-speed/lh-categories/renderBoolean';
-import { StatusCircle } from '@/components/page-speed/JSUsage/StatusCircle';
+import type { TreeMapData } from '@/lib/schema';
 import { NoResultsRow } from '@/components/page-speed/JSUsage/NoResultsRow';
 import { TableControls } from '@/components/page-speed/JSUsage/TableControls';
-import { Label } from '@/components/ui/label';
-import { DebouncedInput } from '@/components/ui/input';
-import { Slider2 } from '@/components/ui/slider';
-import { ArrowUp, ChevronRightIcon, MinusIcon } from 'lucide-react';
-import { toTitleCase } from '@/components/page-speed/toTitleCase';
+import { columns } from '@/components/page-speed/JSUsage/jsUsageTableColumns';
+import { JSUsageTableHeader } from '@/components/page-speed/JSUsage/jsUsageTableHeader';
+import { JSUsageTableRow } from '@/components/page-speed/JSUsage/jsUsageTableRow';
 
-declare module '@tanstack/react-table' {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface ColumnMeta<TData extends RowData, TValue> {
-    className?: string;
-    // doNotShowInGroup?: boolean;
-  }
-}
-
-export function ExpandRow<T>({
-  row,
-  children,
-}: Pick<Partial<CellContext<T, unknown>>, 'row'> & {
-  children?: React.ReactNode;
-}) {
-  'use no memo';
-  if (!row) {
-    return <div className={'h-9 w-9'} />;
-  }
-  
-  const isExpanded = row.getIsExpanded();
-  const canExpand = row.getCanExpand();
-  
-  if (!canExpand) {
-    return <div className={'h-9 w-9'} />;
-  }
-  
-  return (
-    <Button
-      variant={'ghost'}
-      role='button'
-      size={children ? 'default' :'icon'}
-      onClick={row.getToggleExpandedHandler()}
-      style={{ cursor: 'pointer', margin: 0 }}
-      aria-label={isExpanded ? 'Collapse row' : 'Expand row'}
-      aria-expanded={isExpanded}
-      className="h-8 w-8 m-0"
-    >
-      {children}
-      <ChevronRightIcon
-        className={cn('h-4 w-4 transform transition-all duration-300', {
-          'rotate-90': isExpanded,
-        })}
-      />
-      <span className="sr-only">
-        {isExpanded ? 'Collapse row' : 'Expand row'}
-      </span>
-    </Button>
-  );
-}
-
-export function RenderBytesCell(info: CellContext<TreeMapNode, unknown>) {
-  const value = info.getValue();
-  return (
-    <>
-      {typeof value === 'number' ? (
-        <RenderBytesValue value={value} className="w-full text-right" />
-      ) : (
-        <div className="w-full text-right"> N/A</div>
-      )}
-    </>
-  );
-}
-
-export function makeSortingHeading(
-  name: string,
-  filterType?: 'string' | 'range',
-) {
-  return memo(function SortingHeader({
-    column,
-    // table,
-  }: HeaderContext<TreeMapNode, unknown>) {
-    'use no memo';
-    return (
-      <div className="flex h-full flex-col justify-between">
-        <div className='my-2'>
-          <Button
-            variant="ghost"
-            className={`px-0 w-auto text-left`}
-            onClick={() => {
-              column.toggleSorting(column.getIsSorted() === 'asc');
-            }}
-            aria-label={`Sort column ${name}`}
-          >
-            <div className="">{name}</div>
-            {column.getIsSorted() ? (
-              <ArrowUp
-                className={cn('transform transition-all duration-300', {
-                  'rotate-180': column.getIsSorted() !== 'asc',
-                })}
-              />
-            ) : (
-              <MinusIcon />
-            )}
-          </Button>
-        </div>
-        {filterType === 'string' ? (
-          <StringFilterHeader column={column} name={name}/>
-        ) : null}
-        {filterType === 'range' ? <RangeFilter column={column} /> : null}
-      </div>
-    );
-  });
-}
-
-export function StringFilterHeader<T>({
-  column,
-  name
-}: Partial<Pick<HeaderContext<T, unknown>, 'column'>> & {name: string}) {
-  const id = useId();
-  const uniqueValues = column?.getFacetedUniqueValues();
-  const sortedUniqueValues = useMemo(
-    () => Array.from(uniqueValues?.keys() || []).sort().slice(0, 5000),
-    [uniqueValues],
-  );
-
-  const columnFilterValue = column?.getFilterValue();
-  if (!column) {
-    return null;
-  }
-  return (
-    <div className="flex flex-col my-2">
-      <Label htmlFor={`filter_${id}`} className='mb-2'>
-        {name} Filter
-      </Label>
-      <datalist id={column.id + 'list'+ id}>
-        {sortedUniqueValues.map((value: any) => (
-          <option value={value} key={value} />
-        ))}
-      </datalist>
-      <div className="flex flex-row">
-      <DebouncedInput
-        id={`filter_${id}`} 
-        type="text"
-        value={(columnFilterValue ?? '') as string}
-        onChange={(value) => column.setFilterValue(value)}
-        placeholder={`Search... (${column.getFacetedUniqueValues().size})`}
-        className="rounded border shadow"
-        list={column.id + 'list'}
-        debounce={300}
-      />
-      <Button
-        variant="ghost"
-        className="ml-2"
-        onClick={() => {
-          column?.setFilterValue('');
-        }}
-        aria-label={`Clear filter for ${name}`}
-      >
-        <span className="sr-only">Clear filter</span>
-        <span aria-hidden="true">×</span>
-      </Button>
-      </div>
-    </div>
-  );
-}
-
-function useDebouncedCallback(callback: (...arg: any[]) => any, delay = 100) {
-  const timerIdRef = useRef<null | ReturnType<typeof setTimeout>>(null);
-  const latestCallback = useRef(callback);
-
-  // Update the latest callback ref whenever the provided callback changes
-  useEffect(() => {
-    latestCallback.current = callback;
-  }, [callback]);
-
-  const debouncedCallback = useCallback(
-    (...args: any[]) => {
-      if (timerIdRef.current) {
-        clearTimeout(timerIdRef.current);
-      }
-
-      timerIdRef.current = setTimeout(() => {
-        latestCallback.current(...args);
-      }, delay);
-    },
-    [delay], // Only re-create debouncedCallback if delay changes
-  );
-
-  // Clean up the timer on unmount
-  useEffect(() => {
-    return () => {
-      if (timerIdRef.current) {
-        clearTimeout(timerIdRef.current);
-      }
-    };
-  }, []);
-
-  return debouncedCallback;
-}
-
-// Helper function to format numbers based on column context
-function formatFilterValue(value: number, columnId: string, header?: string): ReactNode {
-  const columnIdLower = columnId.toLowerCase();
-  const headerLower = (header || '').toLowerCase();
-  
-  // Check if it's bytes
-  if (columnIdLower.includes('size') || columnIdLower.includes('bytes') || 
-      headerLower.includes('size') || headerLower.includes('bytes')) {
-    return <RenderBytesValue value={value} />;
-  }
-  
-  // Check if it's milliseconds/time
-  if (columnIdLower.includes('time') || columnIdLower.includes('duration') || 
-      columnIdLower.includes('rtt') || columnIdLower.includes('latency') ||
-      columnIdLower.includes('total') || columnIdLower.includes('scripting') ||
-      columnIdLower.includes('parse') || columnIdLower.includes('compile') ||
-      headerLower.includes('time') || headerLower.includes('duration') ||
-      headerLower.includes('ms')) {
-    return <RenderMSValue value={value} />;
-  }
-  
-  // Default: format with commas
-  return <span>{value.toLocaleString('en-US')}</span>;
-}
-
-export function RangeFilter<T>({
-  column,
-}: Pick<HeaderContext<T, unknown>, 'column'>) {
-  const id = useId();
-  const [minValue, maxValue] = (column.getFacetedMinMaxValues() as [
-    number,
-    number,
-  ]) ?? [0, 100];
-  const [fMin, fMax] = (column.getFilterValue() as [number, number]) ?? [
-    minValue,
-    maxValue,
-  ];
-  const updateFilter = useDebouncedCallback((value: [number, number]) => {
-    column.setFilterValue(value);
-  }, 300);
-  
-  const columnId = column.id;
-  const header = typeof column.columnDef.header === 'string' 
-    ? column.columnDef.header 
-    : undefined;
-  
-  // Try to use RenderTableValue if heading metadata exists, otherwise use our formatter
-  const hasHeadingMeta = !!column.columnDef.meta?.heading?.heading;
-  
-  return (
-    <div className="w-64 p-4">
-      <div className="relative space-y-4">
-        {/* Min value display */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-muted-foreground">Min</span>
-          <div className="text-sm font-semibold">
-            {hasHeadingMeta ? (
-              <RenderTableValue
-                value={fMin}
-                device='header'
-                heading={column.columnDef.meta?.heading?.heading || null}
-              />
-            ) : (
-              formatFilterValue(fMin, columnId, header)
-            )}
-          </div>
-        </div>
-
-        {/* Slider */}
-        <div className="px-2">
-          <Slider2
-            id={`range-slider_${id}`}
-            defaultValue={[minValue, maxValue]}
-            value={[fMin, fMax]}
-            onValueChange={updateFilter}
-            min={minValue}
-            max={maxValue}
-            className={cn('w-full')}
-          />
-        </div>
-
-        {/* Max value display */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-muted-foreground">Max</span>
-          <div className="text-sm font-semibold">
-            {hasHeadingMeta ? (
-              <RenderTableValue
-                value={fMax}
-                device='header'
-                heading={column.columnDef.meta?.heading?.heading || null}
-              />
-            ) : (
-              formatFilterValue(fMax, columnId, header)
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export const numericRangeFilter: ColumnFiltersColumnDef<TreeMapNode>['filterFn'] =
-  (row, columnId, filterValue) => {
-    const rowValue = row.getValue(columnId) as number;
-    const [min, max] = filterValue; // filterValue will likely be an array [min, max]
-
-    if (min !== undefined && rowValue < min) {
-      return false;
-    }
-
-    if (max !== undefined && rowValue > max) {
-      return false;
-    }
-
-    return true;
-  };
-
-const getHostName = (row: TreeMapNode) => {
-  try {
-    const url = new URL(row.name);
-    return url.hostname;
-  } catch {
-    return 'Unknown';
-  }
-};
-
-const columnHelper = createColumnHelper<TreeMapNode>();
-export function ExpandAll<T>({table}:{table: ReactTable<T>}) {
-  const isExpanded =  table.getIsAllRowsExpanded()
-  return (
-    <Button
-      variant={'ghost'}
-      size={'icon'}
-      onClick={() => table.toggleAllRowsExpanded()}
-      style={{ cursor: 'pointer', margin: 0 }}
-      role='button'
-      aria-label={isExpanded ? 'Collapse all rows' : 'Expand all rows'}
-      className="h-8 w-8 m-0"
-    >
-      <ChevronRightIcon
-        className={cn('h-4 w-4 transform transition-all duration-300', {
-          'rotate-90':isExpanded,
-        })}
-      />
-      <span className="sr-only">
-        {isExpanded ? 'Collapse all rows' : 'Expand all rows'}
-      </span>
-    </Button>
-  )
-}
-const expanderColumn = columnHelper.display({
-  id: 'expander',
-  header: ExpandAll,
-  cell: ExpandRow,
-  size: 40,
-  meta: {
-    className: '',
-  },
-})
-const makeStatusColumn = (
-  cell: (info: CellContext<TreeMapNode, unknown>) => JSX.Element,
-) =>
-  columnHelper.display({
-    id: 'statusColumn',
-    header: () => <></>,
-    enableGrouping: true,
-    size: 36,
-    cell,
-    meta: {
-      className: 'grid place-content-center',
-    },
-  });
-
-const makeSortableStringColumn = (column: string) => {
-  // @ts-expect-error: Im lazy to do full inference
-  return columnHelper.accessor(column, {
-    getGroupingValue: (row) => getHostName(row),
-    meta: {
-      className: 'overflow-scroll-x h-auto',
-    },
-    size: 700,
-    header: makeSortingHeading(toTitleCase(column), 'string'),
-    aggregationFn: 'unique',
-    enableSorting: true,
-    cell: (info) => {
-      let value = info.getValue();
-      if (Array.isArray(value)) {
-        try {
-          value = new URL(value[0] as string).host;
-        } catch {
-          value = 'Unknown';
-        }
-      }
-      return (
-        <div className="overflow-hidden">
-          <div className="flex flex-row overflow-x-auto">{value as string}</div>
-        </div>
-      );
-    },
-  });
-};
-
-const makeBooleanColumn = (column: string, extra = {}) => {
-  // @ts-expect-error: Im lazy to do full inference
-  return columnHelper.accessor(column, {
-    size: 140,
-    meta: {
-      className: 'place-content-center my-2',
-    },
-    cell: function checkboxItem(info) {
-      return <>{renderBoolean(!!info.getValue())}</>;
-    },
-    ...extra,
-  });
-};
-
-const makeBytesColumn = (column: string, title: string, extra = {}) => {
-  // @ts-expect-error: Im lazy to do full inference
-  return columnHelper.accessor(column, {
-    cell: RenderBytesCell,
-    sortingFn: 'basic',
-    enableSorting: true,
-    sortUndefined: 'last',
-    header: makeSortingHeading(title, 'range'),
-    enableHiding: true,
-    filterFn: numericRangeFilter,
-    aggregationFn: 'sum',
-    size: 140,
-    meta: {
-      className: 'h-auto text',
-    },
-    ...extra,
-  });
-};
-
-const columns = [
-  expanderColumn,
-  makeStatusColumn((info) => <StatusCircle node={info?.row?.original} />),
-  makeSortableStringColumn('name'),
-  columnHelper.accessor(getHostName, {
-    id: 'host',
-    size: 300,
-    enableHiding: true,
-    enablePinning: true,
-    enableGrouping: true,
-    enableMultiSort: true,
-    enableSorting: true,
-    sortingFn: 'basic',
-    header: () => makeSortingHeading('Host'),
-    meta: {
-      className: '',
-      // doNotShowInGroup: true,
-    },
-  }),
-  makeBooleanColumn('duplicatedNormalizedModuleName', {
-    id: 'Duplicated Module',
-    header: 'Duplicated Module',
-  }),
-  makeBytesColumn('resourceBytes', 'Resource Size'),
-  makeBytesColumn('unusedBytes', 'Unused Bytes'),
-
-  columnHelper.accessor(
-    ({ resourceBytes, unusedBytes }) => {
-      if (
-        typeof resourceBytes !== 'number' ||
-        typeof unusedBytes !== 'number'
-      ) {
-        return undefined;
-      }
-      const percent = (unusedBytes / resourceBytes) * 100;
-      return percent;
-    },
-    {
-      id: 'Percent',
-      cell: (info) => {
-        const value = info.getValue();
-        return (
-          <div className="w-36 text-right">
-            {typeof value === 'number'
-              ? `${value.toFixed(2)} %`
-              : value === ''
-                ? ''
-                : 'N/A'}
-          </div>
-        );
-      },
-      sortingFn: 'alphanumeric', //disable resizing for just this column
-      sortUndefined: 'last',
-      meta: {
-        className: '',
-      },
-      aggregationFn: () => '',
-      aggregatedCell: () => <> </>,
-      enableSorting: true,
-      enableHiding: true,
-      size: 140,
-      header: makeSortingHeading('Percent'),
-    },
-  ),
-];
+export { ExpandRow, ExpandAll, RenderBytesCell } from './jsUsageTableParts';
+export { makeSortingHeading } from './jsUsageTableColumns';
+export { StringFilterHeader } from './StringFilterHeader';
+export { RangeFilter, numericRangeFilter } from './jsUsageTableFilters';
 
 export function useUseJSUsageTable(data: TreeMapData['nodes']) {
   'use no memo';
@@ -565,6 +49,7 @@ export function useUseJSUsageTable(data: TreeMapData['nodes']) {
     pageIndex: 0,
     pageSize: 10,
   });
+
   const table = useReactTable({
     columns,
     data: data,
@@ -583,17 +68,16 @@ export function useUseJSUsageTable(data: TreeMapData['nodes']) {
     onPaginationChange: setPagination,
     onExpandedChange: setExpanded,
     getGroupedRowModel: getGroupedRowModel(),
-    getFacetedRowModel: getFacetedRowModel(), // client-side faceting
-    getFacetedUniqueValues: getFacetedUniqueValues(), // generate unique values for select filter/autocomplete
-    getFacetedMinMaxValues: getFacetedMinMaxValues(), //
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    getFacetedMinMaxValues: getFacetedMinMaxValues(),
     enableExpanding: true,
     filterFromLeafRows: true,
     maxLeafRowFilterDepth: 5,
     enableSorting: true,
     filterFns: {
-      'booleanFilterFn': () => true,
+      booleanFilterFn: () => true,
     },
-    // rowCount: data.length,
     state: {
       columnPinning: {
         left: ['expander', 'Usage Status', 'name', 'host'],
@@ -607,6 +91,7 @@ export function useUseJSUsageTable(data: TreeMapData['nodes']) {
       expanded: expanded,
     },
   });
+
   return table;
 }
 
@@ -621,11 +106,11 @@ export function JSUsageTableWithControls({
   'use no memo';
   const table = useUseJSUsageTable(data);
   const rows = table.getRowModel().rows;
+
   return (
     <>
       {depth === 0 ? <TableControls table={table} /> : null}
       <Table className="border-none">
-        {/* {depth === 0 ? ( */}
         <TableHeader className="" suppressHydrationWarning>
           {table.getHeaderGroups().map((headerGroup, i) => (
             <JSUsageTableHeader
@@ -636,7 +121,6 @@ export function JSUsageTableWithControls({
             />
           ))}
         </TableHeader>
-        {/* ) : null} */}
         <TableBody className="flex flex-col border-0" suppressHydrationWarning>
           {rows?.length ? (
             rows.map((row, i) => (
@@ -651,128 +135,6 @@ export function JSUsageTableWithControls({
           )}
         </TableBody>
       </Table>
-    </>
-  );
-}
-export function JSUsageTableHeader({
-  headerGroup,
-  depth,
-  i,
-}: {
-  headerGroup: HeaderGroup<TreeMapNode>;
-  depth: number;
-  i: number;
-}) {
-  'use no memo';
-
-  return (
-    <TableRow
-      key={`${headerGroup.id}_${i}_${depth}`}
-      className={cn('flex h-auto w-full overflow-hidden px-0 py-0', {
-        'border-2': true,
-        'border-l-0': true,
-        'self-end': depth !== 0,
-      })}
-      style={{
-        // @ts-expect-error ts is weird
-        '--depthOffset': `${depth * 2.25}rem`,
-      }}
-    >
-      {headerGroup.headers.map((header) => {
-        return (
-          <TableHead
-            key={`${header.id}_${i}_${depth}`}
-            className={cn(
-              'border-none',
-              `${header.column.columnDef.meta?.className || ''}`,
-            )}
-            style={
-              typeof header.column.getSize() === 'number'
-                ? {
-                    width: header.column.getSize() + 'px',
-                  }
-                : undefined
-            }
-          >
-            {flexRender(header.column.columnDef.header, header.getContext())}
-          </TableHead>
-        );
-      })}
-    </TableRow>
-  );
-}
-
-function JSUsageTableRow({ row, i }: { row: Row<TreeMapNode>; i: number }) {
-  'use no memo';
-  const isExpanded = row.getIsExpanded();
-  const depth = row.depth + (isExpanded ? 1 : 0); //providedDepth + (row.parentId ? 1 : 0);
-  const subRows = row?.getParentRow()?.subRows || [];
-  return (
-    <>
-      <TableRow
-        data-children={row?.original?.children?.length || 0}
-        className={cn(
-          'w-[calc(100% - 4px)] flex overflow-hidden border-muted',
-          {
-            // 'border-t-[length:--depth]':
-            //   depth && row.index === 0,
-            'border-b-[length:--depth]':
-              depth && row.index + 1 === (subRows.length || 0),
-            'border-r-[length:--depth]': depth,
-            'border-r-[length:--depth] border-t-[length:--depth]': isExpanded,
-            'border-b-[length:--depth] border-muted':
-              (depth || isExpanded) &&
-              subRows.findIndex((a) => a == row) === subRows.length - 1,
-          },
-        )}
-        style={{
-          // @ts-expect-error ts is weird
-          '--depth': `${5 * depth}px`,
-        }}
-        suppressHydrationWarning
-      >
-        {row
-          .getVisibleCells()
-          .map((cell, index) => {
-            const cellContent = flexRender(
-              cell.column.columnDef.cell,
-              cell.getContext(),
-            );
-            return (
-              <TableCell
-                key={`${cell.id}_${i}_${depth}`}
-                data-key={`${cell.id}_${i}_${depth}`}
-                data-cell-id={cell.id}
-                data-column-id={cell.column.id}
-                data-can-expand={`${row.getCanExpand()}`}
-                data-depth={row.depth}
-                data-row-expanded={`${row.getIsExpanded()}`}
-                data-grouped={`${cell.getIsGrouped()}`}
-                data-aggregated={`${cell.getIsAggregated()}`}
-                data-placeholder={`${cell.getIsPlaceholder()}`}
-                className={cn(
-                  `flex flex-row`,
-                  {
-                    'border-l-[length:--depth] border-muted':
-                      (depth || isExpanded) && !index,
-                  },
-                  `${cell.column.columnDef.meta?.className || ''}`,
-                )}
-                style={
-                  typeof cell.column.getSize() === 'number'
-                    ? {
-                        width: `${cell.column.getSize()}px`,
-                      }
-                    : undefined
-                }
-                suppressHydrationWarning
-              >
-                {cellContent}
-              </TableCell>
-            );
-          })
-          .filter(Boolean)}
-      </TableRow>
     </>
   );
 }

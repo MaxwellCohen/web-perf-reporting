@@ -1,0 +1,9 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`app/page-speed/loading > renders the shared loading message 1`] = `
+<div>
+  <div>
+    Mock loading message
+  </div>
+</div>
+`;

@@ -1,0 +1,13 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ColumnResizer > applies resizing background when column is resizing 1`] = `
+<div
+  class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 bg-muted"
+/>
+`;
+
+exports[`ColumnResizer > renders resize handle when resizing enabled 1`] = `
+<div
+  class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+/>
+`;

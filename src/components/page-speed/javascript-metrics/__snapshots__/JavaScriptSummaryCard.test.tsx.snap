@@ -1,0 +1,217 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`JavaScriptSummaryCard > renders Report column when multiple reports 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow"
+>
+  <div
+    class="flex flex-col space-y-1.5 p-6"
+  >
+    <div
+      class="font-semibold leading-none tracking-tight"
+    >
+      JavaScript Summary
+    </div>
+  </div>
+  <div
+    class="p-6 pt-0"
+  >
+    <div>
+      <div
+        class="relative w-full overflow-auto"
+      >
+        <table
+          class="w-full caption-bottom text-sm table-fixed"
+        >
+          <thead
+            class="[&_tr]:border-b"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Report
+              </th>
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Total Scripts
+              </th>
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Transfer Size
+              </th>
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Resource Size
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="[&_tr:last-child]:border-0"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 font-medium"
+              >
+                Mobile
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                3
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                <span
+                  class=""
+                  title="bytes"
+                >
+                  500 bytes
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                <span
+                  class=""
+                  title="bytes"
+                >
+                  600 bytes
+                </span>
+              </td>
+            </tr>
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 font-medium"
+              >
+                Desktop
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                4
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                <span
+                  class=""
+                  title="bytes"
+                >
+                  700 bytes
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                <span
+                  class=""
+                  title="bytes"
+                >
+                  800 bytes
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`JavaScriptSummaryCard > renders table with single report (no Report column) 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow"
+>
+  <div
+    class="flex flex-col space-y-1.5 p-6"
+  >
+    <div
+      class="font-semibold leading-none tracking-tight"
+    >
+      JavaScript Summary
+    </div>
+  </div>
+  <div
+    class="p-6 pt-0"
+  >
+    <div>
+      <div
+        class="relative w-full overflow-auto"
+      >
+        <table
+          class="w-full caption-bottom text-sm table-fixed"
+        >
+          <thead
+            class="[&_tr]:border-b"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Total Scripts
+              </th>
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Transfer Size
+              </th>
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Resource Size
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="[&_tr:last-child]:border-0"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                5
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                <span
+                  class=""
+                  title="bytes"
+                >
+                  1000 bytes
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                <span
+                  class=""
+                  title="bytes"
+                >
+                  1.95 KB
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+`;

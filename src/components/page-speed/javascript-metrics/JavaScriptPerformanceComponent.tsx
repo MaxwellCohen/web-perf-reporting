@@ -1,5 +1,4 @@
 'use client';
-import { usePageSpeedItems } from '@/components/page-speed/PageSpeedContext';
 import {
   AccordionContent,
   AccordionItem,
@@ -12,52 +11,13 @@ import { UnminifiedJavaScriptCard } from '@/components/page-speed/javascript-met
 import { LegacyJavaScriptCard } from '@/components/page-speed/javascript-metrics/LegacyJavaScriptCard';
 import { JavaScriptSummaryCard } from '@/components/page-speed/javascript-metrics/JavaScriptSummaryCard';
 import { TaskSummaryCard } from '@/components/page-speed/javascript-metrics/TaskSummaryCard';
-import { extractJSMetrics } from '@/components/page-speed/javascript-metrics/extractJSMetrics';
+import { useJavaScriptMetrics } from '@/components/page-speed/javascript-metrics/javascriptMetricsSelectors';
 
 export function JavaScriptPerformanceComponent() {
   'use memo';
-  const items = usePageSpeedItems();
+  const { jsMetrics, jsStats } = useJavaScriptMetrics();
 
-  const jsMetrics = items.map(extractJSMetrics);
-
-  if (!items.length) {
-    return null;
-  }
-
-  // Calculate JavaScript statistics
-  const jsStats = jsMetrics.map(({ jsResources, label }) => {
-    if (!jsResources.length) {
-      return {
-        label,
-        totalScripts: 0,
-        totalTransferSize: 0,
-        totalResourceSize: 0,
-      };
-    }
-
-    const totalScripts = jsResources.length;
-    const { totalTransferSize, totalResourceSize } = jsResources.reduce(
-      (acc: { totalTransferSize: number; totalResourceSize: number }, curr) => {
-        const transferSize = +(curr?.transferSize || 0) || 0;
-        const resourceSize = +(curr?.resourceSize || 0) || 0;
-        return {
-          totalTransferSize: acc.totalTransferSize + transferSize,
-          totalResourceSize: acc.totalResourceSize + resourceSize,
-        };
-      },
-      {
-        totalTransferSize: 0,
-        totalResourceSize: 0,
-      },
-    );
-
-    return {
-      label,
-      totalScripts,
-      totalTransferSize,
-      totalResourceSize,
-    };
-  });
+  if (!jsMetrics.length) return null;
 
   return (
     <AccordionItem value={'javascriptPerformance'}>

@@ -1,0 +1,85 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`LhTextInput > renders default state with one entry 1`] = `
+<div
+  data-value="text"
+  role="tabpanel"
+>
+  <div
+    class="space-y-4"
+  >
+    <label>
+      JSON Entries
+    </label>
+    <div
+      class="relative space-y-2 rounded-md border p-4"
+    >
+      <div
+        class="flex items-center gap-2"
+      >
+        <label
+          class="w-24"
+          for="json-name-0"
+        >
+          Name:
+        </label>
+        <input
+          class="flex-1"
+          id="json-name-0"
+          placeholder="Entry name"
+          value=""
+        />
+        <button
+          class="absolute right-2 top-2"
+          type="button"
+          variant="ghost"
+        >
+          <svg
+            class="h-4 w-4"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M18 6 6 18"
+            />
+            <path
+              d="m6 6 12 12"
+            />
+          </svg>
+          <span
+            class="sr-only"
+          >
+            Remove
+          </span>
+        </button>
+      </div>
+      <div>
+        <label
+          for="json-text-0"
+        >
+          JSON Content
+        </label>
+        <textarea
+          class="mt-1 min-h-[150px] font-mono"
+          id="json-text-0"
+          placeholder="{"example": "Paste your JSON here"}"
+        />
+      </div>
+    </div>
+    <button
+      class="w-full"
+      type="button"
+      variant="outline"
+    >
+      Add Another JSON Entry
+    </button>
+  </div>
+</div>
+`;

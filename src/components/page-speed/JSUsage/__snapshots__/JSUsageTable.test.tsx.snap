@@ -1,0 +1,51 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`JSUsageTable > ExpandRow > renders collapse label when expanded 1`] = `
+<button
+  aria-expanded="true"
+  aria-label="Collapse row"
+  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground m-0 h-8 w-8"
+  role="button"
+  style="cursor: pointer; margin: 0px;"
+>
+  <span
+    data-testid="chevron-right"
+  />
+  <span
+    class="sr-only"
+  >
+    Collapse row
+  </span>
+</button>
+`;
+
+exports[`JSUsageTable > ExpandRow > renders expand button when row can expand 1`] = `
+<button
+  aria-expanded="false"
+  aria-label="Expand row"
+  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground m-0 h-8 w-8"
+  role="button"
+  style="cursor: pointer; margin: 0px;"
+>
+  <span
+    data-testid="chevron-right"
+  />
+  <span
+    class="sr-only"
+  >
+    Expand row
+  </span>
+</button>
+`;
+
+exports[`JSUsageTable > ExpandRow > renders placeholder when row cannot expand 1`] = `
+<div
+  class="h-9 w-9"
+/>
+`;
+
+exports[`JSUsageTable > ExpandRow > renders placeholder when row is missing 1`] = `
+<div
+  class="h-9 w-9"
+/>
+`;

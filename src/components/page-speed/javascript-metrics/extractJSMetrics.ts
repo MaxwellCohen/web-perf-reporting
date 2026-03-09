@@ -1,4 +1,4 @@
-import { AuditDetailTable, TableItem, PageSpeedInsights } from '@/lib/schema';
+import type { AuditDetailTable, TableItem, PageSpeedInsights } from '@/lib/schema';
 import type { InsightsContextItem } from '@/components/page-speed/PageSpeedContext';
 
 export type JSMetrics = {

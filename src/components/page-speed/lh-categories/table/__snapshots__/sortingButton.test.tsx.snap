@@ -1,0 +1,64 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SortingButton > renders button when column can sort 1`] = `
+<button
+  title="Sort ascending"
+  type="button"
+>
+  〰︎
+</button>
+`;
+
+exports[`SortingButton > sets title to Clear sort when next order is false 1`] = `
+<button
+  title="Clear sort"
+  type="button"
+>
+  〰︎
+</button>
+`;
+
+exports[`SortingButton > sets title to Sort ascending when next order is asc 1`] = `
+<button
+  title="Sort ascending"
+  type="button"
+>
+  〰︎
+</button>
+`;
+
+exports[`SortingButton > sets title to Sort descending when next order is desc 1`] = `
+<button
+  title="Sort descending"
+  type="button"
+>
+  〰︎
+</button>
+`;
+
+exports[`SortingButton > shows ascending icon when sorted asc 1`] = `
+<button
+  title="Sort ascending"
+  type="button"
+>
+  ↑
+</button>
+`;
+
+exports[`SortingButton > shows descending icon when sorted desc 1`] = `
+<button
+  title="Sort ascending"
+  type="button"
+>
+  ↓
+</button>
+`;
+
+exports[`SortingButton > shows unsorted icon when not sorted 1`] = `
+<button
+  title="Sort ascending"
+  type="button"
+>
+  〰︎
+</button>
+`;

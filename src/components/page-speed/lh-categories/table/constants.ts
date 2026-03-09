@@ -1,4 +1,4 @@
-import { ItemValueType } from '@/lib/schema';
+import type { ItemValueType } from '@/lib/schema';
 
 /**
  * Value types that can be grouped in tables

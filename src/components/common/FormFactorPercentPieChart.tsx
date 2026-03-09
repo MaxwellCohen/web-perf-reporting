@@ -114,13 +114,13 @@ export function PercentTable({
       )}
       <Table>
         <TableHeader className="pt-2">
-          {entries.map(([label]) => {
-            return (
+          <TableRow>
+            {entries.map(([label]) => (
               <TableHead key={label} className="h-4">
                 {toSentenceCase(label)}
               </TableHead>
-            );
-          })}
+            ))}
+          </TableRow>
         </TableHeader>
         <TableBody>
           <TableRow>

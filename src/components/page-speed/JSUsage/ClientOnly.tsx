@@ -7,5 +7,5 @@ export function ClientOnly({ children }: { children: React.ReactNode; }) {
   useEffect(() => {
     setIsClient(true);
   }, []);
-  return isClient ? children : null;
+  return isClient ? <>{children}</> : null;
 }

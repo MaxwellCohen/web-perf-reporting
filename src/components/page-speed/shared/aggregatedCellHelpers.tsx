@@ -46,10 +46,15 @@ export function extractValueLabelPairs<T>(
   const leafRows = row.getLeafRows();
   return leafRows
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .map((r: Row<any>) => ({
-      value: r.getValue(columnId) as T,
-      label: r.getValue(labelColumnId) as string,
-    }))
+    .map((r: Row<any>) => {
+      const label =
+        (r.original as { label?: string }).label ??
+        (r.getValue(labelColumnId) as string);
+      return {
+        value: r.getValue(columnId) as T,
+        label,
+      };
+    })
     .filter((v): v is ValueLabelPair<T> => {
       // Filter out undefined, null, and NaN values
       if (v.value === undefined || v.value === null) return false;

@@ -1,5 +1,5 @@
-import { OpportunityItem, TableItem } from '@/lib/schema';
-import { DetailTableItem } from '@/components/page-speed/lh-categories/table/detailTableShared';
+import type { OpportunityItem, TableItem } from '@/lib/schema';
+import type { DetailTableItem } from '@/components/page-speed/lh-categories/table/detailTableShared';
 
 export type DetailTableDataRow = {
   item: TableItem | OpportunityItem;

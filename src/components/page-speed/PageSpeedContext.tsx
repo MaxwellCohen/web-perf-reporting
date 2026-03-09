@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, type ReactNode, useContext, useEffect } from 'react';
-import { useSelector, useStore } from '@xstate/store/react';
+import { useSelector, useStore } from '@xstate/store-react';
 import type { FullPageScreenshot, NullablePageSpeedInsights } from '@/lib/schema';
 import {
   getDashboardItems,

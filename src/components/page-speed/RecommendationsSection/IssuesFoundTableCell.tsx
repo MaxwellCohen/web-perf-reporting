@@ -1,8 +1,8 @@
 import { RenderTableValue } from '@/components/page-speed/lh-categories/table/RenderTableValue';
-import type { TableColumnHeading, TableItem } from '@/lib/schema';
+import type { ItemValue, TableColumnHeading, TableItem } from '@/lib/schema';
 
 interface IssuesFoundTableCellProps {
-  value: unknown;
+  value: ItemValue | unknown;
   subItems?: TableItem['subItems'];
   heading: TableColumnHeading;
   device: string;
@@ -27,11 +27,11 @@ export function IssuesFoundTableCell({
     return (
       <div className="space-y-1">
         <div className="font-medium">
-          <RenderTableValue value={value} heading={heading} device={device} />
+          <RenderTableValue value={value as ItemValue} heading={heading} device={device} />
         </div>
         <ul className="list-disc list-inside ml-2 space-y-0.5 text-muted-foreground">
           {subItems.items.map((subItem: TableItem, subIdx: number) => {
-            const subValue = subItem[subKey];
+            const subValue = subItem[subKey] as ItemValue | undefined;
             return (
               <li key={subIdx} className="text-xs wrap-break-word">
                 <RenderTableValue
@@ -49,7 +49,7 @@ export function IssuesFoundTableCell({
 
   return (
     <div className="wrap-break-word">
-      <RenderTableValue value={value} heading={heading} device={device} />
+      <RenderTableValue value={value as ItemValue} heading={heading} device={device} />
     </div>
   );
 }

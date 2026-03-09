@@ -1,0 +1,102 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ScoreDisplay > renders binary failed 1`] = `
+<div
+  class="text-xs"
+>
+  ❌ - Failed
+</div>
+`;
+
+exports[`ScoreDisplay > renders binary passed 1`] = `
+<div
+  class="text-xs"
+>
+  ✅ - Passed
+</div>
+`;
+
+exports[`ScoreDisplay > renders device label when provided 1`] = `
+<div
+  class="text-xs"
+>
+  Mobile - 
+  ✅ - Passed
+</div>
+`;
+
+exports[`ScoreDisplay > renders error mode with errorMessage 1`] = `
+<div
+  class="text-xs"
+>
+  Error: 
+  Audit failed to run
+</div>
+`;
+
+exports[`ScoreDisplay > renders manual mode 1`] = `
+<div
+  class="text-xs"
+>
+  Manual
+</div>
+`;
+
+exports[`ScoreDisplay > renders metricSavings fallback with device but no displayValue 1`] = `
+<div
+  class="text-xs whitespace-nowrap"
+>
+  Desktop
+   
+   | Score 60 / 100
+</div>
+`;
+
+exports[`ScoreDisplay > renders metricSavings fallback with displayValue 1`] = `
+<div
+  class="text-xs whitespace-nowrap"
+>
+  Mobile
+   
+   | 150 ms | Score 50 / 100
+</div>
+`;
+
+exports[`ScoreDisplay > renders metricSavings fallback without displayValue 1`] = `
+<div
+  class="text-xs whitespace-nowrap"
+>
+   
+   | Score 75 / 100
+</div>
+`;
+
+exports[`ScoreDisplay > renders not applicable mode 1`] = `
+<div
+  class="text-xs"
+>
+  Not Applicable
+</div>
+`;
+
+exports[`ScoreDisplay > renders numeric score with displayValue 1`] = `
+<div
+  class="text-xs"
+>
+  1.2 s - 
+  Score: 
+  90
+   / 100
+   - 1.2 s
+</div>
+`;
+
+exports[`ScoreDisplay > renders numeric score without displayValue 1`] = `
+<div
+  class="text-xs"
+>
+  Score: 
+  85
+   / 100
+</div>
+`;

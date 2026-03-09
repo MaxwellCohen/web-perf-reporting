@@ -1,0 +1,12 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`page-speed [publicId] page > awaits params and renders wrapper with publicId 1`] = `
+<div
+  data-testid="page-speed-dashboard"
+>
+  Dashboard with 
+  1
+   items, labels: 
+  Mobile, Desktop
+</div>
+`;

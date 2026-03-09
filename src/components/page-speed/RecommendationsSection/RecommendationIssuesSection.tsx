@@ -16,9 +16,12 @@ export function RecommendationIssuesSection({
   recommendation,
   reportLabels,
 }: RecommendationIssuesSectionProps) {
-  if (!recommendation.tableData || recommendation.tableData.items.length === 0) {
-    return null;
-  }
+  if (!recommendation.tableData) return null;
+  const { tableData } = recommendation;
+  const hasItems =
+    (tableData.items.length ?? 0) > 0 ||
+    (tableData.itemsByReport?.size ?? 0) > 0;
+  if (!hasItems) return null;
 
   const auditId = getRecommendationAuditId(recommendation.id);
   const shouldShowSeparateTables = shouldShowSeparateTablesPerReport(auditId);

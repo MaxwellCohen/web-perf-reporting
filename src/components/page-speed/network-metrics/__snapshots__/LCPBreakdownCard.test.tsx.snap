@@ -1,0 +1,128 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown data 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow md:col-span-2 lg:col-span-3"
+>
+  <div
+    class="flex flex-col space-y-1.5 p-6"
+  >
+    <div
+      class="font-semibold leading-none tracking-tight"
+    >
+      LCP Breakdown
+    </div>
+  </div>
+  <div
+    class="p-6 pt-0"
+  >
+    <div
+      class="space-y-6"
+    >
+      <div
+        class="relative z-10"
+      >
+        <div
+          class="flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none w-full h-full"
+          data-chart="chart-_r_0_"
+          style="height: 40px;"
+        >
+          <style>
+            
+ [data-chart=chart-_r_0_] {
+  --color-P75: hsl(var(--chart-4));
+  --color-good_density: hsl(var(--chart-1));
+  --color-ni_density: hsl(var(--chart-2));
+  --color-poor_density: hsl(var(--chart-3));
+}
+
+
+.dark [data-chart=chart-_r_0_] {
+  --color-P75: hsl(var(--chart-4));
+  --color-good_density: hsl(var(--chart-1));
+  --color-ni_density: hsl(var(--chart-2));
+  --color-poor_density: hsl(var(--chart-3));
+}
+
+          </style>
+          <div
+            data-testid="responsive-container"
+          />
+        </div>
+      </div>
+      <div
+        class="overflow-x-auto relative z-0"
+      >
+        <div
+          class="relative w-full overflow-auto"
+        >
+          <table
+            class="w-full caption-bottom text-sm table-fixed"
+          >
+            <thead
+              class="[&_tr]:border-b"
+            >
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+              >
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-40"
+                >
+                  Subpart
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-35"
+                >
+                  Desktop
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              class="[&_tr:last-child]:border-0"
+            >
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+              >
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 font-medium"
+                >
+                  TTFB
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+                >
+                  <span
+                    class=""
+                    title="ms"
+                  >
+                    100 ms
+                  </span>
+                </td>
+              </tr>
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+              >
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 font-medium"
+                >
+                  Resource Load
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+                >
+                  <span
+                    class=""
+                    title="ms"
+                  >
+                    200 ms
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

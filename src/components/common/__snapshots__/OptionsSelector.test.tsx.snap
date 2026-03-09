@@ -1,0 +1,21 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`OptionsSelector > renders the title label and passes props through to ChartSelector 1`] = `
+<div
+  class=""
+>
+  <label
+    for="metric-selector"
+  >
+    <div>
+      Metric
+       
+    </div>
+  </label>
+  <div
+    data-testid="chart-selector"
+  >
+    Chart selector
+  </div>
+</div>
+`;

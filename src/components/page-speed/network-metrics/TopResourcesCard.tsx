@@ -36,6 +36,28 @@ type TopResourcesCardProps = {
   stats: TopResources[];
 };
 
+const URL_PROTOCOL_REGEX = /^https?:\/\//;
+
+function resourceToTableRow(label: string, resource: TableItem): TopResourceTableRow {
+  const url = getUrlString(resource.url).replace(URL_PROTOCOL_REGEX, '') || 'Unknown';
+  const resourceType = typeof resource.resourceType === 'string' ? resource.resourceType : 'Unknown';
+  return {
+    label,
+    url,
+    resourceType,
+    transferSize: getNumber(resource.transferSize),
+    resourceSize: getNumber(resource.resourceSize),
+    requestTime: getNumber(resource.networkRequestTime),
+  };
+}
+
+function optionalValueCell(
+  Render: React.ComponentType<{ value: number }>,
+  value: number | undefined
+): React.ReactNode {
+  return value !== undefined ? <Render value={value} /> : 'N/A';
+}
+
 const columnHelper = createColumnHelper<TopResourceTableRow>();
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const cols: ColumnDef<TopResourceTableRow, any>[] = [
@@ -71,10 +93,7 @@ const cols: ColumnDef<TopResourceTableRow, any>[] = [
     enableResizing: true,
     filterFn: 'inNumberRange',
     aggregationFn: 'unique',
-    cell: (info) => {
-      const value = info.getValue();
-      return value !== undefined ? <RenderBytesValue value={value} /> : 'N/A';
-    },
+    cell: (info) => optionalValueCell(RenderBytesValue, info.getValue()),
     aggregatedCell: createBytesAggregatedCell('transferSize'),
   }),
   columnHelper.accessor('resourceSize', {
@@ -84,10 +103,7 @@ const cols: ColumnDef<TopResourceTableRow, any>[] = [
     enableResizing: true,
     filterFn: 'inNumberRange',
     aggregationFn: 'unique',
-    cell: (info) => {
-      const value = info.getValue();
-      return value !== undefined ? <RenderBytesValue value={value} /> : 'N/A';
-    },
+    cell: (info) => optionalValueCell(RenderBytesValue, info.getValue()),
     aggregatedCell: createBytesAggregatedCell('resourceSize'),
   }),
   columnHelper.accessor('requestTime', {
@@ -97,10 +113,7 @@ const cols: ColumnDef<TopResourceTableRow, any>[] = [
     enableResizing: true,
     filterFn: 'inNumberRange',
     aggregationFn: 'unique',
-    cell: (info) => {
-      const value = info.getValue();
-      return value !== undefined ? <RenderMSValue value={value} /> : 'N/A';
-    },
+    cell: (info) => optionalValueCell(RenderMSValue, info.getValue()),
     aggregatedCell: createNumericAggregatedCell('requestTime'),
   }),
 ];
@@ -110,26 +123,10 @@ export function TopResourcesCard({ stats }: TopResourcesCardProps) {
   const validStats = useMemo(() => stats.filter(s => s.topResources && s.topResources.length > 0), [stats]);
   const showReportColumn = validStats.length > 1;
 
-  // Combine all top resources with labels
   const data = useMemo<TopResourceTableRow[]>(() => {
     const allRows = validStats.flatMap(({ label, topResources }) =>
-      topResources.map((resource: TableItem) => {
-        const url = getUrlString(resource.url);
-        const resourceType = typeof resource.resourceType === 'string' ? resource.resourceType : 'Unknown';
-        const transferSize = getNumber(resource.transferSize);
-        const resourceSize = getNumber(resource.resourceSize);
-        const networkRequestTime = getNumber(resource.networkRequestTime);
-        return {
-          label,
-          url: url.replace(/^https?:\/\//, '') || 'Unknown',
-          resourceType,
-          transferSize,
-          resourceSize,
-          requestTime: networkRequestTime,
-        };
-      })
+      topResources.map((resource: TableItem) => resourceToTableRow(label, resource))
     );
-    
     return sortByMaxValueComposite(
       allRows,
       (row) => `${row.url}|${row.resourceType}`,
@@ -159,7 +156,7 @@ export function TopResourcesCard({ stats }: TopResourcesCardProps) {
       </CardHeader>
       <CardContent>
         <div className="w-full overflow-x-auto">
-          <Table className="w-full" style={{ width: '100%' }}>
+          <Table className="w-full">
             <DataTableHeader table={table} />
             <DataTableBody table={table} />
           </Table>

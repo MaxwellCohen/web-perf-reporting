@@ -1,0 +1,9 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ClientOnly > renders children after client hydration 1`] = `
+<span
+  data-testid="child"
+>
+  Child content
+</span>
+`;

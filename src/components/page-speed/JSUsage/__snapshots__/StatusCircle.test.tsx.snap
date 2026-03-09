@@ -1,0 +1,61 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`StatusCircle > renders gray circle when unusedBytes is not reported 1`] = `
+<div
+  class="size-3 self-center rounded-full bg-gray-500"
+>
+  <span
+    class="sr-only"
+  >
+    unused JS not reported
+  </span>
+</div>
+`;
+
+exports[`StatusCircle > renders green circle when unused percent is low (<= 25%) 1`] = `
+<div
+  class="size-3 self-center rounded-full bg-green-500"
+>
+  <span
+    class="sr-only"
+  >
+    unused Js in a good state 
+  </span>
+</div>
+`;
+
+exports[`StatusCircle > renders red circle when unused percent is over 90% 1`] = `
+<div
+  class="size-3 self-center rounded-full bg-red-500"
+>
+  <span
+    class="sr-only"
+  >
+    warning this function could have extra JS
+  </span>
+</div>
+`;
+
+exports[`StatusCircle > renders yellow circle when unused percent is between 25% and 90% 1`] = `
+<div
+  class="size-3 self-center rounded-full bg-yellow-500"
+>
+  <span
+    class="sr-only"
+  >
+    warning this function could have extra JS
+  </span>
+</div>
+`;
+
+exports[`StatusCircle > uses resourceBytes default of 1 when not provided to avoid division by zero 1`] = `
+<div
+  class="size-3 self-center rounded-full bg-red-500"
+>
+  <span
+    class="sr-only"
+  >
+    warning this function could have extra JS
+  </span>
+</div>
+`;

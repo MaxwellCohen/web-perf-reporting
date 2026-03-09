@@ -1,0 +1,17 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`app/viewer/LoadingMessage > renders the loading text and keeps the interval running 1`] = `
+<div
+  class="flex flex-col items-center justify-center"
+>
+  Loading Page Speed Insights data is loading...please wait we have lots of tests to run
+</div>
+`;
+
+exports[`app/viewer/LoadingMessage > renders the loading text and keeps the interval running 2`] = `
+<div
+  class="flex flex-col items-center justify-center"
+>
+  Loading Page Speed Insights data is loading...please wait we have lots of tests to run
+</div>
+`;

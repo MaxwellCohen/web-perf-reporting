@@ -1,0 +1,934 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CWVMetricsSummary > renders Network Request Summary when network-requests audit exists 1`] = `
+<details>
+  <summary
+    class="flex flex-col gap-2"
+  >
+    <h3
+      class="text-xl font-semibold"
+    >
+      Summary Metrics
+    </h3>
+  </summary>
+  <div
+    class="grid grid-cols-1 gap-3 py-3  md:grid-cols-2 lg:grid-cols-3"
+  >
+    <div>
+      <div>
+        Core Web Vitals
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th />
+            <th>
+              Mobile
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+               
+              First Contentful Paint
+               
+            </td>
+            <td>
+              <span>
+                500
+                 ms
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Largest Contentful Paint
+               
+            </td>
+            <td>
+              <span>
+                1500
+                 ms
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Total Blocking Time
+               
+            </td>
+            <td>
+              <span>
+                100
+                 ms
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Cumulative Layout Shift
+               
+            </td>
+            <td>
+              0.05
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Cumulative Layout Shift (Main Frame)
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Speed Index
+               
+            </td>
+            <td>
+              <span>
+                1200
+                 ms
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div>
+        Number of Tasks
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th />
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+               
+              Number of Tasks over 10ms
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Number of Tasks over 25ms
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Number of Tasks over 50ms
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Number of Tasks over 100ms
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Number of Tasks over 500ms
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Number of Top Level Tasks
+               
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div>
+        LCP info
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th />
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+               
+              LCP Load Start
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              LCP Load End
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              LCP Invalidated
+               
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div>
+        Timings info
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th />
+            <th>
+              Mobile
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+               
+              First Contentful Paint
+               
+            </td>
+            <td>
+              <span>
+                500
+                 ms
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              First contentful paint all frames
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Max Potential FID
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Total Blocking Time
+               
+            </td>
+            <td>
+              <span>
+                100
+                 ms
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Largest Contentful Paint
+               
+            </td>
+            <td>
+              <span>
+                1500
+                 ms
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Speed Index
+               
+            </td>
+            <td>
+              <span>
+                1200
+                 ms
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Interactive
+               
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div>
+        Observed Events
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th />
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+               
+              Observed Navigation Start
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Observed First Paint
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Observed First Contentful Paint
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Observed First Contentful Paint All Frames
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Observed Trace End
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Observed Load
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Observed DOM Content Loaded
+               
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div>
+        Network Request Summary
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>
+               Request Type
+            </th>
+            <th>
+               Count
+            </th>
+            <th>
+               Total Transfer Size
+            </th>
+            <th>
+               Total Resource Size
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              Script
+            </td>
+            <td>
+               
+              1
+               
+            </td>
+            <td>
+               
+              <span>
+                1000
+                 bytes
+              </span>
+               
+            </td>
+            <td>
+               
+              <span>
+                800
+                 bytes
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Stylesheet
+            </td>
+            <td>
+               
+              1
+               
+            </td>
+            <td>
+               
+              <span>
+                500
+                 bytes
+              </span>
+               
+            </td>
+            <td>
+               
+              <span>
+                400
+                 bytes
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Total
+            </td>
+            <td>
+               
+              2
+               
+            </td>
+            <td>
+               
+              <span>
+                1500
+                 bytes
+              </span>
+               
+            </td>
+            <td>
+               
+              <span>
+                1200
+                 bytes
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div
+      data-testid="js-usage"
+    >
+      JS Usage
+    </div>
+    <div>
+      <div>
+        Resource Info
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th />
+            <th>
+              Mobile
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+               
+              Number of Requests
+               
+            </td>
+            <td>
+              2
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Number of Fonts
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Number of Scripts
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Number of Stylesheets
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Main Document Transfer Size
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Total Byte Weight
+               
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</details>
+`;
+
+exports[`CWVMetricsSummary > renders Summary Metrics when items have metrics and diagnostics 1`] = `
+<details>
+  <summary
+    class="flex flex-col gap-2"
+  >
+    <h3
+      class="text-xl font-semibold"
+    >
+      Summary Metrics
+    </h3>
+  </summary>
+  <div
+    class="grid grid-cols-1 gap-3 py-3  md:grid-cols-2 lg:grid-cols-3"
+  >
+    <div>
+      <div>
+        Core Web Vitals
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th />
+            <th>
+              Mobile
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+               
+              First Contentful Paint
+               
+            </td>
+            <td>
+              <span>
+                500
+                 ms
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Largest Contentful Paint
+               
+            </td>
+            <td>
+              <span>
+                1500
+                 ms
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Total Blocking Time
+               
+            </td>
+            <td>
+              <span>
+                100
+                 ms
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Cumulative Layout Shift
+               
+            </td>
+            <td>
+              0.05
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Cumulative Layout Shift (Main Frame)
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Speed Index
+               
+            </td>
+            <td>
+              <span>
+                1200
+                 ms
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div>
+        Number of Tasks
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th />
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+               
+              Number of Tasks over 10ms
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Number of Tasks over 25ms
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Number of Tasks over 50ms
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Number of Tasks over 100ms
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Number of Tasks over 500ms
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Number of Top Level Tasks
+               
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div>
+        LCP info
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th />
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+               
+              LCP Load Start
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              LCP Load End
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              LCP Invalidated
+               
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div>
+        Timings info
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th />
+            <th>
+              Mobile
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+               
+              First Contentful Paint
+               
+            </td>
+            <td>
+              <span>
+                500
+                 ms
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              First contentful paint all frames
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Max Potential FID
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Total Blocking Time
+               
+            </td>
+            <td>
+              <span>
+                100
+                 ms
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Largest Contentful Paint
+               
+            </td>
+            <td>
+              <span>
+                1500
+                 ms
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Speed Index
+               
+            </td>
+            <td>
+              <span>
+                1200
+                 ms
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Interactive
+               
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div>
+        Observed Events
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th />
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+               
+              Observed Navigation Start
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Observed First Paint
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Observed First Contentful Paint
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Observed First Contentful Paint All Frames
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Observed Trace End
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Observed Load
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Observed DOM Content Loaded
+               
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div
+      data-testid="js-usage"
+    >
+      JS Usage
+    </div>
+    <div>
+      <div>
+        Resource Info
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th />
+            <th>
+              Mobile
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+               
+              Number of Requests
+               
+            </td>
+            <td>
+              10
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Number of Fonts
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Number of Scripts
+               
+            </td>
+            <td>
+              5
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Number of Stylesheets
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Main Document Transfer Size
+               
+            </td>
+          </tr>
+          <tr>
+            <td>
+               
+              Total Byte Weight
+               
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</details>
+`;

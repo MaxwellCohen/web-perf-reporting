@@ -1,0 +1,8 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`app/global-error > reports the error to sentry and renders the Next error page 1`] = `
+<div>
+  Next error status: 
+  0
+</div>
+`;

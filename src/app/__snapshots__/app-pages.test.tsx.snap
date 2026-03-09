@@ -1,0 +1,314 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`app page coverage smoke tests > passes the public id to the dashboard wrapper page 1`] = `
+<div>
+  Dashboard wrapper for 
+  abc123
+</div>
+`;
+
+exports[`app page coverage smoke tests > renders historical crux lookup or dashboard from the normalized url 1`] = `
+<div
+  class="container mx-auto"
+>
+  <h1
+    class="mx-auto text-center text-2xl font-extrabold"
+  >
+    Historical CrUX reports 
+     for https://example.com 
+  </h1>
+  <div>
+    Historical charts for 
+    https://example.com
+  </div>
+</div>
+`;
+
+exports[`app page coverage smoke tests > renders latest crux lookup when there is no normalized url 1`] = `
+<div
+  class="container mx-auto"
+>
+  <h1
+    class="mx-auto text-center text-2xl font-extrabold"
+  >
+    Latest Crux Report 
+  </h1>
+  <div>
+    Mock URL lookup form
+  </div>
+</div>
+`;
+
+exports[`app page coverage smoke tests > renders latest crux results when a normalized url exists 1`] = `
+<div
+  class="container mx-auto"
+>
+  <h1
+    class="mx-auto text-center text-2xl font-extrabold"
+  >
+    Latest Crux Report 
+     for https://example.com 
+  </h1>
+  <div>
+    Current performance for 
+    https://example.com
+  </div>
+</div>
+`;
+
+exports[`app page coverage smoke tests > renders the home page cards and destination links 1`] = `
+<div
+  class="container mx-auto px-4 py-8"
+>
+  <div
+    class="text-center mb-12"
+  >
+    <h1
+      class="text-4xl font-extrabold mb-4"
+    >
+      Web Performance Reports
+    </h1>
+    <p
+      class="text-xl text-muted-foreground max-w-2xl mx-auto"
+    >
+      Comprehensive insights into your website's performance using Chrome UX Report (CrUX) data and PageSpeed metrics
+    </p>
+  </div>
+  <div
+    class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"
+  >
+    <div
+      class="rounded-xl border bg-card text-card-foreground shadow h-full flex flex-col"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6 flex-1"
+      >
+        <div
+          class="font-semibold leading-none tracking-tight"
+        >
+          Latest CrUX Metrics
+        </div>
+        <div
+          class="text-sm text-muted-foreground"
+        >
+          Analyze actual user experience data from Chrome UX Report
+        </div>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        <p
+          class="text-muted-foreground mb-4"
+        >
+          Get insights into Core Web Vitals and other key performance metrics based on real user data.
+        </p>
+        <a
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 w-full"
+          href="/latest-crux"
+        >
+          View Latest CrUX Data
+        </a>
+      </div>
+    </div>
+    <div
+      class="rounded-xl border bg-card text-card-foreground shadow h-full flex flex-col"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6 flex-1"
+      >
+        <div
+          class="font-semibold leading-none tracking-tight"
+        >
+          Historical Trends
+        </div>
+        <div
+          class="text-sm text-muted-foreground"
+        >
+          Track performance changes over time
+        </div>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        <p
+          class="text-muted-foreground mb-4"
+        >
+          Monitor how your website's performance evolves with historical CrUX data analysis.
+        </p>
+        <a
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 w-full"
+          href="/historical-crux"
+        >
+          View Historical Data
+        </a>
+      </div>
+    </div>
+    <div
+      class="rounded-xl border bg-card text-card-foreground shadow h-full flex flex-col"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6 flex-1"
+      >
+        <div
+          class="font-semibold leading-none tracking-tight"
+        >
+          PageSpeed Insights
+        </div>
+        <div
+          class="text-sm text-muted-foreground"
+        >
+          Lab data and optimization recommendations
+        </div>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        <p
+          class="text-muted-foreground mb-4"
+        >
+          Get detailed performance audits and actionable recommendations to improve your site.
+        </p>
+        <a
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 w-full"
+          href="/page-speed"
+        >
+          Run PageSpeed Analysis
+        </a>
+      </div>
+    </div>
+    <div
+      class="rounded-xl border bg-card text-card-foreground shadow h-full flex flex-col"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6 flex-1"
+      >
+        <div
+          class="font-semibold leading-none tracking-tight"
+        >
+          Lighthouse report viewer
+        </div>
+        <div
+          class="text-sm text-muted-foreground"
+        >
+          View Lighthouse reports from your Experiments
+        </div>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        <p
+          class="text-muted-foreground mb-4"
+        >
+          Visualize LCP, FID, CLS, and INP metrics with detailed breakdowns and pass/fail indicators.
+        </p>
+        <a
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 w-full"
+          href="/viewer"
+        >
+          Go to Lighthouse Report Viewer
+        </a>
+      </div>
+    </div>
+  </div>
+  <div
+    class="text-center"
+  >
+    <h2
+      class="text-2xl font-bold mb-4"
+    >
+      Why Monitor Web Performance?
+    </h2>
+    <div
+      class="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+    >
+      <div
+        class="p-4"
+      >
+        <h3
+          class="font-semibold mb-2"
+        >
+          User Experience
+        </h3>
+        <p
+          class="text-muted-foreground"
+        >
+          Better performance leads to improved user satisfaction and engagement
+        </p>
+      </div>
+      <div
+        class="p-4"
+      >
+        <h3
+          class="font-semibold mb-2"
+        >
+          SEO Rankings
+        </h3>
+        <p
+          class="text-muted-foreground"
+        >
+          Core Web Vitals affect your search engine rankings
+        </p>
+      </div>
+      <div
+        class="p-4"
+      >
+        <h3
+          class="font-semibold mb-2"
+        >
+          Conversion Rates
+        </h3>
+        <p
+          class="text-muted-foreground"
+        >
+          Faster sites have higher conversion rates and lower bounce rates
+        </p>
+      </div>
+      <div
+        class="p-4"
+      >
+        <h3
+          class="font-semibold mb-2"
+        >
+          Mobile Performance
+        </h3>
+        <p
+          class="text-muted-foreground"
+        >
+          Optimize for mobile users with device-specific metrics
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`app page coverage smoke tests > renders the lightweight lh and viewer pages 1`] = `
+<div
+  class="max-w-screen-2xl mx-auto"
+>
+  <div>
+    Mock viewer page
+  </div>
+</div>
+`;
+
+exports[`app page coverage smoke tests > renders the page speed layout shell and nested content 1`] = `
+<div
+  class="mx-auto max-w-screen-2xl"
+>
+  <h1
+    class="mx-auto text-center text-2xl font-extrabold"
+  >
+    Page Speed Insights
+  </h1>
+  <div>
+    Nested page speed content
+  </div>
+</div>
+`;
+
+exports[`app page coverage smoke tests > renders the page speed lookup form when no URL is present 1`] = `
+<div>
+  Mock URL lookup form
+</div>
+`;

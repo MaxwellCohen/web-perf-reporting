@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`RenderTableRowContainer > renders children 1`] = `
+<div
+  class="grid grid-cols-subgrid border-b-2 items-center col-span-full hover:bg-muted/50"
+>
+  <span>
+    Row content
+  </span>
+</div>
+`;

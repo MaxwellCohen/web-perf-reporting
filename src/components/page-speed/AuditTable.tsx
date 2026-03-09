@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/table';
 import ReactMarkdown from 'react-markdown';
 
-export function AuditTable({ audits }: { audits?: AuditResultsRecord }) {
+export function AuditTable({ audits }: { audits?: AuditResultsRecord | null }) {
   if (!audits) {
     return null;
   }

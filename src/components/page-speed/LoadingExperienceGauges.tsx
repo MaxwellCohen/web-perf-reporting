@@ -5,7 +5,7 @@ import { PageSpeedApiLoadingExperience } from '@/lib/schema';
 export function LoadingExperienceGauges({
   experience,
 }: {
-  experience?: PageSpeedApiLoadingExperience;
+  experience?: PageSpeedApiLoadingExperience | null;
 }) {
   if (!experience) {
     return null;

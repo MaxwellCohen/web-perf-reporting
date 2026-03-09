@@ -9,7 +9,7 @@ export function ScreenshotComponent({
       data: string;
       width: number;
       height: number;
-    };
+    } | null;
   }) {
     const [imageError, setImageError] = useState(false);
     

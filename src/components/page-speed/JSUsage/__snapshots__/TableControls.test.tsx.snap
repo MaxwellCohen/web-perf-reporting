@@ -1,0 +1,516 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ColumnSelector > renders column toggle dropdown 1`] = `
+<div>
+  <button
+    class="gap-2 font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
+  >
+    Columns 
+    <span
+      data-testid="chevron"
+    />
+  </button>
+  <div>
+    <div
+      aria-checked="true"
+      role="checkbox"
+    >
+      id
+    </div>
+    <div
+      aria-checked="true"
+      role="checkbox"
+    >
+      name
+    </div>
+  </div>
+</div>
+`;
+
+exports[`DropdownFilter > renders filter dropdown when column exists 1`] = `
+<div>
+  <button
+    class="gap-2 font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
+  >
+    Filter 
+    Name
+     
+    <span
+      data-testid="chevron"
+    />
+  </button>
+  <div>
+    <div
+      aria-checked="true"
+      role="checkbox"
+    >
+      Alpha
+    </div>
+    <div
+      aria-checked="true"
+      role="checkbox"
+    >
+      Beta
+    </div>
+  </div>
+</div>
+`;
+
+exports[`PageSizeSelector > renders page size select 1`] = `
+<div>
+  <div
+    aria-controls="select-content"
+    role="combobox"
+  >
+    <span>
+      Page Size
+    </span>
+  </div>
+  <div>
+    <div
+      data-value="1"
+    >
+      All Items in 1 page
+    </div>
+    <div
+      data-value="10"
+    >
+      10 items on page
+    </div>
+    <div
+      data-value="20"
+    >
+      20 items on page
+    </div>
+    <div
+      data-value="30"
+    >
+      30 items on page
+    </div>
+    <div
+      data-value="40"
+    >
+      40 items on page
+    </div>
+    <div
+      data-value="50"
+    >
+      50 items on page
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TableControls > calls resetColumnFilters when Reset filters is clicked 1`] = `
+<div
+  class="m-4 flex justify-between"
+>
+  <div
+    class="flex flex-row items-end"
+  >
+    <button
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+    >
+      Reset filters
+    </button>
+    <button
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+    >
+      Reset Sorting Order
+    </button>
+  </div>
+  <div
+    class="flex flex-row gap-2"
+  >
+    <div
+      class="flex flex-col flex-wrap items-center gap-2 p-2"
+    >
+      <div>
+        <button
+          class="gap-2 font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
+        >
+          Columns 
+          <span
+            data-testid="chevron"
+          />
+        </button>
+        <div>
+          <div
+            aria-checked="true"
+            role="checkbox"
+          >
+            name
+          </div>
+        </div>
+      </div>
+      <div>
+        <div
+          aria-controls="select-content"
+          role="combobox"
+        >
+          <span>
+            Page Size
+          </span>
+        </div>
+        <div>
+          <div
+            data-value="2"
+          >
+            All Items in 1 page
+          </div>
+          <div
+            data-value="10"
+          >
+            10 items on page
+          </div>
+          <div
+            data-value="20"
+          >
+            20 items on page
+          </div>
+          <div
+            data-value="30"
+          >
+            30 items on page
+          </div>
+          <div
+            data-value="40"
+          >
+            40 items on page
+          </div>
+          <div
+            data-value="50"
+          >
+            50 items on page
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TableControls > calls resetSorting when Reset Sorting Order is clicked 1`] = `
+<div
+  class="m-4 flex justify-between"
+>
+  <div
+    class="flex flex-row items-end"
+  >
+    <button
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+    >
+      Reset filters
+    </button>
+    <button
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+    >
+      Reset Sorting Order
+    </button>
+  </div>
+  <div
+    class="flex flex-row gap-2"
+  >
+    <div
+      class="flex flex-col flex-wrap items-center gap-2 p-2"
+    >
+      <div>
+        <button
+          class="gap-2 font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
+        >
+          Columns 
+          <span
+            data-testid="chevron"
+          />
+        </button>
+        <div>
+          <div
+            aria-checked="true"
+            role="checkbox"
+          >
+            name
+          </div>
+        </div>
+      </div>
+      <div>
+        <div
+          aria-controls="select-content"
+          role="combobox"
+        >
+          <span>
+            Page Size
+          </span>
+        </div>
+        <div>
+          <div
+            data-value="2"
+          >
+            All Items in 1 page
+          </div>
+          <div
+            data-value="10"
+          >
+            10 items on page
+          </div>
+          <div
+            data-value="20"
+          >
+            20 items on page
+          </div>
+          <div
+            data-value="30"
+          >
+            30 items on page
+          </div>
+          <div
+            data-value="40"
+          >
+            40 items on page
+          </div>
+          <div
+            data-value="50"
+          >
+            50 items on page
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TableControls > renders reset filters and reset sorting buttons 1`] = `
+<div
+  class="m-4 flex justify-between"
+>
+  <div
+    class="flex flex-row items-end"
+  >
+    <button
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+    >
+      Reset filters
+    </button>
+    <button
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+    >
+      Reset Sorting Order
+    </button>
+  </div>
+  <div
+    class="flex flex-row gap-2"
+  >
+    <div
+      class="flex flex-col flex-wrap items-center gap-2 p-2"
+    >
+      <div>
+        <button
+          class="gap-2 font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
+        >
+          Columns 
+          <span
+            data-testid="chevron"
+          />
+        </button>
+        <div>
+          <div
+            aria-checked="true"
+            role="checkbox"
+          >
+            name
+          </div>
+        </div>
+      </div>
+      <div>
+        <div
+          aria-controls="select-content"
+          role="combobox"
+        >
+          <span>
+            Page Size
+          </span>
+        </div>
+        <div>
+          <div
+            data-value="2"
+          >
+            All Items in 1 page
+          </div>
+          <div
+            data-value="10"
+          >
+            10 items on page
+          </div>
+          <div
+            data-value="20"
+          >
+            20 items on page
+          </div>
+          <div
+            data-value="30"
+          >
+            30 items on page
+          </div>
+          <div
+            data-value="40"
+          >
+            40 items on page
+          </div>
+          <div
+            data-value="50"
+          >
+            50 items on page
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TableControls > shows Columns dropdown and pagination when multiple pages 1`] = `
+<div
+  class="m-4 flex justify-between"
+>
+  <div
+    class="flex flex-row items-end"
+  >
+    <button
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+    >
+      Reset filters
+    </button>
+    <button
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+    >
+      Reset Sorting Order
+    </button>
+  </div>
+  <div
+    class="flex flex-row gap-2"
+  >
+    <div
+      class="flex flex-col flex-wrap items-center gap-2 p-2"
+    >
+      <div
+        class="flex flex-wrap items-center gap-2"
+      >
+        <button
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+          disabled=""
+        >
+          &lt;&lt;
+        </button>
+        <button
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+          disabled=""
+        >
+          &lt;
+        </button>
+        <button
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+        >
+          &gt;
+        </button>
+        <button
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+        >
+          &gt;&gt;
+        </button>
+      </div>
+      <div
+        class="inline-flex items-center gap-1"
+      >
+        <span
+          class="flex items-center gap-1"
+        >
+          <div>
+            Page
+          </div>
+          <strong>
+            1
+             of 
+            2
+          </strong>
+        </span>
+        <span
+          class="flex items-center gap-1"
+        >
+          | Go to page:
+          <input
+            class="flex h-9 border-input bg-transparent text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-16 rounded border p-1"
+            max="2"
+            min="1"
+            type="number"
+            value="1"
+          />
+        </span>
+      </div>
+    </div>
+    <div
+      class="flex flex-col flex-wrap items-center gap-2 p-2"
+    >
+      <div>
+        <button
+          class="gap-2 font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
+        >
+          Columns 
+          <span
+            data-testid="chevron"
+          />
+        </button>
+        <div>
+          <div
+            aria-checked="true"
+            role="checkbox"
+          >
+            name
+          </div>
+        </div>
+      </div>
+      <div>
+        <div
+          aria-controls="select-content"
+          role="combobox"
+        >
+          <span>
+            Page Size
+          </span>
+        </div>
+        <div>
+          <div
+            data-value="6"
+          >
+            All Items in 1 page
+          </div>
+          <div
+            data-value="10"
+          >
+            10 items on page
+          </div>
+          <div
+            data-value="20"
+          >
+            20 items on page
+          </div>
+          <div
+            data-value="30"
+          >
+            30 items on page
+          </div>
+          <div
+            data-value="40"
+          >
+            40 items on page
+          </div>
+          <div
+            data-value="50"
+          >
+            50 items on page
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

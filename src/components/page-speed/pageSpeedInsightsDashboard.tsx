@@ -25,7 +25,7 @@ import { NetworkMetricsComponent } from '@/components/page-speed/NetworkMeterics
 import { JavaScriptPerformanceComponent } from '@/components/page-speed/javascript-metrics/JavaScriptPerformanceComponent';
 import { RecommendationsSection } from '@/components/page-speed/RecommendationsSection';
 import type { InsightsContextItem } from '@/components/page-speed/PageSpeedContext';
-import { useSelector } from '@xstate/store/react';
+import { useSelector } from '@xstate/store-react';
 
 const loadingExperiences = [
   { title: 'Page Loading Experience', experienceKey: 'loadingExperience' },

@@ -1,0 +1,58 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`PageSpeedInsightsDashboardWrapper > renders dashboard when client-side with valid data 1`] = `
+<div
+  data-testid="page-speed-dashboard"
+>
+  Dashboard with 
+  1
+   items, labels: 
+  Mobile, Desktop
+</div>
+`;
+
+exports[`PageSpeedInsightsDashboardWrapper > shows error when data is not an array 1`] = `
+<div
+  data-testid="error-message"
+>
+  <span
+    data-testid="error-title"
+  >
+    Failed to Load Report
+  </span>
+  <span
+    data-testid="error-description"
+  >
+    We couldn't load the PageSpeed Insights data. This might be due to a temporary issue or the report might not be available.
+  </span>
+  <span
+    data-testid="error-retry-url"
+  >
+    /page-speed/
+  </span>
+</div>
+`;
+
+exports[`PageSpeedInsightsDashboardWrapper > shows loading when data has only null/undefined items 1`] = `
+<div
+  data-testid="loading-message"
+>
+  Loading
+</div>
+`;
+
+exports[`PageSpeedInsightsDashboardWrapper > shows loading when data is empty or has no truthy items 1`] = `
+<div
+  data-testid="loading-message"
+>
+  Loading
+</div>
+`;
+
+exports[`PageSpeedInsightsDashboardWrapper > shows loading when isLoading is true 1`] = `
+<div
+  data-testid="loading-message"
+>
+  Loading
+</div>
+`;

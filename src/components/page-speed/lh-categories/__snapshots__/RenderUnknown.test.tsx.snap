@@ -1,0 +1,36 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`RenderUnknown > falls back to an unknown type label when details are missing 1`] = `
+<div
+  class="overflow-x-auto"
+>
+  We don't know how to render audit details of type
+   
+   unknown 
+  The Lighthouse version that collected this data is likely newer than the Lighthouse version of the report renderer. Expand for the raw JSON.
+  <pre>
+    [
+  null
+]
+  </pre>
+</div>
+`;
+
+exports[`RenderUnknown > renders the unknown detail type and raw json 1`] = `
+<div
+  class="overflow-x-auto"
+>
+  We don't know how to render audit details of type
+   
+  mystery-detail
+  The Lighthouse version that collected this data is likely newer than the Lighthouse version of the report renderer. Expand for the raw JSON.
+  <pre>
+    [
+  {
+    "type": "mystery-detail",
+    "items": []
+  }
+]
+  </pre>
+</div>
+`;

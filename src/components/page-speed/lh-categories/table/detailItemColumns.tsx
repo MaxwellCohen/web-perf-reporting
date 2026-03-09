@@ -62,11 +62,15 @@ function buildBaseColumns(
         return;
       }
 
+      const headerLabel =
+        typeof heading.label === 'string'
+          ? heading.label
+          : heading.label?.formattedDefault ?? toTitleCase(key as string);
       headingsById.set(
         columnId,
         columnHelper.accessor((value) => value[key] ?? undefined, {
           id: columnId,
-          header: heading.label || toTitleCase(key as string),
+          header: headerLabel,
           enableSorting: canSort(heading.valueType),
           sortingFn: 'alphanumeric',
           enableColumnFilter:

@@ -5,7 +5,10 @@ import {
 import { AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { Details } from '@/components/ui/accordion';
 import { TreeDataItem, TreeView } from '@/components/ui/tree-view';
-import { renderTimeValue } from '@/components/page-speed/lh-categories/table/RenderTableValue';
+import {
+  formatBytes,
+  renderTimeValue,
+} from '@/components/page-speed/lh-categories/table/RenderTableValue';
 
 // Type definitions for network dependency tree
 type NetworkTreeNode = {
@@ -96,19 +99,6 @@ function networkTreeToTreeData(
         : undefined,
     };
   });
-}
-
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 bytes';
-  const kb = bytes / 1024;
-  const mb = kb / 1024;
-  if (mb >= 1) {
-    return `${mb.toFixed(2)} MB`;
-  }
-  if (kb >= 1) {
-    return `${kb.toFixed(2)} KB`;
-  }
-  return `${bytes} bytes`;
 }
 
 export function RenderNetworkDependencyTree() {

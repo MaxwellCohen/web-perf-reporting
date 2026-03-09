@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`app/lh/page > renders LhInputForm inside a max-w container 1`] = `
+<div
+  class="max-w-screen-2xl mx-auto"
+>
+  <div>
+    Lighthouse Report Viewer
+  </div>
+</div>
+`;

@@ -1,0 +1,241 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`common charts > renders the main page speed gauge variants when valid metric data is provided 1`] = `
+<div>
+  <div>
+    <div>
+      <div>
+        <div />
+      </div>
+    </div>
+  </div>
+  <div
+    class="flex h-full w-full flex-col justify-center"
+  >
+    <div
+      class="mb-2 flex w-full items-center gap-2 whitespace-nowrap"
+    >
+      <div
+        class="text-sm font-medium"
+      >
+        1200 - FAST
+      </div>
+    </div>
+    <svg
+      class="rounded-full"
+      height="16"
+      preserveAspectRatio="none"
+      viewBox="0 0 100 16"
+      width="100%"
+    >
+      <rect
+        fill="hsl(var(--muted))"
+        height="16"
+        rx="8"
+        ry="8"
+        width="100"
+        x="0"
+        y="0"
+      />
+      <rect
+        fill="hsl(var(--chart-1))"
+        height="16"
+        rx="0"
+        ry="0"
+        width="45.45454545454545"
+        x="0"
+        y="0"
+      />
+      <rect
+        fill="hsl(var(--chart-2))"
+        height="16"
+        width="45.45454545454545"
+        x="45.45454545454545"
+        y="0"
+      />
+      <rect
+        fill="hsl(var(--chart-3))"
+        height="16"
+        width="9.090909090909092"
+        x="90.9090909090909"
+        y="0"
+      />
+      <rect
+        class="rounded-l-full"
+        fill="hsl(var(--destructive-foreground))"
+        height="16"
+        width="2"
+        x="53.54545454545454"
+        y="0"
+      />
+      <text
+        fill="#ffffff"
+        font-size="8"
+        font-weight="700"
+        stroke="#000000"
+        stroke-linejoin="round"
+        stroke-width="0.5"
+        style="paint-order: stroke fill; text-shadow: 0 0 3px rgba(0,0,0,0.8), 0 0 1px rgba(0,0,0,0.8);"
+        text-anchor="middle"
+        x="45.45454545454545"
+        y="12"
+        z="1000"
+      >
+        1000
+      </text>
+      <text
+        fill="#ffffff"
+        font-size="8"
+        font-weight="700"
+        stroke="#000000"
+        stroke-linejoin="round"
+        stroke-width="0.5"
+        style="paint-order: stroke fill; text-shadow: 0 0 3px rgba(0,0,0,0.8), 0 0 1px rgba(0,0,0,0.8);"
+        text-anchor="middle"
+        x="90.9090909090909"
+        y="12"
+        z="1000"
+      >
+        2000
+      </text>
+    </svg>
+  </div>
+</div>
+`;
+
+exports[`common charts > renders the radial form factor chart and percent table 1`] = `
+<div>
+  <div
+    class="rounded-xl border bg-card text-card-foreground shadow grid-rows-[44px,auto, 1fr] grid grid-cols-1 gap-3 p-2"
+  >
+    <div
+      class="text-md text-center font-bold"
+    >
+      Form Factors
+    </div>
+    <div>
+      <div>
+        <div>
+          Chart tooltip
+        </div>
+        <div>
+          Radial bar: 
+          desktop
+        </div>
+        <div>
+          Radial bar: 
+          phone
+        </div>
+        <div>
+          Radial bar: 
+          tablet
+        </div>
+      </div>
+    </div>
+    <div
+      class="p-2"
+    >
+      <div
+        class="text-xs leading-none text-muted-foreground"
+      >
+         
+        <strong>
+          Desktop
+        </strong>
+         
+        50.00
+         %
+         
+      </div>
+      <div
+        class="text-xs leading-none text-muted-foreground"
+      >
+         
+        <strong>
+          Phone
+        </strong>
+         
+        30.00
+         %
+         
+      </div>
+      <div
+        class="text-xs leading-none text-muted-foreground"
+      >
+         
+        <strong>
+          Tablet
+        </strong>
+         
+        20.00
+         %
+         
+      </div>
+    </div>
+  </div>
+  <div
+    class="rounded-xl border bg-card text-card-foreground shadow flex-1"
+  >
+    <div
+      class="text-md text-center font-bold"
+    >
+      Navigation Types
+    </div>
+    <div
+      class="text-xs text-center text-muted-foreground mb-1"
+    >
+      Jan 1 - Jan 31
+    </div>
+    <div
+      class="relative w-full overflow-auto"
+    >
+      <table
+        class="w-full caption-bottom text-sm table-fixed"
+      >
+        <thead
+          class="[&_tr]:border-b pt-2"
+        >
+          <tr
+            class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+          >
+            <th
+              class="px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border h-4"
+            >
+              Navigate
+            </th>
+            <th
+              class="px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border h-4"
+            >
+              Reload
+            </th>
+          </tr>
+        </thead>
+        <tbody
+          class="[&_tr:last-child]:border-0"
+        >
+          <tr
+            class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+          >
+            <td
+              class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 h-4"
+            >
+               
+              70.00
+               %
+               
+            </td>
+            <td
+              class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 h-4"
+            >
+               
+              30.00
+               %
+               
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+`;

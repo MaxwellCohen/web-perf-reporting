@@ -31,71 +31,63 @@ type BootupTimeCardProps = {
 
 const columnHelper = createColumnHelper<BootupTimeTableRow>();
 
+function msCell(info: { getValue: () => number | undefined }) {
+  const value = info.getValue();
+  return value !== undefined ? <RenderMSValue value={value} /> : 'N/A';
+}
+
+const msColumnConfig = {
+  enableSorting: true,
+  enableResizing: true,
+  filterFn: 'inNumberRange' as const,
+  aggregationFn: 'unique' as const,
+  cell: msCell,
+};
+
 const cols: ColumnDef<BootupTimeTableRow, any>[] = [
   createURLColumn(columnHelper),
   columnHelper.accessor('scriptParseCompile', {
     id: 'scriptParseCompile',
     header: 'Parse & Compile',
-    enableSorting: true,
-    enableResizing: true,
-    filterFn: 'inNumberRange',
-    aggregationFn: 'unique',
-    cell: (info) => {
-      const value = info.getValue();
-      return value !== undefined ? <RenderMSValue value={value} /> : 'N/A';
-    },
+    ...msColumnConfig,
     aggregatedCell: createNumericAggregatedCell('scriptParseCompile'),
   }),
   columnHelper.accessor('scripting', {
     id: 'scripting',
     header: 'Scripting',
-    enableSorting: true,
-    enableResizing: true,
-    filterFn: 'inNumberRange',
-    aggregationFn: 'unique',
-    cell: (info) => {
-      const value = info.getValue();
-      return value !== undefined ? <RenderMSValue value={value} /> : 'N/A';
-    },
+    ...msColumnConfig,
     aggregatedCell: createNumericAggregatedCell('scripting'),
   }),
   columnHelper.accessor('total', {
     id: 'total',
     header: 'Total Time',
-    enableSorting: true,
-    enableResizing: true,
-    filterFn: 'inNumberRange',
-    aggregationFn: 'unique',
-    cell: (info) => {
-      const value = info.getValue();
-      return value !== undefined ? <RenderMSValue value={value} /> : 'N/A';
-    },
+    ...msColumnConfig,
     aggregatedCell: createNumericAggregatedCell('total'),
   }),
 ];
 
+function itemToRow(label: string, item: TableItem): BootupTimeTableRow {
+  return {
+    label,
+    url: getUrlString(item.url),
+    total: getNumber(item.total),
+    scripting: getNumber(item.scripting),
+    scriptParseCompile: getNumber(item.scriptParseCompile),
+  };
+}
+
 export function BootupTimeCard({ metrics }: BootupTimeCardProps) {
-  
   const validMetrics = useMemo(
     () => metrics.filter((m) => m.bootupTime.length > 0),
     [metrics],
   );
   const showReportColumn = validMetrics.length > 1;
 
-  // Combine all bootup time data with labels
   const data = useMemo<BootupTimeTableRow[]>(() => {
+    if (!validMetrics.length) return [];
     const allRows = validMetrics.flatMap(({ label, bootupTime }) =>
-      bootupTime.map((item: TableItem) => {
-        return {
-          label,
-          url: getUrlString(item.url),
-          total: getNumber(item.total),
-          scripting: getNumber(item.scripting),
-          scriptParseCompile: getNumber(item.scriptParseCompile),
-        };
-      }),
+      bootupTime.map((item) => itemToRow(label, item)),
     );
-
     return sortByMaxValue(
       allRows,
       (row) => row.url,
@@ -110,9 +102,7 @@ export function BootupTimeCard({ metrics }: BootupTimeCardProps) {
     showReportColumn,
   );
 
-  if (!validMetrics.length) {
-    return null;
-  }
+  if (!validMetrics.length) return null;
 
   return <BootupTimeTable data={data} columns={columns} />;
 }

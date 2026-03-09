@@ -1,0 +1,40 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ScreenshotComponent > renders image when screenshot has valid data 1`] = `
+<div
+  class="border"
+>
+  <img
+    alt="fullscreen image"
+    class="w-20 aspect-[100/80]"
+    src="data:image/png;base64,abc123"
+    width="80"
+  />
+</div>
+`;
+
+exports[`ScreenshotComponent > shows "Image unavailable" when image fails to load 1`] = `
+<div
+  class="flex items-center justify-center border bg-gray-100"
+  style="width: 80px; height: 80px;"
+>
+  <span
+    class="text-xs text-gray-500"
+  >
+    Image unavailable
+  </span>
+</div>
+`;
+
+exports[`ScreenshotComponent > shows "Image unavailable" when screenshot.data is empty 1`] = `
+<div
+  class="flex items-center justify-center border bg-gray-100"
+  style="width: 80px; height: 80px;"
+>
+  <span
+    class="text-xs text-gray-500"
+  >
+    Image unavailable
+  </span>
+</div>
+`;

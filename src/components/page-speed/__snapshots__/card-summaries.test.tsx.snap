@@ -1,0 +1,197 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`page-speed summary cards > renders task summary fallback calculations from diagnostics and task durations 1`] = `
+<div>
+  <h3>
+    Task Summary
+  </h3>
+  <table>
+    <thead>
+      <tr>
+        <th>
+          Report
+        </th>
+        <th>
+          Total Tasks
+        </th>
+        <th>
+          Total Time
+        </th>
+        <th>
+          Avg Duration
+        </th>
+        <th>
+          Longest Task
+        </th>
+        <th>
+          &gt;10ms
+        </th>
+        <th>
+          &gt;25ms
+        </th>
+        <th>
+          &gt;50ms
+        </th>
+        <th>
+          &gt;100ms
+        </th>
+        <th>
+          &gt;500ms
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          Mobile
+        </td>
+        <td>
+          3
+        </td>
+        <td>
+          <span>
+            120
+             ms
+          </span>
+        </td>
+        <td>
+          <span>
+            40
+             ms
+          </span>
+        </td>
+        <td>
+          <span>
+            50
+             ms
+          </span>
+        </td>
+        <td>
+          0
+        </td>
+        <td>
+          0
+        </td>
+        <td>
+          1
+        </td>
+        <td>
+          0
+        </td>
+        <td>
+          0
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Desktop
+        </td>
+        <td>
+          2
+        </td>
+        <td>
+          <span>
+            100
+             ms
+          </span>
+        </td>
+        <td>
+          <span>
+            50
+             ms
+          </span>
+        </td>
+        <td>
+          <span>
+            80
+             ms
+          </span>
+        </td>
+        <td>
+          0
+        </td>
+        <td>
+          0
+        </td>
+        <td>
+          0
+        </td>
+        <td>
+          0
+        </td>
+        <td>
+          0
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+`;
+
+exports[`page-speed summary cards > renders the network requests summary for one or more reports 1`] = `
+<div>
+  <h3>
+    Network Requests Summary
+  </h3>
+  <table>
+    <thead>
+      <tr>
+        <th>
+          Report
+        </th>
+        <th>
+          Total Requests
+        </th>
+        <th>
+          Transfer Size
+        </th>
+        <th>
+          Resource Size
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          Mobile
+        </td>
+        <td>
+          2
+        </td>
+        <td>
+          <span>
+            300
+             bytes
+          </span>
+        </td>
+        <td>
+          <span>
+            450
+             bytes
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Desktop
+        </td>
+        <td>
+          1
+        </td>
+        <td>
+          <span>
+            150
+             bytes
+          </span>
+        </td>
+        <td>
+          <span>
+            200
+             bytes
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+`;

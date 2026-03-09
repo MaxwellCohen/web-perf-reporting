@@ -1,0 +1,164 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`RenderJSONDetails > can be expanded to show content 1`] = `
+<details
+  open=""
+>
+  <summary>
+    All Data
+  </summary>
+  <div
+    class="grid md:grid-cols-2 text-left"
+  >
+    <pre
+      class="overflow-x-auto border-r-2 text-muted-foreground"
+    >
+      {
+  "nested": {
+    "value": 1
+  }
+}
+    </pre>
+  </div>
+</details>
+`;
+
+exports[`RenderJSONDetails > passes through additional props to details element 1`] = `
+<details
+  data-testid="json-details"
+  open=""
+>
+  <summary>
+    All Data
+  </summary>
+  <div
+    class="grid md:grid-cols-2 text-left"
+  >
+    <pre
+      class="overflow-x-auto border-r-2 text-muted-foreground"
+    >
+      {}
+    </pre>
+  </div>
+</details>
+`;
+
+exports[`RenderJSONDetails > renders JSON stringified data when data is provided 1`] = `
+<details>
+  <summary>
+    All Data
+  </summary>
+  <div
+    class="grid md:grid-cols-2 text-left"
+  >
+    <pre
+      class="overflow-x-auto border-r-2 text-muted-foreground"
+    >
+      {
+  "key": "value",
+  "count": 42
+}
+    </pre>
+  </div>
+</details>
+`;
+
+exports[`RenderJSONDetails > renders data2 when provided 1`] = `
+<details>
+  <summary>
+    All Data
+  </summary>
+  <div
+    class="grid md:grid-cols-2 text-left"
+  >
+    <pre
+      class="overflow-x-auto border-r-2 text-muted-foreground"
+    >
+      {
+  "a": 1
+}
+    </pre>
+    <pre
+      class="overflow-x-auto"
+    >
+      {
+  "b": 2
+}
+    </pre>
+  </div>
+</details>
+`;
+
+exports[`RenderJSONDetails > renders details with custom title 1`] = `
+<details>
+  <summary>
+    Custom Title
+  </summary>
+  <div
+    class="grid md:grid-cols-2 text-left"
+  >
+    <pre
+      class="overflow-x-auto border-r-2 text-muted-foreground"
+    >
+      {}
+    </pre>
+  </div>
+</details>
+`;
+
+exports[`RenderJSONDetails > renders details with default title 1`] = `
+<details>
+  <summary>
+    All Data
+  </summary>
+  <div
+    class="grid md:grid-cols-2 text-left"
+  >
+    <pre
+      class="overflow-x-auto border-r-2 text-muted-foreground"
+    >
+      {
+  "foo": "bar"
+}
+    </pre>
+  </div>
+</details>
+`;
+
+exports[`RenderJSONDetails > renders only data when data2 is undefined 1`] = `
+<details>
+  <summary>
+    All Data
+  </summary>
+  <div
+    class="grid md:grid-cols-2 text-left"
+  >
+    <pre
+      class="overflow-x-auto border-r-2 text-muted-foreground"
+    >
+      {
+  "x": 1
+}
+    </pre>
+  </div>
+</details>
+`;
+
+exports[`RenderJSONDetails > renders only data2 when data is undefined 1`] = `
+<details>
+  <summary>
+    All Data
+  </summary>
+  <div
+    class="grid md:grid-cols-2 text-left"
+  >
+    <pre
+      class="overflow-x-auto"
+    >
+      {
+  "x": 1
+}
+    </pre>
+  </div>
+</details>
+`;

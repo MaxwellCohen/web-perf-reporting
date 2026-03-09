@@ -1,0 +1,519 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`NetworkRequestsSummaryCard > does not show Report column when single valid stat 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow"
+>
+  <div
+    class="flex flex-col space-y-1.5 p-6"
+  >
+    <div
+      class="font-semibold leading-none tracking-tight"
+    >
+      Network Requests Summary
+    </div>
+  </div>
+  <div
+    class="p-6 pt-0"
+  >
+    <div>
+      <div
+        class="relative w-full overflow-auto"
+      >
+        <table
+          class="w-full caption-bottom text-sm table-fixed"
+        >
+          <thead
+            class="[&_tr]:border-b"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Total Requests
+              </th>
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Transfer Size
+              </th>
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Resource Size
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="[&_tr:last-child]:border-0"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                5
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                <span
+                  class=""
+                  title="bytes"
+                >
+                  100 bytes
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                <span
+                  class=""
+                  title="bytes"
+                >
+                  200 bytes
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`NetworkRequestsSummaryCard > filters out stats with zero totalRequests 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow"
+>
+  <div
+    class="flex flex-col space-y-1.5 p-6"
+  >
+    <div
+      class="font-semibold leading-none tracking-tight"
+    >
+      Network Requests Summary
+    </div>
+  </div>
+  <div
+    class="p-6 pt-0"
+  >
+    <div>
+      <div
+        class="relative w-full overflow-auto"
+      >
+        <table
+          class="w-full caption-bottom text-sm table-fixed"
+        >
+          <thead
+            class="[&_tr]:border-b"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Total Requests
+              </th>
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Transfer Size
+              </th>
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Resource Size
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="[&_tr:last-child]:border-0"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                3
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                <span
+                  class=""
+                  title="bytes"
+                >
+                  500 bytes
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                <span
+                  class=""
+                  title="bytes"
+                >
+                  600 bytes
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`NetworkRequestsSummaryCard > renders card with title and table when stats have requests 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow"
+>
+  <div
+    class="flex flex-col space-y-1.5 p-6"
+  >
+    <div
+      class="font-semibold leading-none tracking-tight"
+    >
+      Network Requests Summary
+    </div>
+  </div>
+  <div
+    class="p-6 pt-0"
+  >
+    <div>
+      <div
+        class="relative w-full overflow-auto"
+      >
+        <table
+          class="w-full caption-bottom text-sm table-fixed"
+        >
+          <thead
+            class="[&_tr]:border-b"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Total Requests
+              </th>
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Transfer Size
+              </th>
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Resource Size
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="[&_tr:last-child]:border-0"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                10
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                <span
+                  class=""
+                  title="bytes"
+                >
+                  1024 bytes
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                <span
+                  class=""
+                  title="bytes"
+                >
+                  2.00 KB
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid stats 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow"
+>
+  <div
+    class="flex flex-col space-y-1.5 p-6"
+  >
+    <div
+      class="font-semibold leading-none tracking-tight"
+    >
+      Network Requests Summary
+    </div>
+  </div>
+  <div
+    class="p-6 pt-0"
+  >
+    <div>
+      <div
+        class="relative w-full overflow-auto"
+      >
+        <table
+          class="w-full caption-bottom text-sm table-fixed"
+        >
+          <thead
+            class="[&_tr]:border-b"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Report
+              </th>
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Total Requests
+              </th>
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Transfer Size
+              </th>
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Resource Size
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="[&_tr:last-child]:border-0"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 font-medium"
+              >
+                Desktop
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                1
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                <span
+                  class=""
+                  title="bytes"
+                >
+                  0 bytes
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                <span
+                  class=""
+                  title="bytes"
+                >
+                  0 bytes
+                </span>
+              </td>
+            </tr>
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 font-medium"
+              >
+                Mobile
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                1
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                <span
+                  class=""
+                  title="bytes"
+                >
+                  0 bytes
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                <span
+                  class=""
+                  title="bytes"
+                >
+                  0 bytes
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report column shown 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow"
+>
+  <div
+    class="flex flex-col space-y-1.5 p-6"
+  >
+    <div
+      class="font-semibold leading-none tracking-tight"
+    >
+      Network Requests Summary
+    </div>
+  </div>
+  <div
+    class="p-6 pt-0"
+  >
+    <div>
+      <div
+        class="relative w-full overflow-auto"
+      >
+        <table
+          class="w-full caption-bottom text-sm table-fixed"
+        >
+          <thead
+            class="[&_tr]:border-b"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Report
+              </th>
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Total Requests
+              </th>
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Transfer Size
+              </th>
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
+              >
+                Resource Size
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="[&_tr:last-child]:border-0"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 font-medium"
+              >
+                Unknown
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                1
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                <span
+                  class=""
+                  title="bytes"
+                >
+                  0 bytes
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                <span
+                  class=""
+                  title="bytes"
+                >
+                  0 bytes
+                </span>
+              </td>
+            </tr>
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 font-medium"
+              >
+                B
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                1
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                <span
+                  class=""
+                  title="bytes"
+                >
+                  0 bytes
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              >
+                <span
+                  class=""
+                  title="bytes"
+                >
+                  0 bytes
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+`;

@@ -1,0 +1,776 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`TimelineCard > renders card with timeline table when metrics have event data 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow md:col-span-2 lg:col-span-3"
+>
+  <div
+    class="flex flex-col space-y-1.5 p-6"
+  >
+    <div
+      class="font-semibold leading-none tracking-tight"
+    >
+      Timeline of Observed Events
+    </div>
+  </div>
+  <div
+    class="p-6 pt-0"
+  >
+    <div
+      class="overflow-x-auto"
+    >
+      <div
+        class="relative w-full overflow-auto"
+      >
+        <table
+          class="caption-bottom text-sm table-fixed w-full"
+        >
+          <thead
+            class="[&_tr]:border-b"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
+                style="width: 150px;"
+              >
+                <div
+                  class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                >
+                  <div
+                    class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                  >
+                    <span
+                      title="Performance events observed during page load, sorted by time"
+                    >
+                      Event
+                    </span>
+                  </div>
+                  <div
+                    class="flex shrink-0 flex-row items-center gap-1"
+                  >
+                    <button
+                      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                      title="Sort ascending"
+                      type="button"
+                    >
+                      〰︎
+                    </button>
+                  </div>
+                </div>
+                <div
+                  class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                />
+              </th>
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
+                style="width: 150px;"
+              >
+                <div
+                  class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                >
+                  <div
+                    class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                  >
+                    Desktop
+                  </div>
+                  <div
+                    class="flex shrink-0 flex-row items-center gap-1"
+                  >
+                    <button
+                      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                      title="Sort descending"
+                      type="button"
+                    >
+                      〰︎
+                    </button>
+                  </div>
+                </div>
+                <div
+                  class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                />
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="[&_tr:last-child]:border-0"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                data-aggregated="false"
+                data-can-expand="false"
+                data-cell-id="0_event"
+                data-column-id="event"
+                data-depth="0"
+                data-grouped="false"
+                data-placeholder="false"
+                data-row-expanded="false"
+                style="width: 150px;"
+              >
+                <span
+                  class="font-medium"
+                  title="The time when the browser starts navigating to the page. This is the earliest timestamp in the navigation timing API."
+                >
+                  Navigation Start
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                data-aggregated="false"
+                data-can-expand="false"
+                data-cell-id="0_Desktop"
+                data-column-id="Desktop"
+                data-depth="0"
+                data-grouped="false"
+                data-placeholder="false"
+                data-row-expanded="false"
+                style="width: 150px;"
+              >
+                <span
+                  data-testid="ms-value"
+                >
+                  0
+                   ms
+                </span>
+              </td>
+            </tr>
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                data-aggregated="false"
+                data-can-expand="false"
+                data-cell-id="1_event"
+                data-column-id="event"
+                data-depth="0"
+                data-grouped="false"
+                data-placeholder="false"
+                data-row-expanded="false"
+                style="width: 150px;"
+              >
+                <span
+                  class="font-medium"
+                  title="Time to First Byte - The time between when the user requests a page and when the first byte of the response is received from the server."
+                >
+                  TTFB
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                data-aggregated="false"
+                data-can-expand="false"
+                data-cell-id="1_Desktop"
+                data-column-id="Desktop"
+                data-depth="0"
+                data-grouped="false"
+                data-placeholder="false"
+                data-row-expanded="false"
+                style="width: 150px;"
+              >
+                <span
+                  data-testid="ms-value"
+                >
+                  100
+                   ms
+                </span>
+              </td>
+            </tr>
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                data-aggregated="false"
+                data-can-expand="false"
+                data-cell-id="2_event"
+                data-column-id="event"
+                data-depth="0"
+                data-grouped="false"
+                data-placeholder="false"
+                data-row-expanded="false"
+                style="width: 150px;"
+              >
+                <span
+                  class="font-medium"
+                  title="First Contentful Paint - The time when the browser renders the first bit of content from the DOM, such as text, an image, or a canvas element."
+                >
+                  FCP
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                data-aggregated="false"
+                data-can-expand="false"
+                data-cell-id="2_Desktop"
+                data-column-id="Desktop"
+                data-depth="0"
+                data-grouped="false"
+                data-placeholder="false"
+                data-row-expanded="false"
+                style="width: 150px;"
+              >
+                <span
+                  data-testid="ms-value"
+                >
+                  500
+                   ms
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TimelineCard > renders multiple report columns when multiple metrics 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow md:col-span-2 lg:col-span-3"
+>
+  <div
+    class="flex flex-col space-y-1.5 p-6"
+  >
+    <div
+      class="font-semibold leading-none tracking-tight"
+    >
+      Timeline of Observed Events
+    </div>
+  </div>
+  <div
+    class="p-6 pt-0"
+  >
+    <div
+      class="overflow-x-auto"
+    >
+      <div
+        class="relative w-full overflow-auto"
+      >
+        <table
+          class="caption-bottom text-sm table-fixed w-full"
+        >
+          <thead
+            class="[&_tr]:border-b"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
+                style="width: 150px;"
+              >
+                <div
+                  class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                >
+                  <div
+                    class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                  >
+                    <span
+                      title="Performance events observed during page load, sorted by time"
+                    >
+                      Event
+                    </span>
+                  </div>
+                  <div
+                    class="flex shrink-0 flex-row items-center gap-1"
+                  >
+                    <button
+                      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                      title="Sort ascending"
+                      type="button"
+                    >
+                      〰︎
+                    </button>
+                  </div>
+                </div>
+                <div
+                  class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                />
+              </th>
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
+                style="width: 150px;"
+              >
+                <div
+                  class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                >
+                  <div
+                    class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                  >
+                    Desktop
+                  </div>
+                  <div
+                    class="flex shrink-0 flex-row items-center gap-1"
+                  >
+                    <button
+                      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                      title="Sort descending"
+                      type="button"
+                    >
+                      〰︎
+                    </button>
+                  </div>
+                </div>
+                <div
+                  class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                />
+              </th>
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
+                style="width: 150px;"
+              >
+                <div
+                  class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                >
+                  <div
+                    class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                  >
+                    Mobile
+                  </div>
+                  <div
+                    class="flex shrink-0 flex-row items-center gap-1"
+                  >
+                    <button
+                      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                      title="Sort descending"
+                      type="button"
+                    >
+                      〰︎
+                    </button>
+                  </div>
+                </div>
+                <div
+                  class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                />
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="[&_tr:last-child]:border-0"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                data-aggregated="false"
+                data-can-expand="false"
+                data-cell-id="0_event"
+                data-column-id="event"
+                data-depth="0"
+                data-grouped="false"
+                data-placeholder="false"
+                data-row-expanded="false"
+                style="width: 150px;"
+              >
+                <span
+                  class="font-medium"
+                  title="The time when the browser starts navigating to the page. This is the earliest timestamp in the navigation timing API."
+                >
+                  Navigation Start
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                data-aggregated="false"
+                data-can-expand="false"
+                data-cell-id="0_Desktop"
+                data-column-id="Desktop"
+                data-depth="0"
+                data-grouped="false"
+                data-placeholder="false"
+                data-row-expanded="false"
+                style="width: 150px;"
+              >
+                <span
+                  data-testid="ms-value"
+                >
+                  0
+                   ms
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                data-aggregated="false"
+                data-can-expand="false"
+                data-cell-id="0_Mobile"
+                data-column-id="Mobile"
+                data-depth="0"
+                data-grouped="false"
+                data-placeholder="false"
+                data-row-expanded="false"
+                style="width: 150px;"
+              >
+                <span
+                  data-testid="ms-value"
+                >
+                  0
+                   ms
+                </span>
+              </td>
+            </tr>
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                data-aggregated="false"
+                data-can-expand="false"
+                data-cell-id="1_event"
+                data-column-id="event"
+                data-depth="0"
+                data-grouped="false"
+                data-placeholder="false"
+                data-row-expanded="false"
+                style="width: 150px;"
+              >
+                <span
+                  class="font-medium"
+                  title="Time to First Byte - The time between when the user requests a page and when the first byte of the response is received from the server."
+                >
+                  TTFB
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                data-aggregated="false"
+                data-can-expand="false"
+                data-cell-id="1_Desktop"
+                data-column-id="Desktop"
+                data-depth="0"
+                data-grouped="false"
+                data-placeholder="false"
+                data-row-expanded="false"
+                style="width: 150px;"
+              >
+                <span
+                  data-testid="ms-value"
+                >
+                  80
+                   ms
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                data-aggregated="false"
+                data-can-expand="false"
+                data-cell-id="1_Mobile"
+                data-column-id="Mobile"
+                data-depth="0"
+                data-grouped="false"
+                data-placeholder="false"
+                data-row-expanded="false"
+                style="width: 150px;"
+              >
+                <span
+                  data-testid="ms-value"
+                >
+                  120
+                   ms
+                </span>
+              </td>
+            </tr>
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                data-aggregated="false"
+                data-can-expand="false"
+                data-cell-id="2_event"
+                data-column-id="event"
+                data-depth="0"
+                data-grouped="false"
+                data-placeholder="false"
+                data-row-expanded="false"
+                style="width: 150px;"
+              >
+                <span
+                  class="font-medium"
+                  title="First Contentful Paint - The time when the browser renders the first bit of content from the DOM, such as text, an image, or a canvas element."
+                >
+                  FCP
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                data-aggregated="false"
+                data-can-expand="false"
+                data-cell-id="2_Desktop"
+                data-column-id="Desktop"
+                data-depth="0"
+                data-grouped="false"
+                data-placeholder="false"
+                data-row-expanded="false"
+                style="width: 150px;"
+              >
+                <span
+                  data-testid="ms-value"
+                >
+                  400
+                   ms
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                data-aggregated="false"
+                data-can-expand="false"
+                data-cell-id="2_Mobile"
+                data-column-id="Mobile"
+                data-depth="0"
+                data-grouped="false"
+                data-placeholder="false"
+                data-row-expanded="false"
+                style="width: 150px;"
+              >
+                <span
+                  data-testid="ms-value"
+                >
+                  600
+                   ms
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow md:col-span-2 lg:col-span-3"
+>
+  <div
+    class="flex flex-col space-y-1.5 p-6"
+  >
+    <div
+      class="font-semibold leading-none tracking-tight"
+    >
+      Timeline of Observed Events
+    </div>
+  </div>
+  <div
+    class="p-6 pt-0"
+  >
+    <div
+      class="overflow-x-auto"
+    >
+      <div
+        class="relative w-full overflow-auto"
+      >
+        <table
+          class="caption-bottom text-sm table-fixed w-full"
+        >
+          <thead
+            class="[&_tr]:border-b"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
+                style="width: 150px;"
+              >
+                <div
+                  class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                >
+                  <div
+                    class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                  >
+                    <span
+                      title="Performance events observed during page load, sorted by time"
+                    >
+                      Event
+                    </span>
+                  </div>
+                  <div
+                    class="flex shrink-0 flex-row items-center gap-1"
+                  >
+                    <button
+                      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                      title="Sort ascending"
+                      type="button"
+                    >
+                      〰︎
+                    </button>
+                  </div>
+                </div>
+                <div
+                  class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                />
+              </th>
+              <th
+                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
+                style="width: 150px;"
+              >
+                <div
+                  class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                >
+                  <div
+                    class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                  >
+                    Desktop
+                  </div>
+                  <div
+                    class="flex shrink-0 flex-row items-center gap-1"
+                  >
+                    <button
+                      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                      title="Sort descending"
+                      type="button"
+                    >
+                      〰︎
+                    </button>
+                  </div>
+                </div>
+                <div
+                  class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                />
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="[&_tr:last-child]:border-0"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                data-aggregated="false"
+                data-can-expand="false"
+                data-cell-id="0_event"
+                data-column-id="event"
+                data-depth="0"
+                data-grouped="false"
+                data-placeholder="false"
+                data-row-expanded="false"
+                style="width: 150px;"
+              >
+                <span
+                  class="font-medium"
+                  title="The time when the browser starts navigating to the page. This is the earliest timestamp in the navigation timing API."
+                >
+                  Navigation Start
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                data-aggregated="false"
+                data-can-expand="false"
+                data-cell-id="0_Desktop"
+                data-column-id="Desktop"
+                data-depth="0"
+                data-grouped="false"
+                data-placeholder="false"
+                data-row-expanded="false"
+                style="width: 150px;"
+              >
+                <span
+                  data-testid="ms-value"
+                >
+                  0
+                   ms
+                </span>
+              </td>
+            </tr>
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                data-aggregated="false"
+                data-can-expand="false"
+                data-cell-id="1_event"
+                data-column-id="event"
+                data-depth="0"
+                data-grouped="false"
+                data-placeholder="false"
+                data-row-expanded="false"
+                style="width: 150px;"
+              >
+                <span
+                  class="font-medium"
+                  title="Time to First Byte - The time between when the user requests a page and when the first byte of the response is received from the server."
+                >
+                  TTFB
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                data-aggregated="false"
+                data-can-expand="false"
+                data-cell-id="1_Desktop"
+                data-column-id="Desktop"
+                data-depth="0"
+                data-grouped="false"
+                data-placeholder="false"
+                data-row-expanded="false"
+                style="width: 150px;"
+              >
+                <span
+                  data-testid="ms-value"
+                >
+                  100
+                   ms
+                </span>
+              </td>
+            </tr>
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                data-aggregated="false"
+                data-can-expand="false"
+                data-cell-id="2_event"
+                data-column-id="event"
+                data-depth="0"
+                data-grouped="false"
+                data-placeholder="false"
+                data-row-expanded="false"
+                style="width: 150px;"
+              >
+                <span
+                  class="font-medium"
+                  title="The time when the browser first renders any visual content (pixels) to the screen. This includes background colors, borders, or any visual change."
+                >
+                  First Paint
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                data-aggregated="false"
+                data-can-expand="false"
+                data-cell-id="2_Desktop"
+                data-column-id="Desktop"
+                data-depth="0"
+                data-grouped="false"
+                data-placeholder="false"
+                data-row-expanded="false"
+                style="width: 150px;"
+              >
+                <span
+                  data-testid="ms-value"
+                >
+                  300
+                   ms
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+`;

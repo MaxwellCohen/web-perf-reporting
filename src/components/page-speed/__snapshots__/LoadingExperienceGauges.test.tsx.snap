@@ -1,0 +1,33 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`LoadingExperienceGauges > renders gauge charts for each metric when experience has metrics 1`] = `
+<div
+  class="grid-auto-rows-[1fr] mt-2 grid grid-cols-[repeat(auto-fill,_minmax(180px,_1fr))] gap-2"
+>
+  <div
+    data-testid="gauge"
+  >
+    Cumulative Layout Shift
+  </div>
+  <div
+    data-testid="gauge"
+  >
+    Time to First Byte
+  </div>
+  <div
+    data-testid="gauge"
+  >
+    First Contentful Paint
+  </div>
+  <div
+    data-testid="gauge"
+  >
+    Interaction to Next Paint
+  </div>
+  <div
+    data-testid="gauge"
+  >
+    Largest Contentful Paint
+  </div>
+</div>
+`;

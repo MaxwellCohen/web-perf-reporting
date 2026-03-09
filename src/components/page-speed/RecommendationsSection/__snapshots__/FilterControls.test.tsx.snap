@@ -1,0 +1,333 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`FilterControls > renders Collapse All when all expanded 1`] = `
+<div
+  class="mb-6 flex flex-wrap items-center gap-4"
+>
+  <div
+    class="flex items-center gap-2"
+  >
+    <button
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs"
+    >
+      Collapse All
+    </button>
+  </div>
+  <div>
+    <button
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-md px-3 text-xs h-9"
+    >
+      Filter by Category 
+      <span
+        data-testid="chevron"
+      />
+    </button>
+    <div>
+      <div
+        aria-checked="true"
+        role="checkbox"
+      >
+        Performance
+      </div>
+      <div
+        aria-checked="true"
+        role="checkbox"
+      >
+        Accessibility
+      </div>
+      <div
+        class="border-t pt-1 mt-1"
+      >
+        <button
+          class="inline-flex items-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs w-full justify-start"
+        >
+          Clear
+        </button>
+      </div>
+    </div>
+  </div>
+  <div>
+    <button
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-md px-3 text-xs h-9"
+    >
+      Filter by Priority 
+      <span
+        data-testid="chevron"
+      />
+    </button>
+    <div>
+      <div
+        aria-checked="true"
+        role="checkbox"
+      >
+        <span
+          class="capitalize"
+        >
+          high
+        </span>
+      </div>
+      <div
+        aria-checked="true"
+        role="checkbox"
+      >
+        <span
+          class="capitalize"
+        >
+          medium
+        </span>
+      </div>
+      <div
+        aria-checked="true"
+        role="checkbox"
+      >
+        <span
+          class="capitalize"
+        >
+          low
+        </span>
+      </div>
+      <div
+        class="border-t pt-1 mt-1"
+      >
+        <button
+          class="inline-flex items-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs w-full justify-start"
+        >
+          Clear
+        </button>
+      </div>
+    </div>
+  </div>
+  <div
+    class="ml-auto text-sm text-muted-foreground"
+  >
+    Showing 
+    5
+     of 
+    10
+     recommendations
+  </div>
+</div>
+`;
+
+exports[`FilterControls > renders Reset Filters when any filter is selected 1`] = `
+<div
+  class="mb-6 flex flex-wrap items-center gap-4"
+>
+  <div
+    class="flex items-center gap-2"
+  >
+    <button
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs"
+    >
+      Expand All
+    </button>
+  </div>
+  <div>
+    <button
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-md px-3 text-xs h-9"
+    >
+      Filter by Category 
+      <span
+        data-testid="chevron"
+      />
+    </button>
+    <div>
+      <div
+        aria-checked="true"
+        role="checkbox"
+      >
+        Performance
+      </div>
+      <div
+        aria-checked="false"
+        role="checkbox"
+      >
+        Accessibility
+      </div>
+      <div
+        class="border-t pt-1 mt-1"
+      >
+        <button
+          class="inline-flex items-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs w-full justify-start"
+        >
+          Clear
+        </button>
+      </div>
+    </div>
+  </div>
+  <div>
+    <button
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-md px-3 text-xs h-9"
+    >
+      Filter by Priority 
+      <span
+        data-testid="chevron"
+      />
+    </button>
+    <div>
+      <div
+        aria-checked="true"
+        role="checkbox"
+      >
+        <span
+          class="capitalize"
+        >
+          high
+        </span>
+      </div>
+      <div
+        aria-checked="true"
+        role="checkbox"
+      >
+        <span
+          class="capitalize"
+        >
+          medium
+        </span>
+      </div>
+      <div
+        aria-checked="true"
+        role="checkbox"
+      >
+        <span
+          class="capitalize"
+        >
+          low
+        </span>
+      </div>
+      <div
+        class="border-t pt-1 mt-1"
+      >
+        <button
+          class="inline-flex items-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs w-full justify-start"
+        >
+          Clear
+        </button>
+      </div>
+    </div>
+  </div>
+  <button
+    class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs"
+  >
+    Reset Filters
+  </button>
+  <div
+    class="ml-auto text-sm text-muted-foreground"
+  >
+    Showing 
+    5
+     of 
+    10
+     recommendations
+  </div>
+</div>
+`;
+
+exports[`FilterControls > renders default state 1`] = `
+<div
+  class="mb-6 flex flex-wrap items-center gap-4"
+>
+  <div
+    class="flex items-center gap-2"
+  >
+    <button
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs"
+    >
+      Expand All
+    </button>
+  </div>
+  <div>
+    <button
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-md px-3 text-xs h-9"
+    >
+      Filter by Category 
+      <span
+        data-testid="chevron"
+      />
+    </button>
+    <div>
+      <div
+        aria-checked="true"
+        role="checkbox"
+      >
+        Performance
+      </div>
+      <div
+        aria-checked="true"
+        role="checkbox"
+      >
+        Accessibility
+      </div>
+      <div
+        class="border-t pt-1 mt-1"
+      >
+        <button
+          class="inline-flex items-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs w-full justify-start"
+        >
+          Clear
+        </button>
+      </div>
+    </div>
+  </div>
+  <div>
+    <button
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-md px-3 text-xs h-9"
+    >
+      Filter by Priority 
+      <span
+        data-testid="chevron"
+      />
+    </button>
+    <div>
+      <div
+        aria-checked="true"
+        role="checkbox"
+      >
+        <span
+          class="capitalize"
+        >
+          high
+        </span>
+      </div>
+      <div
+        aria-checked="true"
+        role="checkbox"
+      >
+        <span
+          class="capitalize"
+        >
+          medium
+        </span>
+      </div>
+      <div
+        aria-checked="true"
+        role="checkbox"
+      >
+        <span
+          class="capitalize"
+        >
+          low
+        </span>
+      </div>
+      <div
+        class="border-t pt-1 mt-1"
+      >
+        <button
+          class="inline-flex items-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs w-full justify-start"
+        >
+          Clear
+        </button>
+      </div>
+    </div>
+  </div>
+  <div
+    class="ml-auto text-sm text-muted-foreground"
+  >
+    Showing 
+    5
+     of 
+    10
+     recommendations
+  </div>
+</div>
+`;

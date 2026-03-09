@@ -1,0 +1,25 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`app/providers > initializes posthog and renders the tracker with children 1`] = `
+<div
+  data-testid="posthog-provider"
+>
+  <div>
+    Mock page view tracker
+  </div>
+  <div>
+    Provider child
+  </div>
+</div>
+`;
+
+exports[`app/providers > mounts the next themes provider after the first effect 1`] = `
+<div
+  data-attribute="class"
+  data-testid="theme-provider"
+>
+  <div>
+    Themed child
+  </div>
+</div>
+`;

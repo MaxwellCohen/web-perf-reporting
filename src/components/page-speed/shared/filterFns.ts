@@ -4,6 +4,7 @@ export const booleanFilterFn: FilterFn<unknown> = (
   row,
   columnId,
   filterValue,
+  _addMeta,
 ) => {
   if (!filterValue || !filterValue.length) {
     return true;
@@ -16,7 +17,7 @@ export const booleanFilterFn: FilterFn<unknown> = (
 /**
  * Standard filter function for string-based filtering (case-insensitive)
  */
-export const includesStringFilter: FilterFn<unknown> = (row, columnId, filterValue) => {
+export const includesStringFilter: FilterFn<unknown> = (row, columnId, filterValue, _addMeta) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cellValue = String((row as any).getValue(columnId) || '').toLowerCase();
   const filter = String(filterValue || '').toLowerCase();
@@ -26,7 +27,7 @@ export const includesStringFilter: FilterFn<unknown> = (row, columnId, filterVal
 /**
  * Standard filter function for numeric range filtering
  */
-export const inNumberRangeFilter: FilterFn<unknown> = (row, columnId, filterValue) => {
+export const inNumberRangeFilter: FilterFn<unknown> = (row, columnId, filterValue, _addMeta) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cellValue = Number((row as any).getValue(columnId)) || 0;
   const [min, max] = (filterValue as [number, number]) || [0, Infinity];

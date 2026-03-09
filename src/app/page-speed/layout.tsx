@@ -1,8 +1,6 @@
-
-export default async function Home({
-  children
+export default async function PageSpeedLayout({
+  children,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
   children: React.ReactNode;
 }) {
   

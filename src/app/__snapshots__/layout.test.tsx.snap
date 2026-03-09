@@ -1,0 +1,27 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`app/layout > renders the shared layout shell around the page content 1`] = `
+<div
+  class="grid min-h-screen grid-rows-[auto,1fr]"
+>
+  <nav>
+    Mock top nav
+  </nav>
+  <div
+    class="overflow-y-scroll"
+  >
+    <main
+      class="mx-auto min-h-screen p-4 print:min-h-0"
+    >
+      <div>
+        Page content
+      </div>
+    </main>
+    <footer
+      class="w-full text-center print:hidden"
+    >
+      Made by Maxwell Cohen, with data from Google crux report.
+    </footer>
+  </div>
+</div>
+`;

@@ -1,0 +1,29 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`RenderHeading > renders device in parentheses when _device is set 1`] = `
+<div>
+  Score
+  <br />
+  <span
+    class="text-xs"
+  >
+    (
+    Mobile
+    )
+  </span>
+</div>
+`;
+
+exports[`RenderHeading > renders empty string when heading is undefined 1`] = `<div />`;
+
+exports[`RenderHeading > renders formattedDefault when label is not a string 1`] = `
+<div>
+  Transfer Size
+</div>
+`;
+
+exports[`RenderHeading > renders string label 1`] = `
+<div>
+  Name
+</div>
+`;

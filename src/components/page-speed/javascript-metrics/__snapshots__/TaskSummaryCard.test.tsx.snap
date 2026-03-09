@@ -1,0 +1,307 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`TaskSummaryCard > calculates from mainThreadTasks when diagnostics missing 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow md:col-span-2 lg:col-span-3"
+>
+  <div
+    class="flex flex-col space-y-1.5 p-6"
+  >
+    <div
+      class="font-semibold leading-none tracking-tight"
+    >
+      Task Summary
+    </div>
+  </div>
+  <div
+    class="p-6 pt-0"
+  >
+    <div
+      class="overflow-x-auto"
+    >
+      <div
+        class="relative w-full overflow-auto"
+      >
+        <table
+          class="w-full caption-bottom text-sm table-auto min-w-full"
+        >
+          <thead
+            class="[&_tr]:border-b"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <th
+                class="h-10 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-28 whitespace-nowrap px-3"
+              >
+                Total Tasks
+              </th>
+              <th
+                class="h-10 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-24 whitespace-nowrap px-3"
+              >
+                Total Time
+              </th>
+              <th
+                class="h-10 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-28 whitespace-nowrap px-3"
+              >
+                Avg Duration
+              </th>
+              <th
+                class="h-10 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-28 whitespace-nowrap px-3"
+              >
+                Longest Task
+              </th>
+              <th
+                class="h-10 align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-20 whitespace-nowrap px-3 text-center"
+              >
+                &gt;10ms
+              </th>
+              <th
+                class="h-10 align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-20 whitespace-nowrap px-3 text-center"
+              >
+                &gt;25ms
+              </th>
+              <th
+                class="h-10 align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-20 whitespace-nowrap px-3 text-center"
+              >
+                &gt;50ms
+              </th>
+              <th
+                class="h-10 align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-24 whitespace-nowrap px-3 text-center"
+              >
+                &gt;100ms
+              </th>
+              <th
+                class="h-10 align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-24 whitespace-nowrap px-3 text-center"
+              >
+                &gt;500ms
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="[&_tr:last-child]:border-0"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3"
+              >
+                2
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3"
+              >
+                <span
+                  class=""
+                  title="ms"
+                >
+                  80 ms
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3"
+              >
+                <span
+                  class=""
+                  title="ms"
+                >
+                  40 ms
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3"
+              >
+                <span
+                  class=""
+                  title="ms"
+                >
+                  50 ms
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3 text-center"
+              >
+                0
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3 text-center"
+              >
+                0
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3 text-center"
+              >
+                0
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3 text-center"
+              >
+                0
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3 text-center"
+              >
+                0
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TaskSummaryCard > renders stats from diagnostics item 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow md:col-span-2 lg:col-span-3"
+>
+  <div
+    class="flex flex-col space-y-1.5 p-6"
+  >
+    <div
+      class="font-semibold leading-none tracking-tight"
+    >
+      Task Summary
+    </div>
+  </div>
+  <div
+    class="p-6 pt-0"
+  >
+    <div
+      class="overflow-x-auto"
+    >
+      <div
+        class="relative w-full overflow-auto"
+      >
+        <table
+          class="w-full caption-bottom text-sm table-auto min-w-full"
+        >
+          <thead
+            class="[&_tr]:border-b"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <th
+                class="h-10 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-28 whitespace-nowrap px-3"
+              >
+                Total Tasks
+              </th>
+              <th
+                class="h-10 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-24 whitespace-nowrap px-3"
+              >
+                Total Time
+              </th>
+              <th
+                class="h-10 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-28 whitespace-nowrap px-3"
+              >
+                Avg Duration
+              </th>
+              <th
+                class="h-10 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-28 whitespace-nowrap px-3"
+              >
+                Longest Task
+              </th>
+              <th
+                class="h-10 align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-20 whitespace-nowrap px-3 text-center"
+              >
+                &gt;10ms
+              </th>
+              <th
+                class="h-10 align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-20 whitespace-nowrap px-3 text-center"
+              >
+                &gt;25ms
+              </th>
+              <th
+                class="h-10 align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-20 whitespace-nowrap px-3 text-center"
+              >
+                &gt;50ms
+              </th>
+              <th
+                class="h-10 align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-24 whitespace-nowrap px-3 text-center"
+              >
+                &gt;100ms
+              </th>
+              <th
+                class="h-10 align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-24 whitespace-nowrap px-3 text-center"
+              >
+                &gt;500ms
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="[&_tr:last-child]:border-0"
+          >
+            <tr
+              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            >
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3"
+              >
+                10
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3"
+              >
+                <span
+                  class=""
+                  title="ms"
+                >
+                  500 ms
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3"
+              >
+                <span
+                  class=""
+                  title="ms"
+                >
+                  50 ms
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3"
+              >
+                <span
+                  class=""
+                  title="ms"
+                >
+                  0 ms
+                </span>
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3 text-center"
+              >
+                2
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3 text-center"
+              >
+                1
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3 text-center"
+              >
+                0
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3 text-center"
+              >
+                0
+              </td>
+              <td
+                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3 text-center"
+              >
+                0
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+`;

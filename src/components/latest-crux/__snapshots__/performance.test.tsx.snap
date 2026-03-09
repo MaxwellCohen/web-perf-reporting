@@ -1,0 +1,161 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`latest crux performance components > renders the current performance card and chart variants 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow grid h-full grid-cols-1 grid-rows-[2.75rem,auto,1rem,auto] gap-1 p-2"
+>
+  <div
+    class="text-md overflow-hidden text-center font-bold"
+  >
+    Largest Contentful Paint (LCP)
+  </div>
+  <div
+    data-chart-slot="true"
+  />
+  <div
+    class="w-full overflow-hidden rounded-[4px]"
+    data-bar-slot="true"
+  />
+  <div
+    class="mt-1 flex-col items-start text-sm"
+  >
+    <div
+      class="flex gap-2 font-medium leading-none"
+    >
+      P75 is 
+      900
+    </div>
+    <div
+      class="flex gap-2 font-medium leading-none"
+    >
+      <span
+        style="color: hsl(var(--chart-1));"
+      >
+        Good
+      </span>
+    </div>
+    <div
+      class="text-xs leading-none text-muted-foreground"
+    >
+      Good: 0 to 1000
+    </div>
+    <div
+      class="text-xs leading-none text-muted-foreground"
+    >
+      Needs Improvement: 1000 to 2000
+    </div>
+    <div
+      class="text-xs leading-none text-muted-foreground"
+    >
+      Poor: 2000 and above
+    </div>
+  </div>
+</div>
+`;
+
+exports[`latest crux performance components > renders the current performance card and chart variants 2`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow grid h-full grid-cols-1 grid-rows-[2.75rem,auto,1rem,auto] gap-1 p-2"
+>
+  <div
+    class="text-md overflow-hidden text-center font-bold"
+  >
+    Largest Contentful Paint (LCP)
+  </div>
+  <div
+    data-chart-slot="true"
+  />
+  <div
+    class="w-full overflow-hidden rounded-[4px]"
+    data-bar-slot="true"
+  />
+  <div
+    class="mt-1 flex-col items-start text-sm"
+  >
+    <div
+      class="flex gap-2 font-medium leading-none"
+    >
+      P75 is 
+      900
+    </div>
+    <div
+      class="flex gap-2 font-medium leading-none"
+    >
+      <span
+        style="color: hsl(var(--chart-1));"
+      >
+        Good
+      </span>
+    </div>
+    <div
+      class="text-xs leading-none text-muted-foreground"
+    >
+      Good: 0 to 1000
+    </div>
+    <div
+      class="text-xs leading-none text-muted-foreground"
+    >
+      Needs Improvement: 1000 to 2000
+    </div>
+    <div
+      class="text-xs leading-none text-muted-foreground"
+    >
+      Poor: 2000 and above
+    </div>
+  </div>
+</div>
+`;
+
+exports[`latest crux performance components > renders the dashboard and derived metric cards from the report map 1`] = `
+<div>
+  <h2
+    class="text-lg"
+  >
+    Latest Performance Report for 
+    2024-1-1 - 2024-1-31
+  </h2>
+  <div>
+    Largest Contentful Paint (LCP)
+  </div>
+</div>
+`;
+
+exports[`latest crux performance components > renders the radial and stacked chart helpers 1`] = `
+<div>
+  <div>
+    <div>
+      <div>
+        Chart tooltip
+      </div>
+      <div>
+        Radial bar: poor_density
+      </div>
+      <div>
+        Radial bar: ni_density
+      </div>
+      <div>
+        Radial bar: good_density
+      </div>
+    </div>
+  </div>
+  <div>
+    <div>
+      <div>
+        Cartesian grid
+      </div>
+      <div>
+        Chart tooltip
+      </div>
+      <div>
+        Bar: good_density
+      </div>
+      <div>
+        Bar: ni_density
+      </div>
+      <div>
+        Bar: poor_density
+      </div>
+    </div>
+  </div>
+</div>
+`;

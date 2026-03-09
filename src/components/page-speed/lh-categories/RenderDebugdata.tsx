@@ -108,8 +108,6 @@ export function RenderDebugData({ items }: { items: TableDataItem[] }) {
     },
   });
 
-  console.log('table', table);
-
   return (
     <Table>
       <TableHeader>

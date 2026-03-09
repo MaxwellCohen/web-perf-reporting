@@ -13,140 +13,154 @@ type TimelineRow = {
   [reportLabel: string]: string | number | undefined;
 };
 
-type TimelineCardProps = {
-  metrics: Array<{
-    label: string;
-    ttfb?: number;
-    fcp?: number;
-    lcp?: number;
-    domContentLoaded?: number;
-    loadTime?: number;
-    interactive?: number;
-    observedNavigationStart?: number;
-    observedFirstPaint?: number;
-    observedFirstContentfulPaint?: number;
-    observedLargestContentfulPaint?: number;
-    observedFirstContentfulPaintAllFrames?: number;
-    observedFirstVisualChange?: number;
-    observedLargestContentfulPaintAllFrames?: number;
-    observedLastVisualChange?: number;
-    observedTraceEnd?: number;
-  }>;
+type TimelineMetric = {
+  label: string;
+  ttfb?: number;
+  fcp?: number;
+  lcp?: number;
+  domContentLoaded?: number;
+  loadTime?: number;
+  interactive?: number;
+  observedNavigationStart?: number;
+  observedFirstPaint?: number;
+  observedFirstContentfulPaint?: number;
+  observedLargestContentfulPaint?: number;
+  observedFirstContentfulPaintAllFrames?: number;
+  observedFirstVisualChange?: number;
+  observedLargestContentfulPaintAllFrames?: number;
+  observedLastVisualChange?: number;
+  observedTraceEnd?: number;
 };
+
+type TimelineCardProps = {
+  metrics: TimelineMetric[];
+};
+
+const EVENT_MAP: Record<string, string> = {
+  'Navigation Start': 'observedNavigationStart',
+  'TTFB': 'ttfb',
+  'First Paint': 'observedFirstPaint',
+  'First Visual Change': 'observedFirstVisualChange',
+  'FCP': 'fcp',
+  'FCP (Observed)': 'observedFirstContentfulPaint',
+  'FCP (All Frames)': 'observedFirstContentfulPaintAllFrames',
+  'LCP': 'lcp',
+  'LCP (Observed)': 'observedLargestContentfulPaint',
+  'LCP (All Frames)': 'observedLargestContentfulPaintAllFrames',
+  'DOM Content Loaded': 'domContentLoaded',
+  'Load': 'loadTime',
+  'Last Visual Change': 'observedLastVisualChange',
+  'Interactive': 'interactive',
+  'Trace End': 'observedTraceEnd',
+};
+
+const EVENTS_WITH_TTFB = new Set([
+  'DOM Content Loaded',
+  'Load',
+  'First Paint',
+  'First Visual Change',
+  'FCP (Observed)',
+  'FCP (All Frames)',
+  'LCP (Observed)',
+  'LCP (All Frames)',
+  'Last Visual Change',
+  'Trace End',
+]);
+
+const EVENT_DESCRIPTIONS: Record<string, string> = {
+  'Navigation Start': 'The time when the browser starts navigating to the page. This is the earliest timestamp in the navigation timing API.',
+  'TTFB': 'Time to First Byte - The time between when the user requests a page and when the first byte of the response is received from the server.',
+  'First Paint': 'The time when the browser first renders any visual content (pixels) to the screen. This includes background colors, borders, or any visual change.',
+  'First Visual Change': 'The time when the first visual change occurs on the page, marking the beginning of visual rendering.',
+  'FCP': 'First Contentful Paint - The time when the browser renders the first bit of content from the DOM, such as text, an image, or a canvas element.',
+  'FCP (Observed)': 'First Contentful Paint (Observed) - The observed FCP value from the Performance Observer API, which may differ slightly from the calculated FCP.',
+  'FCP (All Frames)': 'First Contentful Paint (All Frames) - The observed FCP value across all frames, including iframes.',
+  'LCP': 'Largest Contentful Paint - The render time of the largest image or text block visible within the viewport.',
+  'LCP (Observed)': 'Largest Contentful Paint (Observed) - The observed LCP value from the Performance Observer API, which tracks the largest content element as it loads.',
+  'LCP (All Frames)': 'Largest Contentful Paint (All Frames) - The observed LCP value across all frames, including iframes.',
+  'DOM Content Loaded': 'The time when the HTML document has been completely loaded and parsed, without waiting for stylesheets, images, and subframes to finish loading.',
+  'Load': 'The time when the page and all its resources (images, stylesheets, scripts) have finished loading.',
+  'Last Visual Change': 'The time when the last visual change occurs on the page, marking the end of visual rendering.',
+  'Interactive': 'Time to Interactive - The time when the page becomes fully interactive, meaning the main thread is idle enough to handle user input.',
+  'Trace End': 'The time when the performance trace ends, marking the completion of the performance measurement.',
+};
+
+function sortNumeric(a: number | undefined, b: number | undefined): number {
+  if (a === undefined && b === undefined) return 0;
+  if (a === undefined) return 1;
+  if (b === undefined) return -1;
+  return a - b;
+}
+
+function buildEventDataMap(metrics: TimelineMetric[]): Map<string, Record<string, number | undefined>> {
+  const eventDataMap = new Map<string, Record<string, number | undefined>>();
+
+  for (const metric of metrics) {
+    const ttfb = metric.ttfb ?? 0;
+
+    for (const [eventLabel, propKey] of Object.entries(EVENT_MAP)) {
+      const rawValue = metric[propKey as keyof TimelineMetric] as number | undefined;
+      if (rawValue === undefined) continue;
+
+      if (!eventDataMap.has(eventLabel)) {
+        eventDataMap.set(eventLabel, {});
+      }
+      const eventData = eventDataMap.get(eventLabel)!;
+
+      if (eventLabel === 'Navigation Start') {
+        eventData[metric.label] = 0;
+      } else if (eventLabel === 'TTFB') {
+        eventData[metric.label] = rawValue;
+      } else if (EVENTS_WITH_TTFB.has(eventLabel)) {
+        eventData[metric.label] = rawValue + ttfb;
+      } else {
+        eventData[metric.label] = rawValue;
+      }
+    }
+  }
+
+  return eventDataMap;
+}
+
+function buildTimelineRows(
+  eventDataMap: Map<string, Record<string, number | undefined>>,
+  reportLabels: string[]
+): TimelineRow[] {
+  const rows: TimelineRow[] = [];
+
+  eventDataMap.forEach((data, eventLabel) => {
+    const row: TimelineRow = { event: eventLabel };
+    for (const reportLabel of reportLabels) {
+      row[reportLabel] = data[reportLabel] ?? undefined;
+    }
+    rows.push(row);
+  });
+
+  if (reportLabels.length > 0) {
+    const firstReportLabel = reportLabels[0];
+    rows.sort((a, b) =>
+      sortNumeric(a[firstReportLabel] as number | undefined, b[firstReportLabel] as number | undefined)
+    );
+  }
+
+  return rows;
+}
+
+function optionalMsCell(value: number | undefined): React.ReactNode {
+  if (value === undefined) {
+    return <span className="text-muted-foreground">N/A</span>;
+  }
+  return <RenderMSValue value={value} />;
+}
 
 export function TimelineCard({ metrics }: TimelineCardProps) {
   "use no memo";
-  
+
   const { data, columns } = useMemo(() => {
-    const eventMap: { [key: string]: string } = {
-      'Navigation Start': 'observedNavigationStart',
-      'TTFB': 'ttfb',
-      'First Paint': 'observedFirstPaint',
-      'First Visual Change': 'observedFirstVisualChange',
-      'FCP': 'fcp',
-      'FCP (Observed)': 'observedFirstContentfulPaint',
-      'FCP (All Frames)': 'observedFirstContentfulPaintAllFrames',
-      'LCP': 'lcp',
-      'LCP (Observed)': 'observedLargestContentfulPaint',
-      'LCP (All Frames)': 'observedLargestContentfulPaintAllFrames',
-      'DOM Content Loaded': 'domContentLoaded',
-      'Load': 'loadTime',
-      'Last Visual Change': 'observedLastVisualChange',
-      'Interactive': 'interactive',
-      'Trace End': 'observedTraceEnd',
-    };
-    
-    const reportLabels = metrics.map(m => m.label);
-    const rows: TimelineRow[] = [];
-    const eventDataMap = new Map<string, { [reportLabel: string]: number | undefined }>();
-    
-    // Events that should account for TTFB (show time after first byte)
-    const eventsWithTTFB = new Set([
-      'DOM Content Loaded',
-      'Load',
-      'First Paint',
-      'First Visual Change',
-      'FCP (Observed)',
-      'FCP (All Frames)',
-      'LCP (Observed)',
-      'LCP (All Frames)',
-      'Last Visual Change',
-      'Trace End',
-    ]);
-    
-    // Collect all event data, adjusting times relative to Navigation Start
-    metrics.forEach((metric) => {
-      // const navigationStart = metric.observedNavigationStart ?? 0;
-      const ttfb = metric.ttfb ?? 0;
-      
-      Object.entries(eventMap).forEach(([eventLabel, propKey]) => {
-        const rawValue = metric[propKey as keyof typeof metric] as number | undefined;
-        if (rawValue !== undefined) {
-          if (!eventDataMap.has(eventLabel)) {
-            eventDataMap.set(eventLabel, {});
-          }
-          const eventData = eventDataMap.get(eventLabel)!;
-          
-          // Navigation Start is always 0
-          if (eventLabel === 'Navigation Start') {
-            eventData[metric.label] = 0;
-          } else if (eventLabel === 'TTFB') {
-            // TTFB is already a relative value (duration from navigation start), so use it as-is
-            eventData[metric.label] = rawValue;
-          } else if (eventsWithTTFB.has(eventLabel)) {
-            // These events account for TTFB: show time after first byte was received
-            // Subtract both navigation start and TTFB to get time after first byte
-            eventData[metric.label] = rawValue + ttfb;
-          } else {
-            // All other events are absolute timestamps, subtract navigation start to get relative time
-            eventData[metric.label] = rawValue;
-          }
-        }
-      });
-    });
-    
-    // Convert to rows
-    eventDataMap.forEach((data, eventLabel) => {
-      const row: TimelineRow = { event: eventLabel };
-      reportLabels.forEach((reportLabel) => {
-        row[reportLabel] = data[reportLabel] ?? undefined;
-      });
-      rows.push(row);
-    });
-    
-    // Sort rows by first report's time value
-    if (reportLabels.length > 0) {
-      const firstReportLabel = reportLabels[0];
-      rows.sort((a, b) => {
-        const aValue = a[firstReportLabel] as number | undefined;
-        const bValue = b[firstReportLabel] as number | undefined;
-        if (aValue === undefined && bValue === undefined) return 0;
-        if (aValue === undefined) return 1;
-        if (bValue === undefined) return -1;
-        return aValue - bValue;
-      });
-    }
-    
-    // Event descriptions for tooltips
-    const eventDescriptions: { [key: string]: string } = {
-      'Navigation Start': 'The time when the browser starts navigating to the page. This is the earliest timestamp in the navigation timing API.',
-      'TTFB': 'Time to First Byte - The time between when the user requests a page and when the first byte of the response is received from the server.',
-      'First Paint': 'The time when the browser first renders any visual content (pixels) to the screen. This includes background colors, borders, or any visual change.',
-      'First Visual Change': 'The time when the first visual change occurs on the page, marking the beginning of visual rendering.',
-      'FCP': 'First Contentful Paint - The time when the browser renders the first bit of content from the DOM, such as text, an image, or a canvas element.',
-      'FCP (Observed)': 'First Contentful Paint (Observed) - The observed FCP value from the Performance Observer API, which may differ slightly from the calculated FCP.',
-      'FCP (All Frames)': 'First Contentful Paint (All Frames) - The observed FCP value across all frames, including iframes.',
-      'LCP': 'Largest Contentful Paint - The render time of the largest image or text block visible within the viewport.',
-      'LCP (Observed)': 'Largest Contentful Paint (Observed) - The observed LCP value from the Performance Observer API, which tracks the largest content element as it loads.',
-      'LCP (All Frames)': 'Largest Contentful Paint (All Frames) - The observed LCP value across all frames, including iframes.',
-      'DOM Content Loaded': 'The time when the HTML document has been completely loaded and parsed, without waiting for stylesheets, images, and subframes to finish loading.',
-      'Load': 'The time when the page and all its resources (images, stylesheets, scripts) have finished loading.',
-      'Last Visual Change': 'The time when the last visual change occurs on the page, marking the end of visual rendering.',
-      'Interactive': 'Time to Interactive - The time when the page becomes fully interactive, meaning the main thread is idle enough to handle user input.',
-      'Trace End': 'The time when the performance trace ends, marking the completion of the performance measurement.',
-    };
-    
-    // Create columns
+    const reportLabels = metrics.map((m) => m.label);
+    const eventDataMap = buildEventDataMap(metrics);
+    const rows = buildTimelineRows(eventDataMap, reportLabels);
+
     const columnHelper = createColumnHelper<TimelineRow>();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const tableColumns: ColumnDef<TimelineRow, any>[] = [
@@ -161,7 +175,7 @@ export function TimelineCard({ metrics }: TimelineCardProps) {
         enableResizing: true,
         cell: (info) => {
           const eventName = info.getValue();
-          const description = eventDescriptions[eventName] || '';
+          const description = EVENT_DESCRIPTIONS[eventName] ?? '';
           return (
             <span className="font-medium" title={description}>
               {eventName}
@@ -178,30 +192,21 @@ export function TimelineCard({ metrics }: TimelineCardProps) {
           sortingFn: (rowA, rowB, columnId) => {
             const a = rowA.getValue(columnId) as number | undefined;
             const b = rowB.getValue(columnId) as number | undefined;
-            if (a === undefined && b === undefined) return 0;
-            if (a === undefined) return 1;
-            if (b === undefined) return -1;
-            return a - b;
+            return sortNumeric(a, b);
           },
-          cell: (info) => {
-            const value = info.getValue();
-            if (value === undefined) {
-              return <span className="text-muted-foreground">N/A</span>;
-            }
-            return <RenderMSValue value={value} />;
-          },
+          cell: (info) => optionalMsCell(info.getValue()),
         })
       ),
     ];
-    
+
     return { data: rows, columns: tableColumns };
   }, [metrics]);
-  
+
   const table = useStandardTable({
     data,
     columns,
   });
-  
+
   if (!metrics.length || data.length === 0) {
     return null;
   }
@@ -213,7 +218,7 @@ export function TimelineCard({ metrics }: TimelineCardProps) {
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
-          <Table className="w-full" style={{ width: '100%' }}>
+          <Table className="w-full">
             <DataTableHeader table={table} />
             <DataTableBody table={table} />
           </Table>
@@ -222,4 +227,3 @@ export function TimelineCard({ metrics }: TimelineCardProps) {
     </Card>
   );
 }
-

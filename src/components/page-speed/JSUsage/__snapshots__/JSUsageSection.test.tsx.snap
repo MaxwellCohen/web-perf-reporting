@@ -1,0 +1,101 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`JSUsageAccordion > renders accordion with table 1`] = `
+<details
+  class="rounded-2 content-visibility-auto mb-2 min-w-full overflow-hidden rounded-md border-4 p-2 col-span-1 w-full lg:col-span-full"
+  open=""
+>
+  <summary
+    class=" flex flex-col gap-2"
+  >
+    <div
+      class="text-lg font-bold group-hover:underline"
+    >
+      JS Usage Table
+       for Desktop
+    </div>
+  </summary>
+  <div
+    data-testid="js-usage-table"
+  >
+    Table rows: 
+    1
+  </div>
+</details>
+`;
+
+exports[`JSUsageCard > renders card with label 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow col-span-1 w-full lg:col-span-full"
+>
+  <div
+    class="flex flex-col space-y-1.5 p-6 text-center text-2xl font-bold"
+  >
+    JS Usage Table
+     for Mobile
+  </div>
+  <div
+    data-testid="js-usage-table"
+  >
+    Table rows: 
+    1
+  </div>
+</div>
+`;
+
+exports[`JSUsageCard > renders without label 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow col-span-1 w-full lg:col-span-full"
+>
+  <div
+    class="flex flex-col space-y-1.5 p-6 text-center text-2xl font-bold"
+  >
+    JS Usage Table
+     
+  </div>
+  <div
+    data-testid="js-usage-table"
+  >
+    Table rows: 
+    1
+  </div>
+</div>
+`;
+
+exports[`JSUsageCardSection > renders cards when treemap data exists 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow col-span-1 w-full lg:col-span-full"
+>
+  <div
+    class="flex flex-col space-y-1.5 p-6 text-center text-2xl font-bold"
+  >
+    JS Usage Table
+     for Desktop
+  </div>
+  <div
+    data-testid="js-usage-table"
+  >
+    Table rows: 
+    1
+  </div>
+</div>
+`;
+
+exports[`JSUsageSection > renders a card per item when items have script-treemap-data 1`] = `
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow col-span-1 w-full lg:col-span-full"
+>
+  <div
+    class="flex flex-col space-y-1.5 p-6 text-center text-2xl font-bold"
+  >
+    JS Usage Table
+     for Mobile
+  </div>
+  <div
+    data-testid="js-usage-table"
+  >
+    Table rows: 
+    1
+  </div>
+</div>
+`;
