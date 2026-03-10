@@ -183,10 +183,10 @@ export function TimelineCard({ metrics }: TimelineCardProps) {
           );
         },
       }),
-      ...reportLabels.map((reportLabel) =>
+      ...reportLabels.map((reportLabel, index) =>
         columnHelper.accessor((row) => row[reportLabel] as number | undefined, {
-          id: reportLabel,
-          header: reportLabel,
+          id: `report_${index}`,
+          header: reportLabel || `Report ${index + 1}`,
           enableSorting: true,
           enableResizing: true,
           sortingFn: (rowA, rowB, columnId) => {

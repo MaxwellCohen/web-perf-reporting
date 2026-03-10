@@ -1,11 +1,10 @@
 'use client';
 
-import * as React from 'react';
 import { Check, Copy } from 'lucide-react';
 
 import { Button, ButtonProps } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useTransition } from 'react';
+import { useTransition, startTransition } from 'react';
 
 interface CopyButtonProps extends ButtonProps {
   text: string;
@@ -25,12 +24,19 @@ export function CopyButton({
   const [hasCopied, setHasCopied] = useTransition();
 
   const onCopy = (text: string) => {
-    setHasCopied(async () => {
+    // prevent double clicks
+    
+    startTransition(async () => {
+      if (hasCopied) return;
       try {
+        console.log('start copying');
         await navigator.clipboard.writeText(text);
-        await new Promise((resolve) => setTimeout(resolve, resetDelay));
-      } catch {
+        setHasCopied(async () => {
+          await new Promise((resolve) => setTimeout(resolve, resetDelay));
+        });
+      } catch (error) {
         // swallow error
+        console.error('error copying text', error);
       }
     });
   };

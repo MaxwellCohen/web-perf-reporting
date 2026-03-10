@@ -44,7 +44,7 @@ describe('CopyButton', () => {
     expect(button!.querySelector('[data-testid="check"]')).not.toBeNull();
 
     await act(async () => {
-      await vi.runAllTimers();
+      await vi.runAllTimersAsync();
     });
     expect(button!.querySelector('[data-testid="copy"]')).not.toBeNull();
   });
