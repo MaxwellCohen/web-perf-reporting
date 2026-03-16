@@ -1,6 +1,5 @@
 import { PageSpeedInsightsDashboardWrapper } from './PageSpeedInsightsDashboardWrapper';
 
-export const dynamic = 'force-dynamic';
 
 export default async function PageSpeedPublicIdPage({
   params,

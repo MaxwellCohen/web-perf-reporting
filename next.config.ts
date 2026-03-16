@@ -7,6 +7,8 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   reactCompiler: true,
+  cacheComponents:true,
+  typedRoutes: true,
 };
 
 export default withSentryConfig(nextConfig, {

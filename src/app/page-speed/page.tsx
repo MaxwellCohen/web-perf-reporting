@@ -3,7 +3,6 @@ import { updateURl } from '@/lib/utils';
 import { requestPageSpeedData } from '@/lib/services/pageSpeedInsights.service';
 import { redirect } from 'next/navigation';
 
-export const dynamic = 'force-dynamic';
 
 export default async function Home({
   searchParams,
