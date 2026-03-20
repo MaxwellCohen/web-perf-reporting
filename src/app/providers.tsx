@@ -3,7 +3,6 @@
 import posthog from 'posthog-js';
 import { PostHogProvider as PHProvider } from 'posthog-js/react';
 import { useEffect, useState } from 'react';
-import PostHogPageView from '@/app/PostHogPageView';
 import { ThemeProvider as NextThemesProvider } from "next-themes"
 import { SWRConfig } from 'swr'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -48,7 +47,6 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <PHProvider client={posthog}>
-      <PostHogPageView />
       {children}
     </PHProvider>
   );

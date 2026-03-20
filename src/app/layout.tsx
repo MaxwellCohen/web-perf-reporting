@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
+import { PostHogAnalytics } from '@/app/PostHogAnalytics';
 import { PostHogProvider, QueryProvider /*ThemeProvider */ } from '@/app/providers';
 import { TopNav } from '@/components/navigation/TopNav';
 
@@ -35,6 +36,7 @@ export default function RootLayout({
         disableTransitionOnChange
       >  */}
       <PostHogProvider>
+        <PostHogAnalytics />
         <QueryProvider>
         <body
           suppressHydrationWarning={true}
