@@ -22,7 +22,7 @@ export function PageSpeedInsightsDashboardWrapper({
     return <ErrorMessage 
       title="Failed to Load Report" 
       description="We couldn't load the PageSpeed Insights data. This might be due to a temporary issue or the report might not be available."
-      retryUrl={`/page-speed/`}
+      retryUrl="/page-speed"
     />;
   }
 

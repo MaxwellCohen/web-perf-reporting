@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import type { Route } from 'next';
 import Link from 'next/link';
 
 export default function Home() {
@@ -79,11 +80,11 @@ function HomeCard({
     linkText,
 
 }: {
-title: string,
-description: string,
-content: string,
-url: string,
-linkText: string,
+  title: string;
+  description: string;
+  content: string;
+  url: Route;
+  linkText: string;
 }) {
   
   return(

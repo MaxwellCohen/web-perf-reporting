@@ -1,16 +1,18 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import type { Route } from 'next';
 import Link from 'next/link';
 import { AlertCircle } from 'lucide-react';
 
-export function ErrorMessage({ 
-  title = "Failed to Load Report", 
-  description = "We couldn't load the PageSpeed Insights data. This might be due to a temporary issue or the report might not be available.",
-  retryUrl = "/page-speed"
+export function ErrorMessage({
+  title = 'Failed to Load Report',
+  description =
+    "We couldn't load the PageSpeed Insights data. This might be due to a temporary issue or the report might not be available.",
+  retryUrl = '/page-speed',
 }: {
   title?: string;
   description?: string;
-  retryUrl?: string;
+  retryUrl?: Route;
 }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-100 p-4">

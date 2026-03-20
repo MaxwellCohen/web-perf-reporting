@@ -1,3 +1,4 @@
+import type { Route } from 'next';
 import type { AnchorHTMLAttributes } from 'react';
 import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
@@ -57,7 +58,7 @@ describe('ErrorMessage', () => {
       <ErrorMessage
         title="Custom Error"
         description="A more specific message."
-        retryUrl="/custom-retry"
+        retryUrl={"/custom-retry" as Route}
       />,
     );
     expect(container.firstChild).toMatchSnapshot();

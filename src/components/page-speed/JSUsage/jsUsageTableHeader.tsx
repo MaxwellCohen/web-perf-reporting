@@ -42,7 +42,10 @@ export function JSUsageTableHeader({
       {headerGroup.headers.map((header) => (
         <TableHead
           key={`${header.id}_${rowKey}`}
-          className={cn('border-none', header.column.columnDef.meta?.className)}
+          className={cn(
+            'min-w-0 overflow-hidden border-none',
+            header.column.columnDef.meta?.className,
+          )}
           style={getHeaderCellStyle(header)}
         >
           {flexRender(header.column.columnDef.header, header.getContext())}

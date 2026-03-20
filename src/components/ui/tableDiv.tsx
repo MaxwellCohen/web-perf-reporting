@@ -1,6 +1,7 @@
 
 
 import { cn } from '@/lib/utils';
+import React from 'react';
 
 // Table container using div and grid, with ARIA role
 const Table = React.forwardRef<

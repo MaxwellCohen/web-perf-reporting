@@ -92,11 +92,13 @@ export function RangeFilter<T>({
   const hasHeadingMeta = !!column.columnDef.meta?.heading?.heading;
 
   return (
-    <div className="w-64 p-4">
-      <div className="relative space-y-4">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-muted-foreground">Min</span>
-          <div className="text-sm font-semibold">
+    <div className="box-border w-full min-w-0 max-w-full p-2">
+      <div className="relative w-full min-w-0 space-y-3">
+        <div className="flex min-w-0 items-center justify-between gap-2">
+          <span className="shrink-0 text-xs font-medium text-muted-foreground">
+            Min
+          </span>
+          <div className="min-w-0 truncate text-right text-sm font-semibold">
             {hasHeadingMeta ? (
               <RenderTableValue
                 value={fMin}
@@ -109,7 +111,7 @@ export function RangeFilter<T>({
           </div>
         </div>
 
-        <div className="px-2">
+        <div className="min-w-0 px-0.5">
           <Slider2
             id={`range-slider_${id}`}
             defaultValue={[minValue, maxValue]}
@@ -121,9 +123,11 @@ export function RangeFilter<T>({
           />
         </div>
 
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-muted-foreground">Max</span>
-          <div className="text-sm font-semibold">
+        <div className="flex min-w-0 items-center justify-between gap-2">
+          <span className="shrink-0 text-xs font-medium text-muted-foreground">
+            Max
+          </span>
+          <div className="min-w-0 truncate text-right text-sm font-semibold">
             {hasHeadingMeta ? (
               <RenderTableValue
                 value={fMax}

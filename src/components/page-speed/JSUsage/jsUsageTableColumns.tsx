@@ -36,7 +36,7 @@ export function makeSortingHeading(
   }: HeaderContext<TreeMapNode, unknown>) {
     'use no memo';
     return (
-      <div className="flex h-full flex-col justify-between">
+      <div className="flex h-full min-w-0 w-full flex-col justify-between">
         <div className="my-2">
           <Button
             variant="ghost"

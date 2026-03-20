@@ -33,6 +33,7 @@ vi.mock('@/components/ui/label', () => ({
 }));
 
 import { LhTextInput } from '@/components/lh/LhTextInput';
+import React from 'react';
 
 function getButton(container: HTMLElement, name: string | RegExp) {
   return Array.from(container.querySelectorAll('button')).find((b) =>

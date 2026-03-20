@@ -1,3 +1,4 @@
+import React from 'react';
 
 import { fireEvent, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

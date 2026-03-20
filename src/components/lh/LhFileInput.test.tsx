@@ -1,6 +1,9 @@
+import React from 'react';
 
 import { fireEvent, render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+
+import { LhFileInput } from '@/components/lh/LhFileInput';
 
 vi.mock('@/components/ui/tabs', () => ({
   TabsContent: ({ value, children }: { value: string; children: React.ReactNode }) => (
@@ -29,8 +32,6 @@ vi.mock('@/components/ui/button', () => ({
 vi.mock('lucide-react', () => ({
   FileJson: () => <span data-testid="file-json" />,
 }));
-
-import { LhFileInput } from '@/components/lh/LhFileInput';
 
 describe('LhFileInput', () => {
   it('renders file upload input when no files', () => {

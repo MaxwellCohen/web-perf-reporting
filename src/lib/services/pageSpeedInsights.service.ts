@@ -56,7 +56,10 @@ export const requestPageSpeedData = async (
       return null;
     }
     const result = await savePageSpeedData(testURL);
-    return result.publicId;
+    if (typeof result.publicId === 'string') {
+      return result.publicId;
+    }
+    return null;
   } catch (error) {
     Sentry.captureException(error);
     return null;
