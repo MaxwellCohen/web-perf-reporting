@@ -2,14 +2,14 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { PageSpeedInsightsDashboardWrapper } from './PageSpeedInsightsDashboardWrapper';
 
-const useFetchPageSpeedDataByPublicIdMock = vi.fn();
+const usePageSpeedInsightsQueryMock = vi.fn();
 
-vi.mock('@/components/page-speed/useFetchPageSpeedDataByPublicId', () => ({
-  useFetchPageSpeedDataByPublicId: (publicId: string) =>
-    useFetchPageSpeedDataByPublicIdMock(publicId),
+vi.mock('@/features/page-speed-insights/data/usePageSpeedInsightsQuery', () => ({
+  usePageSpeedInsightsQuery: (source: { mode: string; publicId?: string }) =>
+    usePageSpeedInsightsQueryMock(source),
 }));
 
-vi.mock('@/components/page-speed/pageSpeedInsightsDashboard', () => ({
+vi.mock('@/features/page-speed-insights/pageSpeedInsightsDashboard', () => ({
   PageSpeedInsightsDashboard: ({
     data,
     labels,
@@ -53,19 +53,22 @@ const createMockPageSpeedData = () => [
 ];
 
 describe('PageSpeedInsightsDashboardWrapper', () => {
-  it('passes publicId to useFetchPageSpeedDataByPublicId', () => {
-    useFetchPageSpeedDataByPublicIdMock.mockReturnValue({
+  it('passes publicId to usePageSpeedInsightsQuery', () => {
+    usePageSpeedInsightsQueryMock.mockReturnValue({
       data: [],
       isLoading: true,
     });
 
     render(<PageSpeedInsightsDashboardWrapper publicId="test-id-123" />);
 
-    expect(useFetchPageSpeedDataByPublicIdMock).toHaveBeenCalledWith('test-id-123');
+    expect(usePageSpeedInsightsQueryMock).toHaveBeenCalledWith({
+      mode: 'publicId',
+      publicId: 'test-id-123',
+    });
   });
 
   it('shows loading when isLoading is true', async () => {
-    useFetchPageSpeedDataByPublicIdMock.mockReturnValue({
+    usePageSpeedInsightsQueryMock.mockReturnValue({
       data: [],
       isLoading: true,
     });
@@ -80,7 +83,7 @@ describe('PageSpeedInsightsDashboardWrapper', () => {
   });
 
   it('shows loading when data is empty or has no truthy items', async () => {
-    useFetchPageSpeedDataByPublicIdMock.mockReturnValue({
+    usePageSpeedInsightsQueryMock.mockReturnValue({
       data: [],
       isLoading: false,
     });
@@ -95,7 +98,7 @@ describe('PageSpeedInsightsDashboardWrapper', () => {
   });
 
   it('shows loading when data has only null/undefined items', async () => {
-    useFetchPageSpeedDataByPublicIdMock.mockReturnValue({
+    usePageSpeedInsightsQueryMock.mockReturnValue({
       data: [null, undefined],
       isLoading: false,
     });
@@ -110,7 +113,7 @@ describe('PageSpeedInsightsDashboardWrapper', () => {
   });
 
   it('shows error when data is not an array', async () => {
-    useFetchPageSpeedDataByPublicIdMock.mockReturnValue({
+    usePageSpeedInsightsQueryMock.mockReturnValue({
       data: { status: 'failed' },
       isLoading: false,
     });
@@ -130,7 +133,7 @@ describe('PageSpeedInsightsDashboardWrapper', () => {
 
   it('renders dashboard when client-side with valid data', async () => {
     const mockData = createMockPageSpeedData();
-    useFetchPageSpeedDataByPublicIdMock.mockReturnValue({
+    usePageSpeedInsightsQueryMock.mockReturnValue({
       data: mockData,
       isLoading: false,
     });

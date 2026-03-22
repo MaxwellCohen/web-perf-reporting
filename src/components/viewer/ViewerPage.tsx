@@ -1,5 +1,5 @@
 'use client';
-import { PageSpeedInsightsDashboard } from '@/components/page-speed/pageSpeedInsightsDashboard';
+import { PageSpeedInsightsDashboard } from '@/features/page-speed-insights/pageSpeedInsightsDashboard';
 import { PageSpeedInsights } from '@/lib/schema';
 import { useEffect, useRef, useState } from 'react';
 import { Details } from '@/components/ui/accordion';

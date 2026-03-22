@@ -1,14 +1,14 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-const useFetchPageSpeedDataByPublicIdMock = vi.fn();
+const usePageSpeedInsightsQueryMock = vi.fn();
 
-vi.mock('@/components/page-speed/useFetchPageSpeedDataByPublicId', () => ({
-  useFetchPageSpeedDataByPublicId: (publicId: string) =>
-    useFetchPageSpeedDataByPublicIdMock(publicId),
+vi.mock('@/features/page-speed-insights/data/usePageSpeedInsightsQuery', () => ({
+  usePageSpeedInsightsQuery: (source: { mode: string; publicId?: string }) =>
+    usePageSpeedInsightsQueryMock(source),
 }));
 
-vi.mock('@/components/page-speed/pageSpeedInsightsDashboard', () => ({
+vi.mock('@/features/page-speed-insights/pageSpeedInsightsDashboard', () => ({
   PageSpeedInsightsDashboard: ({
     data,
     labels,
@@ -34,7 +34,7 @@ import PageSpeedPublicIdPage from './page';
 
 describe('page-speed [publicId] page', () => {
   it('awaits params and renders wrapper with publicId', async () => {
-    useFetchPageSpeedDataByPublicIdMock.mockReturnValue({
+    usePageSpeedInsightsQueryMock.mockReturnValue({
       data: [
         {
           lighthouseResult: { finalDisplayedUrl: 'https://example.com' },
@@ -53,8 +53,9 @@ describe('page-speed [publicId] page', () => {
     await waitFor(() => {
       expect(container.firstChild).toMatchSnapshot();
     });
-    expect(useFetchPageSpeedDataByPublicIdMock).toHaveBeenCalledWith(
-      'report-xyz-123',
-    );
+    expect(usePageSpeedInsightsQueryMock).toHaveBeenCalledWith({
+      mode: 'publicId',
+      publicId: 'report-xyz-123',
+    });
   });
 });

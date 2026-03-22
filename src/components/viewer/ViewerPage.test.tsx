@@ -1,7 +1,7 @@
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/components/page-speed/pageSpeedInsightsDashboard', () => ({
+vi.mock('@/features/page-speed-insights/pageSpeedInsightsDashboard', () => ({
   PageSpeedInsightsDashboard: ({ data }: { data: unknown[] }) => (
     <div data-testid="dashboard">{data.length} reports</div>
   ),

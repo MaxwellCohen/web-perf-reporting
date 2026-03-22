@@ -26,10 +26,9 @@ export default defineConfig({
         'src/**/*.spec.{ts,tsx}',
         'src/**/*.d.ts',
         'src/components/ui/*.tsx',
-        'src/**/pageSpeedInsightsTypes.ts',
         'src/instrumentation.ts',
         'src/lib/schema.ts',
-        'src/components/page-speed/DetailsRender.tsx', // entirely commented out
+        'src/features/page-speed-insights/DetailsRender.tsx', // entirely commented out
       ],
       thresholds: {
         statements: 80,

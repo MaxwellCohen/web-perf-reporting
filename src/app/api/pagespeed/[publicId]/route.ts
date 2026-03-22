@@ -1,37 +1,39 @@
 import { type NextRequest } from 'next/server';
+import {
+  fetchWorkerJobEnvelopeByPublicId,
+  type WorkerJobEnvelope,
+} from '@/lib/page-speed-insights/pageSpeedWorkerClient';
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ publicId: string }> }
+  _request: NextRequest,
+  { params }: { params: Promise<{ publicId: string }> },
 ) {
   try {
     const { publicId } = await params;
-    
+
     if (!publicId) {
       return new Response('No publicId provided', { status: 400 });
     }
 
-    const requestUrl = new URL('https://web-perf-report-cf.to-email-max.workers.dev/get-by-id');
-    requestUrl.searchParams.append('id', publicId);
-    const req = await fetch(requestUrl);
-    
+    const req = await fetchWorkerJobEnvelopeByPublicId(publicId);
+
     if (!req.ok) {
       return new Response(`Error fetching data!`, { status: 500 });
     }
-    
-    const data = await req.json() as { status: string, data?: string };
+
+    const data = (await req.json()) as WorkerJobEnvelope;
     if (!data) {
       return new Response('Data is not yet ready no data!!', { status: 404 });
     }
-    
+
     if (data.status.toLowerCase() === 'failed') {
       return new Response(`Failed to fetch data! ${data.status}`, { status: 500 });
     }
-    
+
     if (data.status.toLowerCase() !== 'completed') {
       return new Response(JSON.stringify(data), { status: 404 });
     }
-    
+
     if (data.data) {
       return new Response(JSON.stringify(data.data), {
         headers: { 'Content-Type': 'application/json' },

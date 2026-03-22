@@ -1,6 +1,6 @@
 'use client';
-import { PageSpeedInsightsDashboard } from '@/components/page-speed/pageSpeedInsightsDashboard';
-import { useFetchPageSpeedDataByPublicId } from '@/components/page-speed/useFetchPageSpeedDataByPublicId';
+import { PageSpeedInsightsDashboard } from '@/features/page-speed-insights/pageSpeedInsightsDashboard';
+import { usePageSpeedInsightsQuery } from '@/features/page-speed-insights/data/usePageSpeedInsightsQuery';
 import { LoadingMessage } from '@/components/common/LoadingMessage';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { useEffect, useState, ViewTransition } from 'react';
@@ -10,7 +10,10 @@ export function PageSpeedInsightsDashboardWrapper({
 }: {
   publicId: string;
 }) {
-  const { data, isLoading } = useFetchPageSpeedDataByPublicId(publicId);
+  const { data, isLoading } = usePageSpeedInsightsQuery({
+    mode: 'publicId',
+    publicId,
+  });
 
   const [isClient, setIsClient] = useState(false);
   useEffect(() => {

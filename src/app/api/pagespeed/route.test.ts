@@ -7,14 +7,12 @@ describe('app/api/pagespeed route', () => {
   });
 
   it('returns a validation error when the request url is invalid', async () => {
-    vi.spyOn(console, 'error').mockImplementation(() => {});
-
     const response = await POST({
       json: async () => ({ testURL: 'not-a-url' }),
     } as any);
 
-    expect(response.status).toBe(500);
-    await expect(response.text()).resolves.toBe('Internal server error');
+    expect(response.status).toBe(400);
+    await expect(response.text()).resolves.toBe('Invalid URL provided');
   });
 
   it('returns the completed page speed payload from the worker', async () => {
