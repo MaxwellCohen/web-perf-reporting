@@ -1,6 +1,5 @@
 import { PageSpeedInsightsDashboardWrapper } from './PageSpeedInsightsDashboardWrapper';
 
-
 export default async function PageSpeedPublicIdPage({
   params,
 }: {

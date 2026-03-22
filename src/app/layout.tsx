@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ViewTransition } from 'react';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
@@ -46,7 +47,7 @@ export default function RootLayout({
             <TopNav />
             <div className="overflow-y-scroll">
               <main className="mx-auto min-h-screen p-4 print:min-h-0">
-                {children}
+                <ViewTransition>{children}</ViewTransition>
               </main>
               <footer className="w-full text-center print:hidden">
                 Made by Maxwell Cohen, with data from Google crux report.

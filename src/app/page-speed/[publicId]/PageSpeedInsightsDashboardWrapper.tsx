@@ -3,7 +3,7 @@ import { PageSpeedInsightsDashboard } from '@/components/page-speed/pageSpeedIns
 import { useFetchPageSpeedDataByPublicId } from '@/components/page-speed/useFetchPageSpeedDataByPublicId';
 import { LoadingMessage } from '@/components/common/LoadingMessage';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, ViewTransition } from 'react';
 
 export function PageSpeedInsightsDashboardWrapper({
   publicId,
@@ -27,13 +27,14 @@ export function PageSpeedInsightsDashboardWrapper({
   }
 
   if (!isClient || isLoading || !data?.filter(Boolean).length) {
-    return <LoadingMessage />;
+    return <ViewTransition><LoadingMessage /></ViewTransition>;
   } 
 
   return (
-    <PageSpeedInsightsDashboard
+    <ViewTransition><PageSpeedInsightsDashboard
       data={data}
       labels={['Mobile', 'Desktop']}
     />
+    </ViewTransition>
   );
 }

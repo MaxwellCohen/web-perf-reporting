@@ -1,4 +1,4 @@
-
+import * as React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -33,7 +33,6 @@ vi.mock('@/components/ui/label', () => ({
 }));
 
 import { LhTextInput } from '@/components/lh/LhTextInput';
-import React from 'react';
 
 function getButton(container: HTMLElement, name: string | RegExp) {
   return Array.from(container.querySelectorAll('button')).find((b) =>

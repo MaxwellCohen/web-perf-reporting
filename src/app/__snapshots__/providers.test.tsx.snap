@@ -1,12 +1,9 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`app/providers > initializes posthog and renders the tracker with children 1`] = `
+exports[`app/providers > initializes posthog and renders children 1`] = `
 <div
   data-testid="posthog-provider"
 >
-  <div>
-    Mock page view tracker
-  </div>
   <div>
     Provider child
   </div>

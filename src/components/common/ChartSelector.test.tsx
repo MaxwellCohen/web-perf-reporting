@@ -11,7 +11,12 @@ vi.mock('@/components/ui/select', () => ({
     children: ReactNode;
     onValueChange: (value: string) => void;
   }) => (
-    <div data-testid="mock-select" onChange={(event) => onValueChange((event.target as HTMLSelectElement).value)}>
+    <div
+      data-testid="mock-select"
+      onChange={(event) =>
+        onValueChange((event.target as unknown as HTMLSelectElement).value)
+      }
+    >
       {children}
     </div>
   ),

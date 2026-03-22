@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  experimental: {
+    viewTransition: true,
+  },
   reactCompiler: true,
   typedRoutes: true,
 };

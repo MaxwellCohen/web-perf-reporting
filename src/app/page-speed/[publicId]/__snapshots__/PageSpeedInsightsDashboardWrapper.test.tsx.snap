@@ -28,7 +28,7 @@ exports[`PageSpeedInsightsDashboardWrapper > shows error when data is not an arr
   <span
     data-testid="error-retry-url"
   >
-    /page-speed/
+    /page-speed
   </span>
 </div>
 `;

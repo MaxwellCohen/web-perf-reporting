@@ -125,9 +125,7 @@ describe('PageSpeedInsightsDashboardWrapper', () => {
     expect(screen.getByTestId('error-title')).toHaveTextContent(
       'Failed to Load Report',
     );
-    expect(screen.getByTestId('error-retry-url')).toHaveTextContent(
-      '/page-speed/',
-    );
+    expect(screen.getByTestId('error-retry-url')).toHaveTextContent('/page-speed');
   });
 
   it('renders dashboard when client-side with valid data', async () => {

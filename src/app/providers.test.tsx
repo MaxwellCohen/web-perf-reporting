@@ -31,10 +31,6 @@ vi.mock('next-themes', () => ({
   ),
 }));
 
-vi.mock('@/app/PostHogPageView', () => ({
-  default: () => <div>Mock page view tracker</div>,
-}));
-
 import {
   PostHogProvider,
   QueryProvider,
@@ -69,7 +65,7 @@ describe('app/providers', () => {
     expect(screen.getByTestId('query-stale-time')).toHaveTextContent('60000');
   });
 
-  it('initializes posthog and renders the tracker with children', () => {
+  it('initializes posthog and renders children', () => {
     const { container } = render(
       <PostHogProvider>
         <div>Provider child</div>

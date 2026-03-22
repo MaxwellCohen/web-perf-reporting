@@ -40,6 +40,9 @@ describe('CopyButton', () => {
     const button = container.querySelector('button');
     fireEvent.click(button!);
 
+    await act(async () => {
+      await Promise.resolve();
+    });
     expect(writeText).toHaveBeenCalledWith('https://example.com');
     expect(button!.querySelector('[data-testid="check"]')).not.toBeNull();
 
