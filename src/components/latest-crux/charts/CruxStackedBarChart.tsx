@@ -1,13 +1,13 @@
 'use client';
+
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import { CruxHistoryItem } from '@/lib/schema';
-import { CartesianGrid, Bar, BarChart } from 'recharts';
 import { chartConfig } from '@/components/common/ChartSettings';
-
+import type { CruxHistoryItem } from '@/lib/schema';
+import { Bar, BarChart, CartesianGrid } from 'recharts';
 
 const margin = {
   left: 12,
@@ -29,15 +29,13 @@ export function PerformanceStackedBarChart({
 
   return (
     <ChartContainer config={chartConfig}>
-      <BarChart
-        accessibilityLayer
-        data={chartData}
-        margin={margin}
-      >
+      <BarChart accessibilityLayer data={chartData} margin={margin}>
         <CartesianGrid vertical={false} />
         <ChartTooltip
           cursor={false}
-          content={<ChartTooltipContent indicator="dot" labelFormatter={() =>  null} />}
+          content={
+            <ChartTooltipContent indicator="dot" labelFormatter={() => null} />
+          }
         />
         <Bar
           dataKey="good_density"

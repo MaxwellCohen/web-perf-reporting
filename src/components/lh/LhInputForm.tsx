@@ -18,20 +18,19 @@ import {
   type FormInputs,
   type FormState,
 } from '@/components/lh/input-form-action';
-import { LhTabList } from '@/components/lh/LhTabList';
-import { InputFormAlert } from '@/components/lh/InputFormAlert';
-import { LhTextInput } from '@/components/lh/LhTextInput';
-import { LhFileInput } from '@/components/lh/LhFileInput';
-import { LhUrlInput } from '@/components/lh/LhUrlInput';
+import type { LhJsonFileEntry, LhJsonTextEntry } from '@/components/lh/types';
+import { InputFormAlert } from '@/components/lh/inputs/InputFormAlert';
+import { LhFileInput } from '@/components/lh/inputs/LhFileInput';
+import { LhTabList } from '@/components/lh/inputs/LhTabList';
+import { LhTextInput } from '@/components/lh/inputs/LhTextInput';
+import { LhUrlInput } from '@/components/lh/inputs/LhUrlInput';
 
 export function LhInputForm() {
-  const [jsonInputs, setJsonInputs] = useState<
-    Array<{ name: string; content: string }>
-  >([{ name: '', content: '' }]);
+  const [jsonInputs, setJsonInputs] = useState<LhJsonTextEntry[]>([
+    { name: '', content: '' },
+  ]);
 
-  const [jsonFiles, setJsonFiles] = useState<
-    Array<{ name: string; file: File }>
-  >([]);
+  const [jsonFiles, setJsonFiles] = useState<LhJsonFileEntry[]>([]);
 
   const [jsonUrl, setJsonUrl] = useState('');
   const [activeTab, setActiveTab] = useState('text');

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/components/lh/input-form', () => ({
+vi.mock('@/components/lh/LhInputForm', () => ({
   LhInputForm: () => <div>Lighthouse Report Viewer</div>,
 }));
 

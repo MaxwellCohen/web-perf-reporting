@@ -3,7 +3,7 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { LhFileInput } from '@/components/lh/LhFileInput';
+import { LhFileInput } from '@/components/lh/inputs/LhFileInput';
 
 vi.mock('@/components/ui/tabs', () => ({
   TabsContent: ({ value, children }: { value: string; children: React.ReactNode }) => (

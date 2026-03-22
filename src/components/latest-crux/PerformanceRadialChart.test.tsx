@@ -18,7 +18,7 @@ vi.mock('@/components/ui/chart', () => ({
   ChartTooltipContent: () => <div data-testid="chart-tooltip-content" />,
 }));
 
-import { RadialChart } from '@/components/latest-crux/PerformanceRadialChart';
+import { CruxRadialChart as RadialChart } from '@/components/latest-crux/charts/CruxRadialChart';
 
 const histogramData = {
   good_density: 0.5,

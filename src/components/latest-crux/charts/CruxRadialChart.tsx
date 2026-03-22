@@ -1,14 +1,15 @@
 'use client';
+
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import { RadialBarChart, RadialBar } from 'recharts';
 import { chartConfig } from '@/components/common/ChartSettings';
-import { CruxHistoryItem } from '@/lib/schema';
+import type { CruxHistoryItem } from '@/lib/schema';
+import { RadialBar, RadialBarChart } from 'recharts';
 
-export function RadialChart({
+export function CruxRadialChart({
   histogramData,
 }: {
   histogramData: CruxHistoryItem;
@@ -22,14 +23,11 @@ export function RadialChart({
   ];
 
   return (
-    <ChartContainer
-      config={chartConfig}
-      className="w-full"
-    >
+    <ChartContainer config={chartConfig} className="w-full">
       <RadialBarChart
         data={chartData}
-        innerRadius={"50%"}
-        outerRadius={"100%"}
+        innerRadius={'50%'}
+        outerRadius={'100%'}
       >
         <ChartTooltip
           cursor={false}

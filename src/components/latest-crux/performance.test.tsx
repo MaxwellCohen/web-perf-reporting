@@ -155,7 +155,7 @@ vi.mock('@/components/latest-crux/PerformanceOptions', () => ({
   ),
 }));
 
-vi.mock('@/components/latest-crux/PerformanceStackedBarChart', () => ({
+vi.mock('@/components/latest-crux/charts/CruxStackedBarChart', () => ({
   PerformanceStackedBarChart: () => (
     <div>
       <div>
@@ -169,8 +169,8 @@ vi.mock('@/components/latest-crux/PerformanceStackedBarChart', () => ({
   ),
 }));
 
-vi.mock('@/components/latest-crux/PerformanceRadialChart', () => ({
-  RadialChart: () => (
+vi.mock('@/components/latest-crux/charts/CruxRadialChart', () => ({
+  CruxRadialChart: () => (
     <div>
       <div>
         <div>Chart tooltip</div>
@@ -186,8 +186,8 @@ import { CurrentPerformanceSection } from '@/components/latest-crux/CurrentPerfo
 import { CurrentPerformanceCard, CurrentPerformanceChartContext } from '@/components/latest-crux/PerformanceCard';
 import { CurrentPerformanceDashboard } from '@/components/latest-crux/PerformanceDashboard';
 import { PerformanceOptions } from '@/components/latest-crux/PerformanceOptions';
-import { PerformanceStackedBarChart } from '@/components/latest-crux/PerformanceStackedBarChart';
-import { RadialChart } from '@/components/latest-crux/PerformanceRadialChart';
+import { PerformanceStackedBarChart } from '@/components/latest-crux/charts/CruxStackedBarChart';
+import { CruxRadialChart as RadialChart } from '@/components/latest-crux/charts/CruxRadialChart';
 
 const histogramData = {
   good_density: 0.5,

@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { fireEvent } from '@testing-library/react';
+import type { LhJsonFileEntry, LhJsonTextEntry } from '@/components/lh/types';
 
 const TabsContext = React.createContext<{
   value: string;
@@ -170,10 +171,8 @@ function LhTextInputMock({
   jsonInputs,
   setJsonInputs,
 }: {
-  jsonInputs: Array<{ name: string; content: string }>;
-  setJsonInputs: React.Dispatch<
-    React.SetStateAction<Array<{ name: string; content: string }>>
-  >;
+  jsonInputs: LhJsonTextEntry[];
+  setJsonInputs: React.Dispatch<React.SetStateAction<LhJsonTextEntry[]>>;
 }) {
   return (
     <TabsContent value="text">
@@ -236,10 +235,8 @@ function LhFileInputMock({
   jsonFiles,
   setJsonFiles,
 }: {
-  jsonFiles: Array<{ name: string; file: File }>;
-  setJsonFiles: React.Dispatch<
-    React.SetStateAction<Array<{ name: string; file: File }>>
-  >;
+  jsonFiles: LhJsonFileEntry[];
+  setJsonFiles: React.Dispatch<React.SetStateAction<LhJsonFileEntry[]>>;
 }) {
   return (
     <TabsContent value="file">

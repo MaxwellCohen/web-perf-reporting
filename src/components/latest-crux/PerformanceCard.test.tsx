@@ -21,11 +21,11 @@ vi.mock('@/components/common/PageSpeedGaugeChart', () => ({
   default: () => <div data-testid="gauge-chart" />,
 }));
 
-vi.mock('@/components/latest-crux/PerformanceRadialChart', () => ({
-  RadialChart: () => <div data-testid="radial-chart" />,
+vi.mock('@/components/latest-crux/charts/CruxRadialChart', () => ({
+  CruxRadialChart: () => <div data-testid="radial-chart" />,
 }));
 
-vi.mock('@/components/latest-crux/PerformanceStackedBarChart', () => ({
+vi.mock('@/components/latest-crux/charts/CruxStackedBarChart', () => ({
   PerformanceStackedBarChart: () => <div data-testid="stacked-bar-chart" />,
 }));
 

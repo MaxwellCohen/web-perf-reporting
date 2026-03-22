@@ -29,7 +29,7 @@ vi.mock('@/lib/services/pageSpeedInsights.service', () => ({
   requestPageSpeedData: (value: string) => requestPageSpeedDataMock(value),
 }));
 
-vi.mock('@/components/lh/input-form', () => ({
+vi.mock('@/components/lh/LhInputForm', () => ({
   LhInputForm: () => <div>Mock LH input form</div>,
 }));
 

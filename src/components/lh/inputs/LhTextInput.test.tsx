@@ -32,7 +32,7 @@ vi.mock('@/components/ui/label', () => ({
   Label: ({ children, ...props }: React.ComponentProps<'label'>) => <label {...props}>{children}</label>,
 }));
 
-import { LhTextInput } from '@/components/lh/LhTextInput';
+import { LhTextInput } from '@/components/lh/inputs/LhTextInput';
 
 function getButton(container: HTMLElement, name: string | RegExp) {
   return Array.from(container.querySelectorAll('button')).find((b) =>

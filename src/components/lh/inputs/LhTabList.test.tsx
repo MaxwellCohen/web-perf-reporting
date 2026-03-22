@@ -20,7 +20,7 @@ vi.mock('@/components/ui/tabs', () => ({
   ),
 }));
 
-import { LhTabList } from '@/components/lh/LhTabList';
+import { LhTabList } from '@/components/lh/inputs/LhTabList';
 
 describe('LhTabList', () => {
   it('renders three tabs', () => {

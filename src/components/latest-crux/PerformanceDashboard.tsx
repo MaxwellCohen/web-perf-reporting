@@ -1,24 +1,24 @@
 'use client';
-import { CruxReport } from '@/lib/schema';
-import { formatCruxReport, formatDate, groupBy } from '@/lib/utils';
+
 import {
   ChartMap,
   CurrentPerformanceCard,
   CurrentPerformanceChartContext,
 } from '@/components/latest-crux/PerformanceCard';
-import {  useState } from 'react';
-import { PercentTable } from '@/components/common/FormFactorPercentPieChart';
-
 import { PerformanceOptions } from '@/components/latest-crux/PerformanceOptions';
-
-
-type Scope = 'origin' | 'url';
-type DeviceType = 'All' | 'DESKTOP' | 'TABLET' | 'PHONE';
+import type {
+  CruxReportMap,
+  DeviceType,
+  Scope,
+} from '@/components/latest-crux/types';
+import { PercentTable } from '@/components/common/FormFactorPercentPieChart';
+import { formatCruxReport, formatDate, groupBy } from '@/lib/utils';
+import { useState } from 'react';
 
 export function CurrentPerformanceDashboard({
   reportMap,
 }: {
-  reportMap: Record<`${Scope}${DeviceType}`, CruxReport | null>;
+  reportMap: CruxReportMap;
 }) {
   const [ChartType, setChartType] = useState('bar');
   const [reportScope, setReportScope] = useState<Scope>('origin');
@@ -26,17 +26,22 @@ export function CurrentPerformanceDashboard({
   const report = reportMap[`${reportScope}${deviceType}`];
   const data = formatCruxReport(report);
 
-
-  const groupedMetics = data ? groupBy(data, ({ metric_name }) => metric_name || '') : {};
-  const form_factors = reportMap[`${reportScope}All`]?.record?.metrics?.form_factors?.fractions;
-  const form_factors_date_range = reportMap[`${reportScope}All`]?.record?.collectionPeriod;
+  const groupedMetrics = data
+    ? groupBy(data, ({ metric_name }) => metric_name || '')
+    : {};
+  const form_factors =
+    reportMap[`${reportScope}All`]?.record?.metrics?.form_factors?.fractions;
+  const form_factors_date_range =
+    reportMap[`${reportScope}All`]?.record?.collectionPeriod;
   const navigation_types = report?.record?.metrics?.navigation_types?.fractions;
-  const collectionPeriod = report?.record?.collectionPeriod
+  const collectionPeriod = report?.record?.collectionPeriod;
   return (
     <CurrentPerformanceChartContext.Provider value={ChartType}>
       <h2 className="text-lg">
         Latest Performance Report for
-        {collectionPeriod ? ` ${formatDate(collectionPeriod.firstDate)} - ${formatDate(collectionPeriod.lastDate)}` : null}
+        {collectionPeriod
+          ? ` ${formatDate(collectionPeriod.firstDate)} - ${formatDate(collectionPeriod.lastDate)}`
+          : null}
       </h2>
       <PerformanceOptions
         setChartType={setChartType}
@@ -48,44 +53,44 @@ export function CurrentPerformanceDashboard({
           <PercentTable
             title={'Form Factors'}
             data={form_factors}
-            dateRange={form_factors_date_range ? `${formatDate(form_factors_date_range.firstDate)} - ${formatDate(form_factors_date_range.lastDate)}` : undefined}
-            className='md:grid md:grid-cols-[auto,1fr] gap-2 pl-2 justify-between items-center flex-row flex-1 min-w-full md:min-w-75 '
+            dateRange={
+              form_factors_date_range
+                ? `${formatDate(form_factors_date_range.firstDate)} - ${formatDate(form_factors_date_range.lastDate)}`
+                : undefined
+            }
+            className="md:grid md:grid-cols-[auto,1fr] gap-2 pl-2 justify-between items-center flex-row flex-1 min-w-full md:min-w-75 "
           />
         ) : null}
       </PerformanceOptions>
       <div className="mt-2 grid gap-1 grid-cols-2 md:grid-cols-3 lg:grid-cols-6 print:grid-cols-3">
         <CurrentPerformanceCard
           title="Largest Contentful Paint (LCP)"
-          histogramData={groupedMetics?.largest_contentful_paint?.[0]}
+          histogramData={groupedMetrics?.largest_contentful_paint?.[0]}
         />
         <CurrentPerformanceCard
           title="Interaction to Next Paint (INP)"
-          histogramData={groupedMetics?.interaction_to_next_paint?.[0]}
+          histogramData={groupedMetrics?.interaction_to_next_paint?.[0]}
         />
         <CurrentPerformanceCard
           title="Cumulative Layout Shift (CLS)"
-          histogramData={groupedMetics?.cumulative_layout_shift?.[0]}
+          histogramData={groupedMetrics?.cumulative_layout_shift?.[0]}
         />
         <CurrentPerformanceCard
           title="First Contentful Paint (FCP)"
-          histogramData={groupedMetics?.first_contentful_paint?.[0]}
+          histogramData={groupedMetrics?.first_contentful_paint?.[0]}
         />
         <CurrentPerformanceCard
           title="Time to First Byte (TTFB)"
-          histogramData={groupedMetics?.experimental_time_to_first_byte?.[0]}
+          histogramData={groupedMetrics?.experimental_time_to_first_byte?.[0]}
         />
         <CurrentPerformanceCard
           title="Round Trip Time (RTT)"
-          histogramData={groupedMetics?.round_trip_time?.[0]}
+          histogramData={groupedMetrics?.round_trip_time?.[0]}
         />
       </div>
       {navigation_types ? (
-        <PercentTable
-          title="Navigation Types"
-          data={navigation_types}
-        />
+        <PercentTable title="Navigation Types" data={navigation_types} />
       ) : null}
-
-    </CurrentPerformanceChartContext.Provider >
+    </CurrentPerformanceChartContext.Provider>
   );
 }

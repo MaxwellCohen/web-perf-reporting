@@ -1,4 +1,4 @@
-import { LhInputForm } from "@/components/lh/input-form";
+import { LhInputForm } from '@/components/lh/LhInputForm';
 
 export default async function Home(params: unknown) {
   console.log(params);

@@ -25,7 +25,7 @@ vi.mock('@/components/ui/label', () => ({
   ),
 }));
 
-import { LhUrlInput } from '@/components/lh/LhUrlInput';
+import { LhUrlInput } from '@/components/lh/inputs/LhUrlInput';
 
 describe('LhUrlInput', () => {
   it('renders URL input', () => {

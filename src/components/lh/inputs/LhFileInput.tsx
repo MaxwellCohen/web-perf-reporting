@@ -6,10 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TabsContent } from '@/components/ui/tabs';
 import { FileJson } from 'lucide-react';
+import type { LhJsonFileEntry } from '@/components/lh/types';
 
 type LhFileInputProps = {
-  jsonFiles: Array<{ name: string; file: File }>;
-  setJsonFiles: React.Dispatch<React.SetStateAction<Array<{ name: string; file: File }>>>;
+  jsonFiles: LhJsonFileEntry[];
+  setJsonFiles: React.Dispatch<React.SetStateAction<LhJsonFileEntry[]>>;
 };
 
 export function LhFileInput({ jsonFiles, setJsonFiles }: LhFileInputProps) {

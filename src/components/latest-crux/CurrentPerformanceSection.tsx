@@ -1,6 +1,6 @@
-import { getCurrentCruxData } from '@/lib/services';
-
 import { CurrentPerformanceDashboard } from '@/components/latest-crux/PerformanceDashboard';
+import { buildCruxReportMap } from '@/components/latest-crux/lib/buildCruxReportMap';
+import { getCurrentCruxData } from '@/lib/services';
 
 export async function CurrentPerformanceSection({ url }: { url: string }) {
   const cruxData = await Promise.all([
@@ -13,16 +13,8 @@ export async function CurrentPerformanceSection({ url }: { url: string }) {
     getCurrentCruxData({ url, formFactor: 'TABLET' }),
     getCurrentCruxData({ url, formFactor: 'PHONE' }),
   ]);
-  const cruxReport = {
-    originAll: cruxData[0],
-    originDESKTOP: cruxData[1],
-    originTABLET: cruxData[2],
-    originPHONE: cruxData[3],
-    urlAll: cruxData[4],
-    urlDESKTOP: cruxData[5],
-    urlTABLET: cruxData[6],
-    urlPHONE: cruxData[7],
-  };
+
+  const cruxReport = buildCruxReportMap(cruxData);
 
   return (
     <div className="flex flex-col mt-4">

@@ -6,7 +6,7 @@ import {
   submitForm,
 } from './__mocks__/input-form-mocks';
 import { executeSubmit } from '@/components/lh/input-form-action';
-import { LhInputForm } from '@/components/lh/input-form';
+import { LhInputForm } from '@/components/lh/LhInputForm';
 
 vi.mock('@/components/lh/input-form-action', async (importOriginal) => {
   const actual =
@@ -41,16 +41,16 @@ vi.mock('@/components/ui/label', () =>
 vi.mock('@/components/ui/alert', () =>
   import('./__mocks__/input-form-mocks').then((m) => m.alertMock)
 );
-vi.mock('@/components/lh/LhTabList', () =>
+vi.mock('@/components/lh/inputs/LhTabList', () =>
   import('./__mocks__/input-form-mocks').then((m) => m.lhTabListMock)
 );
-vi.mock('@/components/lh/LhTextInput', () =>
+vi.mock('@/components/lh/inputs/LhTextInput', () =>
   import('./__mocks__/input-form-mocks').then((m) => m.lhTextInputMock)
 );
-vi.mock('@/components/lh/LhFileInput', () =>
+vi.mock('@/components/lh/inputs/LhFileInput', () =>
   import('./__mocks__/input-form-mocks').then((m) => m.lhFileInputMock)
 );
-vi.mock('@/components/lh/LhUrlInput', () =>
+vi.mock('@/components/lh/inputs/LhUrlInput', () =>
   import('./__mocks__/input-form-mocks').then((m) => m.lhUrlInputMock)
 );
 

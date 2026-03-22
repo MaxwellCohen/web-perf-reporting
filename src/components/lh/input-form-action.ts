@@ -1,8 +1,10 @@
+import type { LhJsonFileEntry, LhJsonTextEntry } from '@/components/lh/types';
+
 export type FormState = { error: string | null; success: boolean };
 
 export type FormInputs = {
-  jsonInputs: Array<{ name: string; content: string }>;
-  jsonFiles: Array<{ name: string; file: File }>;
+  jsonInputs: LhJsonTextEntry[];
+  jsonFiles: LhJsonFileEntry[];
   jsonUrl: string;
   activeTab: string;
 };

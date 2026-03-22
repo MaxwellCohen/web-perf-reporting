@@ -19,7 +19,7 @@ vi.mock('@/components/ui/chart', () => ({
   ChartTooltipContent: () => <div data-testid="chart-tooltip-content" />,
 }));
 
-import { PerformanceStackedBarChart } from '@/components/latest-crux/PerformanceStackedBarChart';
+import { PerformanceStackedBarChart } from '@/components/latest-crux/charts/CruxStackedBarChart';
 
 const histogramData = {
   good_density: 0.5,
