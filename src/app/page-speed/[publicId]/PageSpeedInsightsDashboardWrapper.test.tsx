@@ -6,8 +6,8 @@ import { PageSpeedInsightsDashboardContent } from './PageSpeedInsightsDashboardW
 const usePageSpeedInsightsQueryMock = vi.fn();
 
 vi.mock('@/features/page-speed-insights/data/usePageSpeedInsightsQuery', () => ({
-  usePageSpeedInsightsQuery: (source: unknown, defaultData?: unknown) =>
-    usePageSpeedInsightsQueryMock(source, defaultData),
+  usePageSpeedInsightsQueryByPublicId: (publicId: string) =>
+    usePageSpeedInsightsQueryMock(publicId),
 }));
 
 vi.mock('@/features/page-speed-insights/pageSpeedInsightsDashboard', () => ({
@@ -52,10 +52,7 @@ describe('PageSpeedInsightsDashboardContent', () => {
 
     render(<PageSpeedInsightsDashboardContent publicId="test-id-123" />);
 
-    expect(usePageSpeedInsightsQueryMock).toHaveBeenCalledWith(
-      { publicId: 'test-id-123' },
-      undefined,
-    );
+    expect(usePageSpeedInsightsQueryMock).toHaveBeenCalledWith('test-id-123');
   });
 
   it('shows loading when isLoading is true', async () => {

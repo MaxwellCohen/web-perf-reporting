@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const {
@@ -50,10 +50,13 @@ vi.mock('@xstate/store-react', () => ({
   },
 }));
 
-vi.mock('@/features/page-speed-insights/data/usePageSpeedInsightsQuery', () => ({
-  usePageSpeedInsightsQuery: (source: { url?: string }, data: unknown[]) =>
-    usePageSpeedInsightsQueryMock(source, data),
-}));
+vi.mock(
+  '@/features/page-speed-insights/data/usePageSpeedInsightsQuery',
+  () => ({
+    usePageSpeedInsightsQueryByUrl: (url: string, data: unknown[]) =>
+      usePageSpeedInsightsQueryMock(url, data),
+  }),
+);
 
 vi.mock('@/components/common/LoadingMessage', () => ({
   LoadingMessage: () => <div>Mock loading message</div>,
@@ -65,9 +68,12 @@ vi.mock('@/features/page-speed-insights/LoadingExperience', () => ({
   ),
 }));
 
-vi.mock('@/features/page-speed-insights/lh-categories/table/EntitiesTable', () => ({
-  EntitiesTable: () => <div>Entities table</div>,
-}));
+vi.mock(
+  '@/features/page-speed-insights/lh-categories/table/EntitiesTable',
+  () => ({
+    EntitiesTable: () => <div>Entities table</div>,
+  }),
+);
 
 vi.mock('@/features/page-speed-insights/CWVMetricsComponent', () => ({
   CWVMetricsComponent: () => <div>CWV metrics</div>,
@@ -81,16 +87,21 @@ vi.mock('@/features/page-speed-insights/NetworkMetrics', () => ({
   NetworkMetricsComponent: () => <div>Network metrics</div>,
 }));
 
-vi.mock('@/features/page-speed-insights/javascript-metrics/JavaScriptPerformanceComponent', () => ({
-  JavaScriptPerformanceComponent: () => <div>JavaScript metrics</div>,
-}));
+vi.mock(
+  '@/features/page-speed-insights/javascript-metrics/JavaScriptPerformanceComponent',
+  () => ({
+    JavaScriptPerformanceComponent: () => <div>JavaScript metrics</div>,
+  }),
+);
 
 vi.mock('@/features/page-speed-insights/RecommendationsSection', () => ({
   RecommendationsSection: () => <div>Recommendations section</div>,
 }));
 
 vi.mock('@/features/page-speed-insights/JSUsage/JSUsageTable', () => ({
-  StringFilterHeader: ({ name }: { name: string }) => <div>String filter: {name}</div>,
+  StringFilterHeader: ({ name }: { name: string }) => (
+    <div>String filter: {name}</div>
+  ),
 }));
 
 vi.mock('@/features/page-speed-insights/JSUsage/TableControls', () => ({
@@ -99,13 +110,19 @@ vi.mock('@/features/page-speed-insights/JSUsage/TableControls', () => ({
   ),
 }));
 
+vi.mock('@/features/page-speed-insights/PageSpeedInsightsCopyButtons', () => ({
+  PageSpeedInsightsCopyButtons: () => <div>Copy buttons</div>,
+}));
+
 vi.mock('@/features/page-speed-insights/tsTable/useLHTable', () => ({
   useLHTable: () => ({
     getColumn: (columnId: string) => ({ columnId }),
     resetColumnFilters: () => resetColumnFiltersMock(),
     getRowModel: () => ({ rows: tableRows }),
   }),
-  CategoryRow: ({ row }: { row: { id: string } }) => <div>Category row: {row.id}</div>,
+  CategoryRow: ({ row }: { row: { id: string } }) => (
+    <div>Category row: {row.id}</div>
+  ),
 }));
 
 import { PageSpeedInsightsDashboard } from '@/features/page-speed-insights/pageSpeedInsightsDashboard';
@@ -120,43 +137,28 @@ describe('pageSpeedInsightsDashboard', () => {
     tableRows = [{ id: 'row-1' }, { id: 'row-2' }];
     usePageSpeedInsightsQueryMock.mockReset();
     resetColumnFiltersMock.mockReset();
-    usePageSpeedInsightsQueryMock.mockReturnValue({ data: [], isLoading: false });
+    usePageSpeedInsightsQueryMock.mockReturnValue({
+      data: [],
+      isLoading: false,
+    });
   });
 
-  it('shows the loading state when the dashboard is still fetching', () => {
-    dashboardState.isLoading = true;
+  it('renders report title and mocked sections', () => {
+    render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
 
-    const { container } = render(
-      <PageSpeedInsightsDashboard data={[]} labels={['Mobile']} url="https://example.com" />,
-    );
-
-    expect(container.firstChild).toMatchSnapshot();
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Loaded report' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Entities table')).toBeInTheDocument();
+    expect(screen.getByText('CWV metrics')).toBeInTheDocument();
+    expect(screen.getByText('Category row: row-1')).toBeInTheDocument();
   });
 
-  it('renders the dashboard sections, copy buttons, and category rows when data is ready', () => {
-    dashboardState.items = [
-      { label: 'Mobile', item: { id: 'mobile' } },
-      { label: 'Desktop', item: { id: 'desktop' } },
-    ];
+  it('calls resetColumnFilters when Reset filters is clicked', () => {
+    render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
 
-    const { container } = render(
-      <PageSpeedInsightsDashboard
-        data={[{ id: 1 } as any]}
-        labels={['Mobile', 'Desktop']}
-        url="https://example.com"
-      />,
-    );
+    fireEvent.click(screen.getByRole('button', { name: /reset filters/i }));
 
-    expect(usePageSpeedInsightsQueryMock).toHaveBeenCalledWith(
-      { url: 'https://example.com' },
-      [{ id: 1 }],
-    );
-    expect(container.firstChild).toMatchSnapshot();
-
-    const resetButton = Array.from(container.querySelectorAll('button')).find(
-      (btn) => /reset filters/i.test(btn.textContent ?? ''),
-    );
-    fireEvent.click(resetButton!);
-    expect(resetColumnFiltersMock).toHaveBeenCalled();
+    expect(resetColumnFiltersMock).toHaveBeenCalledTimes(1);
   });
 });

@@ -19,12 +19,11 @@ import {
 } from '@/features/page-speed-insights/JSUsage/JSUsageTable';
 import { Accordion } from '@/components/ui/accordion';
 import { DropdownFilter } from '@/features/page-speed-insights/JSUsage/TableControls';
-import { usePageSpeedInsightsQuery } from '@/features/page-speed-insights/data/usePageSpeedInsightsQuery';
-import { CopyButton } from '@/components/ui/copy-button';
 import { NetworkMetricsComponent } from '@/features/page-speed-insights/NetworkMetrics';
 import { JavaScriptPerformanceComponent } from '@/features/page-speed-insights/javascript-metrics/JavaScriptPerformanceComponent';
 import { RecommendationsSection } from '@/features/page-speed-insights/RecommendationsSection';
 import type { InsightsContextItem } from '@/lib/page-speed-insights/types';
+import { PageSpeedInsightsCopyButtons } from '@/features/page-speed-insights/PageSpeedInsightsCopyButtons';
 import { useSelector } from '@xstate/store-react';
 
 const loadingExperiences = [
@@ -36,51 +35,32 @@ const loadingExperiences = [
 ] as const;
 
 export function PageSpeedInsightsDashboard({
-  data: defaultData,
-  url,
+  data,
   labels,
 }: {
   data: NullablePageSpeedInsights[];
   labels: string[];
   hideReport?: boolean;
-  url?: string;
+  
 }) {
   'use no memo';
-  const { data, isLoading } = usePageSpeedInsightsQuery(
-    { url: url ?? '' },
-    defaultData,
-  );
+  
   const dataForStore: NullablePageSpeedInsights[] = Array.isArray(data)
     ? data
     : [];
   const store = usePageSpeedInsightsStore({
     data: dataForStore,
     labels,
-    isLoading,
+    isLoading: false,
   });
-  const dashboardIsLoading = useSelector(store, selectPageSpeedIsLoading);
   const items: InsightsContextItem[] = useSelector(store, selectPageSpeedItems);
   const reportTitle = useSelector(store, selectPageSpeedReportTitle);
 
   const table = useLHTable(items);
 
-  if (dashboardIsLoading || items.length === 0) {
-    return <LoadingMessage />;
-  }
-
   return (
     <PageSpeedInsightsStoreProvider store={store}>
-      <div className="flex flex-row justify-end gap-4">
-        {items.map((item) => (
-          <CopyButton
-            key={item.label}
-            size="lg"
-            text={JSON.stringify(item.item) || ''}
-          >
-            {item.label}
-          </CopyButton>
-        ))}
-      </div>
+      <PageSpeedInsightsCopyButtons items={items} />
       <h2 className="text-center text-2xl font-bold">
         {reportTitle}
       </h2>

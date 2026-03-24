@@ -3,7 +3,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PageSpeedInsights } from '@/lib/schema';
-import { usePageSpeedInsightsQuery } from '@/features/page-speed-insights/data/usePageSpeedInsightsQuery';
+import {
+  usePageSpeedInsightsQueryByPublicId,
+  usePageSpeedInsightsQueryByUrl,
+} from '@/features/page-speed-insights/data/usePageSpeedInsightsQuery';
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -75,8 +78,8 @@ describe('usePageSpeedInsightsQuery', () => {
       ] as (PageSpeedInsights | null | undefined)[];
       const { result } = renderHook(
         () =>
-          usePageSpeedInsightsQuery(
-            { url: 'https://example.com' },
+          usePageSpeedInsightsQueryByUrl(
+            'https://example.com',
             defaultData,
           ),
         { wrapper: createWrapper() },
@@ -89,7 +92,7 @@ describe('usePageSpeedInsightsQuery', () => {
     it('returns defaultData when defaultData has items (filtered)', () => {
       const defaultData = [null, { lighthouseResult: {} }] as (PageSpeedInsights | null | undefined)[];
       const { result } = renderHook(
-        () => usePageSpeedInsightsQuery({ url: '' }, defaultData),
+        () => usePageSpeedInsightsQueryByUrl('', defaultData),
         { wrapper: createWrapper() },
       );
 
@@ -104,7 +107,7 @@ describe('usePageSpeedInsightsQuery', () => {
       } as Response);
 
       const { result } = renderHook(
-        () => usePageSpeedInsightsQuery({ url: 'https://example.com' }, []),
+        () => usePageSpeedInsightsQueryByUrl('https://example.com', []),
         { wrapper: createWrapper() },
       );
 
@@ -128,7 +131,7 @@ describe('usePageSpeedInsightsQuery', () => {
       } as Response);
 
       const { result } = renderHook(
-        () => usePageSpeedInsightsQuery({ url: 'https://example.com' }),
+        () => usePageSpeedInsightsQueryByUrl('https://example.com'),
         { wrapper: createWrapper() },
       );
 
@@ -156,7 +159,7 @@ describe('usePageSpeedInsightsQuery', () => {
 
       const capture: { error: unknown } = { error: undefined };
       renderHook(
-        () => usePageSpeedInsightsQuery({ url: 'https://example.com' }),
+        () => usePageSpeedInsightsQueryByUrl('https://example.com'),
         { wrapper: createSuspenseErrorWrapper(capture) },
       );
 
@@ -176,7 +179,7 @@ describe('usePageSpeedInsightsQuery', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const { result } = renderHook(
-        () => usePageSpeedInsightsQuery({ url: 'https://example.com' }),
+        () => usePageSpeedInsightsQueryByUrl('https://example.com'),
         { wrapper: createWrapper() },
       );
 
@@ -192,25 +195,6 @@ describe('usePageSpeedInsightsQuery', () => {
   });
 
   describe('publicId mode', () => {
-    it('returns defaultData and isLoading false when hasDefaultData', () => {
-      const defaultData = [
-        {
-          lighthouseResult: { finalDisplayedUrl: 'https://example.com' },
-        },
-      ] as (PageSpeedInsights | null | undefined)[];
-      const { result } = renderHook(
-        () =>
-          usePageSpeedInsightsQuery(
-            { publicId: 'public-123' },
-            defaultData,
-          ),
-        { wrapper: createWrapper() },
-      );
-
-      expect(result.current.data).toEqual(defaultData);
-      expect(result.current.isLoading).toBe(false);
-    });
-
     it('fetches and returns data when publicId is provided', async () => {
       const mockData = [
         {
@@ -223,7 +207,7 @@ describe('usePageSpeedInsightsQuery', () => {
       } as Response);
 
       const { result } = renderHook(
-        () => usePageSpeedInsightsQuery({ publicId: 'public-123' }),
+        () => usePageSpeedInsightsQueryByPublicId('public-123'),
         { wrapper: createWrapper() },
       );
 
@@ -249,7 +233,7 @@ describe('usePageSpeedInsightsQuery', () => {
       } as Response);
 
       const { result } = renderHook(
-        () => usePageSpeedInsightsQuery({ publicId: 'public-123' }),
+        () => usePageSpeedInsightsQueryByPublicId('public-123'),
         { wrapper: createWrapper() },
       );
 
@@ -270,7 +254,7 @@ describe('usePageSpeedInsightsQuery', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const { result } = renderHook(
-        () => usePageSpeedInsightsQuery({ publicId: 'public-123' }),
+        () => usePageSpeedInsightsQueryByPublicId('public-123'),
         { wrapper: createWrapper() },
       );
 

@@ -85,7 +85,6 @@ function TableCardWrapper({
   title: string;
   className?: string;
 }) {
-  "use no memo";
   return (
     <Card className={className}>
       <CardHeader>

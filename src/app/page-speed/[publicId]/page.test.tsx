@@ -5,8 +5,8 @@ import { describe, expect, it, vi } from 'vitest';
 const usePageSpeedInsightsQueryMock = vi.fn();
 
 vi.mock('@/features/page-speed-insights/data/usePageSpeedInsightsQuery', () => ({
-  usePageSpeedInsightsQuery: (source: unknown, defaultData?: unknown) =>
-    usePageSpeedInsightsQueryMock(source, defaultData),
+  usePageSpeedInsightsQueryByPublicId: (publicId: string) =>
+    usePageSpeedInsightsQueryMock(publicId),
 }));
 
 vi.mock('@/features/page-speed-insights/pageSpeedInsightsDashboard', () => ({
@@ -56,9 +56,6 @@ describe('page-speed [publicId] page', () => {
     await waitFor(() => {
       expect(container.firstChild).toMatchSnapshot();
     });
-    expect(usePageSpeedInsightsQueryMock).toHaveBeenCalledWith(
-      { publicId: 'report-xyz-123' },
-      undefined,
-    );
+    expect(usePageSpeedInsightsQueryMock).toHaveBeenCalledWith('report-xyz-123');
   });
 });

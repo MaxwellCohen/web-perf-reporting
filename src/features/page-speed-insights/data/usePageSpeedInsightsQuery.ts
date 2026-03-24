@@ -3,14 +3,12 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import type { PageSpeedInsights } from '@/lib/schema';
 import { parsePageSpeedInsightsArrayFromText } from '@/lib/page-speed-insights/parsePageSpeedInsightsResponse';
 
-export type PageSpeedInsightsQuerySource =
-  | { url: string }
-  | { publicId: string };
-
 /** Result when the saved-report API returns an error envelope instead of PSI rows. */
 export type PageSpeedInsightsQueryData =
   | (PageSpeedInsights | null | undefined)[]
   | { status: 'failed' };
+
+type PageSpeedInsightsDefaultData = (PageSpeedInsights | null | undefined)[];
 
 async function fetchPageSpeedByUrl(url: string, signal: AbortSignal) {
   const res = await fetch('/api/pagespeed', {
@@ -53,27 +51,15 @@ async function fetchPageSpeedByPublicId(
   return parsePageSpeedInsightsArrayFromText(text);
 }
 
-/**
- * Loads PageSpeed Insights JSON arrays from `/api/pagespeed` (URL) or `/api/pagespeed/:id` (saved report).
- */
-export function usePageSpeedInsightsQuery(
-  source: PageSpeedInsightsQuerySource,
-  defaultData?: (PageSpeedInsights | null | undefined)[],
+function usePageSpeedInsightsQueryBase(
+  queryKey: readonly [string, 'url' | 'publicId', string],
+  queryFn: ({ signal }: { signal: AbortSignal }) => Promise<PageSpeedInsightsQueryData>,
+  defaultData?: PageSpeedInsightsDefaultData,
 ) {
   const hasDefaultData = !!defaultData?.filter(Boolean).length;
-
-  const urlMode = 'url' in source;
-  const key = urlMode
-    ? (['pagespeed', 'url', source.url] as const)
-    : (['pagespeed', 'publicId', source.publicId] as const);
-
-
   const { data, isLoading } = useSuspenseQuery({
-    queryKey: key,
-    queryFn: ({ signal }) =>
-      urlMode
-        ? fetchPageSpeedByUrl(source.url, signal)
-        : fetchPageSpeedByPublicId(source.publicId, signal),
+    queryKey,
+    queryFn,
     initialData: hasDefaultData ? defaultData : undefined,
     retryDelay: 3000,
   });
@@ -86,4 +72,22 @@ export function usePageSpeedInsightsQuery(
       []) as PageSpeedInsightsQueryData,
     isLoading,
   };
+}
+
+export function usePageSpeedInsightsQueryByUrl(
+  url: string,
+  defaultData?: PageSpeedInsightsDefaultData,
+) {
+  return usePageSpeedInsightsQueryBase(
+    ['pagespeed', 'url', url] as const,
+    ({ signal }) => fetchPageSpeedByUrl(url, signal),
+    defaultData,
+  );
+}
+
+export function usePageSpeedInsightsQueryByPublicId(publicId: string) {
+  return usePageSpeedInsightsQueryBase(
+    ['pagespeed', 'publicId', publicId] as const,
+    ({ signal }) => fetchPageSpeedByPublicId(publicId, signal),
+  );
 }
