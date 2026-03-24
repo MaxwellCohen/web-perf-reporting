@@ -4,7 +4,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
 import { PostHogAnalytics } from '@/app/PostHogAnalytics';
-import { PostHogProvider, QueryProvider /*ThemeProvider */ } from '@/app/providers';
+import { PostHogProvider, QueryProvider } from '@/app/providers';
 import { TopNav } from '@/components/navigation/TopNav';
 
 const geistSans = Geist({
@@ -28,36 +28,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      {/* <ThemeProvider
-        attribute="class"
-        defaultTheme="dark"
-        enableSystem
-        forcedTheme="dark"
-        disableTransitionOnChange
-      >  */}
-      <PostHogProvider>
-        <PostHogAnalytics />
-        <QueryProvider>
-        <body
-          suppressHydrationWarning={true}
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          <div className="grid min-h-screen grid-rows-[auto,1fr]">
-            <TopNav />
-            <div className="overflow-y-scroll">
-              <main className="mx-auto min-h-screen p-4 print:min-h-0">
-                <ViewTransition>{children}</ViewTransition>
-              </main>
-              <footer className="w-full text-center print:hidden">
-                Made by Maxwell Cohen, with data from Google crux report.
-              </footer>
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <body
+        suppressHydrationWarning={true}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <PostHogProvider>
+          <PostHogAnalytics />
+          <QueryProvider>
+            <div className="grid min-h-screen grid-rows-[auto,1fr]">
+              <TopNav />
+              <div className="overflow-y-scroll">
+                <main className="mx-auto min-h-screen p-4 print:min-h-0">
+                  <ViewTransition>{children}</ViewTransition>
+                </main>
+                <footer className="w-full text-center print:hidden">
+                  Made by Maxwell Cohen, with data from Google crux report.
+                </footer>
+              </div>
             </div>
-          </div>
-        </body>
-        </QueryProvider>
-      </PostHogProvider>
-      {/* </ThemeProvider> */}
+          </QueryProvider>
+        </PostHogProvider>
+      </body>
     </html>
   );
 }

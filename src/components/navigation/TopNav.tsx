@@ -1,5 +1,4 @@
 import Link from 'next/link';
-// import { ModeToggle } from '../ui/darkmode';
 
 export function TopNav() {
   return (
@@ -25,7 +24,6 @@ export function TopNav() {
         <Link href="/viewer" className="">
           <span className="text-md break-keep font-bold">Viewer</span>
         </Link>
-      {/* <ModeToggle /> */}
       </div>
     </nav>
   );

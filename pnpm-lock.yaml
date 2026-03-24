@@ -95,9 +95,6 @@ importers:
       next:
         specifier: 16.2.1
         version: 16.2.1(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.3.0-canary-8b2e903a-20260320(react@19.3.0-canary-8b2e903a-20260320))(react@19.3.0-canary-8b2e903a-20260320)
-      next-themes:
-        specifier: ^0.4.6
-        version: 0.4.6(react-dom@19.3.0-canary-8b2e903a-20260320(react@19.3.0-canary-8b2e903a-20260320))(react@19.3.0-canary-8b2e903a-20260320)
       pako:
         specifier: ^2.1.0
         version: 2.1.0
@@ -119,9 +116,6 @@ importers:
       recharts:
         specifier: ^2.15.4
         version: 2.15.4(react-dom@19.3.0-canary-8b2e903a-20260320(react@19.3.0-canary-8b2e903a-20260320))(react@19.3.0-canary-8b2e903a-20260320)
-      swr:
-        specifier: ^2.4.1
-        version: 2.4.1(react@19.3.0-canary-8b2e903a-20260320)
       tailwind-merge:
         specifier: ^3.5.0
         version: 3.5.0
@@ -4891,12 +4885,6 @@ packages:
     resolution: {integrity: sha512-dBpDMdxv9Irdq66304OLfEmQ9tbNRFnFTuZiLo+bD+r332bBmMJ8GBLXklIXXgxd3+v9+KUnZaUR5PJMa75Gsg==}
     engines: {node: '>= 0.4.0'}
 
-  next-themes@0.4.6:
-    resolution: {integrity: sha512-pZvgD5L0IEvX5/9GWyHMf3m8BKiVQwsCMHfoFosXtXBMnaS0ZnIJ9ST4b4NqLVKDEm8QBxoNNGNaBv2JNF6XNA==}
-    peerDependencies:
-      react: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
-      react-dom: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
-
   next@16.2.1:
     resolution: {integrity: sha512-VaChzNL7o9rbfdt60HUj8tev4m6d7iC1igAy157526+cJlXOQu5LzsBXNT+xaJnTP/k+utSX5vMv7m0G+zKH+Q==}
     engines: {node: '>=20.9.0'}
@@ -5594,11 +5582,6 @@ packages:
   supports-preserve-symlinks-flag@1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
-
-  swr@2.4.1:
-    resolution: {integrity: sha512-2CC6CiKQtEwaEeNiqWTAw9PGykW8SR5zZX8MZk6TeAvEAnVS7Visz8WzphqgtQ8v2xz/4Q5K+j+SeMaKXeeQIA==}
-    peerDependencies:
-      react: ^16.11.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   symbol-tree@3.2.4:
     resolution: {integrity: sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==}
@@ -11094,11 +11077,6 @@ snapshots:
 
   netmask@2.0.2: {}
 
-  next-themes@0.4.6(react-dom@19.3.0-canary-8b2e903a-20260320(react@19.3.0-canary-8b2e903a-20260320))(react@19.3.0-canary-8b2e903a-20260320):
-    dependencies:
-      react: 19.3.0-canary-8b2e903a-20260320
-      react-dom: 19.3.0-canary-8b2e903a-20260320(react@19.3.0-canary-8b2e903a-20260320)
-
   next@16.2.1(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.3.0-canary-8b2e903a-20260320(react@19.3.0-canary-8b2e903a-20260320))(react@19.3.0-canary-8b2e903a-20260320):
     dependencies:
       '@next/env': 16.2.1
@@ -11941,12 +11919,6 @@ snapshots:
       has-flag: 4.0.0
 
   supports-preserve-symlinks-flag@1.0.0: {}
-
-  swr@2.4.1(react@19.3.0-canary-8b2e903a-20260320):
-    dependencies:
-      dequal: 2.0.3
-      react: 19.3.0-canary-8b2e903a-20260320
-      use-sync-external-store: 1.6.0(react@19.3.0-canary-8b2e903a-20260320)
 
   symbol-tree@3.2.4:
     optional: true

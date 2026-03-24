@@ -8,11 +8,11 @@ import { and, eq } from 'drizzle-orm';
 
 type formFactor = 'DESKTOP' | 'MOBILE';
 
-export async function getPageSpeedDataURl(testURL: string, formFactor: formFactor) {
+export async function getPageSpeedDataUrl(testURL: string, formFactor: formFactor) {
   const baseurl = new URL(
     'https://www.googleapis.com/pagespeedonline/v5/runPagespeed',
   );
-  baseurl.searchParams.append('url', encodeURI(testURL));
+  baseurl.searchParams.append('url', testURL);
   ['ACCESSIBILITY', 'BEST_PRACTICES', 'PERFORMANCE', 'PWA', 'SEO'].forEach(
     (category) => baseurl.searchParams.append('category', category),
   );
@@ -36,11 +36,6 @@ export const getSavedPageSpeedData = async (url: string) => {
           ),
         ),
     });
-    debugger;
-    if (typeof result?.data === 'string') {
-      result.data = result.data;
-      console.log('result', result, url)
-    }
     return result;
   } catch (error) {
     Sentry.captureException(error);
@@ -94,7 +89,6 @@ async function savePageSpeedData(url: string): Promise<ApiResponse> {
     const response = (await x.json()) as ApiResponse;
     return response;
   } catch (error) {
-    console.log('error', error);
     await handleMeasurementFailure(error, url, date);
     throw error;
   }

@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const formatCruxReportMock = vi.fn();
@@ -89,7 +89,7 @@ vi.mock('@/components/historical/HistoricalPerformanceCard', () => ({
   ChartMap: { Area: () => null, 'Stacked Bar': () => null },
 }));
 
-import { HistoricalDashboard } from '@/components/historical/HistoricalDashbord';
+import { HistoricalDashboard } from '@/components/historical/HistoricalDashboard';
 
 const makeReport = (lastDate: { year: number; month: number; day: number }) => ({
   record: {

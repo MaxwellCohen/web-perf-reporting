@@ -23,6 +23,7 @@ describe('lib/services', () => {
   });
 
   it('fetches and parses current crux data', async () => {
+    vi.stubEnv('PAGESPEED_INSIGHTS_API', 'test-api-key');
     parseMock.mockReturnValue({ parsed: true });
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: true,
@@ -38,7 +39,7 @@ describe('lib/services', () => {
       expect.stringContaining('content-chromeuxreport.googleapis.com'),
       expect.objectContaining({
         method: 'POST',
-        cache: 'force-cache',
+        next: { revalidate: 86_400 },
         body: JSON.stringify({
           url: 'https://example.com',
           formFactor: 'PHONE',
@@ -51,11 +52,11 @@ describe('lib/services', () => {
   });
 
   it('captures errors and returns null when the request fails', async () => {
+    vi.stubEnv('PAGESPEED_INSIGHTS_API', 'test-api-key');
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: false,
       statusText: 'Bad Request',
     } as Response);
-    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     const result = await getCurrentCruxData({
       origin: 'https://example.com',
@@ -64,8 +65,5 @@ describe('lib/services', () => {
 
     expect(result).toBeNull();
     expect(captureExceptionMock).toHaveBeenCalled();
-    expect(logSpy).toHaveBeenCalled();
-
-    logSpy.mockRestore();
   });
 });

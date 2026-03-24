@@ -7,13 +7,7 @@ exports[`ui/chart > renders chart children inside a responsive container and inj
 >
   <style>
     
- [data-chart=chart-revenue] {
-  --color-sales: #111111;
-  --color-visitors: #222222;
-}
-
-
-.dark [data-chart=chart-revenue] {
+[data-chart=chart-revenue] {
   --color-sales: #111111;
   --color-visitors: #333333;
 }
@@ -36,13 +30,7 @@ exports[`ui/chart > renders tooltip content from the provided config and payload
 >
   <style>
     
- [data-chart=chart-_r_0_] {
-  --color-sales: #111111;
-  --color-visitors: #222222;
-}
-
-
-.dark [data-chart=chart-_r_0_] {
+[data-chart=chart-_r_0_] {
   --color-sales: #111111;
   --color-visitors: #333333;
 }
@@ -102,13 +90,7 @@ exports[`ui/chart > returns nothing when there is no color config or inactive to
   >
     <style>
       
- [data-chart=chart-_r_0_] {
-  --color-sales: #111111;
-  --color-visitors: #222222;
-}
-
-
-.dark [data-chart=chart-_r_0_] {
+[data-chart=chart-_r_0_] {
   --color-sales: #111111;
   --color-visitors: #333333;
 }
@@ -128,13 +110,7 @@ exports[`ui/chart > supports custom label formatting and legend rendering 1`] = 
 >
   <style>
     
- [data-chart=chart-_r_0_] {
-  --color-sales: #111111;
-  --color-visitors: #222222;
-}
-
-
-.dark [data-chart=chart-_r_0_] {
+[data-chart=chart-_r_0_] {
   --color-sales: #111111;
   --color-visitors: #333333;
 }
@@ -160,7 +136,7 @@ exports[`ui/chart > supports custom label formatting and legend rendering 1`] = 
           >
             <div
               class="shrink-0 rounded-xs border-[--color-border] bg-[--color-bg] h-2.5 w-2.5"
-              style="--color-bg: #222222; --color-border: #222222;"
+              style="--color-bg: #333333; --color-border: #333333;"
             />
             <div
               class="flex flex-1 justify-between leading-none items-center"
@@ -200,7 +176,7 @@ exports[`ui/chart > supports custom label formatting and legend rendering 1`] = 
         >
           <div
             class="h-2 w-2 shrink-0 rounded-xs"
-            style="background-color: #222222;"
+            style="background-color: #333333;"
           />
           Visitors
         </div>

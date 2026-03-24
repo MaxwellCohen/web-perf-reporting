@@ -1,4 +1,3 @@
-// import * as Sentry from "@sentry/nextjs";
 import { CruxReport, cruxReportSchema } from '@/lib/schema';
 import * as Sentry from '@sentry/nextjs';
 
@@ -11,6 +10,8 @@ export type formFactor =
   | 'ALL_FORM_FACTORS'
   | undefined;
 
+const CRUX_REVALIDATE_SECONDS = 86_400;
+
 export const getCurrentCruxData = async ({
   url,
   origin,
@@ -20,13 +21,22 @@ export const getCurrentCruxData = async ({
   origin?: string;
   formFactor: formFactor;
 }) => {
+  const apiKey = process.env.PAGESPEED_INSIGHTS_API;
+  if (!apiKey) {
+    const err = new Error(
+      'PAGESPEED_INSIGHTS_API environment variable is not set',
+    );
+    Sentry.captureException(err);
+    return null;
+  }
+
   try {
     const request = await fetch(
-      `https://content-chromeuxreport.googleapis.com/v1/records:queryRecord?alt=json&key=${process.env.PAGESPEED_INSIGHTS_API}`,
+      `https://content-chromeuxreport.googleapis.com/v1/records:queryRecord?alt=json&key=${apiKey}`,
       {
         body: JSON.stringify({ url, formFactor, origin }),
         method: 'POST',
-        cache: 'force-cache'
+        next: { revalidate: CRUX_REVALIDATE_SECONDS },
       },
     );
     if (!request.ok) {
@@ -34,11 +44,10 @@ export const getCurrentCruxData = async ({
         'Failed to fetch current CRUX data: ' + request.statusText,
       );
     }
-    const data = await request.json() as CruxReport;
+    const data = (await request.json()) as CruxReport;
     const parsedData = cruxReportSchema.parse(data);
     return parsedData;
   } catch (error) {
-    console.log(error);
     Sentry.captureException(error);
     return null;
   }

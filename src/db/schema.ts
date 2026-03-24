@@ -13,14 +13,14 @@ export const historicalMetrics = t.sqliteTable('Historical_Metrics', {
   data: t.blob({mode: 'json'}).$type<CruxReport>().notNull(),
 },
 (table) => [
-  t.uniqueIndex('historicalMetrics2_index').on(
+  t.uniqueIndex('historicalMetrics_record_unique').on(
     table.url,
     table.formFactor,
     table.origin,
     table.date,
   ),
   t.index('historical_Metrics_url_index').on(table.url),
-  t.index('historicalMetrics2_index').on(
+  t.index('historicalMetrics_scope_index').on(
     table.url,
     table.formFactor,
     table.origin,

@@ -43,6 +43,13 @@
       "when": 1743546300340,
       "tag": "0005_big_harpoon",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1743546400000,
+      "tag": "0006_fix_historical_metrics_indexes",
+      "breakpoints": true
     }
   ]
 }

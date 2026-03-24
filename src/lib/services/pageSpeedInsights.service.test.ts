@@ -35,7 +35,7 @@ vi.mock('drizzle-orm', () => ({
 }));
 
 import {
-  getPageSpeedDataURl,
+  getPageSpeedDataUrl,
   getSavedPageSpeedData,
   requestPageSpeedData,
 } from '@/lib/services/pageSpeedInsights.service';
@@ -51,7 +51,7 @@ describe('pageSpeedInsights.service', () => {
   });
 
   it('builds the google pagespeed url with categories and strategy', async () => {
-    const url = await getPageSpeedDataURl('https://example.com/home', 'DESKTOP');
+    const url = await getPageSpeedDataUrl('https://example.com/home', 'DESKTOP');
 
     expect(url).toContain('https://www.googleapis.com/pagespeedonline/v5/runPagespeed');
     expect(url).toContain('url=https%3A%2F%2Fexample.com%2Fhome');
@@ -110,7 +110,6 @@ describe('pageSpeedInsights.service', () => {
   });
 
   it('captures errors and cleans up pending measurements when the request fails', async () => {
-    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: false,
       status: 500,
@@ -123,8 +122,5 @@ describe('pageSpeedInsights.service', () => {
     expect(deleteMock).toHaveBeenCalled();
     expect(whereMock).toHaveBeenCalled();
     expect(executeMock).toHaveBeenCalled();
-    expect(logSpy).toHaveBeenCalled();
-
-    logSpy.mockRestore();
   });
 });

@@ -24,7 +24,7 @@ const chartConfig = {
   sales: { label: 'Sales', color: '#111111' },
   visitors: {
     label: 'Visitors',
-    theme: { light: '#222222', dark: '#333333' },
+    color: '#333333',
   },
 };
 
@@ -76,7 +76,7 @@ describe('ui/chart', () => {
                 dataKey: 'visitors',
                 name: 'visitors',
                 value: 13,
-                color: '#222222',
+                color: '#333333',
                 payload: { visitors: 'visitors' },
               },
             ]}
@@ -84,7 +84,7 @@ describe('ui/chart', () => {
           <ChartLegendContent
             payload={[
               { dataKey: 'sales', value: 'sales', color: '#111111' },
-              { dataKey: 'visitors', value: 'visitors', color: '#222222' },
+              { dataKey: 'visitors', value: 'visitors', color: '#333333' },
             ]}
           />
         </div>

@@ -1,6 +1,10 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
+vi.mock('next/cache', () => ({
+  unstable_cache: (fn: () => Promise<unknown>) => () => fn(),
+}));
+
 const getCurrentCruxDataMock = vi.fn();
 
 vi.mock('@/lib/services', () => ({

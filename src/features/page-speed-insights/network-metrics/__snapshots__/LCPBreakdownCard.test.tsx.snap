@@ -29,15 +29,7 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
         >
           <style>
             
- [data-chart=chart-_r_0_] {
-  --color-P75: hsl(var(--chart-4));
-  --color-good_density: hsl(var(--chart-1));
-  --color-ni_density: hsl(var(--chart-2));
-  --color-poor_density: hsl(var(--chart-3));
-}
-
-
-.dark [data-chart=chart-_r_0_] {
+[data-chart=chart-_r_0_] {
   --color-P75: hsl(var(--chart-4));
   --color-good_density: hsl(var(--chart-1));
   --color-ni_density: hsl(var(--chart-2));

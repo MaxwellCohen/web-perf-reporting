@@ -63,7 +63,7 @@ vi.mock('@/components/latest-crux/PerformanceOptions', () => ({
 }));
 
 import { HistoricalChartsSection } from '@/components/historical/HistoricalChartsSection';
-import { HistoricalDashboard } from '@/components/historical/HistoricalDashbord';
+import { HistoricalDashboard } from '@/components/historical/HistoricalDashboard';
 import { HistoricalPerformanceAreaChart, HistoricalP75Chart } from '@/components/historical/HistoricalPerformanceAreaChart';
 import { HistoricalPerformanceBarChart } from '@/components/historical/HistoricalPerformanceBarChart';
 import { HistoricalPerformanceCard } from '@/components/historical/HistoricalPerformanceCard';
