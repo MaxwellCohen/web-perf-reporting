@@ -1,7 +1,5 @@
-import type { Route } from 'next';
-import type { AnchorHTMLAttributes } from 'react';
 import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 
 vi.mock('lucide-react', () => ({
@@ -20,16 +18,18 @@ vi.mock('@/components/ui/button', () => ({
   Button: ({
     children,
     asChild,
+    onClick,
     ...props
   }: {
     children: React.ReactNode;
     asChild?: boolean;
+    onClick?: () => void;
     [k: string]: unknown;
   }) =>
     asChild ? (
       <>{children}</>
     ) : (
-      <button type="button" {...props}>
+      <button type="button" onClick={onClick} {...props}>
         {children}
       </button>
     ),
@@ -40,26 +40,52 @@ vi.mock('next/link', () => ({
     href,
     children,
     ...props
-  }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
+  }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
     <a href={href} {...props}>
       {children}
     </a>
   ),
 }));
 
+function ThrowingChild({ message }: { message: string }): never {
+  throw new Error(message);
+}
+
 describe('ErrorMessage', () => {
-  it('renders the default error state and navigation actions', () => {
-    const { container } = render(<ErrorMessage />);
+  beforeEach(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.mocked(console.error).mockRestore();
+  });
+
+  it('renders children when there is no error', () => {
+    const { container } = render(
+      <ErrorMessage>
+        <p>ok</p>
+      </ErrorMessage>,
+    );
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('renders custom copy and retry destination', () => {
+  it('renders the default error state and recovery actions when a child throws', () => {
+    const { container } = render(
+      <ErrorMessage>
+        <ThrowingChild message="Failed to load PageSpeed Insights report." />
+      </ErrorMessage>,
+    );
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('renders custom copy when a child throws', () => {
     const { container } = render(
       <ErrorMessage
         title="Custom Error"
         description="A more specific message."
-        retryUrl={"/custom-retry" as Route}
-      />,
+      >
+        <ThrowingChild message="Something went wrong." />
+      </ErrorMessage>,
     );
     expect(container.firstChild).toMatchSnapshot();
   });

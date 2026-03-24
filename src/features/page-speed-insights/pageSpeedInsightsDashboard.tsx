@@ -47,7 +47,7 @@ export function PageSpeedInsightsDashboard({
 }) {
   'use no memo';
   const { data, isLoading } = usePageSpeedInsightsQuery(
-    { mode: 'url', url: url || '' },
+    { url: url ?? '' },
     defaultData,
   );
   const dataForStore: NullablePageSpeedInsights[] = Array.isArray(data)

@@ -1,6 +1,12 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ErrorMessage > renders custom copy and retry destination 1`] = `
+exports[`ErrorMessage > renders children when there is no error 1`] = `
+<p>
+  ok
+</p>
+`;
+
+exports[`ErrorMessage > renders custom copy when a child throws 1`] = `
 <div
   class="flex flex-col items-center justify-center min-h-100 p-4"
 >
@@ -22,7 +28,7 @@ exports[`ErrorMessage > renders custom copy and retry destination 1`] = `
     </div>
     <div>
       <a
-        href="/custom-retry"
+        href="/page-speed"
       >
         Try Again
       </a>
@@ -36,7 +42,7 @@ exports[`ErrorMessage > renders custom copy and retry destination 1`] = `
 </div>
 `;
 
-exports[`ErrorMessage > renders the default error state and navigation actions 1`] = `
+exports[`ErrorMessage > renders the default error state and recovery actions when a child throws 1`] = `
 <div
   class="flex flex-col items-center justify-center min-h-100 p-4"
 >

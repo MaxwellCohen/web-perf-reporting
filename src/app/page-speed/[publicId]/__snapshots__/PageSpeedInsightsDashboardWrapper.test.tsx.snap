@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`PageSpeedInsightsDashboardWrapper > renders dashboard when client-side with valid data 1`] = `
+exports[`PageSpeedInsightsDashboardContent > renders dashboard when client-side with valid data 1`] = `
 <div
   data-testid="page-speed-dashboard"
 >
@@ -11,48 +11,110 @@ exports[`PageSpeedInsightsDashboardWrapper > renders dashboard when client-side 
 </div>
 `;
 
-exports[`PageSpeedInsightsDashboardWrapper > shows error when data is not an array 1`] = `
+exports[`PageSpeedInsightsDashboardContent > shows error when data is not an array 1`] = `
 <div
-  data-testid="error-message"
+  class="flex flex-col items-center justify-center min-h-100 p-4"
 >
-  <span
-    data-testid="error-title"
+  <div
+    class="rounded-xl border bg-card text-card-foreground shadow w-full max-w-md"
   >
-    Failed to Load Report
-  </span>
-  <span
-    data-testid="error-description"
-  >
-    We couldn't load the PageSpeed Insights data. This might be due to a temporary issue or the report might not be available.
-  </span>
-  <span
-    data-testid="error-retry-url"
-  >
-    /page-speed
-  </span>
+    <div
+      class="flex flex-col space-y-1.5 p-6 text-center"
+    >
+      <div
+        class="flex justify-center mb-4"
+      >
+        <svg
+          class="lucide lucide-circle-alert h-12 w-12 text-destructive"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <line
+            x1="12"
+            x2="12"
+            y1="8"
+            y2="12"
+          />
+          <line
+            x1="12"
+            x2="12.01"
+            y1="16"
+            y2="16"
+          />
+        </svg>
+      </div>
+      <div
+        class="font-semibold tracking-tight text-xl"
+      >
+        Failed to Load Report
+      </div>
+      <div
+        class="text-sm text-muted-foreground mt-2"
+      >
+        We couldn't load the PageSpeed Insights data. This might be due to a temporary issue or the report might not be available.
+      </div>
+    </div>
+    <div
+      class="p-6 pt-0 flex flex-col gap-3"
+    >
+      <a
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2 w-full"
+        href="/page-speed"
+      >
+        Try Again
+      </a>
+      <a
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 w-full"
+        href="/"
+      >
+        Go to Homepage
+      </a>
+    </div>
+  </div>
 </div>
 `;
 
-exports[`PageSpeedInsightsDashboardWrapper > shows loading when data has only null/undefined items 1`] = `
+exports[`PageSpeedInsightsDashboardContent > shows loading when data has only null/undefined items 1`] = `
 <div
-  data-testid="loading-message"
+  data-testid="page-speed-dashboard"
 >
-  Loading
+  Dashboard with 
+  2
+   items, labels: 
+  Mobile, Desktop
 </div>
 `;
 
-exports[`PageSpeedInsightsDashboardWrapper > shows loading when data is empty or has no truthy items 1`] = `
+exports[`PageSpeedInsightsDashboardContent > shows loading when data is empty or has no truthy items 1`] = `
 <div
-  data-testid="loading-message"
+  data-testid="page-speed-dashboard"
 >
-  Loading
+  Dashboard with 
+  0
+   items, labels: 
+  Mobile, Desktop
 </div>
 `;
 
-exports[`PageSpeedInsightsDashboardWrapper > shows loading when isLoading is true 1`] = `
+exports[`PageSpeedInsightsDashboardContent > shows loading when isLoading is true 1`] = `
 <div
-  data-testid="loading-message"
+  data-testid="page-speed-dashboard"
 >
-  Loading
+  Dashboard with 
+  0
+   items, labels: 
+  Mobile, Desktop
 </div>
 `;

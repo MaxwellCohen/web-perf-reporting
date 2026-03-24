@@ -1,12 +1,11 @@
 'use client';
-
-import { useQuery } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import type { PageSpeedInsights } from '@/lib/schema';
 import { parsePageSpeedInsightsArrayFromText } from '@/lib/page-speed-insights/parsePageSpeedInsightsResponse';
 
 export type PageSpeedInsightsQuerySource =
-  | { mode: 'url'; url: string }
-  | { mode: 'publicId'; publicId: string };
+  | { url: string }
+  | { publicId: string };
 
 /** Result when the saved-report API returns an error envelope instead of PSI rows. */
 export type PageSpeedInsightsQueryData =
@@ -63,22 +62,18 @@ export function usePageSpeedInsightsQuery(
 ) {
   const hasDefaultData = !!defaultData?.filter(Boolean).length;
 
-  const urlMode = source.mode === 'url';
+  const urlMode = 'url' in source;
   const key = urlMode
     ? (['pagespeed', 'url', source.url] as const)
     : (['pagespeed', 'publicId', source.publicId] as const);
 
-  const enabled = urlMode
-    ? !!source.url && !hasDefaultData
-    : !!source.publicId && !hasDefaultData;
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useSuspenseQuery({
     queryKey: key,
     queryFn: ({ signal }) =>
       urlMode
         ? fetchPageSpeedByUrl(source.url, signal)
         : fetchPageSpeedByPublicId(source.publicId, signal),
-    enabled,
     initialData: hasDefaultData ? defaultData : undefined,
     retryDelay: 3000,
   });

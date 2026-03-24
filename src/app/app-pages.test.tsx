@@ -54,7 +54,7 @@ vi.mock('@/components/historical/HistoricalChartsSection', () => ({
 }));
 
 vi.mock('@/app/page-speed/[publicId]/PageSpeedInsightsDashboardWrapper', () => ({
-  PageSpeedInsightsDashboardWrapper: ({ publicId }: { publicId: string }) => (
+  PageSpeedInsightsDashboardContent: ({ publicId }: { publicId: string }) => (
     <div>Dashboard wrapper for {publicId}</div>
   ),
 }));

@@ -1,11 +1,12 @@
 import { render, screen, waitFor } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 const usePageSpeedInsightsQueryMock = vi.fn();
 
 vi.mock('@/features/page-speed-insights/data/usePageSpeedInsightsQuery', () => ({
-  usePageSpeedInsightsQuery: (source: { mode: string; publicId?: string }) =>
-    usePageSpeedInsightsQueryMock(source),
+  usePageSpeedInsightsQuery: (source: unknown, defaultData?: unknown) =>
+    usePageSpeedInsightsQueryMock(source, defaultData),
 }));
 
 vi.mock('@/features/page-speed-insights/pageSpeedInsightsDashboard', () => ({
@@ -27,7 +28,9 @@ vi.mock('@/components/common/LoadingMessage', () => ({
 }));
 
 vi.mock('@/components/common/ErrorMessage', () => ({
-  ErrorMessage: () => <div data-testid="error-message">Error</div>,
+  ErrorMessage: ({ children }: { children?: ReactNode }) => (
+    <div data-testid="error-message">{children}</div>
+  ),
 }));
 
 import PageSpeedPublicIdPage from './page';
@@ -53,9 +56,9 @@ describe('page-speed [publicId] page', () => {
     await waitFor(() => {
       expect(container.firstChild).toMatchSnapshot();
     });
-    expect(usePageSpeedInsightsQueryMock).toHaveBeenCalledWith({
-      mode: 'publicId',
-      publicId: 'report-xyz-123',
-    });
+    expect(usePageSpeedInsightsQueryMock).toHaveBeenCalledWith(
+      { publicId: 'report-xyz-123' },
+      undefined,
+    );
   });
 });

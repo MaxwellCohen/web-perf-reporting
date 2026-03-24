@@ -1,4 +1,8 @@
-import { PageSpeedInsightsDashboardWrapper } from './PageSpeedInsightsDashboardWrapper';
+import { LoadingMessage } from '@/components/common/LoadingMessage';
+import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { Suspense, ViewTransition } from 'react';
+import { ClientOnly } from '@/components/common/ClientOnly';
+import { PageSpeedInsightsDashboardContent } from './PageSpeedInsightsDashboardWrapper';
 
 export default async function PageSpeedPublicIdPage({
   params,
@@ -7,5 +11,15 @@ export default async function PageSpeedPublicIdPage({
 }) {
   const { publicId } = await params;
 
-  return <PageSpeedInsightsDashboardWrapper publicId={publicId} />;
+  return (
+    <ViewTransition>
+      <ErrorMessage>
+        <Suspense fallback={<LoadingMessage />}>
+          <ClientOnly>
+            <PageSpeedInsightsDashboardContent publicId={publicId} />
+          </ClientOnly>
+        </Suspense>
+      </ErrorMessage>
+    </ViewTransition>
+  );
 }

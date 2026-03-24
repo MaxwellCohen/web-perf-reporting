@@ -1,6 +1,6 @@
 import { act, render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { ClientOnly } from '@/features/page-speed-insights/JSUsage/ClientOnly';
+import { ClientOnly } from '@/components/common/ClientOnly';
 
 describe('ClientOnly', () => {
   it('renders children after client hydration', async () => {

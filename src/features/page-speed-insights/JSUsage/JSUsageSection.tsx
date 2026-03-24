@@ -5,7 +5,7 @@ import { usePageSpeedItems } from '@/features/page-speed-insights/PageSpeedConte
 import { flattenTreeMapNode } from '@/features/page-speed-insights/flattenTreeMapNode';
 import { Card, CardHeader } from '@/components/ui/card';
 import { JSUsageTableWithControls } from '@/features/page-speed-insights/JSUsage/JSUsageTable';
-import { ClientOnly } from '@/features/page-speed-insights/JSUsage/ClientOnly';
+import { ClientOnly } from '@/components/common/ClientOnly';
 import { Details } from '@/components/ui/accordion';
 
 export function JSUsageSection() {

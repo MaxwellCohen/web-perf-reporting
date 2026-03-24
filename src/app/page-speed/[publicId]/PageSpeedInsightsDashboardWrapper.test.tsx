@@ -1,12 +1,13 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import { PageSpeedInsightsDashboardWrapper } from './PageSpeedInsightsDashboardWrapper';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { PageSpeedInsightsDashboardContent } from './PageSpeedInsightsDashboardWrapper';
 
 const usePageSpeedInsightsQueryMock = vi.fn();
 
 vi.mock('@/features/page-speed-insights/data/usePageSpeedInsightsQuery', () => ({
-  usePageSpeedInsightsQuery: (source: { mode: string; publicId?: string }) =>
-    usePageSpeedInsightsQueryMock(source),
+  usePageSpeedInsightsQuery: (source: unknown, defaultData?: unknown) =>
+    usePageSpeedInsightsQueryMock(source, defaultData),
 }));
 
 vi.mock('@/features/page-speed-insights/pageSpeedInsightsDashboard', () => ({
@@ -27,24 +28,6 @@ vi.mock('@/components/common/LoadingMessage', () => ({
   LoadingMessage: () => <div data-testid="loading-message">Loading</div>,
 }));
 
-vi.mock('@/components/common/ErrorMessage', () => ({
-  ErrorMessage: ({
-    title,
-    description,
-    retryUrl,
-  }: {
-    title: string;
-    description: string;
-    retryUrl: string;
-  }) => (
-    <div data-testid="error-message">
-      <span data-testid="error-title">{title}</span>
-      <span data-testid="error-description">{description}</span>
-      <span data-testid="error-retry-url">{retryUrl}</span>
-    </div>
-  ),
-}));
-
 const createMockPageSpeedData = () => [
   {
     lighthouseResult: { finalDisplayedUrl: 'https://example.com' },
@@ -52,19 +35,27 @@ const createMockPageSpeedData = () => [
   },
 ];
 
-describe('PageSpeedInsightsDashboardWrapper', () => {
+describe('PageSpeedInsightsDashboardContent', () => {
+  beforeEach(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.mocked(console.error).mockRestore();
+  });
+
   it('passes publicId to usePageSpeedInsightsQuery', () => {
     usePageSpeedInsightsQueryMock.mockReturnValue({
       data: [],
       isLoading: true,
     });
 
-    render(<PageSpeedInsightsDashboardWrapper publicId="test-id-123" />);
+    render(<PageSpeedInsightsDashboardContent publicId="test-id-123" />);
 
-    expect(usePageSpeedInsightsQueryMock).toHaveBeenCalledWith({
-      mode: 'publicId',
-      publicId: 'test-id-123',
-    });
+    expect(usePageSpeedInsightsQueryMock).toHaveBeenCalledWith(
+      { publicId: 'test-id-123' },
+      undefined,
+    );
   });
 
   it('shows loading when isLoading is true', async () => {
@@ -74,7 +65,7 @@ describe('PageSpeedInsightsDashboardWrapper', () => {
     });
 
     const { container } = render(
-      <PageSpeedInsightsDashboardWrapper publicId="test-id" />,
+      <PageSpeedInsightsDashboardContent publicId="test-id" />,
     );
 
     await waitFor(() => {
@@ -89,7 +80,7 @@ describe('PageSpeedInsightsDashboardWrapper', () => {
     });
 
     const { container } = render(
-      <PageSpeedInsightsDashboardWrapper publicId="test-id" />,
+      <PageSpeedInsightsDashboardContent publicId="test-id" />,
     );
 
     await waitFor(() => {
@@ -104,7 +95,7 @@ describe('PageSpeedInsightsDashboardWrapper', () => {
     });
 
     const { container } = render(
-      <PageSpeedInsightsDashboardWrapper publicId="test-id" />,
+      <PageSpeedInsightsDashboardContent publicId="test-id" />,
     );
 
     await waitFor(() => {
@@ -119,16 +110,16 @@ describe('PageSpeedInsightsDashboardWrapper', () => {
     });
 
     const { container } = render(
-      <PageSpeedInsightsDashboardWrapper publicId="test-id" />,
+      <ErrorMessage>
+        <PageSpeedInsightsDashboardContent publicId="test-id" />
+      </ErrorMessage>,
     );
 
     await waitFor(() => {
       expect(container.firstChild).toMatchSnapshot();
     });
-    expect(screen.getByTestId('error-title')).toHaveTextContent(
-      'Failed to Load Report',
-    );
-    expect(screen.getByTestId('error-retry-url')).toHaveTextContent('/page-speed');
+    expect(screen.getByText('Failed to Load Report')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Try Again' })).toBeInTheDocument();
   });
 
   it('renders dashboard when client-side with valid data', async () => {
@@ -139,7 +130,7 @@ describe('PageSpeedInsightsDashboardWrapper', () => {
     });
 
     const { container } = render(
-      <PageSpeedInsightsDashboardWrapper publicId="test-id" />,
+      <PageSpeedInsightsDashboardContent publicId="test-id" />,
     );
 
     await waitFor(() => {

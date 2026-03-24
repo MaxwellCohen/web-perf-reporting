@@ -1,43 +1,13 @@
 'use client';
 import { PageSpeedInsightsDashboard } from '@/features/page-speed-insights/pageSpeedInsightsDashboard';
 import { usePageSpeedInsightsQuery } from '@/features/page-speed-insights/data/usePageSpeedInsightsQuery';
-import { LoadingMessage } from '@/components/common/LoadingMessage';
-import { ErrorMessage } from '@/components/common/ErrorMessage';
-import { useEffect, useState, ViewTransition } from 'react';
 
-export function PageSpeedInsightsDashboardWrapper({
-  publicId,
-}: {
-  publicId: string;
-}) {
-  const { data, isLoading } = usePageSpeedInsightsQuery({
-    mode: 'publicId',
-    publicId,
-  });
-
-  const [isClient, setIsClient] = useState(false);
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-
+export function PageSpeedInsightsDashboardContent({ publicId }: { publicId: string }) {
+  const { data } = usePageSpeedInsightsQuery({ publicId });
   if (data && !Array.isArray(data)) {
-    return <ErrorMessage 
-      title="Failed to Load Report" 
-      description="We couldn't load the PageSpeed Insights data. This might be due to a temporary issue or the report might not be available."
-      retryUrl="/page-speed"
-    />;
+    throw new Error('Failed to load PageSpeed Insights report.');
   }
-
-  if (!isClient || isLoading || !data?.filter(Boolean).length) {
-    return <ViewTransition><LoadingMessage /></ViewTransition>;
-  } 
-
   return (
-    <ViewTransition><PageSpeedInsightsDashboard
-      data={data}
-      labels={['Mobile', 'Desktop']}
-    />
-    </ViewTransition>
+    <PageSpeedInsightsDashboard data={data} labels={['Mobile', 'Desktop']} />
   );
 }

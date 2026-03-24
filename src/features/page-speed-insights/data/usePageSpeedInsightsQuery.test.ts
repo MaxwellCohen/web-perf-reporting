@@ -18,6 +18,45 @@ const createWrapper = () => {
   };
 };
 
+/** useSuspenseQuery suspends then throws on failed fetch; capture that for assertions. */
+function createSuspenseErrorWrapper(capture: { error: unknown }) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+
+  class ErrorCatcher extends React.Component<
+    { children: React.ReactNode },
+    { hasError: boolean }
+  > {
+    state = { hasError: false };
+
+    static getDerivedStateFromError() {
+      return { hasError: true };
+    }
+
+    componentDidCatch(error: unknown) {
+      capture.error = error;
+    }
+
+    render() {
+      if (this.state.hasError) return null;
+      return this.props.children;
+    }
+  }
+
+  return function Wrapper({ children }: { children: React.ReactNode }) {
+    return React.createElement(
+      QueryClientProvider,
+      { client: queryClient },
+      React.createElement(
+        React.Suspense,
+        { fallback: null },
+        React.createElement(ErrorCatcher, null, children),
+      ),
+    );
+  };
+}
+
 describe('usePageSpeedInsightsQuery', () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -37,7 +76,7 @@ describe('usePageSpeedInsightsQuery', () => {
       const { result } = renderHook(
         () =>
           usePageSpeedInsightsQuery(
-            { mode: 'url', url: 'https://example.com' },
+            { url: 'https://example.com' },
             defaultData,
           ),
         { wrapper: createWrapper() },
@@ -50,7 +89,7 @@ describe('usePageSpeedInsightsQuery', () => {
     it('returns defaultData when defaultData has items (filtered)', () => {
       const defaultData = [null, { lighthouseResult: {} }] as (PageSpeedInsights | null | undefined)[];
       const { result } = renderHook(
-        () => usePageSpeedInsightsQuery({ mode: 'url', url: '' }, defaultData),
+        () => usePageSpeedInsightsQuery({ url: '' }, defaultData),
         { wrapper: createWrapper() },
       );
 
@@ -65,7 +104,7 @@ describe('usePageSpeedInsightsQuery', () => {
       } as Response);
 
       const { result } = renderHook(
-        () => usePageSpeedInsightsQuery({ mode: 'url', url: 'https://example.com' }, []),
+        () => usePageSpeedInsightsQuery({ url: 'https://example.com' }, []),
         { wrapper: createWrapper() },
       );
 
@@ -89,7 +128,7 @@ describe('usePageSpeedInsightsQuery', () => {
       } as Response);
 
       const { result } = renderHook(
-        () => usePageSpeedInsightsQuery({ mode: 'url', url: 'https://example.com' }),
+        () => usePageSpeedInsightsQuery({ url: 'https://example.com' }),
         { wrapper: createWrapper() },
       );
 
@@ -108,23 +147,23 @@ describe('usePageSpeedInsightsQuery', () => {
       fetchMock.mockRestore();
     });
 
-    it('returns empty array when response is not ok', async () => {
+    it('throws when response is not ok (useSuspenseQuery error)', async () => {
       const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
         ok: false,
         status: 500,
         text: async () => 'Server error',
       } as Response);
 
-      const { result } = renderHook(
-        () => usePageSpeedInsightsQuery({ mode: 'url', url: 'https://example.com' }),
-        { wrapper: createWrapper() },
+      const capture: { error: unknown } = { error: undefined };
+      renderHook(
+        () => usePageSpeedInsightsQuery({ url: 'https://example.com' }),
+        { wrapper: createSuspenseErrorWrapper(capture) },
       );
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
       });
-      expect(result.current.isLoading).toBe(false);
-      expect(result.current.data).toEqual([]);
+      expect(capture.error).toMatchObject({ status: 500, message: 'Server error' });
       fetchMock.mockRestore();
     });
 
@@ -137,7 +176,7 @@ describe('usePageSpeedInsightsQuery', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const { result } = renderHook(
-        () => usePageSpeedInsightsQuery({ mode: 'url', url: 'https://example.com' }),
+        () => usePageSpeedInsightsQuery({ url: 'https://example.com' }),
         { wrapper: createWrapper() },
       );
 
@@ -162,7 +201,7 @@ describe('usePageSpeedInsightsQuery', () => {
       const { result } = renderHook(
         () =>
           usePageSpeedInsightsQuery(
-            { mode: 'publicId', publicId: 'public-123' },
+            { publicId: 'public-123' },
             defaultData,
           ),
         { wrapper: createWrapper() },
@@ -184,7 +223,7 @@ describe('usePageSpeedInsightsQuery', () => {
       } as Response);
 
       const { result } = renderHook(
-        () => usePageSpeedInsightsQuery({ mode: 'publicId', publicId: 'public-123' }),
+        () => usePageSpeedInsightsQuery({ publicId: 'public-123' }),
         { wrapper: createWrapper() },
       );
 
@@ -210,7 +249,7 @@ describe('usePageSpeedInsightsQuery', () => {
       } as Response);
 
       const { result } = renderHook(
-        () => usePageSpeedInsightsQuery({ mode: 'publicId', publicId: 'public-123' }),
+        () => usePageSpeedInsightsQuery({ publicId: 'public-123' }),
         { wrapper: createWrapper() },
       );
 
@@ -231,7 +270,7 @@ describe('usePageSpeedInsightsQuery', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const { result } = renderHook(
-        () => usePageSpeedInsightsQuery({ mode: 'publicId', publicId: 'public-123' }),
+        () => usePageSpeedInsightsQuery({ publicId: 'public-123' }),
         { wrapper: createWrapper() },
       );
 

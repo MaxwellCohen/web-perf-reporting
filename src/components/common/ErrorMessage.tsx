@@ -1,19 +1,25 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import type { Route } from 'next';
+import type { ErrorInfo } from 'next/error';
+import { unstable_catchError } from 'next/error';
 import Link from 'next/link';
 import { AlertCircle } from 'lucide-react';
 
-export function ErrorMessage({
-  title = 'Failed to Load Report',
-  description =
-    "We couldn't load the PageSpeed Insights data. This might be due to a temporary issue or the report might not be available.",
-  retryUrl = '/page-speed',
-}: {
+export type ErrorMessageProps = {
   title?: string;
   description?: string;
-  retryUrl?: Route;
-}) {
+  children: React.ReactNode;
+};
+
+function ErrorMessageFallback(
+  {
+    title = 'Failed to Load Report',
+    description =
+      "We couldn't load the PageSpeed Insights data. This might be due to a temporary issue or the report might not be available.",
+  }: Omit<ErrorMessageProps, 'children'>,
+) {
   return (
     <div className="flex flex-col items-center justify-center min-h-100 p-4">
       <Card className="w-full max-w-md">
@@ -28,7 +34,7 @@ export function ErrorMessage({
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <Button asChild className="w-full">
-            <Link href={retryUrl}>
+            <Link href="/page-speed">
               Try Again
             </Link>
           </Button>
@@ -42,3 +48,5 @@ export function ErrorMessage({
     </div>
   );
 }
+
+export const ErrorMessage = unstable_catchError(ErrorMessageFallback);

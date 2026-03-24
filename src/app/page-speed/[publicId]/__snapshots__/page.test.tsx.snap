@@ -2,11 +2,15 @@
 
 exports[`page-speed [publicId] page > awaits params and renders wrapper with publicId 1`] = `
 <div
-  data-testid="page-speed-dashboard"
+  data-testid="error-message"
 >
-  Dashboard with 
-  1
-   items, labels: 
-  Mobile, Desktop
+  <div
+    data-testid="page-speed-dashboard"
+  >
+    Dashboard with 
+    1
+     items, labels: 
+    Mobile, Desktop
+  </div>
 </div>
 `;

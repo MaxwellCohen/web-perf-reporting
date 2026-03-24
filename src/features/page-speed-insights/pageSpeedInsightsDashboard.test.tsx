@@ -51,7 +51,7 @@ vi.mock('@xstate/store-react', () => ({
 }));
 
 vi.mock('@/features/page-speed-insights/data/usePageSpeedInsightsQuery', () => ({
-  usePageSpeedInsightsQuery: (source: { mode: string; url?: string }, data: unknown[]) =>
+  usePageSpeedInsightsQuery: (source: { url?: string }, data: unknown[]) =>
     usePageSpeedInsightsQueryMock(source, data),
 }));
 
@@ -148,7 +148,7 @@ describe('pageSpeedInsightsDashboard', () => {
     );
 
     expect(usePageSpeedInsightsQueryMock).toHaveBeenCalledWith(
-      { mode: 'url', url: 'https://example.com' },
+      { url: 'https://example.com' },
       [{ id: 1 }],
     );
     expect(container.firstChild).toMatchSnapshot();
