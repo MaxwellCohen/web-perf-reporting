@@ -1,7 +1,7 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { getHistoricalCruxData } from './historicalCruxData.services';
+import { describe, expect, it, vi, beforeEach } from "vitest";
+import { getHistoricalCruxData } from "./historicalCruxData.services";
 
-vi.mock('@/db', () => ({
+vi.mock("@/db", () => ({
   db: {
     insert: vi.fn(() => ({
       values: vi.fn(() => ({
@@ -20,7 +20,7 @@ vi.mock('@/db', () => ({
   },
 }));
 
-vi.mock('@sentry/nextjs', () => ({
+vi.mock("@sentry/nextjs", () => ({
   captureException: vi.fn(),
 }));
 
@@ -34,7 +34,7 @@ const baseHistogram = [
 
 const validCruxHistoryResponse = {
   record: {
-    key: { origin: 'https://example.com', formFactor: 'PHONE' },
+    key: { origin: "https://example.com", formFactor: "PHONE" },
     collectionPeriods: [
       {
         firstDate: { year: 2024, month: 1, day: 1 },
@@ -70,51 +70,51 @@ const validCruxHistoryResponse = {
   },
 };
 
-describe('getHistoricalCruxData', () => {
+describe("getHistoricalCruxData", () => {
   beforeEach(() => {
-    process.env.PAGESPEED_INSIGHTS_API = 'test-api-key';
+    process.env.PAGESPEED_INSIGHTS_API = "test-api-key";
     global.fetch = mockFetch;
   });
 
-  it('throws when neither url nor origin provided', async () => {
+  it("throws when neither url nor origin provided", async () => {
     await expect(getHistoricalCruxData({})).rejects.toThrow(
-      'Either URL or origin must be provided'
+      "Either URL or origin must be provided",
     );
   });
 
-  it('returns null when PAGESPEED_INSIGHTS_API is not set', async () => {
+  it("returns null when PAGESPEED_INSIGHTS_API is not set", async () => {
     const orig = process.env.PAGESPEED_INSIGHTS_API;
     delete process.env.PAGESPEED_INSIGHTS_API;
-    const result = await getHistoricalCruxData({ url: 'https://example.com' });
+    const result = await getHistoricalCruxData({ url: "https://example.com" });
     process.env.PAGESPEED_INSIGHTS_API = orig;
     expect(result).toBeNull();
   });
 
-  it('returns null when API request fails', async () => {
+  it("returns null when API request fails", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: false,
       status: 500,
-      statusText: 'Internal Server Error',
-      json: () => Promise.resolve({ error: 'Server error' }),
+      statusText: "Internal Server Error",
+      json: () => Promise.resolve({ error: "Server error" }),
     } as unknown as Response);
 
-    const result = await getHistoricalCruxData({ url: 'https://example.com' });
+    const result = await getHistoricalCruxData({ url: "https://example.com" });
     expect(result).toBeNull();
   });
 
-  it('calls fetch and returns data when API succeeds', async () => {
+  it("calls fetch and returns data when API succeeds", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve(validCruxHistoryResponse),
     } as unknown as Response);
 
-    const result = await getHistoricalCruxData({ url: 'https://example.com' });
+    const result = await getHistoricalCruxData({ url: "https://example.com" });
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('chromeuxreport.googleapis.com'),
+      expect.stringContaining("chromeuxreport.googleapis.com"),
       expect.objectContaining({
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      }),
     );
     expect(result).toBeDefined();
     expect(Array.isArray(result)).toBe(true);

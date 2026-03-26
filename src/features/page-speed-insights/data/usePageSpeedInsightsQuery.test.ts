@@ -1,12 +1,12 @@
-import { act, renderHook } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { PageSpeedInsights } from '@/lib/schema';
+import { act, renderHook } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import React from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { PageSpeedInsights } from "@/lib/schema";
 import {
   usePageSpeedInsightsQueryByPublicId,
   usePageSpeedInsightsQueryByUrl,
-} from '@/features/page-speed-insights/data/usePageSpeedInsightsQuery';
+} from "@/features/page-speed-insights/data/usePageSpeedInsightsQuery";
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -27,10 +27,7 @@ function createSuspenseErrorWrapper(capture: { error: unknown }) {
     defaultOptions: { queries: { retry: false } },
   });
 
-  class ErrorCatcher extends React.Component<
-    { children: React.ReactNode },
-    { hasError: boolean }
-  > {
+  class ErrorCatcher extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
     state = { hasError: false };
 
     static getDerivedStateFromError() {
@@ -60,7 +57,7 @@ function createSuspenseErrorWrapper(capture: { error: unknown }) {
   };
 }
 
-describe('usePageSpeedInsightsQuery', () => {
+describe("usePageSpeedInsightsQuery", () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -69,19 +66,15 @@ describe('usePageSpeedInsightsQuery', () => {
     vi.useRealTimers();
   });
 
-  describe('url mode', () => {
-    it('returns defaultData and isLoading false when hasDefaultData', () => {
+  describe("url mode", () => {
+    it("returns defaultData and isLoading false when hasDefaultData", () => {
       const defaultData = [
         {
-          lighthouseResult: { finalDisplayedUrl: 'https://example.com' },
+          lighthouseResult: { finalDisplayedUrl: "https://example.com" },
         },
       ] as (PageSpeedInsights | null | undefined)[];
       const { result } = renderHook(
-        () =>
-          usePageSpeedInsightsQueryByUrl(
-            'https://example.com',
-            defaultData,
-          ),
+        () => usePageSpeedInsightsQueryByUrl("https://example.com", defaultData),
         { wrapper: createWrapper() },
       );
 
@@ -89,25 +82,28 @@ describe('usePageSpeedInsightsQuery', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    it('returns defaultData when defaultData has items (filtered)', () => {
-      const defaultData = [null, { lighthouseResult: {} }] as (PageSpeedInsights | null | undefined)[];
-      const { result } = renderHook(
-        () => usePageSpeedInsightsQueryByUrl('', defaultData),
-        { wrapper: createWrapper() },
-      );
+    it("returns defaultData when defaultData has items (filtered)", () => {
+      const defaultData = [null, { lighthouseResult: {} }] as (
+        | PageSpeedInsights
+        | null
+        | undefined
+      )[];
+      const { result } = renderHook(() => usePageSpeedInsightsQueryByUrl("", defaultData), {
+        wrapper: createWrapper(),
+      });
 
       expect(result.current.data).toEqual(defaultData);
       expect(result.current.isLoading).toBe(false);
     });
 
-    it('does not use defaultData when it is empty', async () => {
-      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+    it("does not use defaultData when it is empty", async () => {
+      const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
         ok: true,
         text: async () => JSON.stringify([]),
       } as Response);
 
       const { result } = renderHook(
-        () => usePageSpeedInsightsQueryByUrl('https://example.com', []),
+        () => usePageSpeedInsightsQueryByUrl("https://example.com", []),
         { wrapper: createWrapper() },
       );
 
@@ -119,21 +115,20 @@ describe('usePageSpeedInsightsQuery', () => {
       fetchMock.mockRestore();
     });
 
-    it('fetches and returns data when url is provided', async () => {
+    it("fetches and returns data when url is provided", async () => {
       const mockData = [
         {
-          lighthouseResult: { finalDisplayedUrl: 'https://example.com' },
+          lighthouseResult: { finalDisplayedUrl: "https://example.com" },
         },
       ];
-      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
         ok: true,
         text: async () => JSON.stringify(mockData),
       } as Response);
 
-      const { result } = renderHook(
-        () => usePageSpeedInsightsQueryByUrl('https://example.com'),
-        { wrapper: createWrapper() },
-      );
+      const { result } = renderHook(() => usePageSpeedInsightsQueryByUrl("https://example.com"), {
+        wrapper: createWrapper(),
+      });
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
@@ -141,47 +136,45 @@ describe('usePageSpeedInsightsQuery', () => {
       expect(result.current.isLoading).toBe(false);
       expect(result.current.data).toEqual(mockData);
       expect(fetchMock).toHaveBeenCalledWith(
-        '/api/pagespeed',
+        "/api/pagespeed",
         expect.objectContaining({
-          method: 'POST',
-          body: JSON.stringify({ testURL: 'https://example.com' }),
+          method: "POST",
+          body: JSON.stringify({ testURL: "https://example.com" }),
         }),
       );
       fetchMock.mockRestore();
     });
 
-    it('throws when response is not ok (useSuspenseQuery error)', async () => {
-      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+    it("throws when response is not ok (useSuspenseQuery error)", async () => {
+      const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
         ok: false,
         status: 500,
-        text: async () => 'Server error',
+        text: async () => "Server error",
       } as Response);
 
       const capture: { error: unknown } = { error: undefined };
-      renderHook(
-        () => usePageSpeedInsightsQueryByUrl('https://example.com'),
-        { wrapper: createSuspenseErrorWrapper(capture) },
-      );
+      renderHook(() => usePageSpeedInsightsQueryByUrl("https://example.com"), {
+        wrapper: createSuspenseErrorWrapper(capture),
+      });
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
       });
-      expect(capture.error).toMatchObject({ status: 500, message: 'Server error' });
+      expect(capture.error).toMatchObject({ status: 500, message: "Server error" });
       fetchMock.mockRestore();
     });
 
-    it('returns empty array when response JSON is invalid', async () => {
-      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+    it("returns empty array when response JSON is invalid", async () => {
+      const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
         ok: true,
-        text: async () => 'invalid json',
+        text: async () => "invalid json",
       } as Response);
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-      const { result } = renderHook(
-        () => usePageSpeedInsightsQueryByUrl('https://example.com'),
-        { wrapper: createWrapper() },
-      );
+      const { result } = renderHook(() => usePageSpeedInsightsQueryByUrl("https://example.com"), {
+        wrapper: createWrapper(),
+      });
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
@@ -194,22 +187,21 @@ describe('usePageSpeedInsightsQuery', () => {
     });
   });
 
-  describe('publicId mode', () => {
-    it('fetches and returns data when publicId is provided', async () => {
+  describe("publicId mode", () => {
+    it("fetches and returns data when publicId is provided", async () => {
       const mockData = [
         {
-          lighthouseResult: { finalDisplayedUrl: 'https://example.com' },
+          lighthouseResult: { finalDisplayedUrl: "https://example.com" },
         },
       ];
-      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
         ok: true,
         text: async () => JSON.stringify(mockData),
       } as Response);
 
-      const { result } = renderHook(
-        () => usePageSpeedInsightsQueryByPublicId('public-123'),
-        { wrapper: createWrapper() },
-      );
+      const { result } = renderHook(() => usePageSpeedInsightsQueryByPublicId("public-123"), {
+        wrapper: createWrapper(),
+      });
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
@@ -217,46 +209,44 @@ describe('usePageSpeedInsightsQuery', () => {
       expect(result.current.isLoading).toBe(false);
       expect(result.current.data).toEqual(mockData);
       expect(fetchMock).toHaveBeenCalledWith(
-        '/api/pagespeed/public-123',
+        "/api/pagespeed/public-123",
         expect.objectContaining({
-          method: 'GET',
+          method: "GET",
         }),
       );
       fetchMock.mockRestore();
     });
 
-    it('returns failed status when response status is 500', async () => {
-      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+    it("returns failed status when response status is 500", async () => {
+      const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
         ok: false,
         status: 500,
-        text: async () => 'Server error',
+        text: async () => "Server error",
       } as Response);
 
-      const { result } = renderHook(
-        () => usePageSpeedInsightsQueryByPublicId('public-123'),
-        { wrapper: createWrapper() },
-      );
+      const { result } = renderHook(() => usePageSpeedInsightsQueryByPublicId("public-123"), {
+        wrapper: createWrapper(),
+      });
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
       });
       expect(result.current.isLoading).toBe(false);
-      expect(result.current.data).toEqual({ status: 'failed' });
+      expect(result.current.data).toEqual({ status: "failed" });
       fetchMock.mockRestore();
     });
 
-    it('returns empty array when response JSON is invalid', async () => {
-      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+    it("returns empty array when response JSON is invalid", async () => {
+      const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
         ok: true,
-        text: async () => 'invalid json',
+        text: async () => "invalid json",
       } as Response);
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-      const { result } = renderHook(
-        () => usePageSpeedInsightsQueryByPublicId('public-123'),
-        { wrapper: createWrapper() },
-      );
+      const { result } = renderHook(() => usePageSpeedInsightsQueryByPublicId("public-123"), {
+        wrapper: createWrapper(),
+      });
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);

@@ -1,15 +1,10 @@
-import {
-  TableItem,
-  TableColumnHeading,
-  NodeValue,
-  DeviceType,
-} from '@/lib/schema';
-import { Card } from '@/components/ui/card';
-import { RenderNodeImage } from '@/features/page-speed-insights/lh-categories/table/RenderNode';
-import { RenderTableCell } from '@/features/page-speed-insights/lh-categories/table/RenderTableCell';
-import { Details } from '@/components/ui/accordion';
-import { cn } from '@/lib/utils';
-import { getItemDevice } from '@/features/page-speed-insights/lh-categories/table/itemDevice';
+import { TableItem, TableColumnHeading, NodeValue, DeviceType } from "@/lib/schema";
+import { Card } from "@/components/ui/card";
+import { RenderNodeImage } from "@/features/page-speed-insights/lh-categories/table/RenderNode";
+import { RenderTableCell } from "@/features/page-speed-insights/lh-categories/table/RenderTableCell";
+import { Details } from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
+import { getItemDevice } from "@/features/page-speed-insights/lh-categories/table/itemDevice";
 
 export function RenderNodeTable({
   headings,
@@ -22,13 +17,13 @@ export function RenderNodeTable({
   device: DeviceType;
   title: string;
 }) {
-  const nodeHeader = headings.find((h) => h.valueType === 'node');
-  if (!nodeHeader?.key && typeof nodeHeader?.key !== 'string') {
+  const nodeHeader = headings.find((h) => h.valueType === "node");
+  if (!nodeHeader?.key && typeof nodeHeader?.key !== "string") {
     return null;
   }
 
   return (
-    <Details  className="w-full @container">
+    <Details className="w-full @container">
       <summary className="flex flex-col gap-2">
         <div className="flex flex-col gap-2">
           <div className="text-lg font-bold">{title} details</div>
@@ -40,18 +35,16 @@ export function RenderNodeTable({
           return (
             <Card
               key={`item-${index}`}
-              className={cn("grid grid-cols-1 gap-2 w-full px-2", {"md:grid-cols-[75%_25%]": info.length})}
+              className={cn("grid grid-cols-1 gap-2 w-full px-2", {
+                "md:grid-cols-[75%_25%]": info.length,
+              })}
             >
-              <div className="col-span-full p-2">
-                Form Factor: {getItemDevice(item, device)}
-              </div>
+              <div className="col-span-full p-2">Form Factor: {getItemDevice(item, device)}</div>
               <NodeSummary
-                item={item[nodeHeader.key || ''] as NodeValue}
+                item={item[nodeHeader.key || ""] as NodeValue}
                 device={getItemDevice(item, device)}
               />
-              {info.length ? (
-                <div className="flex flex-col gap-2 px-2 pt-4">{info}</div>
-              ) : null}
+              {info.length ? <div className="flex flex-col gap-2 px-2 pt-4">{info}</div> : null}
             </Card>
           );
         })}
@@ -60,15 +53,11 @@ export function RenderNodeTable({
   );
 }
 
-const extraInfo = (
-  headings: TableColumnHeading[],
-  item: TableItem,
-  device: DeviceType,
-) => {
+const extraInfo = (headings: TableColumnHeading[], item: TableItem, device: DeviceType) => {
   return headings
     .map((heading, colIndex) => {
       if (!heading.key) return null;
-      if (heading?.valueType === 'node') return null;
+      if (heading?.valueType === "node") return null;
       if (!item[heading.key]) return null;
       return (
         <div
@@ -76,9 +65,9 @@ const extraInfo = (
           key={`cell-${heading.key}-${colIndex}`}
         >
           <span className="wrap-break-word">
-            {typeof heading.label === 'string'
+            {typeof heading.label === "string"
               ? heading.label
-              : heading.label?.formattedDefault || ''}
+              : heading.label?.formattedDefault || ""}
             :
           </span>
           <RenderTableCell
@@ -93,26 +82,18 @@ const extraInfo = (
     .filter(Boolean);
 };
 
-export function NodeSummary({
-  item,
-  device,
-}: {
-  item: NodeValue;
-  device: DeviceType;
-}) {
+export function NodeSummary({ item, device }: { item: NodeValue; device: DeviceType }) {
   if (!item) return null;
   const NodeImage = <RenderNodeImage item={item} device={device} />;
   return (
     <div
-      className={cn('grid gap-2', {
-        'grid-cols-[200px_1fr]': NodeImage,
-        'grid-cols-1': !NodeImage,
+      className={cn("grid gap-2", {
+        "grid-cols-[200px_1fr]": NodeImage,
+        "grid-cols-1": !NodeImage,
       })}
     >
-      {item?.type === 'text' ? (
-        <h3 className="col-span-full px-2 pt-6 text-lg font-bold">
-          {item.value}{' '}
-        </h3>
+      {item?.type === "text" ? (
+        <h3 className="col-span-full px-2 pt-6 text-lg font-bold">{item.value} </h3>
       ) : null}
       {NodeImage}
       <div className="flex flex-col gap-2 md:self-baseline">

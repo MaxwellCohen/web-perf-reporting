@@ -5,11 +5,14 @@ import {
   TableColumnHeading,
   TableItem,
   PageSpeedInsights,
-} from '@/lib/schema';
-import type { AuditEntry, AuditDataMap } from '@/features/page-speed-insights/RecommendationsSection/auditTypes';
+} from "@/lib/schema";
+import type {
+  AuditEntry,
+  AuditDataMap,
+} from "@/features/page-speed-insights/RecommendationsSection/auditTypes";
 
 export function collectAuditData(
-  items: Array<{ item: PageSpeedInsights; label: string }>
+  items: Array<{ item: PageSpeedInsights; label: string }>,
 ): AuditDataMap {
   const auditDataMap = new Map<string, AuditEntry[]>();
 
@@ -19,15 +22,15 @@ export function collectAuditData(
 
     Object.entries(audits).forEach(([auditId, audit]) => {
       if (!audit) return;
-      
+
       if (!auditDataMap.has(auditId)) {
         auditDataMap.set(auditId, []);
       }
-      auditDataMap.get(auditId)!.push({ 
-        auditId, 
-        audit: audit as AuditEntry['audit'], 
-        label, 
-        item 
+      auditDataMap.get(auditId)!.push({
+        auditId,
+        audit: audit as AuditEntry["audit"],
+        label,
+        item,
       });
     });
   });
@@ -45,21 +48,18 @@ export function getWorstScore(auditEntries: AuditEntry[]): number | null {
 
 export function combineMetricSavings(auditEntries: AuditEntry[]): Record<string, number> {
   const combinedMetricSavings: Record<string, number> = {};
-  
+
   auditEntries.forEach(({ audit }) => {
     const metricSavings = (audit as { metricSavings?: Record<string, number> }).metricSavings;
     if (metricSavings) {
       Object.entries(metricSavings).forEach(([metric, savings]) => {
         if (savings && savings > 0) {
-          combinedMetricSavings[metric] = Math.max(
-            combinedMetricSavings[metric] || 0,
-            savings,
-          );
+          combinedMetricSavings[metric] = Math.max(combinedMetricSavings[metric] || 0, savings);
         }
       });
     }
   });
-  
+
   return combinedMetricSavings;
 }
 
@@ -69,9 +69,9 @@ export function extractTableFromListItems(listDetails: AuditDetailList): {
 } {
   const items: TableItem[] = [];
   let headings: TableColumnHeading[] | undefined;
-  
+
   listDetails.items.forEach((item) => {
-    if (item && typeof item === 'object' && 'type' in item && item.type === 'table') {
+    if (item && typeof item === "object" && "type" in item && item.type === "table") {
       const tableItem = item as AuditDetailTable;
       if (tableItem.items && tableItem.items.length > 0) {
         items.push(...tableItem.items);
@@ -81,7 +81,7 @@ export function extractTableFromListItems(listDetails: AuditDetailList): {
       }
     }
   });
-  
+
   return { items, headings };
 }
 
@@ -95,16 +95,16 @@ export function combineAuditItems(auditEntries: AuditEntry[]): {
   const allTableDataItems: TableItem[] = [];
   const itemsByReport = new Map<string, TableItem[]>();
   let tableHeadings: TableColumnHeading[] | undefined;
-  
+
   auditEntries.forEach(({ audit, label }) => {
     const details = audit.details;
-    if (!details || typeof details !== 'object' || !('type' in details)) {
+    if (!details || typeof details !== "object" || !("type" in details)) {
       return;
     }
-    
+
     const detailType = (details as { type?: string }).type;
-    
-    if (detailType === 'table') {
+
+    if (detailType === "table") {
       const tableDetails = details as AuditDetailTable;
       if (tableDetails.items && tableDetails.items.length > 0) {
         allTableDataItems.push(...tableDetails.items);
@@ -116,7 +116,7 @@ export function combineAuditItems(auditEntries: AuditEntry[]): {
           tableHeadings = tableDetails.headings;
         }
       }
-    } else if (detailType === 'list') {
+    } else if (detailType === "list") {
       const listDetails = details as AuditDetailList;
       const { items, headings } = extractTableFromListItems(listDetails);
       if (items.length > 0) {
@@ -129,14 +129,13 @@ export function combineAuditItems(auditEntries: AuditEntry[]): {
           tableHeadings = headings;
         }
       }
-    } else if (detailType === 'opportunity') {
+    } else if (detailType === "opportunity") {
       const opportunityDetails = details as AuditDetailOpportunity;
       if (opportunityDetails.items) {
         allItems.push(...(opportunityDetails.items as Array<Record<string, unknown>>));
       }
     }
   });
-  
+
   return { allItems, allTableDataItems, tableHeadings, itemsByReport };
 }
-

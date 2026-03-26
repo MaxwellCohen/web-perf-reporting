@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { Check, Copy } from 'lucide-react';
-import { useTransition, startTransition } from 'react';
+import { Check, Copy } from "lucide-react";
+import { useTransition, startTransition } from "react";
 
-import { Button, ButtonProps } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { Button, ButtonProps } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface CopyButtonProps extends ButtonProps {
   text: string;
@@ -15,8 +15,8 @@ interface CopyButtonProps extends ButtonProps {
 export function CopyButton({
   text,
   className,
-  variant = 'outline',
-  size = 'icon',
+  variant = "outline",
+  size = "icon",
   children,
   resetDelay = 2000,
   ...props
@@ -41,7 +41,7 @@ export function CopyButton({
     <Button
       variant={variant}
       size={size}
-      className={cn('relative', className)}
+      className={cn("relative", className)}
       onClick={() => onCopy(text)}
       {...props}
     >

@@ -1,4 +1,4 @@
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown from "react-markdown";
 import {
   Table,
   TableBody,
@@ -6,14 +6,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import type { Recommendation } from '@/features/page-speed-insights/RecommendationsSection/types';
-import type { ActionableStep } from '@/features/page-speed-insights/RecommendationsSection/types';
+} from "@/components/ui/table";
+import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
+import type { ActionableStep } from "@/features/page-speed-insights/RecommendationsSection/types";
 import {
   ALL_DEVICES_LABEL,
   compareReportLabels,
   formatReportLabelList,
-} from '@/features/page-speed-insights/shared/reportLabels';
+} from "@/features/page-speed-insights/shared/reportLabels";
 
 interface ActionableStepsTableProps {
   rec: Recommendation;
@@ -33,16 +33,14 @@ const markdownComponents = {
     </a>
   ),
   code: ({ children }: { children?: React.ReactNode }) => (
-    <code className="bg-muted px-1 py-0.5 rounded text-xs">
-      {children}
-    </code>
+    <code className="bg-muted px-1 py-0.5 rounded text-xs">{children}</code>
   ),
 };
 
-const OTHER_GROUP = '\u200bOther'; // zero-width space prefix so "Other" sorts last
+const OTHER_GROUP = "\u200bOther"; // zero-width space prefix so "Other" sorts last
 
 function getActionableStepKey(step: ActionableStep): string {
-  return [step.host, step.url, step.step, formatReportLabelList(step.reports)].join('|');
+  return [step.host, step.url, step.step, formatReportLabelList(step.reports)].join("|");
 }
 
 function StepsList({ steps }: { steps: ActionableStep[] }) {
@@ -53,7 +51,7 @@ function StepsList({ steps }: { steps: ActionableStep[] }) {
   // Group steps by host
   const byHost = new Map<string, ActionableStep[]>();
   for (const s of steps) {
-    const key = (s.host && s.host.trim()) ? s.host : OTHER_GROUP;
+    const key = s.host && s.host.trim() ? s.host : OTHER_GROUP;
     if (!byHost.has(key)) byHost.set(key, []);
     byHost.get(key)!.push(s);
   }
@@ -69,16 +67,12 @@ function StepsList({ steps }: { steps: ActionableStep[] }) {
       {sortedGroups.map(([hostKey, groupSteps]) => (
         <div key={hostKey}>
           {hostKey !== OTHER_GROUP && (
-            <div className="text-xs font-medium text-muted-foreground mb-1.5">
-              {hostKey}
-            </div>
+            <div className="text-xs font-medium text-muted-foreground mb-1.5">{hostKey}</div>
           )}
           <ul className="list-disc list-inside space-y-1">
             {groupSteps.map((step) => (
               <li key={getActionableStepKey(step)}>
-                <ReactMarkdown components={markdownComponents}>
-                  {step.step}
-                </ReactMarkdown>
+                <ReactMarkdown components={markdownComponents}>{step.step}</ReactMarkdown>
               </li>
             ))}
           </ul>
@@ -96,13 +90,12 @@ export function ActionableStepsTable({ rec, items }: ActionableStepsTableProps) 
 
   rec.actionableSteps.forEach((step) => {
     // Check if this step applies to all devices
-    const appliesToAll = step.reports.length === 0 ||
+    const appliesToAll =
+      step.reports.length === 0 ||
       (step.reports.length === reportLabels.length &&
-       step.reports.every((r) => reportLabels.includes(r)));
+        step.reports.every((r) => reportLabels.includes(r)));
 
-    const reportsKey = appliesToAll
-      ? ALL_DEVICES_LABEL
-      : formatReportLabelList(step.reports);
+    const reportsKey = appliesToAll ? ALL_DEVICES_LABEL : formatReportLabelList(step.reports);
 
     if (!stepsByReport.has(reportsKey)) {
       stepsByReport.set(reportsKey, []);
@@ -122,20 +115,14 @@ export function ActionableStepsTable({ rec, items }: ActionableStepsTableProps) 
       <Table className="w-full">
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className="text-xs font-semibold">
-              Report
-            </TableHead>
-            <TableHead className="text-xs font-semibold">
-              Steps
-            </TableHead>
+            <TableHead className="text-xs font-semibold">Report</TableHead>
+            <TableHead className="text-xs font-semibold">Steps</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {rows.map(({ reportLabel, steps }) => (
             <TableRow key={reportLabel} className="hover:bg-transparent">
-              <TableCell className="text-sm py-2 font-medium">
-                {reportLabel}
-              </TableCell>
+              <TableCell className="text-sm py-2 font-medium">{reportLabel}</TableCell>
               <TableCell className="text-sm py-2">
                 <StepsList steps={steps} />
               </TableCell>
@@ -146,4 +133,3 @@ export function ActionableStepsTable({ rec, items }: ActionableStepsTableProps) 
     </div>
   );
 }
-

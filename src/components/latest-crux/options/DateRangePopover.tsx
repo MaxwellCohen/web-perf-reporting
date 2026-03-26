@@ -1,16 +1,12 @@
-'use client';
+"use client";
 
-import { formatDateRangeDisplay } from '@/components/latest-crux/lib/formatDateRangeDisplay';
-import type { DateRange } from '@/components/latest-crux/types';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { CalendarIcon } from 'lucide-react';
+import { formatDateRangeDisplay } from "@/components/latest-crux/lib/formatDateRangeDisplay";
+import type { DateRange } from "@/components/latest-crux/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
 
 export function DateRangePopover({
   id,
@@ -23,10 +19,7 @@ export function DateRangePopover({
 }) {
   return (
     <div className="">
-      <Label
-        className="text-center my-2 block"
-        htmlFor={`date-range-button${id}`}
-      >
+      <Label className="text-center my-2 block" htmlFor={`date-range-button${id}`}>
         <div>Date Range</div>
       </Label>
       <Popover>
@@ -37,9 +30,7 @@ export function DateRangePopover({
             className="mb-2 w-40 text-xs justify-start text-left font-normal"
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            <span className="truncate">
-              {formatDateRangeDisplay(dateRange)}
-            </span>
+            <span className="truncate">{formatDateRangeDisplay(dateRange)}</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-4" align="start">
@@ -50,7 +41,7 @@ export function DateRangePopover({
                 <Input
                   id={`date-range-start${id}`}
                   type="date"
-                  value={dateRange?.startDate || ''}
+                  value={dateRange?.startDate || ""}
                   onChange={(e) =>
                     setDateRange({
                       startDate: e.target.value || null,
@@ -64,7 +55,7 @@ export function DateRangePopover({
                 <Input
                   id={`date-range-end${id}`}
                   type="date"
-                  value={dateRange?.endDate || ''}
+                  value={dateRange?.endDate || ""}
                   onChange={(e) =>
                     setDateRange({
                       startDate: dateRange?.startDate || null,

@@ -1,16 +1,12 @@
-'use client';
+"use client";
 
-import GaugeChart from '@/components/common/PageSpeedGaugeChart';
-import type { CruxHistoryItem, UserPageLoadMetricV5 } from '@/lib/schema';
+import GaugeChart from "@/components/common/PageSpeedGaugeChart";
+import type { CruxHistoryItem, UserPageLoadMetricV5 } from "@/lib/schema";
 
-export function CruxGaugeChart({
-  histogramData,
-}: {
-  histogramData: CruxHistoryItem;
-}) {
+export function CruxGaugeChart({ histogramData }: { histogramData: CruxHistoryItem }) {
   const data: UserPageLoadMetricV5 = {
     percentile: +(histogramData.P75 ?? 0),
-    category: '',
+    category: "",
     distributions: [
       {
         min: 0,
@@ -30,5 +26,5 @@ export function CruxGaugeChart({
     ],
   };
 
-  return <GaugeChart metric={''} data={data} />;
+  return <GaugeChart metric={""} data={data} />;
 }

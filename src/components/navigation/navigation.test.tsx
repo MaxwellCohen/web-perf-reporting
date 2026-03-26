@@ -1,9 +1,9 @@
-import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import { NavigationMenuItems } from '@/components/navigation/NavigationMenuItems';
-import { TopNav } from '@/components/navigation/TopNav';
+import { render } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { NavigationMenuItems } from "@/components/navigation/NavigationMenuItems";
+import { TopNav } from "@/components/navigation/TopNav";
 
-vi.mock('@/components/ui/navigation-menu', () => ({
+vi.mock("@/components/ui/navigation-menu", () => ({
   NavigationMenu: ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <nav className={className}>{children}</nav>
   ),
@@ -13,7 +13,7 @@ vi.mock('@/components/ui/navigation-menu', () => ({
     asChild ? <>{children}</> : <span>{children}</span>,
 }));
 
-vi.mock('next/link', () => ({
+vi.mock("next/link", () => ({
   default: ({
     children,
     href,
@@ -25,26 +25,26 @@ vi.mock('next/link', () => ({
   ),
 }));
 
-describe('navigation components', () => {
-  it('renders the top navigation links', () => {
+describe("navigation components", () => {
+  it("renders the top navigation links", () => {
     const { container } = render(<TopNav />);
 
     expect(container.querySelector('a[href="/"]')?.textContent).toContain(
-      'Web Performance Reporting',
+      "Web Performance Reporting",
     );
-    expect(container.querySelector('a[href="/latest-crux"]')?.textContent).toContain('Latest');
+    expect(container.querySelector('a[href="/latest-crux"]')?.textContent).toContain("Latest");
     expect(container.querySelector('a[href="/historical-crux"]')?.textContent).toContain(
-      'Historical',
+      "Historical",
     );
-    expect(container.querySelector('a[href="/page-speed"]')?.textContent).toContain('Insights');
-    expect(container.querySelector('a[href="/viewer"]')?.textContent).toContain('Viewer');
+    expect(container.querySelector('a[href="/page-speed"]')?.textContent).toContain("Insights");
+    expect(container.querySelector('a[href="/viewer"]')?.textContent).toContain("Viewer");
   });
 
-  it('renders the navigation menu home link', () => {
+  it("renders the navigation menu home link", () => {
     const { container } = render(<NavigationMenuItems />);
 
     expect(container.querySelector('a[href="/"]')?.textContent).toContain(
-      'Web Performance Reporting',
+      "Web Performance Reporting",
     );
   });
 });

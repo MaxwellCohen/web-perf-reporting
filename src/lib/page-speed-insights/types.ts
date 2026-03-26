@@ -1,4 +1,4 @@
-import type { PageSpeedInsights } from '@/lib/schema';
+import type { PageSpeedInsights } from "@/lib/schema";
 
 export type PageSpeedDashboardItem = {
   item: PageSpeedInsights;

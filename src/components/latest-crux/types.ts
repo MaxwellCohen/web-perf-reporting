@@ -1,7 +1,7 @@
-import type { CruxReport } from '@/lib/schema';
+import type { CruxReport } from "@/lib/schema";
 
-export type Scope = 'origin' | 'url';
-export type DeviceType = 'All' | 'DESKTOP' | 'TABLET' | 'PHONE';
+export type Scope = "origin" | "url";
+export type DeviceType = "All" | "DESKTOP" | "TABLET" | "PHONE";
 
 export type DateRange = {
   startDate: string | null;

@@ -1,22 +1,25 @@
-'use client';
-import { useMemo } from 'react';
-import { ColumnDef } from '@tanstack/react-table';
-import { Table, TableCaption } from '@/components/ui/table';
-import { DataTableHeader } from '@/features/page-speed-insights/lh-categories/table/DataTableHeader';
-import { DataTableBody } from '@/features/page-speed-insights/lh-categories/table/DataTableBody';
-import type { TableColumnHeading, TableItem } from '@/lib/schema';
-import { useSimpleTable } from '@/features/page-speed-insights/shared/useSimpleTable';
-import { getFilterFnForValueType, getColumnSize } from '@/features/page-speed-insights/shared/tableColumnUtils';
-import { IssuesFoundTableCell } from '@/features/page-speed-insights/RecommendationsSection/IssuesFoundTableCell';
-import { NetworkWaterfallCell } from '@/features/page-speed-insights/lh-categories/table/NetworkWaterfallCell';
-import { cn } from '@/lib/utils';
+"use client";
+import { useMemo } from "react";
+import { ColumnDef } from "@tanstack/react-table";
+import { Table, TableCaption } from "@/components/ui/table";
+import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
+import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
+import type { TableColumnHeading, TableItem } from "@/lib/schema";
+import { useSimpleTable } from "@/features/page-speed-insights/shared/useSimpleTable";
+import {
+  getFilterFnForValueType,
+  getColumnSize,
+} from "@/features/page-speed-insights/shared/tableColumnUtils";
+import { IssuesFoundTableCell } from "@/features/page-speed-insights/RecommendationsSection/IssuesFoundTableCell";
+import { NetworkWaterfallCell } from "@/features/page-speed-insights/lh-categories/table/NetworkWaterfallCell";
+import { cn } from "@/lib/utils";
 import {
   getNetworkRequestsTimeRange,
   isNetworkRequestsTable,
   NETWORK_REQUESTS_COLUMN_ORDER,
   sortHeadingsByKeyOrder,
   WATERFALL_REPLACED_NETWORK_REQUEST_KEYS,
-} from '@/features/page-speed-insights/shared/networkRequestsTable';
+} from "@/features/page-speed-insights/shared/networkRequestsTable";
 
 interface IssuesFoundTableProps {
   headings: TableColumnHeading[];
@@ -38,14 +41,14 @@ const NETWORK_REQUESTS_COLUMN_SIZES: Record<string, number> = {
 
 /** Short, scannable header labels for network-requests table */
 const HEADER_LABEL_OVERRIDES: Record<string, string> = {
-  url: 'URL',
-  protocol: 'Protocol',
-  transferSize: 'Transfer',
-  resourceSize: 'Size',
-  statusCode: 'Status',
-  mimeType: 'MIME type',
-  resourceType: 'Resource type',
-  waterfall: 'Waterfall',
+  url: "URL",
+  protocol: "Protocol",
+  transferSize: "Transfer",
+  resourceSize: "Size",
+  statusCode: "Status",
+  mimeType: "MIME type",
+  resourceType: "Resource type",
+  waterfall: "Waterfall",
 };
 
 function getHeaderLabel(key: string, fallback: string, isNetworkRequests: boolean): string {
@@ -55,13 +58,16 @@ function getHeaderLabel(key: string, fallback: string, isNetworkRequests: boolea
   return fallback;
 }
 
-function deduplicateRowsByColumnValues(items: TableItem[], headings: TableColumnHeading[]): TableItem[] {
+function deduplicateRowsByColumnValues(
+  items: TableItem[],
+  headings: TableColumnHeading[],
+): TableItem[] {
   const keys = headings.map((h) => h.key).filter((k): k is string => k != null);
   if (keys.length === 0) return items;
   const seen = new Set<string>();
   const result: TableItem[] = [];
   for (const item of items) {
-    const rowKey = keys.map((k) => String(item[k] ?? '')).join('\u200b');
+    const rowKey = keys.map((k) => String(item[k] ?? "")).join("\u200b");
     if (seen.has(rowKey)) continue;
     seen.add(rowKey);
     result.push(item);
@@ -85,24 +91,19 @@ export function IssuesFoundTable({ headings, items, device }: IssuesFoundTablePr
 
   // Create column definitions from headings
   const columns = useMemo<ColumnDef<TableItem>[]>(() => {
-    let headingsToUse =
-      isNetworkRequests
-        ? headings.filter(
-            (heading) =>
-              heading.key != null &&
-              !WATERFALL_REPLACED_NETWORK_REQUEST_KEYS.includes(heading.key),
-          )
-        : headings;
+    let headingsToUse = isNetworkRequests
+      ? headings.filter(
+          (heading) =>
+            heading.key != null && !WATERFALL_REPLACED_NETWORK_REQUEST_KEYS.includes(heading.key),
+        )
+      : headings;
     if (isNetworkRequests) {
-      headingsToUse = sortHeadingsByKeyOrder(
-        headingsToUse,
-        NETWORK_REQUESTS_COLUMN_ORDER,
-      );
+      headingsToUse = sortHeadingsByKeyOrder(headingsToUse, NETWORK_REQUESTS_COLUMN_ORDER);
     }
 
     const baseColumns = headingsToUse.map((heading) => {
-      const key = heading.key || '';
-      const rawLabel = typeof heading.label === 'string' ? heading.label : key;
+      const key = heading.key || "";
+      const rawLabel = typeof heading.label === "string" ? heading.label : key;
       const label = getHeaderLabel(key, rawLabel, isNetworkRequests);
       const valueType = heading.valueType;
       const filterFn = getFilterFnForValueType(valueType);
@@ -136,7 +137,7 @@ export function IssuesFoundTable({ headings, items, device }: IssuesFoundTablePr
               device={device}
             />
           );
-          if (key === 'url' && value != null) {
+          if (key === "url" && value != null) {
             return (
               <div className="truncate min-w-0" title={String(value)}>
                 {content}
@@ -154,9 +155,9 @@ export function IssuesFoundTable({ headings, items, device }: IssuesFoundTablePr
 
     if (isNetworkRequests && timeRange) {
       const waterfallColumn: ColumnDef<TableItem> = {
-        id: 'waterfall',
-        accessorKey: 'url',
-        header: 'Waterfall',
+        id: "waterfall",
+        accessorKey: "url",
+        header: "Waterfall",
         size: NETWORK_REQUESTS_COLUMN_SIZES.waterfall,
         minSize: 100,
         maxSize: 400,
@@ -164,16 +165,20 @@ export function IssuesFoundTable({ headings, items, device }: IssuesFoundTablePr
         enableSorting: false,
         enableColumnFilter: false,
         cell: ({ row }) => {
-          const r = row.original as TableItem & { networkRequestTime?: number; networkEndTime?: number; resourceType?: string };
-          const start = typeof r.networkRequestTime === 'number' ? r.networkRequestTime : 0;
-          const end = typeof r.networkEndTime === 'number' ? r.networkEndTime : start;
+          const r = row.original as TableItem & {
+            networkRequestTime?: number;
+            networkEndTime?: number;
+            resourceType?: string;
+          };
+          const start = typeof r.networkRequestTime === "number" ? r.networkRequestTime : 0;
+          const end = typeof r.networkEndTime === "number" ? r.networkEndTime : start;
           return (
             <NetworkWaterfallCell
               requestTime={start}
               endTime={end}
               minStart={timeRange.minStart}
               maxEnd={timeRange.maxEnd}
-              resourceType={typeof r.resourceType === 'string' ? r.resourceType : undefined}
+              resourceType={typeof r.resourceType === "string" ? r.resourceType : undefined}
               width={200}
               barHeight={12}
               showTimeLabels
@@ -203,16 +208,17 @@ export function IssuesFoundTable({ headings, items, device }: IssuesFoundTablePr
         <Table
           aria-label={isNetworkRequests ? `Network requests for ${device}` : undefined}
           className={cn(
-            'w-full text-sm',
-            '[&_thead]:bg-muted/50 [&_thead_tr]:border-b [&_th]:py-2 [&_th]:px-2.5 [&_th]:text-sm [&_th]:font-semibold [&_th]:text-foreground [&_th]:whitespace-nowrap [&_th]:align-bottom',
-            '[&_td]:py-1 [&_td]:px-2 [&_td]:text-xs',
+            "w-full text-sm",
+            "[&_thead]:bg-muted/50 [&_thead_tr]:border-b [&_th]:py-2 [&_th]:px-2.5 [&_th]:text-sm [&_th]:font-semibold [&_th]:text-foreground [&_th]:whitespace-nowrap [&_th]:align-bottom",
+            "[&_td]:py-1 [&_td]:px-2 [&_td]:text-xs",
             isNetworkRequests &&
-              '[&_tbody_tr:nth-child(even)]:bg-muted/25 [&_tbody_tr:hover]:bg-muted/40'
+              "[&_tbody_tr:nth-child(even)]:bg-muted/25 [&_tbody_tr:hover]:bg-muted/40",
           )}
         >
           {isNetworkRequests && (
             <TableCaption className="sr-only">
-              {device} – network requests ({deduplicatedItems.length} {deduplicatedItems.length === 1 ? 'request' : 'requests'})
+              {device} – network requests ({deduplicatedItems.length}{" "}
+              {deduplicatedItems.length === 1 ? "request" : "requests"})
             </TableCaption>
           )}
           <DataTableHeader table={table} />
@@ -227,4 +233,3 @@ export function IssuesFoundTable({ headings, items, device }: IssuesFoundTablePr
     </div>
   );
 }
-

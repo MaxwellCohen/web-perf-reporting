@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableHeader } from '@/components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableHeader } from "@/components/ui/table";
 
 type CardWithTableProps = {
   title: string;

@@ -1,10 +1,10 @@
-'use client';
-import { TableBody, TableCell, TableRow } from '@/components/ui/table';
-import { flexRender, Table as TableType } from '@tanstack/react-table';
-import { cn } from '@/lib/utils';
+"use client";
+import { TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { flexRender, Table as TableType } from "@tanstack/react-table";
+import { cn } from "@/lib/utils";
 
 export function DataTableBody<T>({ table }: { table: TableType<T> }) {
-  'use no memo';
+  "use no memo";
   return (
     <TableBody>
       {table.getRowModel().rows.map((row) => {
@@ -13,19 +13,13 @@ export function DataTableBody<T>({ table }: { table: TableType<T> }) {
             {row
               .getVisibleCells()
               .map((cell) => {
-                let cellRender = flexRender(
-                  cell.column.columnDef.cell,
-                  cell.getContext(),
-                );
+                let cellRender = flexRender(cell.column.columnDef.cell, cell.getContext());
                 if (cell.getIsAggregated() || cell.getIsGrouped()) {
-                  cellRender = flexRender(
-                    cell.column.columnDef.aggregatedCell,
-                    cell.getContext(),
-                  );
+                  cellRender = flexRender(cell.column.columnDef.aggregatedCell, cell.getContext());
                 }
 
-                const isExpanderColumn = cell.column.id === 'expander';
-                
+                const isExpanderColumn = cell.column.id === "expander";
+
                 return (
                   <TableCell
                     key={cell.id}
@@ -37,7 +31,7 @@ export function DataTableBody<T>({ table }: { table: TableType<T> }) {
                       ...(isExpanderColumn && {
                         minWidth: `${cell.column.getSize()}px`,
                         maxWidth: `${cell.column.getSize()}px`,
-                        boxSizing: 'border-box',
+                        boxSizing: "border-box",
                       }),
                     }}
                     data-cell-id={cell.id}

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 type NetworkWaterfallCellProps = {
   /** Start time in ms (e.g. networkRequestTime) */
@@ -20,19 +20,19 @@ type NetworkWaterfallCellProps = {
 };
 
 const RESOURCE_TYPE_COLORS: Record<string, string> = {
-  Document: 'bg-amber-500/90 dark:bg-amber-500/80',
-  Script: 'bg-amber-400/90 dark:bg-amber-400/80',
-  Stylesheet: 'bg-violet-500/90 dark:bg-violet-400/80',
-  Font: 'bg-emerald-600/90 dark:bg-emerald-500/80',
-  Image: 'bg-sky-500/90 dark:bg-sky-400/80',
-  Media: 'bg-rose-500/90 dark:bg-rose-400/80',
-  XHR: 'bg-teal-500/90 dark:bg-teal-400/80',
-  Fetch: 'bg-teal-500/90 dark:bg-teal-400/80',
-  Other: 'bg-slate-500/80 dark:bg-slate-400/70',
+  Document: "bg-amber-500/90 dark:bg-amber-500/80",
+  Script: "bg-amber-400/90 dark:bg-amber-400/80",
+  Stylesheet: "bg-violet-500/90 dark:bg-violet-400/80",
+  Font: "bg-emerald-600/90 dark:bg-emerald-500/80",
+  Image: "bg-sky-500/90 dark:bg-sky-400/80",
+  Media: "bg-rose-500/90 dark:bg-rose-400/80",
+  XHR: "bg-teal-500/90 dark:bg-teal-400/80",
+  Fetch: "bg-teal-500/90 dark:bg-teal-400/80",
+  Other: "bg-slate-500/80 dark:bg-slate-400/70",
 };
 
 function getBarColor(resourceType?: string): string {
-  if (!resourceType) return RESOURCE_TYPE_COLORS.Other ?? 'bg-slate-500/80';
+  if (!resourceType) return RESOURCE_TYPE_COLORS.Other ?? "bg-slate-500/80";
   return RESOURCE_TYPE_COLORS[resourceType] ?? RESOURCE_TYPE_COLORS.Other;
 }
 
@@ -58,7 +58,9 @@ export function NetworkWaterfallCell({
     return (
       <div className="w-full" title="No timing range">
         {showTimeLabels && (
-          <span className="text-[10px] text-muted-foreground tabular-nums">{startMs} → {endMs} ms</span>
+          <span className="text-[10px] text-muted-foreground tabular-nums">
+            {startMs} → {endMs} ms
+          </span>
         )}
       </div>
     );

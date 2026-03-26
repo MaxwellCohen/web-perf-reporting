@@ -1,14 +1,14 @@
-import React from 'react';
+import React from "react";
 
-import { fireEvent, render } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { Accordion } from '@/components/ui/accordion';
+import { fireEvent, render } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { Accordion } from "@/components/ui/accordion";
 import {
   mapItemsToNetworkMetrics,
   mapNetworkMetricsToStats,
-} from '@/features/page-speed-insights/network-metrics/useNetworkMetricsData';
+} from "@/features/page-speed-insights/network-metrics/useNetworkMetricsData";
 
-vi.mock('lucide-react', () => ({
+vi.mock("lucide-react", () => ({
   ChevronDown: () => <span data-testid="chevron" />,
   ListFilter: () => <span data-testid="list-filter" />,
   ArrowUp: () => <span data-testid="arrow-up" />,
@@ -17,34 +17,34 @@ vi.mock('lucide-react', () => ({
   Copy: () => <span data-testid="copy" />,
 }));
 
-vi.mock('@/components/ui/accordion', () => {
+vi.mock("@/components/ui/accordion", () => {
   const AccordionContext = React.createContext<{
     value: string[];
     onValueChange: (v: string[]) => void;
-    type: 'single' | 'multiple';
-  }>({ value: [], onValueChange: () => {}, type: 'multiple' });
-  const ItemValueContext = React.createContext<string>('');
+    type: "single" | "multiple";
+  }>({ value: [], onValueChange: () => {}, type: "multiple" });
+  const ItemValueContext = React.createContext<string>("");
 
   const AccordionRoot = ({
     children,
-    type = 'multiple',
+    type = "multiple",
     defaultValue,
     value,
     onValueChange,
   }: {
     children?: React.ReactNode;
-    type?: 'single' | 'multiple';
+    type?: "single" | "multiple";
     defaultValue?: string | string[];
     value?: string | string[];
     onValueChange?: (v: string | string[]) => void;
   }) => {
-    const [internal, setInternal] = React.useState<string[]>(
-      () => (Array.isArray(defaultValue) ? defaultValue : defaultValue ? [defaultValue] : [])
+    const [internal, setInternal] = React.useState<string[]>(() =>
+      Array.isArray(defaultValue) ? defaultValue : defaultValue ? [defaultValue] : [],
     );
     const val = value !== undefined ? (Array.isArray(value) ? value : [value]) : internal;
     const setVal = (v: string[]) => {
       if (value === undefined) setInternal(v);
-      onValueChange?.(type === 'single' ? v[0] ?? '' : v);
+      onValueChange?.(type === "single" ? (v[0] ?? "") : v);
     };
     return (
       <AccordionContext.Provider value={{ value: val, onValueChange: setVal, type }}>
@@ -53,13 +53,27 @@ vi.mock('@/components/ui/accordion', () => {
     );
   };
 
-  const AccordionItem = ({ children, value: itemValue }: { children?: React.ReactNode; value: string }) => (
+  const AccordionItem = ({
+    children,
+    value: itemValue,
+  }: {
+    children?: React.ReactNode;
+    value: string;
+  }) => (
     <ItemValueContext.Provider value={itemValue}>
-      <div data-accordion-item={itemValue} data-value={itemValue}>{children}</div>
+      <div data-accordion-item={itemValue} data-value={itemValue}>
+        {children}
+      </div>
     </ItemValueContext.Provider>
   );
 
-  const AccordionTrigger = ({ children, className }: { children?: React.ReactNode; className?: string }) => {
+  const AccordionTrigger = ({
+    children,
+    className,
+  }: {
+    children?: React.ReactNode;
+    className?: string;
+  }) => {
     const ctx = React.useContext(AccordionContext);
     const itemValue = React.useContext(ItemValueContext);
     return (
@@ -70,7 +84,7 @@ vi.mock('@/components/ui/accordion', () => {
           const isOpen = ctx.value.includes(itemValue);
           const next = isOpen
             ? ctx.value.filter((x) => x !== itemValue)
-            : ctx.type === 'single'
+            : ctx.type === "single"
               ? [itemValue]
               : [...ctx.value, itemValue];
           ctx.onValueChange(next);
@@ -81,7 +95,13 @@ vi.mock('@/components/ui/accordion', () => {
     );
   };
 
-  const AccordionContent = ({ children, className }: { children?: React.ReactNode; className?: string }) => {
+  const AccordionContent = ({
+    children,
+    className,
+  }: {
+    children?: React.ReactNode;
+    className?: string;
+  }) => {
     const ctx = React.useContext(AccordionContext);
     const itemValue = React.useContext(ItemValueContext);
     const isOpen = ctx.value.includes(itemValue);
@@ -101,7 +121,7 @@ let pageSpeedItems: any[] = [];
 const analyzeAuditsMock = vi.fn();
 const extractJSMetricsMock = vi.fn();
 
-vi.mock('@/features/page-speed-insights/PageSpeedContext', () => ({
+vi.mock("@/features/page-speed-insights/PageSpeedContext", () => ({
   usePageSpeedItems: () => pageSpeedItems,
   usePageSpeedSelector: (selector: (snapshot: { context: unknown }) => unknown) =>
     selector({
@@ -111,195 +131,162 @@ vi.mock('@/features/page-speed-insights/PageSpeedContext', () => ({
         data: [],
         labels: [],
         isLoading: false,
-        reportTitle: '',
+        reportTitle: "",
         fullPageScreenshots: {},
       },
     }),
 }));
 
-vi.mock('@/features/page-speed-insights/javascript-metrics/javascriptMetricsSelectors', async (importOriginal) => {
-  const { selectJavaScriptMetrics } =
-    (await importOriginal()) as typeof import('@/features/page-speed-insights/javascript-metrics/javascriptMetricsSelectors');
-  return {
-    selectJavaScriptMetrics,
-    useJavaScriptMetrics: () =>
-      selectJavaScriptMetrics({ context: { items: pageSpeedItems } }),
-  };
-});
+vi.mock(
+  "@/features/page-speed-insights/javascript-metrics/javascriptMetricsSelectors",
+  async (importOriginal) => {
+    const { selectJavaScriptMetrics } =
+      (await importOriginal()) as typeof import("@/features/page-speed-insights/javascript-metrics/javascriptMetricsSelectors");
+    return {
+      selectJavaScriptMetrics,
+      useJavaScriptMetrics: () => selectJavaScriptMetrics({ context: { items: pageSpeedItems } }),
+    };
+  },
+);
 
-vi.mock('@/components/common/PageSpeedGaugeChart', () => ({
-  HorizontalGaugeChart: ({ metric }: { metric: string }) => (
-    <div>{metric}</div>
-  ),
-  HorizontalScoreChart: ({ score }: { score: number }) => (
-    <div>Score chart: {score}</div>
-  ),
+vi.mock("@/components/common/PageSpeedGaugeChart", () => ({
+  HorizontalGaugeChart: ({ metric }: { metric: string }) => <div>{metric}</div>,
+  HorizontalScoreChart: ({ score }: { score: number }) => <div>Score chart: {score}</div>,
 }));
 
-vi.mock('@/features/page-speed-insights/network-metrics/NetworkRequestsSummaryCard', () => ({
+vi.mock("@/features/page-speed-insights/network-metrics/NetworkRequestsSummaryCard", () => ({
   NetworkRequestsSummaryCard: () => {
     const stats = mapNetworkMetricsToStats(mapItemsToNetworkMetrics(pageSpeedItems));
-    return (
-      <div>Network summary: {stats.map((stat) => stat.totalRequests).join(',')}</div>
-    );
+    return <div>Network summary: {stats.map((stat) => stat.totalRequests).join(",")}</div>;
   },
 }));
 
-vi.mock('@/features/page-speed-insights/network-metrics/TimingMetricsCard', () => ({
+vi.mock("@/features/page-speed-insights/network-metrics/TimingMetricsCard", () => ({
   TimingMetricsCard: () => {
     const series = mapItemsToNetworkMetrics(pageSpeedItems);
-    return (
-      <div>Timing metrics: {series.map((metric) => metric.ttfb).join(',')}</div>
-    );
+    return <div>Timing metrics: {series.map((metric) => metric.ttfb).join(",")}</div>;
   },
 }));
 
-vi.mock('@/features/page-speed-insights/network-metrics/TimelineCard', () => ({
+vi.mock("@/features/page-speed-insights/network-metrics/TimelineCard", () => ({
   TimelineCard: () => {
     const series = mapItemsToNetworkMetrics(pageSpeedItems);
     return (
-      <div>
-        Timeline metrics: {series.map((metric) => metric.observedFirstPaint).join(',')}
-      </div>
+      <div>Timeline metrics: {series.map((metric) => metric.observedFirstPaint).join(",")}</div>
     );
   },
 }));
 
-vi.mock('@/features/page-speed-insights/network-metrics/LCPBreakdownCard', () => ({
-  LCPBreakdownCard: () => (
-    <div>LCP breakdown count: {pageSpeedItems.length}</div>
-  ),
+vi.mock("@/features/page-speed-insights/network-metrics/LCPBreakdownCard", () => ({
+  LCPBreakdownCard: () => <div>LCP breakdown count: {pageSpeedItems.length}</div>,
 }));
 
-vi.mock('@/features/page-speed-insights/network-metrics/NetworkRTTCard', () => ({
+vi.mock("@/features/page-speed-insights/network-metrics/NetworkRTTCard", () => ({
   NetworkRTTCard: () => {
     const series = mapItemsToNetworkMetrics(pageSpeedItems);
-    return (
-      <div>RTT metrics: {series.map((metric) => metric.networkRTT.length).join(',')}</div>
-    );
+    return <div>RTT metrics: {series.map((metric) => metric.networkRTT.length).join(",")}</div>;
   },
 }));
 
-vi.mock('@/features/page-speed-insights/network-metrics/ServerLatencyCard', () => ({
+vi.mock("@/features/page-speed-insights/network-metrics/ServerLatencyCard", () => ({
   ServerLatencyCard: () => {
     const series = mapItemsToNetworkMetrics(pageSpeedItems);
     return (
-      <div>
-        Server metrics: {series.map((metric) => metric.serverLatency.length).join(',')}
-      </div>
+      <div>Server metrics: {series.map((metric) => metric.serverLatency.length).join(",")}</div>
     );
   },
 }));
 
-vi.mock('@/features/page-speed-insights/network-metrics/ResourceTypeBreakdownCard', () => ({
+vi.mock("@/features/page-speed-insights/network-metrics/ResourceTypeBreakdownCard", () => ({
   ResourceTypeBreakdownCard: () => {
     const stats = mapNetworkMetricsToStats(mapItemsToNetworkMetrics(pageSpeedItems));
     return (
       <div>
-        Resource types:{' '}
-        {stats
-          .map((stat) => Object.keys(stat.byResourceType).sort().join('|'))
-          .join(',')}
+        Resource types:{" "}
+        {stats.map((stat) => Object.keys(stat.byResourceType).sort().join("|")).join(",")}
       </div>
     );
   },
 }));
 
-vi.mock('@/features/page-speed-insights/network-metrics/TopResourcesCard', () => ({
+vi.mock("@/features/page-speed-insights/network-metrics/TopResourcesCard", () => ({
   TopResourcesCard: () => {
     const stats = mapNetworkMetricsToStats(mapItemsToNetworkMetrics(pageSpeedItems));
     return (
-      <div>
-        Top resources:{' '}
-        {stats.map((stat) => stat.topResources[0]?.url ?? 'none').join(',')}
-      </div>
+      <div>Top resources: {stats.map((stat) => stat.topResources[0]?.url ?? "none").join(",")}</div>
     );
   },
 }));
 
-vi.mock('@/features/page-speed-insights/javascript-metrics/JavaScriptSummaryCard', () => ({
+vi.mock("@/features/page-speed-insights/javascript-metrics/JavaScriptSummaryCard", () => ({
   JavaScriptSummaryCard: ({
     stats,
   }: {
     stats: Array<{ totalScripts: number; totalTransferSize: number }>;
   }) => (
     <div>
-      JavaScript summary:{' '}
-      {stats
-        .map((stat) => `${stat.totalScripts}/${stat.totalTransferSize}`)
-        .join(',')}
+      JavaScript summary:{" "}
+      {stats.map((stat) => `${stat.totalScripts}/${stat.totalTransferSize}`).join(",")}
     </div>
   ),
 }));
 
-vi.mock('@/features/page-speed-insights/javascript-metrics/TaskSummaryCard', () => ({
+vi.mock("@/features/page-speed-insights/javascript-metrics/TaskSummaryCard", () => ({
   TaskSummaryCard: ({
     metrics,
   }: {
     metrics: Array<{ diagnostics: unknown[]; mainThreadTasks: unknown[] }>;
   }) => (
     <div>
-      Task summary:{' '}
+      Task summary:{" "}
       {metrics
         .map((metric) => `${metric.diagnostics.length}/${metric.mainThreadTasks.length}`)
-        .join(',')}
+        .join(",")}
     </div>
   ),
 }));
 
-vi.mock('@/features/page-speed-insights/javascript-metrics/BootupTimeCard', () => ({
+vi.mock("@/features/page-speed-insights/javascript-metrics/BootupTimeCard", () => ({
   BootupTimeCard: ({ metrics }: { metrics: Array<{ bootupTime: unknown[] }> }) => (
-    <div>Bootup metrics: {metrics.map((metric) => metric.bootupTime.length).join(',')}</div>
+    <div>Bootup metrics: {metrics.map((metric) => metric.bootupTime.length).join(",")}</div>
   ),
 }));
 
-vi.mock('@/features/page-speed-insights/javascript-metrics/MainThreadWorkCard', () => ({
-  MainThreadWorkCard: ({
-    metrics,
-  }: {
-    metrics: Array<{ mainThreadWork: unknown[] }>;
-  }) => (
-    <div>
-      Main thread work: {metrics.map((metric) => metric.mainThreadWork.length).join(',')}
-    </div>
+vi.mock("@/features/page-speed-insights/javascript-metrics/MainThreadWorkCard", () => ({
+  MainThreadWorkCard: ({ metrics }: { metrics: Array<{ mainThreadWork: unknown[] }> }) => (
+    <div>Main thread work: {metrics.map((metric) => metric.mainThreadWork.length).join(",")}</div>
   ),
 }));
 
-vi.mock('@/features/page-speed-insights/javascript-metrics/UnusedJavaScriptCard', () => ({
+vi.mock("@/features/page-speed-insights/javascript-metrics/UnusedJavaScriptCard", () => ({
   UnusedJavaScriptCard: ({ metrics }: { metrics: Array<{ unusedJS: unknown[] }> }) => (
-    <div>Unused JS: {metrics.map((metric) => metric.unusedJS.length).join(',')}</div>
+    <div>Unused JS: {metrics.map((metric) => metric.unusedJS.length).join(",")}</div>
   ),
 }));
 
-vi.mock('@/features/page-speed-insights/javascript-metrics/UnminifiedJavaScriptCard', () => ({
-  UnminifiedJavaScriptCard: ({
-    metrics,
-  }: {
-    metrics: Array<{ unminifiedJS: unknown[] }>;
-  }) => (
-    <div>
-      Unminified JS: {metrics.map((metric) => metric.unminifiedJS.length).join(',')}
-    </div>
+vi.mock("@/features/page-speed-insights/javascript-metrics/UnminifiedJavaScriptCard", () => ({
+  UnminifiedJavaScriptCard: ({ metrics }: { metrics: Array<{ unminifiedJS: unknown[] }> }) => (
+    <div>Unminified JS: {metrics.map((metric) => metric.unminifiedJS.length).join(",")}</div>
   ),
 }));
 
-vi.mock('@/features/page-speed-insights/javascript-metrics/LegacyJavaScriptCard', () => ({
+vi.mock("@/features/page-speed-insights/javascript-metrics/LegacyJavaScriptCard", () => ({
   LegacyJavaScriptCard: ({ metrics }: { metrics: Array<{ legacyJS: unknown[] }> }) => (
-    <div>Legacy JS: {metrics.map((metric) => metric.legacyJS.length).join(',')}</div>
+    <div>Legacy JS: {metrics.map((metric) => metric.legacyJS.length).join(",")}</div>
   ),
 }));
 
-vi.mock('@/features/page-speed-insights/javascript-metrics/extractJSMetrics', () => ({
+vi.mock("@/features/page-speed-insights/javascript-metrics/extractJSMetrics", () => ({
   extractJSMetrics: (item: unknown) => extractJSMetricsMock(item),
 }));
 
-vi.mock('@/features/page-speed-insights/RecommendationsSection/analyzeAudits', () => ({
+vi.mock("@/features/page-speed-insights/RecommendationsSection/analyzeAudits", () => ({
   analyzeAudits: (items: unknown[]) => analyzeAuditsMock(items),
   hasDetails: (recommendation: { details?: unknown[] }) =>
     (recommendation.details?.length ?? 0) > 0,
 }));
 
-vi.mock('@/features/page-speed-insights/RecommendationsSection/FilterControls', () => ({
+vi.mock("@/features/page-speed-insights/RecommendationsSection/FilterControls", () => ({
   FilterControls: ({
     filteredCount,
     totalCount,
@@ -323,25 +310,23 @@ vi.mock('@/features/page-speed-insights/RecommendationsSection/FilterControls', 
   ),
 }));
 
-vi.mock('@/features/page-speed-insights/RecommendationsSection/RecommendationItem', () => ({
-  RecommendationItem: ({ rec }: { rec: { id: string; title: string } }) => (
-    <div>{rec.title}</div>
-  ),
+vi.mock("@/features/page-speed-insights/RecommendationsSection/RecommendationItem", () => ({
+  RecommendationItem: ({ rec }: { rec: { id: string; title: string } }) => <div>{rec.title}</div>,
 }));
 
-import { CWVMetricsComponent } from '@/features/page-speed-insights/CWVMetricsComponent';
-import { JavaScriptPerformanceComponent } from '@/features/page-speed-insights/javascript-metrics/JavaScriptPerformanceComponent';
-import { LoadingExperience } from '@/features/page-speed-insights/loading-experience';
-import { NetworkMetricsComponent } from '@/features/page-speed-insights/network-metrics';
-import { RecommendationsSection } from '@/features/page-speed-insights/RecommendationsSection/RecommendationsSection';
+import { CWVMetricsComponent } from "@/features/page-speed-insights/CWVMetricsComponent";
+import { JavaScriptPerformanceComponent } from "@/features/page-speed-insights/javascript-metrics/JavaScriptPerformanceComponent";
+import { LoadingExperience } from "@/features/page-speed-insights/loading-experience";
+import { NetworkMetricsComponent } from "@/features/page-speed-insights/network-metrics";
+import { RecommendationsSection } from "@/features/page-speed-insights/RecommendationsSection/RecommendationsSection";
 import {
   ScoreDisplay,
   ScoreDisplayModes,
   isEmptyResult,
   sortByScoreDisplayModes,
-} from '@/features/page-speed-insights/ScoreDisplay';
+} from "@/features/page-speed-insights/ScoreDisplay";
 
-describe('page-speed container coverage', () => {
+describe("page-speed container coverage", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     pageSpeedItems = [];
@@ -353,54 +338,48 @@ describe('page-speed container coverage', () => {
     vi.useRealTimers();
   });
 
-  it('returns null when LoadingExperience has no items', () => {
+  it("returns null when LoadingExperience has no items", () => {
     pageSpeedItems = [];
 
     const { container } = render(
       <Accordion type="multiple">
-        <LoadingExperience
-          title="Page Loading Experience"
-          experienceKey="loadingExperience"
-        />
+        <LoadingExperience title="Page Loading Experience" experienceKey="loadingExperience" />
       </Accordion>,
     );
 
     expect(container.querySelector('[value="loadingExperience"]')).toBeNull();
   });
 
-  it('returns null when LoadingExperience items have no experience data', () => {
+  it("returns null when LoadingExperience items have no experience data", () => {
     pageSpeedItems = [
-      { label: 'Mobile', item: {} },
-      { label: 'Desktop', item: { lighthouseResult: {} } },
+      { label: "Mobile", item: {} },
+      { label: "Desktop", item: { lighthouseResult: {} } },
     ];
 
     const { container } = render(
       <Accordion type="multiple">
-        <LoadingExperience
-          title="Page Loading Experience"
-          experienceKey="loadingExperience"
-        />
+        <LoadingExperience title="Page Loading Experience" experienceKey="loadingExperience" />
       </Accordion>,
     );
 
     expect(container.querySelector('[value="loadingExperience"]')).toBeNull();
   });
 
-  it('renders the loading experience gauges for available metrics', () => {
+  it("renders the loading experience gauges for available metrics", () => {
     pageSpeedItems = [
       {
-        label: 'Mobile',
+        label: "Mobile",
         item: {
           loadingExperience: {
-            overall_category: 'FAST',
+            overall_category: "FAST",
             metrics: {
               FIRST_CONTENTFUL_PAINT_MS: {
                 percentile: 1200,
-                category: 'FAST',
+                category: "FAST",
               },
               LARGEST_CONTENTFUL_PAINT_MS: {
                 percentile: 2200,
-                category: 'AVERAGE',
+                category: "AVERAGE",
               },
             },
           },
@@ -409,23 +388,20 @@ describe('page-speed container coverage', () => {
     ];
 
     const { container } = render(
-      <Accordion type="multiple" defaultValue={['loadingExperience']}>
-        <LoadingExperience
-          title="Page Loading Experience"
-          experienceKey="loadingExperience"
-        />
+      <Accordion type="multiple" defaultValue={["loadingExperience"]}>
+        <LoadingExperience title="Page Loading Experience" experienceKey="loadingExperience" />
       </Accordion>,
     );
 
     expect(container.textContent).toMatch(/Page Loading Experience: Mobile - FAST/);
-    expect(container.textContent).toContain('1200 - FAST (Mobile)');
-    expect(container.textContent).toContain('2200 - AVERAGE (Mobile)');
+    expect(container.textContent).toContain("1200 - FAST (Mobile)");
+    expect(container.textContent).toContain("2200 - AVERAGE (Mobile)");
   });
 
-  it('returns null when no items have metric audits', () => {
+  it("returns null when no items have metric audits", () => {
     pageSpeedItems = [
       {
-        label: 'Mobile',
+        label: "Mobile",
         item: {
           lighthouseResult: {
             audits: {},
@@ -443,7 +419,7 @@ describe('page-speed container coverage', () => {
     expect(container.querySelector('[value="cwv"]')).toBeNull();
   });
 
-  it('returns null when network items is empty', () => {
+  it("returns null when network items is empty", () => {
     pageSpeedItems = [];
 
     const { container } = render(
@@ -455,43 +431,43 @@ describe('page-speed container coverage', () => {
     expect(container.querySelector('[value="networkMetrics"]')).toBeNull();
   });
 
-  it('renders the cwv summary cards when audits are available', () => {
+  it("renders the cwv summary cards when audits are available", () => {
     pageSpeedItems = [
       {
-        label: 'Mobile',
+        label: "Mobile",
         item: {
           lighthouseResult: {
-            categoryGroups: { metrics: { title: 'Metrics' } },
+            categoryGroups: { metrics: { title: "Metrics" } },
             audits: {
-              'first-contentful-paint': {
-                title: 'First Contentful Paint',
-                description: 'FCP description',
+              "first-contentful-paint": {
+                title: "First Contentful Paint",
+                description: "FCP description",
                 score: 0.92,
                 scoreDisplayMode: ScoreDisplayModes.NUMERIC,
-                displayValue: '1.2 s',
+                displayValue: "1.2 s",
               },
-              'largest-contentful-paint': {
-                title: 'Largest Contentful Paint',
-                description: 'LCP description',
+              "largest-contentful-paint": {
+                title: "Largest Contentful Paint",
+                description: "LCP description",
                 score: 1,
                 scoreDisplayMode: ScoreDisplayModes.BINARY,
               },
-              'total-blocking-time': {
-                title: 'Total Blocking Time',
-                description: 'TBT description',
+              "total-blocking-time": {
+                title: "Total Blocking Time",
+                description: "TBT description",
                 score: null,
                 scoreDisplayMode: ScoreDisplayModes.INFORMATIVE,
               },
-              'cumulative-layout-shift': {
-                title: 'Cumulative Layout Shift',
-                description: 'CLS description',
+              "cumulative-layout-shift": {
+                title: "Cumulative Layout Shift",
+                description: "CLS description",
                 score: 0,
                 scoreDisplayMode: ScoreDisplayModes.ERROR,
-                errorMessage: 'Failed',
+                errorMessage: "Failed",
               },
-              'speed-index': {
-                title: 'Speed Index',
-                description: 'Speed index description',
+              "speed-index": {
+                title: "Speed Index",
+                description: "Speed index description",
                 score: 0.5,
                 scoreDisplayMode: ScoreDisplayModes.MANUAL,
               },
@@ -502,24 +478,24 @@ describe('page-speed container coverage', () => {
     ];
 
     const { container } = render(
-      <Accordion type="multiple" defaultValue={['cwv']}>
+      <Accordion type="multiple" defaultValue={["cwv"]}>
         <CWVMetricsComponent />
       </Accordion>,
     );
 
-    expect(container.textContent).toContain('Core Web Vitals Summary');
-    expect(container.textContent).toContain('First Contentful Paint');
+    expect(container.textContent).toContain("Core Web Vitals Summary");
+    expect(container.textContent).toContain("First Contentful Paint");
     expect(container.textContent).toMatch(/Score: 92 \/ 100/);
-    expect(container.textContent).toContain('Mobile - ✅ - Passed');
-    expect(container.textContent).toContain('Error: Failed');
-    expect(container.textContent).toContain('Mobile - Manual');
+    expect(container.textContent).toContain("Mobile - ✅ - Passed");
+    expect(container.textContent).toContain("Error: Failed");
+    expect(container.textContent).toContain("Mobile - Manual");
     expect((container.textContent?.match(/Score chart:/g) ?? []).length).toBe(5);
   });
 
-  it('aggregates network metrics before rendering the child cards', () => {
+  it("aggregates network metrics before rendering the child cards", () => {
     pageSpeedItems = [
       {
-        label: 'Mobile',
+        label: "Mobile",
         item: {
           lighthouseResult: {
             audits: {
@@ -548,27 +524,27 @@ describe('page-speed container coverage', () => {
                   ],
                 },
               },
-              'network-requests': {
+              "network-requests": {
                 details: {
                   items: [
                     {
-                      url: 'https://cdn.example.com/app.js',
+                      url: "https://cdn.example.com/app.js",
                       transferSize: 300,
                       resourceSize: 500,
-                      resourceType: 'Script',
+                      resourceType: "Script",
                     },
                     {
-                      url: 'https://cdn.example.com/app.css',
+                      url: "https://cdn.example.com/app.css",
                       transferSize: 100,
                       resourceSize: 150,
-                      resourceType: 'Stylesheet',
+                      resourceType: "Stylesheet",
                     },
                   ],
                 },
               },
-              'network-rtt': { details: { items: [{ origin: 'self', rtt: 90 }] } },
-              'network-server-latency': {
-                details: { items: [{ origin: 'self', latency: 40 }] },
+              "network-rtt": { details: { items: [{ origin: "self", rtt: 90 }] } },
+              "network-server-latency": {
+                details: { items: [{ origin: "self", latency: 40 }] },
               },
             },
           },
@@ -577,27 +553,30 @@ describe('page-speed container coverage', () => {
     ];
 
     const { container } = render(
-      <Accordion type="multiple" defaultValue={['networkMetrics']}>
+      <Accordion type="multiple" defaultValue={["networkMetrics"]}>
         <NetworkMetricsComponent />
       </Accordion>,
     );
 
-    expect(container.textContent).toContain('Network summary: 2');
-    expect(container.textContent).toContain('Timing metrics: 100');
-    expect(container.textContent).toContain('Timeline metrics: 150');
-    expect(container.textContent).toContain('LCP breakdown count: 1');
-    expect(container.textContent).toContain('RTT metrics: 1');
-    expect(container.textContent).toContain('Server metrics: 1');
-    expect(container.textContent).toContain('Resource types: Script|Stylesheet');
-    expect(container.textContent).toContain('Top resources: https://cdn.example.com/app.js');
+    expect(container.textContent).toContain("Network summary: 2");
+    expect(container.textContent).toContain("Timing metrics: 100");
+    expect(container.textContent).toContain("Timeline metrics: 150");
+    expect(container.textContent).toContain("LCP breakdown count: 1");
+    expect(container.textContent).toContain("RTT metrics: 1");
+    expect(container.textContent).toContain("Server metrics: 1");
+    expect(container.textContent).toContain("Resource types: Script|Stylesheet");
+    expect(container.textContent).toContain("Top resources: https://cdn.example.com/app.js");
   });
 
-  it('builds javascript metric summaries from extracted resources', () => {
-    pageSpeedItems = [{ label: 'Mobile', item: { id: 1 } }, { label: 'Desktop', item: { id: 2 } }];
+  it("builds javascript metric summaries from extracted resources", () => {
+    pageSpeedItems = [
+      { label: "Mobile", item: { id: 1 } },
+      { label: "Desktop", item: { id: 2 } },
+    ];
     extractJSMetricsMock.mockImplementation((item: { label: string }) => {
-      if (item.label === 'Mobile') {
+      if (item.label === "Mobile") {
         return {
-          label: 'Mobile',
+          label: "Mobile",
           jsResources: [{ transferSize: 10, resourceSize: 20 }],
           diagnostics: [{ numTasks: 2 }],
           mainThreadTasks: [{ duration: 10 }, { duration: 20 }],
@@ -605,12 +584,12 @@ describe('page-speed container coverage', () => {
           mainThreadWork: [{ duration: 30 }],
           unusedJS: [{ wastedBytes: 10 }],
           unminifiedJS: [{ wastedBytes: 5 }],
-          legacyJS: [{ signal: 'legacy' }],
+          legacyJS: [{ signal: "legacy" }],
         };
       }
 
       return {
-        label: 'Desktop',
+        label: "Desktop",
         jsResources: [],
         diagnostics: [],
         mainThreadTasks: [],
@@ -623,68 +602,68 @@ describe('page-speed container coverage', () => {
     });
 
     const { container } = render(
-      <Accordion type="multiple" defaultValue={['javascriptPerformance']}>
+      <Accordion type="multiple" defaultValue={["javascriptPerformance"]}>
         <JavaScriptPerformanceComponent />
       </Accordion>,
     );
 
-    expect(container.textContent).toContain('JavaScript summary: 1/10,0/0');
-    expect(container.textContent).toContain('Task summary: 1/2,0/0');
-    expect(container.textContent).toContain('Bootup metrics: 1,0');
-    expect(container.textContent).toContain('Main thread work: 1,0');
-    expect(container.textContent).toContain('Unused JS: 1,0');
-    expect(container.textContent).toContain('Unminified JS: 1,0');
-    expect(container.textContent).toContain('Legacy JS: 1,0');
+    expect(container.textContent).toContain("JavaScript summary: 1/10,0/0");
+    expect(container.textContent).toContain("Task summary: 1/2,0/0");
+    expect(container.textContent).toContain("Bootup metrics: 1,0");
+    expect(container.textContent).toContain("Main thread work: 1,0");
+    expect(container.textContent).toContain("Unused JS: 1,0");
+    expect(container.textContent).toContain("Unminified JS: 1,0");
+    expect(container.textContent).toContain("Legacy JS: 1,0");
   });
 
-  it('filters recommendation items down to entries with details and toggles expansion', () => {
-    pageSpeedItems = [{ label: 'Mobile', item: { lighthouseResult: {} } }];
+  it("filters recommendation items down to entries with details and toggles expansion", () => {
+    pageSpeedItems = [{ label: "Mobile", item: { lighthouseResult: {} } }];
     analyzeAuditsMock.mockReturnValue([
       {
-        id: 'rec-1',
-        title: 'Compress images',
-        category: 'Images',
-        priority: 'high',
-        details: [{ text: 'detail' }],
+        id: "rec-1",
+        title: "Compress images",
+        category: "Images",
+        priority: "high",
+        details: [{ text: "detail" }],
       },
       {
-        id: 'rec-2',
-        title: 'Inline critical CSS',
-        category: 'CSS',
-        priority: 'medium',
-        details: [{ text: 'detail' }],
+        id: "rec-2",
+        title: "Inline critical CSS",
+        category: "CSS",
+        priority: "medium",
+        details: [{ text: "detail" }],
       },
       {
-        id: 'rec-3',
-        title: 'Drop empty recommendation',
-        category: 'Other',
-        priority: 'low',
+        id: "rec-3",
+        title: "Drop empty recommendation",
+        category: "Other",
+        priority: "low",
         details: [],
       },
     ]);
 
     const { container } = render(
-      <Accordion type="multiple" defaultValue={['recommendations']}>
+      <Accordion type="multiple" defaultValue={["recommendations"]}>
         <RecommendationsSection />
       </Accordion>,
     );
 
-    expect(container.textContent).toContain('Recommendations');
-    expect(container.textContent).toContain('Filter summary: 2/2');
-    expect(container.textContent).toContain('Compress images');
-    expect(container.textContent).toContain('Inline critical CSS');
-    expect(container.textContent).not.toContain('Drop empty recommendation');
-    expect(container.textContent).toContain('Expanded count: 0');
+    expect(container.textContent).toContain("Recommendations");
+    expect(container.textContent).toContain("Filter summary: 2/2");
+    expect(container.textContent).toContain("Compress images");
+    expect(container.textContent).toContain("Inline critical CSS");
+    expect(container.textContent).not.toContain("Drop empty recommendation");
+    expect(container.textContent).toContain("Expanded count: 0");
 
-    const toggleBtn = Array.from(container.querySelectorAll('button')).find(
-      (b) => b.textContent?.trim() === 'Toggle all',
+    const toggleBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.trim() === "Toggle all",
     );
     fireEvent.click(toggleBtn!);
 
-    expect(container.textContent).toContain('Expanded count: 2');
+    expect(container.textContent).toContain("Expanded count: 2");
   });
 
-  it('handles score display edge cases and audit sorting helpers', () => {
+  it("handles score display edge cases and audit sorting helpers", () => {
     const informativeAudit = {
       score: null,
       scoreDisplayMode: ScoreDisplayModes.INFORMATIVE,
@@ -692,13 +671,13 @@ describe('page-speed container coverage', () => {
     const numericAudit = {
       score: 0.9,
       scoreDisplayMode: ScoreDisplayModes.NUMERIC,
-      displayValue: '900 ms',
-      details: { type: 'table', items: [{ url: 'https://example.com' }] },
+      displayValue: "900 ms",
+      details: { type: "table", items: [{ url: "https://example.com" }] },
     };
     const emptyAudit = {
       score: 1,
       scoreDisplayMode: ScoreDisplayModes.NUMERIC,
-      details: { type: 'table', items: [] },
+      details: { type: "table", items: [] },
     };
 
     const { container } = render(<ScoreDisplay audit={numericAudit as any} device="Mobile" />);

@@ -1,9 +1,5 @@
 "use client";
-import {
-  TableCell,
-  TableHead,
-  TableRow,
-} from "@/components/ui/table";
+import { TableCell, TableHead, TableRow } from "@/components/ui/table";
 import { RenderBytesValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import { CardWithTable } from "@/features/page-speed-insights/shared/CardWithTable";
 import { useNetworkRequestStats } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
@@ -31,13 +27,16 @@ export function NetworkRequestsSummaryCard() {
     >
       {validStats.map(({ label, totalRequests, totalTransferSize, totalResourceSize }) => (
         <TableRow key={label}>
-          {showReportColumn && <TableCell className="font-medium">{label || 'Unknown'}</TableCell>}
+          {showReportColumn && <TableCell className="font-medium">{label || "Unknown"}</TableCell>}
           <TableCell>{totalRequests}</TableCell>
-          <TableCell><RenderBytesValue value={totalTransferSize} /></TableCell>
-          <TableCell><RenderBytesValue value={totalResourceSize} /></TableCell>
+          <TableCell>
+            <RenderBytesValue value={totalTransferSize} />
+          </TableCell>
+          <TableCell>
+            <RenderBytesValue value={totalResourceSize} />
+          </TableCell>
         </TableRow>
       ))}
     </CardWithTable>
   );
 }
-

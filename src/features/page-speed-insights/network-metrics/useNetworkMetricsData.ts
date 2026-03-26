@@ -46,13 +46,9 @@ function metricNumber(value: unknown): number {
   return getNumber(value) ?? 0;
 }
 
-export function mapItemsToNetworkMetrics(
-  items: InsightsContextItem[],
-): NetworkMetricSeries[] {
+export function mapItemsToNetworkMetrics(items: InsightsContextItem[]): NetworkMetricSeries[] {
   return items.map(({ item, label }) => {
-    const metricsAudit = item?.lighthouseResult?.audits?.metrics as
-      | MetricsAuditDetails
-      | undefined;
+    const metricsAudit = item?.lighthouseResult?.audits?.metrics as MetricsAuditDetails | undefined;
     const metricsDetails = metricsAudit?.details?.items?.[0];
 
     return {
@@ -65,44 +61,27 @@ export function mapItemsToNetworkMetrics(
       domContentLoaded: metricNumber(metricsDetails?.observedDomContentLoaded),
       loadTime: metricNumber(metricsDetails?.observedLoad),
       interactive: metricNumber(metricsDetails?.interactive),
-      observedNavigationStart: metricNumber(
-        metricsDetails?.observedNavigationStart,
-      ),
+      observedNavigationStart: metricNumber(metricsDetails?.observedNavigationStart),
       observedFirstPaint: metricNumber(metricsDetails?.observedFirstPaint),
-      observedFirstContentfulPaint: metricNumber(
-        metricsDetails?.observedFirstContentfulPaint,
-      ),
-      observedLargestContentfulPaint: metricNumber(
-        metricsDetails?.observedLargestContentfulPaint,
-      ),
+      observedFirstContentfulPaint: metricNumber(metricsDetails?.observedFirstContentfulPaint),
+      observedLargestContentfulPaint: metricNumber(metricsDetails?.observedLargestContentfulPaint),
       observedFirstContentfulPaintAllFrames: metricNumber(
         metricsDetails?.observedFirstContentfulPaintAllFrames,
       ),
-      observedFirstVisualChange: metricNumber(
-        metricsDetails?.observedFirstVisualChange,
-      ),
+      observedFirstVisualChange: metricNumber(metricsDetails?.observedFirstVisualChange),
       observedLargestContentfulPaintAllFrames: metricNumber(
         metricsDetails?.observedLargestContentfulPaintAllFrames,
       ),
-      observedLastVisualChange: metricNumber(
-        metricsDetails?.observedLastVisualChange,
-      ),
+      observedLastVisualChange: metricNumber(metricsDetails?.observedLastVisualChange),
       observedTraceEnd: metricNumber(metricsDetails?.observedTraceEnd),
       networkRequests:
-        (
-          item?.lighthouseResult?.audits?.["network-requests"]
-            ?.details as AuditDetailTable
-        )?.items || [],
+        (item?.lighthouseResult?.audits?.["network-requests"]?.details as AuditDetailTable)
+          ?.items || [],
       networkRTT:
-        (
-          item?.lighthouseResult?.audits?.["network-rtt"]
-            ?.details as AuditDetailTable
-        )?.items || [],
+        (item?.lighthouseResult?.audits?.["network-rtt"]?.details as AuditDetailTable)?.items || [],
       serverLatency:
-        (
-          item?.lighthouseResult?.audits?.["network-server-latency"]
-            ?.details as AuditDetailTable
-        )?.items || [],
+        (item?.lighthouseResult?.audits?.["network-server-latency"]?.details as AuditDetailTable)
+          ?.items || [],
     };
   });
 }
@@ -137,13 +116,11 @@ export function mapNetworkMetricsToStats(
       return typeof resourceType === "string" ? resourceType : "Unknown";
     });
 
-    const topResources = [...networkRequests].sort(
-      (a: TableItem, b: TableItem) => {
-        const aSize = typeof a?.transferSize === "number" ? a.transferSize : 0;
-        const bSize = typeof b?.transferSize === "number" ? b.transferSize : 0;
-        return bSize - aSize;
-      },
-    );
+    const topResources = [...networkRequests].sort((a: TableItem, b: TableItem) => {
+      const aSize = typeof a?.transferSize === "number" ? a.transferSize : 0;
+      const bSize = typeof b?.transferSize === "number" ? b.transferSize : 0;
+      return bSize - aSize;
+    });
 
     return {
       label,

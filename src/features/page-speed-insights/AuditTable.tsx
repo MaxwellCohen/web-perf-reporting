@@ -1,4 +1,4 @@
-import { AuditResultsRecord } from '@/lib/schema';
+import { AuditResultsRecord } from "@/lib/schema";
 import {
   Table,
   TableBody,
@@ -6,8 +6,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import ReactMarkdown from 'react-markdown';
+} from "@/components/ui/table";
+import ReactMarkdown from "react-markdown";
 
 export function AuditTable({ audits }: { audits?: AuditResultsRecord | null }) {
   if (!audits) {
@@ -34,7 +34,7 @@ export function AuditTable({ audits }: { audits?: AuditResultsRecord | null }) {
                 <TableCell rowSpan={1}> {audit.id} </TableCell>
                 <TableCell rowSpan={1}> {audit.title} </TableCell>
                 <TableCell rowSpan={1}>
-                  <ReactMarkdown>{audit.description || ''}</ReactMarkdown>
+                  <ReactMarkdown>{audit.description || ""}</ReactMarkdown>
                 </TableCell>
               </TableRow>
             );
@@ -43,4 +43,4 @@ export function AuditTable({ audits }: { audits?: AuditResultsRecord | null }) {
       </Table>
     </>
   );
-} 
+}

@@ -1,15 +1,10 @@
-'use client';
+"use client";
 
-import { p75ThresholdSegments } from '@/components/latest-crux/lib/p75ThresholdSegments';
-import type { CruxHistoryItem } from '@/lib/schema';
+import { p75ThresholdSegments } from "@/components/latest-crux/lib/p75ThresholdSegments";
+import type { CruxHistoryItem } from "@/lib/schema";
 
-export function CruxP75ThresholdBar({
-  histogramData,
-}: {
-  histogramData: CruxHistoryItem;
-}) {
-  const { goodPercent, niPercent, poorPercent, p75Location } =
-    p75ThresholdSegments(histogramData);
+export function CruxP75ThresholdBar({ histogramData }: { histogramData: CruxHistoryItem }) {
+  const { goodPercent, niPercent, poorPercent, p75Location } = p75ThresholdSegments(histogramData);
 
   return (
     <div className="w-full overflow-hidden rounded-[4px]">

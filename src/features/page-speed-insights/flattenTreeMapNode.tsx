@@ -1,8 +1,8 @@
-'use client';
-import { TreeMapNode } from '@/lib/schema';
+"use client";
+import { TreeMapNode } from "@/lib/schema";
 
 export function flattenTreeMapNode(obj: TreeMapNode) {
-  const transformChildren = (children: TreeMapNode[], prefix = '') => {
+  const transformChildren = (children: TreeMapNode[], prefix = "") => {
     if (!children) {
       return [];
     }
@@ -11,11 +11,9 @@ export function flattenTreeMapNode(obj: TreeMapNode) {
       const { children: nestedChildren, name } = child;
       const newPrefix = prefix ? `${prefix}/${name}` : name;
       if (nestedChildren && Array.isArray(nestedChildren)) {
-        transformChildren(nestedChildren, newPrefix).forEach(
-          (transformedChild) => {
-            acc.push(transformedChild);
-          }
-        );
+        transformChildren(nestedChildren, newPrefix).forEach((transformedChild) => {
+          acc.push(transformedChild);
+        });
       } else if (prefix) {
         acc.push({
           ...child,

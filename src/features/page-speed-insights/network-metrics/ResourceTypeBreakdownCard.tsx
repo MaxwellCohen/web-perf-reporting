@@ -4,13 +4,13 @@ import { Table } from "@/components/ui/table";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { TableItem } from "@/lib/schema";
 import { useMemo } from "react";
-import {
-  ColumnDef,
-  createColumnHelper,
-} from "@tanstack/react-table";
+import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
 import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
-import { createNumericAggregatedCell, createStringAggregatedCell } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
+import {
+  createNumericAggregatedCell,
+  createStringAggregatedCell,
+} from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
 import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
 import { useStandardTable } from "@/features/page-speed-insights/shared/tableConfigHelpers";
 import { createBytesColumn } from "@/features/page-speed-insights/shared/tableColumnHelpers";
@@ -28,33 +28,33 @@ type ResourceTypeTableRow = {
 function sumOn<T extends Record<string, unknown>>(items: T[], key: string): number {
   return items.reduce((acc, curr) => {
     const value = curr[key];
-    return acc + (typeof value === 'number' ? value : 0);
+    return acc + (typeof value === "number" ? value : 0);
   }, 0);
 }
 
 const columnHelper = createColumnHelper<ResourceTypeTableRow>();
 const cols: ColumnDef<ResourceTypeTableRow, any>[] = [
-  columnHelper.accessor('resourceType', {
-    id: 'resourceType',
-    header: 'Resource Type',
+  columnHelper.accessor("resourceType", {
+    id: "resourceType",
+    header: "Resource Type",
     enableSorting: true,
     enableGrouping: true,
     enableResizing: true,
-    filterFn: 'includesString',
+    filterFn: "includesString",
     cell: (info) => toTitleCase(info.getValue()),
-    aggregatedCell: createStringAggregatedCell('resourceType', toTitleCase),
+    aggregatedCell: createStringAggregatedCell("resourceType", toTitleCase),
   }),
-  columnHelper.accessor('count', {
-    id: 'count',
-    header: 'Count',
+  columnHelper.accessor("count", {
+    id: "count",
+    header: "Count",
     enableSorting: true,
     enableResizing: true,
-    filterFn: 'inNumberRange',
+    filterFn: "inNumberRange",
     cell: (info) => <span>{info.getValue()}</span>,
-    aggregatedCell: createNumericAggregatedCell('count', (value) => <span>{value}</span>),
+    aggregatedCell: createNumericAggregatedCell("count", (value) => <span>{value}</span>),
   }),
-  createBytesColumn(columnHelper, 'transferSize', 'Total Transfer Size'),
-  createBytesColumn(columnHelper, 'resourceSize', 'Total Resource Size'),
+  createBytesColumn(columnHelper, "transferSize", "Total Transfer Size"),
+  createBytesColumn(columnHelper, "resourceSize", "Total Resource Size"),
 ];
 
 function ResourceTypeTable({ label, data }: { label: string; data: ResourceTypeTableRow[] }) {
@@ -67,11 +67,9 @@ function ResourceTypeTable({ label, data }: { label: string; data: ResourceTypeT
 
   return (
     <div>
-      <h5 className="font-semibold text-sm mb-2 text-muted-foreground">
-        {label}
-      </h5>
+      <h5 className="font-semibold text-sm mb-2 text-muted-foreground">{label}</h5>
       <div className="w-full overflow-x-auto">
-        <Table className="w-full" style={{ width: '100%' }}>
+        <Table className="w-full" style={{ width: "100%" }}>
           <DataTableHeader table={table} />
           <DataTableBody table={table} />
         </Table>
@@ -83,10 +81,7 @@ function ResourceTypeTable({ label, data }: { label: string; data: ResourceTypeT
 export function ResourceTypeBreakdownCard() {
   const requestStats = useNetworkRequestStats();
   const validStats = useMemo(
-    () =>
-      requestStats.filter(
-        (s) => s.byResourceType && Object.keys(s.byResourceType).length > 0,
-      ),
+    () => requestStats.filter((s) => s.byResourceType && Object.keys(s.byResourceType).length > 0),
     [requestStats],
   );
 
@@ -98,8 +93,8 @@ export function ResourceTypeBreakdownCard() {
           label,
           resourceType: type,
           count: typedItems.length,
-          transferSize: sumOn(typedItems, 'transferSize'),
-          resourceSize: sumOn(typedItems, 'resourceSize'),
+          transferSize: sumOn(typedItems, "transferSize"),
+          resourceSize: sumOn(typedItems, "resourceSize"),
         };
       });
 

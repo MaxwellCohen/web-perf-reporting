@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
-import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
-import { createReportColumn } from '@/features/page-speed-insights/shared/tableColumnHelpers';
+import { useMemo } from "react";
+import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
+import { createReportColumn } from "@/features/page-speed-insights/shared/tableColumnHelpers";
 
 /**
  * Hook to conditionally add a report column to table columns based on showReportColumn flag.
@@ -26,4 +26,3 @@ export function useTableColumns<T extends { label: string }>(
     return baseColumns;
   }, [baseColumns, columnHelper, showReportColumn]);
 }
-

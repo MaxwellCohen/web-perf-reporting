@@ -1,34 +1,28 @@
 /* eslint-disable @next/next/no-img-element */
-'use client';
-import { memo, useEffect, useRef, useState } from 'react';
-import { useFullPageScreenshots } from '@/features/page-speed-insights/PageSpeedContext';
-import { RenderJSONDetails } from '@/features/page-speed-insights/RenderJSONDetails';
-import { NodeValue, FullPageScreenshot, Rect } from '@/lib/schema';
+"use client";
+import { memo, useEffect, useRef, useState } from "react";
+import { useFullPageScreenshots } from "@/features/page-speed-insights/PageSpeedContext";
+import { RenderJSONDetails } from "@/features/page-speed-insights/RenderJSONDetails";
+import { NodeValue, FullPageScreenshot, Rect } from "@/lib/schema";
 import {
   Dialog,
   DialogClose,
   DialogContent,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 /**
  * React component that renders a node element similar to the renderNode function
  * in the Lighthouse details-renderer.js
  */
-export function NodeComponent({
-  item,
-  device,
-}: {
-  item: NodeValue;
-  device: string;
-}) {
+export function NodeComponent({ item, device }: { item: NodeValue; device: string }) {
   // Validate item is an object
-  if (!item || typeof item !== 'object') {
+  if (!item || typeof item !== "object") {
     return null;
   }
-  
+
   return (
     <div className="flex flex-col gap-2">
       <div className="grid gap-2 md:grid-cols-[auto_auto]">
@@ -44,7 +38,7 @@ export function NodeComponent({
       </div>
       <RenderJSONDetails
         data={item}
-        title={`Node Data for ${item.lhId || 'unknown'} on ${device}`}
+        title={`Node Data for ${item.lhId || "unknown"} on ${device}`}
       />
     </div>
   );
@@ -61,16 +55,16 @@ export function RenderNodeImage({
 }) {
   const screenshotData = useFullPageScreenshots();
   const [imageError, setImageError] = useState(false);
-  
+
   // Validate item is an object
-  if (!item || typeof item !== 'object') {
+  if (!item || typeof item !== "object") {
     return null;
   }
-  
+
   // Try to find the screenshot by matching device label
   // Device might be "Mobile", "Desktop", or a full label like "Mobile Report"
   let fullPageScreenshot = screenshotData?.[device];
-  
+
   // If not found, try to find by partial match
   if (!fullPageScreenshot && device) {
     const deviceKey = Object.keys(screenshotData || {}).find((key) => {
@@ -90,7 +84,7 @@ export function RenderNodeImage({
       fullPageScreenshot = screenshotData?.[deviceKey];
     }
   }
-  
+
   // If still not found, try to get the first available screenshot
   if (!fullPageScreenshot && screenshotData) {
     const firstKey = Object.keys(screenshotData)[0];
@@ -102,7 +96,7 @@ export function RenderNodeImage({
     // No screenshot data available - return null to hide image
     return null;
   }
-  
+
   if (!item?.lhId) {
     // No lhId in item - can't render node-specific screenshot
     return null;
@@ -116,12 +110,12 @@ export function RenderNodeImage({
 
   // Get the node rect from the fullPageScreenshot
   let nodeRect = fullPageScreenshot.nodes?.[item.lhId];
-  
+
   // If node rect doesn't exist in screenshot data, try to use boundingRect from item as fallback
   if ((!nodeRect || nodeRect.width === 0 || nodeRect.height === 0) && item.boundingRect) {
     nodeRect = item.boundingRect;
   }
-  
+
   // If node rect still doesn't exist or has invalid dimensions, show full screenshot as fallback
   if (!nodeRect || nodeRect.width === 0 || nodeRect.height === 0) {
     // Fallback: show full screenshot thumbnail if node rect is missing
@@ -129,18 +123,21 @@ export function RenderNodeImage({
     const aspectRatio = screenshot.width / screenshot.height;
     const displayHeight = Math.min(imageSize, screenshot.height);
     const displayWidth = displayHeight * aspectRatio;
-    
+
     if (imageError || !screenshot.data) {
       return (
-        <div className="flex items-center justify-center overflow-hidden rounded border border-gray-300 bg-gray-100" style={{
-          width: `${displayWidth}px`,
-          height: `${displayHeight}px`,
-        }}>
+        <div
+          className="flex items-center justify-center overflow-hidden rounded border border-gray-300 bg-gray-100"
+          style={{
+            width: `${displayWidth}px`,
+            height: `${displayHeight}px`,
+          }}
+        >
           <span className="text-xs text-gray-500">Image unavailable</span>
         </div>
       );
     }
-    
+
     return (
       <Dialog>
         <DialogTrigger>
@@ -152,7 +149,7 @@ export function RenderNodeImage({
               style={{
                 width: `${displayWidth}px`,
                 height: `${displayHeight}px`,
-                objectFit: 'contain',
+                objectFit: "contain",
               }}
             />
           </div>
@@ -170,8 +167,8 @@ export function RenderNodeImage({
                 alt="Full screenshot"
                 onError={() => setImageError(true)}
                 style={{
-                  maxWidth: '100%',
-                  height: 'auto',
+                  maxWidth: "100%",
+                  height: "auto",
                 }}
               />
             )}
@@ -230,7 +227,7 @@ interface ScreenshotPositions {
  */
 interface ElementScreenshotRendererProps {
   /** Screenshot object with data, width, and height */
-  screenshot: FullPageScreenshot['screenshot'];
+  screenshot: FullPageScreenshot["screenshot"];
   /** Array of element rectangles */
   elementRects?: Rect[];
   /** Maximum thumbnail size */
@@ -242,7 +239,7 @@ interface ElementScreenshotRendererProps {
  */
 interface ElementScreenshotProps {
   /** Screenshot object with data, width, and height */
-  screenshot: FullPageScreenshot['screenshot'];
+  screenshot: FullPageScreenshot["screenshot"];
   /** Element rectangle */
   elementRect: Rect;
   /** Maximum render size */
@@ -269,10 +266,7 @@ interface ClipPathProps {
  * @param rect - The element rect with left, right, top, bottom
  * @return Whether the screenshot overlaps with the rect
  */
-function screenshotOverlapsRect(
-  screenshot: FullPageScreenshot['screenshot'],
-  rect: Rect,
-): boolean {
+function screenshotOverlapsRect(screenshot: FullPageScreenshot["screenshot"], rect: Rect): boolean {
   return (
     rect?.left <= screenshot.width &&
     0 <= rect?.right &&
@@ -361,17 +355,13 @@ function getScreenshotPositions(
  * @param renderContainerSizeDC - Container size in display coordinates
  * @return The zoom factor
  */
-function computeZoomFactor(
-  elementRectSC: Rect,
-  renderContainerSizeDC: Size,
-): number {
+function computeZoomFactor(elementRectSC: Rect, renderContainerSizeDC: Size): number {
   const targetClipToViewportRatio = 0.75;
   const zoomRatioXY = {
     x: renderContainerSizeDC.width / elementRectSC.width,
     y: renderContainerSizeDC.height / elementRectSC.height,
   };
-  const zoomFactor =
-    targetClipToViewportRatio * Math.min(zoomRatioXY.x, zoomRatioXY.y);
+  const zoomFactor = targetClipToViewportRatio * Math.min(zoomRatioXY.x, zoomRatioXY.y);
   return Math.min(1, zoomFactor);
 }
 
@@ -424,18 +414,18 @@ function ElementScreenshot({
   }
 
   // Validate data URL format
-  const isValidDataUrl = screenshot.data && (
-    screenshot.data.startsWith('data:image/') ||
-    screenshot.data.startsWith('http://') ||
-    screenshot.data.startsWith('https://')
-  );
+  const isValidDataUrl =
+    screenshot.data &&
+    (screenshot.data.startsWith("data:image/") ||
+      screenshot.data.startsWith("http://") ||
+      screenshot.data.startsWith("https://"));
 
   // If image data is invalid or error occurred, show fallback
   if (imageError || !screenshot.data || !isValidDataUrl) {
     const displayWidth = Math.min(maxRenderSize.width, 150);
     const displayHeight = Math.min(maxRenderSize.height, 150);
     return (
-      <div 
+      <div
         className="flex items-center justify-center overflow-hidden rounded border border-gray-300 bg-gray-100"
         style={{
           width: `${displayWidth}px`,
@@ -456,14 +446,8 @@ function ElementScreenshot({
     height: maxRenderSize.height / zoomFactor,
   };
 
-  elementPreviewSizeSC.width = Math.min(
-    screenshot.width,
-    elementPreviewSizeSC.width,
-  );
-  elementPreviewSizeSC.height = Math.min(
-    screenshot.height,
-    elementPreviewSizeSC.height,
-  );
+  elementPreviewSizeSC.width = Math.min(screenshot.width, elementPreviewSizeSC.width);
+  elementPreviewSizeSC.height = Math.min(screenshot.height, elementPreviewSizeSC.height);
 
   // Calculate preview size in display coordinates
   const elementPreviewSizeDC: Size = {
@@ -479,44 +463,44 @@ function ElementScreenshot({
 
   // Styles for the image element (matches Lighthouse's lh-element-screenshot__image)
   const imageStyle: React.CSSProperties = {
-    position: 'relative',
+    position: "relative",
     width: `${elementPreviewSizeDC.width}px`,
     height: `${elementPreviewSizeDC.height}px`,
     backgroundImage: `url('${screenshot.data}')`,
     backgroundPosition: `${-(positions.screenshot.left * zoomFactor)}px ${-(positions.screenshot.top * zoomFactor)}px`,
     backgroundSize: `${screenshot.width * zoomFactor}px ${screenshot.height * zoomFactor}px`,
-    backgroundRepeat: 'no-repeat',
-    outline: '2px solid #777',
-    backgroundColor: 'white',
+    backgroundRepeat: "no-repeat",
+    outline: "2px solid #777",
+    backgroundColor: "white",
   };
 
   // Styles for the marker element (matches Lighthouse's lh-element-screenshot__element-marker)
   const markerStyle: React.CSSProperties = {
-    position: 'absolute',
+    position: "absolute",
     width: `${elementRect.width * zoomFactor}px`,
     height: `${elementRect.height * zoomFactor}px`,
     left: `${positions.clip.left * zoomFactor}px`,
     top: `${positions.clip.top * zoomFactor}px`,
-    outline: '2px solid #84cc16', // var(--color-lime-400)
+    outline: "2px solid #84cc16", // var(--color-lime-400)
   };
 
   // Styles for the mask element (matches Lighthouse's lh-element-screenshot__mask)
   const maskStyle: React.CSSProperties = {
-    position: 'absolute',
+    position: "absolute",
     width: `${elementPreviewSizeDC.width}px`,
     height: `${elementPreviewSizeDC.height}px`,
-    background: '#555',
+    background: "#555",
     opacity: 0.8,
     clipPath: `url(#${clipId})`,
   };
 
   // Styles for the content wrapper (matches Lighthouse's lh-element-screenshot__content)
   const contentStyle: React.CSSProperties = {
-    overflow: 'hidden',
-    minWidth: '110px',
-    display: 'flex',
-    justifyContent: 'center',
-    backgroundColor: 'var(--report-background-color, #fff)',
+    overflow: "hidden",
+    minWidth: "110px",
+    display: "flex",
+    justifyContent: "center",
+    backgroundColor: "var(--report-background-color, #fff)",
   };
 
   return (
@@ -527,14 +511,14 @@ function ElementScreenshot({
       data-rect-height={elementRect.height}
       data-rect-left={elementRect.left}
       data-rect-top={elementRect.top}
-      style={{ float: 'left', marginRight: '20px' }}
+      style={{ float: "left", marginRight: "20px" }}
     >
       {/* Hidden img to detect load errors for background-image */}
       <img
         src={screenshot.data}
         alt=""
         onError={() => setImageError(true)}
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
         aria-hidden="true"
       />
       <div className="lh-element-screenshot__content" style={contentStyle}>
@@ -567,7 +551,7 @@ const RenderThumbnails = memo(function RThumbnails({
   const aspectRatio = screenshot.width / screenshot.height;
   const displayHeight = Math.min(maxThumbnailSize.height, screenshot.height);
   const displayWidth = displayHeight * aspectRatio;
-  
+
   const thumbnails = elementRects.map((rect, index) => {
     // Check if the rect overlaps with the screenshot before trying to render
     if (!screenshotOverlapsRect(screenshot, rect)) {
@@ -602,15 +586,15 @@ const RenderThumbnails = memo(function RThumbnails({
             alt="Screenshot"
             onError={() => setImageError(true)}
             style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
             }}
           />
         </div>
       );
     }
-    
+
     return (
       <div
         key={index}
@@ -628,21 +612,24 @@ const RenderThumbnails = memo(function RThumbnails({
       </div>
     );
   });
-  
+
   // If no element rects provided, show at least the full screenshot
   if (elementRects.length === 0) {
     if (imageError || !screenshot.data) {
       return (
-        <div className="flex items-center justify-center overflow-hidden rounded border border-gray-300 bg-gray-100 transition-transform" style={{
-          width: `${displayWidth}px`,
-          height: `${displayHeight}px`,
-        }}>
+        <div
+          className="flex items-center justify-center overflow-hidden rounded border border-gray-300 bg-gray-100 transition-transform"
+          style={{
+            width: `${displayWidth}px`,
+            height: `${displayHeight}px`,
+          }}
+        >
           <span className="text-xs text-gray-500">Image unavailable</span>
         </div>
       );
     }
     return (
-      <div 
+      <div
         className="flex items-center justify-center overflow-hidden rounded border border-gray-300 transition-transform"
         style={{
           width: `${displayWidth}px`,
@@ -656,15 +643,15 @@ const RenderThumbnails = memo(function RThumbnails({
           alt="Screenshot"
           onError={() => setImageError(true)}
           style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain',
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
           }}
         />
       </div>
     );
   }
-  
+
   return <>{thumbnails}</>;
 });
 
@@ -686,26 +673,27 @@ function ElementScreenshotRenderer({
     <Dialog>
       <DialogTrigger asChild>
         <div className="flex cursor-pointer items-center justify-center hover:scale-110 hover:shadow-md">
-        {isClient ? <RenderThumbnails
-            maxThumbnailSize={maxThumbnailSize}
-            elementRects={elementRects}
-            screenshot={screenshot}
-          /> : null}
+          {isClient ? (
+            <RenderThumbnails
+              maxThumbnailSize={maxThumbnailSize}
+              elementRects={elementRects}
+              screenshot={screenshot}
+            />
+          ) : null}
         </div>
       </DialogTrigger>
-      <DialogContent
-        ref={ref}
-        className="h-full w-screen max-w-none justify-center md:w-[74vw]"
-      >
+      <DialogContent ref={ref} className="h-full w-screen max-w-none justify-center md:w-[74vw]">
         <DialogTitle>screenshot</DialogTitle>
-        {isClient ? <RenderThumbnails
-          maxThumbnailSize={{
-            width: ref.current?.clientWidth || 500,
-            height: ref.current?.clientHeight || 500,
-          }}
-          screenshot={screenshot}
-          elementRects={elementRects}
-        /> : null}
+        {isClient ? (
+          <RenderThumbnails
+            maxThumbnailSize={{
+              width: ref.current?.clientWidth || 500,
+              height: ref.current?.clientHeight || 500,
+            }}
+            screenshot={screenshot}
+            elementRects={elementRects}
+          />
+        ) : null}
 
         <DialogClose asChild>
           <Button className="w-17" autoFocus>

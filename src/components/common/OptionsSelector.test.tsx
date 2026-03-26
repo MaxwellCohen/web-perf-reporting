@@ -1,11 +1,11 @@
-import type { ReactNode } from 'react';
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import { OptionsSelector } from '@/components/common/OptionsSelector';
+import type { ReactNode } from "react";
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { OptionsSelector } from "@/components/common/OptionsSelector";
 
 const chartSelectorSpy = vi.fn();
 
-vi.mock('@/components/common/ChartSelector', () => ({
+vi.mock("@/components/common/ChartSelector", () => ({
   ChartSelector: ({
     id,
     options,
@@ -20,23 +20,19 @@ vi.mock('@/components/common/ChartSelector', () => ({
   },
 }));
 
-vi.mock('@/components/ui/label', () => ({
-  Label: ({
-    children,
-    htmlFor,
-  }: {
-    children: ReactNode;
-    htmlFor?: string;
-  }) => <label htmlFor={htmlFor}>{children}</label>,
+vi.mock("@/components/ui/label", () => ({
+  Label: ({ children, htmlFor }: { children: ReactNode; htmlFor?: string }) => (
+    <label htmlFor={htmlFor}>{children}</label>
+  ),
 }));
 
-describe('OptionsSelector', () => {
-  it('renders the title label and passes props through to ChartSelector', () => {
+describe("OptionsSelector", () => {
+  it("renders the title label and passes props through to ChartSelector", () => {
     const { container } = render(
       <OptionsSelector
         id="metric-selector"
         title="Metric"
-        options={['LCP', 'CLS']}
+        options={["LCP", "CLS"]}
         onValueChange={() => {}}
       />,
     );
@@ -44,8 +40,8 @@ describe('OptionsSelector', () => {
     expect(container.firstChild).toMatchSnapshot();
     expect(chartSelectorSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'metric-selector',
-        options: ['LCP', 'CLS'],
+        id: "metric-selector",
+        options: ["LCP", "CLS"],
       }),
     );
   });

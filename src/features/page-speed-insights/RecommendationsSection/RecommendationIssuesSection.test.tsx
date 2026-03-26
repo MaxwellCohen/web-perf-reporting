@@ -1,9 +1,9 @@
-import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import { RecommendationIssuesSection } from '@/features/page-speed-insights/RecommendationsSection/RecommendationIssuesSection';
-import type { Recommendation } from '@/features/page-speed-insights/RecommendationsSection/types';
+import { render } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { RecommendationIssuesSection } from "@/features/page-speed-insights/RecommendationsSection/RecommendationIssuesSection";
+import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
 
-vi.mock('@/features/page-speed-insights/RecommendationsSection/IssuesFoundTable', () => ({
+vi.mock("@/features/page-speed-insights/RecommendationsSection/IssuesFoundTable", () => ({
   IssuesFoundTable: ({
     headings,
     items,
@@ -19,72 +19,71 @@ vi.mock('@/features/page-speed-insights/RecommendationsSection/IssuesFoundTable'
   ),
 }));
 
-vi.mock('@/features/page-speed-insights/auditTableConfig', () => ({
+vi.mock("@/features/page-speed-insights/auditTableConfig", () => ({
   shouldShowSeparateTablesPerReport: vi.fn(() => false),
 }));
 
 const baseRec: Recommendation = {
-  id: 'test',
-  title: 'Test',
-  description: '',
-  priority: 'high',
-  category: 'Performance',
+  id: "test",
+  title: "Test",
+  description: "",
+  priority: "high",
+  category: "Performance",
   impact: {},
   actionableSteps: [],
 };
 
-describe('RecommendationIssuesSection', () => {
-  it('returns null when no tableData', () => {
+describe("RecommendationIssuesSection", () => {
+  it("returns null when no tableData", () => {
     const { container } = render(
-      <RecommendationIssuesSection recommendation={baseRec} reportLabels={['Mobile']} />,
+      <RecommendationIssuesSection recommendation={baseRec} reportLabels={["Mobile"]} />,
     );
     expect(container.firstChild).toBeNull();
   });
 
-  it('returns null when tableData items empty', () => {
+  it("returns null when tableData items empty", () => {
     const rec: Recommendation = {
       ...baseRec,
-      tableData: { headings: [{ key: 'url', label: 'URL', valueType: 'url' }], items: [] },
+      tableData: { headings: [{ key: "url", label: "URL", valueType: "url" }], items: [] },
     };
     const { container } = render(
-      <RecommendationIssuesSection recommendation={rec} reportLabels={['Mobile']} />,
+      <RecommendationIssuesSection recommendation={rec} reportLabels={["Mobile"]} />,
     );
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders single IssuesFoundTable when items exist', () => {
+  it("renders single IssuesFoundTable when items exist", () => {
     const rec: Recommendation = {
       ...baseRec,
       tableData: {
-        headings: [{ key: 'url', label: 'URL', valueType: 'url' }],
-        items: [{ url: 'https://example.com' }],
+        headings: [{ key: "url", label: "URL", valueType: "url" }],
+        items: [{ url: "https://example.com" }],
       },
     };
     const { container } = render(
-      <RecommendationIssuesSection recommendation={rec} reportLabels={['Mobile']} />,
+      <RecommendationIssuesSection recommendation={rec} reportLabels={["Mobile"]} />,
     );
     expect(container.querySelector('[data-testid="issues-table"]')).toBeTruthy();
-    expect(container.textContent).toContain('Issues Found');
+    expect(container.textContent).toContain("Issues Found");
   });
 
-  it('renders separate tables per report when itemsByReport', async () => {
-    const { shouldShowSeparateTablesPerReport } = await import(
-      '@/features/page-speed-insights/auditTableConfig'
-    );
+  it("renders separate tables per report when itemsByReport", async () => {
+    const { shouldShowSeparateTablesPerReport } =
+      await import("@/features/page-speed-insights/auditTableConfig");
     vi.mocked(shouldShowSeparateTablesPerReport).mockReturnValue(true);
     const rec: Recommendation = {
       ...baseRec,
       tableData: {
-        headings: [{ key: 'url', label: 'URL', valueType: 'url' }],
+        headings: [{ key: "url", label: "URL", valueType: "url" }],
         items: [],
         itemsByReport: new Map([
-          ['Mobile', [{ url: 'https://m.example.com' }]],
-          ['Desktop', [{ url: 'https://d.example.com' }]],
+          ["Mobile", [{ url: "https://m.example.com" }]],
+          ["Desktop", [{ url: "https://d.example.com" }]],
         ]),
       },
     };
     const { container } = render(
-      <RecommendationIssuesSection recommendation={rec} reportLabels={['Mobile', 'Desktop']} />,
+      <RecommendationIssuesSection recommendation={rec} reportLabels={["Mobile", "Desktop"]} />,
     );
     expect(container.querySelectorAll('[data-testid="issues-table"]')).toHaveLength(2);
   });

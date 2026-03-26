@@ -1,24 +1,16 @@
-'use client';
+"use client";
 
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart';
-import { chartConfig } from '@/components/common/ChartSettings';
-import type { CruxHistoryItem } from '@/lib/schema';
-import { Bar, BarChart, CartesianGrid } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { chartConfig } from "@/components/common/ChartSettings";
+import type { CruxHistoryItem } from "@/lib/schema";
+import { Bar, BarChart, CartesianGrid } from "recharts";
 
 const margin = {
   left: 12,
   right: 12,
 };
 
-export function PerformanceStackedBarChart({
-  histogramData,
-}: {
-  histogramData: CruxHistoryItem;
-}) {
+export function PerformanceStackedBarChart({ histogramData }: { histogramData: CruxHistoryItem }) {
   const chartData = [
     {
       good_density: histogramData.good_density ?? 0,
@@ -33,9 +25,7 @@ export function PerformanceStackedBarChart({
         <CartesianGrid vertical={false} />
         <ChartTooltip
           cursor={false}
-          content={
-            <ChartTooltipContent indicator="dot" labelFormatter={() => null} />
-          }
+          content={<ChartTooltipContent indicator="dot" labelFormatter={() => null} />}
         />
         <Bar
           dataKey="good_density"

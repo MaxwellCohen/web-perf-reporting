@@ -1,5 +1,5 @@
-import { DeviceType, ItemValue, TableColumnHeading } from '@/lib/schema';
-import { RenderTableValue } from '@/features/page-speed-insights/lh-categories/table/RenderTableValue';
+import { DeviceType, ItemValue, TableColumnHeading } from "@/lib/schema";
+import { RenderTableValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 
 export function RenderTableCell({
   value,

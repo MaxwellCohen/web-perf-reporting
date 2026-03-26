@@ -1,13 +1,13 @@
-import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { render } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
-vi.mock('lucide-react', () => ({
+vi.mock("lucide-react", () => ({
   Code: () => <span data-testid="code" />,
   FileJson: () => <span data-testid="file-json" />,
   Globe: () => <span data-testid="globe" />,
 }));
 
-vi.mock('@/components/ui/tabs', () => ({
+vi.mock("@/components/ui/tabs", () => ({
   TabsList: ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <div role="tablist" className={className}>
       {children}
@@ -20,19 +20,19 @@ vi.mock('@/components/ui/tabs', () => ({
   ),
 }));
 
-import { LhTabList } from '@/components/lh/inputs/LhTabList';
+import { LhTabList } from "@/components/lh/inputs/LhTabList";
 
-describe('LhTabList', () => {
-  it('renders three tabs', () => {
+describe("LhTabList", () => {
+  it("renders three tabs", () => {
     const { container } = render(<LhTabList />);
     const tabs = container.querySelectorAll('[role="tab"]');
     expect(tabs).toHaveLength(3);
-    expect(container.textContent).toContain('Paste Lighthouse JSON');
-    expect(container.textContent).toContain('Upload Lighthouse JSON File');
-    expect(container.textContent).toContain('Fetch via PageSpeed Insights API');
+    expect(container.textContent).toContain("Paste Lighthouse JSON");
+    expect(container.textContent).toContain("Upload Lighthouse JSON File");
+    expect(container.textContent).toContain("Fetch via PageSpeed Insights API");
   });
 
-  it('renders snapshot', () => {
+  it("renders snapshot", () => {
     const { container } = render(<LhTabList />);
     expect(container.firstChild).toMatchSnapshot();
   });

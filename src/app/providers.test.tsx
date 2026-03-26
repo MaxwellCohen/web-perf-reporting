@@ -1,22 +1,22 @@
-import { render, screen } from '@testing-library/react';
-import { useQueryClient } from '@tanstack/react-query';
-import { describe, expect, it, vi } from 'vitest';
+import { render, screen } from "@testing-library/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { describe, expect, it, vi } from "vitest";
 
 const posthogInitMock = vi.fn();
 
-vi.mock('posthog-js', () => ({
+vi.mock("posthog-js", () => ({
   default: {
     init: (...args: unknown[]) => posthogInitMock(...args),
   },
 }));
 
-vi.mock('posthog-js/react', () => ({
+vi.mock("posthog-js/react", () => ({
   PostHogProvider: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="posthog-provider">{children}</div>
   ),
 }));
 
-import { PostHogProvider, QueryProvider } from '@/app/providers';
+import { PostHogProvider, QueryProvider } from "@/app/providers";
 
 function QueryConsumer() {
   const queryClient = useQueryClient();
@@ -28,30 +28,29 @@ function QueryConsumer() {
   );
 }
 
-describe('app/providers', () => {
-  it('provides a configured query client to descendants', () => {
+describe("app/providers", () => {
+  it("provides a configured query client to descendants", () => {
     render(
       <QueryProvider>
         <QueryConsumer />
       </QueryProvider>,
     );
 
-    expect(screen.getByTestId('query-stale-time')).toHaveTextContent('60000');
+    expect(screen.getByTestId("query-stale-time")).toHaveTextContent("60000");
   });
 
-  it('initializes posthog and renders children', () => {
+  it("initializes posthog and renders children", () => {
     const { container } = render(
       <PostHogProvider>
         <div>Provider child</div>
       </PostHogProvider>,
     );
 
-    expect(posthogInitMock).toHaveBeenCalledWith('', {
+    expect(posthogInitMock).toHaveBeenCalledWith("", {
       api_host: undefined,
-      person_profiles: 'identified_only',
+      person_profiles: "identified_only",
       capture_pageview: false,
     });
     expect(container.firstChild).toMatchSnapshot();
   });
-
 });

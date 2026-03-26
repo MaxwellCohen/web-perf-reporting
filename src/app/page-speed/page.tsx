@@ -1,8 +1,7 @@
-import { UrlLookupForm } from '@/components/common/UrlLookupForm';
-import { updateURl } from '@/lib/utils';
-import { requestPageSpeedData } from '@/lib/services/pageSpeedInsights.service';
-import { redirect } from 'next/navigation';
-
+import { UrlLookupForm } from "@/components/common/UrlLookupForm";
+import { updateURl } from "@/lib/utils";
+import { requestPageSpeedData } from "@/lib/services/pageSpeedInsights.service";
+import { redirect } from "next/navigation";
 
 export default async function Home({
   searchParams,

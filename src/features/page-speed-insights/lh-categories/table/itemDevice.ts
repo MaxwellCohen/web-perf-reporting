@@ -1,4 +1,4 @@
-import type { DeviceType } from '@/lib/schema';
+import type { DeviceType } from "@/lib/schema";
 
 type DeviceScopedItem = {
   _device?: DeviceType;

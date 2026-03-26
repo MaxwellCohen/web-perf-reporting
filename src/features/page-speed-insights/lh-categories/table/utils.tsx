@@ -1,14 +1,9 @@
-import { DeviceType, TableColumnHeading, TableItem } from '@/lib/schema';
-import { ItemValueType } from '@/lib/schema';
+import { DeviceType, TableColumnHeading, TableItem } from "@/lib/schema";
+import { ItemValueType } from "@/lib/schema";
 
-export const SUMMABLE_VALUETYPES: ItemValueType[] = [
-  'bytes',
-  'numeric',
-  'ms',
-  'timespanMs',
-];
+export const SUMMABLE_VALUETYPES: ItemValueType[] = ["bytes", "numeric", "ms", "timespanMs"];
 
-export const SHOW_BOTH_DEVICES_KEYS: string[] = ['_device', 'percent', 'node'];
+export const SHOW_BOTH_DEVICES_KEYS: string[] = ["_device", "percent", "node"];
 
 function showKeyBothDevices(key: string) {
   return !!SHOW_BOTH_DEVICES_KEYS.find((k) => key.includes(k));
@@ -16,20 +11,18 @@ function showKeyBothDevices(key: string) {
 export function showBothDevices(heading: TableColumnHeading) {
   return (
     SUMMABLE_VALUETYPES.includes(heading.valueType as ItemValueType) ||
-    showKeyBothDevices(heading.key || 'zzz')
+    showKeyBothDevices(heading.key || "zzz")
   );
 }
 
-export function getDerivedSubItemsHeading(
-  heading: TableColumnHeading,
-): TableColumnHeading | null {
+export function getDerivedSubItemsHeading(heading: TableColumnHeading): TableColumnHeading | null {
   if (!heading.subItemsHeading) return null;
   return {
     key: heading.subItemsHeading.key || null,
     valueType: heading.subItemsHeading.valueType || heading.valueType,
     granularity: heading.subItemsHeading.granularity || heading.granularity,
     displayUnit: heading.subItemsHeading.displayUnit || heading.displayUnit,
-    label: '',
+    label: "",
   };
 }
 
@@ -41,15 +34,15 @@ export function mergedTable(
 ): [TableColumnHeading[], TableItem[], DeviceType, boolean] {
   let headings: TableColumnHeading[] = [];
   let items: TableItem[] = [];
-  let device: DeviceType = 'Desktop';
+  let device: DeviceType = "Desktop";
   if (!desktopItems && !mobileItems) {
-    return [[], [], 'Desktop', false] as const;
+    return [[], [], "Desktop", false] as const;
   }
   const hasNode = [...(mobileHeadings || []), ...(desktopHeadings || [])].some(
-    (h) => h.valueType === 'node',
+    (h) => h.valueType === "node",
   );
-  const mItems = (mobileItems || []).map((i) => renameKeys(i, 'Mobile'));
-  const dItems = (desktopItems || []).map((i) => renameKeys(i, 'Desktop'));
+  const mItems = (mobileItems || []).map((i) => renameKeys(i, "Mobile"));
+  const dItems = (desktopItems || []).map((i) => renameKeys(i, "Desktop"));
   if (hasNode) {
     headings = [...(mobileHeadings || []), ...(desktopHeadings || [])].filter(
       (heading, i, Arr) => Arr.findIndex((t) => t.key === heading.key) === i,
@@ -59,7 +52,7 @@ export function mergedTable(
     headings = mergeHeadings(mobileHeadings);
     headings = mobileHeadings || [];
     items = mItems;
-    device = 'Mobile';
+    device = "Mobile";
   } else if (!mobileItems?.length && dItems?.length) {
     headings = mergeHeadings([], desktopHeadings);
     items = dItems;
@@ -74,13 +67,11 @@ export function mergeHeadings(
   mobileHeadings?: TableColumnHeading[],
   desktopHeadings?: TableColumnHeading[],
 ) {
-  const mHeadings = (mobileHeadings || []).map((heading) =>
-    updateTableHeading(heading, 'Mobile'),
-);
-const dHeadings = (desktopHeadings || []).map((heading) =>
-  updateTableHeading(heading, 'Desktop'),
-);
-const headings: TableColumnHeading[] = [];
+  const mHeadings = (mobileHeadings || []).map((heading) => updateTableHeading(heading, "Mobile"));
+  const dHeadings = (desktopHeadings || []).map((heading) =>
+    updateTableHeading(heading, "Desktop"),
+  );
+  const headings: TableColumnHeading[] = [];
   while (mHeadings.length || dHeadings.length) {
     let i = mHeadings.shift();
     if (i) {
@@ -91,9 +82,7 @@ const headings: TableColumnHeading[] = [];
       headings.push(i);
     }
   }
-  return headings.filter(
-    (heading, i, Arr) => Arr.findIndex((t) => t.key === heading.key) === i,
-  );
+  return headings.filter((heading, i, Arr) => Arr.findIndex((t) => t.key === heading.key) === i);
 }
 
 export function updateTableHeading(
@@ -114,10 +103,7 @@ export function updateTableHeading(
     ...(heading.subItemsHeading
       ? {
           subItemsHeading: getDerivedSubItemsHeading(heading)
-            ? updateTableHeading(
-                getDerivedSubItemsHeading(heading) as TableColumnHeading,
-                device,
-              )
+            ? updateTableHeading(getDerivedSubItemsHeading(heading) as TableColumnHeading, device)
             : undefined,
         }
       : {}),
@@ -128,7 +114,7 @@ export function renameKeys(obj: TableItem, device: DeviceType): TableItem {
   return {
     ...obj,
     ...Object.entries(obj).reduce((acc: TableItem, [key, value]) => {
-      if (key !== 'subItems') {
+      if (key !== "subItems") {
         acc[`${key}_${device}`] = value;
       }
       return acc;
@@ -137,9 +123,7 @@ export function renameKeys(obj: TableItem, device: DeviceType): TableItem {
       ? {
           subItems: {
             ...obj.subItems,
-            items: obj.subItems.items.map((subItem) =>
-              renameKeys(subItem, device),
-            ),
+            items: obj.subItems.items.map((subItem) => renameKeys(subItem, device)),
           },
         }
       : {}),
@@ -154,11 +138,11 @@ export function mergeTableItem(a: TableItem, b: TableItem): TableItem {
     ...(a.subItems || b.subItems
       ? {
           subItems: {
-            type: 'subitems',
-            items: [
-              ...(a.subItems?.items || []),
-              ...(b.subItems?.items || []),
-            ].reduce(reduceTableItems, []),
+            type: "subitems",
+            items: [...(a.subItems?.items || []), ...(b.subItems?.items || [])].reduce(
+              reduceTableItems,
+              [],
+            ),
           },
         }
       : {}),
@@ -185,10 +169,10 @@ export const makeID = (i: TableItem) =>
   Object.entries(i)
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([k, v]) => {
-      if (typeof v === 'string' && !showKeyBothDevices(k) && !k.includes('_')) {
+      if (typeof v === "string" && !showKeyBothDevices(k) && !k.includes("_")) {
         return `${k}|${v}`;
       }
-      return '';
+      return "";
     })
     .filter(Boolean)
-    .join(',');
+    .join(",");

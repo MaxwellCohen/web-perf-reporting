@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import type React from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { TabsContent } from '@/components/ui/tabs';
-import { FileJson } from 'lucide-react';
-import type { LhJsonFileEntry } from '@/components/lh/types';
+import type React from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { TabsContent } from "@/components/ui/tabs";
+import { FileJson } from "lucide-react";
+import type { LhJsonFileEntry } from "@/components/lh/types";
 
 type LhFileInputProps = {
   jsonFiles: LhJsonFileEntry[];
@@ -17,13 +17,13 @@ export function LhFileInput({ jsonFiles, setJsonFiles }: LhFileInputProps) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const newFiles = Array.from(e.target.files).map((file) => ({
-        name: file.name.replace(/\.[^/.]+$/, ''), // Default name is filename without extension
+        name: file.name.replace(/\.[^/.]+$/, ""), // Default name is filename without extension
         file,
       }));
       setJsonFiles((prev) => [...prev, ...newFiles]);
 
       // Reset the file input to allow selecting the same files again
-      e.target.value = '';
+      e.target.value = "";
     }
   };
 
@@ -45,13 +45,7 @@ export function LhFileInput({ jsonFiles, setJsonFiles }: LhFileInputProps) {
         <div className="space-y-2">
           <Label htmlFor="json-file">Upload JSON Files</Label>
           <div className="grid w-full max-w-sm items-center gap-1.5">
-            <Input
-              id="json-file"
-              type="file"
-              accept=".json"
-              onChange={handleFileChange}
-              multiple
-            />
+            <Input id="json-file" type="file" accept=".json" onChange={handleFileChange} multiple />
           </div>
         </div>
 
@@ -60,10 +54,7 @@ export function LhFileInput({ jsonFiles, setJsonFiles }: LhFileInputProps) {
             <Label>Uploaded Files</Label>
             <div className="space-y-3">
               {jsonFiles.map((fileEntry, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-2 rounded-md border p-3"
-                >
+                <div key={index} className="flex items-center gap-2 rounded-md border p-3">
                   <FileJson size={20} className="flex-shrink-0 text-blue-500" />
                   <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center">
                     <span className="flex-shrink-0 truncate text-sm font-medium">

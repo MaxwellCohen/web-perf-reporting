@@ -1,7 +1,7 @@
-import * as React from 'react';
-import type { ReactNode } from 'react';
-import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import * as React from "react";
+import type { ReactNode } from "react";
+import { render } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import {
   PageSpeedInsightsStoreProvider,
   selectPageSpeedIsLoading,
@@ -10,9 +10,9 @@ import {
   usePageSpeedItems,
   usePageSpeedReportTitle,
   usePageSpeedSelector,
-} from '@/features/page-speed-insights/PageSpeedContext';
+} from "@/features/page-speed-insights/PageSpeedContext";
 
-vi.mock('@xstate/store-react', () => {
+vi.mock("@xstate/store-react", () => {
   function createStore(config: {
     context: unknown;
     on: { sync: (ctx: unknown, event: unknown) => unknown };
@@ -35,9 +35,7 @@ vi.mock('@xstate/store-react', () => {
   }
   return {
     useStore: (definition: Parameters<typeof createStore>[0]) => {
-      const storeRef = React.useRef<ReturnType<typeof createStore> | undefined>(
-        undefined,
-      );
+      const storeRef = React.useRef<ReturnType<typeof createStore> | undefined>(undefined);
       if (!storeRef.current) {
         storeRef.current = createStore(definition);
       }
@@ -64,15 +62,15 @@ type ProviderProps = {
 
 function createLighthouseResult(overrides: Record<string, unknown> = {}) {
   return {
-    lighthouseVersion: '12.8.2',
-    finalDisplayedUrl: 'https://example.com',
+    lighthouseVersion: "12.8.2",
+    finalDisplayedUrl: "https://example.com",
     configSettings: {
-      formFactor: 'mobile',
+      formFactor: "mobile",
     },
     fullPageScreenshot: {
       nodes: {},
       screenshot: {
-        data: 'image-data',
+        data: "image-data",
         height: 200,
         width: 100,
       },
@@ -88,11 +86,7 @@ function TestProvider({ data, labels, isLoading, children }: ProviderProps) {
     isLoading,
   });
 
-  return (
-    <PageSpeedInsightsStoreProvider store={store}>
-      {children}
-    </PageSpeedInsightsStoreProvider>
-  );
+  return <PageSpeedInsightsStoreProvider store={store}>{children}</PageSpeedInsightsStoreProvider>;
 }
 
 function StoreConsumer() {
@@ -105,9 +99,7 @@ function StoreConsumer() {
     <>
       <div data-testid="item-count">{items.length}</div>
       <div data-testid="report-title">{reportTitle}</div>
-      <div data-testid="screenshot-labels">
-        {Object.keys(fullPageScreenshots).join(',')}
-      </div>
+      <div data-testid="screenshot-labels">{Object.keys(fullPageScreenshots).join(",")}</div>
       <div data-testid="loading-state">{String(isLoading)}</div>
     </>
   );
@@ -118,51 +110,45 @@ function OutsideProviderConsumer() {
   return null;
 }
 
-describe('PageSpeedContext', () => {
-  it('provides derived dashboard state to consumers', () => {
+describe("PageSpeedContext", () => {
+  it("provides derived dashboard state to consumers", () => {
     const { container } = render(
       <TestProvider
         data={[
           {
             lighthouseResult: createLighthouseResult(),
-            analysisUTCTimestamp: '2024-02-03T12:00:00.000Z',
+            analysisUTCTimestamp: "2024-02-03T12:00:00.000Z",
           },
         ]}
-        labels={['Mobile run']}
+        labels={["Mobile run"]}
         isLoading={false}
       >
         <StoreConsumer />
       </TestProvider>,
     );
 
-    expect(
-      container.querySelector('[data-testid="item-count"]'),
-    ).toHaveTextContent('1');
-    expect(
-      container.querySelector('[data-testid="report-title"]'),
-    ).toHaveTextContent(
+    expect(container.querySelector('[data-testid="item-count"]')).toHaveTextContent("1");
+    expect(container.querySelector('[data-testid="report-title"]')).toHaveTextContent(
       `Report for https://example.com on Mobile at ${new Date(
-        '2024-02-03T12:00:00.000Z',
+        "2024-02-03T12:00:00.000Z",
       ).toLocaleDateString()}`,
     );
-    expect(
-      container.querySelector('[data-testid="screenshot-labels"]'),
-    ).toHaveTextContent('Mobile run');
-    expect(
-      container.querySelector('[data-testid="loading-state"]'),
-    ).toHaveTextContent('false');
+    expect(container.querySelector('[data-testid="screenshot-labels"]')).toHaveTextContent(
+      "Mobile run",
+    );
+    expect(container.querySelector('[data-testid="loading-state"]')).toHaveTextContent("false");
   });
 
-  it('updates consumers when provider input changes', () => {
+  it("updates consumers when provider input changes", () => {
     const { container, rerender } = render(
       <TestProvider
         data={[
           {
             lighthouseResult: createLighthouseResult(),
-            analysisUTCTimestamp: '2024-02-03T12:00:00.000Z',
+            analysisUTCTimestamp: "2024-02-03T12:00:00.000Z",
           },
         ]}
-        labels={['Mobile run']}
+        labels={["Mobile run"]}
         isLoading={true}
       >
         <StoreConsumer />
@@ -174,43 +160,37 @@ describe('PageSpeedContext', () => {
         data={[
           {
             lighthouseResult: createLighthouseResult({
-              finalDisplayedUrl: 'https://example.org',
+              finalDisplayedUrl: "https://example.org",
               configSettings: {
-                formFactor: 'desktop',
+                formFactor: "desktop",
               },
               fullPageScreenshot: null,
             }),
-            analysisUTCTimestamp: '2024-02-04T12:00:00.000Z',
+            analysisUTCTimestamp: "2024-02-04T12:00:00.000Z",
           },
         ]}
-        labels={['Desktop run']}
+        labels={["Desktop run"]}
         isLoading={false}
       >
         <StoreConsumer />
       </TestProvider>,
     );
 
-    expect(
-      container.querySelector('[data-testid="item-count"]'),
-    ).toHaveTextContent('1');
-    expect(
-      container.querySelector('[data-testid="report-title"]'),
-    ).toHaveTextContent(
+    expect(container.querySelector('[data-testid="item-count"]')).toHaveTextContent("1");
+    expect(container.querySelector('[data-testid="report-title"]')).toHaveTextContent(
       `Report for https://example.org on Desktop at ${new Date(
-        '2024-02-04T12:00:00.000Z',
+        "2024-02-04T12:00:00.000Z",
       ).toLocaleDateString()}`,
     );
-    expect(
-      container.querySelector('[data-testid="screenshot-labels"]'),
-    ).toHaveTextContent('Desktop run');
-    expect(
-      container.querySelector('[data-testid="loading-state"]'),
-    ).toHaveTextContent('false');
+    expect(container.querySelector('[data-testid="screenshot-labels"]')).toHaveTextContent(
+      "Desktop run",
+    );
+    expect(container.querySelector('[data-testid="loading-state"]')).toHaveTextContent("false");
   });
 
-  it('throws when selectors are used outside the provider', () => {
+  it("throws when selectors are used outside the provider", () => {
     expect(() => render(<OutsideProviderConsumer />)).toThrow(
-      'PageSpeed insights store is unavailable outside the dashboard provider.',
+      "PageSpeed insights store is unavailable outside the dashboard provider.",
     );
   });
 });

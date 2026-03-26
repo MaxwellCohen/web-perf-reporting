@@ -1,27 +1,25 @@
-import { render } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { render } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const formatCruxReportMock = vi.fn();
 const groupByMock = vi.fn();
 
-vi.mock('@/lib/utils', () => ({
+vi.mock("@/lib/utils", () => ({
   formatCruxReport: (...args: unknown[]) => formatCruxReportMock(...args),
-  formatDate: (d: { year: number; month: number; day: number }) =>
-    `${d.year}-${d.month}-${d.day}`,
+  formatDate: (d: { year: number; month: number; day: number }) => `${d.year}-${d.month}-${d.day}`,
   groupBy: (...args: unknown[]) => groupByMock(...args),
 }));
 
-vi.mock('@/components/common/FormFactorPercentPieChart', () => ({
-  PercentTable: ({
-    title,
-    dateRange,
-  }: {
-    title: string;
-    dateRange?: string;
-  }) => <div data-testid="percent-table">{title}{dateRange ? ` - ${dateRange}` : ''}</div>,
+vi.mock("@/components/common/FormFactorPercentPieChart", () => ({
+  PercentTable: ({ title, dateRange }: { title: string; dateRange?: string }) => (
+    <div data-testid="percent-table">
+      {title}
+      {dateRange ? ` - ${dateRange}` : ""}
+    </div>
+  ),
 }));
 
-vi.mock('@/components/latest-crux/PerformanceOptions', () => ({
+vi.mock("@/components/latest-crux/PerformanceOptions", () => ({
   PerformanceOptions: ({
     setChartType,
     setReportScope,
@@ -36,35 +34,31 @@ vi.mock('@/components/latest-crux/PerformanceOptions', () => ({
     children?: React.ReactNode;
   }) => (
     <div data-testid="performance-options">
-      <button
-        type="button"
-        onClick={() => setChartType('Gauge Chart')}
-      >
+      <button type="button" onClick={() => setChartType("Gauge Chart")}>
         Set Gauge
       </button>
-      <button
-        type="button"
-        onClick={() => setReportScope('url')}
-      >
+      <button type="button" onClick={() => setReportScope("url")}>
         Set URL scope
       </button>
-      <button
-        type="button"
-        onClick={() => setDeviceType('PHONE')}
-      >
+      <button type="button" onClick={() => setDeviceType("PHONE")}>
         Set Phone
       </button>
-      <span>{chartKeys.join(',')}</span>
+      <span>{chartKeys.join(",")}</span>
       {children}
     </div>
   ),
 }));
 
-vi.mock('@/components/latest-crux/PerformanceCard', async () => {
-  const React = await import('react');
+vi.mock("@/components/latest-crux/PerformanceCard", async () => {
+  const React = await import("react");
   return {
-    ChartMap: { Histogram: 'histogram', 'Gauge Chart': 'gauge', 'Stacked Bar': 'bar', 'Radial Chart': 'radial' },
-    CurrentPerformanceChartContext: React.createContext('bar'),
+    ChartMap: {
+      Histogram: "histogram",
+      "Gauge Chart": "gauge",
+      "Stacked Bar": "bar",
+      "Radial Chart": "radial",
+    },
+    CurrentPerformanceChartContext: React.createContext("bar"),
     CurrentPerformanceCard: ({
       title,
       histogramData,
@@ -74,13 +68,13 @@ vi.mock('@/components/latest-crux/PerformanceCard', async () => {
     }) => (
       <div data-testid="performance-card">
         {title}
-        {histogramData ? 'has-data' : 'no-data'}
+        {histogramData ? "has-data" : "no-data"}
       </div>
     ),
   };
 });
 
-import { CurrentPerformanceDashboard } from '@/components/latest-crux/PerformanceDashboard';
+import { CurrentPerformanceDashboard } from "@/components/latest-crux/PerformanceDashboard";
 
 const report = {
   record: {
@@ -104,15 +98,15 @@ const histogramData = {
   P75: 900,
 };
 
-describe('CurrentPerformanceDashboard', () => {
+describe("CurrentPerformanceDashboard", () => {
   beforeEach(() => {
     formatCruxReportMock.mockReset();
     groupByMock.mockReset();
   });
 
-  it('renders with report data and metric cards', () => {
+  it("renders with report data and metric cards", () => {
     formatCruxReportMock.mockReturnValue([
-      { metric_name: 'largest_contentful_paint', ...histogramData },
+      { metric_name: "largest_contentful_paint", ...histogramData },
     ]);
     groupByMock.mockReturnValue({
       largest_contentful_paint: [histogramData],
@@ -134,17 +128,15 @@ describe('CurrentPerformanceDashboard', () => {
       urlPHONE: report,
     };
 
-    const { container } = render(
-      <CurrentPerformanceDashboard reportMap={reportMap as any} />
-    );
+    const { container } = render(<CurrentPerformanceDashboard reportMap={reportMap as any} />);
 
-    expect(container.textContent).toContain('Latest Performance Report for');
-    expect(container.textContent).toContain('2024-1-1 - 2024-1-31');
-    expect(container.textContent).toContain('Largest Contentful Paint (LCP)');
-    expect(container.textContent).toContain('Form Factors');
+    expect(container.textContent).toContain("Latest Performance Report for");
+    expect(container.textContent).toContain("2024-1-1 - 2024-1-31");
+    expect(container.textContent).toContain("Largest Contentful Paint (LCP)");
+    expect(container.textContent).toContain("Form Factors");
   });
 
-  it('renders without date when collectionPeriod is missing', () => {
+  it("renders without date when collectionPeriod is missing", () => {
     formatCruxReportMock.mockReturnValue([]);
     groupByMock.mockReturnValue({});
 
@@ -159,14 +151,12 @@ describe('CurrentPerformanceDashboard', () => {
       urlPHONE: null,
     };
 
-    const { container } = render(
-      <CurrentPerformanceDashboard reportMap={reportMap as any} />
-    );
+    const { container } = render(<CurrentPerformanceDashboard reportMap={reportMap as any} />);
 
-    expect(container.textContent).toContain('Latest Performance Report for');
+    expect(container.textContent).toContain("Latest Performance Report for");
   });
 
-  it('renders Navigation Types when navigation_types present', () => {
+  it("renders Navigation Types when navigation_types present", () => {
     formatCruxReportMock.mockReturnValue([]);
     groupByMock.mockReturnValue({});
 
@@ -192,10 +182,8 @@ describe('CurrentPerformanceDashboard', () => {
       urlPHONE: reportWithNav,
     };
 
-    const { container } = render(
-      <CurrentPerformanceDashboard reportMap={reportMap as any} />
-    );
+    const { container } = render(<CurrentPerformanceDashboard reportMap={reportMap as any} />);
 
-    expect(container.textContent).toContain('Navigation Types');
+    expect(container.textContent).toContain("Navigation Types");
   });
 });

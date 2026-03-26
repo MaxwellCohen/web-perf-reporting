@@ -1,13 +1,9 @@
-import { fireEvent, render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import {
-  createColumnHelper,
-  getCoreRowModel,
-  useReactTable,
-} from '@tanstack/react-table';
-import { TableCard } from '@/features/page-speed-insights/shared/TableCard';
+import { fireEvent, render } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { createColumnHelper, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 
-vi.mock('@/features/page-speed-insights/lh-categories/table/DataTableHeader', () => ({
+vi.mock("@/features/page-speed-insights/lh-categories/table/DataTableHeader", () => ({
   DataTableHeader: () => (
     <thead data-testid="data-table-header">
       <tr>
@@ -17,7 +13,7 @@ vi.mock('@/features/page-speed-insights/lh-categories/table/DataTableHeader', ()
   ),
 }));
 
-vi.mock('@/features/page-speed-insights/lh-categories/table/DataTableBody', () => ({
+vi.mock("@/features/page-speed-insights/lh-categories/table/DataTableBody", () => ({
   DataTableBody: () => (
     <tbody data-testid="data-table-body">
       <tr>
@@ -27,7 +23,7 @@ vi.mock('@/features/page-speed-insights/lh-categories/table/DataTableBody', () =
   ),
 }));
 
-vi.mock('@/features/page-speed-insights/JSUsage/TableControls', () => ({
+vi.mock("@/features/page-speed-insights/JSUsage/TableControls", () => ({
   PaginationCard: () => <div data-testid="pagination-card" />,
 }));
 
@@ -41,9 +37,7 @@ function TableCardWithTable({
   pageSize?: number;
 }) {
   const columnHelper = createColumnHelper<{ id: string }>();
-  const columns = [
-    columnHelper.accessor('id', { header: 'ID' }),
-  ];
+  const columns = [columnHelper.accessor("id", { header: "ID" })];
   const data = Array.from({ length: rowCount }, (_, i) => ({ id: `row-${i}` }));
   const table = useReactTable({
     data,
@@ -61,33 +55,29 @@ function TableCardWithTable({
   );
 }
 
-describe('TableCard', () => {
-  it('renders title and table', () => {
+describe("TableCard", () => {
+  it("renders title and table", () => {
     const { container } = render(<TableCardWithTable rowCount={2} />);
-    expect(container.textContent).toContain('Test Table');
+    expect(container.textContent).toContain("Test Table");
     expect(container.querySelector('[data-testid="data-table-header"]')).toBeTruthy();
   });
 
-  it('shows Show all results when rowCount > pageSize and showPagination', () => {
-    const { container } = render(
-      <TableCardWithTable rowCount={15} showPagination pageSize={10} />
-    );
-    const showAllBtn = Array.from(container.querySelectorAll('button')).find(
-      (b) => b.textContent?.includes('Show all results')
+  it("shows Show all results when rowCount > pageSize and showPagination", () => {
+    const { container } = render(<TableCardWithTable rowCount={15} showPagination pageSize={10} />);
+    const showAllBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Show all results"),
     );
     expect(showAllBtn).toBeTruthy();
   });
 
-  it('calls setPageSize when Show all results clicked', () => {
-    const { container } = render(
-      <TableCardWithTable rowCount={15} showPagination pageSize={10} />
-    );
-    const showAllBtn = Array.from(container.querySelectorAll('button')).find(
-      (b) => b.textContent?.includes('Show all results')
+  it("calls setPageSize when Show all results clicked", () => {
+    const { container } = render(<TableCardWithTable rowCount={15} showPagination pageSize={10} />);
+    const showAllBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Show all results"),
     );
     fireEvent.click(showAllBtn!);
-    const showLessBtn = Array.from(container.querySelectorAll('button')).find(
-      (b) => b.textContent?.includes('Show less results')
+    const showLessBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Show less results"),
     );
     expect(showLessBtn).toBeTruthy();
   });

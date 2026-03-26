@@ -1,13 +1,13 @@
-import { fireEvent, render } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { suppressConsoleError } from '@/test-utils';
+import { fireEvent, render } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { suppressConsoleError } from "@/test-utils";
 
 const formatCruxReportMock = vi.fn();
 const groupByMock = vi.fn();
 const getCurrentCruxDataMock = vi.fn();
 const setDateRangeMock = vi.fn();
 
-vi.mock('recharts', () => ({
+vi.mock("recharts", () => ({
   BarChart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Bar: ({ dataKey }: { dataKey: string }) => <div>Bar: {dataKey}</div>,
   CartesianGrid: () => <div>Cartesian grid</div>,
@@ -17,67 +17,68 @@ vi.mock('recharts', () => ({
   RadialBar: ({ dataKey }: { dataKey: string }) => <div>Radial bar: {dataKey}</div>,
 }));
 
-vi.mock('@/components/ui/chart', () => ({
+vi.mock("@/components/ui/chart", () => ({
   ChartContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   ChartTooltip: () => <div>Chart tooltip</div>,
   ChartTooltipContent: () => <div>Tooltip content</div>,
 }));
 
-vi.mock('@/components/common/PageSpeedGaugeChart', () => ({
+vi.mock("@/components/common/PageSpeedGaugeChart", () => ({
   default: ({ metric }: { metric: string }) => <div>Gauge: {metric}</div>,
 }));
 
-vi.mock('@/components/common/FormFactorPercentPieChart', () => ({
-  PercentTable: ({
-    title,
-    dateRange,
-  }: {
-    title: string;
-    dateRange?: string;
-  }) => <div>{title}{dateRange ? ` - ${dateRange}` : ''}</div>,
+vi.mock("@/components/common/FormFactorPercentPieChart", () => ({
+  PercentTable: ({ title, dateRange }: { title: string; dateRange?: string }) => (
+    <div>
+      {title}
+      {dateRange ? ` - ${dateRange}` : ""}
+    </div>
+  ),
 }));
 
-vi.mock('@/lib/utils', () => ({
+vi.mock("@/lib/utils", () => ({
   formatCruxReport: (...args: unknown[]) => formatCruxReportMock(...args),
   formatDate: (date: { year: number; month: number; day: number }) =>
     `${date.year}-${date.month}-${date.day}`,
   groupBy: (...args: unknown[]) => groupByMock(...args),
-  cn: (...values: Array<string | false | null | undefined>) =>
-    values.filter(Boolean).join(' '),
+  cn: (...values: Array<string | false | null | undefined>) => values.filter(Boolean).join(" "),
 }));
 
-vi.mock('@/lib/services', () => ({
+vi.mock("@/lib/services", () => ({
   getCurrentCruxData: (...args: unknown[]) => getCurrentCruxDataMock(...args),
 }));
 
-vi.mock('@/components/ui/popover', () => ({
+vi.mock("@/components/ui/popover", () => ({
   Popover: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  PopoverTrigger: ({ children }: { children: React.ReactNode }) => <button type="button">{children}</button>,
+  PopoverTrigger: ({ children }: { children: React.ReactNode }) => (
+    <button type="button">{children}</button>
+  ),
   PopoverContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-vi.mock('lucide-react', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('lucide-react')>();
+vi.mock("lucide-react", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("lucide-react")>();
   return {
     ...actual,
     CalendarIcon: () => <span data-testid="calendar-icon" />,
   };
 });
 
-vi.mock('@/components/latest-crux/CurrentPerformanceSection', () => ({
+vi.mock("@/components/latest-crux/CurrentPerformanceSection", () => ({
   CurrentPerformanceSection: async ({ url }: { url: string }) => {
-    const { getCurrentCruxData } = await import('@/lib/services');
+    const { getCurrentCruxData } = await import("@/lib/services");
     const cruxData = await Promise.all([
       getCurrentCruxData({ origin: url, formFactor: undefined }),
-      getCurrentCruxData({ origin: url, formFactor: 'DESKTOP' }),
-      getCurrentCruxData({ origin: url, formFactor: 'TABLET' }),
-      getCurrentCruxData({ origin: url, formFactor: 'PHONE' }),
+      getCurrentCruxData({ origin: url, formFactor: "DESKTOP" }),
+      getCurrentCruxData({ origin: url, formFactor: "TABLET" }),
+      getCurrentCruxData({ origin: url, formFactor: "PHONE" }),
       getCurrentCruxData({ url, formFactor: undefined }),
-      getCurrentCruxData({ url, formFactor: 'DESKTOP' }),
-      getCurrentCruxData({ url, formFactor: 'TABLET' }),
-      getCurrentCruxData({ url, formFactor: 'PHONE' }),
+      getCurrentCruxData({ url, formFactor: "DESKTOP" }),
+      getCurrentCruxData({ url, formFactor: "TABLET" }),
+      getCurrentCruxData({ url, formFactor: "PHONE" }),
     ]);
-    const { CurrentPerformanceDashboard } = await import('@/components/latest-crux/PerformanceDashboard');
+    const { CurrentPerformanceDashboard } =
+      await import("@/components/latest-crux/PerformanceDashboard");
     const cruxReport = {
       originAll: cruxData[0],
       originDESKTOP: cruxData[1],
@@ -96,34 +97,59 @@ vi.mock('@/components/latest-crux/CurrentPerformanceSection', () => ({
   },
 }));
 
-vi.mock('@/components/latest-crux/PerformanceCard', () => ({
+vi.mock("@/components/latest-crux/PerformanceCard", () => ({
   CurrentPerformanceCard: ({ title, histogramData }: { title: string; histogramData: unknown }) => (
     <div className="rounded-xl border bg-card text-card-foreground shadow grid h-full grid-cols-1 grid-rows-[2.75rem,auto,1rem,auto] gap-1 p-2">
       <div className="text-md overflow-hidden text-center font-bold">{title}</div>
       <div data-chart-slot />
       <div className="w-full overflow-hidden rounded-[4px]" data-bar-slot />
       <div className="mt-1 flex-col items-start text-sm">
-        <div className="flex gap-2 font-medium leading-none">P75 is {(histogramData as { P75?: number })?.P75 ?? 0}</div>
-        <div className="flex gap-2 font-medium leading-none"><span style={{ color: 'hsl(var(--chart-1))' }}>Good</span></div>
+        <div className="flex gap-2 font-medium leading-none">
+          P75 is {(histogramData as { P75?: number })?.P75 ?? 0}
+        </div>
+        <div className="flex gap-2 font-medium leading-none">
+          <span style={{ color: "hsl(var(--chart-1))" }}>Good</span>
+        </div>
         <div className="text-xs leading-none text-muted-foreground">Good: 0 to 1000</div>
-        <div className="text-xs leading-none text-muted-foreground">Needs Improvement: 1000 to 2000</div>
+        <div className="text-xs leading-none text-muted-foreground">
+          Needs Improvement: 1000 to 2000
+        </div>
         <div className="text-xs leading-none text-muted-foreground">Poor: 2000 and above</div>
       </div>
     </div>
   ),
-  CurrentPerformanceChartContext: { Provider: ({ children }: { value: string; children: React.ReactNode }) => <>{children}</> },
+  CurrentPerformanceChartContext: {
+    Provider: ({ children }: { value: string; children: React.ReactNode }) => <>{children}</>,
+  },
 }));
 
-vi.mock('@/components/latest-crux/PerformanceDashboard', async () => {
-  const utils = await import('@/lib/utils');
+vi.mock("@/components/latest-crux/PerformanceDashboard", async () => {
+  const utils = await import("@/lib/utils");
   return {
-    CurrentPerformanceDashboard: ({ reportMap }: { reportMap: Record<string, { record?: { collectionPeriod?: { firstDate?: { year: number; month: number; day: number }; lastDate?: { year: number; month: number; day: number } } } }> }) => {
+    CurrentPerformanceDashboard: ({
+      reportMap,
+    }: {
+      reportMap: Record<
+        string,
+        {
+          record?: {
+            collectionPeriod?: {
+              firstDate?: { year: number; month: number; day: number };
+              lastDate?: { year: number; month: number; day: number };
+            };
+          };
+        }
+      >;
+    }) => {
       const reports = Object.values(reportMap).filter(Boolean);
       const first = reports[0]?.record?.collectionPeriod?.firstDate;
       const last = reports[0]?.record?.collectionPeriod?.lastDate;
-      const dateStr = first && last ? `${first.year}-${first.month}-${first.day} - ${last.year}-${last.month}-${last.day}` : '';
+      const dateStr =
+        first && last
+          ? `${first.year}-${first.month}-${first.day} - ${last.year}-${last.month}-${last.day}`
+          : "";
       (utils.formatCruxReport as (arg: unknown) => void)(reports[0]);
-      (utils.groupBy as (...args: unknown[]) => void)([], () => '');
+      (utils.groupBy as (...args: unknown[]) => void)([], () => "");
       return (
         <div>
           <h2 className="text-lg">Latest Performance Report for {dateStr}</h2>
@@ -134,7 +160,7 @@ vi.mock('@/components/latest-crux/PerformanceDashboard', async () => {
   };
 });
 
-vi.mock('@/components/latest-crux/PerformanceOptions', () => ({
+vi.mock("@/components/latest-crux/PerformanceOptions", () => ({
   PerformanceOptions: ({
     dateRange,
     setDateRange,
@@ -145,17 +171,21 @@ vi.mock('@/components/latest-crux/PerformanceOptions', () => ({
     <div>
       <span>Report Scope</span>
       <span>Chart type</span>
-      <button id="date-range-button" type="button">Date</button>
+      <button id="date-range-button" type="button">
+        Date
+      </button>
       <input
         id="date-range-start"
         defaultValue={dateRange?.startDate}
-        onChange={(e) => setDateRange?.({ startDate: e.target.value, endDate: dateRange?.endDate ?? '' })}
+        onChange={(e) =>
+          setDateRange?.({ startDate: e.target.value, endDate: dateRange?.endDate ?? "" })
+        }
       />
     </div>
   ),
 }));
 
-vi.mock('@/components/latest-crux/charts/CruxStackedBarChart', () => ({
+vi.mock("@/components/latest-crux/charts/CruxStackedBarChart", () => ({
   PerformanceStackedBarChart: () => (
     <div>
       <div>
@@ -169,7 +199,7 @@ vi.mock('@/components/latest-crux/charts/CruxStackedBarChart', () => ({
   ),
 }));
 
-vi.mock('@/components/latest-crux/charts/CruxRadialChart', () => ({
+vi.mock("@/components/latest-crux/charts/CruxRadialChart", () => ({
   CruxRadialChart: () => (
     <div>
       <div>
@@ -182,12 +212,15 @@ vi.mock('@/components/latest-crux/charts/CruxRadialChart', () => ({
   ),
 }));
 
-import { CurrentPerformanceSection } from '@/components/latest-crux/CurrentPerformanceSection';
-import { CurrentPerformanceCard, CurrentPerformanceChartContext } from '@/components/latest-crux/PerformanceCard';
-import { CurrentPerformanceDashboard } from '@/components/latest-crux/PerformanceDashboard';
-import { PerformanceOptions } from '@/components/latest-crux/PerformanceOptions';
-import { PerformanceStackedBarChart } from '@/components/latest-crux/charts/CruxStackedBarChart';
-import { CruxRadialChart as RadialChart } from '@/components/latest-crux/charts/CruxRadialChart';
+import { CurrentPerformanceSection } from "@/components/latest-crux/CurrentPerformanceSection";
+import {
+  CurrentPerformanceCard,
+  CurrentPerformanceChartContext,
+} from "@/components/latest-crux/PerformanceCard";
+import { CurrentPerformanceDashboard } from "@/components/latest-crux/PerformanceDashboard";
+import { PerformanceOptions } from "@/components/latest-crux/PerformanceOptions";
+import { PerformanceStackedBarChart } from "@/components/latest-crux/charts/CruxStackedBarChart";
+import { CruxRadialChart as RadialChart } from "@/components/latest-crux/charts/CruxRadialChart";
 
 const histogramData = {
   good_density: 0.5,
@@ -215,7 +248,7 @@ const report = {
   },
 };
 
-describe('latest crux performance components', () => {
+describe("latest crux performance components", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     suppressConsoleError();
@@ -229,32 +262,32 @@ describe('latest crux performance components', () => {
     vi.useRealTimers();
   });
 
-  it('renders performance options including the optional date range popover', () => {
+  it("renders performance options including the optional date range popover", () => {
     const { container } = render(
       <PerformanceOptions
         setChartType={() => {}}
         setReportScope={() => {}}
         setDeviceType={() => {}}
-        chartKeys={['Histogram', 'Gauge Chart']}
-        dateRange={{ startDate: '2024-01-01', endDate: '2024-01-31' }}
+        chartKeys={["Histogram", "Gauge Chart"]}
+        dateRange={{ startDate: "2024-01-01", endDate: "2024-01-31" }}
         setDateRange={setDateRangeMock}
       />,
     );
 
-    expect(container.textContent).toContain('Report Scope');
-    expect(container.textContent).toContain('Chart type');
+    expect(container.textContent).toContain("Report Scope");
+    expect(container.textContent).toContain("Chart type");
 
     const dateRangeBtn = container.querySelector('[id^="date-range-button"]');
     fireEvent.click(dateRangeBtn!);
     const startDateInput = container.querySelector('input[id*="date-range-start"]');
-    fireEvent.change(startDateInput!, { target: { value: '2024-01-05' } });
+    fireEvent.change(startDateInput!, { target: { value: "2024-01-05" } });
     expect(setDateRangeMock).toHaveBeenCalledWith({
-      startDate: '2024-01-05',
-      endDate: '2024-01-31',
+      startDate: "2024-01-05",
+      endDate: "2024-01-31",
     });
   });
 
-  it('renders the current performance card and chart variants', () => {
+  it("renders the current performance card and chart variants", () => {
     const { container, rerender } = render(
       <CurrentPerformanceChartContext.Provider value="Histogram">
         <CurrentPerformanceCard
@@ -276,7 +309,7 @@ describe('latest crux performance components', () => {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('renders the radial and stacked chart helpers', () => {
+  it("renders the radial and stacked chart helpers", () => {
     const { container } = render(
       <div>
         <RadialChart histogramData={histogramData as any} />
@@ -286,8 +319,10 @@ describe('latest crux performance components', () => {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('renders the dashboard and derived metric cards from the report map', () => {
-    formatCruxReportMock.mockReturnValue([{ metric_name: 'largest_contentful_paint', ...histogramData }]);
+  it("renders the dashboard and derived metric cards from the report map", () => {
+    formatCruxReportMock.mockReturnValue([
+      { metric_name: "largest_contentful_paint", ...histogramData },
+    ]);
     groupByMock.mockReturnValue({
       largest_contentful_paint: [histogramData],
       interaction_to_next_paint: [histogramData],
@@ -314,9 +349,11 @@ describe('latest crux performance components', () => {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('fetches all current crux variants before rendering the dashboard section', async () => {
+  it("fetches all current crux variants before rendering the dashboard section", async () => {
     getCurrentCruxDataMock.mockResolvedValue(report);
-    formatCruxReportMock.mockReturnValue([{ metric_name: 'largest_contentful_paint', ...histogramData }]);
+    formatCruxReportMock.mockReturnValue([
+      { metric_name: "largest_contentful_paint", ...histogramData },
+    ]);
     groupByMock.mockReturnValue({
       largest_contentful_paint: [histogramData],
       interaction_to_next_paint: [histogramData],
@@ -326,9 +363,9 @@ describe('latest crux performance components', () => {
       round_trip_time: [histogramData],
     });
 
-    const { container } = render(await CurrentPerformanceSection({ url: 'https://example.com' }));
+    const { container } = render(await CurrentPerformanceSection({ url: "https://example.com" }));
 
     expect(getCurrentCruxDataMock).toHaveBeenCalledTimes(8);
-    expect(container.textContent).toContain('Largest Contentful Paint (LCP)');
+    expect(container.textContent).toContain("Largest Contentful Paint (LCP)");
   });
 });

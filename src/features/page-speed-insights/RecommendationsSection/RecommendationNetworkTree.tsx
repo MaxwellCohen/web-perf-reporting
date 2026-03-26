@@ -1,11 +1,11 @@
-import { useMemo } from 'react';
-import { TreeDataItem, TreeView } from '@/components/ui/tree-view';
-import { Details } from '@/components/ui/accordion';
-import { renderTimeValue } from '@/features/page-speed-insights/lh-categories/table/RenderTableValue';
-import { formatBytes } from '@/features/page-speed-insights/RecommendationsSection/utils';
-import type { Recommendation } from '@/features/page-speed-insights/RecommendationsSection/types';
-import type { InsightsContextItem } from '@/lib/page-speed-insights/types';
-import { isNetworkDependencyTreeRecommendation } from '@/features/page-speed-insights/RecommendationsSection/recommendationHelpers';
+import { useMemo } from "react";
+import { TreeDataItem, TreeView } from "@/components/ui/tree-view";
+import { Details } from "@/components/ui/accordion";
+import { renderTimeValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
+import { formatBytes } from "@/features/page-speed-insights/RecommendationsSection/utils";
+import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
+import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
+import { isNetworkDependencyTreeRecommendation } from "@/features/page-speed-insights/RecommendationsSection/recommendationHelpers";
 
 type NetworkTreeNode = {
   url: string;
@@ -20,7 +20,7 @@ type NetworkTreeChains = {
 };
 
 type NetworkTreeValue = {
-  type: 'network-tree';
+  type: "network-tree";
   longestChain?: {
     duration: number;
   };
@@ -36,21 +36,19 @@ function extractNetworkTreeFromAudit(item: InsightsContextItem): {
   tree: NetworkTreeValue | null;
   label: string;
 } {
-  const audit =
-    item.item?.lighthouseResult?.audits?.['network-dependency-tree-insight'];
+  const audit = item.item?.lighthouseResult?.audits?.["network-dependency-tree-insight"];
 
-  if (!audit?.details || audit.details.type !== 'list') {
+  if (!audit?.details || audit.details.type !== "list") {
     return { tree: null, label: item.label };
   }
 
-  const listItems =
-    (audit.details as { items?: Array<{ value?: unknown }> })?.items || [];
+  const listItems = (audit.details as { items?: Array<{ value?: unknown }> })?.items || [];
   const networkTreeItem = listItems.find(
     (listItem) =>
       listItem.value &&
-      typeof listItem.value === 'object' &&
-      'type' in listItem.value &&
-      listItem.value.type === 'network-tree',
+      typeof listItem.value === "object" &&
+      "type" in listItem.value &&
+      listItem.value.type === "network-tree",
   );
 
   if (!networkTreeItem?.value) {
@@ -63,10 +61,7 @@ function extractNetworkTreeFromAudit(item: InsightsContextItem): {
   };
 }
 
-function networkTreeToTreeData(
-  chains: NetworkTreeChains,
-  isRoot = false,
-): TreeDataItem[] {
+function networkTreeToTreeData(chains: NetworkTreeChains, isRoot = false): TreeDataItem[] {
   return Object.entries(chains).map(([id, node]) => {
     const parts: string[] = [node.url];
 
@@ -79,21 +74,19 @@ function networkTreeToTreeData(
     }
 
     if (node.isLongest) {
-      parts.push('(Longest Chain)');
+      parts.push("(Longest Chain)");
     }
 
     return {
       id,
-      name: parts.join(' | '),
+      name: parts.join(" | "),
       icon: undefined,
       selectedIcon: undefined,
       openIcon: undefined,
       draggable: false,
       droppable: false,
       isRoot,
-      children: node.children
-        ? networkTreeToTreeData(node.children, false)
-        : undefined,
+      children: node.children ? networkTreeToTreeData(node.children, false) : undefined,
     };
   });
 }
@@ -132,16 +125,12 @@ export function RecommendationNetworkTree({
         const treeData = networkTreeToTreeData(tree.chains, true);
 
         return (
-          <Details
-            key={label}
-            className="mb-4 flex flex-col gap-2 rounded-lg border p-4"
-          >
+          <Details key={label} className="mb-4 flex flex-col gap-2 rounded-lg border p-4">
             <summary className="flex cursor-pointer flex-col gap-2">
               <div className="text-sm font-semibold">{label}</div>
               {tree.longestChain ? (
                 <div className="text-xs text-muted-foreground">
-                  Longest Chain Duration:{' '}
-                  {renderTimeValue(tree.longestChain.duration)}
+                  Longest Chain Duration: {renderTimeValue(tree.longestChain.duration)}
                 </div>
               ) : null}
             </summary>

@@ -1,11 +1,11 @@
-import { Details } from '@/components/ui/accordion';
-import { sortByScoreDisplayModes } from '@/features/page-speed-insights/ScoreDisplay';
-import { AuditResultsRecord, CategoryResult } from '@/lib/schema';
-import { CategoryScoreInfo } from '@/features/page-speed-insights/lh-categories/CategoryScoreInfo';
-import { AuditDetailsSection } from '@/features/page-speed-insights/lh-categories/AuditDetailsSection';
-import { useMemo } from 'react';
+import { Details } from "@/components/ui/accordion";
+import { sortByScoreDisplayModes } from "@/features/page-speed-insights/ScoreDisplay";
+import { AuditResultsRecord, CategoryResult } from "@/lib/schema";
+import { CategoryScoreInfo } from "@/features/page-speed-insights/lh-categories/CategoryScoreInfo";
+import { AuditDetailsSection } from "@/features/page-speed-insights/lh-categories/AuditDetailsSection";
+import { useMemo } from "react";
 
-const AuditRefsToHide = ['final-screenshot', 'script-treemap-data'];
+const AuditRefsToHide = ["final-screenshot", "script-treemap-data"];
 
 export function CategoryAuditSection({
   category,
@@ -22,10 +22,7 @@ export function CategoryAuditSection({
       category
         .map((c) => c?.auditRefs || [])
         .reduce((acc, c) => [...acc, ...c], [])
-        .filter(
-          (auditRef, index, arr) =>
-            arr.findIndex((a) => a.id === auditRef.id) === index,
-        ),
+        .filter((auditRef, index, arr) => arr.findIndex((a) => a.id === auditRef.id) === index),
     [category],
   );
 
@@ -39,17 +36,11 @@ export function CategoryAuditSection({
     <Details className="flex flex-col gap-2">
       <summary className="flex flex-row justify-start gap-2 text-lg font-bold">
         <div className="flex flex-1 flex-row flex-wrap items-center justify-between">
-          <div className="flex w-[200px] whitespace-nowrap group-hover:underline">
-            {title}
-          </div>
+          <div className="flex w-[200px] whitespace-nowrap group-hover:underline">{title}</div>
           {category.filter(Boolean).map((c, i) => (
-            <CategoryScoreInfo
-              key={`${i}_${c?.title}`}
-              category={c}
-              device={labels[i] || ''}
-            />
+            <CategoryScoreInfo key={`${i}_${c?.title}`} category={c} device={labels[i] || ""} />
           ))}
-          {/* 
+          {/*
           <CategoryScoreInfo category={desktopCategory} device="Desktop" /> */}
         </div>
       </summary>
@@ -60,11 +51,7 @@ export function CategoryAuditSection({
               .filter((auditRef) => {
                 // should be an auditRef.id and not be metrics group
                 const id = auditRef?.id;
-                if (
-                  !id ||
-                  auditRef.group === 'metrics' ||
-                  AuditRefsToHide.includes(id)
-                ) {
+                if (!id || auditRef.group === "metrics" || AuditRefsToHide.includes(id)) {
                   return false;
                 }
                 const auditDataArr = auditsRecords.map((audit) => audit?.[id]);
@@ -73,10 +60,9 @@ export function CategoryAuditSection({
                   return false;
                 }
 
-                const detailsType = auditDataArr.find((a) => a?.details?.type)
-                  ?.details?.type;
+                const detailsType = auditDataArr.find((a) => a?.details?.type)?.details?.type;
 
-                if (detailsType === 'filmstrip') {
+                if (detailsType === "filmstrip") {
                   return false;
                 }
 
@@ -84,11 +70,9 @@ export function CategoryAuditSection({
               })
               .sort((a, b) => {
                 const aDetails =
-                  auditsRecords.find((au) => au?.[a.id || ''])?.[a.id || ''] ??
-                  undefined;
+                  auditsRecords.find((au) => au?.[a.id || ""])?.[a.id || ""] ?? undefined;
                 const bDetails =
-                  auditsRecords.find((au) => au?.[b.id || ''])?.[b.id || ''] ??
-                  undefined;
+                  auditsRecords.find((au) => au?.[b.id || ""])?.[b.id || ""] ?? undefined;
 
                 return sortByScoreDisplayModes(aDetails, bDetails);
               })

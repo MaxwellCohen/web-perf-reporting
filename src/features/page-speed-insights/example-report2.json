@@ -125,12 +125,7 @@
       "emulatedFormFactor": "mobile",
       "formFactor": "mobile",
       "locale": "en-US",
-      "onlyCategories": [
-        "performance",
-        "accessibility",
-        "best-practices",
-        "seo"
-      ],
+      "onlyCategories": ["performance", "accessibility", "best-practices", "seo"],
       "channel": "lr"
     },
     "audits": {
@@ -16188,9 +16183,7 @@
         "score": 1,
         "scoreDisplayMode": "binary",
         "details": {
-          "headings": [
-            { "label": "Failing Elements", "key": "node", "valueType": "node" }
-          ],
+          "headings": [{ "label": "Failing Elements", "key": "node", "valueType": "node" }],
           "items": [],
           "type": "table"
         }
@@ -16839,9 +16832,7 @@
               "valueType": "text"
             }
           ],
-          "items": [
-            { "severity": "High", "description": "No COOP header found" }
-          ],
+          "items": [{ "severity": "High", "description": "No COOP header found" }],
           "type": "table"
         }
       },
@@ -17931,9 +17922,7 @@
             {
               "subItems": {
                 "type": "subitems",
-                "items": [
-                  { "error": "Warning: missing 3 items in `.sourcesContent`" }
-                ]
+                "items": [{ "error": "Warning: missing 3 items in `.sourcesContent`" }]
               },
               "scriptUrl": "https://www.clearchoice.com/assets/digitalmarketing/_next/static/chunks/webpack-a01ac3624f9a0a66.js",
               "sourceMapUrl": "https://www.clearchoice.com/assets/digitalmarketing/_next/static/chunks/webpack-a01ac3624f9a0a66.js.map"
@@ -17941,9 +17930,7 @@
             {
               "scriptUrl": "https://www.clearchoice.com/assets/digitalmarketing/_next/static/chunks/pages/_app-d43ff6c8ff5cdab8.js",
               "subItems": {
-                "items": [
-                  { "error": "Warning: missing 3 items in `.sourcesContent`" }
-                ],
+                "items": [{ "error": "Warning: missing 3 items in `.sourcesContent`" }],
                 "type": "subitems"
               },
               "sourceMapUrl": "https://www.clearchoice.com/assets/digitalmarketing/_next/static/chunks/pages/_app-d43ff6c8ff5cdab8.js.map"
@@ -17952,17 +17939,13 @@
               "scriptUrl": "https://www.clearchoice.com/assets/digitalmarketing/_next/static/chunks/main-246bbbf16be6667a.js",
               "sourceMapUrl": "https://www.clearchoice.com/assets/digitalmarketing/_next/static/chunks/main-246bbbf16be6667a.js.map",
               "subItems": {
-                "items": [
-                  { "error": "Warning: missing 87 items in `.sourcesContent`" }
-                ],
+                "items": [{ "error": "Warning: missing 87 items in `.sourcesContent`" }],
                 "type": "subitems"
               }
             },
             {
               "subItems": {
-                "items": [
-                  { "error": "Warning: missing 12 items in `.sourcesContent`" }
-                ],
+                "items": [{ "error": "Warning: missing 12 items in `.sourcesContent`" }],
                 "type": "subitems"
               },
               "scriptUrl": "https://www.clearchoice.com/assets/digitalmarketing/_next/static/chunks/78104-39be16139bef5413.js",
@@ -17973,9 +17956,7 @@
               "scriptUrl": "https://www.clearchoice.com/assets/digitalmarketing/_next/static/chunks/17692-0131ed7e1d7bbe4d.js",
               "subItems": {
                 "type": "subitems",
-                "items": [
-                  { "error": "Warning: missing 5 items in `.sourcesContent`" }
-                ]
+                "items": [{ "error": "Warning: missing 5 items in `.sourcesContent`" }]
               }
             },
             {
@@ -18463,9 +18444,7 @@
         "metricSavings": { "LCP": 0, "FCP": 0 },
         "details": {
           "overallSavingsMs": 0,
-          "items": [
-            { "url": "https://www.clearchoice.com/", "responseTime": 94 }
-          ],
+          "items": [{ "url": "https://www.clearchoice.com/", "responseTime": 94 }],
           "type": "opportunity",
           "headings": [
             { "key": "url", "label": "URL", "valueType": "url" },
@@ -20368,9 +20347,7 @@
         "scoreDisplayMode": "binary",
         "details": {
           "type": "table",
-          "headings": [
-            { "key": "node", "label": "Uncrawlable Link", "valueType": "node" }
-          ],
+          "headings": [{ "key": "node", "label": "Uncrawlable Link", "valueType": "node" }],
           "items": []
         }
       },
@@ -24337,10 +24314,7 @@
         "name": "Optanon",
         "homepage": "https://www.cookielaw.org/",
         "category": "consent-provider",
-        "origins": [
-          "https://cdn.cookielaw.org",
-          "https://geolocation.onetrust.com"
-        ]
+        "origins": ["https://cdn.cookielaw.org", "https://geolocation.onetrust.com"]
       },
       {
         "name": "freshpaint-cdn.com",
@@ -24414,10 +24388,7 @@
         "name": "Google/Doubleclick Ads",
         "homepage": "https://marketingplatform.google.com/about/enterprise/",
         "category": "ad",
-        "origins": [
-          "https://googleads.g.doubleclick.net",
-          "https://stats.g.doubleclick.net"
-        ]
+        "origins": ["https://googleads.g.doubleclick.net", "https://stats.g.doubleclick.net"]
       },
       {
         "name": "Google Analytics",

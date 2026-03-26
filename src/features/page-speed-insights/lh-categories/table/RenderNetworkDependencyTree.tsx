@@ -1,15 +1,15 @@
 import {
   usePageSpeedItems,
   type InsightsContextItem,
-} from '@/features/page-speed-insights/PageSpeedContext';
-import { AccordionItem, AccordionContent } from '@/components/ui/accordion';
-import { AccordionSectionTitleTrigger } from '@/components/ui/accordion-section-title-trigger';
-import { Details } from '@/components/ui/accordion';
-import { TreeDataItem, TreeView } from '@/components/ui/tree-view';
+} from "@/features/page-speed-insights/PageSpeedContext";
+import { AccordionItem, AccordionContent } from "@/components/ui/accordion";
+import { AccordionSectionTitleTrigger } from "@/components/ui/accordion-section-title-trigger";
+import { Details } from "@/components/ui/accordion";
+import { TreeDataItem, TreeView } from "@/components/ui/tree-view";
 import {
   formatBytes,
   renderTimeValue,
-} from '@/features/page-speed-insights/lh-categories/table/RenderTableValue';
+} from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 
 // Type definitions for network dependency tree
 type NetworkTreeNode = {
@@ -25,7 +25,7 @@ type NetworkTreeChains = {
 };
 
 type NetworkTreeValue = {
-  type: 'network-tree';
+  type: "network-tree";
   longestChain?: {
     duration: number;
   };
@@ -36,8 +36,8 @@ function extractNetworkTreeFromAudit(item: InsightsContextItem): {
   tree: NetworkTreeValue | null;
   label: string;
 } {
-  const audit = item.item?.lighthouseResult?.audits?.['network-dependency-tree-insight'];
-  if (!audit?.details || audit.details.type !== 'list') {
+  const audit = item.item?.lighthouseResult?.audits?.["network-dependency-tree-insight"];
+  if (!audit?.details || audit.details.type !== "list") {
     return { tree: null, label: item.label };
   }
 
@@ -46,9 +46,9 @@ function extractNetworkTreeFromAudit(item: InsightsContextItem): {
   const networkTreeItem = listItems.find(
     (item) =>
       item.value &&
-      typeof item.value === 'object' &&
-      'type' in item.value &&
-      item.value.type === 'network-tree'
+      typeof item.value === "object" &&
+      "type" in item.value &&
+      item.value.type === "network-tree",
   );
 
   if (!networkTreeItem?.value) {
@@ -61,87 +61,66 @@ function extractNetworkTreeFromAudit(item: InsightsContextItem): {
   };
 }
 
-function networkTreeToTreeData(
-  chains: NetworkTreeChains,
-  isRoot = false
-): TreeDataItem[] {
+function networkTreeToTreeData(chains: NetworkTreeChains, isRoot = false): TreeDataItem[] {
   return Object.entries(chains).map(([id, node]) => {
     const parts: string[] = [];
-    
+
     // Add URL
     parts.push(node.url);
-    
+
     // Add transfer size if available
     if (node.transferSize !== undefined) {
       parts.push(`Transfer: ${formatBytes(node.transferSize)}`);
     }
-    
+
     // Add nav start to end time if available
     if (node.navStartToEndTime !== undefined) {
       parts.push(`Time: ${renderTimeValue(node.navStartToEndTime)}`);
     }
-    
+
     // Mark longest chain
     if (node.isLongest) {
-      parts.push('(Longest Chain)');
+      parts.push("(Longest Chain)");
     }
 
     return {
       id,
-      name: parts.join(' | '),
+      name: parts.join(" | "),
       icon: undefined,
       selectedIcon: undefined,
       openIcon: undefined,
       draggable: false,
       droppable: false,
       isRoot: isRoot,
-      children: node.children
-        ? networkTreeToTreeData(node.children, false)
-        : undefined,
+      children: node.children ? networkTreeToTreeData(node.children, false) : undefined,
     };
   });
 }
 
 export function RenderNetworkDependencyTree() {
   const items = usePageSpeedItems();
-  
-  const networkTrees = items.map(extractNetworkTreeFromAudit).filter(
-    ({ tree }) => tree !== null
-  );
+
+  const networkTrees = items.map(extractNetworkTreeFromAudit).filter(({ tree }) => tree !== null);
 
   if (networkTrees.length === 0) {
     return null;
   }
 
   return (
-    <AccordionItem value={'networkDependencyTree'}>
-      <AccordionSectionTitleTrigger>
-        Network Dependency Tree
-      </AccordionSectionTitleTrigger>
+    <AccordionItem value={"networkDependencyTree"}>
+      <AccordionSectionTitleTrigger>Network Dependency Tree</AccordionSectionTitleTrigger>
       <AccordionContent>
         {networkTrees.map(({ tree, label }) => {
           if (!tree) return null;
-          
-          return (
-            <NetworkDependencyTreeSection
-              key={label}
-              tree={tree}
-              label={label}
-            />
-          );
+
+          return <NetworkDependencyTreeSection key={label} tree={tree} label={label} />;
         })}
       </AccordionContent>
     </AccordionItem>
   );
 }
 
-function NetworkDependencyTreeSection({
-  tree,
-  label,
-}: {
-  tree: NetworkTreeValue;
-  label: string;
-}) {
+function NetworkDependencyTreeSection({ tree, label }: { tree: NetworkTreeValue; label: string }) {
   if (!tree.chains || Object.keys(tree.chains).length === 0) {
     return null;
   }
@@ -151,9 +130,7 @@ function NetworkDependencyTreeSection({
   return (
     <Details className="flex flex-col gap-2 print:border-0">
       <summary className="flex flex-col gap-2">
-        <div className="text-lg font-bold">
-          Network Dependency Tree for {label}
-        </div>
+        <div className="text-lg font-bold">Network Dependency Tree for {label}</div>
         {tree.longestChain && (
           <div className="text-sm">
             Longest Chain Duration: {renderTimeValue(tree.longestChain.duration)}
@@ -167,4 +144,3 @@ function NetworkDependencyTreeSection({
     </Details>
   );
 }
-

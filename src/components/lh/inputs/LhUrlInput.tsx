@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import type React from 'react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { TabsContent } from '@/components/ui/tabs';
+import type React from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { TabsContent } from "@/components/ui/tabs";
 
 type LhUrlInputProps = {
   jsonUrl: string;

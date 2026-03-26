@@ -1,9 +1,9 @@
-import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import { RenderChecklist } from '@/features/page-speed-insights/lh-categories/RenderChecklist';
-import type { TableDataItem } from '@/features/page-speed-insights/tsTable/TableDataItem';
+import { render } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { RenderChecklist } from "@/features/page-speed-insights/lh-categories/RenderChecklist";
+import type { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataItem";
 
-vi.mock('@/components/ui/table', () => ({
+vi.mock("@/components/ui/table", () => ({
   Table: ({ children }: { children: React.ReactNode }) => <table>{children}</table>,
   TableHeader: ({ children }: { children: React.ReactNode }) => <thead>{children}</thead>,
   TableBody: ({ children }: { children: React.ReactNode }) => <tbody>{children}</tbody>,
@@ -12,12 +12,12 @@ vi.mock('@/components/ui/table', () => ({
   TableCell: ({ children }: { children: React.ReactNode }) => <td>{children}</td>,
 }));
 
-vi.mock('@/components/ui/accordion', () => ({
+vi.mock("@/components/ui/accordion", () => ({
   Details: ({ children }: { children: React.ReactNode }) => <details>{children}</details>,
 }));
 
-vi.mock('@/features/page-speed-insights/lh-categories/renderBoolean', () => ({
-  renderBoolean: (v: boolean) => <span>{v ? 'Yes' : 'No'}</span>,
+vi.mock("@/features/page-speed-insights/lh-categories/renderBoolean", () => ({
+  renderBoolean: (v: boolean) => <span>{v ? "Yes" : "No"}</span>,
 }));
 
 function makeItem(
@@ -29,38 +29,33 @@ function makeItem(
     _category: {} as any,
     auditRef: {},
     auditResult: {
-      id: 'test',
-      details: { type: 'checklist', items },
+      id: "test",
+      details: { type: "checklist", items },
     } as any,
   };
 }
 
-describe('RenderChecklist', () => {
-  it('renders table with title', () => {
-    const items = [
-      makeItem('Mobile', { item1: { label: 'Item 1', value: true } }),
-    ];
+describe("RenderChecklist", () => {
+  it("renders table with title", () => {
+    const items = [makeItem("Mobile", { item1: { label: "Item 1", value: true } })];
     const { container } = render(<RenderChecklist items={items} title="Performance" />);
-    expect(container.textContent).toContain('Performance Audit Checklist Items');
-    expect(container.querySelector('table')).toBeTruthy();
+    expect(container.textContent).toContain("Performance Audit Checklist Items");
+    expect(container.querySelector("table")).toBeTruthy();
   });
 
-  it('renders checklist items from multiple items', () => {
+  it("renders checklist items from multiple items", () => {
     const items = [
-      makeItem('Mobile', { a: { label: 'Check A', value: true } }),
-      makeItem('Desktop', { a: { label: 'Check A', value: false } }),
+      makeItem("Mobile", { a: { label: "Check A", value: true } }),
+      makeItem("Desktop", { a: { label: "Check A", value: false } }),
     ];
     const { container } = render(<RenderChecklist items={items} title="Test" />);
-    expect(container.textContent).toContain('Check A');
+    expect(container.textContent).toContain("Check A");
   });
 
-  it('renders device labels as column headers', () => {
-    const items = [
-      makeItem('Mobile', {}),
-      makeItem('Desktop', {}),
-    ];
+  it("renders device labels as column headers", () => {
+    const items = [makeItem("Mobile", {}), makeItem("Desktop", {})];
     const { container } = render(<RenderChecklist items={items} title="Test" />);
-    expect(container.textContent).toContain('Mobile');
-    expect(container.textContent).toContain('Desktop');
+    expect(container.textContent).toContain("Mobile");
+    expect(container.textContent).toContain("Desktop");
   });
 });

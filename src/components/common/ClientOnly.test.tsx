@@ -1,9 +1,9 @@
-import { act, render } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
-import { ClientOnly } from '@/components/common/ClientOnly';
+import { act, render } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+import { ClientOnly } from "@/components/common/ClientOnly";
 
-describe('ClientOnly', () => {
-  it('renders children after client hydration', async () => {
+describe("ClientOnly", () => {
+  it("renders children after client hydration", async () => {
     const { container } = render(
       <ClientOnly>
         <span data-testid="child">Child content</span>

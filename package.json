@@ -10,8 +10,10 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "typecheck": "tsgo --noEmit",
-    "lint": "eslint .",
-    "prettier": "prettier --write .",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio"
@@ -60,7 +62,6 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.5",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/postcss": "^4.2.2",
     "@testing-library/jest-dom": "^6.9.1",
@@ -71,13 +72,10 @@
     "@typescript/native-preview": "7.0.0-dev.20260307.1",
     "@vitest/coverage-v8": "^4.1.0",
     "drizzle-kit": "^0.30.6",
-    "eslint": "^9.39.4",
-    "eslint-config-next": "16.2.1",
-    "eslint-plugin-prettier": "^5.5.5",
     "happy-dom": "^20.8.4",
+    "oxfmt": "^0.42.0",
+    "oxlint": "^1.57.0",
     "postcss": "^8.5.8",
-    "prettier": "^3.8.1",
-    "prettier-plugin-tailwindcss": "^0.6.14",
     "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3",
     "vitest": "^4.1.0"

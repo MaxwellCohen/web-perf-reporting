@@ -69,7 +69,6 @@
 //   );
 // };
 
-
 // const Bytes = ({ value }: { value: number }) => {
 //   const formattedValue = `${(value / 1024).toFixed(2)} KiB`;
 //   const formattedBytes = `${value} bytes`;
@@ -181,7 +180,6 @@
 //   | 'timespanMs'
 //   | 'url';
 
-
 // interface TableItem {
 //     entity?: string;
 //     subItems?: {
@@ -196,7 +194,6 @@
 //     granularity?: number;
 //     displayUnit?: string;
 //   }
-  
 
 // const TableRow = ({
 //   item,

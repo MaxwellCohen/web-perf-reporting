@@ -1,11 +1,10 @@
-import { TableItem, TableColumnHeading, DeviceType } from '@/lib/schema';
-import { Fragment, useMemo } from 'react';
-import { getDerivedSubItemsHeading } from '@/features/page-speed-insights/lh-categories/table/utils';
-import { RenderTableRowContainer } from '@/features/page-speed-insights/lh-categories/table/RenderTableRowContainer';
-import { RenderTableHeader } from '@/features/page-speed-insights/lh-categories/table/RenderTableHeader';
-import { RenderTableCell } from '@/features/page-speed-insights/lh-categories/table/RenderTableCell';
-import { getEntityGroupItems } from '@/features/page-speed-insights/lh-categories/table/getEntityGroupItems';
-
+import { TableItem, TableColumnHeading, DeviceType } from "@/lib/schema";
+import { Fragment, useMemo } from "react";
+import { getDerivedSubItemsHeading } from "@/features/page-speed-insights/lh-categories/table/utils";
+import { RenderTableRowContainer } from "@/features/page-speed-insights/lh-categories/table/RenderTableRowContainer";
+import { RenderTableHeader } from "@/features/page-speed-insights/lh-categories/table/RenderTableHeader";
+import { RenderTableCell } from "@/features/page-speed-insights/lh-categories/table/RenderTableCell";
+import { getEntityGroupItems } from "@/features/page-speed-insights/lh-categories/table/getEntityGroupItems";
 
 export function RenderEntityTable({
   headings = [],
@@ -22,20 +21,24 @@ export function RenderEntityTable({
   skipSumming: string[];
   sortedBy: string[];
 }) {
-  const entityItems = useMemo(() => getEntityGroupItems({
-    items,
-    headings,
-    isEntityGrouped,
-    skipSumming,
-    sortedBy,
-  }), [items, headings, isEntityGrouped, skipSumming, sortedBy]);
+  const entityItems = useMemo(
+    () =>
+      getEntityGroupItems({
+        items,
+        headings,
+        isEntityGrouped,
+        skipSumming,
+        sortedBy,
+      }),
+    [items, headings, isEntityGrouped, skipSumming, sortedBy],
+  );
 
   return (
     <div
       className="grid overflow-x-auto"
       style={{ gridTemplateColumns: `repeat(${headings?.length || 0}, auto)` }}
     >
-      <RenderTableHeader headings={headings}  />
+      <RenderTableHeader headings={headings} />
       {entityItems?.map((entityItem, index) => (
         <Fragment key={index}>
           <RenderTableRowContainer>
@@ -48,7 +51,7 @@ export function RenderEntityTable({
                   style={{
                     gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
                   }}
-                  value={entityItem[heading.key || '']}
+                  value={entityItem[heading.key || ""]}
                   heading={heading}
                   device={(entityItem?._device as DeviceType) || device}
                 />
@@ -77,10 +80,7 @@ export function RenderEntityTable({
                   })}
                 </RenderTableRowContainer>
                 {item.subItems?.items.map((subItem, subIndex) => (
-                  <RenderTableRowContainer
-                    key={subIndex}
-                    className="border-red-500"
-                  >
+                  <RenderTableRowContainer key={subIndex} className="border-red-500">
                     {headings.map((heading, colIndex) => {
                       if (!heading.subItemsHeading?.key) return null;
                       return (

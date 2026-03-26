@@ -1,24 +1,24 @@
-'use client';
-import { PageSpeedInsightsDashboard } from '@/features/page-speed-insights/pageSpeedInsightsDashboard';
-import { PageSpeedInsights } from '@/lib/schema';
-import { useEffect, useRef, useState } from 'react';
-import { Details } from '@/components/ui/accordion';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { TextEncoding } from 'lighthouse/report/renderer/text-encoding';
-import pako from 'pako';
+"use client";
+import { PageSpeedInsightsDashboard } from "@/features/page-speed-insights/pageSpeedInsightsDashboard";
+import { PageSpeedInsights } from "@/lib/schema";
+import { useEffect, useRef, useState } from "react";
+import { Details } from "@/components/ui/accordion";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { TextEncoding } from "lighthouse/report/renderer/text-encoding";
+import pako from "pako";
 if (globalThis.window !== undefined) {
   window.pako = pako;
 }
 
 function useHash() {
-  const [hash, setHash] = useState('');
+  const [hash, setHash] = useState("");
 
   useEffect(() => {
     const handleHashChange = () => setHash(window.location.hash);
-    window.addEventListener('hashchange', handleHashChange);
+    window.addEventListener("hashchange", handleHashChange);
     setHash(window.location.hash);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
   return [
@@ -38,39 +38,29 @@ export default function ViewerPage() {
   const handleJsonSubmit = async (jsonString: string) => {
     try {
       let rawData = JSON.parse(jsonString) as unknown;
-      rawData = (rawData as PageSpeedInsights).lighthouseResult ? {lighthouseResult: (rawData as PageSpeedInsights).lighthouseResult } : rawData;
-      setData(
-        Array.isArray(rawData)
-          ? rawData
-          : rawData
-            ? [rawData as PageSpeedInsights]
-            : [],
-      );
+      rawData = (rawData as PageSpeedInsights).lighthouseResult
+        ? { lighthouseResult: (rawData as PageSpeedInsights).lighthouseResult }
+        : rawData;
+      setData(Array.isArray(rawData) ? rawData : rawData ? [rawData as PageSpeedInsights] : []);
     } catch (e) {
-      console.error('JSON parsing error:', e);
-      alert('Invalid JSON');
+      console.error("JSON parsing error:", e);
+      alert("Invalid JSON");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if(!hash) return
+    if (!hash) return;
     const urlData = hash.substring(1);
     if (!urlData) return;
 
     try {
       const text = TextEncoding.fromBase64(urlData, { gzip: true });
       const rawData = JSON.parse(text) as unknown;
-      setData(
-        Array.isArray(rawData)
-          ? rawData
-          : rawData
-            ? [rawData as PageSpeedInsights]
-            : [],
-      );
+      setData(Array.isArray(rawData) ? rawData : rawData ? [rawData as PageSpeedInsights] : []);
     } catch (e) {
-      console.error('Data parsing error:', e);
+      console.error("Data parsing error:", e);
     }
   }, [hash]);
 
@@ -81,14 +71,13 @@ export default function ViewerPage() {
           <Button
             variant="link"
             onClick={() => {
-              setData([]); 
-              setHash('');
+              setData([]);
+              setHash("");
             }}
             className="text-sm text-muted-foreground hover:text-primary"
           >
             ← Back to input
           </Button>
-          
         </div>
         <PageSpeedInsightsDashboard data={data} labels={[]} hideReport />
       </div>
@@ -98,9 +87,7 @@ export default function ViewerPage() {
   return (
     <Details>
       <summary className="flex flex-col gap-2">
-        <div className="text-lg font-bold">
-          Enter the lighthouse JSON Data here
-        </div>
+        <div className="text-lg font-bold">Enter the lighthouse JSON Data here</div>
       </summary>
       <Textarea ref={textRef} />
       <Button
@@ -115,7 +102,7 @@ export default function ViewerPage() {
           setTimeout(() => handleJsonSubmit(value), 0);
         }}
       >
-        {loading ? 'Loading...' : 'Show Report'}
+        {loading ? "Loading..." : "Show Report"}
       </Button>
     </Details>
   );

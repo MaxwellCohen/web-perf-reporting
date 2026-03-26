@@ -1,5 +1,5 @@
-import { chartConfig } from '@/components/common/ChartSettings';
-import type { CruxHistoryItem } from '@/lib/schema';
+import { chartConfig } from "@/components/common/ChartSettings";
+import type { CruxHistoryItem } from "@/lib/schema";
 
 export function p75StatusFromHistogram(histogramData: CruxHistoryItem) {
   const p75 = histogramData.P75;

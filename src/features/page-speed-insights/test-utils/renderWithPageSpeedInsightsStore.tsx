@@ -19,11 +19,7 @@ function PageSpeedStoreRoot({
   isLoading = false,
 }: RenderPageSpeedStoreOptions & { children: ReactNode }) {
   const store = usePageSpeedInsightsStore({ data, labels, isLoading });
-  return (
-    <PageSpeedInsightsStoreProvider store={store}>
-      {children}
-    </PageSpeedInsightsStoreProvider>
-  );
+  return <PageSpeedInsightsStoreProvider store={store}>{children}</PageSpeedInsightsStoreProvider>;
 }
 
 export function renderWithPageSpeedInsightsStore(

@@ -1,8 +1,8 @@
-import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import { RenderTableCell } from '@/features/page-speed-insights/lh-categories/table/RenderTableCell';
+import { render } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { RenderTableCell } from "@/features/page-speed-insights/lh-categories/table/RenderTableCell";
 
-vi.mock('@/features/page-speed-insights/lh-categories/table/RenderTableValue', () => ({
+vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", () => ({
   RenderTableValue: ({
     value,
     heading,
@@ -20,47 +20,43 @@ vi.mock('@/features/page-speed-insights/lh-categories/table/RenderTableValue', (
       data-device={device}
       className={className}
     >
-      {String(value ?? '')}
+      {String(value ?? "")}
     </span>
   ),
 }));
 
-describe('RenderTableCell', () => {
-  it('renders value via RenderTableValue', () => {
+describe("RenderTableCell", () => {
+  it("renders value via RenderTableValue", () => {
     const { container } = render(
       <RenderTableCell
         value="test"
-        heading={{ key: 'x', valueType: 'text', label: 'X' }}
+        heading={{ key: "x", valueType: "text", label: "X" }}
         device="Desktop"
-      />
+      />,
     );
     const el = container.querySelector('[data-testid="table-value"]');
     expect(el).toBeTruthy();
-    expect(el?.getAttribute('data-value')).toBe('test');
-    expect(el?.getAttribute('data-device')).toBe('Desktop');
+    expect(el?.getAttribute("data-value")).toBe("test");
+    expect(el?.getAttribute("data-device")).toBe("Desktop");
   });
 
-  it('renders with undefined value', () => {
+  it("renders with undefined value", () => {
     const { container } = render(
-      <RenderTableCell
-        value={undefined}
-        heading={null}
-        device="Mobile"
-      />
+      <RenderTableCell value={undefined} heading={null} device="Mobile" />,
     );
     expect(container.querySelector('[data-testid="table-value"]')).toBeTruthy();
   });
 
-  it('passes through className to RenderTableValue', () => {
+  it("passes through className to RenderTableValue", () => {
     const { container } = render(
       <RenderTableCell
         value={42}
-        heading={{ key: 'n', valueType: 'numeric', label: 'N' }}
+        heading={{ key: "n", valueType: "numeric", label: "N" }}
         device="Desktop"
         className="custom-class"
-      />
+      />,
     );
-    const el = container.querySelector('.custom-class');
+    const el = container.querySelector(".custom-class");
     expect(el).toBeTruthy();
   });
 });

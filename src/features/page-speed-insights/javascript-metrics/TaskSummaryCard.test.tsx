@@ -1,14 +1,14 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
-import { TaskSummaryCard } from '@/features/page-speed-insights/javascript-metrics/TaskSummaryCard';
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+import { TaskSummaryCard } from "@/features/page-speed-insights/javascript-metrics/TaskSummaryCard";
 
-describe('TaskSummaryCard', () => {
-  it('returns null when no metrics have totalTasks > 0', () => {
+describe("TaskSummaryCard", () => {
+  it("returns null when no metrics have totalTasks > 0", () => {
     const { container } = render(
       <TaskSummaryCard
         metrics={[
           {
-            label: 'Mobile',
+            label: "Mobile",
             diagnostics: [],
             mainThreadTasks: [],
           },
@@ -18,12 +18,12 @@ describe('TaskSummaryCard', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders stats from diagnostics item', () => {
+  it("renders stats from diagnostics item", () => {
     const { container } = render(
       <TaskSummaryCard
         metrics={[
           {
-            label: 'Mobile',
+            label: "Mobile",
             diagnostics: [
               {
                 numTasks: 10,
@@ -43,17 +43,14 @@ describe('TaskSummaryCard', () => {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('calculates from mainThreadTasks when diagnostics missing', () => {
+  it("calculates from mainThreadTasks when diagnostics missing", () => {
     const { container } = render(
       <TaskSummaryCard
         metrics={[
           {
-            label: 'Desktop',
+            label: "Desktop",
             diagnostics: [],
-            mainThreadTasks: [
-              { duration: 50 },
-              { duration: 30 },
-            ] as any,
+            mainThreadTasks: [{ duration: 50 }, { duration: 30 }] as any,
           },
         ]}
       />,

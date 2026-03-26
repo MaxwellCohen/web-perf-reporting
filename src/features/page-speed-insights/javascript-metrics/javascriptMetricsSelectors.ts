@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
-import type { InsightsContextItem } from '@/lib/page-speed-insights/types';
-import { usePageSpeedItems } from '@/features/page-speed-insights/PageSpeedContext';
-import type { JSMetrics } from '@/features/page-speed-insights/javascript-metrics/extractJSMetrics';
-import { extractJSMetrics } from '@/features/page-speed-insights/javascript-metrics/extractJSMetrics';
+import { useMemo } from "react";
+import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
+import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
+import type { JSMetrics } from "@/features/page-speed-insights/javascript-metrics/extractJSMetrics";
+import { extractJSMetrics } from "@/features/page-speed-insights/javascript-metrics/extractJSMetrics";
 
 export type JSStats = {
   label: string;
@@ -57,8 +57,5 @@ export function selectJavaScriptMetrics(snapshot: SnapshotWithItems) {
 
 export function useJavaScriptMetrics() {
   const items = usePageSpeedItems();
-  return useMemo(
-    () => selectJavaScriptMetrics({ context: { items } }),
-    [items],
-  );
+  return useMemo(() => selectJavaScriptMetrics({ context: { items } }), [items]);
 }

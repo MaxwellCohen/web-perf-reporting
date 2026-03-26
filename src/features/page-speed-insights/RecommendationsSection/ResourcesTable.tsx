@@ -1,11 +1,14 @@
-'use client';
-import { useMemo } from 'react';
-import { ColumnDef } from '@tanstack/react-table';
-import { Table } from '@/components/ui/table';
-import { DataTableHeader } from '@/features/page-speed-insights/lh-categories/table/DataTableHeader';
-import { DataTableBody } from '@/features/page-speed-insights/lh-categories/table/DataTableBody';
-import { RenderBytesValue, RenderMSValue } from '@/features/page-speed-insights/lh-categories/table/RenderTableValue';
-import { useSimpleTable } from '@/features/page-speed-insights/shared/useSimpleTable';
+"use client";
+import { useMemo } from "react";
+import { ColumnDef } from "@tanstack/react-table";
+import { Table } from "@/components/ui/table";
+import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
+import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
+import {
+  RenderBytesValue,
+  RenderMSValue,
+} from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
+import { useSimpleTable } from "@/features/page-speed-insights/shared/useSimpleTable";
 
 interface ResourceItem {
   url?: string;
@@ -24,22 +27,22 @@ interface ResourcesTableProps {
 }
 
 export function ResourcesTable({ items }: ResourcesTableProps) {
-  'use no memo';
+  "use no memo";
 
   const columns = useMemo<ColumnDef<ResourceItem>[]>(() => {
     return [
       {
-        id: 'url',
-        accessorKey: 'url',
-        header: 'Resource URL',
+        id: "url",
+        accessorKey: "url",
+        header: "Resource URL",
         size: 400,
         minSize: 200,
         maxSize: 800,
         enableResizing: true,
-        filterFn: 'includesString',
+        filterFn: "includesString",
         cell: ({ row }) => {
           const url = row.original.url;
-          if (url && url !== 'Unattributable') {
+          if (url && url !== "Unattributable") {
             return (
               <a
                 href={url}
@@ -57,14 +60,14 @@ export function ResourcesTable({ items }: ResourcesTableProps) {
         enableColumnFilter: true,
       },
       {
-        id: 'wastedBytes',
-        accessorKey: 'wastedBytes',
-        header: 'Wasted Bytes',
+        id: "wastedBytes",
+        accessorKey: "wastedBytes",
+        header: "Wasted Bytes",
         size: 120,
         minSize: 80,
         maxSize: 200,
         enableResizing: true,
-        filterFn: 'inNumberRange',
+        filterFn: "inNumberRange",
         cell: ({ row }) => {
           const value = row.original.wastedBytes;
           return value !== undefined && value > 0 ? (
@@ -77,14 +80,14 @@ export function ResourcesTable({ items }: ResourcesTableProps) {
         enableColumnFilter: true,
       },
       {
-        id: 'wastedMs',
-        accessorKey: 'wastedMs',
-        header: 'Wasted Time',
+        id: "wastedMs",
+        accessorKey: "wastedMs",
+        header: "Wasted Time",
         size: 120,
         minSize: 80,
         maxSize: 200,
         enableResizing: true,
-        filterFn: 'inNumberRange',
+        filterFn: "inNumberRange",
         cell: ({ row }) => {
           const value = row.original.wastedMs;
           return value !== undefined && value > 0 ? (
@@ -97,14 +100,14 @@ export function ResourcesTable({ items }: ResourcesTableProps) {
         enableColumnFilter: true,
       },
       {
-        id: 'wastedPercent',
-        accessorKey: 'wastedPercent',
-        header: 'Wasted %',
+        id: "wastedPercent",
+        accessorKey: "wastedPercent",
+        header: "Wasted %",
         size: 100,
         minSize: 70,
         maxSize: 150,
         enableResizing: true,
-        filterFn: 'inNumberRange',
+        filterFn: "inNumberRange",
         cell: ({ row }) => {
           const value = row.original.wastedPercent;
           return value !== undefined && value > 0 ? (
@@ -117,14 +120,14 @@ export function ResourcesTable({ items }: ResourcesTableProps) {
         enableColumnFilter: true,
       },
       {
-        id: 'totalBytes',
-        accessorKey: 'totalBytes',
-        header: 'Total Size',
+        id: "totalBytes",
+        accessorKey: "totalBytes",
+        header: "Total Size",
         size: 120,
         minSize: 80,
         maxSize: 200,
         enableResizing: true,
-        filterFn: 'inNumberRange',
+        filterFn: "inNumberRange",
         cell: ({ row }) => {
           const value = row.original.totalBytes;
           return value !== undefined && value > 0 ? (
@@ -137,14 +140,14 @@ export function ResourcesTable({ items }: ResourcesTableProps) {
         enableColumnFilter: true,
       },
       {
-        id: 'scripting',
-        accessorKey: 'scripting',
-        header: 'Scripting Time',
+        id: "scripting",
+        accessorKey: "scripting",
+        header: "Scripting Time",
         size: 130,
         minSize: 90,
         maxSize: 200,
         enableResizing: true,
-        filterFn: 'inNumberRange',
+        filterFn: "inNumberRange",
         cell: ({ row }) => {
           const value = row.original.scripting;
           return value !== undefined && value > 0 ? (
@@ -157,14 +160,14 @@ export function ResourcesTable({ items }: ResourcesTableProps) {
         enableColumnFilter: true,
       },
       {
-        id: 'scriptParseCompile',
-        accessorKey: 'scriptParseCompile',
-        header: 'Parse/Compile Time',
+        id: "scriptParseCompile",
+        accessorKey: "scriptParseCompile",
+        header: "Parse/Compile Time",
         size: 150,
         minSize: 100,
         maxSize: 200,
         enableResizing: true,
-        filterFn: 'inNumberRange',
+        filterFn: "inNumberRange",
         cell: ({ row }) => {
           const value = row.original.scriptParseCompile;
           return value !== undefined && value > 0 ? (
@@ -177,14 +180,14 @@ export function ResourcesTable({ items }: ResourcesTableProps) {
         enableColumnFilter: true,
       },
       {
-        id: 'total',
-        accessorKey: 'total',
-        header: 'Total CPU Time',
+        id: "total",
+        accessorKey: "total",
+        header: "Total CPU Time",
         size: 130,
         minSize: 90,
         maxSize: 200,
         enableResizing: true,
-        filterFn: 'inNumberRange',
+        filterFn: "inNumberRange",
         cell: ({ row }) => {
           const value = row.original.total;
           return value !== undefined && value > 0 ? (

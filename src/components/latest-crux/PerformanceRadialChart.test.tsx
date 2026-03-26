@@ -1,7 +1,7 @@
-import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { render } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
-vi.mock('recharts', () => ({
+vi.mock("recharts", () => ({
   RadialBarChart: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="radial-chart">{children}</div>
   ),
@@ -10,7 +10,7 @@ vi.mock('recharts', () => ({
   ),
 }));
 
-vi.mock('@/components/ui/chart', () => ({
+vi.mock("@/components/ui/chart", () => ({
   ChartContainer: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="chart-container">{children}</div>
   ),
@@ -18,7 +18,7 @@ vi.mock('@/components/ui/chart', () => ({
   ChartTooltipContent: () => <div data-testid="chart-tooltip-content" />,
 }));
 
-import { CruxRadialChart as RadialChart } from '@/components/latest-crux/charts/CruxRadialChart';
+import { CruxRadialChart as RadialChart } from "@/components/latest-crux/charts/CruxRadialChart";
 
 const histogramData = {
   good_density: 0.5,
@@ -29,27 +29,27 @@ const histogramData = {
   P75: 900,
 };
 
-describe('RadialChart', () => {
-  it('renders chart with histogram data', () => {
-    const { container } = render(
-      <RadialChart histogramData={histogramData as any} />
-    );
+describe("RadialChart", () => {
+  it("renders chart with histogram data", () => {
+    const { container } = render(<RadialChart histogramData={histogramData as any} />);
     expect(container.querySelector('[data-testid="radial-chart"]')).toBeTruthy();
     expect(container.querySelector('[data-testid="radial-bar-poor_density"]')).toBeTruthy();
     expect(container.querySelector('[data-testid="radial-bar-ni_density"]')).toBeTruthy();
     expect(container.querySelector('[data-testid="radial-bar-good_density"]')).toBeTruthy();
   });
 
-  it('handles null density values', () => {
+  it("handles null density values", () => {
     const { container } = render(
       <RadialChart
-        histogramData={{
-          ...histogramData,
-          good_density: undefined,
-          ni_density: undefined,
-          poor_density: undefined,
-        } as any}
-      />
+        histogramData={
+          {
+            ...histogramData,
+            good_density: undefined,
+            ni_density: undefined,
+            poor_density: undefined,
+          } as any
+        }
+      />,
     );
     expect(container.querySelector('[data-testid="radial-chart"]')).toBeTruthy();
   });

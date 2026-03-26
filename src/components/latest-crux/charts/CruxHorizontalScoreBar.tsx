@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
 /** CrUX-style horizontal score bar (not the PSI category score chart in PageSpeedGaugeChart). */
 export function CruxHorizontalScoreBar({
@@ -16,7 +16,7 @@ export function CruxHorizontalScoreBar({
   const Marker = score <= 1 ? `${(score / 1) * 100}% ` : `${score}% `;
 
   return (
-    <div className={cn('h-8 w-full', className)}>
+    <div className={cn("h-8 w-full", className)}>
       <svg viewBox="0 0 100 7">
         <g className="flex flex-row">
           <rect width={poorPercent} height="10" fill="hsl(var(--chart-3))" />

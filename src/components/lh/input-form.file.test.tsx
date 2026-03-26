@@ -1,56 +1,53 @@
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getAlert, getTab, submitForm } from './__mocks__/input-form-mocks';
-import { executeSubmit } from '@/components/lh/input-form-action';
-import { LhInputForm } from '@/components/lh/LhInputForm';
+import { act, fireEvent, render, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { getAlert, getTab, submitForm } from "./__mocks__/input-form-mocks";
+import { executeSubmit } from "@/components/lh/input-form-action";
+import { LhInputForm } from "@/components/lh/LhInputForm";
 
-vi.mock('@/components/lh/input-form-action', async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import('@/components/lh/input-form-action')>();
+vi.mock("@/components/lh/input-form-action", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/components/lh/input-form-action")>();
   return {
     ...actual,
     executeSubmit: vi.fn().mockResolvedValue({ error: null, success: false }),
   };
 });
 
-vi.mock('@/components/ui/tabs', () =>
-  import('./__mocks__/input-form-mocks').then((m) => m.tabsMock)
+vi.mock("@/components/ui/tabs", () =>
+  import("./__mocks__/input-form-mocks").then((m) => m.tabsMock),
 );
-vi.mock('lucide-react', () =>
-  import('./__mocks__/input-form-mocks').then((m) => m.lucideMock)
+vi.mock("lucide-react", () => import("./__mocks__/input-form-mocks").then((m) => m.lucideMock));
+vi.mock("@/components/ui/card", () =>
+  import("./__mocks__/input-form-mocks").then((m) => m.cardMock),
 );
-vi.mock('@/components/ui/card', () =>
-  import('./__mocks__/input-form-mocks').then((m) => m.cardMock)
+vi.mock("@/components/ui/input", () =>
+  import("./__mocks__/input-form-mocks").then((m) => m.inputMock),
 );
-vi.mock('@/components/ui/input', () =>
-  import('./__mocks__/input-form-mocks').then((m) => m.inputMock)
+vi.mock("@/components/ui/textarea", () =>
+  import("./__mocks__/input-form-mocks").then((m) => m.textareaMock),
 );
-vi.mock('@/components/ui/textarea', () =>
-  import('./__mocks__/input-form-mocks').then((m) => m.textareaMock)
+vi.mock("@/components/ui/button", () =>
+  import("./__mocks__/input-form-mocks").then((m) => m.buttonMock),
 );
-vi.mock('@/components/ui/button', () =>
-  import('./__mocks__/input-form-mocks').then((m) => m.buttonMock)
+vi.mock("@/components/ui/label", () =>
+  import("./__mocks__/input-form-mocks").then((m) => m.labelMock),
 );
-vi.mock('@/components/ui/label', () =>
-  import('./__mocks__/input-form-mocks').then((m) => m.labelMock)
+vi.mock("@/components/ui/alert", () =>
+  import("./__mocks__/input-form-mocks").then((m) => m.alertMock),
 );
-vi.mock('@/components/ui/alert', () =>
-  import('./__mocks__/input-form-mocks').then((m) => m.alertMock)
+vi.mock("@/components/lh/inputs/LhTabList", () =>
+  import("./__mocks__/input-form-mocks").then((m) => m.lhTabListMock),
 );
-vi.mock('@/components/lh/inputs/LhTabList', () =>
-  import('./__mocks__/input-form-mocks').then((m) => m.lhTabListMock)
+vi.mock("@/components/lh/inputs/LhTextInput", () =>
+  import("./__mocks__/input-form-mocks").then((m) => m.lhTextInputMock),
 );
-vi.mock('@/components/lh/inputs/LhTextInput', () =>
-  import('./__mocks__/input-form-mocks').then((m) => m.lhTextInputMock)
+vi.mock("@/components/lh/inputs/LhFileInput", () =>
+  import("./__mocks__/input-form-mocks").then((m) => m.lhFileInputMock),
 );
-vi.mock('@/components/lh/inputs/LhFileInput', () =>
-  import('./__mocks__/input-form-mocks').then((m) => m.lhFileInputMock)
-);
-vi.mock('@/components/lh/inputs/LhUrlInput', () =>
-  import('./__mocks__/input-form-mocks').then((m) => m.lhUrlInputMock)
+vi.mock("@/components/lh/inputs/LhUrlInput", () =>
+  import("./__mocks__/input-form-mocks").then((m) => m.lhUrlInputMock),
 );
 
-describe('LhInputForm file tab', () => {
+describe("LhInputForm file tab", () => {
   beforeEach(() => {
     vi.mocked(executeSubmit).mockReset();
     vi.mocked(executeSubmit).mockResolvedValue({
@@ -59,9 +56,9 @@ describe('LhInputForm file tab', () => {
     });
   });
 
-  it('shows error when submitting with no files selected', async () => {
+  it("shows error when submitting with no files selected", async () => {
     vi.mocked(executeSubmit).mockResolvedValueOnce({
-      error: 'Please select at least one JSON file',
+      error: "Please select at least one JSON file",
       success: false,
     });
     const { container } = render(<LhInputForm />);
@@ -71,13 +68,11 @@ describe('LhInputForm file tab', () => {
     });
     submitForm();
     await waitFor(() => {
-      expect(getAlert(container)).toHaveTextContent(
-        'Please select at least one JSON file',
-      );
+      expect(getAlert(container)).toHaveTextContent("Please select at least one JSON file");
     });
   });
 
-  it('shows success when file has valid JSON and name', async () => {
+  it("shows success when file has valid JSON and name", async () => {
     vi.mocked(executeSubmit).mockResolvedValueOnce({
       error: null,
       success: true,
@@ -87,56 +82,53 @@ describe('LhInputForm file tab', () => {
     await act(async () => {
       fireEvent.click(fileTab!);
     });
-    const file = new File(['{"score": 85}'], 'report.json', {
-      type: 'application/json',
+    const file = new File(['{"score": 85}'], "report.json", {
+      type: "application/json",
     });
-    fireEvent.change(container.querySelector('#json-file')!, {
+    fireEvent.change(container.querySelector("#json-file")!, {
       target: { files: [file] },
     });
-    fireEvent.change(
-      container.querySelector('input[placeholder="Enter a name for this file"]')!,
-      { target: { value: 'MyFile' } },
-    );
+    fireEvent.change(container.querySelector('input[placeholder="Enter a name for this file"]')!, {
+      target: { value: "MyFile" },
+    });
     submitForm();
     await waitFor(() => {
-      expect(getAlert(container)).toHaveTextContent('Success');
+      expect(getAlert(container)).toHaveTextContent("Success");
     });
   });
 
-  it('ignores file input change when no files selected', async () => {
+  it("ignores file input change when no files selected", async () => {
     const { container } = render(<LhInputForm />);
     const fileTab = getTab(container, /Upload Lighthouse JSON File/);
     await act(async () => {
       fireEvent.click(fileTab!);
     });
-    fireEvent.change(container.querySelector('#json-file')!, {
+    fireEvent.change(container.querySelector("#json-file")!, {
       target: { files: [] },
     });
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('allows updating file name and removing file', async () => {
+  it("allows updating file name and removing file", async () => {
     const { container } = render(<LhInputForm />);
     const fileTab = getTab(container, /Upload Lighthouse JSON File/);
     await act(async () => {
       fireEvent.click(fileTab!);
     });
-    const file = new File(['{}'], 'a.json', { type: 'application/json' });
-    fireEvent.change(container.querySelector('#json-file')!, {
+    const file = new File(["{}"], "a.json", { type: "application/json" });
+    fireEvent.change(container.querySelector("#json-file")!, {
       target: { files: [file] },
     });
     const nameInput = container.querySelector(
       'input[placeholder="Enter a name for this file"]',
     ) as HTMLInputElement;
-    fireEvent.change(nameInput!, { target: { value: 'CustomName' } });
-    expect(nameInput).toHaveValue('CustomName');
-    const removeButtons = Array.from(
-      container.querySelectorAll('button'),
-    ).filter((b) => b.textContent?.trim() === 'Remove');
+    fireEvent.change(nameInput!, { target: { value: "CustomName" } });
+    expect(nameInput).toHaveValue("CustomName");
+    const removeButtons = Array.from(container.querySelectorAll("button")).filter(
+      (b) => b.textContent?.trim() === "Remove",
+    );
     fireEvent.click(removeButtons[removeButtons.length - 1]!);
     await act(async () => {});
-    expect(
-      container.querySelector('input[placeholder="Enter a name for this file"]'),
-    ).toBeNull();
+    expect(container.querySelector('input[placeholder="Enter a name for this file"]')).toBeNull();
   });
 });

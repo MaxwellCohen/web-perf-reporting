@@ -1,10 +1,10 @@
-import { db } from '@/db';
-import { CruxHistoryReportSchema } from '@/lib/schema';
-import { convertCruxHistoryToReports, formatDate } from '@/lib/utils';
-import * as Sentry from '@sentry/nextjs';
-import { historicalMetrics } from '@/db/schema';
-import { eq, and, asc } from 'drizzle-orm';
-import { formFactor } from '@/lib/services';
+import { db } from "@/db";
+import { CruxHistoryReportSchema } from "@/lib/schema";
+import { convertCruxHistoryToReports, formatDate } from "@/lib/utils";
+import * as Sentry from "@sentry/nextjs";
+import { historicalMetrics } from "@/db/schema";
+import { eq, and, asc } from "drizzle-orm";
+import { formFactor } from "@/lib/services";
 
 export const getHistoricalCruxData = async ({
   url,
@@ -17,36 +17,38 @@ export const getHistoricalCruxData = async ({
 }) => {
   // Validate that at least one parameter is provided
   if (!url && !origin) {
-    throw new Error('Either URL or origin must be provided');
+    throw new Error("Either URL or origin must be provided");
   }
 
   try {
     const API_KEY = process.env.PAGESPEED_INSIGHTS_API;
     if (!API_KEY) {
-      throw new Error('PAGESPEED_INSIGHTS_API environment variable is not set');
+      throw new Error("PAGESPEED_INSIGHTS_API environment variable is not set");
     }
 
     const response = await fetch(
       `https://chromeuxreport.googleapis.com/v1/records:queryHistoryRecord?key=${API_KEY}`,
       {
-        body: JSON.stringify({ 
-          url: url || undefined, 
-          formFactor: formFactor || undefined, 
-          origin: origin || undefined, 
-          collectionPeriodCount: 40
+        body: JSON.stringify({
+          url: url || undefined,
+          formFactor: formFactor || undefined,
+          origin: origin || undefined,
+          collectionPeriodCount: 40,
         }),
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       },
     );
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
-      throw new Error(`API request failed: ${response.status} ${response.statusText}${
-        errorData ? ` - ${JSON.stringify(errorData)}` : ''
-      }`);
+      throw new Error(
+        `API request failed: ${response.status} ${response.statusText}${
+          errorData ? ` - ${JSON.stringify(errorData)}` : ""
+        }`,
+      );
     }
 
     const data = await response.json();
@@ -54,18 +56,19 @@ export const getHistoricalCruxData = async ({
     const reports = convertCruxHistoryToReports(parseData);
 
     if (reports.length) {
-      await db.insert(historicalMetrics)
+      await db
+        .insert(historicalMetrics)
         .values(
           reports.map((data) => {
             const lastDate = data.record.collectionPeriod.lastDate;
             const date = formatDate(lastDate);
-            const id = `${url ?? ''}-${origin ?? ''}-${formFactor ?? ''}-${date}`;
-            
+            const id = `${url ?? ""}-${origin ?? ""}-${formFactor ?? ""}-${date}`;
+
             return {
               id,
-              url: url ?? '',
-              origin: origin ?? '',
-              formFactor: formFactor ?? '',
+              url: url ?? "",
+              origin: origin ?? "",
+              formFactor: formFactor ?? "",
               date,
               date2: new Date(lastDate.year, lastDate.month - 1, lastDate.day), // Month is 0-based
               data,
@@ -80,9 +83,9 @@ export const getHistoricalCruxData = async ({
       .from(historicalMetrics)
       .where(
         and(
-          eq(historicalMetrics.url, url ?? ''),
-          eq(historicalMetrics.origin, origin ?? ''),
-          eq(historicalMetrics.formFactor, formFactor ?? ''),
+          eq(historicalMetrics.url, url ?? ""),
+          eq(historicalMetrics.origin, origin ?? ""),
+          eq(historicalMetrics.formFactor, formFactor ?? ""),
         ),
       )
       .orderBy(asc(historicalMetrics.date2));
@@ -92,4 +95,4 @@ export const getHistoricalCruxData = async ({
     Sentry.captureException(error);
     return null;
   }
-}; 
+};

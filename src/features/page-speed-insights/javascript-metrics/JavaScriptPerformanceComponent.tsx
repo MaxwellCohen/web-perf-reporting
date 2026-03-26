@@ -1,26 +1,24 @@
-'use client';
-import { AccordionContent, AccordionItem } from '@/components/ui/accordion';
-import { AccordionSectionTitleTrigger } from '@/components/ui/accordion-section-title-trigger';
-import { BootupTimeCard } from '@/features/page-speed-insights/javascript-metrics/BootupTimeCard';
-import { MainThreadWorkCard } from '@/features/page-speed-insights/javascript-metrics/MainThreadWorkCard';
-import { UnusedJavaScriptCard } from '@/features/page-speed-insights/javascript-metrics/UnusedJavaScriptCard';
-import { UnminifiedJavaScriptCard } from '@/features/page-speed-insights/javascript-metrics/UnminifiedJavaScriptCard';
-import { LegacyJavaScriptCard } from '@/features/page-speed-insights/javascript-metrics/LegacyJavaScriptCard';
-import { JavaScriptSummaryCard } from '@/features/page-speed-insights/javascript-metrics/JavaScriptSummaryCard';
-import { TaskSummaryCard } from '@/features/page-speed-insights/javascript-metrics/TaskSummaryCard';
-import { useJavaScriptMetrics } from '@/features/page-speed-insights/javascript-metrics/javascriptMetricsSelectors';
+"use client";
+import { AccordionContent, AccordionItem } from "@/components/ui/accordion";
+import { AccordionSectionTitleTrigger } from "@/components/ui/accordion-section-title-trigger";
+import { BootupTimeCard } from "@/features/page-speed-insights/javascript-metrics/BootupTimeCard";
+import { MainThreadWorkCard } from "@/features/page-speed-insights/javascript-metrics/MainThreadWorkCard";
+import { UnusedJavaScriptCard } from "@/features/page-speed-insights/javascript-metrics/UnusedJavaScriptCard";
+import { UnminifiedJavaScriptCard } from "@/features/page-speed-insights/javascript-metrics/UnminifiedJavaScriptCard";
+import { LegacyJavaScriptCard } from "@/features/page-speed-insights/javascript-metrics/LegacyJavaScriptCard";
+import { JavaScriptSummaryCard } from "@/features/page-speed-insights/javascript-metrics/JavaScriptSummaryCard";
+import { TaskSummaryCard } from "@/features/page-speed-insights/javascript-metrics/TaskSummaryCard";
+import { useJavaScriptMetrics } from "@/features/page-speed-insights/javascript-metrics/javascriptMetricsSelectors";
 
 export function JavaScriptPerformanceComponent() {
-  'use memo';
+  "use memo";
   const { jsMetrics, jsStats } = useJavaScriptMetrics();
 
   if (!jsMetrics.length) return null;
 
   return (
-    <AccordionItem value={'javascriptPerformance'}>
-      <AccordionSectionTitleTrigger>
-        JavaScript Performance
-      </AccordionSectionTitleTrigger>
+    <AccordionItem value={"javascriptPerformance"}>
+      <AccordionSectionTitleTrigger>JavaScript Performance</AccordionSectionTitleTrigger>
       <AccordionContent className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         <JavaScriptSummaryCard stats={jsStats} />
         <TaskSummaryCard

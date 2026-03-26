@@ -4,10 +4,7 @@ import { Table } from "@/components/ui/table";
 import { TableItem } from "@/lib/schema";
 import { getNumber } from "@/lib/utils";
 import { useMemo } from "react";
-import {
-  ColumnDef,
-  createColumnHelper,
-} from "@tanstack/react-table";
+import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
 import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
 import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
@@ -28,23 +25,19 @@ type RTTTableRow = {
 const columnHelper = createColumnHelper<RTTTableRow>();
 const cols: ColumnDef<RTTTableRow, unknown>[] = [
   createTruncatedTextColumn(columnHelper, {
-    accessor: 'origin',
-    id: 'origin',
-    header: 'Origin',
-    maxWidthClass: 'max-w-50',
+    accessor: "origin",
+    id: "origin",
+    header: "Origin",
+    maxWidthClass: "max-w-50",
     enableGrouping: true,
   }),
-  createMSColumn(columnHelper, 'rtt', 'RTT'),
+  createMSColumn(columnHelper, "rtt", "RTT"),
 ];
 
 export function NetworkRTTCard() {
   "use no memo";
   const series = useNetworkMetricSeries();
-  const validMetrics = useMemo(
-    () => series.filter((m) => m.networkRTT.length > 0),
-    [series],
-  );
-
+  const validMetrics = useMemo(() => series.filter((m) => m.networkRTT.length > 0), [series]);
 
   const showReportColumn = validMetrics.length > 1;
 
@@ -52,21 +45,21 @@ export function NetworkRTTCard() {
   const data = useMemo<RTTTableRow[]>(() => {
     const allRows = validMetrics.flatMap(({ label, networkRTT }) =>
       networkRTT.map((item: TableItem) => {
-        const origin = typeof item.origin === 'string' ? item.origin : '';
+        const origin = typeof item.origin === "string" ? item.origin : "";
         const rtt = getNumber(item.rtt);
         return {
           label,
-          origin: origin.replace(/^https?:\/\//, '') || 'Unknown',
+          origin: origin.replace(/^https?:\/\//, "") || "Unknown",
           rtt,
         };
-      })
+      }),
     );
 
     return sortByMaxValue(
       allRows,
       (row) => row.origin,
       (row) => row.rtt || 0,
-      validMetrics.length
+      validMetrics.length,
     );
   }, [validMetrics]);
 
@@ -75,7 +68,7 @@ export function NetworkRTTCard() {
   const table = useStandardTable({
     data,
     columns,
-    grouping: ['origin'],
+    grouping: ["origin"],
   });
 
   if (!validMetrics.length) {
@@ -89,7 +82,7 @@ export function NetworkRTTCard() {
       </CardHeader>
       <CardContent>
         <div className="w-full max-h-96 overflow-y-auto">
-          <Table className="w-full" style={{ width: '100%' }}>
+          <Table className="w-full" style={{ width: "100%" }}>
             <DataTableHeader table={table} />
             <DataTableBody table={table} />
           </Table>

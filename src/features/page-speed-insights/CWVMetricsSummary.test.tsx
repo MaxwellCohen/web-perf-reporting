@@ -1,36 +1,32 @@
-import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { render } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import {
   PageSpeedInsightsStoreProvider,
   usePageSpeedInsightsStore,
-} from '@/features/page-speed-insights/PageSpeedContext';
-import { CWVMetricsSummary } from '@/features/page-speed-insights/CWVMetricsSummary';
+} from "@/features/page-speed-insights/PageSpeedContext";
+import { CWVMetricsSummary } from "@/features/page-speed-insights/CWVMetricsSummary";
 
-vi.mock('@/features/page-speed-insights/JSUsage/JSUsageSection', () => ({
+vi.mock("@/features/page-speed-insights/JSUsage/JSUsageSection", () => ({
   JSUsageSection: () => <div data-testid="js-usage">JS Usage</div>,
 }));
 
-vi.mock('@/features/page-speed-insights/lh-categories/table/RenderTableValue', () => ({
-  RenderBytesValue: ({ value }: { value: number }) => (
-    <span>{value} bytes</span>
-  ),
-  RenderMSValue: ({ value }: { value: number }) => (
-    <span>{Math.round(Number(value))} ms</span>
-  ),
+vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", () => ({
+  RenderBytesValue: ({ value }: { value: number }) => <span>{value} bytes</span>,
+  RenderMSValue: ({ value }: { value: number }) => <span>{Math.round(Number(value))} ms</span>,
 }));
 
-vi.mock('@/components/ui/accordion', () => ({
+vi.mock("@/components/ui/accordion", () => ({
   Details: ({ children, ...props }: React.HTMLAttributes<HTMLDetailsElement>) => (
     <details {...props}>{children}</details>
   ),
 }));
 
-vi.mock('@/components/ui/card', () => ({
+vi.mock("@/components/ui/card", () => ({
   Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   CardHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-vi.mock('@/components/ui/table', () => ({
+vi.mock("@/components/ui/table", () => ({
   Table: ({ children }: { children: React.ReactNode }) => <table>{children}</table>,
   TableHeader: ({ children }: { children: React.ReactNode }) => <thead>{children}</thead>,
   TableBody: ({ children }: { children: React.ReactNode }) => <tbody>{children}</tbody>,
@@ -49,11 +45,7 @@ function TestWrapper({
   labels: string[];
 }) {
   const store = usePageSpeedInsightsStore({ data, labels, isLoading: false });
-  return (
-    <PageSpeedInsightsStoreProvider store={store}>
-      {children}
-    </PageSpeedInsightsStoreProvider>
-  );
+  return <PageSpeedInsightsStoreProvider store={store}>{children}</PageSpeedInsightsStoreProvider>;
 }
 
 function createMetricsItem(overrides: Record<string, unknown> = {}) {
@@ -67,8 +59,8 @@ function createMetricsItem(overrides: Record<string, unknown> = {}) {
   };
 }
 
-describe('CWVMetricsSummary', () => {
-  it('returns null when no items have metrics', () => {
+describe("CWVMetricsSummary", () => {
+  it("returns null when no items have metrics", () => {
     const data = [
       {
         lighthouseResult: {
@@ -77,14 +69,14 @@ describe('CWVMetricsSummary', () => {
       },
     ];
     const { container } = render(
-      <TestWrapper data={data} labels={['Mobile']}>
+      <TestWrapper data={data} labels={["Mobile"]}>
         <CWVMetricsSummary />
       </TestWrapper>,
     );
-    expect(container.querySelector('details')).toBeNull();
+    expect(container.querySelector("details")).toBeNull();
   });
 
-  it('renders Summary Metrics when items have metrics and diagnostics', () => {
+  it("renders Summary Metrics when items have metrics and diagnostics", () => {
     const metricsItem = createMetricsItem();
     const diagnosticsItem = { numRequests: 10, numScripts: 5 };
     const data = [
@@ -102,18 +94,18 @@ describe('CWVMetricsSummary', () => {
       },
     ];
     const { container } = render(
-      <TestWrapper data={data} labels={['Mobile']}>
+      <TestWrapper data={data} labels={["Mobile"]}>
         <CWVMetricsSummary />
       </TestWrapper>,
     );
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('renders Network Request Summary when network-requests audit exists', () => {
+  it("renders Network Request Summary when network-requests audit exists", () => {
     const metricsItem = createMetricsItem();
     const networkItems = [
-      { resourceType: 'script', transferSize: 1000, resourceSize: 800 },
-      { resourceType: 'stylesheet', transferSize: 500, resourceSize: 400 },
+      { resourceType: "script", transferSize: 1000, resourceSize: 800 },
+      { resourceType: "stylesheet", transferSize: 500, resourceSize: 400 },
     ];
     const data = [
       {
@@ -121,9 +113,9 @@ describe('CWVMetricsSummary', () => {
           audits: {
             metrics: { details: { items: [metricsItem] } },
             diagnostics: { details: { items: [{ numRequests: 2 }] } },
-            'network-requests': {
+            "network-requests": {
               details: {
-                type: 'table',
+                type: "table",
                 items: networkItems,
               },
             },
@@ -132,7 +124,7 @@ describe('CWVMetricsSummary', () => {
       },
     ];
     const { container } = render(
-      <TestWrapper data={data} labels={['Mobile']}>
+      <TestWrapper data={data} labels={["Mobile"]}>
         <CWVMetricsSummary />
       </TestWrapper>,
     );

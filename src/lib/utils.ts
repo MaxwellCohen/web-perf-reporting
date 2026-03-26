@@ -6,9 +6,9 @@ import {
   CruxHistoryReport,
   CruxReport,
   urlSchema,
-} from '@/lib/schema';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+} from "@/lib/schema";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -16,51 +16,49 @@ export function cn(...inputs: ClassValue[]) {
 
 export const formatDate = (data?: CruxDate) => {
   if (!data) {
-    return '';
+    return "";
   }
   const date = new Date(data.year, data.month - 1, data.day);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
   });
 };
 
 export function formatFormFactor(string?: string) {
   if (!string) {
-    return 'All';
+    return "All";
   }
   return string
-    .replaceAll('_', ' ')
+    .replaceAll("_", " ")
     .toLowerCase()
-    .split(' ')
+    .split(" ")
     .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-    .join(' ');
+    .join(" ");
 }
 
 const histogramFields = [
-  'cumulative_layout_shift',
-  'experimental_time_to_first_byte',
-  'interaction_to_next_paint',
-  'largest_contentful_paint',
-  'round_trip_time',
-  'first_contentful_paint',
+  "cumulative_layout_shift",
+  "experimental_time_to_first_byte",
+  "interaction_to_next_paint",
+  "largest_contentful_paint",
+  "round_trip_time",
+  "first_contentful_paint",
 ] as const;
 
 const percentilesTimeseries = [
-  'largest_contentful_paint_image_time_to_first_byte',
-  'largest_contentful_paint_image_resource_load_delay',
-  'largest_contentful_paint_image_resource_load_duration',
-  'largest_contentful_paint_image_element_render_delay',
+  "largest_contentful_paint_image_time_to_first_byte",
+  "largest_contentful_paint_image_resource_load_delay",
+  "largest_contentful_paint_image_resource_load_duration",
+  "largest_contentful_paint_image_element_render_delay",
 ] as const;
 
 // form_factors
 // largest_contentful_paint_resource_type
 // navigation_types
 
-export function formatCruxReport(
-  item: CruxReport | null,
-): CruxHistoryItem[] | null {
+export function formatCruxReport(item: CruxReport | null): CruxHistoryItem[] | null {
   const url =
     item?.urlNormalizationDetails?.originalUrl ??
     item?.record?.key?.origin ??
@@ -73,8 +71,8 @@ export function formatCruxReport(
       const d: CruxHistoryItem = JSON.parse(
         JSON.stringify({
           url,
-          formFactor: item.record.key.formFactor || '',
-          origin: !item.urlNormalizationDetails ? 'origin' : 'url',
+          formFactor: item.record.key.formFactor || "",
+          origin: !item.urlNormalizationDetails ? "origin" : "url",
           start_date: formatDate(item.record.collectionPeriod.firstDate),
           end_date: formatDate(item.record.collectionPeriod.lastDate),
           metric_name: metric,
@@ -95,8 +93,7 @@ export function formatCruxHistoryReport(
   item: CruxHistoryReport,
   formFactor?: string,
 ): CruxHistoryItem[] | null {
-  const url =
-    item?.urlNormalizationDetails?.normalizedUrl ?? item?.record?.key?.origin;
+  const url = item?.urlNormalizationDetails?.normalizedUrl ?? item?.record?.key?.origin;
   if (!url) return null;
   return histogramFields
     .map((metric) => {
@@ -111,8 +108,8 @@ export function formatCruxHistoryReport(
         }
         const d: CruxHistoryItem = {
           url,
-          formFactor: formFactor ?? '',
-          origin: !item.urlNormalizationDetails ? 'origin' : 'url',
+          formFactor: formFactor ?? "",
+          origin: !item.urlNormalizationDetails ? "origin" : "url",
           start_date: formatDate(time.firstDate),
           end_date: formatDate(time.lastDate),
           metric_name: metric,
@@ -130,10 +127,7 @@ export function formatCruxHistoryReport(
     .filter((item): item is CruxHistoryItem => !!item);
 }
 
-const makeHistogramData = (
-  item: CruxHistoryHistogramTimeseries,
-  index: number,
-): CruxHistogram =>
+const makeHistogramData = (item: CruxHistoryHistogramTimeseries, index: number): CruxHistogram =>
   [
     {
       start: item[0].start,
@@ -151,12 +145,9 @@ const makeHistogramData = (
     },
   ] as const;
 
-type CruxMetrics = CruxReport['record']['metrics'];
+type CruxMetrics = CruxReport["record"]["metrics"];
 
-const getHistogramMetrics = (
-  historicalData: CruxHistoryReport,
-  index: number,
-) =>
+const getHistogramMetrics = (historicalData: CruxHistoryReport, index: number) =>
   histogramFields.reduce((acc: CruxMetrics, fieldName) => {
     const metric = historicalData.record.metrics[fieldName];
     if (!metric?.histogramTimeseries) return acc;
@@ -170,10 +161,7 @@ const getHistogramMetrics = (
     return acc;
   }, {});
 
-const getLcpResourceTypeMetrics = (
-  historicalData: CruxHistoryReport,
-  index: number,
-) => {
+const getLcpResourceTypeMetrics = (historicalData: CruxHistoryReport, index: number) => {
   if (!historicalData.record.metrics.largest_contentful_paint_resource_type) {
     return {};
   }
@@ -181,22 +169,19 @@ const getLcpResourceTypeMetrics = (
     largest_contentful_paint_resource_type: {
       fractions: {
         image: +(
-          historicalData.record.metrics.largest_contentful_paint_resource_type
-            .fractionTimeseries.image.fractions[index] || 0
+          historicalData.record.metrics.largest_contentful_paint_resource_type.fractionTimeseries
+            .image.fractions[index] || 0
         ),
         text: +(
-          historicalData.record.metrics.largest_contentful_paint_resource_type
-            .fractionTimeseries.text.fractions[index] || 0
+          historicalData.record.metrics.largest_contentful_paint_resource_type.fractionTimeseries
+            .text.fractions[index] || 0
         ),
       },
     },
   };
 };
 
-const getNavigationTypes = (
-  historicalData: CruxHistoryReport,
-  index: number,
-) => {
+const getNavigationTypes = (historicalData: CruxHistoryReport, index: number) => {
   if (!historicalData?.record?.metrics?.navigation_types) {
     return {};
   }
@@ -218,10 +203,7 @@ const getNavigationTypes = (
   };
 };
 
-const getPercentilesTimeseries = (
-  historicalData: CruxHistoryReport,
-  index: number,
-) =>
+const getPercentilesTimeseries = (historicalData: CruxHistoryReport, index: number) =>
   percentilesTimeseries.reduce((acc: CruxMetrics, fieldName) => {
     const metric = historicalData.record.metrics[fieldName];
     if (!metric?.percentilesTimeseries) return acc;
@@ -233,37 +215,30 @@ const getPercentilesTimeseries = (
     return acc;
   }, {});
 
-
-const getFormFactors = (
-  historicalData: CruxHistoryReport,
-  index: number,
-) => {
+const getFormFactors = (historicalData: CruxHistoryReport, index: number) => {
   const fractionTimeseries = historicalData?.record?.metrics?.form_factors?.fractionTimeseries;
   if (!fractionTimeseries) {
     return {};
   }
   return {
-    form_factors : {
+    form_factors: {
       fractions: {
         desktop: +(fractionTimeseries.desktop.fractions[index] || 0),
         phone: +(fractionTimeseries.phone.fractions[index] || 0),
         tablet: +(fractionTimeseries.tablet.fractions[index] || 0),
+      },
+    },
+  };
+};
 
-      }
-    }
-  }
-}
-
-export function convertCruxHistoryToReports(
-  historicalData: CruxHistoryReport,
-): CruxReport[] {
+export function convertCruxHistoryToReports(historicalData: CruxHistoryReport): CruxReport[] {
   return historicalData.record.collectionPeriods.map((period, index) => {
     const metrics: CruxMetrics = {
       ...getHistogramMetrics(historicalData, index),
       ...getPercentilesTimeseries(historicalData, index),
       ...getLcpResourceTypeMetrics(historicalData, index),
       ...getNavigationTypes(historicalData, index),
-      ...getFormFactors(historicalData, index)
+      ...getFormFactors(historicalData, index),
     };
     return {
       record: {
@@ -271,11 +246,10 @@ export function convertCruxHistoryToReports(
         metrics,
         collectionPeriod: period,
       },
-      urlNormalizationDetails : historicalData.urlNormalizationDetails
+      urlNormalizationDetails: historicalData.urlNormalizationDetails,
     };
   });
 }
-
 
 export function groupBy<T>(list: T[], keyGetter: (item: T) => string) {
   const map = new Map<string, T[]>();
@@ -292,23 +266,23 @@ export function groupBy<T>(list: T[], keyGetter: (item: T) => string) {
 }
 
 export function getUrlString(url: unknown): string {
-  return typeof url === 'string' ? url : '';
+  return typeof url === "string" ? url : "";
 }
 
 export function getNumber(value: unknown): number | undefined {
-  return typeof value === 'number' ? value : undefined;
+  return typeof value === "number" ? value : undefined;
 }
 
 export function updateURl(url?: string) {
   if (!url) {
-    return '';
+    return "";
   }
-  if (!url.startsWith('http://') && !url.startsWith('https://')) {
-    url = 'https://' + url;
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    url = "https://" + url;
   }
-  if (!url.includes('www.')) {
-    const urlParts = url.split('://');
-    url = urlParts[0] + '://www.' + urlParts[1];
+  if (!url.includes("www.")) {
+    const urlParts = url.split("://");
+    url = urlParts[0] + "://www." + urlParts[1];
   }
-  return urlSchema.safeParse(url).data ?? '';
+  return urlSchema.safeParse(url).data ?? "";
 }

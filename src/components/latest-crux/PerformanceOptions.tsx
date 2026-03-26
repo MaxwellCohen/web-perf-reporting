@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { DateRangePopover } from '@/components/latest-crux/options/DateRangePopover';
-import type { DateRange, DeviceType, Scope } from '@/components/latest-crux/types';
-import { Card } from '@/components/ui/card';
-import { OptionsSelector } from '@/components/common/OptionsSelector';
-import type { ReactNode } from 'react';
-import { useId } from 'react';
+import { DateRangePopover } from "@/components/latest-crux/options/DateRangePopover";
+import type { DateRange, DeviceType, Scope } from "@/components/latest-crux/types";
+import { Card } from "@/components/ui/card";
+import { OptionsSelector } from "@/components/common/OptionsSelector";
+import type { ReactNode } from "react";
+import { useId } from "react";
 
-export type { DateRange, DeviceType, Scope } from '@/components/latest-crux/types';
+export type { DateRange, DeviceType, Scope } from "@/components/latest-crux/types";
 
 interface PerformanceOptionsProps {
   setChartType: (value: string) => void;
@@ -36,20 +36,22 @@ export function PerformanceOptions({
         title="Report Scope"
         onValueChange={(value) => setReportScope(value as Scope)}
         options={[
-          { value: 'origin', label: 'Whole Site' },
-          { value: 'url', label: 'Current Page' },
+          { value: "origin", label: "Whole Site" },
+          { value: "url", label: "Current Page" },
         ]}
       />
       <OptionsSelector
         id={`current-chart-device${id}`}
         title="Device"
         onValueChange={(value) => setDeviceType(value as DeviceType)}
-        options={[
-          'All',
-          { value: 'DESKTOP', label: 'Desktop' },
-          { value: 'TABLET', label: 'Tablet' },
-          { value: 'PHONE', label: 'Phone' },
-        ] as const}
+        options={
+          [
+            "All",
+            { value: "DESKTOP", label: "Desktop" },
+            { value: "TABLET", label: "Tablet" },
+            { value: "PHONE", label: "Phone" },
+          ] as const
+        }
       />
       <OptionsSelector
         id={`current-chart-type${id}`}
@@ -58,11 +60,7 @@ export function PerformanceOptions({
         options={chartKeys}
       />
       {setDateRange && (
-        <DateRangePopover
-          id={id}
-          dateRange={dateRange}
-          setDateRange={setDateRange}
-        />
+        <DateRangePopover id={id} dateRange={dateRange} setDateRange={setDateRange} />
       )}
       {children}
     </Card>

@@ -1,9 +1,5 @@
-'use client';
-import {
-  AuditDetailTable,
-  DebugData,
-  NullablePageSpeedInsights,
-} from '@/lib/schema';
+"use client";
+import { AuditDetailTable, DebugData, NullablePageSpeedInsights } from "@/lib/schema";
 import {
   Table,
   TableBody,
@@ -11,67 +7,67 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { renderBoolean } from '@/features/page-speed-insights/lh-categories/renderBoolean';
-import { camelCaseToSentenceCase } from '@/features/page-speed-insights/lh-categories/camelCaseToSentenceCase';
-import { Card, CardHeader } from '@/components/ui/card';
-import { Details } from '@/components/ui/accordion';
+} from "@/components/ui/table";
+import { renderBoolean } from "@/features/page-speed-insights/lh-categories/renderBoolean";
+import { camelCaseToSentenceCase } from "@/features/page-speed-insights/lh-categories/camelCaseToSentenceCase";
+import { Card, CardHeader } from "@/components/ui/card";
+import { Details } from "@/components/ui/accordion";
 import {
   RenderBytesValue,
   RenderMSValue,
-} from '@/features/page-speed-insights/lh-categories/table/RenderTableValue';
-import { Fragment, JSX } from 'react';
-import { groupBy } from '@/lib/utils';
-import { toTitleCase } from '@/features/page-speed-insights/toTitleCase';
-import { usePageSpeedItems } from '@/features/page-speed-insights/PageSpeedContext';
-import { JSUsageSection } from '@/features/page-speed-insights/JSUsage/JSUsageSection';
+} from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
+import { Fragment, JSX } from "react";
+import { groupBy } from "@/lib/utils";
+import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
+import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
+import { JSUsageSection } from "@/features/page-speed-insights/JSUsage/JSUsageSection";
 
 const CWV = [
-  'firstContentfulPaint',
-  'largestContentfulPaint',
-  'totalBlockingTime',
-  'cumulativeLayoutShift',
-  'cumulativeLayoutShiftMainFrame',
-  'speedIndex',
+  "firstContentfulPaint",
+  "largestContentfulPaint",
+  "totalBlockingTime",
+  "cumulativeLayoutShift",
+  "cumulativeLayoutShiftMainFrame",
+  "speedIndex",
 ];
 
 const taskKeys = [
-  'numTasksOver10ms',
-  'numTasksOver25ms',
-  'numTasksOver50ms',
-  'numTasksOver100ms',
-  'numTasksOver500ms',
-  'numTasks',
+  "numTasksOver10ms",
+  "numTasksOver25ms",
+  "numTasksOver50ms",
+  "numTasksOver100ms",
+  "numTasksOver500ms",
+  "numTasks",
 ];
 
 const resourceKeys = [
-  'numRequests',
-  'numFonts',
-  'numScripts',
-  'numStylesheets',
-  'mainDocumentTransferSize',
-  'totalByteWeight',
+  "numRequests",
+  "numFonts",
+  "numScripts",
+  "numStylesheets",
+  "mainDocumentTransferSize",
+  "totalByteWeight",
 ];
 
-const LCPInfo = ['lcpLoadStart', 'lcpLoadEnd', 'lcpInvalidated'];
+const LCPInfo = ["lcpLoadStart", "lcpLoadEnd", "lcpInvalidated"];
 
 const timingInfo = [
-  'firstContentfulPaint',
-  'firstContentfulPaintAllFrames',
-  'maxPotentialFID',
-  'totalBlockingTime',
-  'largestContentfulPaint',
-  'speedIndex',
-  'interactive',
+  "firstContentfulPaint",
+  "firstContentfulPaintAllFrames",
+  "maxPotentialFID",
+  "totalBlockingTime",
+  "largestContentfulPaint",
+  "speedIndex",
+  "interactive",
 ];
 const ObservedEvents = [
-  'observedNavigationStart',
-  'observedFirstPaint',
-  'observedFirstContentfulPaint',
-  'observedFirstContentfulPaintAllFrames',
-  'observedTraceEnd',
-  'observedLoad',
-  'observedDomContentLoaded',
+  "observedNavigationStart",
+  "observedFirstPaint",
+  "observedFirstContentfulPaint",
+  "observedFirstContentfulPaintAllFrames",
+  "observedTraceEnd",
+  "observedLoad",
+  "observedDomContentLoaded",
 ];
 
 export function CWVMetricsSummary() {
@@ -79,16 +75,11 @@ export function CWVMetricsSummary() {
   const labels = data.map((d) => d.label);
   const items = data.map(({ item }) => mergeData(item));
   const itemKeys = items.map((d) => Object.keys(d));
-  const keys = [
-    ...new Set(itemKeys.reduce((acc, curr) => [...acc, ...curr], [])),
-  ]
-    .filter((k) => k !== 'type')
-    .filter((k) => !k.endsWith('Ts'))
+  const keys = [...new Set(itemKeys.reduce((acc, curr) => [...acc, ...curr], []))]
+    .filter((k) => k !== "type")
+    .filter((k) => !k.endsWith("Ts"))
     .sort((a, b) => {
-      return (
-        (TitleMap[a]?.sortOrder || Infinity) -
-        (TitleMap[b]?.sortOrder || Infinity)
-      );
+      return (TitleMap[a]?.sortOrder || Infinity) - (TitleMap[b]?.sortOrder || Infinity);
     });
 
   if (!keys.length) {
@@ -105,12 +96,9 @@ export function CWVMetricsSummary() {
           items={items}
           labels={labels}
           keys={CWV}
-          title={'Core Web Vitals'}
+          title={"Core Web Vitals"}
           formatter={(v, k) =>
-            [
-              'cumulativeLayoutShift',
-              'cumulativeLayoutShiftMainFrame',
-            ].includes(k as string)
+            ["cumulativeLayoutShift", "cumulativeLayoutShiftMainFrame"].includes(k as string)
               ? `${+(v as number).toFixed(4)}`
               : RenderMSValue({ value: v })
           }
@@ -119,7 +107,7 @@ export function CWVMetricsSummary() {
           items={items}
           labels={labels}
           keys={taskKeys}
-          title={'Number of Tasks'}
+          title={"Number of Tasks"}
           formatter={(v) => `${v}`}
         />
 
@@ -127,18 +115,16 @@ export function CWVMetricsSummary() {
           items={items}
           labels={labels}
           keys={LCPInfo}
-          title={'LCP info'}
+          title={"LCP info"}
           formatter={(v) => {
-            return typeof v === 'boolean'
-              ? renderBoolean(v)
-              : RenderMSValue({ value: v });
+            return typeof v === "boolean" ? renderBoolean(v) : RenderMSValue({ value: v });
           }}
         />
         <RenderTable
           items={items}
           labels={labels}
           keys={timingInfo}
-          title={'Timings info'}
+          title={"Timings info"}
           formatter={(v) => {
             return RenderMSValue({ value: v });
           }}
@@ -147,7 +133,7 @@ export function CWVMetricsSummary() {
           items={items}
           labels={labels}
           keys={ObservedEvents}
-          title={'Observed Events'}
+          title={"Observed Events"}
           formatter={(v) => {
             return RenderMSValue({ value: v });
           }}
@@ -158,11 +144,9 @@ export function CWVMetricsSummary() {
           items={items}
           labels={labels}
           keys={resourceKeys}
-          title={'Resource Info'}
+          title={"Resource Info"}
           formatter={(v, key) =>
-            ['mainDocumentTransferSize', 'totalByteWeight'].includes(
-              key as string,
-            )
+            ["mainDocumentTransferSize", "totalByteWeight"].includes(key as string)
               ? RenderBytesValue({ value: v })
               : `${v}`
           }
@@ -176,13 +160,11 @@ function RenderNetworkRequestsSummary() {
   const items = usePageSpeedItems();
   const labels = items.map((d) => d.label);
   const networkData = items.map(
-    ({ item: d }) =>
-      d?.lighthouseResult?.audits?.['network-requests']
-        ?.details as AuditDetailTable,
+    ({ item: d }) => d?.lighthouseResult?.audits?.["network-requests"]?.details as AuditDetailTable,
   );
   const groupedNetworkData = networkData.map((d) => {
     if (!d) return {};
-    return groupBy(d?.items || {}, (e) => `${e?.resourceType}` || '');
+    return groupBy(d?.items || {}, (e) => `${e?.resourceType}` || "");
   });
   const displayKeys = groupedNetworkData
     .map((d) => Object.keys(d))
@@ -192,16 +174,12 @@ function RenderNetworkRequestsSummary() {
   if (!keys.length) {
     return null;
   }
-  keys.push('Total');
-  groupedNetworkData.map(
-    (nd, i) => (nd['Total'] = networkData[i]?.items || []),
-  );
+  keys.push("Total");
+  groupedNetworkData.map((nd, i) => (nd["Total"] = networkData[i]?.items || []));
 
   return (
     <Card className="col-span-2">
-      <CardHeader className="text-center text-2xl font-bold">
-        Network Request Summary
-      </CardHeader>
+      <CardHeader className="text-center text-2xl font-bold">Network Request Summary</CardHeader>
       <Table>
         <TableHeader>
           <TableRow>
@@ -229,24 +207,22 @@ function RenderNetworkRequestsSummary() {
                     return (
                       <TableRow key={`${i}-${key}-${labelIndex}`}>
                         {idx === 0 ? (
-                          <TableCell rowSpan={filteredData.length}>
-                            {toTitleCase(key)}
-                          </TableCell>
+                          <TableCell rowSpan={filteredData.length}>{toTitleCase(key)}</TableCell>
                         ) : null}
                         {labels.length > 1 ? (
-                          <TableCell> {labels[labelIndex] || ''} </TableCell>
+                          <TableCell> {labels[labelIndex] || ""} </TableCell>
                         ) : null}
                         <TableCell> {item.length} </TableCell>
                         <TableCell>
-                          {' '}
+                          {" "}
                           {RenderBytesValue({
-                            value: sumOn(item, 'transferSize'),
-                          })}{' '}
+                            value: sumOn(item, "transferSize"),
+                          })}{" "}
                         </TableCell>
                         <TableCell>
-                          {' '}
+                          {" "}
                           {RenderBytesValue({
-                            value: sumOn(item, 'resourceSize'),
+                            value: sumOn(item, "resourceSize"),
                           })}
                         </TableCell>
                       </TableRow>
@@ -261,7 +237,6 @@ function RenderNetworkRequestsSummary() {
     </Card>
   );
 }
-
 
 function sumOn<T>(items: T[], key: string) {
   return items.reduce((acc, curr) => {
@@ -282,15 +257,11 @@ function RenderTable({
   title: string;
   formatter: (item: unknown, key?: string) => string | JSX.Element;
 }) {
-  const itemKeys = items.map((d) =>
-    Object.keys(d).filter((k) => keys.includes(k)),
-  );
+  const itemKeys = items.map((d) => Object.keys(d).filter((k) => keys.includes(k)));
 
   return (
     <Card className="min-w-1/3">
-      <CardHeader className="text-center text-2xl font-bold">
-        {title}
-      </CardHeader>
+      <CardHeader className="text-center text-2xl font-bold">{title}</CardHeader>
       <Table>
         <TableHeader>
           <TableRow>
@@ -298,9 +269,7 @@ function RenderTable({
             {itemKeys
               .map((itemKey, idx) =>
                 itemKey?.length ? (
-                  <TableHead key={`${idx}-${labels[idx]}`}>
-                    {labels[idx] || ''}
-                  </TableHead>
+                  <TableHead key={`${idx}-${labels[idx]}`}>{labels[idx] || ""}</TableHead>
                 ) : null,
               )
               .filter(Boolean)}
@@ -335,14 +304,11 @@ function mergeData(auditData?: NullablePageSpeedInsights) {
     return {};
   }
   const metrics =
-    (auditData?.lighthouseResult?.audits?.['metrics'] as unknown as DebugData)
-      ?.details?.items || [];
+    (auditData?.lighthouseResult?.audits?.["metrics"] as unknown as DebugData)?.details?.items ||
+    [];
   const details =
-    (
-      auditData?.lighthouseResult?.audits?.[
-        'diagnostics'
-      ] as unknown as DebugData
-    )?.details?.items || [];
+    (auditData?.lighthouseResult?.audits?.["diagnostics"] as unknown as DebugData)?.details
+      ?.items || [];
   const allData = [...metrics, ...details];
   const mergedData = allData.reduce(
     (acc, curr) => {
@@ -355,145 +321,143 @@ function mergeData(auditData?: NullablePageSpeedInsights) {
 
 const TitleMap: Record<string, { label: string; sortOrder: number }> = {
   // Core Web Vitals
-  cumulativeLayoutShift: { label: 'Cumulative Layout Shift', sortOrder: 1 },
+  cumulativeLayoutShift: { label: "Cumulative Layout Shift", sortOrder: 1 },
   cumulativeLayoutShiftMainFrame: {
-    label: 'Cumulative Layout Shift (Main Frame)',
+    label: "Cumulative Layout Shift (Main Frame)",
     sortOrder: 2,
   },
-  firstContentfulPaint: { label: 'First Contentful Paint', sortOrder: 3 },
-  largestContentfulPaint: { label: 'Largest Contentful Paint', sortOrder: 4 },
-  interactive: { label: 'Interactive', sortOrder: 5 },
-  totalBlockingTime: { label: 'Total Blocking Time', sortOrder: 6 },
+  firstContentfulPaint: { label: "First Contentful Paint", sortOrder: 3 },
+  largestContentfulPaint: { label: "Largest Contentful Paint", sortOrder: 4 },
+  interactive: { label: "Interactive", sortOrder: 5 },
+  totalBlockingTime: { label: "Total Blocking Time", sortOrder: 6 },
 
   // LCP Details
-  lcpLoadStart: { label: 'LCP Load Start', sortOrder: 7 },
-  lcpLoadEnd: { label: 'LCP Load End', sortOrder: 8 },
-  lcpInvalidated: { label: 'LCP Invalidated', sortOrder: 9 },
+  lcpLoadStart: { label: "LCP Load Start", sortOrder: 7 },
+  lcpLoadEnd: { label: "LCP Load End", sortOrder: 8 },
+  lcpInvalidated: { label: "LCP Invalidated", sortOrder: 9 },
 
   // Performance Metrics
-  speedIndex: { label: 'Speed Index', sortOrder: 10 },
-  maxPotentialFID: { label: 'Max Potential FID', sortOrder: 11 },
-  timeToFirstByte: { label: 'Time To First Byte', sortOrder: 12 },
+  speedIndex: { label: "Speed Index", sortOrder: 10 },
+  maxPotentialFID: { label: "Max Potential FID", sortOrder: 11 },
+  timeToFirstByte: { label: "Time To First Byte", sortOrder: 12 },
 
   // Network Statistics
-  rtt: { label: 'Round Trip Time (RTT)', sortOrder: 13 },
-  maxRtt: { label: 'Maximum Round Trip Time', sortOrder: 14 },
-  maxServerLatency: { label: 'Maximum Server Latency', sortOrder: 15 },
-  throughput: { label: 'Throughput', sortOrder: 16 },
+  rtt: { label: "Round Trip Time (RTT)", sortOrder: 13 },
+  maxRtt: { label: "Maximum Round Trip Time", sortOrder: 14 },
+  maxServerLatency: { label: "Maximum Server Latency", sortOrder: 15 },
+  throughput: { label: "Throughput", sortOrder: 16 },
   mainDocumentTransferSize: {
-    label: 'Main Document Transfer Size',
+    label: "Main Document Transfer Size",
     sortOrder: 17,
   },
-  totalByteWeight: { label: 'Total Byte Weight', sortOrder: 18 },
+  totalByteWeight: { label: "Total Byte Weight", sortOrder: 18 },
 
   // Resource Counts
-  numRequests: { label: 'Number of Requests', sortOrder: 19 },
-  numFonts: { label: 'Number of Fonts', sortOrder: 20 },
-  numScripts: { label: 'Number of Scripts', sortOrder: 21 },
-  numStylesheets: { label: 'Number of Stylesheets', sortOrder: 22 },
+  numRequests: { label: "Number of Requests", sortOrder: 19 },
+  numFonts: { label: "Number of Fonts", sortOrder: 20 },
+  numScripts: { label: "Number of Scripts", sortOrder: 21 },
+  numStylesheets: { label: "Number of Stylesheets", sortOrder: 22 },
 
   // Task Timing
-  numTasks: { label: 'Number of Top Level Tasks', sortOrder: 23 },
-  numTasksOver10ms: { label: 'Number of Tasks over 10ms', sortOrder: 24 },
-  numTasksOver25ms: { label: 'Number of Tasks over 25ms', sortOrder: 25 },
-  numTasksOver50ms: { label: 'Number of Tasks over 50ms', sortOrder: 26 },
-  numTasksOver100ms: { label: 'Number of Tasks over 100ms', sortOrder: 27 },
-  numTasksOver500ms: { label: 'Number of Tasks over 500ms', sortOrder: 28 },
-  totalTaskTime: { label: 'Total Task Time', sortOrder: 29 },
+  numTasks: { label: "Number of Top Level Tasks", sortOrder: 23 },
+  numTasksOver10ms: { label: "Number of Tasks over 10ms", sortOrder: 24 },
+  numTasksOver25ms: { label: "Number of Tasks over 25ms", sortOrder: 25 },
+  numTasksOver50ms: { label: "Number of Tasks over 50ms", sortOrder: 26 },
+  numTasksOver100ms: { label: "Number of Tasks over 100ms", sortOrder: 27 },
+  numTasksOver500ms: { label: "Number of Tasks over 500ms", sortOrder: 28 },
+  totalTaskTime: { label: "Total Task Time", sortOrder: 29 },
 
   // Observed Metrics
   observedCumulativeLayoutShift: {
-    label: 'Observed Cumulative Layout Shift',
+    label: "Observed Cumulative Layout Shift",
     sortOrder: 30,
   },
   observedCumulativeLayoutShiftMainFrame: {
-    label: 'Observed Cumulative Layout Shift Main Frame',
+    label: "Observed Cumulative Layout Shift Main Frame",
     sortOrder: 31,
   },
-  observedFirstPaint: { label: 'Observed First Paint', sortOrder: 32 },
-  observedFirstPaintTs: { label: 'Observed First Paint Ts', sortOrder: 33 },
+  observedFirstPaint: { label: "Observed First Paint", sortOrder: 32 },
+  observedFirstPaintTs: { label: "Observed First Paint Ts", sortOrder: 33 },
   observedFirstContentfulPaint: {
-    label: 'Observed First Contentful Paint',
+    label: "Observed First Contentful Paint",
     sortOrder: 34,
   },
   observedFirstContentfulPaintTs: {
-    label: 'Observed First Contentful Paint Ts',
+    label: "Observed First Contentful Paint Ts",
     sortOrder: 35,
   },
   observedFirstContentfulPaintAllFrames: {
-    label: 'Observed First Contentful Paint All Frames',
+    label: "Observed First Contentful Paint All Frames",
     sortOrder: 36,
   },
   observedFirstContentfulPaintAllFramesTs: {
-    label: 'Observed First Contentful Paint All Frames Ts',
+    label: "Observed First Contentful Paint All Frames Ts",
     sortOrder: 37,
   },
   observedLargestContentfulPaint: {
-    label: 'Observed Largest Contentful Paint',
+    label: "Observed Largest Contentful Paint",
     sortOrder: 38,
   },
   observedLargestContentfulPaintTs: {
-    label: 'Observed Largest Contentful Paint Ts',
+    label: "Observed Largest Contentful Paint Ts",
     sortOrder: 39,
   },
   observedLargestContentfulPaintAllFrames: {
-    label: 'Observed Largest Contentful Paint All Frames',
+    label: "Observed Largest Contentful Paint All Frames",
     sortOrder: 40,
   },
   observedLargestContentfulPaintAllFramesTs: {
-    label: 'Observed Largest Contentful Paint All Frames Ts',
+    label: "Observed Largest Contentful Paint All Frames Ts",
     sortOrder: 41,
   },
 
   // Page Load Events
   observedDomContentLoaded: {
-    label: 'Observed DOM Content Loaded',
+    label: "Observed DOM Content Loaded",
     sortOrder: 42,
   },
   observedDomContentLoadedTs: {
-    label: 'Observed Dom Content Loaded Ts',
+    label: "Observed Dom Content Loaded Ts",
     sortOrder: 43,
   },
-  observedLoad: { label: 'Observed Load', sortOrder: 44 },
-  observedLoadTs: { label: 'Observed Load Ts', sortOrder: 45 },
+  observedLoad: { label: "Observed Load", sortOrder: 44 },
+  observedLoadTs: { label: "Observed Load Ts", sortOrder: 45 },
 
   // Visual Change Events
   observedFirstVisualChange: {
-    label: 'Observed First Visual Change',
+    label: "Observed First Visual Change",
     sortOrder: 46,
   },
   observedFirstVisualChangeTs: {
-    label: 'Observed First Visual Change Ts',
+    label: "Observed First Visual Change Ts",
     sortOrder: 47,
   },
   observedLastVisualChange: {
-    label: 'Observed Last Visual Change',
+    label: "Observed Last Visual Change",
     sortOrder: 48,
   },
   observedLastVisualChangeTs: {
-    label: 'Observed Last Visual Change Ts',
+    label: "Observed Last Visual Change Ts",
     sortOrder: 49,
   },
 
   // Navigation and Timing
   observedNavigationStart: {
-    label: 'Observed Navigation Start',
+    label: "Observed Navigation Start",
     sortOrder: 50,
   },
   observedNavigationStartTs: {
-    label: 'Observed Navigation Start Ts',
+    label: "Observed Navigation Start Ts",
     sortOrder: 51,
   },
-  observedSpeedIndex: { label: 'Observed Speed Index', sortOrder: 52 },
-  observedSpeedIndexTs: { label: 'Observed Speed Index Ts', sortOrder: 53 },
-  observedTimeOrigin: { label: 'Observed Time Origin', sortOrder: 54 },
-  observedTimeOriginTs: { label: 'Observed Time Origin Ts', sortOrder: 55 },
-  observedTraceEnd: { label: 'Observed Trace End', sortOrder: 56 },
-  observedTraceEndTs: { label: 'Observed Trace End Ts', sortOrder: 57 },
+  observedSpeedIndex: { label: "Observed Speed Index", sortOrder: 52 },
+  observedSpeedIndexTs: { label: "Observed Speed Index Ts", sortOrder: 53 },
+  observedTimeOrigin: { label: "Observed Time Origin", sortOrder: 54 },
+  observedTimeOriginTs: { label: "Observed Time Origin Ts", sortOrder: 55 },
+  observedTraceEnd: { label: "Observed Trace End", sortOrder: 56 },
+  observedTraceEndTs: { label: "Observed Trace End Ts", sortOrder: 57 },
 };
 
 function RenderTitle(s: string) {
-  return (
-    TitleMap[s as keyof typeof TitleMap]?.label || camelCaseToSentenceCase(s)
-  );
+  return TitleMap[s as keyof typeof TitleMap]?.label || camelCaseToSentenceCase(s);
 }

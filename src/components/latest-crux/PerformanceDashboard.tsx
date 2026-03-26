@@ -1,38 +1,26 @@
-'use client';
+"use client";
 
 import {
   ChartMap,
   CurrentPerformanceCard,
   CurrentPerformanceChartContext,
-} from '@/components/latest-crux/PerformanceCard';
-import { PerformanceOptions } from '@/components/latest-crux/PerformanceOptions';
-import type {
-  CruxReportMap,
-  DeviceType,
-  Scope,
-} from '@/components/latest-crux/types';
-import { PercentTable } from '@/components/common/FormFactorPercentPieChart';
-import { formatCruxReport, formatDate, groupBy } from '@/lib/utils';
-import { useState } from 'react';
+} from "@/components/latest-crux/PerformanceCard";
+import { PerformanceOptions } from "@/components/latest-crux/PerformanceOptions";
+import type { CruxReportMap, DeviceType, Scope } from "@/components/latest-crux/types";
+import { PercentTable } from "@/components/common/FormFactorPercentPieChart";
+import { formatCruxReport, formatDate, groupBy } from "@/lib/utils";
+import { useState } from "react";
 
-export function CurrentPerformanceDashboard({
-  reportMap,
-}: {
-  reportMap: CruxReportMap;
-}) {
-  const [ChartType, setChartType] = useState('bar');
-  const [reportScope, setReportScope] = useState<Scope>('origin');
-  const [deviceType, setDeviceType] = useState<DeviceType>('All');
+export function CurrentPerformanceDashboard({ reportMap }: { reportMap: CruxReportMap }) {
+  const [ChartType, setChartType] = useState("bar");
+  const [reportScope, setReportScope] = useState<Scope>("origin");
+  const [deviceType, setDeviceType] = useState<DeviceType>("All");
   const report = reportMap[`${reportScope}${deviceType}`];
   const data = formatCruxReport(report);
 
-  const groupedMetrics = data
-    ? groupBy(data, ({ metric_name }) => metric_name || '')
-    : {};
-  const form_factors =
-    reportMap[`${reportScope}All`]?.record?.metrics?.form_factors?.fractions;
-  const form_factors_date_range =
-    reportMap[`${reportScope}All`]?.record?.collectionPeriod;
+  const groupedMetrics = data ? groupBy(data, ({ metric_name }) => metric_name || "") : {};
+  const form_factors = reportMap[`${reportScope}All`]?.record?.metrics?.form_factors?.fractions;
+  const form_factors_date_range = reportMap[`${reportScope}All`]?.record?.collectionPeriod;
   const navigation_types = report?.record?.metrics?.navigation_types?.fractions;
   const collectionPeriod = report?.record?.collectionPeriod;
   return (
@@ -51,7 +39,7 @@ export function CurrentPerformanceDashboard({
       >
         {form_factors ? (
           <PercentTable
-            title={'Form Factors'}
+            title={"Form Factors"}
             data={form_factors}
             dateRange={
               form_factors_date_range
@@ -88,9 +76,7 @@ export function CurrentPerformanceDashboard({
           histogramData={groupedMetrics?.round_trip_time?.[0]}
         />
       </div>
-      {navigation_types ? (
-        <PercentTable title="Navigation Types" data={navigation_types} />
-      ) : null}
+      {navigation_types ? <PercentTable title="Navigation Types" data={navigation_types} /> : null}
     </CurrentPerformanceChartContext.Provider>
   );
 }

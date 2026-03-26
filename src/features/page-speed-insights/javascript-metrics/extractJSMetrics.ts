@@ -1,5 +1,5 @@
-import type { AuditDetailTable, TableItem, PageSpeedInsights } from '@/lib/schema';
-import type { InsightsContextItem } from '@/lib/page-speed-insights/types';
+import type { AuditDetailTable, TableItem, PageSpeedInsights } from "@/lib/schema";
+import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
 
 export type JSMetrics = {
   label: string;
@@ -17,7 +17,7 @@ export type JSMetrics = {
  * Helper function to extract audit details from a Lighthouse audit
  */
 function getAuditDetails(
-  audits: PageSpeedInsights['lighthouseResult']['audits'],
+  audits: PageSpeedInsights["lighthouseResult"]["audits"],
   auditId: string,
 ): AuditDetailTable | undefined {
   const audit = audits?.[auditId];
@@ -36,10 +36,7 @@ function filterJavaScriptResources(
 
   return networkRequestsDetails.items.filter((item: TableItem) => {
     const resourceType = item?.resourceType;
-    return (
-      typeof resourceType === 'string' &&
-      resourceType.toLowerCase() === 'script'
-    );
+    return typeof resourceType === "string" && resourceType.toLowerCase() === "script";
   });
 }
 
@@ -63,14 +60,14 @@ export function extractJSMetrics({ item, label }: InsightsContextItem): JSMetric
   }
 
   // Extract audit details
-  const bootupTimeDetails = getAuditDetails(audits, 'bootup-time');
-  const mainThreadWorkDetails = getAuditDetails(audits, 'mainthread-work-breakdown');
-  const unusedJSDetails = getAuditDetails(audits, 'unused-javascript');
-  const unminifiedJSDetails = getAuditDetails(audits, 'unminified-javascript');
-  const legacyJSDetails = getAuditDetails(audits, 'legacy-javascript-insight');
-  const diagnosticsDetails = getAuditDetails(audits, 'diagnostics');
-  const mainThreadTasksDetails = getAuditDetails(audits, 'main-thread-tasks');
-  const networkRequestsDetails = getAuditDetails(audits, 'network-requests');
+  const bootupTimeDetails = getAuditDetails(audits, "bootup-time");
+  const mainThreadWorkDetails = getAuditDetails(audits, "mainthread-work-breakdown");
+  const unusedJSDetails = getAuditDetails(audits, "unused-javascript");
+  const unminifiedJSDetails = getAuditDetails(audits, "unminified-javascript");
+  const legacyJSDetails = getAuditDetails(audits, "legacy-javascript-insight");
+  const diagnosticsDetails = getAuditDetails(audits, "diagnostics");
+  const mainThreadTasksDetails = getAuditDetails(audits, "main-thread-tasks");
+  const networkRequestsDetails = getAuditDetails(audits, "network-requests");
 
   // Filter JavaScript resources from network requests
   const jsResources = filterJavaScriptResources(networkRequestsDetails);
@@ -87,4 +84,3 @@ export function extractJSMetrics({ item, label }: InsightsContextItem): JSMetric
     jsResources,
   };
 }
-

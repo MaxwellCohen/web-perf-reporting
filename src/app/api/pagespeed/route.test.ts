@@ -1,92 +1,92 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { POST } from '@/app/api/pagespeed/route';
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { POST } from "@/app/api/pagespeed/route";
 
-describe('app/api/pagespeed route', () => {
+describe("app/api/pagespeed route", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('returns a validation error when the request url is invalid', async () => {
+  it("returns a validation error when the request url is invalid", async () => {
     const response = await POST({
-      json: async () => ({ testURL: 'not-a-url' }),
+      json: async () => ({ testURL: "not-a-url" }),
     } as any);
 
     expect(response.status).toBe(400);
-    await expect(response.text()).resolves.toBe('Invalid URL provided');
+    await expect(response.text()).resolves.toBe("Invalid URL provided");
   });
 
-  it('returns the completed page speed payload from the worker', async () => {
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+  it("returns the completed page speed payload from the worker", async () => {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
-      json: async () => ({ status: 'completed', data: '{"ok":true}' }),
+      json: async () => ({ status: "completed", data: '{"ok":true}' }),
     } as Response);
 
     const response = await POST({
-      json: async () => ({ testURL: 'https://example.com' }),
+      json: async () => ({ testURL: "https://example.com" }),
     } as any);
 
     expect(response.status).toBe(200);
     await expect(response.text()).resolves.toBe('{"ok":true}');
   });
 
-  it('returns error when fetch is not ok', async () => {
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+  it("returns error when fetch is not ok", async () => {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: false,
       status: 502,
     } as Response);
 
     const response = await POST({
-      json: async () => ({ testURL: 'https://example.com' }),
+      json: async () => ({ testURL: "https://example.com" }),
     } as any);
 
     expect(response.status).toBe(502);
-    await expect(response.text()).resolves.toBe('Error fetching data');
+    await expect(response.text()).resolves.toBe("Error fetching data");
   });
 
-  it('returns 404 when worker returns no data', async () => {
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+  it("returns 404 when worker returns no data", async () => {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
       json: async () => null,
     } as Response);
 
     const response = await POST({
-      json: async () => ({ testURL: 'https://example.com' }),
+      json: async () => ({ testURL: "https://example.com" }),
     } as any);
 
     expect(response.status).toBe(404);
-    await expect(response.text()).resolves.toBe('Data is not yet ready no data');
+    await expect(response.text()).resolves.toBe("Data is not yet ready no data");
   });
 
-  it('returns 500 when status is completed but data.data is missing', async () => {
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+  it("returns 500 when status is completed but data.data is missing", async () => {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
-      json: async () => ({ status: 'completed' }),
+      json: async () => ({ status: "completed" }),
     } as Response);
 
     const response = await POST({
-      json: async () => ({ testURL: 'https://example.com' }),
+      json: async () => ({ testURL: "https://example.com" }),
     } as any);
 
     expect(response.status).toBe(500);
-    await expect(response.text()).resolves.toBe('');
+    await expect(response.text()).resolves.toBe("");
   });
 
-  it('returns a not-ready error when the worker status is not completed', async () => {
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+  it("returns a not-ready error when the worker status is not completed", async () => {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
-      json: async () => ({ status: 'PENDING' }),
+      json: async () => ({ status: "PENDING" }),
     } as Response);
 
     const response = await POST({
-      json: async () => ({ testURL: 'https://example.com' }),
+      json: async () => ({ testURL: "https://example.com" }),
     } as any);
 
     expect(response.status).toBe(404);
-    await expect(response.text()).resolves.toContain('Data is not yet ready');
+    await expect(response.text()).resolves.toContain("Data is not yet ready");
   });
 });

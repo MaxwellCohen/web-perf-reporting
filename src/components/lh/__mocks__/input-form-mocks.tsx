@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
-import { fireEvent } from '@testing-library/react';
-import type { LhJsonFileEntry, LhJsonTextEntry } from '@/components/lh/types';
+import { fireEvent } from "@testing-library/react";
+import type { LhJsonFileEntry, LhJsonTextEntry } from "@/components/lh/types";
 
 const TabsContext = React.createContext<{
   value: string;
   onValueChange: (v: string) => void;
-}>({ value: '', onValueChange: () => {} });
+}>({ value: "", onValueChange: () => {} });
 
 const Tabs = ({
   value,
@@ -17,9 +17,7 @@ const Tabs = ({
   onValueChange?: (v: string) => void;
   children?: React.ReactNode;
 }) => (
-  <TabsContext.Provider
-    value={{ value: value ?? '', onValueChange: onValueChange ?? (() => {}) }}
-  >
+  <TabsContext.Provider value={{ value: value ?? "", onValueChange: onValueChange ?? (() => {}) }}>
     <div data-orientation="horizontal" dir="ltr">
       {children}
     </div>
@@ -33,13 +31,13 @@ const TabsList = React.forwardRef<
   <div
     ref={ref}
     role="tablist"
-    className={className ? `inline-flex h-9 ${className}` : 'inline-flex h-9'}
+    className={className ? `inline-flex h-9 ${className}` : "inline-flex h-9"}
     {...props}
   >
     {children}
   </div>
 ));
-TabsList.displayName = 'TabsList';
+TabsList.displayName = "TabsList";
 
 const TabsTrigger = React.forwardRef<
   HTMLButtonElement,
@@ -50,7 +48,7 @@ const TabsTrigger = React.forwardRef<
     <button
       ref={ref}
       role="tab"
-      data-state={value === ctx.value ? 'active' : 'inactive'}
+      data-state={value === ctx.value ? "active" : "inactive"}
       onClick={() => ctx.onValueChange(value)}
       {...props}
     >
@@ -58,7 +56,7 @@ const TabsTrigger = React.forwardRef<
     </button>
   );
 });
-TabsTrigger.displayName = 'TabsTrigger';
+TabsTrigger.displayName = "TabsTrigger";
 
 const TabsContent = React.forwardRef<
   HTMLDivElement,
@@ -71,7 +69,7 @@ const TabsContent = React.forwardRef<
     </div>
   ) : null;
 });
-TabsContent.displayName = 'TabsContent';
+TabsContent.displayName = "TabsContent";
 
 export const tabsMock = { Tabs, TabsList, TabsTrigger, TabsContent };
 
@@ -84,63 +82,45 @@ export const lucideMock = {
 
 export const cardMock = {
   Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  CardContent: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
-  CardDescription: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
-  CardFooter: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
-  CardHeader: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
-  CardTitle: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
+  CardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  CardDescription: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  CardFooter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  CardHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  CardTitle: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 };
 
 export const inputMock = {
-  Input: React.forwardRef<HTMLInputElement, React.ComponentProps<'input'>>(
-    (props, ref) => <input ref={ref} {...props} />
-  ),
+  Input: React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>((props, ref) => (
+    <input ref={ref} {...props} />
+  )),
 };
 
 export const textareaMock = {
-  Textarea: React.forwardRef<
-    HTMLTextAreaElement,
-    React.ComponentProps<'textarea'>
-  >((props, ref) => <textarea ref={ref} {...props} />),
+  Textarea: React.forwardRef<HTMLTextAreaElement, React.ComponentProps<"textarea">>(
+    (props, ref) => <textarea ref={ref} {...props} />,
+  ),
 };
 
 export const buttonMock = {
-  Button: React.forwardRef<HTMLButtonElement, React.ComponentProps<'button'>>(
+  Button: React.forwardRef<HTMLButtonElement, React.ComponentProps<"button">>(
     ({ children, ...props }, ref) => (
       <button ref={ref} {...props}>
         {children}
       </button>
-    )
+    ),
   ),
 };
 
 export const labelMock = {
-  Label: ({
-    children,
-    ...props
-  }: React.ComponentProps<'label'>) => <label {...props}>{children}</label>,
+  Label: ({ children, ...props }: React.ComponentProps<"label">) => (
+    <label {...props}>{children}</label>
+  ),
 };
 
 export const alertMock = {
-  Alert: ({ children }: { children: React.ReactNode }) => (
-    <div role="alert">{children}</div>
-  ),
-  AlertDescription: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
-  AlertTitle: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
+  Alert: ({ children }: { children: React.ReactNode }) => <div role="alert">{children}</div>,
+  AlertDescription: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  AlertTitle: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 };
 
 const Input = inputMock.Input;
@@ -195,9 +175,7 @@ function LhTextInputMock({
             />
             <Button
               type="button"
-              onClick={() =>
-                setJsonInputs((prev) => prev.filter((_, i) => i !== index))
-              }
+              onClick={() => setJsonInputs((prev) => prev.filter((_, i) => i !== index))}
             >
               <span className="sr-only">Remove</span>
             </Button>
@@ -220,9 +198,7 @@ function LhTextInputMock({
         ))}
         <Button
           type="button"
-          onClick={() =>
-            setJsonInputs((prev) => [...prev, { name: '', content: '' }])
-          }
+          onClick={() => setJsonInputs((prev) => [...prev, { name: "", content: "" }])}
         >
           Add Another JSON Entry
         </Button>
@@ -249,11 +225,11 @@ function LhFileInputMock({
           onChange={(e) => {
             if (e.target.files?.length) {
               const newFiles = Array.from(e.target.files).map((file) => ({
-                name: file.name.replace(/\.[^/.]+$/, ''),
+                name: file.name.replace(/\.[^/.]+$/, ""),
                 file,
               }));
               setJsonFiles((prev) => [...prev, ...newFiles]);
-              e.target.value = '';
+              e.target.value = "";
             }
           }}
           multiple
@@ -274,9 +250,7 @@ function LhFileInputMock({
             />
             <Button
               type="button"
-              onClick={() =>
-                setJsonFiles((prev) => prev.filter((_, i) => i !== index))
-              }
+              onClick={() => setJsonFiles((prev) => prev.filter((_, i) => i !== index))}
             >
               <span className="sr-only">Remove</span>
             </Button>
@@ -318,19 +292,15 @@ export const lhUrlInputMock = { LhUrlInput: LhUrlInputMock };
 export function getTab(container: HTMLElement, name: string | RegExp) {
   return (
     Array.from(container.querySelectorAll('[role="tab"]')).find((t) =>
-      typeof name === 'string'
-        ? t.textContent?.trim() === name
-        : name.test(t.textContent ?? '')
+      typeof name === "string" ? t.textContent?.trim() === name : name.test(t.textContent ?? ""),
     ) ?? null
   );
 }
 
 export function getButton(container: HTMLElement, name: string | RegExp) {
   return (
-    Array.from(container.querySelectorAll('button')).find((b) =>
-      typeof name === 'string'
-        ? b.textContent?.trim() === name
-        : name.test(b.textContent ?? '')
+    Array.from(container.querySelectorAll("button")).find((b) =>
+      typeof name === "string" ? b.textContent?.trim() === name : name.test(b.textContent ?? ""),
     ) ?? null
   );
 }
@@ -345,7 +315,7 @@ export function submitForm(container?: HTMLElement) {
   if (button) {
     fireEvent.click(button);
   } else {
-    const form = root.querySelector('form');
+    const form = root.querySelector("form");
     if (form) fireEvent.submit(form);
   }
 }

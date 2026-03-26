@@ -57,4 +57,3 @@ export function sortByMaxValueComposite<T>(
     return bMax - aMax;
   });
 }
-

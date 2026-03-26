@@ -1,9 +1,9 @@
-import React from 'react';
+import React from "react";
 
-import { render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock('@xstate/store-react', () => {
+vi.mock("@xstate/store-react", () => {
   function createStore(config: {
     context: unknown;
     on: { sync: (ctx: unknown, event: unknown) => unknown };
@@ -26,9 +26,7 @@ vi.mock('@xstate/store-react', () => {
   }
   return {
     useStore: (definition: Parameters<typeof createStore>[0]) => {
-      const storeRef = React.useRef<ReturnType<typeof createStore> | undefined>(
-        undefined,
-      );
+      const storeRef = React.useRef<ReturnType<typeof createStore> | undefined>(undefined);
       if (!storeRef.current) {
         storeRef.current = createStore(definition);
       }
@@ -46,18 +44,32 @@ vi.mock('@xstate/store-react', () => {
   };
 });
 
-import { Accordion } from '@/components/ui/accordion';
+import { Accordion } from "@/components/ui/accordion";
 import {
   PageSpeedInsightsStoreProvider,
   usePageSpeedInsightsStore,
-} from '@/features/page-speed-insights/PageSpeedContext';
-import { RenderFilmStrip } from '@/features/page-speed-insights/RenderFilmStrip';
+} from "@/features/page-speed-insights/PageSpeedContext";
+import { RenderFilmStrip } from "@/features/page-speed-insights/RenderFilmStrip";
 
-vi.mock('@/components/ui/accordion', () => {
-  const ItemValueContext = React.createContext<string>('');
-  const AccordionContext = React.createContext<{ value: string[]; onValueChange: (v: string[]) => void; type: string }>({ value: [], onValueChange: () => {}, type: 'single' });
-  const AccordionRoot = ({ children, type = 'single', defaultValue }: { children?: React.ReactNode; type?: string; defaultValue?: string | string[] }) => {
-    const [val, setVal] = React.useState<string[]>(() => (Array.isArray(defaultValue) ? defaultValue : defaultValue ? [defaultValue] : []));
+vi.mock("@/components/ui/accordion", () => {
+  const ItemValueContext = React.createContext<string>("");
+  const AccordionContext = React.createContext<{
+    value: string[];
+    onValueChange: (v: string[]) => void;
+    type: string;
+  }>({ value: [], onValueChange: () => {}, type: "single" });
+  const AccordionRoot = ({
+    children,
+    type = "single",
+    defaultValue,
+  }: {
+    children?: React.ReactNode;
+    type?: string;
+    defaultValue?: string | string[];
+  }) => {
+    const [val, setVal] = React.useState<string[]>(() =>
+      Array.isArray(defaultValue) ? defaultValue : defaultValue ? [defaultValue] : [],
+    );
     return (
       <AccordionContext.Provider value={{ value: val, onValueChange: setVal, type }}>
         <div>{children}</div>
@@ -65,13 +77,17 @@ vi.mock('@/components/ui/accordion', () => {
     );
   };
   const AccordionItem = ({ children, value: v }: { children?: React.ReactNode; value: string }) => (
-    <ItemValueContext.Provider value={v}><div>{children}</div></ItemValueContext.Provider>
+    <ItemValueContext.Provider value={v}>
+      <div>{children}</div>
+    </ItemValueContext.Provider>
   );
   const AccordionTrigger = ({ children }: { children?: React.ReactNode }) => {
     const ctx = React.useContext(AccordionContext);
     const v = React.useContext(ItemValueContext);
     return (
-      <button type="button" onClick={() => ctx.onValueChange(ctx.value.includes(v) ? [] : [v])}>{children}</button>
+      <button type="button" onClick={() => ctx.onValueChange(ctx.value.includes(v) ? [] : [v])}>
+        {children}
+      </button>
     );
   };
   const AccordionContent = ({ children }: { children?: React.ReactNode }) => {
@@ -82,8 +98,8 @@ vi.mock('@/components/ui/accordion', () => {
   return { Accordion: AccordionRoot, AccordionItem, AccordionTrigger, AccordionContent };
 });
 
-vi.mock('@/features/page-speed-insights/Timeline', () => ({
-  Timeline: ({ device }: { device?: string }) => <div data-timeline>{device ?? 'Timeline'}</div>,
+vi.mock("@/features/page-speed-insights/Timeline", () => ({
+  Timeline: ({ device }: { device?: string }) => <div data-timeline>{device ?? "Timeline"}</div>,
 }));
 
 function TestWrapper({
@@ -105,11 +121,11 @@ function TestWrapper({
   );
 }
 
-describe('RenderFilmStrip', () => {
+describe("RenderFilmStrip", () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
-  it('returns null when no screenshot thumbnails in items', () => {
+  it("returns null when no screenshot thumbnails in items", () => {
     const data = [
       {
         lighthouseResult: {
@@ -118,21 +134,21 @@ describe('RenderFilmStrip', () => {
       },
     ];
     render(
-      <TestWrapper data={data} labels={['Mobile']}>
+      <TestWrapper data={data} labels={["Mobile"]}>
         <RenderFilmStrip />
       </TestWrapper>,
     );
-    expect(screen.queryByText('Screenshots')).toBeNull();
+    expect(screen.queryByText("Screenshots")).toBeNull();
   });
 
-  it('returns null when screenshot-thumbnails details is not filmstrip type', () => {
+  it("returns null when screenshot-thumbnails details is not filmstrip type", () => {
     const data = [
       {
         lighthouseResult: {
           audits: {
-            'screenshot-thumbnails': {
+            "screenshot-thumbnails": {
               details: {
-                type: 'table',
+                type: "table",
                 items: [],
               },
             },
@@ -141,24 +157,24 @@ describe('RenderFilmStrip', () => {
       },
     ];
     render(
-      <TestWrapper data={data} labels={['Mobile']}>
+      <TestWrapper data={data} labels={["Mobile"]}>
         <RenderFilmStrip />
       </TestWrapper>,
     );
-    expect(screen.queryByText('Screenshots')).toBeNull();
+    expect(screen.queryByText("Screenshots")).toBeNull();
   });
 
-  it('renders Screenshots accordion when filmstrip data exists', () => {
+  it("renders Screenshots accordion when filmstrip data exists", () => {
     const data = [
       {
         lighthouseResult: {
           audits: {
-            'screenshot-thumbnails': {
+            "screenshot-thumbnails": {
               details: {
-                type: 'filmstrip',
+                type: "filmstrip",
                 items: [
                   {
-                    data: 'data:image/png;base64,a',
+                    data: "data:image/png;base64,a",
                     timestamp: 0,
                     timing: 100,
                   },
@@ -170,7 +186,7 @@ describe('RenderFilmStrip', () => {
       },
     ];
     const { container } = render(
-      <TestWrapper data={data} labels={['Mobile']}>
+      <TestWrapper data={data} labels={["Mobile"]}>
         <RenderFilmStrip />
       </TestWrapper>,
     );

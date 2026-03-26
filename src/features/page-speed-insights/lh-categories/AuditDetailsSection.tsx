@@ -1,12 +1,12 @@
-import { Details } from '@/components/ui/accordion';
-import { RenderJSONDetails } from '@/features/page-speed-insights/RenderJSONDetails';
-import { AuditRef, AuditResultsRecord } from '@/lib/schema';
-import { AuditDetailsSummary } from '@/features/page-speed-insights/lh-categories/AuditDetailsSummary';
-import { RenderMetricSavings } from '@/features/page-speed-insights/lh-categories/RenderMetricSavings';
+import { Details } from "@/components/ui/accordion";
+import { RenderJSONDetails } from "@/features/page-speed-insights/RenderJSONDetails";
+import { AuditRef, AuditResultsRecord } from "@/lib/schema";
+import { AuditDetailsSummary } from "@/features/page-speed-insights/lh-categories/AuditDetailsSummary";
+import { RenderMetricSavings } from "@/features/page-speed-insights/lh-categories/RenderMetricSavings";
 // import { RenderDetails } from './RenderDetails';
-import { isEmptyResult } from '@/features/page-speed-insights/ScoreDisplay';
+import { isEmptyResult } from "@/features/page-speed-insights/ScoreDisplay";
 
-const doNotRenderDetails = ['screenshot-thumbnails', 'main-thread-tasks'];
+const doNotRenderDetails = ["screenshot-thumbnails", "main-thread-tasks"];
 
 export function AuditDetailsSection({
   auditRef,
@@ -25,26 +25,19 @@ export function AuditDetailsSection({
   if (!auditRefId) return null;
   const auditData = auditsRecords.map((d) => d?.[auditRefId] || null);
 
-  const scoreDisplayMode =
-    auditData.find((d) => d?.scoreDisplayMode)?.scoreDisplayMode || 'bottom';
+  const scoreDisplayMode = auditData.find((d) => d?.scoreDisplayMode)?.scoreDisplayMode || "bottom";
 
   const emptyTable = auditData.every((d) => isEmptyResult(d));
 
   const doNotRender = doNotRenderDetails.includes(auditRefId);
   const disabled =
-    doNotRender ||
-    emptyTable ||
-    ['notApplicable', 'manual', 'bottom'].includes(scoreDisplayMode);
+    doNotRender || emptyTable || ["notApplicable", "manual", "bottom"].includes(scoreDisplayMode);
 
   if (disabled) {
     return (
       <div className="rounded-2 mb-4 rounded-md border-4 p-2">
         <div className="flex flex-col gap-4">
-          <AuditDetailsSummary
-            auditData={auditData}
-            labels={labels}
-            acronym={acronym}
-          />
+          <AuditDetailsSummary auditData={auditData} labels={labels} acronym={acronym} />
 
           <RenderJSONDetails
             className="text-right"
@@ -60,11 +53,7 @@ export function AuditDetailsSection({
   return (
     <Details id={auditRefId} className="rounded-2 mb-4 rounded-md border-4 p-2">
       <summary className="flex flex-col gap-4">
-        <AuditDetailsSummary
-          auditData={auditData}
-          labels={labels}
-          acronym={auditRef?.acronym}
-        />
+        <AuditDetailsSummary auditData={auditData} labels={labels} acronym={auditRef?.acronym} />
         <RenderJSONDetails
           className="text-right"
           data={auditData[0]}

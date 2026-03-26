@@ -1,5 +1,5 @@
-import { fireEvent, render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, render } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import {
   getCoreRowModel,
   getFacetedMinMaxValues,
@@ -7,19 +7,22 @@ import {
   getFilteredRowModel,
   useReactTable,
   flexRender,
-} from '@tanstack/react-table';
-import { columns, makeSortingHeading } from '@/features/page-speed-insights/JSUsage/jsUsageTableColumns';
-import type { TreeMapNode } from '@/lib/schema';
+} from "@tanstack/react-table";
+import {
+  columns,
+  makeSortingHeading,
+} from "@/features/page-speed-insights/JSUsage/jsUsageTableColumns";
+import type { TreeMapNode } from "@/lib/schema";
 
-vi.mock('@/components/ui/button', () => ({
+vi.mock("@/components/ui/button", () => ({
   Button: ({
     children,
     onClick,
-    'aria-label': ariaLabel,
+    "aria-label": ariaLabel,
   }: {
     children: React.ReactNode;
     onClick?: () => void;
-    'aria-label'?: string;
+    "aria-label"?: string;
   }) => (
     <button type="button" onClick={onClick} aria-label={ariaLabel}>
       {children}
@@ -27,46 +30,48 @@ vi.mock('@/components/ui/button', () => ({
   ),
 }));
 
-vi.mock('lucide-react', () => ({
+vi.mock("lucide-react", () => ({
   ArrowUp: () => <span data-testid="arrow-up" />,
   MinusIcon: () => <span data-testid="minus" />,
 }));
 
-vi.mock('@/features/page-speed-insights/JSUsage/StringFilterHeader', () => ({
-  StringFilterHeader: ({ name }: { name: string }) => <span data-testid="string-filter">{name}</span>,
+vi.mock("@/features/page-speed-insights/JSUsage/StringFilterHeader", () => ({
+  StringFilterHeader: ({ name }: { name: string }) => (
+    <span data-testid="string-filter">{name}</span>
+  ),
 }));
 
-vi.mock('@/features/page-speed-insights/JSUsage/jsUsageTableFilters', () => ({
+vi.mock("@/features/page-speed-insights/JSUsage/jsUsageTableFilters", () => ({
   RangeFilter: () => <span data-testid="range-filter" />,
   numericRangeFilter: () => true,
 }));
 
-vi.mock('@/features/page-speed-insights/JSUsage/jsUsageTableParts', () => ({
+vi.mock("@/features/page-speed-insights/JSUsage/jsUsageTableParts", () => ({
   ExpandRow: () => <span data-testid="expand-row" />,
   ExpandAll: () => <span data-testid="expand-all" />,
   RenderBytesCell: () => <span data-testid="bytes-cell" />,
 }));
 
-vi.mock('@/features/page-speed-insights/JSUsage/StatusCircle', () => ({
+vi.mock("@/features/page-speed-insights/JSUsage/StatusCircle", () => ({
   StatusCircle: () => <span data-testid="status-circle" />,
 }));
 
-vi.mock('@/features/page-speed-insights/lh-categories/renderBoolean', () => ({
-  renderBoolean: (v: boolean) => <span>{v ? 'Yes' : 'No'}</span>,
+vi.mock("@/features/page-speed-insights/lh-categories/renderBoolean", () => ({
+  renderBoolean: (v: boolean) => <span>{v ? "Yes" : "No"}</span>,
 }));
 
-vi.mock('@/features/page-speed-insights/lh-categories/table/RenderTableValue', () => ({
+vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", () => ({
   RenderBytesValue: ({ value }: { value: number }) => <span>{value} bytes</span>,
 }));
 
 const mockData: TreeMapNode[] = [
   {
-    name: 'https://example.com/script.js',
+    name: "https://example.com/script.js",
     resourceBytes: 50000,
     unusedBytes: 10000,
   },
   {
-    name: 'https://other.com/bundle.js',
+    name: "https://other.com/bundle.js",
     resourceBytes: 100000,
     unusedBytes: 50000,
   },
@@ -83,18 +88,12 @@ function TableWithNameHeader() {
     filterFns: { booleanFilterFn: () => true },
   });
   const headerGroup = table.getHeaderGroups()[0];
-  const header = headerGroup.headers.find((h) => h.column.id === 'name');
+  const header = headerGroup.headers.find((h) => h.column.id === "name");
   if (!header) return null;
   return <div>{flexRender(header.column.columnDef.header, header.getContext())}</div>;
 }
 
-function CellRenderer({
-  data,
-  columnId,
-}: {
-  data: TreeMapNode[];
-  columnId: string;
-}) {
+function CellRenderer({ data, columnId }: { data: TreeMapNode[]; columnId: string }) {
   const table = useReactTable({
     data,
     columns,
@@ -115,15 +114,15 @@ function CellRenderer({
   );
 }
 
-describe('jsUsageTableColumns', () => {
-  describe('makeSortingHeading', () => {
-    it('renders name and string filter', () => {
+describe("jsUsageTableColumns", () => {
+  describe("makeSortingHeading", () => {
+    it("renders name and string filter", () => {
       const { container } = render(<TableWithNameHeader />);
-      expect(container.textContent).toContain('Name');
+      expect(container.textContent).toContain("Name");
       expect(container.querySelector('[data-testid="string-filter"]')).toBeTruthy();
     });
 
-    it('sort button is clickable', () => {
+    it("sort button is clickable", () => {
       const { container } = render(<TableWithNameHeader />);
       const btn = container.querySelector('button[aria-label="Sort column Name"]');
       expect(btn).toBeTruthy();
@@ -132,38 +131,38 @@ describe('jsUsageTableColumns', () => {
     });
   });
 
-  describe('columns', () => {
-    it('renders name cell with URL host for array value', () => {
+  describe("columns", () => {
+    it("renders name cell with URL host for array value", () => {
       const { container } = render(
         <CellRenderer
-          data={[{ name: ['https://foo.com/bar.js'], resourceBytes: 0 } as unknown as TreeMapNode]}
+          data={[{ name: ["https://foo.com/bar.js"], resourceBytes: 0 } as unknown as TreeMapNode]}
           columnId="name"
         />,
       );
-      expect(container.textContent).toContain('foo.com');
+      expect(container.textContent).toContain("foo.com");
     });
 
-    it('renders Unknown for invalid URL in array', () => {
+    it("renders Unknown for invalid URL in array", () => {
       const { container } = render(
         <CellRenderer
-          data={[{ name: ['not-a-url'], resourceBytes: 0 } as unknown as TreeMapNode]}
+          data={[{ name: ["not-a-url"], resourceBytes: 0 } as unknown as TreeMapNode]}
           columnId="name"
         />,
       );
-      expect(container.textContent).toContain('Unknown');
+      expect(container.textContent).toContain("Unknown");
     });
 
-    it('renders Percent cell with N/A for undefined', () => {
+    it("renders Percent cell with N/A for undefined", () => {
       const { container } = render(
-        <CellRenderer data={[{ name: 'x', resourceBytes: 0 } as TreeMapNode]} columnId="Percent" />,
+        <CellRenderer data={[{ name: "x", resourceBytes: 0 } as TreeMapNode]} columnId="Percent" />,
       );
-      expect(container.textContent).toContain('N/A');
+      expect(container.textContent).toContain("N/A");
     });
 
-    it('renders Percent cell with value for valid numbers', () => {
+    it("renders Percent cell with value for valid numbers", () => {
       const { container } = render(
         <CellRenderer
-          data={[{ name: 'x', resourceBytes: 100, unusedBytes: 25 } as TreeMapNode]}
+          data={[{ name: "x", resourceBytes: 100, unusedBytes: 25 } as TreeMapNode]}
           columnId="Percent"
         />,
       );

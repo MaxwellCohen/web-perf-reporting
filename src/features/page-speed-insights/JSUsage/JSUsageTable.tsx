@@ -1,11 +1,7 @@
-'use client';
-'use no memo';
-import { useState } from 'react';
-import {
-  Table,
-  TableBody,
-  TableHeader,
-} from '@/components/ui/table';
+"use client";
+"use no memo";
+import { useState } from "react";
+import { Table, TableBody, TableHeader } from "@/components/ui/table";
 import {
   ColumnFiltersState,
   ExpandedState,
@@ -22,21 +18,21 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
   getFacetedMinMaxValues,
-} from '@tanstack/react-table';
-import type { TreeMapData } from '@/lib/schema';
-import { NoResultsRow } from '@/features/page-speed-insights/JSUsage/NoResultsRow';
-import { TableControls } from '@/features/page-speed-insights/JSUsage/TableControls';
-import { columns } from '@/features/page-speed-insights/JSUsage/jsUsageTableColumns';
-import { JSUsageTableHeader } from '@/features/page-speed-insights/JSUsage/jsUsageTableHeader';
-import { JSUsageTableRow } from '@/features/page-speed-insights/JSUsage/jsUsageTableRow';
+} from "@tanstack/react-table";
+import type { TreeMapData } from "@/lib/schema";
+import { NoResultsRow } from "@/features/page-speed-insights/JSUsage/NoResultsRow";
+import { TableControls } from "@/features/page-speed-insights/JSUsage/TableControls";
+import { columns } from "@/features/page-speed-insights/JSUsage/jsUsageTableColumns";
+import { JSUsageTableHeader } from "@/features/page-speed-insights/JSUsage/jsUsageTableHeader";
+import { JSUsageTableRow } from "@/features/page-speed-insights/JSUsage/jsUsageTableRow";
 
-export { ExpandRow, ExpandAll, RenderBytesCell } from './jsUsageTableParts';
-export { makeSortingHeading } from './jsUsageTableColumns';
-export { StringFilterHeader } from './StringFilterHeader';
-export { RangeFilter, numericRangeFilter } from './jsUsageTableFilters';
+export { ExpandRow, ExpandAll, RenderBytesCell } from "./jsUsageTableParts";
+export { makeSortingHeading } from "./jsUsageTableColumns";
+export { StringFilterHeader } from "./StringFilterHeader";
+export { RangeFilter, numericRangeFilter } from "./jsUsageTableFilters";
 
-export function useUseJSUsageTable(data: TreeMapData['nodes']) {
-  'use no memo';
+export function useUseJSUsageTable(data: TreeMapData["nodes"]) {
+  "use no memo";
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
@@ -44,7 +40,7 @@ export function useUseJSUsageTable(data: TreeMapData['nodes']) {
   });
   const [rowSelection, setRowSelection] = useState({});
   const [expanded, setExpanded] = useState<ExpandedState>({});
-  const [grouping, setGrouping] = useState(['host']);
+  const [grouping, setGrouping] = useState(["host"]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -80,7 +76,7 @@ export function useUseJSUsageTable(data: TreeMapData['nodes']) {
     },
     state: {
       columnPinning: {
-        left: ['expander', 'Usage Status', 'name', 'host'],
+        left: ["expander", "Usage Status", "name", "host"],
       },
       pagination,
       sorting,
@@ -99,11 +95,11 @@ export function JSUsageTableWithControls({
   data,
   depth = 0,
 }: {
-  data: TreeMapData['nodes'];
+  data: TreeMapData["nodes"];
   label?: string;
   depth?: number;
 }) {
-  'use no memo';
+  "use no memo";
   const table = useUseJSUsageTable(data);
   const rows = table.getRowModel().rows;
 
@@ -124,11 +120,7 @@ export function JSUsageTableWithControls({
         <TableBody className="flex flex-col border-0" suppressHydrationWarning>
           {rows?.length ? (
             rows.map((row, i) => (
-              <JSUsageTableRow
-                key={`${row.id}_${i}_${depth}`}
-                row={row}
-                i={i}
-              />
+              <JSUsageTableRow key={`${row.id}_${i}_${depth}`} row={row} i={i} />
             ))
           ) : (
             <NoResultsRow />

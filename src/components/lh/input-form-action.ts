@@ -1,4 +1,4 @@
-import type { LhJsonFileEntry, LhJsonTextEntry } from '@/components/lh/types';
+import type { LhJsonFileEntry, LhJsonTextEntry } from "@/components/lh/types";
 
 export type FormState = { error: string | null; success: boolean };
 
@@ -28,7 +28,7 @@ export async function fetchJsonFromUrl(
   }
   const data = await response.text();
   if (!validateJson(data)) {
-    throw new Error('URL did not return valid JSON');
+    throw new Error("URL did not return valid JSON");
   }
   return data;
 }
@@ -43,14 +43,14 @@ export async function executeSubmit(
   try {
     const processedData: Array<{ name: string; data: unknown }> = [];
 
-    if (activeTab === 'text') {
+    if (activeTab === "text") {
       if (jsonInputs.length === 0) {
-        throw new Error('Please add at least one JSON entry');
+        throw new Error("Please add at least one JSON entry");
       }
 
       for (const input of jsonInputs) {
         if (!input.name.trim()) {
-          throw new Error('All JSON entries must have a name');
+          throw new Error("All JSON entries must have a name");
         }
         if (!input.content.trim()) {
           throw new Error(`JSON content for "${input.name}" is empty`);
@@ -63,29 +63,27 @@ export async function executeSubmit(
           data: JSON.parse(input.content),
         });
       }
-    } else if (activeTab === 'file') {
+    } else if (activeTab === "file") {
       if (jsonFiles.length === 0) {
-        throw new Error('Please select at least one JSON file');
+        throw new Error("Please select at least one JSON file");
       }
 
       for (const fileEntry of jsonFiles) {
         if (!fileEntry.name.trim()) {
-          throw new Error('All files must have a name');
+          throw new Error("All files must have a name");
         }
         const fileContent = await fileEntry.file.text();
         if (!validateJson(fileContent)) {
-          throw new Error(
-            `File "${fileEntry.file.name}" does not contain valid JSON`,
-          );
+          throw new Error(`File "${fileEntry.file.name}" does not contain valid JSON`);
         }
         processedData.push({
           name: fileEntry.name,
           data: JSON.parse(fileContent),
         });
       }
-    } else if (activeTab === 'url') {
+    } else if (activeTab === "url") {
       if (!jsonUrl.trim()) {
-        throw new Error('Please enter a URL');
+        throw new Error("Please enter a URL");
       }
       const jsonData = await fetchJsonFromUrl(jsonUrl, fetchFn);
       processedData.push({
@@ -97,8 +95,7 @@ export async function executeSubmit(
     return { error: null, success: true };
   } catch (err) {
     return {
-      error:
-        err instanceof Error ? err.message : 'An unknown error occurred',
+      error: err instanceof Error ? err.message : "An unknown error occurred",
       success: false,
     };
   }

@@ -1,30 +1,27 @@
-'use client';
-import { useMemo, useState } from 'react';
-import { usePageSpeedItems } from '@/features/page-speed-insights/PageSpeedContext';
+"use client";
+import { useMemo, useState } from "react";
+import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
+import { Accordion, AccordionItem, AccordionContent } from "@/components/ui/accordion";
+import { AccordionSectionTitleTrigger } from "@/components/ui/accordion-section-title-trigger";
+import { Badge } from "@/components/ui/badge";
 import {
-  Accordion,
-  AccordionItem,
-  AccordionContent,
-} from '@/components/ui/accordion';
-import { AccordionSectionTitleTrigger } from '@/components/ui/accordion-section-title-trigger';
-import { Badge } from '@/components/ui/badge';
-import { analyzeAudits, hasDetails } from '@/features/page-speed-insights/RecommendationsSection/analyzeAudits';
-import { FilterControls } from '@/features/page-speed-insights/RecommendationsSection/FilterControls';
-import { RecommendationItem } from '@/features/page-speed-insights/RecommendationsSection/RecommendationItem';
-import type { Recommendation } from '@/features/page-speed-insights/RecommendationsSection/types';
-
-
+  analyzeAudits,
+  hasDetails,
+} from "@/features/page-speed-insights/RecommendationsSection/analyzeAudits";
+import { FilterControls } from "@/features/page-speed-insights/RecommendationsSection/FilterControls";
+import { RecommendationItem } from "@/features/page-speed-insights/RecommendationsSection/RecommendationItem";
+import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
 
 const priorityColors = {
-  high: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-  medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-  low: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+  high: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+  medium: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+  low: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
 };
 
 export function RecommendationsSection() {
   const items = usePageSpeedItems();
   const allRecommendations = useMemo(() => analyzeAudits(items), [items]);
-  
+
   const recommendations = useMemo(() => {
     return allRecommendations.filter(hasDetails);
   }, [allRecommendations]);
@@ -74,12 +71,13 @@ export function RecommendationsSection() {
     return null;
   }
 
-
   return (
     <AccordionItem value="recommendations">
       <AccordionSectionTitleTrigger titleClassName="flex items-center gap-2">
         <span>Recommendations</span>
-        <Badge variant="outline" className="no-underline hover:no-underline">{recommendations.length}</Badge>
+        <Badge variant="outline" className="no-underline hover:no-underline">
+          {recommendations.length}
+        </Badge>
       </AccordionSectionTitleTrigger>
       <AccordionContent>
         <div className="p-6">
@@ -121,4 +119,3 @@ export function RecommendationsSection() {
     </AccordionItem>
   );
 }
-

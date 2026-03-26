@@ -1,27 +1,27 @@
-import type { TableColumnHeading, ItemValueType } from '@/lib/schema';
+import type { TableColumnHeading, ItemValueType } from "@/lib/schema";
 
 /**
  * Determines the appropriate filter function based on value type
  */
 export function getFilterFnForValueType(
   valueType?: ItemValueType | string | number,
-): 'includesString' | 'inNumberRange' | undefined {
-  if (!valueType || typeof valueType !== 'string') {
-    return 'includesString';
+): "includesString" | "inNumberRange" | undefined {
+  if (!valueType || typeof valueType !== "string") {
+    return "includesString";
   }
 
   // Numeric types
-  if (['numeric', 'bytes', 'timespanMs', 'ms'].includes(valueType)) {
-    return 'inNumberRange';
+  if (["numeric", "bytes", "timespanMs", "ms"].includes(valueType)) {
+    return "inNumberRange";
   }
 
   // String types
-  if (['code', 'url', 'text', 'link', 'source-location'].includes(valueType)) {
-    return 'includesString';
+  if (["code", "url", "text", "link", "source-location"].includes(valueType)) {
+    return "includesString";
   }
 
   // Default to string filter for unknown types
-  return 'includesString';
+  return "includesString";
 }
 
 /**
@@ -33,16 +33,16 @@ export function getColumnSize(
   valueType?: ItemValueType | string | number,
 ): number {
   // URL columns need more space
-  if (key === 'url' || label.toLowerCase().includes('url')) {
+  if (key === "url" || label.toLowerCase().includes("url")) {
     return 300;
   }
 
   // Numeric columns are typically narrower
-  if (valueType && typeof valueType === 'string') {
-    if (['bytes', 'numeric', 'timespanMs', 'ms'].includes(valueType)) {
+  if (valueType && typeof valueType === "string") {
+    if (["bytes", "numeric", "timespanMs", "ms"].includes(valueType)) {
       return 120;
     }
-    if (['protocol', 'mime'].some((term) => label.toLowerCase().includes(term))) {
+    if (["protocol", "mime"].some((term) => label.toLowerCase().includes(term))) {
       return 100;
     }
   }
@@ -54,9 +54,7 @@ export function getColumnSize(
 /**
  * Creates a column definition from a TableColumnHeading
  */
-export function createColumnFromHeading<T>(
-  heading: TableColumnHeading,
-): {
+export function createColumnFromHeading<T>(heading: TableColumnHeading): {
   id: string;
   accessorKey: string;
   header: string;
@@ -64,7 +62,7 @@ export function createColumnFromHeading<T>(
   minSize: number;
   maxSize: number;
   enableResizing: boolean;
-  filterFn?: 'includesString' | 'inNumberRange';
+  filterFn?: "includesString" | "inNumberRange";
   enableSorting: boolean;
   enableColumnFilter: boolean;
   meta: {
@@ -73,8 +71,8 @@ export function createColumnFromHeading<T>(
     };
   };
 } {
-  const key = heading.key || '';
-  const label = typeof heading.label === 'string' ? heading.label : key;
+  const key = heading.key || "";
+  const label = typeof heading.label === "string" ? heading.label : key;
   const valueType = heading.valueType;
   const filterFn = getFilterFnForValueType(valueType);
   const initialSize = getColumnSize(key, label, valueType);
@@ -97,4 +95,3 @@ export function createColumnFromHeading<T>(
     },
   };
 }
-

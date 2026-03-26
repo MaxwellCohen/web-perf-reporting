@@ -1,4 +1,4 @@
-import { RenderJSONDetails } from '@/features/page-speed-insights/RenderJSONDetails';
+import { RenderJSONDetails } from "@/features/page-speed-insights/RenderJSONDetails";
 
 interface RecommendationAuditDetailsProps {
   auditId: string;

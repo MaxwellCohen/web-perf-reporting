@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   ColumnDef,
   SortingState,
   ColumnFiltersState,
   useReactTable,
   type TableOptions,
-} from '@tanstack/react-table';
-import { flatTanStackTableSlice } from '@/features/page-speed-insights/shared/flatTanStackTableSlice';
+} from "@tanstack/react-table";
+import { flatTanStackTableSlice } from "@/features/page-speed-insights/shared/flatTanStackTableSlice";
 
 export type SimpleTableOptions<T> = {
   data: T[];

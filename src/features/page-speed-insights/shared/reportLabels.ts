@@ -1,30 +1,30 @@
-import { toTitleCase } from '@/features/page-speed-insights/toTitleCase';
+import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 
-export const ALL_DEVICES_LABEL = 'All Devices';
+export const ALL_DEVICES_LABEL = "All Devices";
 
-type ReportLabelGroup = 'all-devices' | 'mobile' | 'desktop' | 'other';
+type ReportLabelGroup = "all-devices" | "mobile" | "desktop" | "other";
 
 function getReportLabelGroup(label: string): ReportLabelGroup {
   if (label.includes(ALL_DEVICES_LABEL)) {
-    return 'all-devices';
+    return "all-devices";
   }
-  if (label.includes('Mobile')) {
-    return 'mobile';
+  if (label.includes("Mobile")) {
+    return "mobile";
   }
-  if (label.includes('Desktop')) {
-    return 'desktop';
+  if (label.includes("Desktop")) {
+    return "desktop";
   }
-  return 'other';
+  return "other";
 }
 
 export function normalizeReportLabel(label: string): string {
   switch (getReportLabelGroup(label)) {
-    case 'all-devices':
+    case "all-devices":
       return ALL_DEVICES_LABEL;
-    case 'mobile':
-      return 'Mobile';
-    case 'desktop':
-      return 'Desktop';
+    case "mobile":
+      return "Mobile";
+    case "desktop":
+      return "Desktop";
     default:
       return label.trim();
   }
@@ -32,7 +32,7 @@ export function normalizeReportLabel(label: string): string {
 
 export function compareReportLabels(labelA: string, labelB: string): number {
   const groupOrder: Record<ReportLabelGroup, number> = {
-    'all-devices': 0,
+    "all-devices": 0,
     mobile: 1,
     desktop: 2,
     other: 3,
@@ -65,12 +65,12 @@ export function formatReportLabelList(reportLabels: string[]): string {
     return ALL_DEVICES_LABEL;
   }
 
-  return sortedLabels.join(', ');
+  return sortedLabels.join(", ");
 }
 
 export function getCombinedReportLabel(reportLabels: string[]): string {
   if (reportLabels.length === 1) {
-    return normalizeReportLabel(reportLabels[0] ?? '');
+    return normalizeReportLabel(reportLabels[0] ?? "");
   }
 
   return ALL_DEVICES_LABEL;
@@ -83,7 +83,7 @@ export function formatReportTableTitle(
 ): string {
   const auditTitle = toTitleCase(title);
   const formattedLabel = normalizeReportLabel(reportLabel);
-  const itemLabel = itemCount === 1 ? 'item' : 'items';
+  const itemLabel = itemCount === 1 ? "item" : "items";
 
   return `${auditTitle} Table for ${formattedLabel} (${itemCount} ${itemLabel})`;
 }

@@ -1,10 +1,10 @@
-import { TableColumnHeading, TableItem } from '@/lib/schema';
+import { TableColumnHeading, TableItem } from "@/lib/schema";
 
 export interface Recommendation {
   id: string;
   title: string;
   description: string;
-  priority: 'high' | 'medium' | 'low';
+  priority: "high" | "medium" | "low";
   category: string;
   impact: {
     metric?: string;
@@ -32,4 +32,3 @@ export interface ActionableStep {
   url?: string; // URL of the resource if this step references a specific resource
   host?: string; // Host/origin of the resource, for grouping steps by host
 }
-

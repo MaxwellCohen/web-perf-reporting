@@ -1,6 +1,6 @@
-import ReactMarkdown from 'react-markdown';
-import { ScoreDisplay } from '@/features/page-speed-insights/ScoreDisplay';
-import { AuditResultsRecord } from '@/lib/schema';
+import ReactMarkdown from "react-markdown";
+import { ScoreDisplay } from "@/features/page-speed-insights/ScoreDisplay";
+import { AuditResultsRecord } from "@/lib/schema";
 
 export function AuditDetailsSummary({
   auditData,
@@ -11,35 +11,30 @@ export function AuditDetailsSummary({
   labels: string[];
   acronym?: string;
 }) {
-  const title = auditData?.find((audit) => audit?.title)?.title || '';
+  const title = auditData?.find((audit) => audit?.title)?.title || "";
   const scoreDisplayMode =
-    auditData?.find((audit) => audit?.scoreDisplayMode)?.scoreDisplayMode || '';
-  const description =
-    auditData?.find((audit) => audit?.description)?.description || '';
+    auditData?.find((audit) => audit?.scoreDisplayMode)?.scoreDisplayMode || "";
+  const description = auditData?.find((audit) => audit?.description)?.description || "";
 
   return (
     <div className="flex flex-1 flex-col flex-wrap gap-4 md:flex-row">
       <div className="flex flex-col gap-1 font-bold md:flex-[0_0_21rem]">
         <span className="underline">
-          {title} {acronym ? `(${acronym})` : ''}
+          {title} {acronym ? `(${acronym})` : ""}
         </span>
         {auditData
           .map((audit, i) =>
             audit ? (
-              <ScoreDisplay
-                key={`${i}_${audit.id}`}
-                audit={audit}
-                device={labels[i]}
-              />
+              <ScoreDisplay key={`${i}_${audit.id}`} audit={audit} device={labels[i]} />
             ) : null,
           )
           .filter(Boolean)}
         <SmallText
           text={
-            scoreDisplayMode === 'notApplicable'
-              ? 'Not Applicable'
-              : scoreDisplayMode === 'manual'
-                ? 'Manual validation required'
+            scoreDisplayMode === "notApplicable"
+              ? "Not Applicable"
+              : scoreDisplayMode === "manual"
+                ? "Manual validation required"
                 : null
           }
         />

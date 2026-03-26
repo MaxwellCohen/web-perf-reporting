@@ -1,8 +1,8 @@
-'use client';
-'use no memo';
-import { TreeMapNode } from '@/lib/schema';
+"use client";
+"use no memo";
+import { TreeMapNode } from "@/lib/schema";
 
-export function StatusCircle({ node }: { node: TreeMapNode; }) {
+export function StatusCircle({ node }: { node: TreeMapNode }) {
   const { unusedBytes, resourceBytes = 1 } = node;
   if (!unusedBytes) {
     return (
@@ -16,18 +16,14 @@ export function StatusCircle({ node }: { node: TreeMapNode; }) {
   if (percent > 90) {
     return (
       <div className="size-3 self-center rounded-full bg-red-500">
-        <span className="sr-only">
-          warning this function could have extra JS
-        </span>
+        <span className="sr-only">warning this function could have extra JS</span>
       </div>
     );
   }
   if (percent > 25) {
     return (
       <div className="size-3 self-center rounded-full bg-yellow-500">
-        <span className="sr-only">
-          warning this function could have extra JS
-        </span>
+        <span className="sr-only">warning this function could have extra JS</span>
       </div>
     );
   }

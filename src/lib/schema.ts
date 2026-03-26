@@ -1,6 +1,6 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-export type DeviceType = 'Desktop' | 'Mobile';
+export type DeviceType = "Desktop" | "Mobile";
 const coerceNumber = z.coerce.number().default(0).catch(NaN);
 
 const cruxHistogramItemSchema = z.object({
@@ -94,14 +94,18 @@ export const cruxReportSchema = z.object({
             fractions: FormFactorFractionsSchema,
           })
           .optional(),
-        largest_contentful_paint_image_resource_load_duration:
-          CruxHistogramItem.omit({ histogram: true }).optional(),
-        largest_contentful_paint_image_element_render_delay:
-          CruxHistogramItem.omit({ histogram: true }).optional(),
-        largest_contentful_paint_image_resource_load_delay:
-          CruxHistogramItem.omit({ histogram: true }).optional(),
-        largest_contentful_paint_image_time_to_first_byte:
-          CruxHistogramItem.omit({ histogram: true }).optional(),
+        largest_contentful_paint_image_resource_load_duration: CruxHistogramItem.omit({
+          histogram: true,
+        }).optional(),
+        largest_contentful_paint_image_element_render_delay: CruxHistogramItem.omit({
+          histogram: true,
+        }).optional(),
+        largest_contentful_paint_image_resource_load_delay: CruxHistogramItem.omit({
+          histogram: true,
+        }).optional(),
+        largest_contentful_paint_image_time_to_first_byte: CruxHistogramItem.omit({
+          histogram: true,
+        }).optional(),
       })
       .partial(),
     collectionPeriod: z.object({
@@ -126,17 +130,13 @@ export const CruxHistoryHistogramTimeseries = z.tuple([
   cruxHistogramTimeseriesItemSchema.omit({ end: true }),
 ]);
 
-export type CruxHistoryHistogramTimeseries = z.infer<
-  typeof CruxHistoryHistogramTimeseries
->;
+export type CruxHistoryHistogramTimeseries = z.infer<typeof CruxHistoryHistogramTimeseries>;
 
 export const CruxHistoryPercentilesTimeseries = z.object({
   p75s: z.array(z.union([z.null(), z.number(), z.string()])).optional(),
 });
 
-export type CruxHistoryPercentilesTimeseries = z.infer<
-  typeof CruxHistoryPercentilesTimeseries
->;
+export type CruxHistoryPercentilesTimeseries = z.infer<typeof CruxHistoryPercentilesTimeseries>;
 
 export const CruxHistoryReportCollectionPeriods = z.array(
   z.object({
@@ -145,9 +145,7 @@ export const CruxHistoryReportCollectionPeriods = z.array(
   }),
 );
 
-export type CruxHistoryReportCollectionPeriods = z.infer<
-  typeof CruxHistoryReportCollectionPeriods
->;
+export type CruxHistoryReportCollectionPeriods = z.infer<typeof CruxHistoryReportCollectionPeriods>;
 
 export const CruxHistoryTimeseries = z.object({
   histogramTimeseries: CruxHistoryHistogramTimeseries,
@@ -168,14 +166,18 @@ export const CruxHistoryReportSchema = z.object({
       interaction_to_next_paint: CruxHistoryTimeseries,
       cumulative_layout_shift: CruxHistoryTimeseries,
       largest_contentful_paint: CruxHistoryTimeseries,
-      largest_contentful_paint_image_resource_load_delay:
-        CruxHistoryTimeseries.omit({ histogramTimeseries: true }).optional(),
-      largest_contentful_paint_image_element_render_delay:
-        CruxHistoryTimeseries.omit({ histogramTimeseries: true }).optional(),
-      largest_contentful_paint_image_resource_load_duration:
-        CruxHistoryTimeseries.omit({ histogramTimeseries: true }).optional(),
-      largest_contentful_paint_image_time_to_first_byte:
-        CruxHistoryTimeseries.omit({ histogramTimeseries: true }).optional(),
+      largest_contentful_paint_image_resource_load_delay: CruxHistoryTimeseries.omit({
+        histogramTimeseries: true,
+      }).optional(),
+      largest_contentful_paint_image_element_render_delay: CruxHistoryTimeseries.omit({
+        histogramTimeseries: true,
+      }).optional(),
+      largest_contentful_paint_image_resource_load_duration: CruxHistoryTimeseries.omit({
+        histogramTimeseries: true,
+      }).optional(),
+      largest_contentful_paint_image_time_to_first_byte: CruxHistoryTimeseries.omit({
+        histogramTimeseries: true,
+      }).optional(),
       form_factors: z
         .object({
           fractionTimeseries: z.object({
@@ -245,9 +247,7 @@ export const PageSpeedApiLoadingExperienceV5schema = z.object({
   overall_category: z.string(),
 });
 
-export type PageSpeedApiLoadingExperience = z.infer<
-  typeof PageSpeedApiLoadingExperienceV5schema
->;
+export type PageSpeedApiLoadingExperience = z.infer<typeof PageSpeedApiLoadingExperienceV5schema>;
 
 export const LighthouseResultV5 = z.object({
   fetchTime: z.string(),
@@ -269,11 +269,9 @@ const auditRefSchema = z
 
 export type AuditRef = z.infer<typeof auditRefSchema>;
 
-
-
 export type DebugData = {
-  type: 'debugdata';
-  details:{
+  type: "debugdata";
+  details: {
     items: Array<Record<string, string | number>>;
     [key: string]: unknown;
   };
@@ -282,7 +280,7 @@ export type DebugData = {
 };
 
 export const DebugDataSchema = z.custom<DebugData>((v) => {
-  if (v.type === 'debugdata') {
+  if (v.type === "debugdata") {
     return v;
   }
   return null;
@@ -300,7 +298,7 @@ export const RectSchema = z.object({
 export type Rect = z.infer<typeof RectSchema>;
 
 export const NodeValueSchema = z.object({
-  type: z.literal('node').or(z.literal('text')),
+  type: z.literal("node").or(z.literal("text")),
   lhId: z.string().optional(),
   path: z.string().optional(),
   selector: z.string().optional(),
@@ -308,14 +306,14 @@ export const NodeValueSchema = z.object({
   nodeLabel: z.string().optional(),
   explanation: z.string().optional(),
   snippet: z.string().optional(),
-  value: z.string().optional()  
+  value: z.string().optional(),
 });
 
 export type NodeValue = z.infer<typeof NodeValueSchema>;
 
 /** A table item for rows that are nested within a top-level TableItem (row). */
 export interface TableSubItems {
-  type: 'subitems';
+  type: "subitems";
   items: TableItem[];
 }
 
@@ -339,7 +337,7 @@ export const AuditDetailsTableHeading = z.array(
 );
 
 export interface AuditDetailTable extends BaseDetails {
-  type: 'table';
+  type: "table";
   headings: TableColumnHeading[];
   items: TableItem[];
   summary?: {
@@ -355,11 +353,10 @@ export interface AuditDetailTable extends BaseDetails {
   isEntityGrouped?: boolean;
   /** Column keys to skip summing. If omitted, all column types supported are summed. */
   skipSumming?: Array<string>;
-  
 }
 
 export const AuditDetailTableSchema = z.custom<AuditDetailTable>((v) => {
-  if (v.type === 'table') {
+  if (v.type === "table") {
     return v;
   }
   return null;
@@ -375,19 +372,19 @@ export interface TreeMapNode {
   children?: TreeMapNode[];
 }
 export interface TreeMapData extends BaseDetails {
-  type: 'treemap-data';
+  type: "treemap-data";
   nodes: TreeMapNode[];
 }
 
 export const TreeMapDataSchema = z.custom<TreeMapData>((v) => {
-  if (v.type === 'treemap-data') {
+  if (v.type === "treemap-data") {
     return v;
   }
   return null;
 });
 
 export const AuditDetailListSchema = z.object({
-  type: z.literal('list'),
+  type: z.literal("list"),
   items: z.array(AuditDetailTableSchema.or(DebugDataSchema)),
   debugData: DebugDataSchema.optional(),
 });
@@ -395,7 +392,7 @@ export const AuditDetailListSchema = z.object({
 export type AuditDetailList = z.infer<typeof AuditDetailListSchema>;
 
 export const AuditDetailFilmstripSchema = z.object({
-  type: z.literal('filmstrip'),
+  type: z.literal("filmstrip"),
   items: z.array(
     z.object({
       timing: coerceNumber,
@@ -416,8 +413,8 @@ export interface OpportunityItem extends TableItem {
   debugData?: DebugData;
   [p: string]: undefined | ItemValue;
 }
-export  interface AuditDetailOpportunity  extends BaseDetails {
-  type: 'opportunity';
+export interface AuditDetailOpportunity extends BaseDetails {
+  type: "opportunity";
   headings: TableColumnHeading[];
   items: OpportunityItem[];
   /**
@@ -441,7 +438,7 @@ export  interface AuditDetailOpportunity  extends BaseDetails {
 }
 
 export const AuditDetailOpportunitySchema = z.custom<AuditDetailOpportunity>((v) => {
-  if (v.type === 'opportunity') {
+  if (v.type === "opportunity") {
     return v;
   }
   return null;
@@ -453,7 +450,7 @@ export interface BaseDetails {
 }
 
 export interface CriticalRequestChain extends BaseDetails {
-  type: 'criticalrequestchain';
+  type: "criticalrequestchain";
   longestChain: {
     duration: number;
     length: number;
@@ -476,7 +473,7 @@ export type SimpleCriticalRequestNode = {
 };
 
 export const AuditDetailScreenshotSchema = z.object({
-  type: z.literal('screenshot'),
+  type: z.literal("screenshot"),
   timing: coerceNumber,
   timestamp: coerceNumber,
   data: z.string(),
@@ -487,27 +484,27 @@ export type AuditDetailScreenshot = z.infer<typeof AuditDetailScreenshotSchema>;
 
 /** String enum of possible types of values found within table items. */
 export const ItemValueTypeSchema = z.union([
-  z.literal('bytes'),
-  z.literal('ms'),
-  z.literal('url'),
-  z.literal('code'),
-  z.literal('link'),
-  z.literal('node'),
-  z.literal('source-location'),
-  z.literal('numeric'),
-  z.literal('text'),
-  z.literal('thumbnail'),
-  z.literal('timespanMs'),
-  z.literal('multi'), // not sure what this is 
+  z.literal("bytes"),
+  z.literal("ms"),
+  z.literal("url"),
+  z.literal("code"),
+  z.literal("link"),
+  z.literal("node"),
+  z.literal("source-location"),
+  z.literal("numeric"),
+  z.literal("text"),
+  z.literal("thumbnail"),
+  z.literal("timespanMs"),
+  z.literal("multi"), // not sure what this is
 ]);
 
 /** String enum of possible types of values found within table items. */
 export type ItemValueType = z.infer<typeof ItemValueTypeSchema>;
 
 export const SourceLocationValueSchema = z.object({
-  type: z.literal('source-location'),
+  type: z.literal("source-location"),
   url: z.string(),
-  urlProvider: z.enum(['network', 'comment']),
+  urlProvider: z.enum(["network", "comment"]),
   line: z.number(),
   column: z.number(),
   original: z
@@ -522,7 +519,7 @@ export const SourceLocationValueSchema = z.object({
 export type SourceLocationValue = z.infer<typeof SourceLocationValueSchema>;
 
 export const LinkValueSchema = z.object({
-  type: z.literal('link'),
+  type: z.literal("link"),
   text: z.string(),
   url: z.string(),
 });
@@ -530,7 +527,7 @@ export const LinkValueSchema = z.object({
 export type LinkValue = z.infer<typeof LinkValueSchema>;
 
 export const UrlValueSchema = z.object({
-  type: z.literal('url'),
+  type: z.literal("url"),
   value: z.string(),
 });
 
@@ -545,14 +542,14 @@ export const IcuMessageSchema = z.object({
 export type IcuMessage = z.infer<typeof IcuMessageSchema>;
 
 export const CodeValueSchema = z.object({
-  type: z.literal('code'),
+  type: z.literal("code"),
   value: z.union([IcuMessageSchema, z.string()]),
 });
 
 export type CodeValue = z.infer<typeof CodeValueSchema>;
 
 export const NumericValueSchema = z.object({
-  type: z.literal('numeric'),
+  type: z.literal("numeric"),
   value: z.number(),
   granularity: z.number().optional(),
 });
@@ -560,7 +557,7 @@ export const NumericValueSchema = z.object({
 export type NumericValue = z.infer<typeof NumericValueSchema>;
 
 export const TextValueSchema = z.object({
-  type: z.literal('text'),
+  type: z.literal("text"),
   value: z.string(),
 });
 
@@ -614,7 +611,6 @@ export interface TableColumnHeading {
 
   displayUnit?: string;
   granularity?: number;
-
 }
 
 export const TableColumnHeadingSchema = z.custom<TableColumnHeading>((v) => {
@@ -632,7 +628,7 @@ export type TableItem = {
 };
 
 export const AuditDetailChecklistSchema = z.object({
-  type: z.literal('checklist'),
+  type: z.literal("checklist"),
   items: z.record(
     z.object({
       value: z.boolean(),
@@ -644,16 +640,14 @@ export const AuditDetailChecklistSchema = z.object({
 
 export type AuditDetailChecklist = z.infer<typeof AuditDetailChecklistSchema>;
 
-export const AuditDetailCriticalRequestChainSchema =
-  z.custom<CriticalRequestChain>((v) => {
-    if (v.type === 'criticalrequestchain') {
-      return v;
-    }
-    return null;
-  });
+export const AuditDetailCriticalRequestChainSchema = z.custom<CriticalRequestChain>((v) => {
+  if (v.type === "criticalrequestchain") {
+    return v;
+  }
+  return null;
+});
 
-
-const AuditResultSchema =   z.object({
+const AuditResultSchema = z.object({
   description: z.string().optional(),
   details: AuditDetailTableSchema.or(AuditDetailFilmstripSchema)
     .or(AuditDetailOpportunitySchema)
@@ -671,24 +665,22 @@ const AuditResultSchema =   z.object({
   // sore is 0 to 1 where 0-.49 is bad and .50-.89 is needs improvement and .90-1 is good
   score: z.number().nullable(),
   scoreDisplayMode: z
-    .literal('numeric')
-    .or(z.literal('binary'))
-    .or(z.literal('metricSavings'))
-    .or(z.literal('manual'))
-    .or(z.literal('informative'))
-    .or(z.literal('notApplicable'))
-    .or(z.literal('error')),
+    .literal("numeric")
+    .or(z.literal("binary"))
+    .or(z.literal("metricSavings"))
+    .or(z.literal("manual"))
+    .or(z.literal("informative"))
+    .or(z.literal("notApplicable"))
+    .or(z.literal("error")),
   title: z.string(),
   warnings: z.array(z.any()).optional(),
   numericUnit: z.string().optional(),
   displayValue: z.string().optional(),
   metricSavings: z.record(z.number()).optional(),
-})
+});
 
 export type AuditResult = z.infer<typeof AuditResultSchema>;
-const auditResultsRecordSchema = z.record(
-  AuditResultSchema
-);
+const auditResultsRecordSchema = z.record(AuditResultSchema);
 
 export type AuditResultsRecord = z.infer<typeof auditResultsRecordSchema>;
 
@@ -819,7 +811,7 @@ export type NullablePageSpeedInsights = PageSpeedInsights | null | undefined;
 
 export const cruxHistoryItemSchema = z.object({
   url: z.string(),
-  origin: z.enum(['url', 'origin']),
+  origin: z.enum(["url", "origin"]),
   formFactor: z.string(),
   start_date: z.string(),
   end_date: z.string(),

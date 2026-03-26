@@ -1,6 +1,6 @@
-import { Header, Table } from '@tanstack/react-table';
-import clsx from 'clsx';
-import { useMemo } from 'react';
+import { Header, Table } from "@tanstack/react-table";
+import clsx from "clsx";
+import { useMemo } from "react";
 
 export function ColumnResizer<T>({ header }: { header: Header<T, unknown> }) {
   if (header.column.columnDef.enableResizing === false) {
@@ -13,9 +13,9 @@ export function ColumnResizer<T>({ header }: { header: Header<T, unknown> }) {
       onMouseDown={handler}
       onTouchStart={handler}
       className={clsx(
-        'absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200',
+        "absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200",
         {
-          'bg-muted': header.column.getIsResizing(),
+          "bg-muted": header.column.getIsResizing(),
         },
       )}
     />
@@ -23,7 +23,7 @@ export function ColumnResizer<T>({ header }: { header: Header<T, unknown> }) {
 }
 
 export function useColumnSizeVars<T>(table: Table<T>) {
-  'use no memo';
+  "use no memo";
   /**
    * Instead of calling `column.getSize()` on every render for every header
    * and especially every data cell (very expensive),

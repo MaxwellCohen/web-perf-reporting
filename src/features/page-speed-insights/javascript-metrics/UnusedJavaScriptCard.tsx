@@ -1,17 +1,17 @@
-'use client';
-import { TableItem } from '@/lib/schema';
-import { getUrlString, getNumber } from '@/lib/utils';
-import { useMemo } from 'react';
-import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
-import { sortByMaxValue } from '@/features/page-speed-insights/shared/dataSortingHelpers';
-import { useStandardTable } from '@/features/page-speed-insights/shared/tableConfigHelpers';
+"use client";
+import { TableItem } from "@/lib/schema";
+import { getUrlString, getNumber } from "@/lib/utils";
+import { useMemo } from "react";
+import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
+import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
+import { useStandardTable } from "@/features/page-speed-insights/shared/tableConfigHelpers";
 import {
   createBytesColumn,
   createPercentageColumn,
   createURLColumn,
-} from '@/features/page-speed-insights/shared/tableColumnHelpers';
-import { useTableColumns } from '@/features/page-speed-insights/shared/useTableColumns';
-import { TableCard } from '@/features/page-speed-insights/shared/TableCard';
+} from "@/features/page-speed-insights/shared/tableColumnHelpers";
+import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
+import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 
 type UnusedJavaScriptData = {
   label: string;
@@ -34,17 +34,14 @@ const columnHelper = createColumnHelper<UnusedJSTableRow>();
 
 const cols: ColumnDef<UnusedJSTableRow, unknown>[] = [
   createURLColumn(columnHelper),
-  createBytesColumn(columnHelper, 'wastedBytes', 'Wasted Bytes'),
-  createBytesColumn(columnHelper, 'totalBytes', 'Total Bytes'),
-  createPercentageColumn(columnHelper, 'wastedPercent', 'Wasted %', 1),
+  createBytesColumn(columnHelper, "wastedBytes", "Wasted Bytes"),
+  createBytesColumn(columnHelper, "totalBytes", "Total Bytes"),
+  createPercentageColumn(columnHelper, "wastedPercent", "Wasted %", 1),
 ];
 
 export function UnusedJavaScriptCard({ metrics }: UnusedJavaScriptCardProps) {
-  'use no memo';
-  const validMetrics = useMemo(
-    () => metrics.filter((m) => m.unusedJS.length > 0),
-    [metrics],
-  );
+  "use no memo";
+  const validMetrics = useMemo(() => metrics.filter((m) => m.unusedJS.length > 0), [metrics]);
   const showReportColumn = validMetrics.length > 1;
 
   // Combine all unused JS data with labels
@@ -57,7 +54,7 @@ export function UnusedJavaScriptCard({ metrics }: UnusedJavaScriptCardProps) {
         const wastedPercent = getNumber(item.wastedPercent);
         return {
           label,
-          url: url.replace(/^https?:\/\//, '') || 'Unknown',
+          url: url.replace(/^https?:\/\//, "") || "Unknown",
           wastedBytes,
           totalBytes,
           wastedPercent,
@@ -78,7 +75,7 @@ export function UnusedJavaScriptCard({ metrics }: UnusedJavaScriptCardProps) {
   const table = useStandardTable({
     data,
     columns,
-    grouping: ['url'],
+    grouping: ["url"],
     enablePagination: true,
     defaultPageSize: 10,
   });

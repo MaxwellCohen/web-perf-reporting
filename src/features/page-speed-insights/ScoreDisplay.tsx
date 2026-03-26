@@ -1,29 +1,29 @@
-import { AuditResultsRecord } from '@/lib/schema';
+import { AuditResultsRecord } from "@/lib/schema";
 
 export const ScoreDisplayModes = {
   /** Scores of 0-1 (map to displayed scores of 0-100). */
-  NUMERIC: 'numeric',
+  NUMERIC: "numeric",
   /** Pass/fail audit (0 and 1 are only possible scores). */
-  BINARY: 'binary',
+  BINARY: "binary",
   /**
    * Audit result score is determined by the metric savings and product score:
    * 1   - audit passed based on product score
    * 0.5 - audit failed and had no metric savings
    * 0   - audit failed and had metric savings
    */
-  METRIC_SAVINGS: 'metricSavings',
+  METRIC_SAVINGS: "metricSavings",
   /** The audit exists only to tell you to review something yourself. Score is null and should be ignored. */
-  MANUAL: 'manual',
+  MANUAL: "manual",
   /** The audit is an FYI only, and can't be interpreted as pass/fail. Score is null and should be ignored. */
-  INFORMATIVE: 'informative',
+  INFORMATIVE: "informative",
   /** The audit turned out to not apply to the page. Score is null and should be ignored. */
-  NOT_APPLICABLE: 'notApplicable',
+  NOT_APPLICABLE: "notApplicable",
   /** There was an error while running the audit (check `errorMessage` for details). Score is null and should be ignored. */
-  ERROR: 'error',
+  ERROR: "error",
 } as const;
 
 export const ScoreDisplayModesRanking: Record<
-  AuditResultsRecord[string]['scoreDisplayMode'] | 'empty',
+  AuditResultsRecord[string]["scoreDisplayMode"] | "empty",
   number
 > = {
   metricSavings: 1,
@@ -40,16 +40,10 @@ export function isEmptyResult(auditData?: AuditResultsRecord[string] | null) {
   if (!auditData) {
     return true;
   }
-  if (
-    auditData?.details?.type === 'table' &&
-    auditData?.details.items?.length === 0
-  ) {
+  if (auditData?.details?.type === "table" && auditData?.details.items?.length === 0) {
     return true;
   }
-  if (
-    auditData?.details?.type === 'opportunity' &&
-    auditData?.details.items?.length === 0
-  ) {
+  if (auditData?.details?.type === "opportunity" && auditData?.details.items?.length === 0) {
     return true;
   }
 
@@ -65,12 +59,8 @@ export const sortByScoreDisplayModes = (
   }
 
   const scoreDisplayModeDiff =
-    ScoreDisplayModesRanking[
-      isEmptyResult(a) ? 'empty' : a.scoreDisplayMode || 'notApplicable'
-    ] -
-    ScoreDisplayModesRanking[
-      isEmptyResult(b) ? 'empty' : b.scoreDisplayMode || 'notApplicable'
-    ];
+    ScoreDisplayModesRanking[isEmptyResult(a) ? "empty" : a.scoreDisplayMode || "notApplicable"] -
+    ScoreDisplayModesRanking[isEmptyResult(b) ? "empty" : b.scoreDisplayMode || "notApplicable"];
   if (scoreDisplayModeDiff === 0) {
     const scoreDiff = (a.score || 0) - (b.score || 0);
     return scoreDiff;
@@ -92,15 +82,15 @@ export function ScoreDisplay({
   if (audit.score === null || audit.scoreDisplayMode === undefined) {
     return null;
   }
-  const labelText = device ? `${device} - `: ''
+  const labelText = device ? `${device} - ` : "";
   if (audit.scoreDisplayMode === ScoreDisplayModes.NUMERIC) {
     return (
       <>
         <div className="text-xs">
           {labelText}
-          {audit.displayValue ? `${audit.displayValue} - ` : ''}
-          Score: {Math.round(audit.score * 100)} / 100 
-          {audit.displayValue ? ` - ${audit.displayValue}` : ''}
+          {audit.displayValue ? `${audit.displayValue} - ` : ""}
+          Score: {Math.round(audit.score * 100)} / 100
+          {audit.displayValue ? ` - ${audit.displayValue}` : ""}
         </div>
       </>
     );
@@ -108,7 +98,8 @@ export function ScoreDisplay({
   if (audit.scoreDisplayMode === ScoreDisplayModes.BINARY) {
     return (
       <div className="text-xs">
-        {labelText}{audit.score ? '✅ - Passed' : '❌ - Failed'}
+        {labelText}
+        {audit.score ? "✅ - Passed" : "❌ - Failed"}
       </div>
     );
   }
@@ -128,7 +119,10 @@ export function ScoreDisplay({
 
   return (
     <div className="text-xs whitespace-nowrap">
-      {device || ''} {audit.displayValue ? ` | ${audit.displayValue} | Score ${Math.round(audit.score * 100)} / 100` : ` | Score ${Math.round(audit.score * 100)} / 100`}
+      {device || ""}{" "}
+      {audit.displayValue
+        ? ` | ${audit.displayValue} | Score ${Math.round(audit.score * 100)} / 100`
+        : ` | Score ${Math.round(audit.score * 100)} / 100`}
       {/* Score: {Math.round(audit.score * 100)} / 100 */}
     </div>
   );

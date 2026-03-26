@@ -10,38 +10,30 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { RenderMSValue, renderTimeValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart';
-import {
-  BarChart,
-  Bar,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-} from 'recharts';
-import { chartConfig } from '@/components/common/ChartSettings';
+  RenderMSValue,
+  renderTimeValue,
+} from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { BarChart, Bar, CartesianGrid, XAxis, YAxis } from "recharts";
+import { chartConfig } from "@/components/common/ChartSettings";
 import { getNumber } from "@/lib/utils";
 
-
- // Color mapping for subparts
- const subpartColors = [
-    'hsl(var(--chart-1))',
-    'hsl(var(--chart-2))',
-    'hsl(var(--chart-3))',
-    'hsl(var(--chart-4))',
-    'hsl(var(--chart-5))',
-  ];
+// Color mapping for subparts
+const subpartColors = [
+  "hsl(var(--chart-1))",
+  "hsl(var(--chart-2))",
+  "hsl(var(--chart-3))",
+  "hsl(var(--chart-4))",
+  "hsl(var(--chart-5))",
+];
 
 // LCP subpart order (from first to last)
 const LCP_SUBPART_ORDER = [
-  'timeToFirstByte',      // Time to First Byte (TTFB)
-  'resourceLoadDelay',    // Resource load delay
-  'resourceLoadDuration', // Resource load duration
-  'elementRenderDelay',   // Element render delay
+  "timeToFirstByte", // Time to First Byte (TTFB)
+  "resourceLoadDelay", // Resource load delay
+  "resourceLoadDuration", // Resource load duration
+  "elementRenderDelay", // Element render delay
 ];
 
 type LCPSubpartRow = {
@@ -53,34 +45,37 @@ type LCPSubpartRow = {
 export function LCPBreakdownCard() {
   const metrics = usePageSpeedItems();
   const breakdownData = useMemo(() => {
-    return metrics.map(({ item, label }) => {
-      const lcpBreakdownAudit = item?.lighthouseResult?.audits?.['lcp-breakdown-insight'];
-      const details = lcpBreakdownAudit?.details as { items?: Array<{ type?: string; items?: Array<Record<string, unknown>> }> } | undefined;
-      
-      // Find the table item in details
-      const tableItem = details?.items?.find(item => item.type === 'table');
-      const subparts = (tableItem?.items || []) as Array<{
-        subpart?: string;
-        label?: string;
-        duration?: number | unknown;
-      }>;
-      
-      return {
-        label,
-        subparts: subparts.map(subpart => ({
-          subpart: typeof subpart.subpart === 'string' ? subpart.subpart : '',
-          label: typeof subpart.label === 'string' ? subpart.label : '',
-          duration: getNumber(subpart.duration) || 0,
-        })),
-      };
-    }).filter(data => data.subparts.length > 0);
-  }, [metrics]);
+    return metrics
+      .map(({ item, label }) => {
+        const lcpBreakdownAudit = item?.lighthouseResult?.audits?.["lcp-breakdown-insight"];
+        const details = lcpBreakdownAudit?.details as
+          | { items?: Array<{ type?: string; items?: Array<Record<string, unknown>> }> }
+          | undefined;
 
+        // Find the table item in details
+        const tableItem = details?.items?.find((item) => item.type === "table");
+        const subparts = (tableItem?.items || []) as Array<{
+          subpart?: string;
+          label?: string;
+          duration?: number | unknown;
+        }>;
+
+        return {
+          label,
+          subparts: subparts.map((subpart) => ({
+            subpart: typeof subpart.subpart === "string" ? subpart.subpart : "",
+            label: typeof subpart.label === "string" ? subpart.label : "",
+            duration: getNumber(subpart.duration) || 0,
+          })),
+        };
+      })
+      .filter((data) => data.subparts.length > 0);
+  }, [metrics]);
 
   // Create table rows
   const tableRows = useMemo(() => {
     const subpartMap = new Map<string, LCPSubpartRow>();
-    
+
     breakdownData.forEach(({ label, subparts }) => {
       subparts.forEach(({ subpart, label: subpartLabel, duration }) => {
         if (!subpartMap.has(subpart)) {
@@ -93,7 +88,7 @@ export function LCPBreakdownCard() {
         row[label] = duration;
       });
     });
-    
+
     // Sort by LCP subpart order
     return Array.from(subpartMap.values()).sort((a, b) => {
       const aIndex = LCP_SUBPART_ORDER.indexOf(a.subpart);
@@ -135,7 +130,7 @@ export function LCPBreakdownCard() {
         report: label,
       };
       // Create a map for quick lookup
-      const subpartMap = new Map(subparts.map(s => [s.subpart, s.duration]));
+      const subpartMap = new Map(subparts.map((s) => [s.subpart, s.duration]));
       // Add each subpart in order (using allSubparts which is already sorted)
       allSubparts.forEach((subpart) => {
         dataPoint[subpart] = subpartMap.get(subpart) || 0;
@@ -144,8 +139,8 @@ export function LCPBreakdownCard() {
     });
   }, [breakdownData, allSubparts]);
 
-  const reportLabels = breakdownData.map(d => d.label);
-  
+  const reportLabels = breakdownData.map((d) => d.label);
+
   // Calculate chart height based on number of reports (1rem per report + spacing)
   const chartHeight = useMemo(() => {
     const barHeight = 16; // 1rem = 16px
@@ -154,9 +149,14 @@ export function LCPBreakdownCard() {
     const bottomMargin = 12;
     // Height = (number of bars × (bar height + spacing)) + margins
     // For the last bar, we don't need spacing after it
-    return breakdownData.length * barHeight + (breakdownData.length - 1) * spacing + topMargin + bottomMargin;
+    return (
+      breakdownData.length * barHeight +
+      (breakdownData.length - 1) * spacing +
+      topMargin +
+      bottomMargin
+    );
   }, [breakdownData.length]);
-  
+
   // Map subpart keys to their labels for display
   const subpartLabels = useMemo(() => {
     const labelMap = new Map<string, string>();
@@ -169,8 +169,6 @@ export function LCPBreakdownCard() {
     });
     return labelMap;
   }, [breakdownData]);
-  
- 
 
   if (!breakdownData.length) {
     return null;
@@ -184,20 +182,24 @@ export function LCPBreakdownCard() {
       <CardContent>
         <div className="space-y-6">
           {/* Chart Visualization */}
-             <div className="relative z-10">
-             <ChartContainer config={chartConfig} className="w-full h-full" style={{ height: `${chartHeight}px` }}>
-                <BarChart
-                  accessibilityLayer
-                  data={chartData}
-                  layout="vertical"
-                  margin={{
-                    left: 120,
-                    right: 12,
-                    top: 12,
-                    bottom: 12,
-                  }}
-                  barCategoryGap={24}
-                >
+          <div className="relative z-10">
+            <ChartContainer
+              config={chartConfig}
+              className="w-full h-full"
+              style={{ height: `${chartHeight}px` }}
+            >
+              <BarChart
+                accessibilityLayer
+                data={chartData}
+                layout="vertical"
+                margin={{
+                  left: 120,
+                  right: 12,
+                  top: 12,
+                  bottom: 12,
+                }}
+                barCategoryGap={24}
+              >
                 <CartesianGrid horizontal={false} />
                 <XAxis
                   type="number"
@@ -218,15 +220,17 @@ export function LCPBreakdownCard() {
                 <ChartTooltip
                   cursor={false}
                   wrapperStyle={{ zIndex: 9999 }}
-                  content={<ChartTooltipContent 
-                    indicator="line"
-                    style={{ zIndex: 9999 }}
-                    formatter={(value, name) => {
-                      const label = subpartLabels.get(name as string) || name;
-                      const formattedValue = `${renderTimeValue(value)} `;
-                      return [formattedValue, label];
-                    }}
-                  />}
+                  content={
+                    <ChartTooltipContent
+                      indicator="line"
+                      style={{ zIndex: 9999 }}
+                      formatter={(value, name) => {
+                        const label = subpartLabels.get(name as string) || name;
+                        const formattedValue = `${renderTimeValue(value)} `;
+                        return [formattedValue, label];
+                      }}
+                    />
+                  }
                 />
                 {allSubparts.map((subpart, index) => (
                   <Bar
@@ -241,17 +245,18 @@ export function LCPBreakdownCard() {
                 ))}
               </BarChart>
             </ChartContainer>
-            </div>
-          
+          </div>
 
           {/* Table */}
-           <div className="overflow-x-auto relative z-0">
+          <div className="overflow-x-auto relative z-0">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="min-w-40">Subpart</TableHead>
                   {reportLabels.map((label) => (
-                    <TableHead key={label} className="min-w-35">{label}</TableHead>
+                    <TableHead key={label} className="min-w-35">
+                      {label}
+                    </TableHead>
                   ))}
                 </TableRow>
               </TableHeader>
@@ -278,4 +283,3 @@ export function LCPBreakdownCard() {
     </Card>
   );
 }
-

@@ -1,31 +1,20 @@
-'use client';
+"use client";
 
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart';
-import { chartConfig } from '@/components/common/ChartSettings';
-import { cruxHistogramBarData } from '@/components/latest-crux/lib/cruxHistogramBarData';
-import type { CruxHistoryItem } from '@/lib/schema';
-import { useMemo } from 'react';
-import { Bar, BarChart, CartesianGrid, Rectangle, XAxis } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { chartConfig } from "@/components/common/ChartSettings";
+import { cruxHistogramBarData } from "@/components/latest-crux/lib/cruxHistogramBarData";
+import type { CruxHistoryItem } from "@/lib/schema";
+import { useMemo } from "react";
+import { Bar, BarChart, CartesianGrid, Rectangle, XAxis } from "recharts";
 
 const HISTOGRAM_STATUS_LABELS: Record<string, string> = {
-  good: 'Good',
-  ni: 'Needs Improvement',
-  poor: 'Poor',
+  good: "Good",
+  ni: "Needs Improvement",
+  poor: "Poor",
 };
 
-export function CruxHistogramChart({
-  histogramData,
-}: {
-  histogramData: CruxHistoryItem;
-}) {
-  const chartData = useMemo(
-    () => cruxHistogramBarData(histogramData),
-    [histogramData],
-  );
+export function CruxHistogramChart({ histogramData }: { histogramData: CruxHistoryItem }) {
+  const chartData = useMemo(() => cruxHistogramBarData(histogramData), [histogramData]);
 
   return (
     <div>
@@ -37,17 +26,13 @@ export function CruxHistogramChart({
             tickLine={false}
             axisLine={false}
             hide={true}
-            tickFormatter={(value) =>
-              chartConfig[value as keyof typeof chartConfig]?.label || ''
-            }
+            tickFormatter={(value) => chartConfig[value as keyof typeof chartConfig]?.label || ""}
           />
           <ChartTooltip
             cursor={true}
             content={
               <ChartTooltipContent
-                labelFormatter={(value) =>
-                  HISTOGRAM_STATUS_LABELS[value] || ''
-                }
+                labelFormatter={(value) => HISTOGRAM_STATUS_LABELS[value] || ""}
                 formatter={(value, _label, payload) => {
                   return (
                     <div className="flex items-center gap-1">

@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { DataTableHeader } from '@/features/page-speed-insights/lh-categories/table/DataTableHeader';
-import { DataTableBody } from '@/features/page-speed-insights/lh-categories/table/DataTableBody';
-import { Table as TableType } from '@tanstack/react-table';
-import { PaginationCard } from '@/features/page-speed-insights/JSUsage/TableControls';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
+import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
+import { Table as TableType } from "@tanstack/react-table";
+import { PaginationCard } from "@/features/page-speed-insights/JSUsage/TableControls";
 
 type TableCardProps<T = unknown> = {
   title: string;
@@ -23,30 +23,27 @@ export function TableCard<T = unknown>({
   title,
   table,
   showPagination = false,
-  className = 'md:col-span-2 lg:col-span-3',
+  className = "md:col-span-2 lg:col-span-3",
   // maxHeight,
   pageSize = 10,
 }: TableCardProps<T>) {
-  'use no memo';
+  "use no memo";
   const [showAllResults, setShowAllResults] = useState(false);
   const rowCount = table.getRowCount();
   const canShowAllResults = rowCount > pageSize;
-  const showPaginationControls =
-    showPagination && canShowAllResults && !showAllResults;
+  const showPaginationControls = showPagination && canShowAllResults && !showAllResults;
 
   return (
     <TableCardWrapper title={title} className={className}>
       <div className={`w-full overflow-x-auto`}>
-        <Table className="w-full" style={{ width: '100%' }}>
+        <Table className="w-full" style={{ width: "100%" }}>
           <DataTableHeader table={table} />
           <DataTableBody table={table} />
         </Table>
       </div>
       {showPagination && (
         <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-          {showPaginationControls && (
-            <PaginationCard table={table} showManualControls />
-          )}
+          {showPaginationControls && <PaginationCard table={table} showManualControls />}
           {canShowAllResults && !showAllResults && (
             <Button
               variant="outline"

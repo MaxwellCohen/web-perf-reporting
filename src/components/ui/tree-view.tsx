@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-'use client';
+"use client";
 
-import React from 'react';
-import * as AccordionPrimitive from '@radix-ui/react-accordion';
-import { ChevronRight } from 'lucide-react';
-import { cva } from 'class-variance-authority';
-import { cn } from '@/lib/utils';
+import React from "react";
+import * as AccordionPrimitive from "@radix-ui/react-accordion";
+import { ChevronRight } from "lucide-react";
+import { cva } from "class-variance-authority";
+import { cn } from "@/lib/utils";
 
 // Tree marker SVG components matching Lighthouse style
 // Each marker is 12px wide (w-3 = 12px) and 26px tall
 const TreeMarker = {
   horizDown: () => (
-    <span 
+    <span
       className="inline-block w-3 h-6.5 bg-no-repeat bg-top-left float-left"
       style={{
         backgroundImage: `url("data:image/svg+xml;utf8,<svg width='16' height='26' viewBox='0 0 16 26' xmlns='http://www.w3.org/2000/svg'><g fill='%23D8D8D8' fill-rule='evenodd'><path d='M16 12v2H-2v-2z'/><path d='M9 12v14H7V12z'/></g></svg>")`,
@@ -20,7 +20,7 @@ const TreeMarker = {
     />
   ),
   right: () => (
-    <span 
+    <span
       className="inline-block w-3 h-6.5 bg-no-repeat bg-top-left float-left"
       style={{
         backgroundImage: `url("data:image/svg+xml;utf8,<svg width='16' height='26' viewBox='0 0 16 26' xmlns='http://www.w3.org/2000/svg'><path d='M16 12v2H0v-2z' fill='%23D8D8D8' fill-rule='evenodd'/></svg>")`,
@@ -28,7 +28,7 @@ const TreeMarker = {
     />
   ),
   upRight: () => (
-    <span 
+    <span
       className="inline-block w-3 h-6.5 bg-no-repeat bg-top-left float-left"
       style={{
         backgroundImage: `url("data:image/svg+xml;utf8,<svg width='16' height='26' viewBox='0 0 16 26' xmlns='http://www.w3.org/2000/svg'><path d='M7 0h2v14H7zm2 12h7v2H9z' fill='%23D8D8D8' fill-rule='evenodd'/></svg>")`,
@@ -36,7 +36,7 @@ const TreeMarker = {
     />
   ),
   vertRight: () => (
-    <span 
+    <span
       className="inline-block w-3 h-6.5 bg-no-repeat bg-top-left float-left"
       style={{
         backgroundImage: `url("data:image/svg+xml;utf8,<svg width='16' height='26' viewBox='0 0 16 26' xmlns='http://www.w3.org/2000/svg'><path d='M7 0h2v27H7zm2 12h7v2H9z' fill='%23D8D8D8' fill-rule='evenodd'/></svg>")`,
@@ -44,7 +44,7 @@ const TreeMarker = {
     />
   ),
   vert: () => (
-    <span 
+    <span
       className="inline-block w-3 h-6.5 bg-no-repeat bg-top-left float-left"
       style={{
         backgroundImage: `url("data:image/svg+xml;utf8,<svg width='16' height='26' viewBox='0 0 16 26' xmlns='http://www.w3.org/2000/svg'><path d='M7 0h2v26H7z' fill='%23D8D8D8' fill-rule='evenodd'/></svg>")`,
@@ -54,13 +54,9 @@ const TreeMarker = {
   empty: () => <span className="inline-block w-3 h-6.5 float-left" />,
 };
 
-const selectedTreeVariants = cva(
-  'before:opacity-100 before:bg-accent/70 text-accent-foreground',
-);
+const selectedTreeVariants = cva("before:opacity-100 before:bg-accent/70 text-accent-foreground");
 
-const dragOverVariants = cva(
-  'before:opacity-100 before:bg-primary/20 text-primary-foreground',
-);
+const dragOverVariants = cva("before:opacity-100 before:bg-primary/20 text-primary-foreground");
 
 interface TreeDataItem {
   id: string;
@@ -101,13 +97,11 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
     },
     ref,
   ) => {
-    const [selectedItemId, setSelectedItemId] = React.useState<
-      string | undefined
-    >(initialSelectedItemId);
-
-    const [draggedItem, setDraggedItem] = React.useState<TreeDataItem | null>(
-      null,
+    const [selectedItemId, setSelectedItemId] = React.useState<string | undefined>(
+      initialSelectedItemId,
     );
+
+    const [draggedItem, setDraggedItem] = React.useState<TreeDataItem | null>(null);
 
     const handleSelectChange = React.useCallback(
       (item: TreeDataItem | undefined) => {
@@ -160,10 +154,7 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
 
       const ids: string[] = [];
 
-      function walkTreeItems(
-        items: TreeDataItem[] | TreeDataItem,
-        targetId: string,
-      ) {
+      function walkTreeItems(items: TreeDataItem[] | TreeDataItem, targetId: string) {
         if (items instanceof Array) {
           for (let i = 0; i < items.length; i++) {
             ids.push(items[i]!.id);
@@ -184,7 +175,7 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
     }, [data, expandAll, initialSelectedItemId]);
 
     return (
-      <div className={cn('relative overflow-hidden p-2', className)}>
+      <div className={cn("relative overflow-hidden p-2", className)}>
         <TreeItem
           data={data}
           ref={ref}
@@ -203,7 +194,7 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
     );
   },
 );
-TreeView.displayName = 'TreeView';
+TreeView.displayName = "TreeView";
 
 type TreeItemProps = TreeProps & {
   selectedItemId?: string;
@@ -225,7 +216,7 @@ function generateTreeMarkers(
   hasChildren: boolean,
 ): React.ReactNode[] {
   const markers: React.ReactNode[] = [];
-  
+
   // For each parent level: add vert (if has siblings) or empty, then always add empty spacer
   // This creates the vertical lines that continue through parent levels
   treeMarkers.forEach((separator, i) => {
@@ -239,7 +230,7 @@ function generateTreeMarkers(
     // Always add an empty spacer marker after each level (matches Lighthouse pattern)
     markers.push(<TreeMarker.empty key={`spacer-${i}`} />);
   });
-  
+
   // Add the connecting marker for this level
   // Last child uses up-right (L shape), middle child uses vert-right (vertical then right)
   if (isLast) {
@@ -247,42 +238,42 @@ function generateTreeMarkers(
   } else {
     markers.push(<TreeMarker.vertRight key="connector" />);
   }
-  
+
   // Always add horizontal right marker
   markers.push(<TreeMarker.right key="right" />);
-  
+
   // Add horiz-down if has children (shows vertical line continues), otherwise another right
   if (hasChildren) {
     markers.push(<TreeMarker.horizDown key="end" />);
   } else {
     markers.push(<TreeMarker.right key="end" />);
   }
-  
+
   return markers;
 }
 
 const TreeItem = React.forwardRef<HTMLDivElement, TreeItemProps>(
-	(
-		{
-			className,
-			data,
-			selectedItemId,
-			handleSelectChange,
-			expandedItemIds,
-			handleDragStart,
-			handleDrop,
-			draggedItem,
-			defaultNodeIcon,
-			defaultLeafIcon,
-			...props
-		},
-		ref,
-	) => {
+  (
+    {
+      className,
+      data,
+      selectedItemId,
+      handleSelectChange,
+      expandedItemIds,
+      handleDragStart,
+      handleDrop,
+      draggedItem,
+      defaultNodeIcon,
+      defaultLeafIcon,
+      ...props
+    },
+    ref,
+  ) => {
     if (!(data instanceof Array)) {
       data = [data];
     }
-		return (
-			<div ref={ref} role="tree" className={className} {...props}>
+    return (
+      <div ref={ref} role="tree" className={className} {...props}>
         <ul className="list-none m-0 p-0">
           {data.map((item, index) => {
             const isLast = index === data.length - 1;
@@ -318,7 +309,7 @@ const TreeItem = React.forwardRef<HTMLDivElement, TreeItemProps>(
     );
   },
 );
-TreeItem.displayName = 'TreeItem';
+TreeItem.displayName = "TreeItem";
 
 const TreeNode = ({
   item,
@@ -348,17 +339,14 @@ const TreeNode = ({
 
   return (
     <div className="relative">
-      <div className={cn(
-        "flex items-center h-6.5 leading-6.5 whitespace-nowrap scroll-auto",
-        isLongest && "text-red-600 dark:text-red-400"
-      )}>
-        <span className="shrink-0">
-          {markers}
-        </span>
-        <span className={cn(
-          "ml-2.5 text-sm",
-          isLongest ? "font-bold" : ""
-        )}>
+      <div
+        className={cn(
+          "flex items-center h-6.5 leading-6.5 whitespace-nowrap scroll-auto",
+          isLongest && "text-red-600 dark:text-red-400",
+        )}
+      >
+        <span className="shrink-0">{markers}</span>
+        <span className={cn("ml-2.5 text-sm", isLongest ? "font-bold" : "")}>
           {item.name.replace("| (Longest Chain)", "")}
         </span>
       </div>
@@ -430,16 +418,12 @@ const TreeLeaf = React.forwardRef<
         e.preventDefault();
         return;
       }
-      e.dataTransfer.setData('text/plain', item.id);
+      e.dataTransfer.setData("text/plain", item.id);
       handleDragStart?.(item);
     };
 
     const onDragOver = (e: React.DragEvent) => {
-      if (
-        item.droppable !== false &&
-        draggedItem &&
-        draggedItem.id !== item.id
-      ) {
+      if (item.droppable !== false && draggedItem && draggedItem.id !== item.id) {
         e.preventDefault();
         setIsDragOver(true);
       }
@@ -459,7 +443,7 @@ const TreeLeaf = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          'flex items-center h-6.5 leading-6.5 whitespace-nowrap cursor-pointer',
+          "flex items-center h-6.5 leading-6.5 whitespace-nowrap cursor-pointer",
           className,
           selectedItemId === item.id && selectedTreeVariants(),
           isDragOver && dragOverVariants(),
@@ -475,20 +459,20 @@ const TreeLeaf = React.forwardRef<
         onDrop={onDrop}
         {...props}
       >
-        <span className="shrink-0">
-          {markers}
-        </span>
-        <span className={cn(
-          "ml-2.5 text-xs",
-          isLongest ? "text-red-600 dark:text-red-400 font-bold" : ""
-        )}>
+        <span className="shrink-0">{markers}</span>
+        <span
+          className={cn(
+            "ml-2.5 text-xs",
+            isLongest ? "text-red-600 dark:text-red-400 font-bold" : "",
+          )}
+        >
           {item.name}
         </span>
       </div>
     );
   },
 );
-TreeLeaf.displayName = 'TreeLeaf';
+TreeLeaf.displayName = "TreeLeaf";
 
 const AccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
@@ -498,7 +482,7 @@ const AccordionTrigger = React.forwardRef<
     <AccordionPrimitive.Trigger
       ref={ref}
       className={cn(
-        'flex w-full flex-1 items-center py-2 transition-all first:[&[data-state=open]>svg]:rotate-90',
+        "flex w-full flex-1 items-center py-2 transition-all first:[&[data-state=open]>svg]:rotate-90",
         className,
       )}
       {...props}
@@ -517,7 +501,7 @@ const AccordionContent = React.forwardRef<
   <AccordionPrimitive.Content
     ref={ref}
     className={cn(
-      'overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down',
+      "overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down",
       className,
     )}
     {...props}

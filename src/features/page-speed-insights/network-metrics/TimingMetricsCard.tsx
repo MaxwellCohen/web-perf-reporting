@@ -1,9 +1,5 @@
 "use client";
-import {
-  TableCell,
-  TableHead,
-  TableRow,
-} from "@/components/ui/table";
+import { TableCell, TableHead, TableRow } from "@/components/ui/table";
 import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import { CardWithTable } from "@/features/page-speed-insights/shared/CardWithTable";
 import { useNetworkMetricSeries } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
@@ -16,11 +12,15 @@ function TimingValue({ value, category }: { value?: number; category?: string })
         <RenderMSValue value={value} />
       </span>
       {category && (
-        <span className={`text-xs px-2 py-0.5 rounded-full ${
-          category === 'FAST' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-          category === 'AVERAGE' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
-          'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-        }`}>
+        <span
+          className={`text-xs px-2 py-0.5 rounded-full ${
+            category === "FAST"
+              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+              : category === "AVERAGE"
+                ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+          }`}
+        >
           {category}
         </span>
       )}
@@ -62,19 +62,28 @@ export function TimingMetricsCard() {
         </TableRow>
       }
     >
-      {validMetrics.map(
-        ({ label, ttfb, fcp, lcp, speedIndex, totalBlockingTime }) => (
+      {validMetrics.map(({ label, ttfb, fcp, lcp, speedIndex, totalBlockingTime }) => (
         <TableRow key={label}>
-          {showReportColumn && <TableCell className="font-medium min-w-20">{label || 'Unknown'}</TableCell>}
-          <TableCell className="min-w-25"><TimingValue value={ttfb} /></TableCell>
-          <TableCell className="min-w-25"><TimingValue value={fcp} /></TableCell>
-          <TableCell className="min-w-25"><TimingValue value={lcp} /></TableCell>
-          <TableCell className="min-w-30"><TimingValue value={speedIndex} /></TableCell>
-          <TableCell className="min-w-25"><TimingValue value={totalBlockingTime} /></TableCell>
+          {showReportColumn && (
+            <TableCell className="font-medium min-w-20">{label || "Unknown"}</TableCell>
+          )}
+          <TableCell className="min-w-25">
+            <TimingValue value={ttfb} />
+          </TableCell>
+          <TableCell className="min-w-25">
+            <TimingValue value={fcp} />
+          </TableCell>
+          <TableCell className="min-w-25">
+            <TimingValue value={lcp} />
+          </TableCell>
+          <TableCell className="min-w-30">
+            <TimingValue value={speedIndex} />
+          </TableCell>
+          <TableCell className="min-w-25">
+            <TimingValue value={totalBlockingTime} />
+          </TableCell>
         </TableRow>
-      ),
-      )}
+      ))}
     </CardWithTable>
   );
 }
-

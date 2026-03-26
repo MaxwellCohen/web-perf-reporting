@@ -1,20 +1,20 @@
-import { render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-vi.mock('@/components/lh/LhInputForm', () => ({
+vi.mock("@/components/lh/LhInputForm", () => ({
   LhInputForm: () => <div>Lighthouse Report Viewer</div>,
 }));
 
-import LhPage from '@/app/lh/page';
+import LhPage from "@/app/lh/page";
 
-describe('app/lh/page', () => {
+describe("app/lh/page", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('renders LhInputForm inside a max-w container', async () => {
-    const params = { route: 'lh', searchParams: {} };
-    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+  it("renders LhInputForm inside a max-w container", async () => {
+    const params = { route: "lh", searchParams: {} };
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
     const Page = await LhPage(params);
     const { container } = render(Page);
@@ -23,9 +23,9 @@ describe('app/lh/page', () => {
     expect(logSpy).toHaveBeenCalledWith(params);
   });
 
-  it('logs arbitrary params', async () => {
-    const params = { foo: 'bar', count: 1 };
-    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+  it("logs arbitrary params", async () => {
+    const params = { foo: "bar", count: 1 };
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
     const Page = await LhPage(params);
     render(Page);

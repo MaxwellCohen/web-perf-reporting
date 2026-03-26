@@ -1,12 +1,11 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { ChevronDown } from 'lucide-react';
-
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
 
 interface FilterControlsProps {
   categories: string[];
@@ -38,14 +37,8 @@ export function FilterControls({
   return (
     <div className="mb-6 flex flex-wrap items-center gap-4">
       <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onToggleAll}
-        >
-          {expandedCount === totalFiltered
-            ? 'Collapse All'
-            : 'Expand All'}
+        <Button variant="outline" size="sm" onClick={onToggleAll}>
+          {expandedCount === totalFiltered ? "Collapse All" : "Expand All"}
         </Button>
       </div>
       <DropdownMenu>
@@ -58,16 +51,13 @@ export function FilterControls({
           {categories.map((category) => (
             <DropdownMenuCheckboxItem
               key={category}
-              checked={
-                selectedCategories.length === 0 ||
-                selectedCategories.includes(category)
-              }
+              checked={selectedCategories.length === 0 || selectedCategories.includes(category)}
               onCheckedChange={(checked) => {
                 if (checked) {
                   onCategoriesChange(
                     selectedCategories.includes(category)
                       ? selectedCategories
-                      : [...selectedCategories, category]
+                      : [...selectedCategories, category],
                   );
                 } else {
                   onCategoriesChange(selectedCategories.filter((c) => c !== category));
@@ -99,16 +89,13 @@ export function FilterControls({
           {priorities.map((priority) => (
             <DropdownMenuCheckboxItem
               key={priority}
-              checked={
-                selectedPriorities.length === 0 ||
-                selectedPriorities.includes(priority)
-              }
+              checked={selectedPriorities.length === 0 || selectedPriorities.includes(priority)}
               onCheckedChange={(checked) => {
                 if (checked) {
                   onPrioritiesChange(
                     selectedPriorities.includes(priority)
                       ? selectedPriorities
-                      : [...selectedPriorities, priority]
+                      : [...selectedPriorities, priority],
                   );
                 } else {
                   onPrioritiesChange(selectedPriorities.filter((p) => p !== priority));
@@ -148,4 +135,3 @@ export function FilterControls({
     </div>
   );
 }
-

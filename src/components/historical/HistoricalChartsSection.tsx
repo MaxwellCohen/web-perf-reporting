@@ -1,26 +1,17 @@
-import {
-  getHistoricalCruxData,
+import { getHistoricalCruxData } from "@/lib/services";
 
-} from '@/lib/services';
+import { HistoricalDashboard } from "@/components/historical/HistoricalDashboard";
 
-import { HistoricalDashboard } from '@/components/historical/HistoricalDashboard';
-
-export async function HistoricalChartsSection({
-  url,
-  
-}: {
-  url: string;
-}) {
-
+export async function HistoricalChartsSection({ url }: { url: string }) {
   const cruxData = await Promise.all([
     getHistoricalCruxData({ origin: url, formFactor: undefined }),
-    getHistoricalCruxData({ origin: url, formFactor: 'DESKTOP' }),
-    getHistoricalCruxData({ origin: url, formFactor: 'TABLET' }),
-    getHistoricalCruxData({ origin: url, formFactor: 'PHONE' }),
+    getHistoricalCruxData({ origin: url, formFactor: "DESKTOP" }),
+    getHistoricalCruxData({ origin: url, formFactor: "TABLET" }),
+    getHistoricalCruxData({ origin: url, formFactor: "PHONE" }),
     getHistoricalCruxData({ url, formFactor: undefined }),
-    getHistoricalCruxData({ url, formFactor: 'DESKTOP' }),
-    getHistoricalCruxData({ url, formFactor: 'TABLET' }),
-    getHistoricalCruxData({ url, formFactor: 'PHONE' }),
+    getHistoricalCruxData({ url, formFactor: "DESKTOP" }),
+    getHistoricalCruxData({ url, formFactor: "TABLET" }),
+    getHistoricalCruxData({ url, formFactor: "PHONE" }),
   ]);
   const cruxReport = {
     originAll: cruxData[0],
@@ -35,10 +26,7 @@ export async function HistoricalChartsSection({
 
   return (
     <div className="flex flex-col mt-4">
-    <HistoricalDashboard reportMap={cruxReport} />
-  </div>
+      <HistoricalDashboard reportMap={cruxReport} />
+    </div>
   );
 }
-
-
-

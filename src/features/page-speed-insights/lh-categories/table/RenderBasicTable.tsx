@@ -1,19 +1,22 @@
-import { TableItem, TableColumnHeading, DeviceType } from '@/lib/schema';
+import { TableItem, TableColumnHeading, DeviceType } from "@/lib/schema";
 
-import { getDerivedSubItemsHeading, showBothDevices } from '@/features/page-speed-insights/lh-categories/table/utils';
+import {
+  getDerivedSubItemsHeading,
+  showBothDevices,
+} from "@/features/page-speed-insights/lh-categories/table/utils";
 import {
   RenderTableRowContainer,
   renderTableRowContainerCss,
-} from '@/features/page-speed-insights/lh-categories/table/RenderTableRowContainer';
-import { RenderTableHeader } from '@/features/page-speed-insights/lh-categories/table/RenderTableHeader';
-import { RenderHeading } from '@/features/page-speed-insights/lh-categories/table/RenderHeading';
-import { RenderTableCell } from '@/features/page-speed-insights/lh-categories/table/RenderTableCell';
-import { RenderTableValue } from '@/features/page-speed-insights/lh-categories/table/RenderTableValue';
-import { Fragment, JSX } from 'react';
-import { cn } from '@/lib/utils';
-import { Details } from '@/components/ui/accordion';
-import { toSentenceCase } from '@/components/common/FormFactorPercentPieChart';
-import { getItemDevice } from '@/features/page-speed-insights/lh-categories/table/itemDevice';
+} from "@/features/page-speed-insights/lh-categories/table/RenderTableRowContainer";
+import { RenderTableHeader } from "@/features/page-speed-insights/lh-categories/table/RenderTableHeader";
+import { RenderHeading } from "@/features/page-speed-insights/lh-categories/table/RenderHeading";
+import { RenderTableCell } from "@/features/page-speed-insights/lh-categories/table/RenderTableCell";
+import { RenderTableValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
+import { Fragment, JSX } from "react";
+import { cn } from "@/lib/utils";
+import { Details } from "@/components/ui/accordion";
+import { toSentenceCase } from "@/components/common/FormFactorPercentPieChart";
+import { getItemDevice } from "@/features/page-speed-insights/lh-categories/table/itemDevice";
 
 export function RenderBasicTable({
   headings,
@@ -30,18 +33,16 @@ export function RenderBasicTable({
     <Details className="@container">
       <summary className="flex flex-col gap-2">
         <div className="flex flex-col gap-2">
-          <div className="text-lg font-bold">
-            {toSentenceCase(`${title} details`.trim())}
-          </div>
+          <div className="text-lg font-bold">{toSentenceCase(`${title} details`.trim())}</div>
         </div>
       </summary>
       <TableContainer headings={headings} className="">
-        <RenderTableHeader headings={headings} className={'border-0'} />
+        <RenderTableHeader headings={headings} className={"border-0"} />
         {items.map((item, index) => {
           if (!item.subItems?.items?.length) {
             return (
               <RenderMainRow
-                className={'border-0 px-1'}
+                className={"border-0 px-1"}
                 key={`item-${index}`}
                 item={item}
                 headings={headings}
@@ -50,12 +51,7 @@ export function RenderBasicTable({
             );
           }
           return (
-            <NestedTable
-              key={`item-${index}`}
-              item={item}
-              headings={headings}
-              device={device}
-            />
+            <NestedTable key={`item-${index}`} item={item} headings={headings} device={device} />
           );
         })}
       </TableContainer>
@@ -68,22 +64,18 @@ export function TableContainer({
   children,
   className,
   ...props
-}: { headings: TableColumnHeading[] } & JSX.IntrinsicElements['div']) {
+}: { headings: TableColumnHeading[] } & JSX.IntrinsicElements["div"]) {
   return (
     <div
       {...props}
-      className={cn('grid w-full overflow-x-auto', className)}
+      className={cn("grid w-full overflow-x-auto", className)}
       style={{
         ...(props.style || {}),
         gridTemplateColumns: headings
           .map((h) =>
-            showBothDevices(h)
-              ? '140px'
-              : h.label === 'Protocol'
-                ? '140px'
-                : 'minmax(300px, 1fr)',
+            showBothDevices(h) ? "140px" : h.label === "Protocol" ? "140px" : "minmax(300px, 1fr)",
           )
-          .join(' '),
+          .join(" "),
       }}
     >
       {children}
@@ -106,7 +98,7 @@ export function NestedTableNoCollapse({
         item={item}
         headings={headings}
         device={device}
-        className={'border-b-3 -mx-3 border-x-2 border-t-2'}
+        className={"border-b-3 -mx-3 border-x-2 border-t-2"}
       />
       {item.subItems?.items?.length ? (
         <div className="contents">
@@ -128,8 +120,8 @@ export function NestedTable({
   device: DeviceType;
 }) {
   return (
-    <Details className={cn(renderTableRowContainerCss, '@container  mb-1')}>
-      <summary className={cn(renderTableRowContainerCss, '')}>
+    <Details className={cn(renderTableRowContainerCss, "@container  mb-1")}>
+      <summary className={cn(renderTableRowContainerCss, "")}>
         <TableContainer headings={headings} className="col-span-full ">
           {headings
             .map((heading, colIndex) => {
@@ -147,10 +139,10 @@ export function NestedTable({
             .filter(Boolean)}
         </TableContainer>
       </summary>
-        <TableContainer headings={headings} className="col-span-full ">
-          {item.subItems?.items?.length ? (
-            <RenderSubItems item={item} headings={headings} device={device} />
-          ) : null}
+      <TableContainer headings={headings} className="col-span-full ">
+        {item.subItems?.items?.length ? (
+          <RenderSubItems item={item} headings={headings} device={device} />
+        ) : null}
       </TableContainer>
     </Details>
   );
@@ -172,13 +164,13 @@ function RenderSubItems({
     <RenderTableRowContainer
       key={`subitem-${subIndex}`}
       {...props}
-      className={cn('border-x-2 border-b-2', props.className)}
+      className={cn("border-x-2 border-b-2", props.className)}
     >
       {headings.map((heading, colIndex) => (
         <RenderTableValue
           key={`subcell-${heading.key || colIndex}`}
           className="px-6 py-0.5 text-sm"
-          value={subItem[heading?.subItemsHeading?.key || '']}
+          value={subItem[heading?.subItemsHeading?.key || ""]}
           heading={getDerivedSubItemsHeading(heading)}
           device={getItemDevice(item, device)}
         />
@@ -193,30 +185,29 @@ export function RenderSubItemsHeader({
 }: {
   headings: TableColumnHeading[];
 } & React.HTMLAttributes<HTMLDivElement>) {
-  const content = headings
-    .map((h, colIndex) => {
-      const headingKey = h?.subItemsHeading?.key;
-      if (!headingKey) {
-        return (<div key={`subheading-${colIndex}`} className='col-span-1'></div>);
-      }
-      const heading = headings.find(({ key }) => key === headingKey);
-      if (!heading) {
-        return <div key={`subheading-${colIndex}`} className='col-span-1'></div>;
-      }
+  const content = headings.map((h, colIndex) => {
+    const headingKey = h?.subItemsHeading?.key;
+    if (!headingKey) {
+      return <div key={`subheading-${colIndex}`} className="col-span-1"></div>;
+    }
+    const heading = headings.find(({ key }) => key === headingKey);
+    if (!heading) {
+      return <div key={`subheading-${colIndex}`} className="col-span-1"></div>;
+    }
 
-      return (
-        <RenderHeading
-          key={`subheading-${heading.key || colIndex}`}
-          heading={heading}
-          className="px-6 py-0.5 text-sm tracking-wider text-muted-foreground col-span-1"
-        />
-      );
-    })
+    return (
+      <RenderHeading
+        key={`subheading-${heading.key || colIndex}`}
+        heading={heading}
+        className="px-6 py-0.5 text-sm tracking-wider text-muted-foreground col-span-1"
+      />
+    );
+  });
   if (!content.length) return null;
   return (
     <RenderTableRowContainer
       {...props}
-      className={cn(renderTableRowContainerCss, 'border-2', props.className)}
+      className={cn(renderTableRowContainerCss, "border-2", props.className)}
     >
       {content}
     </RenderTableRowContainer>

@@ -1,8 +1,8 @@
-import { act, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { LoadingMessage } from '@/components/common/LoadingMessage';
+import { act, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { LoadingMessage } from "@/components/common/LoadingMessage";
 
-describe('LoadingMessage', () => {
+describe("LoadingMessage", () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -11,7 +11,7 @@ describe('LoadingMessage', () => {
     vi.useRealTimers();
   });
 
-  it('stays hidden for the first two seconds and then appears', () => {
+  it("stays hidden for the first two seconds and then appears", () => {
     const { container } = render(<LoadingMessage />);
 
     expect(container.firstChild).toMatchSnapshot();
@@ -27,7 +27,7 @@ describe('LoadingMessage', () => {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('increments elapsed time and rotates loading messages over time', () => {
+  it("increments elapsed time and rotates loading messages over time", () => {
     const { container } = render(<LoadingMessage />);
 
     act(() => {

@@ -1,12 +1,12 @@
-'use client';
-'use no memo';
-import { Button } from '@/components/ui/button';
-import { ChevronRightIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import type { CellContext } from '@tanstack/react-table';
-import type { TreeMapNode } from '@/lib/schema';
-import { RenderBytesValue } from '@/features/page-speed-insights/lh-categories/table/RenderTableValue';
-import type { Table as ReactTable } from '@tanstack/react-table';
+"use client";
+"use no memo";
+import { Button } from "@/components/ui/button";
+import { ChevronRightIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { CellContext } from "@tanstack/react-table";
+import type { TreeMapNode } from "@/lib/schema";
+import { RenderBytesValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
+import type { Table as ReactTable } from "@tanstack/react-table";
 
 function ExpandToggleButton({
   isExpanded,
@@ -14,7 +14,7 @@ function ExpandToggleButton({
   expandLabel,
   collapseLabel,
   children,
-  size = 'icon',
+  size = "icon",
   ariaExpanded,
 }: {
   isExpanded: boolean;
@@ -22,7 +22,7 @@ function ExpandToggleButton({
   expandLabel: string;
   collapseLabel: string;
   children?: React.ReactNode;
-  size?: 'icon' | 'default';
+  size?: "icon" | "default";
   ariaExpanded?: boolean;
 }) {
   const label = isExpanded ? collapseLabel : expandLabel;
@@ -32,15 +32,15 @@ function ExpandToggleButton({
       role="button"
       size={size}
       onClick={onClick}
-      style={{ cursor: 'pointer', margin: 0 }}
+      style={{ cursor: "pointer", margin: 0 }}
       aria-label={label}
       aria-expanded={ariaExpanded}
       className="m-0 h-8 w-8"
     >
       {children}
       <ChevronRightIcon
-        className={cn('h-4 w-4 transform transition-all duration-300', {
-          'rotate-90': isExpanded,
+        className={cn("h-4 w-4 transform transition-all duration-300", {
+          "rotate-90": isExpanded,
         })}
       />
       <span className="sr-only">{label}</span>
@@ -51,10 +51,10 @@ function ExpandToggleButton({
 export function ExpandRow<T>({
   row,
   children,
-}: Pick<Partial<CellContext<T, unknown>>, 'row'> & {
+}: Pick<Partial<CellContext<T, unknown>>, "row"> & {
   children?: React.ReactNode;
 }) {
-  'use no memo';
+  "use no memo";
   if (!row) {
     return <div className="h-9 w-9" />;
   }
@@ -72,7 +72,7 @@ export function ExpandRow<T>({
       onClick={row.getToggleExpandedHandler()}
       expandLabel="Expand row"
       collapseLabel="Collapse row"
-      size={children ? 'default' : 'icon'}
+      size={children ? "default" : "icon"}
       ariaExpanded={isExpanded}
     >
       {children}
@@ -83,7 +83,7 @@ export function ExpandRow<T>({
 export function RenderBytesCell(info: CellContext<TreeMapNode, unknown>) {
   const value = info.getValue();
 
-  if (typeof value !== 'number') {
+  if (typeof value !== "number") {
     return <div className="w-full text-right"> N/A</div>;
   }
   return <RenderBytesValue value={value} className="w-full text-right" />;

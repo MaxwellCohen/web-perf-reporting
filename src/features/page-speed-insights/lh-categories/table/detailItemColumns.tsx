@@ -1,14 +1,14 @@
-import { ItemValue, OpportunityItem, TableItem } from '@/lib/schema';
-import { createColumnHelper, ColumnDef } from '@tanstack/react-table';
-import { RenderTableValue } from '@/features/page-speed-insights/lh-categories/table/RenderTableValue';
+import { ItemValue, OpportunityItem, TableItem } from "@/lib/schema";
+import { createColumnHelper, ColumnDef } from "@tanstack/react-table";
+import { RenderTableValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import {
   canGroup,
   canSort,
   DetailTableItem,
   isNumberColumn,
-} from '@/features/page-speed-insights/lh-categories/table/detailTableShared';
-import { toTitleCase } from '@/features/page-speed-insights/toTitleCase';
-import { NetworkWaterfallCell } from '@/features/page-speed-insights/lh-categories/table/NetworkWaterfallCell';
+} from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
+import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
+import { NetworkWaterfallCell } from "@/features/page-speed-insights/lh-categories/table/NetworkWaterfallCell";
 import {
   getNetworkRequestsTimeRange,
   isNetworkRequestsAudit,
@@ -16,7 +16,7 @@ import {
   NetworkRequestTimeRange,
   sortHeadingsByKeyOrder,
   WATERFALL_REPLACED_NETWORK_REQUEST_KEYS,
-} from '@/features/page-speed-insights/shared/networkRequestsTable';
+} from "@/features/page-speed-insights/shared/networkRequestsTable";
 
 type DetailRowValue = TableItem | OpportunityItem;
 
@@ -43,8 +43,7 @@ function buildBaseColumns(
       headingsToUse = sortHeadingsByKeyOrder(
         headingsToUse.filter(
           (heading) =>
-            heading.key != null &&
-            !WATERFALL_REPLACED_NETWORK_REQUEST_KEYS.includes(heading.key),
+            heading.key != null && !WATERFALL_REPLACED_NETWORK_REQUEST_KEYS.includes(heading.key),
         ),
         NETWORK_REQUESTS_COLUMN_ORDER,
       );
@@ -63,22 +62,21 @@ function buildBaseColumns(
       }
 
       const headerLabel =
-        typeof heading.label === 'string'
+        typeof heading.label === "string"
           ? heading.label
-          : heading.label?.formattedDefault ?? toTitleCase(key as string);
+          : (heading.label?.formattedDefault ?? toTitleCase(key as string));
       headingsById.set(
         columnId,
         columnHelper.accessor((value) => value[key] ?? undefined, {
           id: columnId,
           header: headerLabel,
           enableSorting: canSort(heading.valueType),
-          sortingFn: 'alphanumeric',
-          enableColumnFilter:
-            canGroup(heading.valueType) || isNumberColumn(heading.valueType),
+          sortingFn: "alphanumeric",
+          enableColumnFilter: canGroup(heading.valueType) || isNumberColumn(heading.valueType),
           filterFn: canGroup(heading.valueType)
-            ? 'includesString'
+            ? "includesString"
             : isNumberColumn(heading.valueType)
-              ? 'inNumberRange'
+              ? "inNumberRange"
               : undefined,
           enableResizing: true,
           minSize: 200,
@@ -113,8 +111,8 @@ export function createDetailItemColumns({
   }
 
   const waterfallColumn = columnHelper.display({
-    id: 'waterfall',
-    header: 'Waterfall',
+    id: "waterfall",
+    header: "Waterfall",
     enableSorting: false,
     enableColumnFilter: false,
     enableResizing: true,
@@ -126,9 +124,8 @@ export function createDetailItemColumns({
         networkEndTime?: number;
         resourceType?: string;
       };
-      const start =
-        typeof row.networkRequestTime === 'number' ? row.networkRequestTime : 0;
-      const end = typeof row.networkEndTime === 'number' ? row.networkEndTime : start;
+      const start = typeof row.networkRequestTime === "number" ? row.networkRequestTime : 0;
+      const end = typeof row.networkEndTime === "number" ? row.networkEndTime : start;
 
       return (
         <NetworkWaterfallCell
@@ -136,9 +133,7 @@ export function createDetailItemColumns({
           endTime={end}
           minStart={timeRange.minStart}
           maxEnd={timeRange.maxEnd}
-          resourceType={
-            typeof row.resourceType === 'string' ? row.resourceType : undefined
-          }
+          resourceType={typeof row.resourceType === "string" ? row.resourceType : undefined}
           showTimeLabels
         />
       );

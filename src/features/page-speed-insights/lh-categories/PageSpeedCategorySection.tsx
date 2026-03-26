@@ -1,6 +1,6 @@
 "use client";
-import { NullablePageSpeedInsights } from '@/lib/schema';
-import { CategoryAuditSection } from '@/features/page-speed-insights/lh-categories/CategoryAuditSection';
+import { NullablePageSpeedInsights } from "@/lib/schema";
+import { CategoryAuditSection } from "@/features/page-speed-insights/lh-categories/CategoryAuditSection";
 
 export function PageSpeedCategorySection({
   data,
@@ -17,14 +17,13 @@ export function PageSpeedCategorySection({
       categories.reduce((acc, curr) => {
         if (!curr) return acc;
         return [...acc, ...Object.keys(curr)];
-      }, [] as string[])
+      }, [] as string[]),
     ),
   ];
-  const categoryData = categoryKeys
-    .map((key) => ({
-      key,
-      categoryArr: categories.map((category) => category?.[key] || null),
-    }))
+  const categoryData = categoryKeys.map((key) => ({
+    key,
+    categoryArr: categories.map((category) => category?.[key] || null),
+  }));
 
   return (
     <>

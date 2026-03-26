@@ -1,15 +1,15 @@
-import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { render } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
-vi.mock('@/features/page-speed-insights/shared/TableCard', () => ({
+vi.mock("@/features/page-speed-insights/shared/TableCard", () => ({
   TableCard: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-vi.mock('@/features/page-speed-insights/lh-categories/table/RenderTableValue', () => ({
+vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", () => ({
   RenderMSValue: ({ value }: { value: number }) => <span>{value} ms</span>,
 }));
 
-vi.mock('@/features/page-speed-insights/shared/tableConfigHelpers', () => ({
+vi.mock("@/features/page-speed-insights/shared/tableConfigHelpers", () => ({
   useStandardTable: () => ({
     getHeaderGroups: () => [],
     getRowModel: () => ({ rows: [] }),
@@ -17,9 +17,9 @@ vi.mock('@/features/page-speed-insights/shared/tableConfigHelpers', () => ({
   }),
 }));
 
-vi.mock('@/features/page-speed-insights/shared/tableColumnHelpers', () => ({
-  createURLColumn: () => ({ id: 'url', header: 'URL', cell: () => null }),
-  createReportColumn: () => ({ id: 'label', header: 'Report', cell: () => null }),
+vi.mock("@/features/page-speed-insights/shared/tableColumnHelpers", () => ({
+  createURLColumn: () => ({ id: "url", header: "URL", cell: () => null }),
+  createReportColumn: () => ({ id: "label", header: "Report", cell: () => null }),
   createMSColumn: (_helper: unknown, accessor: string, header: string) => ({
     id: String(accessor),
     header,
@@ -27,30 +27,30 @@ vi.mock('@/features/page-speed-insights/shared/tableColumnHelpers', () => ({
   }),
 }));
 
-import { BootupTimeCard } from '@/features/page-speed-insights/javascript-metrics/BootupTimeCard';
+import { BootupTimeCard } from "@/features/page-speed-insights/javascript-metrics/BootupTimeCard";
 
-describe('BootupTimeCard', () => {
-  it('returns null when no metrics have bootupTime items', () => {
+describe("BootupTimeCard", () => {
+  it("returns null when no metrics have bootupTime items", () => {
     const { container } = render(
       <BootupTimeCard
         metrics={[
-          { label: 'Mobile', bootupTime: [] },
-          { label: 'Desktop', bootupTime: [] },
+          { label: "Mobile", bootupTime: [] },
+          { label: "Desktop", bootupTime: [] },
         ]}
       />,
     );
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders card with bootup time table when data present', () => {
+  it("renders card with bootup time table when data present", () => {
     const { container } = render(
       <BootupTimeCard
         metrics={[
           {
-            label: 'Mobile',
+            label: "Mobile",
             bootupTime: [
               {
-                url: 'https://example.com/app.js',
+                url: "https://example.com/app.js",
                 total: 100,
                 scripting: 50,
                 scriptParseCompile: 30,

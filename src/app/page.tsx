@@ -1,7 +1,7 @@
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import type { Route } from 'next';
-import Link from 'next/link';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Route } from "next";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -36,7 +36,7 @@ export default function Home() {
           url="/page-speed"
           linkText="Run PageSpeed Analysis"
         />
-        
+
         <HomeCard
           title="Lighthouse report viewer"
           description="View Lighthouse reports from your Experiments"
@@ -51,19 +51,27 @@ export default function Home() {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="p-4">
             <h3 className="font-semibold mb-2">User Experience</h3>
-            <p className="text-muted-foreground">Better performance leads to improved user satisfaction and engagement</p>
+            <p className="text-muted-foreground">
+              Better performance leads to improved user satisfaction and engagement
+            </p>
           </div>
           <div className="p-4">
             <h3 className="font-semibold mb-2">SEO Rankings</h3>
-            <p className="text-muted-foreground">Core Web Vitals affect your search engine rankings</p>
+            <p className="text-muted-foreground">
+              Core Web Vitals affect your search engine rankings
+            </p>
           </div>
           <div className="p-4">
             <h3 className="font-semibold mb-2">Conversion Rates</h3>
-            <p className="text-muted-foreground">Faster sites have higher conversion rates and lower bounce rates</p>
+            <p className="text-muted-foreground">
+              Faster sites have higher conversion rates and lower bounce rates
+            </p>
           </div>
           <div className="p-4">
             <h3 className="font-semibold mb-2">Mobile Performance</h3>
-            <p className="text-muted-foreground">Optimize for mobile users with device-specific metrics</p>
+            <p className="text-muted-foreground">
+              Optimize for mobile users with device-specific metrics
+            </p>
           </div>
         </div>
       </div>
@@ -71,14 +79,12 @@ export default function Home() {
   );
 }
 
-
 function HomeCard({
-    title,
-    description,
-    content,
-    url,
-    linkText,
-
+  title,
+  description,
+  content,
+  url,
+  linkText,
 }: {
   title: string;
   description: string;
@@ -86,21 +92,18 @@ function HomeCard({
   url: Route;
   linkText: string;
 }) {
-  
-  return(
+  return (
     <Card className="h-full flex flex-col">
-          <CardHeader className='flex-1'>
-            <CardTitle>{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">{content}</p>
-            <Button asChild variant="outline" className="w-full">
-              <Link href={url}>
-                {linkText}
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-  )
+      <CardHeader className="flex-1">
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-muted-foreground mb-4">{content}</p>
+        <Button asChild variant="outline" className="w-full">
+          <Link href={url}>{linkText}</Link>
+        </Button>
+      </CardContent>
+    </Card>
+  );
 }

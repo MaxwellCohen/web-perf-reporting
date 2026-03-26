@@ -1,18 +1,17 @@
-
-import { render } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { render } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const formatCruxReportMock = vi.fn();
 const groupByMock = vi.fn();
 const getHistoricalCruxDataMock = vi.fn();
 
-vi.mock('next/dynamic', () => ({
-  default: () => ((props: { chartData?: unknown[] }) => (
+vi.mock("next/dynamic", () => ({
+  default: () => (props: { chartData?: unknown[] }) => (
     <div>Dynamic chart: {props.chartData?.length ?? 0}</div>
-  )),
+  ),
 }));
 
-vi.mock('recharts', () => ({
+vi.mock("recharts", () => ({
   Area: ({ dataKey }: { dataKey: string }) => <div>Area: {dataKey}</div>,
   Bar: ({ dataKey }: { dataKey: string }) => <div>Bar: {dataKey}</div>,
   CartesianGrid: () => <div>Cartesian grid</div>,
@@ -23,51 +22,54 @@ vi.mock('recharts', () => ({
   BarChart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-vi.mock('@/components/ui/chart', () => ({
+vi.mock("@/components/ui/chart", () => ({
   ChartContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   ChartTooltip: () => <div>Chart tooltip</div>,
   ChartTooltipContent: () => <div>Tooltip content</div>,
 }));
 
-vi.mock('@/components/common/FormFactorPercentPieChart', () => ({
-  PercentTable: ({
-    title,
-    dateRange,
-  }: {
-    title: string;
-    dateRange?: string;
-  }) => <div>{title}{dateRange ? ` - ${dateRange}` : ''}</div>,
+vi.mock("@/components/common/FormFactorPercentPieChart", () => ({
+  PercentTable: ({ title, dateRange }: { title: string; dateRange?: string }) => (
+    <div>
+      {title}
+      {dateRange ? ` - ${dateRange}` : ""}
+    </div>
+  ),
 }));
 
-vi.mock('@/lib/utils', () => ({
+vi.mock("@/lib/utils", () => ({
   formatCruxReport: (...args: unknown[]) => formatCruxReportMock(...args),
   formatDate: (date: { year: number; month: number; day: number }) =>
     `${date.year}-${date.month}-${date.day}`,
   groupBy: (...args: unknown[]) => groupByMock(...args),
-  cn: (...values: Array<string | false | null | undefined>) =>
-    values.filter(Boolean).join(' '),
+  cn: (...values: Array<string | false | null | undefined>) => values.filter(Boolean).join(" "),
 }));
 
-vi.mock('@/lib/services', () => ({
+vi.mock("@/lib/services", () => ({
   getHistoricalCruxData: (...args: unknown[]) => getHistoricalCruxDataMock(...args),
 }));
 
-vi.mock('@/components/ui/accordion', () => ({
+vi.mock("@/components/ui/accordion", () => ({
   Details: ({ children, ...props }: React.HTMLAttributes<HTMLDetailsElement>) => (
-    <details open {...props}>{children}</details>
+    <details open {...props}>
+      {children}
+    </details>
   ),
 }));
 
-vi.mock('@/components/latest-crux/PerformanceOptions', () => ({
+vi.mock("@/components/latest-crux/PerformanceOptions", () => ({
   PerformanceOptions: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
 }));
 
-import { HistoricalChartsSection } from '@/components/historical/HistoricalChartsSection';
-import { HistoricalDashboard } from '@/components/historical/HistoricalDashboard';
-import { HistoricalPerformanceAreaChart, HistoricalP75Chart } from '@/components/historical/HistoricalPerformanceAreaChart';
-import { HistoricalPerformanceBarChart } from '@/components/historical/HistoricalPerformanceBarChart';
-import { HistoricalPerformanceCard } from '@/components/historical/HistoricalPerformanceCard';
-import { CurrentPerformanceChartContext } from '@/components/latest-crux/PerformanceCard';
+import { HistoricalChartsSection } from "@/components/historical/HistoricalChartsSection";
+import { HistoricalDashboard } from "@/components/historical/HistoricalDashboard";
+import {
+  HistoricalPerformanceAreaChart,
+  HistoricalP75Chart,
+} from "@/components/historical/HistoricalPerformanceAreaChart";
+import { HistoricalPerformanceBarChart } from "@/components/historical/HistoricalPerformanceBarChart";
+import { HistoricalPerformanceCard } from "@/components/historical/HistoricalPerformanceCard";
+import { CurrentPerformanceChartContext } from "@/components/latest-crux/PerformanceCard";
 
 const report = {
   record: {
@@ -84,7 +86,7 @@ const report = {
 };
 
 const historyItem = {
-  end_date: '2024-01-31',
+  end_date: "2024-01-31",
   good_density: 0.5,
   ni_density: 0.3,
   poor_density: 0.2,
@@ -93,7 +95,7 @@ const historyItem = {
   P75: 900,
 };
 
-describe('historical components', () => {
+describe("historical components", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     formatCruxReportMock.mockReset();
@@ -103,7 +105,7 @@ describe('historical components', () => {
 
   afterEach(() => vi.useRealTimers());
 
-  it('renders the historical area and bar charts', () => {
+  it("renders the historical area and bar charts", () => {
     const { container } = render(
       <div>
         <HistoricalPerformanceAreaChart chartData={[historyItem] as any} />
@@ -112,12 +114,12 @@ describe('historical components', () => {
       </div>,
     );
 
-    expect(container.textContent).toContain('Area: good_density');
-    expect(container.textContent).toContain('Line: P75');
-    expect(container.textContent).toContain('Bar: good_density');
+    expect(container.textContent).toContain("Area: good_density");
+    expect(container.textContent).toContain("Line: P75");
+    expect(container.textContent).toContain("Bar: good_density");
   });
 
-  it('renders the historical performance card with chart content and thresholds', () => {
+  it("renders the historical performance card with chart content and thresholds", () => {
     const { container } = render(
       <CurrentPerformanceChartContext.Provider value="Area">
         <HistoricalPerformanceCard
@@ -127,13 +129,13 @@ describe('historical components', () => {
       </CurrentPerformanceChartContext.Provider>,
     );
 
-    expect(container.textContent).toContain('Largest Contentful Paint (LCP)');
-    expect(container.textContent).toContain('Dynamic chart: 1');
+    expect(container.textContent).toContain("Largest Contentful Paint (LCP)");
+    expect(container.textContent).toContain("Dynamic chart: 1");
     expect(container.textContent).toMatch(/Good:/);
     expect(container.textContent).toMatch(/Needs Improvement:/);
   });
 
-  it('renders the historical dashboard with grouped metric cards and filters', () => {
+  it("renders the historical dashboard with grouped metric cards and filters", () => {
     formatCruxReportMock.mockReturnValue([historyItem]);
     groupByMock.mockReturnValue({
       largest_contentful_paint: [historyItem],
@@ -161,11 +163,11 @@ describe('historical components', () => {
 
     expect(container.textContent).toMatch(/Historical CrUX Report for 2024-1-31\s+to 2024-1-31/);
     expect(container.textContent).toMatch(/Form Factors/);
-    expect(container.textContent).toContain('Largest Contentful Paint (LCP)');
-    expect(container.textContent).toContain('Round Trip Time (RTT)');
+    expect(container.textContent).toContain("Largest Contentful Paint (LCP)");
+    expect(container.textContent).toContain("Round Trip Time (RTT)");
   });
 
-  it('fetches all historical crux variants before rendering the charts section', async () => {
+  it("fetches all historical crux variants before rendering the charts section", async () => {
     getHistoricalCruxDataMock.mockResolvedValue([report]);
     formatCruxReportMock.mockReturnValue([historyItem]);
     groupByMock.mockReturnValue({
@@ -177,11 +179,9 @@ describe('historical components', () => {
       round_trip_time: [historyItem],
     });
 
-    const { container } = render(
-      await HistoricalChartsSection({ url: 'https://example.com' }),
-    );
+    const { container } = render(await HistoricalChartsSection({ url: "https://example.com" }));
 
     expect(getHistoricalCruxDataMock).toHaveBeenCalledTimes(8);
-    expect(container.textContent).toContain('Largest Contentful Paint (LCP)');
+    expect(container.textContent).toContain("Largest Contentful Paint (LCP)");
   });
 });

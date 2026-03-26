@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import type { CruxHistoryReport, CruxReport } from '@/lib/schema';
+import { describe, expect, it } from "vitest";
+import type { CruxHistoryReport, CruxReport } from "@/lib/schema";
 import {
   convertCruxHistoryToReports,
   formatCruxHistoryReport,
@@ -10,7 +10,7 @@ import {
   getUrlString,
   groupBy,
   updateURl,
-} from '@/lib/utils';
+} from "@/lib/utils";
 
 function asCruxReport(value: unknown): CruxReport {
   return value as CruxReport;
@@ -25,26 +25,26 @@ const baseCollectionPeriod = {
   lastDate: { year: 2024, month: 1, day: 28 },
 };
 
-describe('utils', () => {
-  it('formats dates and form factors', () => {
-    expect(formatDate({ year: 2024, month: 1, day: 28 })).toBe('1/28/2024');
-    expect(formatDate()).toBe('');
-    expect(formatFormFactor()).toBe('All');
-    expect(formatFormFactor('PHONE_DESKTOP')).toBe('Phone Desktop');
+describe("utils", () => {
+  it("formats dates and form factors", () => {
+    expect(formatDate({ year: 2024, month: 1, day: 28 })).toBe("1/28/2024");
+    expect(formatDate()).toBe("");
+    expect(formatFormFactor()).toBe("All");
+    expect(formatFormFactor("PHONE_DESKTOP")).toBe("Phone Desktop");
   });
 
-  it('formats crux reports and returns null when no url is present', () => {
+  it("formats crux reports and returns null when no url is present", () => {
     expect(formatCruxReport(asCruxReport({ record: { key: {} } }))).toBeNull();
 
     expect(
       formatCruxReport(
         asCruxReport({
           urlNormalizationDetails: {
-            originalUrl: 'https://example.com',
+            originalUrl: "https://example.com",
           },
           record: {
             key: {
-              formFactor: 'PHONE',
+              formFactor: "PHONE",
             },
             collectionPeriod: baseCollectionPeriod,
             metrics: {
@@ -62,12 +62,12 @@ describe('utils', () => {
       ),
     ).toEqual([
       {
-        url: 'https://example.com',
-        formFactor: 'PHONE',
-        origin: 'url',
-        start_date: '1/1/2024',
-        end_date: '1/28/2024',
-        metric_name: 'largest_contentful_paint',
+        url: "https://example.com",
+        formFactor: "PHONE",
+        origin: "url",
+        start_date: "1/1/2024",
+        end_date: "1/28/2024",
+        metric_name: "largest_contentful_paint",
         P75: 2500,
         good_max: 2500,
         ni_max: 4000,
@@ -78,7 +78,7 @@ describe('utils', () => {
     ]);
   });
 
-  it('formats crux history reports and skips invalid timeseries entries', () => {
+  it("formats crux history reports and skips invalid timeseries entries", () => {
     expect(
       formatCruxHistoryReport(
         asCruxHistoryReport({
@@ -94,11 +94,11 @@ describe('utils', () => {
       formatCruxHistoryReport(
         asCruxHistoryReport({
           urlNormalizationDetails: {
-            normalizedUrl: 'https://example.com',
+            normalizedUrl: "https://example.com",
           },
           record: {
             key: {
-              origin: 'https://origin.example.com',
+              origin: "https://origin.example.com",
             },
             collectionPeriods: [
               baseCollectionPeriod,
@@ -119,16 +119,16 @@ describe('utils', () => {
             },
           },
         }),
-        'desktop',
+        "desktop",
       ),
     ).toEqual([
       {
-        url: 'https://example.com',
-        formFactor: 'desktop',
-        origin: 'url',
-        start_date: '1/1/2024',
-        end_date: '1/28/2024',
-        metric_name: 'largest_contentful_paint',
+        url: "https://example.com",
+        formFactor: "desktop",
+        origin: "url",
+        start_date: "1/1/2024",
+        end_date: "1/28/2024",
+        metric_name: "largest_contentful_paint",
         P75: 2500,
         good_max: 2500,
         ni_max: 4000,
@@ -137,12 +137,12 @@ describe('utils', () => {
         poor_density: 0.2,
       },
       {
-        url: 'https://example.com',
-        formFactor: 'desktop',
-        origin: 'url',
-        start_date: '2/1/2024',
-        end_date: '2/28/2024',
-        metric_name: 'largest_contentful_paint',
+        url: "https://example.com",
+        formFactor: "desktop",
+        origin: "url",
+        start_date: "2/1/2024",
+        end_date: "2/28/2024",
+        metric_name: "largest_contentful_paint",
         P75: 3000,
         good_max: 2500,
         ni_max: 4000,
@@ -153,17 +153,17 @@ describe('utils', () => {
     ]);
   });
 
-  it('converts crux history reports back into point-in-time reports', () => {
+  it("converts crux history reports back into point-in-time reports", () => {
     expect(
       convertCruxHistoryToReports(
         asCruxHistoryReport({
           urlNormalizationDetails: {
-            normalizedUrl: 'https://example.com',
+            normalizedUrl: "https://example.com",
           },
           record: {
             key: {
-              origin: 'https://origin.example.com',
-              formFactor: 'PHONE',
+              origin: "https://origin.example.com",
+              formFactor: "PHONE",
             },
             collectionPeriods: [baseCollectionPeriod],
             metrics: {
@@ -208,12 +208,12 @@ describe('utils', () => {
       )[0],
     ).toMatchObject({
       urlNormalizationDetails: {
-        normalizedUrl: 'https://example.com',
+        normalizedUrl: "https://example.com",
       },
       record: {
         key: {
-          origin: 'https://origin.example.com',
-          formFactor: 'PHONE',
+          origin: "https://origin.example.com",
+          formFactor: "PHONE",
         },
         metrics: {
           largest_contentful_paint: {
@@ -246,21 +246,21 @@ describe('utils', () => {
     });
   });
 
-  it('groups values and returns typed primitive helpers', () => {
-    expect(groupBy(['a', 'ab', 'b'], (item) => item[0]!)).toEqual({
-      a: ['a', 'ab'],
-      b: ['b'],
+  it("groups values and returns typed primitive helpers", () => {
+    expect(groupBy(["a", "ab", "b"], (item) => item[0]!)).toEqual({
+      a: ["a", "ab"],
+      b: ["b"],
     });
-    expect(getUrlString('https://example.com')).toBe('https://example.com');
-    expect(getUrlString(123)).toBe('');
+    expect(getUrlString("https://example.com")).toBe("https://example.com");
+    expect(getUrlString(123)).toBe("");
     expect(getNumber(42)).toBe(42);
-    expect(getNumber('42')).toBeUndefined();
+    expect(getNumber("42")).toBeUndefined();
   });
 
-  it('normalizes user-provided urls', () => {
-    expect(updateURl()).toBe('');
-    expect(updateURl('example.com')).toBe('https://www.example.com');
-    expect(updateURl('https://example.com')).toBe('https://www.example.com');
-    expect(updateURl('nota url')).toBe('');
+  it("normalizes user-provided urls", () => {
+    expect(updateURl()).toBe("");
+    expect(updateURl("example.com")).toBe("https://www.example.com");
+    expect(updateURl("https://example.com")).toBe("https://www.example.com");
+    expect(updateURl("nota url")).toBe("");
   });
 });

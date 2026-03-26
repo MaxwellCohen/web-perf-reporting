@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { createContext, type ReactNode, useContext, useEffect } from 'react';
-import { useSelector, useStore } from '@xstate/store-react';
-import type { FullPageScreenshot, NullablePageSpeedInsights } from '@/lib/schema';
+import { createContext, type ReactNode, useContext, useEffect } from "react";
+import { useSelector, useStore } from "@xstate/store-react";
+import type { FullPageScreenshot, NullablePageSpeedInsights } from "@/lib/schema";
 import {
   getDashboardItems,
   getDashboardTitle,
   getFullPageScreenshotMap,
-} from '@/features/page-speed-insights/pageSpeedDashboardHelpers';
+} from "@/features/page-speed-insights/pageSpeedDashboardHelpers";
 import {
   mapItemsToNetworkMetrics,
   type NetworkMetricSeries,
-} from '@/features/page-speed-insights/network-metrics/useNetworkMetricsData';
-import type { InsightsContextItem } from '@/lib/page-speed-insights/types';
+} from "@/features/page-speed-insights/network-metrics/useNetworkMetricsData";
+import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
 
 type PageSpeedInsightsStoreInput = {
   data?: NullablePageSpeedInsights[];
@@ -49,9 +49,7 @@ function createPageSpeedInsightsState({
   };
 }
 
-function createPageSpeedInsightsStoreConfig(
-  input: PageSpeedInsightsStoreInput,
-) {
+function createPageSpeedInsightsStoreConfig(input: PageSpeedInsightsStoreInput) {
   return {
     context: createPageSpeedInsightsState(input),
     on: {
@@ -63,15 +61,11 @@ function createPageSpeedInsightsStoreConfig(
   };
 }
 
-export type { InsightsContextItem } from '@/lib/page-speed-insights/types';
+export type { InsightsContextItem } from "@/lib/page-speed-insights/types";
 
-export function usePageSpeedInsightsStore(
-  input: PageSpeedInsightsStoreInput,
-) {
+export function usePageSpeedInsightsStore(input: PageSpeedInsightsStoreInput) {
   const { data, isLoading, labels } = input;
-  const store = useStore(
-    createPageSpeedInsightsStoreConfig({ data, isLoading, labels }),
-  );
+  const store = useStore(createPageSpeedInsightsStoreConfig({ data, isLoading, labels }));
 
   useEffect(() => {
     store.trigger.sync({ data, isLoading, labels });
@@ -81,31 +75,23 @@ export function usePageSpeedInsightsStore(
 }
 
 type PageSpeedInsightsStore = ReturnType<typeof usePageSpeedInsightsStore>;
-export type PageSpeedInsightsSnapshot =
-  ReturnType<PageSpeedInsightsStore['getSnapshot']>;
+export type PageSpeedInsightsSnapshot = ReturnType<PageSpeedInsightsStore["getSnapshot"]>;
 
-const PageSpeedInsightsStoreContext =
-  createContext<PageSpeedInsightsStore | null>(null);
+const PageSpeedInsightsStoreContext = createContext<PageSpeedInsightsStore | null>(null);
 
-export const selectPageSpeedItems = (
-  snapshot: PageSpeedInsightsSnapshot,
-) => snapshot.context.items;
+export const selectPageSpeedItems = (snapshot: PageSpeedInsightsSnapshot) => snapshot.context.items;
 
-export const selectPageSpeedNetworkMetricSeries = (
-  snapshot: PageSpeedInsightsSnapshot,
-) => snapshot.context.networkMetricSeries;
+export const selectPageSpeedNetworkMetricSeries = (snapshot: PageSpeedInsightsSnapshot) =>
+  snapshot.context.networkMetricSeries;
 
-export const selectPageSpeedReportTitle = (
-  snapshot: PageSpeedInsightsSnapshot,
-) => snapshot.context.reportTitle;
+export const selectPageSpeedReportTitle = (snapshot: PageSpeedInsightsSnapshot) =>
+  snapshot.context.reportTitle;
 
-export const selectPageSpeedFullPageScreenshots = (
-  snapshot: PageSpeedInsightsSnapshot,
-) => snapshot.context.fullPageScreenshots;
+export const selectPageSpeedFullPageScreenshots = (snapshot: PageSpeedInsightsSnapshot) =>
+  snapshot.context.fullPageScreenshots;
 
-export const selectPageSpeedIsLoading = (
-  snapshot: PageSpeedInsightsSnapshot,
-) => snapshot.context.isLoading;
+export const selectPageSpeedIsLoading = (snapshot: PageSpeedInsightsSnapshot) =>
+  snapshot.context.isLoading;
 
 export function PageSpeedInsightsStoreProvider({
   store,
@@ -125,17 +111,13 @@ function useRequiredPageSpeedInsightsStore() {
   const store = useContext(PageSpeedInsightsStoreContext);
 
   if (!store) {
-    throw new Error(
-      'PageSpeed insights store is unavailable outside the dashboard provider.',
-    );
+    throw new Error("PageSpeed insights store is unavailable outside the dashboard provider.");
   }
 
   return store;
 }
 
-export function usePageSpeedSelector<T>(
-  selector: (snapshot: PageSpeedInsightsSnapshot) => T,
-) {
+export function usePageSpeedSelector<T>(selector: (snapshot: PageSpeedInsightsSnapshot) => T) {
   const store = useRequiredPageSpeedInsightsStore();
   return useSelector(store, selector);
 }

@@ -1,23 +1,19 @@
-'use client';
-import { usePageSpeedItems } from '@/features/page-speed-insights/PageSpeedContext';
-import { renderBoolean } from '@/features/page-speed-insights/lh-categories/renderBoolean';
-import {
-  ColumnDef,
-  createColumnHelper,
-  FilterFn,
-} from '@tanstack/react-table';
-import { useStandardTable } from '@/features/page-speed-insights/shared/tableConfigHelpers';
-import { useTableColumns } from '@/features/page-speed-insights/shared/useTableColumns';
-import { TableCard } from '@/features/page-speed-insights/shared/TableCard';
-import { AccordionContent, AccordionItem } from '@/components/ui/accordion';
-import { AccordionSectionTitleTrigger } from '@/components/ui/accordion-section-title-trigger';
+"use client";
+import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
+import { renderBoolean } from "@/features/page-speed-insights/lh-categories/renderBoolean";
+import { ColumnDef, createColumnHelper, FilterFn } from "@tanstack/react-table";
+import { useStandardTable } from "@/features/page-speed-insights/shared/tableConfigHelpers";
+import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
+import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
+import { AccordionContent, AccordionItem } from "@/components/ui/accordion";
+import { AccordionSectionTitleTrigger } from "@/components/ui/accordion-section-title-trigger";
 import {
   createBooleanAggregatedCell,
   createOriginsArrayAggregatedCell,
   createStringAggregatedCell,
-} from '@/features/page-speed-insights/shared/aggregatedCellHelpers';
+} from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
 
-declare module '@tanstack/react-table' {
+declare module "@tanstack/react-table" {
   interface FilterFns {
     booleanFilterFn: FilterFn<unknown>;
   }
@@ -33,37 +29,37 @@ type EntityTableRow = {
 
 const columnHelper = createColumnHelper<EntityTableRow>();
 const cols: ColumnDef<EntityTableRow, any>[] = [
-  columnHelper.accessor('name', {
-    id: 'name',
-    header: 'Name',
+  columnHelper.accessor("name", {
+    id: "name",
+    header: "Name",
     enableSorting: true,
     enableGrouping: true,
     enableResizing: true,
-    filterFn: 'includesString',
-    aggregationFn: 'unique',
-    aggregatedCell: createStringAggregatedCell('name', undefined, false),
+    filterFn: "includesString",
+    aggregationFn: "unique",
+    aggregatedCell: createStringAggregatedCell("name", undefined, false),
   }),
-  columnHelper.accessor('isFirstParty', {
-    id: 'isFirstParty',
-    header: 'Is First Party',
+  columnHelper.accessor("isFirstParty", {
+    id: "isFirstParty",
+    header: "Is First Party",
     enableSorting: true,
     enableResizing: true,
-    filterFn: 'booleanFilterFn',
+    filterFn: "booleanFilterFn",
     cell: (info) => renderBoolean(!!info.getValue()),
-    aggregatedCell: createBooleanAggregatedCell('isFirstParty', renderBoolean),
+    aggregatedCell: createBooleanAggregatedCell("isFirstParty", renderBoolean),
   }),
-  columnHelper.accessor('isUnrecognized', {
-    id: 'isUnrecognized',
-    header: 'Is Unrecognized',
+  columnHelper.accessor("isUnrecognized", {
+    id: "isUnrecognized",
+    header: "Is Unrecognized",
     enableSorting: true,
     enableResizing: true,
-    filterFn: 'booleanFilterFn',
+    filterFn: "booleanFilterFn",
     cell: (info) => renderBoolean(!!info.getValue()),
-    aggregatedCell: createBooleanAggregatedCell('isUnrecognized', renderBoolean),
+    aggregatedCell: createBooleanAggregatedCell("isUnrecognized", renderBoolean),
   }),
-  columnHelper.accessor('origins', {
-    id: 'origins',
-    header: 'Origins',
+  columnHelper.accessor("origins", {
+    id: "origins",
+    header: "Origins",
     enableSorting: false,
     enableResizing: true,
     cell: (info) => {
@@ -95,7 +91,7 @@ export function EntitiesTable() {
       .filter((entity): entity is NonNullable<typeof entity> => !!entity)
       .map((entity) => ({
         label,
-        name: entity.name || '',
+        name: entity.name || "",
         isFirstParty: entity.isFirstParty || false,
         isUnrecognized: entity.isUnrecognized || false,
         origins: entity.origins || [],
@@ -105,11 +101,7 @@ export function EntitiesTable() {
   const showReportColumn = validItems.length > 1;
   const hasEntities = validItems.length > 0;
 
-  const columns = useTableColumns<EntityTableRow>(
-    cols,
-    columnHelper,
-    showReportColumn,
-  );
+  const columns = useTableColumns<EntityTableRow>(cols, columnHelper, showReportColumn);
 
   if (!hasEntities) {
     return null;
@@ -124,16 +116,16 @@ function EntitiesTableContent({
   data: EntityTableRow[];
   columns: ColumnDef<EntityTableRow>[];
 }) {
-  'use no memo';
+  "use no memo";
   const table = useStandardTable({
     data,
     columns,
-    grouping: ['name'],
+    grouping: ["name"],
     defaultPageSize: data.length,
     enablePagination: true,
   });
   return (
-    <AccordionItem value={'entities'}>
+    <AccordionItem value={"entities"}>
       <AccordionSectionTitleTrigger>Entities</AccordionSectionTitleTrigger>
       <AccordionContent>
         <TableCard title="Third-Party Entities" table={table} />

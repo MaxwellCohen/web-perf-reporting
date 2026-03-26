@@ -1,24 +1,24 @@
-'use client';
-import { useMemo, ReactNode } from 'react';
-import { TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { flexRender, Header, Table as TableType } from '@tanstack/react-table';
+"use client";
+import { useMemo, ReactNode } from "react";
+import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { flexRender, Header, Table as TableType } from "@tanstack/react-table";
 
-import { renderBoolean } from '@/features/page-speed-insights/lh-categories/renderBoolean';
-import { SortingButton } from '@/features/page-speed-insights/lh-categories/table/sortingButton';
-import { Popover } from '@/components/ui/popover';
-import { PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
-import { ListFilter } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { renderBoolean } from "@/features/page-speed-insights/lh-categories/renderBoolean";
+import { SortingButton } from "@/features/page-speed-insights/lh-categories/table/sortingButton";
+import { Popover } from "@/components/ui/popover";
+import { PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
+import { ListFilter } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   RangeFilter,
   StringFilterHeader,
-} from '@/features/page-speed-insights/JSUsage/JSUsageTable';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ColumnResizer } from '@/features/page-speed-insights/lh-categories/table/columnResizer';
+} from "@/features/page-speed-insights/JSUsage/JSUsageTable";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ColumnResizer } from "@/features/page-speed-insights/lh-categories/table/columnResizer";
 
 export function DataTableHeader<T>({ table }: { table: TableType<T> }) {
-  'use no memo';
+  "use no memo";
   return (
     <TableHeader>
       {table.getHeaderGroups().map((headerGroup) => {
@@ -35,8 +35,8 @@ export function DataTableHeader<T>({ table }: { table: TableType<T> }) {
 }
 
 export function DataTableHead<T>({ header }: { header: Header<T, unknown> }) {
-  'use no memo';
-  const isExpanderColumn = header.column.id === 'expander';
+  "use no memo";
+  const isExpanderColumn = header.column.id === "expander";
 
   return (
     <TableHead
@@ -73,15 +73,13 @@ export function DataTableHead<T>({ header }: { header: Header<T, unknown> }) {
 }
 
 function FilterPopover<T>({ header }: { header: Header<T, unknown> }) {
-  'use no memo';
+  "use no memo";
   if (!header.column.getCanFilter()) {
     return null;
   }
   const filterType = header.column.columnDef.filterFn as string;
   const map: Record<string, () => ReactNode> = {
-    includesString: () => (
-      <StringFilterHeader column={header.column} name={''} />
-    ),
+    includesString: () => <StringFilterHeader column={header.column} name={""} />,
     booleanFilterFn: () => <CheckBoxFilter header={header} />,
     inNumberRange: () => <RangeFilter column={header.column} />,
   };
@@ -93,7 +91,7 @@ function FilterPopover<T>({ header }: { header: Header<T, unknown> }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button type="button" variant={'ghost'} size={'icon'}>
+        <Button type="button" variant={"ghost"} size={"icon"}>
           <ListFilter />
         </Button>
       </PopoverTrigger>
@@ -115,9 +113,7 @@ function CheckBoxFilter<T>({ header }: { header: Header<T, unknown> }) {
         .slice(0, 5000),
     [col],
   );
-  const filterValue = (col.getFilterValue() as string[]) || [
-    ...sortedUniqueValues,
-  ];
+  const filterValue = (col.getFilterValue() as string[]) || [...sortedUniqueValues];
 
   return (
     <div className="flex flex-col gap-2">
@@ -125,11 +121,7 @@ function CheckBoxFilter<T>({ header }: { header: Header<T, unknown> }) {
         return (
           <Label key={`${v}`} className="flex flex-row items-center gap-3">
             <Checkbox
-              checked={
-                filterValue.length
-                  ? filterValue.findIndex((a) => !!a === !!v) > -1
-                  : true
-              }
+              checked={filterValue.length ? filterValue.findIndex((a) => !!a === !!v) > -1 : true}
               onCheckedChange={(checked: unknown) => {
                 col.setFilterValue((oldValue: string[]) => {
                   let previousValue = oldValue;
@@ -146,7 +138,7 @@ function CheckBoxFilter<T>({ header }: { header: Header<T, unknown> }) {
                 });
               }}
             ></Checkbox>
-            {typeof v === 'string' ? v : renderBoolean(!!v)}
+            {typeof v === "string" ? v : renderBoolean(!!v)}
           </Label>
         );
       })}

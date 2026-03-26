@@ -2,18 +2,16 @@ import type {
   FullPageScreenshot,
   NullablePageSpeedInsights,
   PageSpeedInsights,
-} from '@/lib/schema';
-import type { PageSpeedDashboardItem } from '@/lib/page-speed-insights/types';
-import { toTitleCase } from '@/features/page-speed-insights/toTitleCase';
+} from "@/lib/schema";
+import type { PageSpeedDashboardItem } from "@/lib/page-speed-insights/types";
+import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 
-function normalizePageSpeedItem(
-  item: NullablePageSpeedInsights,
-): PageSpeedInsights | null {
+function normalizePageSpeedItem(item: NullablePageSpeedInsights): PageSpeedInsights | null {
   if (item?.lighthouseResult) {
     return item as PageSpeedInsights;
   }
 
-  if ((item as PageSpeedInsights['lighthouseResult'])?.lighthouseVersion) {
+  if ((item as PageSpeedInsights["lighthouseResult"])?.lighthouseVersion) {
     return { lighthouseResult: item } as unknown as PageSpeedInsights;
   }
 
@@ -35,7 +33,7 @@ export function getDashboardItems(
 
         return {
           item: normalizedItem,
-          label: labels[index] || '',
+          label: labels[index] || "",
         };
       })
       .filter((item): item is PageSpeedDashboardItem => item != null) || []
@@ -45,22 +43,21 @@ export function getDashboardItems(
 export function getDashboardTitle(items: PageSpeedDashboardItem[]): string {
   const titleStrings = items.map(({ item }) =>
     [
-      item?.lighthouseResult?.finalDisplayedUrl || 'unknown url',
+      item?.lighthouseResult?.finalDisplayedUrl || "unknown url",
       item.lighthouseResult?.configSettings?.formFactor
         ? `on ${toTitleCase(item.lighthouseResult.configSettings.formFactor)}`
-        : '',
+        : "",
       item?.analysisUTCTimestamp
         ? `at ${new Date(item.analysisUTCTimestamp).toLocaleDateString()}`
-        : '',
+        : "",
     ]
-      .join(' ')
+      .join(" ")
       .trim(),
   );
 
-  const reportTitle =
-    titleStrings.length > 1 ? titleStrings.join(', ') : titleStrings[0];
+  const reportTitle = titleStrings.length > 1 ? titleStrings.join(", ") : titleStrings[0];
 
-  return `Report for ${reportTitle || 'unknown url'}`;
+  return `Report for ${reportTitle || "unknown url"}`;
 }
 
 export function getFullPageScreenshotMap(

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { Code, FileJson, Globe } from 'lucide-react';
-import { TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Code, FileJson, Globe } from "lucide-react";
+import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function LhTabList() {
   return (

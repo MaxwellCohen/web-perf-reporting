@@ -1,19 +1,11 @@
-'use client';
+"use client";
 
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart';
-import { chartConfig } from '@/components/common/ChartSettings';
-import type { CruxHistoryItem } from '@/lib/schema';
-import { RadialBar, RadialBarChart } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { chartConfig } from "@/components/common/ChartSettings";
+import type { CruxHistoryItem } from "@/lib/schema";
+import { RadialBar, RadialBarChart } from "recharts";
 
-export function CruxRadialChart({
-  histogramData,
-}: {
-  histogramData: CruxHistoryItem;
-}) {
+export function CruxRadialChart({ histogramData }: { histogramData: CruxHistoryItem }) {
   const chartData = [
     {
       good_density: histogramData.good_density ?? 0,
@@ -24,15 +16,8 @@ export function CruxRadialChart({
 
   return (
     <ChartContainer config={chartConfig} className="w-full">
-      <RadialBarChart
-        data={chartData}
-        innerRadius={'50%'}
-        outerRadius={'100%'}
-      >
-        <ChartTooltip
-          cursor={false}
-          content={<ChartTooltipContent hideLabel />}
-        />
+      <RadialBarChart data={chartData} innerRadius={"50%"} outerRadius={"100%"}>
+        <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
         <RadialBar
           dataKey="poor_density"
           type="natural"

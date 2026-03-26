@@ -1,11 +1,7 @@
-'use client';
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart';
-import { CartesianGrid, XAxis, Bar, BarChart } from 'recharts';
-import { HistoricalPerformanceChartData, chartConfig } from '@/components/common/ChartSettings';
+"use client";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { CartesianGrid, XAxis, Bar, BarChart } from "recharts";
+import { HistoricalPerformanceChartData, chartConfig } from "@/components/common/ChartSettings";
 
 export function HistoricalPerformanceBarChart({
   chartData,
@@ -30,10 +26,7 @@ export function HistoricalPerformanceBarChart({
           tickMargin={8}
           tickFormatter={(value) => value.slice(0, 3)}
         />
-        <ChartTooltip
-          cursor={false}
-          content={<ChartTooltipContent indicator="dot" />}
-        />
+        <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
         <Bar
           dataKey="good_density"
           type="natural"

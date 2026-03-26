@@ -1,11 +1,6 @@
-import { FilterFn } from '@tanstack/react-table';
+import { FilterFn } from "@tanstack/react-table";
 
-export const booleanFilterFn: FilterFn<unknown> = (
-  row,
-  columnId,
-  filterValue,
-  _addMeta,
-) => {
+export const booleanFilterFn: FilterFn<unknown> = (row, columnId, filterValue, _addMeta) => {
   if (!filterValue || !filterValue.length) {
     return true;
   }
@@ -19,8 +14,8 @@ export const booleanFilterFn: FilterFn<unknown> = (
  */
 export const includesStringFilter: FilterFn<unknown> = (row, columnId, filterValue, _addMeta) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const cellValue = String((row as any).getValue(columnId) || '').toLowerCase();
-  const filter = String(filterValue || '').toLowerCase();
+  const cellValue = String((row as any).getValue(columnId) || "").toLowerCase();
+  const filter = String(filterValue || "").toLowerCase();
   return cellValue.includes(filter);
 };
 
@@ -37,12 +32,7 @@ export const inNumberRangeFilter: FilterFn<unknown> = (row, columnId, filterValu
 /**
  * Multi-select style filter: row value is included in the selected filter values (or array overlap).
  */
-export const arrIncludesSomeFilter: FilterFn<unknown> = (
-  row,
-  columnId,
-  filterValue,
-  _addMeta,
-) => {
+export const arrIncludesSomeFilter: FilterFn<unknown> = (row, columnId, filterValue, _addMeta) => {
   const selected = filterValue as unknown[] | undefined;
   if (!selected?.length) {
     return true;
@@ -60,4 +50,3 @@ export const standardFilterFns = {
   includesString: includesStringFilter,
   inNumberRange: inNumberRangeFilter,
 } as Record<string, FilterFn<unknown>>;
-

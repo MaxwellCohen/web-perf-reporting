@@ -1,6 +1,5 @@
-'use client';
+"use client";
 
-import { createContext } from 'react';
+import { createContext } from "react";
 
-export const CurrentPerformanceChartContext =
-  createContext<string>('Histogram');
+export const CurrentPerformanceChartContext = createContext<string>("Histogram");

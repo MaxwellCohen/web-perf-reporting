@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { RadialBar, RadialBarChart } from 'recharts';
+import { RadialBar, RadialBarChart } from "recharts";
 
-import { Card } from '@/components/ui/card';
+import { Card } from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from '@/components/ui/chart';
+} from "@/components/ui/chart";
 import {
   Table,
   TableBody,
@@ -16,15 +16,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import React from 'react';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/table";
+import React from "react";
+import { cn } from "@/lib/utils";
 
 export function toSentenceCase(str: string) {
   if (!str) {
-    return '';
+    return "";
   }
-  const result = str.split('_').join(' ').toLowerCase();
+  const result = str.split("_").join(" ").toLowerCase();
   return result.charAt(0).toUpperCase() + result.slice(1);
 }
 
@@ -54,15 +54,8 @@ export function FormFactorPercentPieChart({
     <Card className="grid-rows-[44px,auto, 1fr] grid grid-cols-1 gap-3 p-2">
       <div className="text-md text-center font-bold">{title}</div>
       <ChartContainer config={chartConfig} className="w-full">
-        <RadialBarChart
-          data={chartData}
-          innerRadius={'50%'}
-          outerRadius={'100%'}
-        >
-          <ChartTooltip
-            cursor={false}
-            content={<ChartTooltipContent hideLabel />}
-          />
+        <RadialBarChart data={chartData} innerRadius={"50%"} outerRadius={"100%"}>
+          <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
           {entries.map(([label]) => (
             <RadialBar
               key={label}
@@ -81,9 +74,8 @@ export function FormFactorPercentPieChart({
         {entries.map(([label, value]) => {
           return (
             <div key={label} className="text-xs leading-none text-muted-foreground">
-              {' '}
-              <strong>{toSentenceCase(label)}</strong>{' '}
-              {(value * 100).toFixed(2)} %{' '}
+              {" "}
+              <strong>{toSentenceCase(label)}</strong> {(value * 100).toFixed(2)} %{" "}
             </div>
           );
         })}
@@ -105,12 +97,10 @@ export function PercentTable({
 }) {
   const entries = Object.entries(data);
   return (
-    <Card className={cn('flex-1', className)}>
+    <Card className={cn("flex-1", className)}>
       <div className="text-md text-center font-bold">{title}</div>
       {dateRange && (
-        <div className="text-xs text-center text-muted-foreground mb-1">
-          {dateRange}
-        </div>
+        <div className="text-xs text-center text-muted-foreground mb-1">{dateRange}</div>
       )}
       <Table>
         <TableHeader className="pt-2">
@@ -127,8 +117,8 @@ export function PercentTable({
             {entries.map(([label, value]) => {
               return (
                 <TableCell key={label} className="h-4">
-                  {' '}
-                  {(value * 100).toFixed(2)} %{' '}
+                  {" "}
+                  {(value * 100).toFixed(2)} %{" "}
                 </TableCell>
               );
             })}

@@ -1,4 +1,4 @@
-import type { CruxHistoryItem } from '@/lib/schema';
+import type { CruxHistoryItem } from "@/lib/schema";
 
 /** SVG bar segments as percentage strings (matches previous `parseFloat` + `% ` behavior). */
 export function p75ThresholdSegments(histogramData: CruxHistoryItem) {

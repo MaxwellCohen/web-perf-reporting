@@ -1,21 +1,21 @@
-import { render } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { NetworkRequestStatsRow } from '@/features/page-speed-insights/network-metrics/useNetworkMetricsData';
+import { render } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { NetworkRequestStatsRow } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsData";
 
 const mockUseNetworkRequestStats = vi.hoisted(() => vi.fn());
 
-vi.mock('@/features/page-speed-insights/network-metrics/useNetworkMetricsStore', () => ({
+vi.mock("@/features/page-speed-insights/network-metrics/useNetworkMetricsStore", () => ({
   useNetworkRequestStats: () => mockUseNetworkRequestStats(),
 }));
 
-vi.mock('@/components/ui/card', () => ({
+vi.mock("@/components/ui/card", () => ({
   Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   CardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   CardHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   CardTitle: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-vi.mock('@/components/ui/table', () => ({
+vi.mock("@/components/ui/table", () => ({
   Table: ({ children }: { children: React.ReactNode }) => <table>{children}</table>,
   TableHeader: ({ children }: { children: React.ReactNode }) => <thead>{children}</thead>,
   TableBody: ({ children }: { children: React.ReactNode }) => <tbody>{children}</tbody>,
@@ -24,13 +24,13 @@ vi.mock('@/components/ui/table', () => ({
   TableCell: ({ children }: { children: React.ReactNode }) => <td>{children}</td>,
 }));
 
-vi.mock('@/features/page-speed-insights/lh-categories/table/RenderTableValue', () => ({
+vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", () => ({
   RenderBytesValue: ({ value }: { value: number }) => <span>{value} bytes</span>,
   RenderMSValue: ({ value }: { value: number }) => <span>{Math.round(value)} ms</span>,
 }));
 
-vi.mock('@/features/page-speed-insights/shared/CardWithTable', () => {
-  const React = require('react');
+vi.mock("@/features/page-speed-insights/shared/CardWithTable", () => {
+  const React = require("react");
   return {
     CardWithTable: ({
       title,
@@ -52,13 +52,13 @@ vi.mock('@/features/page-speed-insights/shared/CardWithTable', () => {
   };
 });
 
-import { TaskSummaryCard } from '@/features/page-speed-insights/javascript-metrics/TaskSummaryCard';
-import { NetworkRequestsSummaryCard } from '@/features/page-speed-insights/network-metrics/NetworkRequestsSummaryCard';
+import { TaskSummaryCard } from "@/features/page-speed-insights/javascript-metrics/TaskSummaryCard";
+import { NetworkRequestsSummaryCard } from "@/features/page-speed-insights/network-metrics/NetworkRequestsSummaryCard";
 
 function summaryRow(
   partial: Pick<
     NetworkRequestStatsRow,
-    'label' | 'totalRequests' | 'totalTransferSize' | 'totalResourceSize'
+    "label" | "totalRequests" | "totalTransferSize" | "totalResourceSize"
   >,
 ): NetworkRequestStatsRow {
   return {
@@ -68,21 +68,21 @@ function summaryRow(
   };
 }
 
-describe('page-speed summary cards', () => {
+describe("page-speed summary cards", () => {
   beforeEach(() => {
     mockUseNetworkRequestStats.mockReset();
   });
 
-  it('renders the network requests summary for one or more reports', () => {
+  it("renders the network requests summary for one or more reports", () => {
     mockUseNetworkRequestStats.mockReturnValue([
       summaryRow({
-        label: 'Mobile',
+        label: "Mobile",
         totalRequests: 2,
         totalTransferSize: 300,
         totalResourceSize: 450,
       }),
       summaryRow({
-        label: 'Desktop',
+        label: "Desktop",
         totalRequests: 1,
         totalTransferSize: 150,
         totalResourceSize: 200,
@@ -93,17 +93,17 @@ describe('page-speed summary cards', () => {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('renders task summary fallback calculations from diagnostics and task durations', () => {
+  it("renders task summary fallback calculations from diagnostics and task durations", () => {
     const { container } = render(
       <TaskSummaryCard
         metrics={[
           {
-            label: 'Mobile',
+            label: "Mobile",
             diagnostics: [{ numTasks: 3, totalTaskTime: 120, numTasksOver50ms: 1 }],
             mainThreadTasks: [{ duration: 30 }, { duration: 40 }, { duration: 50 }],
           },
           {
-            label: 'Desktop',
+            label: "Desktop",
             diagnostics: [],
             mainThreadTasks: [{ duration: 80 }, { duration: 20 }],
           },

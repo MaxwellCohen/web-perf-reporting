@@ -1,4 +1,4 @@
-import { PageSpeedInsights } from '@/lib/schema';
+import { PageSpeedInsights } from "@/lib/schema";
 
 export type AuditEntry = {
   auditId: string;
@@ -18,4 +18,3 @@ export type AuditEntry = {
 };
 
 export type AuditDataMap = Map<string, AuditEntry[]>;
-

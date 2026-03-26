@@ -1,8 +1,8 @@
-import { CriticalRequestChain } from '@/lib/schema';
-import { Details } from '@/components/ui/accordion';
-import { accordionSectionTitleClassName } from '@/components/ui/accordion-section-title-trigger';
-import { TreeDataItem, TreeView } from '@/components/ui/tree-view';
-import { renderTimeValue } from '@/features/page-speed-insights/lh-categories/table/RenderTableValue';
+import { CriticalRequestChain } from "@/lib/schema";
+import { Details } from "@/components/ui/accordion";
+import { accordionSectionTitleClassName } from "@/components/ui/accordion-section-title-trigger";
+import { TreeDataItem, TreeView } from "@/components/ui/tree-view";
+import { renderTimeValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 
 export function RenderCriticalChainData({
   desktopDetails,
@@ -14,9 +14,7 @@ export function RenderCriticalChainData({
   return (
     <Details className="flex flex-col gap-2 print:border-0">
       <summary className="flex flex-col gap-2">
-        <div className={accordionSectionTitleClassName}>
-          Critical Request Chains
-        </div>
+        <div className={accordionSectionTitleClassName}>Critical Request Chains</div>
       </summary>
       {mobileDetails?.chains ? (
         <CriticalRequestChainSection details={mobileDetails} device="Mobile" />
@@ -42,13 +40,10 @@ function CriticalRequestChainSection({
   return (
     <Details className="flex flex-col gap-2 print:border-0">
       <summary className="flex flex-col gap-2">
-        <div className="text-lg font-bold">
-          Critical Request Chains for {device}
-        </div>
+        <div className="text-lg font-bold">Critical Request Chains for {device}</div>
         <div className="text-sm">
-          Longest Chain: {renderTimeValue(details.longestChain.duration)} with{' '}
-          {details.longestChain.length} requests and{' '}
-          {details.longestChain.transferSize} bytes
+          Longest Chain: {renderTimeValue(details.longestChain.duration)} with{" "}
+          {details.longestChain.length} requests and {details.longestChain.transferSize} bytes
         </div>
       </summary>
 
@@ -57,11 +52,11 @@ function CriticalRequestChainSection({
   );
 }
 
-function chainToTree(node: CriticalRequestChain['chains']): TreeDataItem[] {
+function chainToTree(node: CriticalRequestChain["chains"]): TreeDataItem[] {
   return Object.entries(node).map(([key, value]) => {
     return {
       id: key,
-      name: `${value.request.url} | Start Time ${renderTimeValue((value.request.startTime))} | Segment Time ${renderTimeValue((value.request.endTime - value.request.startTime) * 1000)} | Transfer Amount ${value.request.transferSize} bytes`,
+      name: `${value.request.url} | Start Time ${renderTimeValue(value.request.startTime)} | Segment Time ${renderTimeValue((value.request.endTime - value.request.startTime) * 1000)} | Transfer Amount ${value.request.transferSize} bytes`,
       icon: undefined,
       selectedIcon: undefined,
       openIcon: undefined,
@@ -71,4 +66,3 @@ function chainToTree(node: CriticalRequestChain['chains']): TreeDataItem[] {
     };
   });
 }
-

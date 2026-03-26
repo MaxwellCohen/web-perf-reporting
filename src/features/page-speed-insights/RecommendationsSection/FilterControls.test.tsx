@@ -1,11 +1,11 @@
-import { fireEvent, render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, render } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
-vi.mock('lucide-react', () => ({
+vi.mock("lucide-react", () => ({
   ChevronDown: () => <span data-testid="chevron" />,
 }));
 
-vi.mock('@/components/ui/dropdown-menu', () => ({
+vi.mock("@/components/ui/dropdown-menu", () => ({
   DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   DropdownMenuTrigger: ({ children, asChild }: { children: React.ReactNode; asChild?: boolean }) =>
     asChild ? <>{children}</> : <button type="button">{children}</button>,
@@ -25,11 +25,11 @@ vi.mock('@/components/ui/dropdown-menu', () => ({
   ),
 }));
 
-import { FilterControls } from '@/features/page-speed-insights/RecommendationsSection/FilterControls';
+import { FilterControls } from "@/features/page-speed-insights/RecommendationsSection/FilterControls";
 
 const defaultProps = {
-  categories: ['Performance', 'Accessibility'],
-  priorities: ['high', 'medium', 'low'],
+  categories: ["Performance", "Accessibility"],
+  priorities: ["high", "medium", "low"],
   selectedCategories: [] as string[],
   selectedPriorities: [] as string[],
   onCategoriesChange: vi.fn(),
@@ -41,115 +41,108 @@ const defaultProps = {
   totalFiltered: 5,
 };
 
-describe('FilterControls', () => {
-  it('renders default state', () => {
+describe("FilterControls", () => {
+  it("renders default state", () => {
     const { container } = render(<FilterControls {...defaultProps} />);
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('renders Collapse All when all expanded', () => {
+  it("renders Collapse All when all expanded", () => {
     const { container } = render(
-      <FilterControls
-        {...defaultProps}
-        expandedCount={5}
-        totalFiltered={5}
-      />,
+      <FilterControls {...defaultProps} expandedCount={5} totalFiltered={5} />,
     );
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('renders Reset Filters when any filter is selected', () => {
+  it("renders Reset Filters when any filter is selected", () => {
     const { container } = render(
-      <FilterControls
-        {...defaultProps}
-        selectedCategories={['Performance']}
-      />,
+      <FilterControls {...defaultProps} selectedCategories={["Performance"]} />,
     );
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('calls onToggleAll when toggle button is clicked', () => {
+  it("calls onToggleAll when toggle button is clicked", () => {
     const onToggleAll = vi.fn();
     const { container } = render(<FilterControls {...defaultProps} onToggleAll={onToggleAll} />);
-    const expandButton = container.querySelector('button');
+    const expandButton = container.querySelector("button");
     fireEvent.click(expandButton!);
     expect(onToggleAll).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onCategoriesChange and onPrioritiesChange when Reset Filters clicked', () => {
+  it("calls onCategoriesChange and onPrioritiesChange when Reset Filters clicked", () => {
     const onCategoriesChange = vi.fn();
     const onPrioritiesChange = vi.fn();
     const { container } = render(
       <FilterControls
         {...defaultProps}
-        selectedCategories={['Performance']}
+        selectedCategories={["Performance"]}
         onCategoriesChange={onCategoriesChange}
         onPrioritiesChange={onPrioritiesChange}
       />,
     );
-    const resetButton = Array.from(container.querySelectorAll('button')).find(
-      (btn) => btn.textContent?.trim() === 'Reset Filters',
+    const resetButton = Array.from(container.querySelectorAll("button")).find(
+      (btn) => btn.textContent?.trim() === "Reset Filters",
     );
     fireEvent.click(resetButton!);
     expect(onCategoriesChange).toHaveBeenCalledWith([]);
     expect(onPrioritiesChange).toHaveBeenCalledWith([]);
   });
 
-  it('calls onCategoriesChange when category dropdown Clear clicked', () => {
+  it("calls onCategoriesChange when category dropdown Clear clicked", () => {
     const onCategoriesChange = vi.fn();
     const { container } = render(
       <FilterControls
         {...defaultProps}
-        selectedCategories={['Performance']}
+        selectedCategories={["Performance"]}
         onCategoriesChange={onCategoriesChange}
       />,
     );
-    const categoryTrigger = Array.from(container.querySelectorAll('button')).find(
-      (b) => b.textContent?.includes('Filter by Category'),
+    const categoryTrigger = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Filter by Category"),
     );
     fireEvent.click(categoryTrigger!);
-    const clearBtn = Array.from(container.querySelectorAll('button')).find(
-      (b) => b.textContent?.trim() === 'Clear',
+    const clearBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.trim() === "Clear",
     );
     fireEvent.click(clearBtn!);
     expect(onCategoriesChange).toHaveBeenCalledWith([]);
   });
 
-  it('calls onPrioritiesChange when priority dropdown Clear clicked', () => {
+  it("calls onPrioritiesChange when priority dropdown Clear clicked", () => {
     const onPrioritiesChange = vi.fn();
     const { container } = render(
       <FilterControls
         {...defaultProps}
-        selectedPriorities={['high']}
+        selectedPriorities={["high"]}
         onPrioritiesChange={onPrioritiesChange}
       />,
     );
-    const priorityTrigger = Array.from(container.querySelectorAll('button')).find(
-      (b) => b.textContent?.includes('Filter by Priority'),
+    const priorityTrigger = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Filter by Priority"),
     );
     fireEvent.click(priorityTrigger!);
-    const clearBtns = Array.from(container.querySelectorAll('button')).filter(
-      (b) => b.textContent?.trim() === 'Clear',
+    const clearBtns = Array.from(container.querySelectorAll("button")).filter(
+      (b) => b.textContent?.trim() === "Clear",
     );
     fireEvent.click(clearBtns[1]!);
     expect(onPrioritiesChange).toHaveBeenCalledWith([]);
   });
 
-  it('removes category when unchecked', () => {
+  it("removes category when unchecked", () => {
     const onCategoriesChange = vi.fn();
     const { container } = render(
       <FilterControls
         {...defaultProps}
-        selectedCategories={['Performance']}
+        selectedCategories={["Performance"]}
         onCategoriesChange={onCategoriesChange}
       />,
     );
-    const categoryTrigger = Array.from(container.querySelectorAll('button')).find(
-      (b) => b.textContent?.includes('Filter by Category'),
+    const categoryTrigger = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Filter by Category"),
     );
     fireEvent.click(categoryTrigger!);
-    const perfCheckbox = Array.from(container.querySelectorAll('[role="checkbox"]')).find(
-      (el) => el.textContent?.includes('Performance'),
+    const perfCheckbox = Array.from(container.querySelectorAll('[role="checkbox"]')).find((el) =>
+      el.textContent?.includes("Performance"),
     );
     fireEvent.click(perfCheckbox!);
     expect(onCategoriesChange).toHaveBeenCalledWith([]);

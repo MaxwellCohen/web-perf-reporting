@@ -4,10 +4,7 @@ import { Table } from "@/components/ui/table";
 import { TableItem } from "@/lib/schema";
 import { getNumber } from "@/lib/utils";
 import { useMemo } from "react";
-import {
-  ColumnDef,
-  createColumnHelper,
-} from "@tanstack/react-table";
+import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
 import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
 import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
@@ -28,23 +25,19 @@ type LatencyTableRow = {
 const columnHelper = createColumnHelper<LatencyTableRow>();
 const cols: ColumnDef<LatencyTableRow, unknown>[] = [
   createTruncatedTextColumn(columnHelper, {
-    accessor: 'origin',
-    id: 'origin',
-    header: 'Origin',
-    maxWidthClass: 'max-w-50',
+    accessor: "origin",
+    id: "origin",
+    header: "Origin",
+    maxWidthClass: "max-w-50",
     enableGrouping: true,
   }),
-  createMSColumn(columnHelper, 'latency', 'Latency'),
+  createMSColumn(columnHelper, "latency", "Latency"),
 ];
 
 export function ServerLatencyCard() {
   "use no memo";
   const series = useNetworkMetricSeries();
-  const validMetrics = useMemo(
-    () => series.filter((m) => m.serverLatency.length > 0),
-    [series],
-  );
-
+  const validMetrics = useMemo(() => series.filter((m) => m.serverLatency.length > 0), [series]);
 
   const showReportColumn = validMetrics.length > 1;
 
@@ -52,21 +45,21 @@ export function ServerLatencyCard() {
   const data = useMemo((): LatencyTableRow[] => {
     const allRows = validMetrics.flatMap(({ label, serverLatency }) =>
       serverLatency.map((item: TableItem) => {
-        const origin = typeof item.origin === 'string' ? item.origin : '';
+        const origin = typeof item.origin === "string" ? item.origin : "";
         const latency = getNumber(item.serverResponseTime);
         return {
           label,
-          origin: origin.replace(/^https?:\/\//, '') || 'Unknown',
+          origin: origin.replace(/^https?:\/\//, "") || "Unknown",
           latency,
         };
-      })
+      }),
     );
 
     return sortByMaxValue(
       allRows,
       (row) => row.origin,
       (row) => row.latency || 0,
-      validMetrics.length
+      validMetrics.length,
     );
   }, [validMetrics]);
 
@@ -75,7 +68,7 @@ export function ServerLatencyCard() {
   const table = useStandardTable({
     data,
     columns,
-    grouping: ['origin'],
+    grouping: ["origin"],
   });
 
   if (!validMetrics.length) {
@@ -89,7 +82,7 @@ export function ServerLatencyCard() {
       </CardHeader>
       <CardContent>
         <div className="w-full max-h-96 overflow-y-auto">
-          <Table className="w-full" style={{ width: '100%' }}>
+          <Table className="w-full" style={{ width: "100%" }}>
             <DataTableHeader table={table} />
             <DataTableBody table={table} />
           </Table>

@@ -1,17 +1,15 @@
-import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { render } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
-vi.mock('recharts', () => ({
+vi.mock("recharts", () => ({
   BarChart: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="bar-chart">{children}</div>
   ),
-  Bar: ({ dataKey }: { dataKey: string }) => (
-    <div data-testid={`bar-${dataKey}`}>{dataKey}</div>
-  ),
+  Bar: ({ dataKey }: { dataKey: string }) => <div data-testid={`bar-${dataKey}`}>{dataKey}</div>,
   CartesianGrid: () => <div data-testid="cartesian-grid" />,
 }));
 
-vi.mock('@/components/ui/chart', () => ({
+vi.mock("@/components/ui/chart", () => ({
   ChartContainer: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="chart-container">{children}</div>
   ),
@@ -19,7 +17,7 @@ vi.mock('@/components/ui/chart', () => ({
   ChartTooltipContent: () => <div data-testid="chart-tooltip-content" />,
 }));
 
-import { PerformanceStackedBarChart } from '@/components/latest-crux/charts/CruxStackedBarChart';
+import { PerformanceStackedBarChart } from "@/components/latest-crux/charts/CruxStackedBarChart";
 
 const histogramData = {
   good_density: 0.5,
@@ -30,10 +28,10 @@ const histogramData = {
   P75: 900,
 };
 
-describe('PerformanceStackedBarChart', () => {
-  it('renders chart with histogram data', () => {
+describe("PerformanceStackedBarChart", () => {
+  it("renders chart with histogram data", () => {
     const { container } = render(
-      <PerformanceStackedBarChart histogramData={histogramData as any} />
+      <PerformanceStackedBarChart histogramData={histogramData as any} />,
     );
     expect(container.querySelector('[data-testid="bar-chart"]')).toBeTruthy();
     expect(container.querySelector('[data-testid="bar-good_density"]')).toBeTruthy();
@@ -41,16 +39,18 @@ describe('PerformanceStackedBarChart', () => {
     expect(container.querySelector('[data-testid="bar-poor_density"]')).toBeTruthy();
   });
 
-  it('handles null density values', () => {
+  it("handles null density values", () => {
     const { container } = render(
       <PerformanceStackedBarChart
-        histogramData={{
-          ...histogramData,
-          good_density: undefined,
-          ni_density: undefined,
-          poor_density: undefined,
-        } as any}
-      />
+        histogramData={
+          {
+            ...histogramData,
+            good_density: undefined,
+            ni_density: undefined,
+            poor_density: undefined,
+          } as any
+        }
+      />,
     );
     expect(container.querySelector('[data-testid="bar-chart"]')).toBeTruthy();
   });

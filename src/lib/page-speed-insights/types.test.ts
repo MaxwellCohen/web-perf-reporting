@@ -1,24 +1,21 @@
-import { describe, expect, it } from 'vitest';
-import type {
-  InsightsContextItem,
-  PageSpeedDashboardItem,
-} from '@/lib/page-speed-insights/types';
-import type { PageSpeedInsights } from '@/lib/schema';
+import { describe, expect, it } from "vitest";
+import type { InsightsContextItem, PageSpeedDashboardItem } from "@/lib/page-speed-insights/types";
+import type { PageSpeedInsights } from "@/lib/schema";
 
-describe('page-speed-insights types', () => {
-  it('PageSpeedDashboardItem has item and label', () => {
+describe("page-speed-insights types", () => {
+  it("PageSpeedDashboardItem has item and label", () => {
     const item: PageSpeedDashboardItem = {
       item: {} as PageSpeedInsights,
-      label: 'Mobile',
+      label: "Mobile",
     };
     expect(item.item).toBeDefined();
-    expect(item.label).toBe('Mobile');
+    expect(item.label).toBe("Mobile");
   });
 
-  it('InsightsContextItem is compatible with PageSpeedDashboardItem', () => {
+  it("InsightsContextItem is compatible with PageSpeedDashboardItem", () => {
     const dashboardItem: PageSpeedDashboardItem = {
       item: {} as PageSpeedInsights,
-      label: 'Desktop',
+      label: "Desktop",
     };
     const contextItem: InsightsContextItem = dashboardItem;
     expect(contextItem).toEqual(dashboardItem);

@@ -39,17 +39,12 @@
       "indexes": {
         "PageSpeedInsightsTable_index1": {
           "name": "PageSpeedInsightsTable_index1",
-          "columns": [
-            "url"
-          ],
+          "columns": ["url"],
           "isUnique": false
         },
         "PageSpeedInsightsTable_index2": {
           "name": "PageSpeedInsightsTable_index2",
-          "columns": [
-            "url",
-            "date"
-          ],
+          "columns": ["url", "date"],
           "isUnique": false
         }
       },
@@ -114,18 +109,12 @@
       "indexes": {
         "historicalMetrics2_index": {
           "name": "historicalMetrics2_index",
-          "columns": [
-            "url",
-            "formFactor",
-            "origin"
-          ],
+          "columns": ["url", "formFactor", "origin"],
           "isUnique": false
         },
         "historical_Metrics_url_index": {
           "name": "historical_Metrics_url_index",
-          "columns": [
-            "url"
-          ],
+          "columns": ["url"],
           "isUnique": false
         }
       },

@@ -1,23 +1,15 @@
-import { TableItem, TableColumnHeading, ItemValueType } from '@/lib/schema';
-import { SUMMABLE_VALUETYPES } from '@/features/page-speed-insights/lh-categories/table/utils';
+import { TableItem, TableColumnHeading, ItemValueType } from "@/lib/schema";
+import { SUMMABLE_VALUETYPES } from "@/features/page-speed-insights/lh-categories/table/utils";
 
 export function getTableItemSortComparator(sortedBy: string[]) {
   return (a: TableItem, b: TableItem) => {
     for (const key of sortedBy) {
       const aVal = a[key];
       const bVal = b[key];
-      if (
-        typeof aVal === 'number' &&
-        typeof bVal === 'number' &&
-        aVal !== bVal
-      ) {
+      if (typeof aVal === "number" && typeof bVal === "number" && aVal !== bVal) {
         return bVal - aVal;
       }
-      if (
-        typeof aVal === 'string' &&
-        typeof bVal === 'string' &&
-        aVal !== bVal
-      ) {
+      if (typeof aVal === "string" && typeof bVal === "string" && aVal !== bVal) {
         return aVal.localeCompare(bVal);
       }
     }
@@ -26,7 +18,7 @@ export function getTableItemSortComparator(sortedBy: string[]) {
 }
 
 export function shouldGroupEntity(items: TableItem[], isEntityGrouped: boolean) {
-  return !(!items.length || isEntityGrouped || !items.some((item) => item.entity))
+  return !(!items.length || isEntityGrouped || !items.some((item) => item.entity));
 }
 
 export const getEntityGroupItems = ({
@@ -63,10 +55,9 @@ export const getEntityGroupItems = ({
   const byEntity = new Map<string | undefined, TableItem>();
 
   for (const item of items) {
-    const entityName =
-      typeof item.entity === 'string' ? item.entity : undefined;
+    const entityName = typeof item.entity === "string" ? item.entity : undefined;
     const groupedItem = byEntity.get(entityName) || {
-      [firstColumnKey]: entityName || 'Unattributable',
+      [firstColumnKey]: entityName || "Unattributable",
       entity: entityName,
     };
 

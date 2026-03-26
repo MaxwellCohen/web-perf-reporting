@@ -1,9 +1,9 @@
-import { RenderTableValue } from '@/features/page-speed-insights/lh-categories/table/RenderTableValue';
-import type { ItemValue, TableColumnHeading, TableItem } from '@/lib/schema';
+import { RenderTableValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
+import type { ItemValue, TableColumnHeading, TableItem } from "@/lib/schema";
 
 interface IssuesFoundTableCellProps {
   value: ItemValue | unknown;
-  subItems?: TableItem['subItems'];
+  subItems?: TableItem["subItems"];
   heading: TableColumnHeading;
   device: string;
 }
@@ -15,7 +15,7 @@ export function IssuesFoundTableCell({
   device,
 }: IssuesFoundTableCellProps) {
   if (subItems?.items && subItems.items.length > 0) {
-    const subKey = heading.subItemsHeading?.key || 'url';
+    const subKey = heading.subItemsHeading?.key || "url";
     const subHeading: TableColumnHeading | null = heading.subItemsHeading
       ? ({
           ...heading.subItemsHeading,
@@ -34,11 +34,7 @@ export function IssuesFoundTableCell({
             const subValue = subItem[subKey] as ItemValue | undefined;
             return (
               <li key={subIdx} className="text-xs wrap-break-word">
-                <RenderTableValue
-                  value={subValue}
-                  heading={subHeading}
-                  device={device}
-                />
+                <RenderTableValue value={subValue} heading={subHeading} device={device} />
               </li>
             );
           })}
@@ -53,4 +49,3 @@ export function IssuesFoundTableCell({
     </div>
   );
 }
-

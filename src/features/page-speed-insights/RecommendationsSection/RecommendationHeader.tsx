@@ -1,7 +1,7 @@
-import ReactMarkdown from 'react-markdown';
-import { Badge } from '@/components/ui/badge';
-import { formatTime } from '@/features/page-speed-insights/RecommendationsSection/utils';
-import type { Recommendation } from '@/features/page-speed-insights/RecommendationsSection/types';
+import ReactMarkdown from "react-markdown";
+import { Badge } from "@/components/ui/badge";
+import { formatTime } from "@/features/page-speed-insights/RecommendationsSection/utils";
+import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
 
 interface RecommendationHeaderProps {
   recommendation: Recommendation;
@@ -10,13 +10,7 @@ interface RecommendationHeaderProps {
 
 const titleMarkdownComponents = {
   p: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
-  a: ({
-    href,
-    children,
-  }: {
-    href?: string;
-    children?: React.ReactNode;
-  }) => (
+  a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
     <a
       href={href}
       target="_blank"
@@ -48,7 +42,7 @@ export function RecommendationHeader({
         </div>
         {recommendation.impact.metric && recommendation.impact.savings ? (
           <div className="text-sm text-muted-foreground">
-            Potential savings: {formatTime(recommendation.impact.savings)} on{' '}
+            Potential savings: {formatTime(recommendation.impact.savings)} on{" "}
             {recommendation.impact.metric}
           </div>
         ) : null}

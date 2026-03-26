@@ -5,11 +5,11 @@ import {
   getFacetedUniqueValues,
   getFilteredRowModel,
   getSortedRowModel,
-} from '@tanstack/react-table';
+} from "@tanstack/react-table";
 import {
   booleanFilterFn,
   standardFilterFns,
-} from '@/features/page-speed-insights/shared/filterFns';
+} from "@/features/page-speed-insights/shared/filterFns";
 
 /**
  * Shared TanStack Table options for flat tables: sort, filter, faceting, resize.
@@ -25,7 +25,7 @@ export const flatTanStackTableSlice = {
   getFacetedUniqueValues: getFacetedUniqueValues(),
   getFacetedMinMaxValues: getFacetedMinMaxValues(),
   enableColumnResizing: true,
-  columnResizeMode: 'onChange' as const,
+  columnResizeMode: "onChange" as const,
   filterFns: {
     booleanFilterFn,
     ...standardFilterFns,

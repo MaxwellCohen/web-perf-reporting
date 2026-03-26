@@ -2,13 +2,13 @@
 import { TableItem } from "@/lib/schema";
 import { getUrlString, getNumber } from "@/lib/utils";
 import { useMemo } from "react";
-import {
-  ColumnDef,
-  createColumnHelper,
-} from "@tanstack/react-table";
+import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
 import { useStandardTable } from "@/features/page-speed-insights/shared/tableConfigHelpers";
-import { createURLColumn, createBytesColumn } from "@/features/page-speed-insights/shared/tableColumnHelpers";
+import {
+  createURLColumn,
+  createBytesColumn,
+} from "@/features/page-speed-insights/shared/tableColumnHelpers";
 import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
 import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 
@@ -32,13 +32,13 @@ const columnHelper = createColumnHelper<LegacyJSTableRow>();
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const cols: ColumnDef<LegacyJSTableRow, any>[] = [
   createURLColumn(columnHelper),
-  createBytesColumn(columnHelper, 'wastedBytes', 'Wasted Bytes'),
-  createBytesColumn(columnHelper, 'totalBytes', 'Total Bytes'),
+  createBytesColumn(columnHelper, "wastedBytes", "Wasted Bytes"),
+  createBytesColumn(columnHelper, "totalBytes", "Total Bytes"),
 ];
 
 export function LegacyJavaScriptCard({ metrics }: LegacyJavaScriptCardProps) {
   "use no memo";
-  const validMetrics = useMemo(() => metrics.filter(m => m.legacyJS.length > 0), [metrics]);
+  const validMetrics = useMemo(() => metrics.filter((m) => m.legacyJS.length > 0), [metrics]);
   const showReportColumn = validMetrics.length > 1;
 
   // Combine all legacy JS data with labels
@@ -50,18 +50,18 @@ export function LegacyJavaScriptCard({ metrics }: LegacyJavaScriptCardProps) {
         const totalBytes = getNumber(item.totalBytes);
         return {
           label,
-          url: url.replace(/^https?:\/\//, '') || 'Unknown',
+          url: url.replace(/^https?:\/\//, "") || "Unknown",
           wastedBytes,
           totalBytes,
         };
-      })
+      }),
     );
-    
+
     return sortByMaxValue(
       allRows,
       (row) => row.url,
       (row) => row.wastedBytes || 0,
-      validMetrics.length
+      validMetrics.length,
     );
   }, [validMetrics]);
 
@@ -70,7 +70,7 @@ export function LegacyJavaScriptCard({ metrics }: LegacyJavaScriptCardProps) {
   const table = useStandardTable({
     data,
     columns,
-    grouping: ['url'],
+    grouping: ["url"],
     enablePagination: true,
     defaultPageSize: 10,
   });
@@ -79,12 +79,5 @@ export function LegacyJavaScriptCard({ metrics }: LegacyJavaScriptCardProps) {
     return null;
   }
 
-  return (
-    <TableCard
-      title="Legacy JavaScript"
-      table={table}
-      showPagination
-    />
-  );
+  return <TableCard title="Legacy JavaScript" table={table} showPagination />;
 }
-

@@ -5,25 +5,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { AuditDetailChecklist } from '@/lib/schema';
-import { renderBoolean } from '@/features/page-speed-insights/lh-categories/renderBoolean';
-import { Details } from '@/components/ui/accordion';
-import { TableDataItem } from '@/features/page-speed-insights/tsTable/TableDataItem';
-import { useMemo } from 'react';
+} from "@/components/ui/table";
+import { AuditDetailChecklist } from "@/lib/schema";
+import { renderBoolean } from "@/features/page-speed-insights/lh-categories/renderBoolean";
+import { Details } from "@/components/ui/accordion";
+import { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataItem";
+import { useMemo } from "react";
 
-export function RenderChecklist({
-  items,
-  title,
-}: {
-  items: TableDataItem[];
-  title: string;
-}) {
+export function RenderChecklist({ items, title }: { items: TableDataItem[]; title: string }) {
   const auditItems = useMemo(
-    () =>
-      items.map(
-        (a) => (a?.auditResult.details as AuditDetailChecklist)?.items || {},
-      ),
+    () => items.map((a) => (a?.auditResult.details as AuditDetailChecklist)?.items || {}),
     [items],
   );
 
@@ -43,7 +34,7 @@ export function RenderChecklist({
           <TableRow>
             <TableHead>Checklist Item</TableHead>
             {items.map((a, i) => {
-              const label = a?._userLabel || '';
+              const label = a?._userLabel || "";
               return <TableHead key={`${label}_${i}`}>{label}</TableHead>;
             })}
           </TableRow>
@@ -54,12 +45,10 @@ export function RenderChecklist({
 
             return (
               <TableRow key={key}>
-                <TableCell>{items.find((a) => a?.label)?.label || ''}</TableCell>
+                <TableCell>{items.find((a) => a?.label)?.label || ""}</TableCell>
                 {items.map((a, i) => {
                   return (
-                    <TableCell key={`${a}_${i}`}>
-                      {a ? renderBoolean(a.value) : null}
-                    </TableCell>
+                    <TableCell key={`${a}_${i}`}>{a ? renderBoolean(a.value) : null}</TableCell>
                   );
                 })}
               </TableRow>

@@ -1,25 +1,25 @@
-import type { Metadata } from 'next';
-import { ViewTransition } from 'react';
-import { Geist, Geist_Mono } from 'next/font/google';
-import './globals.css';
+import type { Metadata } from "next";
+import { ViewTransition } from "react";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
 
-import { PostHogAnalytics } from '@/app/PostHogAnalytics';
-import { PostHogProvider, QueryProvider } from '@/app/providers';
-import { TopNav } from '@/components/navigation/TopNav';
+import { PostHogAnalytics } from "@/app/PostHogAnalytics";
+import { PostHogProvider, QueryProvider } from "@/app/providers";
+import { TopNav } from "@/components/navigation/TopNav";
 
 const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: 'Web Performance Report',
-  description: 'Web performance report from CRUX data',
+  title: "Web Performance Report",
+  description: "Web performance report from CRUX data",
 };
 
 export default function RootLayout({

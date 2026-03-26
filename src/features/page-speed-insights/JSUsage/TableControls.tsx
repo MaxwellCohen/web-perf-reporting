@@ -1,8 +1,8 @@
-'use client';
-'use no memo';
-import { Table as TableType } from '@tanstack/react-table';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+"use client";
+"use no memo";
+import { Table as TableType } from "@tanstack/react-table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 // import { Label } from '@/components/ui/label';s
 import {
   Select,
@@ -10,19 +10,19 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { ChevronDown } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { useMemo } from 'react';
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { useMemo } from "react";
 
 export function TableControls<T>({ table }: { table: TableType<T> }) {
-  'use no memo';
+  "use no memo";
   // const id = useId();
   return (
     <div className="m-4 flex justify-between">
@@ -58,7 +58,7 @@ export function TableControls<T>({ table }: { table: TableType<T> }) {
 }
 
 export function ColumnSelector<T>({ table }: { table: TableType<T> }) {
-  'use no memo';
+  "use no memo";
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -90,14 +90,8 @@ export function ColumnSelector<T>({ table }: { table: TableType<T> }) {
   );
 }
 
-export function DropdownFilter<T>({
-  table,
-  columnId,
-}: {
-  table: TableType<T>;
-  columnId: string;
-}) {
-  'use no memo';
+export function DropdownFilter<T>({ table, columnId }: { table: TableType<T>; columnId: string }) {
+  "use no memo";
   const col = table.getColumn(columnId);
   const sortedUniqueValues = useMemo(
     () =>
@@ -109,9 +103,7 @@ export function DropdownFilter<T>({
   if (!col) {
     return null;
   }
-  const filterValue = (col.getFilterValue() as string[]) || [
-    ...sortedUniqueValues,
-  ];
+  const filterValue = (col.getFilterValue() as string[]) || [...sortedUniqueValues];
 
   return (
     <DropdownMenu>
@@ -120,7 +112,7 @@ export function DropdownFilter<T>({
           variant="outline"
           className="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
         >
-          Filter {(col?.columnDef.header as string) || ''} <ChevronDown />
+          Filter {(col?.columnDef.header as string) || ""} <ChevronDown />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -132,7 +124,7 @@ export function DropdownFilter<T>({
               onCheckedChange={(checked) => {
                 col.setFilterValue((oldValue: string[]) => {
                   const previousValue = oldValue || [...sortedUniqueValues];
-        
+
                   const newFilter = checked
                     ? [...new Set([...previousValue, v])]
                     : previousValue?.filter((a) => a !== v);
@@ -150,7 +142,7 @@ export function DropdownFilter<T>({
 }
 
 export function PageSizeSelector<T>({ table }: { table: TableType<T> }) {
-  'use no memo';
+  "use no memo";
 
   const rowCount = table.getRowCount();
   return (
@@ -166,9 +158,7 @@ export function PageSizeSelector<T>({ table }: { table: TableType<T> }) {
       <SelectContent>
         {[...new Set([rowCount, 10, 20, 30, 40, 50])].map((pageSize) => (
           <SelectItem key={pageSize} value={`${pageSize}`}>
-            {pageSize === rowCount
-              ? 'All Items in 1 page'
-              : `${pageSize} items on page`}
+            {pageSize === rowCount ? "All Items in 1 page" : `${pageSize} items on page`}
           </SelectItem>
         ))}
       </SelectContent>
@@ -183,7 +173,7 @@ export function PaginationCard<T>({
   table: TableType<T>;
   showManualControls?: boolean;
 }) {
-  'use no memo';
+  "use no memo";
   const pageCount = table.getPageCount();
   if (pageCount <= 1) {
     return null;
@@ -196,43 +186,29 @@ export function PaginationCard<T>({
           onClick={() => table.firstPage()}
           disabled={!table.getCanPreviousPage()}
         >
-          {'<<'}
+          {"<<"}
         </Button>
         <Button
           variant="ghost"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
-          {'<'}
+          {"<"}
         </Button>
-        <Button
-          variant="ghost"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          {'>'}
+        <Button variant="ghost" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+          {">"}
         </Button>
-        <Button
-          variant="ghost"
-          onClick={() => table.lastPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          {'>>'}
+        <Button variant="ghost" onClick={() => table.lastPage()} disabled={!table.getCanNextPage()}>
+          {">>"}
         </Button>
       </div>
-      {showManualControls ? (
-        <PaginationControlsManuelPageSelection table={table} />
-      ) : null}
+      {showManualControls ? <PaginationControlsManuelPageSelection table={table} /> : null}
     </Card>
   );
 }
 
-export function PaginationControlsManuelPageSelection<T>({
-  table,
-}: {
-  table: TableType<T>;
-}) {
-  'use no memo';
+export function PaginationControlsManuelPageSelection<T>({ table }: { table: TableType<T> }) {
+  "use no memo";
   return (
     <div className="inline-flex items-center gap-1">
       <span className="flex items-center gap-1">

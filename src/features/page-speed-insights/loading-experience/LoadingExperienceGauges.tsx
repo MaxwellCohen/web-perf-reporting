@@ -1,6 +1,6 @@
-'use client';
-import GaugeChart from '@/components/common/PageSpeedGaugeChart';
-import { PageSpeedApiLoadingExperience } from '@/lib/schema';
+"use client";
+import GaugeChart from "@/components/common/PageSpeedGaugeChart";
+import { PageSpeedApiLoadingExperience } from "@/lib/schema";
 
 export function LoadingExperienceGauges({
   experience,
@@ -12,27 +12,27 @@ export function LoadingExperienceGauges({
   }
   const metrics: {
     metric: string;
-    key: keyof PageSpeedApiLoadingExperience['metrics'];
+    key: keyof PageSpeedApiLoadingExperience["metrics"];
   }[] = [
     {
-      metric: 'Cumulative Layout Shift',
-      key: 'CUMULATIVE_LAYOUT_SHIFT_SCORE',
+      metric: "Cumulative Layout Shift",
+      key: "CUMULATIVE_LAYOUT_SHIFT_SCORE",
     },
     {
-      metric: 'Time to First Byte',
-      key: 'EXPERIMENTAL_TIME_TO_FIRST_BYTE',
+      metric: "Time to First Byte",
+      key: "EXPERIMENTAL_TIME_TO_FIRST_BYTE",
     },
     {
-      metric: 'First Contentful Paint',
-      key: 'FIRST_CONTENTFUL_PAINT_MS',
+      metric: "First Contentful Paint",
+      key: "FIRST_CONTENTFUL_PAINT_MS",
     },
     {
-      metric: 'Interaction to Next Paint',
-      key: 'INTERACTION_TO_NEXT_PAINT',
+      metric: "Interaction to Next Paint",
+      key: "INTERACTION_TO_NEXT_PAINT",
     },
     {
-      metric: 'Largest Contentful Paint',
-      key: 'LARGEST_CONTENTFUL_PAINT_MS',
+      metric: "Largest Contentful Paint",
+      key: "LARGEST_CONTENTFUL_PAINT_MS",
     },
   ];
   return (

@@ -1,4 +1,4 @@
-import { Details } from '@/components/ui/accordion';
+import { Details } from "@/components/ui/accordion";
 import {
   Table,
   TableBody,
@@ -6,8 +6,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { AuditResultsRecord } from '@/lib/schema';
+} from "@/components/ui/table";
+import { AuditResultsRecord } from "@/lib/schema";
 
 export function RenderMetricSavings({
   auditData,
@@ -45,9 +45,7 @@ export function RenderMetricSavings({
           <TableRow>
             <TableHead>Metric</TableHead>
             {metricSavings.map((ms, i) => (
-              <TableHead key={`${i}_${ms.label}`}>
-                Possible {ms.label || ''} Savings
-              </TableHead>
+              <TableHead key={`${i}_${ms.label}`}>Possible {ms.label || ""} Savings</TableHead>
             ))}
           </TableRow>
         </TableHeader>
@@ -56,9 +54,7 @@ export function RenderMetricSavings({
             <TableRow key={metric}>
               <TableCell>{metric}</TableCell>
               {metricSavings.map((ms, i) => (
-                <TableCell key={`${i}_${ms.label}`}>
-                  {ms?.metricSavings?.[metric] ?? 0}
-                </TableCell>
+                <TableCell key={`${i}_${ms.label}`}>{ms?.metricSavings?.[metric] ?? 0}</TableCell>
               ))}
             </TableRow>
           ))}

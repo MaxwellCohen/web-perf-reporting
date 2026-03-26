@@ -1,34 +1,36 @@
-'use client';
-import { OpportunityItem, TableItem } from '@/lib/schema';
-import { useMemo } from 'react';
-import { DetailTableItem } from '@/features/page-speed-insights/lh-categories/table/detailTableShared';
+"use client";
+import { OpportunityItem, TableItem } from "@/lib/schema";
+import { useMemo } from "react";
+import { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion';
-import { Table } from '@/components/ui/table';
-import { DataTableHeader } from '@/features/page-speed-insights/lh-categories/table/DataTableHeader';
-import { DataTableBody } from '@/features/page-speed-insights/lh-categories/table/DataTableBody';
+} from "@/components/ui/accordion";
+import { Table } from "@/components/ui/table";
+import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
+import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
 import {
   compareReportLabels,
   formatReportTableTitle,
-} from '@/features/page-speed-insights/shared/reportLabels';
-import { useSimpleTable } from '@/features/page-speed-insights/shared/useSimpleTable';
+} from "@/features/page-speed-insights/shared/reportLabels";
+import { useSimpleTable } from "@/features/page-speed-insights/shared/useSimpleTable";
 import {
   flattenDetailItems,
   getAuditId,
   groupRowsByReportLabel,
-} from '@/features/page-speed-insights/lh-categories/table/detailTableData';
+} from "@/features/page-speed-insights/lh-categories/table/detailTableData";
 import {
   createDetailItemColumns,
   getDetailItemsTimeRange,
-} from '@/features/page-speed-insights/lh-categories/table/detailItemColumns';
+} from "@/features/page-speed-insights/lh-categories/table/detailItemColumns";
 
-function getSortedReports(
-  rowsByReport: Map<string, DetailTableItem[]>
-): Array<{ reportLabel: string; reportRows: DetailTableItem[]; data: (TableItem | OpportunityItem)[] }> {
+function getSortedReports(rowsByReport: Map<string, DetailTableItem[]>): Array<{
+  reportLabel: string;
+  reportRows: DetailTableItem[];
+  data: (TableItem | OpportunityItem)[];
+}> {
   return Array.from(rowsByReport.entries())
     .sort(([labelA], [labelB]) => compareReportLabels(labelA, labelB))
     .map(([reportLabel, reportRows]) => {
@@ -40,7 +42,11 @@ function getSortedReports(
 
       return { reportLabel, reportRows, data };
     })
-    .filter((v) => v !== null) as Array<{ reportLabel: string; reportRows: DetailTableItem[]; data: (TableItem | OpportunityItem)[] }>;
+    .filter((v) => v !== null) as Array<{
+    reportLabel: string;
+    reportRows: DetailTableItem[];
+    data: (TableItem | OpportunityItem)[];
+  }>;
 }
 
 /**
@@ -62,14 +68,12 @@ export function DetailTableSeparatePerReport({
   return (
     <Accordion type="single" collapsible className="w-full">
       {sortedReports.map(({ reportLabel, reportRows, data }) => {
-        const accordionValue = `${title}-${reportLabel}`.replace(/\s+/g, '-').toLowerCase();
+        const accordionValue = `${title}-${reportLabel}`.replace(/\s+/g, "-").toLowerCase();
         const reportTitle = formatReportTableTitle(title, reportLabel, data.length);
         return (
           <AccordionItem key={accordionValue} value={accordionValue}>
             <AccordionTrigger>
-              <div className="text-base font-semibold text-left">
-                {reportTitle}
-              </div>
+              <div className="text-base font-semibold text-left">{reportTitle}</div>
             </AccordionTrigger>
             <AccordionContent>
               <ReportTable
@@ -97,11 +101,8 @@ function ReportTable({
   rows: DetailTableItem[];
   auditId?: string;
 }) {
-  'use no memo';
-  const timeRange = useMemo(
-    () => getDetailItemsTimeRange(data, auditId),
-    [auditId, data],
-  );
+  "use no memo";
+  const timeRange = useMemo(() => getDetailItemsTimeRange(data, auditId), [auditId, data]);
   const reportColumns = useMemo(
     () =>
       createDetailItemColumns({
@@ -116,7 +117,7 @@ function ReportTable({
 
   return (
     <div className="w-full overflow-x-auto">
-      <Table className="w-full" style={{ width: '100%' }}>
+      <Table className="w-full" style={{ width: "100%" }}>
         <DataTableHeader table={table} />
         <DataTableBody table={table} />
       </Table>

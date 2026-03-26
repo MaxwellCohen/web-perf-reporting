@@ -1,9 +1,9 @@
-import { Button } from '@/components/ui/button';
-import { Header } from '@tanstack/react-table';
+import { Button } from "@/components/ui/button";
+import { Header } from "@tanstack/react-table";
 
 const IconMap: Record<string, string> = {
-  asc: '↑',
-  desc: '↓',
+  asc: "↑",
+  desc: "↓",
 };
 
 export function SortingButton<T>({ header }: { header: Header<T, unknown> }) {
@@ -13,18 +13,18 @@ export function SortingButton<T>({ header }: { header: Header<T, unknown> }) {
   return (
     <Button
       type="button"
-      variant={'ghost'}
-      size={'icon'}
+      variant={"ghost"}
+      size={"icon"}
       onClick={header.column.getToggleSortingHandler()}
       title={
-        header.column.getNextSortingOrder() === 'asc'
-          ? 'Sort ascending'
-          : header.column.getNextSortingOrder() === 'desc'
-            ? 'Sort descending'
-            : 'Clear sort'
+        header.column.getNextSortingOrder() === "asc"
+          ? "Sort ascending"
+          : header.column.getNextSortingOrder() === "desc"
+            ? "Sort descending"
+            : "Clear sort"
       }
     >
-      {IconMap[header.column.getIsSorted() as string] ?? '〰︎'}
+      {IconMap[header.column.getIsSorted() as string] ?? "〰︎"}
     </Button>
   );
 }

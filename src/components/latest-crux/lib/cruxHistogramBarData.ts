@@ -1,24 +1,22 @@
-import type { PerformanceChartData } from '@/components/common/ChartSettings';
-import type { CruxHistoryItem } from '@/lib/schema';
+import type { PerformanceChartData } from "@/components/common/ChartSettings";
+import type { CruxHistoryItem } from "@/lib/schema";
 
-export function cruxHistogramBarData(
-  data: CruxHistoryItem,
-): PerformanceChartData[] {
+export function cruxHistogramBarData(data: CruxHistoryItem): PerformanceChartData[] {
   return [
     {
-      status: 'good',
+      status: "good",
       density: data.good_density || 0,
-      fill: 'var(--color-good_density)',
+      fill: "var(--color-good_density)",
     },
     {
-      status: 'ni',
+      status: "ni",
       density: data.ni_density || 0,
-      fill: 'var(--color-ni_density)',
+      fill: "var(--color-ni_density)",
     },
     {
-      status: 'poor',
+      status: "poor",
       density: data.poor_density || 0,
-      fill: 'var(--color-poor_density)',
+      fill: "var(--color-poor_density)",
     },
   ];
 }

@@ -1,15 +1,14 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { AccordionTrigger } from '@/components/ui/accordion';
-import { cn } from '@/lib/utils';
+import * as React from "react";
+import { AccordionTrigger } from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
 
-export const accordionSectionTitleClassName =
-  'text-lg font-bold group-hover:underline';
+export const accordionSectionTitleClassName = "text-lg font-bold group-hover:underline";
 
 export type AccordionSectionTitleTriggerProps = Omit<
   React.ComponentPropsWithoutRef<typeof AccordionTrigger>,
-  'children'
+  "children"
 > & {
   /** Additional classes merged onto the inner title element */
   titleClassName?: string;
@@ -21,9 +20,7 @@ export const AccordionSectionTitleTrigger = React.forwardRef<
   AccordionSectionTitleTriggerProps
 >(({ className, titleClassName, children, ...props }, ref) => (
   <AccordionTrigger ref={ref} className={className} {...props}>
-    <div className={cn(accordionSectionTitleClassName, titleClassName)}>
-      {children}
-    </div>
+    <div className={cn(accordionSectionTitleClassName, titleClassName)}>{children}</div>
   </AccordionTrigger>
 ));
-AccordionSectionTitleTrigger.displayName = 'AccordionSectionTitleTrigger';
+AccordionSectionTitleTrigger.displayName = "AccordionSectionTitleTrigger";

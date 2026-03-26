@@ -9,13 +9,10 @@ import {
   PaginationState,
   VisibilityState,
   type TableOptions,
-} from '@tanstack/react-table';
-import { useMemo, useState } from 'react';
-import { flatTanStackTableSlice } from '@/features/page-speed-insights/shared/flatTanStackTableSlice';
-import {
-  ExpandAll,
-  ExpandRow,
-} from '@/features/page-speed-insights/JSUsage/JSUsageTable';
+} from "@tanstack/react-table";
+import { useMemo, useState } from "react";
+import { flatTanStackTableSlice } from "@/features/page-speed-insights/shared/flatTanStackTableSlice";
+import { ExpandAll, ExpandRow } from "@/features/page-speed-insights/JSUsage/JSUsageTable";
 
 export type TableConfigOptions<T> = {
   data: T[];
@@ -49,49 +46,50 @@ export function useStandardTable<T>({
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const tableColumns = useMemo<ColumnDef<T, any>[]>(() => [
-    {
-      id: 'expander',
-      header: (props) => <ExpandAll table={props.table} />,
-      cell: ExpandRow,
-      aggregatedCell: ExpandRow,
-      size: 40,
-      enableHiding: true,
-      enableGrouping: false,
-      enablePinning: true,
-      enableSorting: false,
-      enableResizing: true,
-    },
-    ...columns,
-  ], [columns]);
-
-  const table = useReactTable(
-    {
-      data,
-      columns: tableColumns,
-      ...flatTanStackTableSlice,
-      getGroupedRowModel: getGroupedRowModel(),
-      getExpandedRowModel: getExpandedRowModel(),
-      enableExpanding: true,
-      getRowCanExpand: () => false, // Disable expansion for grouped rows
-      groupedColumnMode: false, // Allow sorting on grouped columns
-      onSortingChange: setSorting,
-      onColumnFiltersChange: setColumnFilters,
-      onGroupingChange: setGrouping,
-      ...(enablePagination && {
-        getPaginationRowModel: getPaginationRowModel(),
-        onPaginationChange: setPagination,
-      }),
-      onColumnVisibilityChange: setColumnVisibility,
-      state: {
-        sorting,
-        columnFilters,
-        grouping: groupingState,
-        ...(enablePagination && { pagination }),
-        columnVisibility,
+  const tableColumns = useMemo<ColumnDef<T, any>[]>(
+    () => [
+      {
+        id: "expander",
+        header: (props) => <ExpandAll table={props.table} />,
+        cell: ExpandRow,
+        aggregatedCell: ExpandRow,
+        size: 40,
+        enableHiding: true,
+        enableGrouping: false,
+        enablePinning: true,
+        enableSorting: false,
+        enableResizing: true,
       },
-    } as unknown as TableOptions<T>,
+      ...columns,
+    ],
+    [columns],
   );
+
+  const table = useReactTable({
+    data,
+    columns: tableColumns,
+    ...flatTanStackTableSlice,
+    getGroupedRowModel: getGroupedRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
+    enableExpanding: true,
+    getRowCanExpand: () => false, // Disable expansion for grouped rows
+    groupedColumnMode: false, // Allow sorting on grouped columns
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onGroupingChange: setGrouping,
+    ...(enablePagination && {
+      getPaginationRowModel: getPaginationRowModel(),
+      onPaginationChange: setPagination,
+    }),
+    onColumnVisibilityChange: setColumnVisibility,
+    state: {
+      sorting,
+      columnFilters,
+      grouping: groupingState,
+      ...(enablePagination && { pagination }),
+      columnVisibility,
+    },
+  } as unknown as TableOptions<T>);
 
   return table;
 }

@@ -1,11 +1,13 @@
-'use client';
+"use client";
+import { AuditDetailTable, ItemValue, ItemValueType, TableColumnHeading } from "@/lib/schema";
 import {
-  AuditDetailTable,
-  ItemValue,
-  ItemValueType,
-  TableColumnHeading,
-} from '@/lib/schema';
-import { CSSProperties, Fragment, useMemo, useState, startTransition, type ReactElement } from 'react';
+  CSSProperties,
+  Fragment,
+  useMemo,
+  useState,
+  startTransition,
+  type ReactElement,
+} from "react";
 import {
   ColumnDef,
   useReactTable,
@@ -23,22 +25,22 @@ import {
   Row,
   createColumnHelper,
   Cell,
-} from '@tanstack/react-table';
-import { RenderTableValue } from '@/features/page-speed-insights/lh-categories/table/RenderTableValue';
-import clsx from 'clsx';
-import { cn } from '@/lib/utils';
-import { ExpandAll, ExpandRow } from '@/features/page-speed-insights/JSUsage/JSUsageTable';
-import { toTitleCase } from '@/features/page-speed-insights/toTitleCase';
-import { DataTableHeader } from '@/features/page-speed-insights/lh-categories/table/DataTableHeader';
-import { booleanFilterFn } from '@/features/page-speed-insights/lh-categories/table/DataTableNoGrouping';
-import { AccordionContent, AccordionItem } from '@/components/ui/accordion';
-import { AccordionSectionTitleTrigger } from '@/components/ui/accordion-section-title-trigger';
-import { DataTableBody } from '@/features/page-speed-insights/lh-categories/table/DataTableBody';
-import { DetailTableWith1ReportAndNoSubitem } from '@/features/page-speed-insights/lh-categories/table/DetailTableWith1ReportAndNoSubitem';
-import { DetailTableSeparatePerReport } from '@/features/page-speed-insights/lh-categories/table/DetailTableSeparatePerReport';
-import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
-import { useStandardTable } from '@/features/page-speed-insights/shared/tableConfigHelpers';
-import { shouldShowSeparateTablesPerReport } from '@/features/page-speed-insights/auditTableConfig';
+} from "@tanstack/react-table";
+import { RenderTableValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
+import clsx from "clsx";
+import { cn } from "@/lib/utils";
+import { ExpandAll, ExpandRow } from "@/features/page-speed-insights/JSUsage/JSUsageTable";
+import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
+import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
+import { booleanFilterFn } from "@/features/page-speed-insights/lh-categories/table/DataTableNoGrouping";
+import { AccordionContent, AccordionItem } from "@/components/ui/accordion";
+import { AccordionSectionTitleTrigger } from "@/components/ui/accordion-section-title-trigger";
+import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
+import { DetailTableWith1ReportAndNoSubitem } from "@/features/page-speed-insights/lh-categories/table/DetailTableWith1ReportAndNoSubitem";
+import { DetailTableSeparatePerReport } from "@/features/page-speed-insights/lh-categories/table/DetailTableSeparatePerReport";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { useStandardTable } from "@/features/page-speed-insights/shared/tableConfigHelpers";
+import { shouldShowSeparateTablesPerReport } from "@/features/page-speed-insights/auditTableConfig";
 import {
   UNIQUE_AGG_VALUE_TYPES,
   COLUMN_SIZE_DEFAULT,
@@ -46,20 +48,20 @@ import {
   EXPANDER_COLUMN_SIZE,
   DEVICE_COLUMN_SIZE,
   SORT_VALUE_SEPARATOR,
-} from '@/features/page-speed-insights/lh-categories/table/constants';
+} from "@/features/page-speed-insights/lh-categories/table/constants";
 import {
   DetailTableDataRow,
   flattenDetailRows,
   getAuditId,
   hasDetailItems,
   hasDetailSubitems,
-} from '@/features/page-speed-insights/lh-categories/table/detailTableData';
+} from "@/features/page-speed-insights/lh-categories/table/detailTableData";
 import {
   canGroup,
   canSort,
   DetailTableItem,
   isNumberColumn,
-} from '@/features/page-speed-insights/lh-categories/table/detailTableShared';
+} from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 
 type ColumnHeadingConfig = {
   heading: TableColumnHeading;
@@ -69,44 +71,37 @@ type ColumnHeadingConfig = {
 
 type DeviceValuePair = [string, number];
 
-declare module '@tanstack/react-table' {
+declare module "@tanstack/react-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ColumnMeta<TData extends RowData, TValue> {
     heading?: { heading: TableColumnHeading; _userLabel?: string };
     defaultVisibility?: boolean;
-    rowType?: 'main' | 'sub';
-    headerType?: 'group' | 'sub';
+    rowType?: "main" | "sub";
+    headerType?: "group" | "sub";
   }
 }
 
 /**
  * Gets the user label from column meta or row original data
  */
-const getUserLabel = (
-  info: CellContext<DetailTableDataRow, unknown>,
-): string => {
+const getUserLabel = (info: CellContext<DetailTableDataRow, unknown>): string => {
   const metaLabel = info.column.columnDef.meta?.heading?._userLabel;
   if (metaLabel) {
     return metaLabel;
   }
-  return info.row.original._userLabel || '';
+  return info.row.original._userLabel || "";
 };
 
 /**
  * Checks if value is an array of device-value pairs
  */
-const isDeviceValuePairArray = (
-  value: unknown,
-): value is DeviceValuePair[] => {
+const isDeviceValuePairArray = (value: unknown): value is DeviceValuePair[] => {
   return (
     Array.isArray(value) &&
     value.length > 0 &&
     value.every(
       (v): v is DeviceValuePair =>
-        Array.isArray(v) &&
-        v.length === 2 &&
-        typeof v[0] === 'string' &&
-        typeof v[1] === 'number',
+        Array.isArray(v) && v.length === 2 && typeof v[0] === "string" && typeof v[1] === "number",
     )
   );
 };
@@ -123,9 +118,7 @@ const renderValueWithLabel = (
   return (
     <div>
       <RenderTableValue value={value} heading={heading} device={device} />
-      {showLabel && device && (
-        <span className="text-xs text-muted-foreground"> ({device})</span>
-      )}
+      {showLabel && device && <span className="text-xs text-muted-foreground"> ({device})</span>}
     </div>
   );
 };
@@ -145,11 +138,7 @@ const renderDeviceValuePairs = (
   if (pairs.length === 1) {
     return (
       <>
-        <RenderTableValue
-          value={pairs[0][1] as ItemValue}
-          heading={heading}
-          device={pairs[0][0]}
-        />
+        <RenderTableValue value={pairs[0][1] as ItemValue} heading={heading} device={pairs[0][0]} />
         <span className="text-xs text-muted-foreground"> ({pairs[0][0]})</span>
       </>
     );
@@ -160,12 +149,7 @@ const renderDeviceValuePairs = (
     <div className="flex flex-col gap-1">
       {pairs.map(([device, val], i) => (
         <div key={i}>
-          {renderValueWithLabel(
-            val as ItemValue,
-            heading,
-            device,
-            pairs.length > 1,
-          )}
+          {renderValueWithLabel(val as ItemValue, heading, device, pairs.length > 1)}
         </div>
       ))}
     </div>
@@ -182,24 +166,19 @@ const renderSubRowValues = (
 ): (ReactElement | null)[] => {
   return info.row.subRows.map((sr, i) => {
     const srItem = sr.getValue(key);
-    const srUserLabel = (sr.getValue('device') as string) || '';
+    const srUserLabel = (sr.getValue("device") as string) || "";
 
-    if (srItem === undefined || srItem === '') {
+    if (srItem === undefined || srItem === "") {
       return null;
     }
 
-    if (heading?.valueType === 'node') {
+    if (heading?.valueType === "node") {
       return null;
     }
 
     return (
       <Fragment key={i}>
-        {renderValueWithLabel(
-          srItem as ItemValue,
-          heading,
-          srUserLabel,
-          true,
-        )}
+        {renderValueWithLabel(srItem as ItemValue, heading, srUserLabel, true)}
       </Fragment>
     );
   });
@@ -215,20 +194,14 @@ const cell = (info: CellContext<DetailTableDataRow, unknown>) => {
   const _userLabel = getUserLabel(info);
   const rowDepth = info.row.depth;
   // Show device label for sub-rows (depth > 0) in grouped tables, but not for the device column itself
-  const showDeviceLabel = rowDepth > 0 && _userLabel && key !== 'device';
+  const showDeviceLabel = rowDepth > 0 && _userLabel && key !== "device";
 
   // Handle non-array values
   if (!Array.isArray(value)) {
     if (showDeviceLabel) {
       return renderValueWithLabel(value as ItemValue, heading, _userLabel, true);
     }
-    return (
-      <RenderTableValue
-        value={value as ItemValue}
-        heading={heading}
-        device={_userLabel}
-      />
-    );
+    return <RenderTableValue value={value as ItemValue} heading={heading} device={_userLabel} />;
   }
 
   // Handle device-value pair arrays (aggregated data)
@@ -241,13 +214,7 @@ const cell = (info: CellContext<DetailTableDataRow, unknown>) => {
     if (showDeviceLabel) {
       return renderValueWithLabel(value[0] as ItemValue, heading, _userLabel, true);
     }
-    return (
-      <RenderTableValue
-        value={value[0] as ItemValue}
-        heading={heading}
-        device={_userLabel}
-      />
-    );
+    return <RenderTableValue value={value[0] as ItemValue} heading={heading} device={_userLabel} />;
   }
 
   // Handle arrays with sub-rows (length < 2 means empty or single, but check subRows)
@@ -262,25 +229,16 @@ const cell = (info: CellContext<DetailTableDataRow, unknown>) => {
 /**
  * Simple cell renderer that doesn't handle complex array cases
  */
-export const simpleTableCell = (
-  info: CellContext<DetailTableDataRow, unknown>,
-) => {
+export const simpleTableCell = (info: CellContext<DetailTableDataRow, unknown>) => {
   const value = info.getValue();
   const heading = info.column.columnDef.meta?.heading?.heading;
   const _userLabel = getUserLabel(info);
 
   if (!Array.isArray(value)) {
-    return (
-      <RenderTableValue
-        value={value as ItemValue}
-        heading={heading}
-        device={_userLabel}
-      />
-    );
+    return <RenderTableValue value={value as ItemValue} heading={heading} device={_userLabel} />;
   }
   return value;
 };
-
 
 /**
  * Accessor function for main items in a table row
@@ -292,7 +250,7 @@ const accessorFnMainItems =
       return undefined;
     }
     const mainItem = r.item?.[key];
-    if (typeof mainItem !== 'undefined') {
+    if (typeof mainItem !== "undefined") {
       return mainItem;
     }
     return undefined;
@@ -308,7 +266,7 @@ const accessorFnSubItems =
       return undefined;
     }
     const subItem = r.subitem?.[subItemsHeadingKey];
-    if (typeof subItem !== 'undefined') {
+    if (typeof subItem !== "undefined") {
       return subItem;
     }
     return r.item?.[key];
@@ -333,29 +291,26 @@ const setSizeSetting = (type: ItemValueType | string) => {
 /**
  * Custom aggregation function that sums values by device/user label
  */
-const customSum = (
-  aggregationKey: string,
-  rows: Row<DetailTableDataRow>[],
-): DeviceValuePair[] => {
+const customSum = (aggregationKey: string, rows: Row<DetailTableDataRow>[]): DeviceValuePair[] => {
   const aggregationObj = rows.reduce((acc: Record<string, number>, r) => {
     let v = r.getValue(aggregationKey);
 
     // Extract numeric value from object if needed
     if (
       v &&
-      typeof v === 'object' &&
-      'value' in v &&
-      typeof (v as { value: unknown }).value === 'number'
+      typeof v === "object" &&
+      "value" in v &&
+      typeof (v as { value: unknown }).value === "number"
     ) {
       v = (v as { value: number }).value;
     }
 
-    if (typeof v === 'number') {
-      const userLabel = (r.getValue('device') as string) || '';
+    if (typeof v === "number") {
+      const userLabel = (r.getValue("device") as string) || "";
       const cell = r.getAllCells().find((c) => c.column.id === aggregationKey);
       const rowType = cell?.column?.columnDef?.meta?.rowType;
 
-      if (rowType !== 'sub') {
+      if (rowType !== "sub") {
         acc[userLabel] = v;
       } else {
         acc[userLabel] = (acc[userLabel] || 0) + v;
@@ -377,11 +332,11 @@ const getAggregationFn = (
   key: string,
   skipSumming: string[] | undefined,
   showUserLabel: boolean,
-): 'unique' | 'sum' | typeof customSum => {
+): "unique" | "sum" | typeof customSum => {
   if (isUniqueAgg(valueType) || (skipSumming || []).includes(key)) {
-    return 'unique';
+    return "unique";
   }
-  return showUserLabel ? customSum : 'sum';
+  return showUserLabel ? customSum : "sum";
 };
 
 /**
@@ -389,12 +344,12 @@ const getAggregationFn = (
  */
 const getFilterFn = (
   valueType: ItemValueType | string,
-): 'includesString' | 'inNumberRange' | undefined => {
+): "includesString" | "inNumberRange" | undefined => {
   if (canGroup(valueType)) {
-    return 'includesString';
+    return "includesString";
   }
   if (isNumberColumn(valueType)) {
-    return 'inNumberRange';
+    return "inNumberRange";
   }
   return undefined;
 };
@@ -420,100 +375,79 @@ export const makeColumnDef = (
   }
 
   const defaultVisibility = !_userLabel && !subItemsHeadingKey;
-  const valueType = h.heading.valueType || 'text';
+  const valueType = h.heading.valueType || "text";
 
   // Main column definition
   columnDefs.push(
-    columnHelper.accessor(
-      accessorFnMainItems(_userLabel, key),
-      {
-        id: `${key}${_userLabel ? `_${_userLabel}` : ''}`,
-        header: `${h.heading.label || toTitleCase(key)}${_userLabel ? ` (${_userLabel})` : ''}`,
-        cell,
-        aggregatedCell: cell,
-        enableGrouping: canGroup(valueType),
-        enableHiding: true,
-        enableSorting: canSort(valueType),
-        ...setSizeSetting(valueType),
-        aggregationFn: getAggregationFn(
-          valueType,
-          key,
-          h.skipSumming,
-          settings.showUserLabel,
-        ),
-        filterFn: getFilterFn(valueType),
-        meta: {
-          heading: h,
-          className: '',
-          defaultVisibility,
-          rowType: subItemsHeadingKey ? 'main' : undefined,
-          headerType: 'group',
-        },
+    columnHelper.accessor(accessorFnMainItems(_userLabel, key), {
+      id: `${key}${_userLabel ? `_${_userLabel}` : ""}`,
+      header: `${h.heading.label || toTitleCase(key)}${_userLabel ? ` (${_userLabel})` : ""}`,
+      cell,
+      aggregatedCell: cell,
+      enableGrouping: canGroup(valueType),
+      enableHiding: true,
+      enableSorting: canSort(valueType),
+      ...setSizeSetting(valueType),
+      aggregationFn: getAggregationFn(valueType, key, h.skipSumming, settings.showUserLabel),
+      filterFn: getFilterFn(valueType),
+      meta: {
+        heading: h,
+        className: "",
+        defaultVisibility,
+        rowType: subItemsHeadingKey ? "main" : undefined,
+        headerType: "group",
       },
-    ),
+    }),
   );
 
   // Sub-items column definition (if applicable)
   if (subItemsHeadingKey) {
-    const subValueType = subItemsHeading.valueType || 'text';
+    const subValueType = subItemsHeading.valueType || "text";
     columnDefs.push(
-      columnHelper.accessor(
-        accessorFnSubItems(_userLabel, key, subItemsHeadingKey),
-        {
-          id: `${key}${subItemsHeadingKey}${_userLabel ? `_${_userLabel}` : ''}`,
-          header: `${subItemsHeading.label || ''}${_userLabel ? ` (${_userLabel})` : ''}`,
-          cell,
-          enableGrouping: canGroup(subValueType),
-          ...setSizeSetting(subValueType),
-          enableHiding: true,
-          enableSorting: canSort(subValueType),
-          aggregationFn: getAggregationFn(
-            subValueType,
-            subItemsHeadingKey,
-            h.skipSumming,
-            settings.showUserLabel,
-          ),
-          filterFn: getFilterFn(subValueType),
-          aggregatedCell(info) {
-            const value = accessorFnMainItems(_userLabel, key)(
-              info.row.original,
-            );
+      columnHelper.accessor(accessorFnSubItems(_userLabel, key, subItemsHeadingKey), {
+        id: `${key}${subItemsHeadingKey}${_userLabel ? `_${_userLabel}` : ""}`,
+        header: `${subItemsHeading.label || ""}${_userLabel ? ` (${_userLabel})` : ""}`,
+        cell,
+        enableGrouping: canGroup(subValueType),
+        ...setSizeSetting(subValueType),
+        enableHiding: true,
+        enableSorting: canSort(subValueType),
+        aggregationFn: getAggregationFn(
+          subValueType,
+          subItemsHeadingKey,
+          h.skipSumming,
+          settings.showUserLabel,
+        ),
+        filterFn: getFilterFn(subValueType),
+        aggregatedCell(info) {
+          const value = accessorFnMainItems(_userLabel, key)(info.row.original);
 
-            if (isDeviceValuePairArray(value)) {
-              return (
-                <>
-                  {value.map((v, i) => (
-                    <Fragment key={i}>
-                      <RenderTableValue
-                        value={v[1] as ItemValue}
-                        heading={h.heading}
-                        device={v[0]}
-                      />
-                    </Fragment>
-                  ))}
-                </>
-              );
-            }
-
+          if (isDeviceValuePairArray(value)) {
             return (
-              <RenderTableValue
-                value={value as ItemValue}
-                heading={h.heading}
-                device={_userLabel}
-              />
+              <>
+                {value.map((v, i) => (
+                  <Fragment key={i}>
+                    <RenderTableValue value={v[1] as ItemValue} heading={h.heading} device={v[0]} />
+                  </Fragment>
+                ))}
+              </>
             );
-          },
-          meta: {
-            heading: {
-              heading: subItemsHeading,
-              _userLabel: h._userLabel,
-            },
-            className: '',
-            defaultVisibility: !_userLabel,
-            rowType: 'sub',
-          },
+          }
+
+          return (
+            <RenderTableValue value={value as ItemValue} heading={h.heading} device={_userLabel} />
+          );
         },
-      ),
+        meta: {
+          heading: {
+            heading: subItemsHeading,
+            _userLabel: h._userLabel,
+          },
+          className: "",
+          defaultVisibility: !_userLabel,
+          rowType: "sub",
+        },
+      }),
     );
   }
 
@@ -530,7 +464,7 @@ function DeviceCell(info: CellContext<DetailTableDataRow, unknown>) {
     return (
       <>
         {value
-          .filter((v) => v != null && v !== '')
+          .filter((v) => v != null && v !== "")
           .map((v, i) => (
             <div key={i}>{String(v)}</div>
           ))}
@@ -544,13 +478,7 @@ function DeviceCell(info: CellContext<DetailTableDataRow, unknown>) {
  * Main component that routes to the appropriate table implementation
  * based on the data structure and audit configuration
  */
-export function DetailTable({
-  rows,
-  title,
-}: {
-  rows: DetailTableItem[];
-  title: string;
-}) {
+export function DetailTable({ rows, title }: { rows: DetailTableItem[]; title: string }) {
   const hasItems = useMemo(() => hasDetailItems(rows), [rows]);
 
   if (!hasItems) {
@@ -579,18 +507,15 @@ export function DetailTable({
 /**
  * Combines item and subitem values for sorting/comparison
  */
-const combineItemSubItemValue = (
-  itemVal: unknown,
-  subItemVal: unknown,
-): unknown => {
-  if (typeof subItemVal === 'number' && typeof itemVal === 'number') {
+const combineItemSubItemValue = (itemVal: unknown, subItemVal: unknown): unknown => {
+  if (typeof subItemVal === "number" && typeof itemVal === "number") {
     // Combine numbers: item.subitem format (e.g., 123.45)
-    const itemNum = Number(itemVal.toString().replace(/[^0-9]/g, '')) || 0;
-    const subNum = Number(subItemVal.toString().replace(/[^0-9]/g, '')) || 0;
+    const itemNum = Number(itemVal.toString().replace(/[^0-9]/g, "")) || 0;
+    const subNum = Number(subItemVal.toString().replace(/[^0-9]/g, "")) || 0;
     return Number(`${itemNum}.${subNum}`);
   }
 
-  if (typeof subItemVal === 'string' && typeof itemVal === 'string') {
+  if (typeof subItemVal === "string" && typeof itemVal === "string") {
     // Combine strings with separator for sorting
     return `${itemVal}${SORT_VALUE_SEPARATOR}${subItemVal}`;
   }
@@ -598,21 +523,13 @@ const combineItemSubItemValue = (
   return subItemVal ?? itemVal;
 };
 
-function DetailTableWithSubitems({
-  rows,
-  title,
-}: {
-  rows: DetailTableItem[];
-  title: string;
-}) {
+function DetailTableWithSubitems({ rows, title }: { rows: DetailTableItem[]; title: string }) {
   const data = useMemo(() => flattenDetailRows(rows), [rows]);
 
   // Create columns
   const columns = useMemo(() => {
     const sColumnHelper = createColumnHelper<DetailTableDataRow>();
-    const columnDef: ColumnDef<DetailTableDataRow, unknown>[] = [
-      getExpandingControlColumn(),
-    ];
+    const columnDef: ColumnDef<DetailTableDataRow, unknown>[] = [getExpandingControlColumn()];
 
     const firstRow = rows[0];
     if (!firstRow) {
@@ -634,7 +551,7 @@ function DetailTableWithSubitems({
         ...h,
         ...h.subItemsHeading,
       };
-      const valueType = h.valueType || 'text';
+      const valueType = h.valueType || "text";
 
       columnDef.push(
         sColumnHelper.accessor(
@@ -645,7 +562,7 @@ function DetailTableWithSubitems({
           },
           {
             id: `${key}_${subItemKey}`,
-            header: (subItem.label as string) || '',
+            header: (subItem.label as string) || "",
             enableGrouping: canGroup(valueType),
             enableHiding: true,
             enableSorting: true,
@@ -653,7 +570,7 @@ function DetailTableWithSubitems({
             filterFn: getFilterFn(valueType),
             getGroupingValue: (r) => {
               const val = r.item[key];
-              return typeof val === 'string' ? val : undefined;
+              return typeof val === "string" ? val : undefined;
             },
             ...setSizeSetting(valueType),
             cell: (info) => {
@@ -667,7 +584,7 @@ function DetailTableWithSubitems({
                   key={JSON.stringify(val)}
                   value={val as ItemValue}
                   heading={subItem}
-                  device={r._userLabel || ''}
+                  device={r._userLabel || ""}
                 />
               );
             },
@@ -677,7 +594,7 @@ function DetailTableWithSubitems({
                 <RenderTableValue
                   value={value as ItemValue}
                   heading={h}
-                  device={firstRow._userLabel || ''}
+                  device={firstRow._userLabel || ""}
                 />
               );
             },
@@ -696,9 +613,7 @@ function DetailTableWithSubitems({
 
   // Calculate default grouping
   const defaultGrouping = useMemo(() => {
-    const groupableColumn = columns.find(
-      (c) => c.id && c.enableGrouping,
-    )?.id;
+    const groupableColumn = columns.find((c) => c.id && c.enableGrouping)?.id;
     return groupableColumn ? [groupableColumn] : [];
   }, [columns]);
 
@@ -716,7 +631,7 @@ function DetailTableWithSubitems({
       </AccordionSectionTitleTrigger>
       <AccordionContent>
         <div className="w-full overflow-x-auto">
-          <Table className="w-full" style={{ width: '100%' }}>
+          <Table className="w-full" style={{ width: "100%" }}>
             <DataTableHeader table={table} />
             <DataTableBody table={table} />
           </Table>
@@ -729,9 +644,7 @@ function DetailTableWithSubitems({
 /**
  * Transforms audit result items into table data rows
  */
-const extractAllHeadings = (
-  rows: DetailTableItem[],
-): ColumnHeadingConfig[] => {
+const extractAllHeadings = (rows: DetailTableItem[]): ColumnHeadingConfig[] => {
   return rows
     .flatMap((r) =>
       (r.auditResult?.details?.headings || []).map((h) =>
@@ -762,13 +675,11 @@ const createColumnsFromHeadings = (
 
   // Add base columns (without user label)
   allHeadings.forEach((h) => {
-    makeColumnDef({ ...h, _userLabel: '' }, { showUserLabel }).forEach(
-      (col) => {
-        if (col?.id && !columnMap[col.id]) {
-          columnMap[col.id] = col;
-        }
-      },
-    );
+    makeColumnDef({ ...h, _userLabel: "" }, { showUserLabel }).forEach((col) => {
+      if (col?.id && !columnMap[col.id]) {
+        columnMap[col.id] = col;
+      }
+    });
   });
 
   // Add user-label specific columns if needed
@@ -784,23 +695,20 @@ const createColumnsFromHeadings = (
 
   // Add device column if showing user labels
   if (showUserLabel) {
-    const deviceColumn = columnHelper.accessor(
-      (r) => r?._userLabel ?? '',
-      {
-        id: 'device',
-        header: 'Report type(s)',
-        enableHiding: true,
-        enableGrouping: false,
-        enableSorting: true,
-        aggregationFn: 'unique',
-        size: DEVICE_COLUMN_SIZE,
-        cell: DeviceCell,
-        aggregatedCell: DeviceCell,
-        meta: {
-          defaultVisibility: false,
-        },
+    const deviceColumn = columnHelper.accessor((r) => r?._userLabel ?? "", {
+      id: "device",
+      header: "Report type(s)",
+      enableHiding: true,
+      enableGrouping: false,
+      enableSorting: true,
+      aggregationFn: "unique",
+      size: DEVICE_COLUMN_SIZE,
+      cell: DeviceCell,
+      aggregatedCell: DeviceCell,
+      meta: {
+        defaultVisibility: false,
       },
-    );
+    });
     columnMap.device = deviceColumn as ColumnDef<DetailTableDataRow, unknown>;
   }
 
@@ -816,9 +724,7 @@ const calculateDefaultSorting = (
   availableColumnIds: Set<string>,
 ): SortingState => {
   const sortedByKeys = rows
-    .flatMap(
-      (r) => (r.auditResult?.details as AuditDetailTable).sortedBy || [],
-    )
+    .flatMap((r) => (r.auditResult?.details as AuditDetailTable).sortedBy || [])
     .filter((v, i, a): v is string => !!(v && i === a.indexOf(v)));
 
   // Map sortedBy keys to actual column IDs that exist
@@ -848,7 +754,7 @@ const calculateDefaultGrouping = (
   showUserLabel: boolean,
 ): string[] => {
   const groupingCandidates = columns
-    .filter((c) => c.enableGrouping && c.id && !c.id.includes('_'))
+    .filter((c) => c.enableGrouping && c.id && !c.id.includes("_"))
     .map((c) => ({
       id: c.id as string,
       rowType: c.meta?.rowType,
@@ -856,13 +762,13 @@ const calculateDefaultGrouping = (
 
   if (groupingCandidates.length === 0) {
     // Don't default to 'device' grouping if device column is hidden by default
-    const deviceColumn = columns.find((c) => c.id === 'device');
+    const deviceColumn = columns.find((c) => c.id === "device");
     const deviceIsVisible = deviceColumn?.meta?.defaultVisibility !== false;
-    return showUserLabel && deviceIsVisible ? ['device'] : [];
+    return showUserLabel && deviceIsVisible ? ["device"] : [];
   }
 
-  const main = groupingCandidates.find((v) => v.rowType === 'main');
-  const sub = groupingCandidates.find((v) => v.rowType === 'sub');
+  const main = groupingCandidates.find((v) => v.rowType === "main");
+  const sub = groupingCandidates.find((v) => v.rowType === "sub");
 
   if (main || sub) {
     return [main?.id, sub?.id].filter(Boolean) as string[];
@@ -900,11 +806,7 @@ const renderTableCell = (
     cellEl = flexRender(cell.column.columnDef.cell, cell.getContext());
   } else if (cell.getIsAggregated()) {
     let cellType = cell.column.columnDef.cell;
-    if (
-      row.getCanExpand() &&
-      groupsList.length > 1 &&
-      row.depth < groupsList.length - 1
-    ) {
+    if (row.getCanExpand() && groupsList.length > 1 && row.depth < groupsList.length - 1) {
       cellType = cell.column.columnDef.aggregatedCell;
     }
     cellEl = flexRender(cellType, cell.getContext());
@@ -918,12 +820,12 @@ const renderTableCell = (
     cellEl = flexRender(cell.column.columnDef.cell, cell.getContext());
   }
 
-  if (!cellEl || (typeof cellEl === 'object' && !('type' in cellEl))) {
+  if (!cellEl || (typeof cellEl === "object" && !("type" in cellEl))) {
     return null;
   }
 
   // const isExpanderColumn = cell.column.id === 'expander';
-  
+
   return (
     <TableCell
       key={cell.id}
@@ -935,9 +837,7 @@ const renderTableCell = (
       data-grouped={`${cell.getIsGrouped()}`}
       data-aggregated={`${cell.getIsAggregated()}`}
       data-placeholder={`${cell.getIsPlaceholder()}`}
-      className={cn(
-        "min-w-0 wrap-break-word transition-all duration-300 ease-in-out",
-      )}
+      className={cn("min-w-0 wrap-break-word transition-all duration-300 ease-in-out")}
       style={{
         width: `${cell.column.getSize()}px`,
         viewTransitionName: `table-cell-${cell.id}`,
@@ -948,12 +848,7 @@ const renderTableCell = (
   );
 };
 
-function DetailTableFull({
-  rows,
-}: {
-  rows: DetailTableItem[];
-  title: string;
-}) {
+function DetailTableFull({ rows }: { rows: DetailTableItem[]; title: string }) {
   const showUserLabel = rows.length > 1;
 
   // Transform data
@@ -1017,11 +912,8 @@ function DetailTableFull({
 
   // Helper function to extract the actual value from a leaf row
   // Leaf rows are not aggregated, so getValue should return the actual value
-  const getOriginalValue = (
-    leafRow: Row<DetailTableDataRow>,
-    columnId: string,
-  ): unknown => {
-    if (!columnId || columnId === 'expander' || columnId === 'device') {
+  const getOriginalValue = (leafRow: Row<DetailTableDataRow>, columnId: string): unknown => {
+    if (!columnId || columnId === "expander" || columnId === "device") {
       return undefined;
     }
 
@@ -1038,7 +930,7 @@ function DetailTableFull({
   const getRowCanExpandFn = useMemo(() => {
     return (row: Row<DetailTableDataRow>) => {
       const leafRows = row.getLeafRows();
-      
+
       // If there's only one or zero leaf rows, no expansion needed
       if (leafRows.length <= 1) {
         return false;
@@ -1047,7 +939,7 @@ function DetailTableFull({
       // Get all visible columns (excluding the expander and device columns)
       const visibleColumns = columns.filter((col) => {
         const colId = col.id;
-        if (!colId || colId === 'expander' || colId === 'device') return false;
+        if (!colId || colId === "expander" || colId === "device") return false;
         // Column is visible if visibility is not explicitly set to false
         return columnVisibility[colId] !== false;
       });
@@ -1061,7 +953,7 @@ function DetailTableFull({
       for (const column of visibleColumns) {
         const columnId = column.id;
         if (!columnId) continue;
-        
+
         const values = leafRows.map((leafRow) => {
           try {
             const value = getOriginalValue(leafRow, columnId);
@@ -1072,7 +964,7 @@ function DetailTableFull({
             if (Array.isArray(value)) {
               return JSON.stringify(value);
             }
-            if (typeof value === 'object') {
+            if (typeof value === "object") {
               return JSON.stringify(value);
             }
             return value;
@@ -1084,7 +976,7 @@ function DetailTableFull({
 
         // Check if all values are the same
         if (values.length === 0) continue;
-        
+
         const firstValue = values[0];
         const allSame = values.every((val) => {
           // Handle null cases (normalized undefined/null)
@@ -1095,7 +987,7 @@ function DetailTableFull({
             return false;
           }
           // Deep equality check for objects/arrays (already stringified)
-          if (typeof firstValue === 'string' && typeof val === 'string') {
+          if (typeof firstValue === "string" && typeof val === "string") {
             // Could be stringified objects/arrays, so compare directly
             return firstValue === val;
           }
@@ -1127,7 +1019,7 @@ function DetailTableFull({
     getExpandedRowModel: getExpandedRowModel(),
     getRowCanExpand: getRowCanExpandFn,
     onColumnVisibilityChange: handleColumnVisibilityChange,
-    columnResizeMode: 'onChange',
+    columnResizeMode: "onChange",
     manualPagination: true,
     enableSorting: true,
     enableColumnFilters: true,
@@ -1140,14 +1032,14 @@ function DetailTableFull({
       grouping,
       columnVisibility,
       columnPinning: {
-        left: ['expander'],
+        left: ["expander"],
       },
     },
   });
 
   return (
     <div className="w-full min-w-0">
-      <Table className="w-full max-w-full" style={{ width: '100%' }}>
+      <Table className="w-full max-w-full" style={{ width: "100%" }}>
         <DataTableHeader table={table} />
         <TableBody className="[&_tr:last-child]:border-(length:--border-width)">
           {table
@@ -1163,11 +1055,11 @@ function DetailTableFull({
                 <Fragment key={row.id}>
                   <TableRow
                     className={clsx(
-                      'border-x-(length:--border-width) bg-muted-foreground/10 transition-all duration-300 ease-in-out',
+                      "border-x-(length:--border-width) bg-muted-foreground/10 transition-all duration-300 ease-in-out",
                     )}
                     style={
                       {
-                        '--border-width': `${row.depth / 4}rem`,
+                        "--border-width": `${row.depth / 4}rem`,
                         backgroundColor: `hsl(var(--muted-foreground) / ${row.depth / 10})`,
                         viewTransitionName: `table-row-${row.id}`,
                       } as CSSProperties
@@ -1175,9 +1067,7 @@ function DetailTableFull({
                   >
                     {row
                       .getVisibleCells()
-                      .map((cell) =>
-                        renderTableCell(cell, row, groupsList),
-                      )
+                      .map((cell) => renderTableCell(cell, row, groupsList))
                       .filter(Boolean)}
                   </TableRow>
                 </Fragment>
@@ -1195,7 +1085,7 @@ function DetailTableFull({
  */
 function getExpandingControlColumn() {
   return {
-    id: 'expander',
+    id: "expander",
     header: ExpandAll,
     cell: ExpandRow,
     aggregatedCell: ExpandRow,

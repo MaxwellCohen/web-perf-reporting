@@ -1,19 +1,19 @@
-import React, { type ComponentType } from 'react';
-import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
+import React, { type ComponentType } from "react";
+import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import {
   RenderBytesValue,
   RenderMSValue,
-} from '@/features/page-speed-insights/lh-categories/table/RenderTableValue';
+} from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import {
   createBytesAggregatedCell,
   createNumericAggregatedCell,
   createPercentageAggregatedCell,
   createReportLabelAggregatedCell,
   createStringAggregatedCell,
-} from '@/features/page-speed-insights/shared/aggregatedCellHelpers';
+} from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
 
 /** Placeholder for missing numeric / metric values in grouped metric tables */
-export const METRIC_TABLE_EMPTY_DISPLAY = 'N/A' as const;
+export const METRIC_TABLE_EMPTY_DISPLAY = "N/A" as const;
 
 export function metricTableEmptyDisplay(): React.ReactNode {
   return METRIC_TABLE_EMPTY_DISPLAY;
@@ -41,13 +41,7 @@ export function createTruncatedTextColumn<T>(
   columnHelper: ReturnType<typeof createColumnHelper<T>>,
   options: TruncatedTextColumnOptions<T>,
 ): ColumnDef<T, unknown> {
-  const {
-    accessor,
-    id,
-    header,
-    maxWidthClass = 'max-w-75',
-    enableGrouping = true,
-  } = options;
+  const { accessor, id, header, maxWidthClass = "max-w-75", enableGrouping = true } = options;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return columnHelper.accessor(accessor as any, {
@@ -56,8 +50,8 @@ export function createTruncatedTextColumn<T>(
     enableSorting: true,
     enableGrouping,
     enableResizing: true,
-    filterFn: 'includesString',
-    aggregationFn: 'unique',
+    filterFn: "includesString",
+    aggregationFn: "unique",
     cell: (info) => {
       const raw = info.getValue() as string;
       return (
@@ -75,12 +69,12 @@ export function createTruncatedTextColumn<T>(
  */
 export function createURLColumn<T extends { url: string }>(
   columnHelper: ReturnType<typeof createColumnHelper<T>>,
-  maxWidthClass: string = 'max-w-75',
+  maxWidthClass: string = "max-w-75",
 ): ColumnDef<T, unknown> {
   return createTruncatedTextColumn(columnHelper, {
-    accessor: 'url' as keyof T & string,
-    id: 'url',
-    header: 'URL',
+    accessor: "url" as keyof T & string,
+    id: "url",
+    header: "URL",
     maxWidthClass,
     enableGrouping: true,
   });
@@ -101,13 +95,9 @@ export function createMSColumn<T>(
     header,
     enableSorting: true,
     enableResizing: true,
-    filterFn: 'inNumberRange',
-    aggregationFn: 'unique',
-    cell: (info) =>
-      createOptionalNumericCell(
-        RenderMSValue,
-        info.getValue() as number | undefined,
-      ),
+    filterFn: "inNumberRange",
+    aggregationFn: "unique",
+    cell: (info) => createOptionalNumericCell(RenderMSValue, info.getValue() as number | undefined),
     aggregatedCell: createNumericAggregatedCell(id),
   });
 }
@@ -140,10 +130,9 @@ export function createOptionalNumericColumn<T>(
     header,
     enableSorting: true,
     enableResizing: true,
-    filterFn: 'inNumberRange',
-    aggregationFn: 'unique',
-    cell: (info) =>
-      createOptionalNumericCell(Render, info.getValue() as number | undefined),
+    filterFn: "inNumberRange",
+    aggregationFn: "unique",
+    cell: (info) => createOptionalNumericCell(Render, info.getValue() as number | undefined),
     aggregatedCell: aggregatedCellFactory(aggregatedColumnId),
   });
 }
@@ -181,13 +170,11 @@ export function createPercentageColumn<T>(
     header,
     enableSorting: true,
     enableResizing: true,
-    filterFn: 'inNumberRange',
-    aggregationFn: 'unique',
+    filterFn: "inNumberRange",
+    aggregationFn: "unique",
     cell: (info) => {
       const value = info.getValue() as number | undefined;
-      return value !== undefined
-        ? `${value.toFixed(precision)}%`
-        : metricTableEmptyDisplay();
+      return value !== undefined ? `${value.toFixed(precision)}%` : metricTableEmptyDisplay();
     },
     aggregatedCell: createPercentageAggregatedCell(id, precision),
   });
@@ -200,13 +187,13 @@ export function createReportColumn<T extends { label: string }>(
   columnHelper: ReturnType<typeof createColumnHelper<T>>,
 ): ColumnDef<T, unknown> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return columnHelper.accessor('label' as any, {
-    id: 'label',
-    header: 'Report',
+  return columnHelper.accessor("label" as any, {
+    id: "label",
+    header: "Report",
     enableSorting: true,
     enableResizing: true,
-    filterFn: 'includesString',
-    aggregationFn: 'unique',
-    aggregatedCell: createReportLabelAggregatedCell('label'),
+    filterFn: "includesString",
+    aggregationFn: "unique",
+    aggregatedCell: createReportLabelAggregatedCell("label"),
   });
 }

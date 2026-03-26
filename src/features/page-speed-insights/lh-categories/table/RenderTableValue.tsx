@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
-import { cn } from '@/lib/utils';
-import { NodeComponent } from '@/features/page-speed-insights/lh-categories/table/RenderNode';
+import { cn } from "@/lib/utils";
+import { NodeComponent } from "@/features/page-speed-insights/lh-categories/table/RenderNode";
 import {
   CodeValue,
   ItemValue,
@@ -11,9 +11,9 @@ import {
   TableColumnHeading,
   TextValue,
   UrlValue,
-} from '@/lib/schema';
-import { parseUrlForDisplay } from '@/lib/urlDisplay';
-const URL_PREFIXES = ['http://', 'https://', 'data:'];
+} from "@/lib/schema";
+import { parseUrlForDisplay } from "@/lib/urlDisplay";
+const URL_PREFIXES = ["http://", "https://", "data:"];
 
 export function formatBytes(value: unknown): string {
   const bytes = Math.floor(Number(value));
@@ -47,35 +47,22 @@ export function RenderTableValue({
   }
 
   // Object values: type overrides heading
-  if (typeof value === 'object' && 'type' in value) {
+  if (typeof value === "object" && "type" in value) {
     const type = (value as { type: string }).type;
     switch (type) {
-      case 'code':
+      case "code":
         return <RenderCodeValue value={value as CodeValue} {...props} />;
-      case 'link':
+      case "link":
         return <RenderLinkValue value={value as LinkValue} {...props} />;
-      case 'node':
-        return (
-          <NodeComponent item={value as NodeValue} device={device} {...props} />
-        );
-      case 'numeric':
-        return (
-          <RenderNumericValue
-            value={value as NumericValue}
-            heading={heading}
-            {...props}
-          />
-        );
-      case 'source-location':
-        return (
-          <RenderSourceLocation
-            value={value as SourceLocationValue}
-            {...props}
-          />
-        );
-      case 'url':
+      case "node":
+        return <NodeComponent item={value as NodeValue} device={device} {...props} />;
+      case "numeric":
+        return <RenderNumericValue value={value as NumericValue} heading={heading} {...props} />;
+      case "source-location":
+        return <RenderSourceLocation value={value as SourceLocationValue} {...props} />;
+      case "url":
         return <RenderUrlValue value={value as UrlValue} {...props} />;
-      case 'text':
+      case "text":
         return <RenderTextValue value={value as TextValue} {...props} />;
       default:
         return <RenderDefault value={value} {...props} />;
@@ -84,23 +71,21 @@ export function RenderTableValue({
 
   // Primitive values: use heading's valueType
   switch (heading?.valueType) {
-    case 'bytes':
+    case "bytes":
       return <RenderBytesValue value={value} {...props} />;
-    case 'code':
+    case "code":
       return <RenderCode value={value} {...props} />;
-    case 'ms':
+    case "ms":
       return <RenderMSValue value={value} {...props} />;
-    case 'numeric':
-      return (
-        <RenderNumberValue value={value} heading={heading} {...props} />
-      );
-    case 'text':
+    case "numeric":
+      return <RenderNumberValue value={value} heading={heading} {...props} />;
+    case "text":
       return <RenderText value={value} {...props} />;
-    case 'thumbnail':
+    case "thumbnail":
       return <RenderThumbnail value={value} {...props} />;
-    case 'timespanMs':
+    case "timespanMs":
       return <RenderTimespanMs value={value} {...props} />;
-    case 'url':
+    case "url":
       return <RenderUrl value={value} {...props} />;
     default:
       return <RenderDefault value={value} {...props} />;
@@ -115,12 +100,9 @@ function RenderCodeValue({
     <code
       title="code"
       {...props}
-      className={cn(
-        'overflow-hidden break-all font-mono text-xs',
-        props.className,
-      )}
+      className={cn("overflow-hidden break-all font-mono text-xs", props.className)}
     >
-      {typeof value === 'string' ? value : JSON.stringify(value)}
+      {typeof value === "string" ? value : JSON.stringify(value)}
     </code>
   );
 }
@@ -134,10 +116,7 @@ function RenderLinkValue({
       href={value.url}
       title={value.text}
       {...props}
-      className={cn(
-        'block overflow-auto wrap-break-word break-all',
-        props.className,
-      )}
+      className={cn("block overflow-auto wrap-break-word break-all", props.className)}
     >
       {value.text}
     </a>
@@ -152,16 +131,16 @@ function RenderNumericValue({
   value: NumericValue;
   heading?: TableColumnHeading | null;
 } & React.HTMLAttributes<HTMLElement>) {
-  if (heading?.granularity && typeof value.value === 'number') {
+  if (heading?.granularity && typeof value.value === "number") {
     return (
-      <span title="numeric" {...props} className={cn('', props.className)}>
+      <span title="numeric" {...props} className={cn("", props.className)}>
         {(value.value || 0).toFixed(-Math.log10(heading.granularity))}
       </span>
     );
   }
 
   return (
-    <span title="numeric" {...props} className={cn('', props.className)}>
+    <span title="numeric" {...props} className={cn("", props.className)}>
       {value.value}
     </span>
   );
@@ -182,10 +161,7 @@ function SourceLocationLink({
       rel="noopener"
       target="_blank"
       {...props}
-      className={cn(
-        'break-all text-blue-600 underline hover:text-blue-800',
-        props.className,
-      )}
+      className={cn("break-all text-blue-600 underline hover:text-blue-800", props.className)}
       title={title}
     >
       {children}
@@ -196,16 +172,14 @@ function SourceLocationLink({
 function SourceLocationUrlDisplay({ url }: { url: string }) {
   const parsed = parseUrlForDisplay(url);
   const path = parsed?.path ?? url;
-  const hostLabel = parsed?.hostLabel ?? '';
+  const hostLabel = parsed?.hostLabel ?? "";
 
   return (
     <span className="flex flex-wrap items-center">
       <SourceLocationLink href={url} title={url}>
         {path}
       </SourceLocationLink>
-      {hostLabel ? (
-        <span className="ml-1 text-gray-600">{hostLabel}</span>
-      ) : null}
+      {hostLabel ? <span className="ml-1 text-gray-600">{hostLabel}</span> : null}
     </span>
   );
 }
@@ -219,20 +193,16 @@ function SourceLocationContent({
   gen,
   ...props
 }: {
-  urlProvider: 'network' | 'comment';
+  urlProvider: "network" | "comment";
   url: string;
   line: number;
   column: number;
   orig: string | undefined;
   gen: string;
 } & React.HTMLAttributes<HTMLElement>) {
-  if (urlProvider === 'network') {
+  if (urlProvider === "network") {
     return orig ? (
-      <SourceLocationLink
-        href={url}
-        title={`maps to generated location ${gen}`}
-        {...props}
-      >
+      <SourceLocationLink href={url} title={`maps to generated location ${gen}`} {...props}>
         {orig}
       </SourceLocationLink>
     ) : (
@@ -245,7 +215,7 @@ function SourceLocationContent({
     );
   }
 
-  if (urlProvider === 'comment') {
+  if (urlProvider === "comment") {
     return orig ? (
       <span className="break-all" title={`${gen} (from sourceURL)`}>
         {orig} (from source map)
@@ -270,7 +240,7 @@ function RenderSourceLocation({
 
   const gen = `${value.url}:${value.line + 1}:${value.column}`;
   const orig = value.original
-    ? `${value.original.file || '<unmapped>'}:${value.original.line + 1}:${value.original.column}`
+    ? `${value.original.file || "<unmapped>"}:${value.original.line + 1}:${value.original.column}`
     : undefined;
 
   const content = (
@@ -310,10 +280,7 @@ function RenderUrlValue({
       href={value.value}
       title={value.value}
       {...props}
-      className={cn(
-        'block overflow-auto wrap-break-word break-all',
-        props.className,
-      )}
+      className={cn("block overflow-auto wrap-break-word break-all", props.className)}
     >
       {value.value}
     </a>
@@ -348,26 +315,20 @@ export function RenderBytesValue({
   ...props
 }: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
   return (
-    <span title="bytes" {...props} className={cn('', props.className)}>
+    <span title="bytes" {...props} className={cn("", props.className)}>
       {children}
       {formatBytes(value)}
     </span>
   );
 }
 
-function RenderCode({
-  value,
-  ...props
-}: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
+function RenderCode({ value, ...props }: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
   const strValue = String(value);
   return (
     <code
       title="code"
       {...props}
-      className={cn(
-        'overflow-hidden break-all font-mono text-xs',
-        props.className,
-      )}
+      className={cn("overflow-hidden break-all font-mono text-xs", props.className)}
     >
       {strValue}
     </code>
@@ -379,7 +340,7 @@ export function renderTimeValue(msU: unknown) {
   // Normalize values very close to zero to avoid "-0 ms" display
   const normalizedMs = Math.abs(ms) < 0.001 ? 0 : ms;
   if (Number.isNaN(normalizedMs) || normalizedMs <= 0) {
-    return '0 ms';
+    return "0 ms";
   }
 
   const milliseconds = Math.floor(normalizedMs % 1000);
@@ -404,19 +365,19 @@ export function renderTimeValue(msU: unknown) {
 
   if (seconds > 0) {
     parts.push(`${seconds}.${milliseconds || 0} s`);
-    return `${parts.join(' ')}`;
+    return `${parts.join(" ")}`;
   }
 
   if (milliseconds > 0 || parts.length === 0) {
     parts.push(`${milliseconds} ms`);
   }
 
-  return `${parts.join(' ')}`;
+  return `${parts.join(" ")}`;
 }
 
 function formatMsValue(value: unknown): string {
   const ms = Number(value);
-  if (Number.isNaN(ms)) return 'N/A';
+  if (Number.isNaN(ms)) return "N/A";
   const normalizedMs = Math.abs(ms) < 0.001 ? 0 : ms;
   if (normalizedMs < 1000) {
     const displayMs = Math.abs(normalizedMs) < 0.5 ? 0 : normalizedMs;
@@ -434,7 +395,7 @@ export function RenderMSValue({
   ...props
 }: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
   return (
-    <span title="ms" {...props} className={cn('', props.className)}>
+    <span title="ms" {...props} className={cn("", props.className)}>
       {formatMsValue(value)}
     </span>
   );
@@ -448,37 +409,26 @@ function RenderNumberValue({
   value: unknown;
   heading?: TableColumnHeading | null;
 } & React.HTMLAttributes<HTMLElement>) {
-  if (heading?.granularity && typeof value === 'number') {
+  if (heading?.granularity && typeof value === "number") {
     return (
-      <span
-        title="numeric"
-        {...props}
-        className={cn('align-right', props.className)}
-      >
-        {(+value as number || 0).toFixed(-Math.log10(+heading.granularity || 1))}
+      <span title="numeric" {...props} className={cn("align-right", props.className)}>
+        {((+value as number) || 0).toFixed(-Math.log10(+heading.granularity || 1))}
       </span>
     );
   }
 
   return (
-    <span
-      title="numeric"
-      {...props}
-      className={cn('align-right', props.className)}
-      >
-        {(Number(value) || 0).toFixed(-Math.log10(heading?.granularity || 1))}
-      </span>
+    <span title="numeric" {...props} className={cn("align-right", props.className)}>
+      {(Number(value) || 0).toFixed(-Math.log10(heading?.granularity || 1))}
+    </span>
   );
 }
 
-function RenderText({
-  value,
-  ...props
-}: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
+function RenderText({ value, ...props }: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
   const strValue = String(value);
   if (strValue.length < 10) {
     return (
-      <span title="text" {...props} className={cn('', props.className)}>
+      <span title="text" {...props} className={cn("", props.className)}>
         {strValue}
       </span>
     );
@@ -490,10 +440,7 @@ function RenderText({
   );
 }
 
-function RenderUrl({
-  value,
-  ...props
-}: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
+function RenderUrl({ value, ...props }: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
   const strValue = String(value);
   if (URL_PREFIXES.some((prefix) => strValue.startsWith(prefix))) {
     return (
@@ -501,10 +448,7 @@ function RenderUrl({
         href={strValue}
         title={strValue}
         {...props}
-        className={cn(
-          'block overflow-auto wrap-break-word break-all',
-          props.className,
-        )}
+        className={cn("block overflow-auto wrap-break-word break-all", props.className)}
       >
         {strValue}
       </a>
@@ -515,10 +459,7 @@ function RenderUrl({
       <span
         title="url"
         {...props}
-        className={cn(
-          'block overflow-auto wrap-break-word break-all',
-          props.className,
-        )}
+        className={cn("block overflow-auto wrap-break-word break-all", props.className)}
       >
         {strValue}
       </span>
@@ -542,11 +483,10 @@ function RenderTimespanMs({
   return <RenderMSValue value={numValue} {...props} />;
 }
 
-
 export function RenderCountNumber(v: unknown) {
   const numValue = Number(v);
   if (Number.isNaN(numValue)) {
-    return 'N/A';
+    return "N/A";
   }
   return `${numValue}`;
 }

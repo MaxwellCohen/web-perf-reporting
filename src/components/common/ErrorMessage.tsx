@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import type { ErrorInfo } from 'next/error';
-import { unstable_catchError } from 'next/error';
-import Link from 'next/link';
-import { AlertCircle } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import type { ErrorInfo } from "next/error";
+import { unstable_catchError } from "next/error";
+import Link from "next/link";
+import { AlertCircle } from "lucide-react";
 
 export type ErrorMessageProps = {
   title?: string;
@@ -13,13 +13,10 @@ export type ErrorMessageProps = {
   children: React.ReactNode;
 };
 
-function ErrorMessageFallback(
-  {
-    title = 'Failed to Load Report',
-    description =
-      "We couldn't load the PageSpeed Insights data. This might be due to a temporary issue or the report might not be available.",
-  }: Omit<ErrorMessageProps, 'children'>,
-) {
+function ErrorMessageFallback({
+  title = "Failed to Load Report",
+  description = "We couldn't load the PageSpeed Insights data. This might be due to a temporary issue or the report might not be available.",
+}: Omit<ErrorMessageProps, "children">) {
   return (
     <div className="flex flex-col items-center justify-center min-h-100 p-4">
       <Card className="w-full max-w-md">
@@ -28,20 +25,14 @@ function ErrorMessageFallback(
             <AlertCircle className="h-12 w-12 text-destructive" />
           </div>
           <CardTitle className="text-xl">{title}</CardTitle>
-          <CardDescription className="mt-2">
-            {description}
-          </CardDescription>
+          <CardDescription className="mt-2">{description}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <Button asChild className="w-full">
-            <Link href="/page-speed">
-              Try Again
-            </Link>
+            <Link href="/page-speed">Try Again</Link>
           </Button>
           <Button variant="outline" asChild className="w-full">
-            <Link href="/">
-              Go to Homepage
-            </Link>
+            <Link href="/">Go to Homepage</Link>
           </Button>
         </CardContent>
       </Card>

@@ -1,31 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-'use client';
-import { useId, useMemo } from 'react';
-import type { HeaderContext } from '@tanstack/react-table';
-import { Label } from '@/components/ui/label';
-import { DebouncedInput } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+"use client";
+import { useId, useMemo } from "react";
+import type { HeaderContext } from "@tanstack/react-table";
+import { Label } from "@/components/ui/label";
+import { DebouncedInput } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const MAX_DATALIST_OPTIONS = 5000;
 
 export function StringFilterHeader<T>({
   column,
   name,
-}: Partial<Pick<HeaderContext<T, unknown>, 'column'>> & { name: string }) {
+}: Partial<Pick<HeaderContext<T, unknown>, "column">> & { name: string }) {
   const id = useId();
   const uniqueValues = column?.getFacetedUniqueValues();
   const sortedUniqueValues = useMemo(
     () =>
-      uniqueValues
-        ? Array.from(uniqueValues.keys()).sort().slice(0, MAX_DATALIST_OPTIONS)
-        : [],
+      uniqueValues ? Array.from(uniqueValues.keys()).sort().slice(0, MAX_DATALIST_OPTIONS) : [],
     [uniqueValues],
   );
-  
+
   if (!column) {
     return null;
   }
-  
+
   const uniqueCount = uniqueValues?.size ?? 0;
   const columnFilterValue = column?.getFilterValue();
   const datalistId = `${column.id}-list-${id}`;
@@ -44,7 +42,7 @@ export function StringFilterHeader<T>({
         <DebouncedInput
           id={`filter_${id}`}
           type="text"
-          value={(columnFilterValue ?? '') as string}
+          value={(columnFilterValue ?? "") as string}
           onChange={(value) => column.setFilterValue(value)}
           placeholder={`Search... (${uniqueCount})`}
           className="rounded border shadow"
@@ -54,7 +52,7 @@ export function StringFilterHeader<T>({
         <Button
           variant="ghost"
           className="ml-2"
-          onClick={() => column.setFilterValue('')}
+          onClick={() => column.setFilterValue("")}
           aria-label={`Clear filter for ${name}`}
         >
           <span className="sr-only">Clear filter</span>
