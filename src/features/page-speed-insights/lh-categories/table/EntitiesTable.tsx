@@ -1,24 +1,19 @@
 'use client';
-import { useMemo, type ReactNode } from 'react';
 import { usePageSpeedItems } from '@/features/page-speed-insights/PageSpeedContext';
 import { renderBoolean } from '@/features/page-speed-insights/lh-categories/renderBoolean';
 import {
   ColumnDef,
   createColumnHelper,
   FilterFn,
-  CellContext,
-  Row,
 } from '@tanstack/react-table';
 import { useStandardTable } from '@/features/page-speed-insights/shared/tableConfigHelpers';
 import { useTableColumns } from '@/features/page-speed-insights/shared/useTableColumns';
 import { TableCard } from '@/features/page-speed-insights/shared/TableCard';
+import { AccordionContent, AccordionItem } from '@/components/ui/accordion';
+import { AccordionSectionTitleTrigger } from '@/components/ui/accordion-section-title-trigger';
 import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import {
-  extractValueLabelPairs,
+  createBooleanAggregatedCell,
+  createOriginsArrayAggregatedCell,
   createStringAggregatedCell,
 } from '@/features/page-speed-insights/shared/aggregatedCellHelpers';
 
@@ -36,90 +31,7 @@ type EntityTableRow = {
   origins: string[];
 };
 
-// Create aggregated cell for boolean values
-const createBooleanAggregatedCell = (columnId: string) => {
-  // eslint-disable-next-line react/display-name
-  return (info: CellContext<EntityTableRow, unknown>): ReactNode => {
-    const row = info.row;
-    const valueLabelPairs = extractValueLabelPairs<boolean>(row, columnId);
-
-    if (valueLabelPairs.length === 0) return 'N/A';
-
-    const uniqueValues = [...new Set(valueLabelPairs.map((p) => p.value))];
-    const uniqueLabels = [...new Set(valueLabelPairs.map((p) => p.label))];
-
-    if (uniqueValues.length === 1) {
-      const value = uniqueValues[0];
-      if (uniqueLabels.length > 1) {
-        return (
-          <div className="flex items-center gap-2">
-            {renderBoolean(value)}
-            <span className="text-muted-foreground text-xs">(All Devices)</span>
-          </div>
-        );
-      }
-      return renderBoolean(value);
-    }
-
-    const valueGroups = new Map<boolean, string[]>();
-    valueLabelPairs.forEach(({ value, label }) => {
-      if (!valueGroups.has(value)) {
-        valueGroups.set(value, []);
-      }
-      valueGroups.get(value)!.push(label);
-    });
-
-    return (
-      <div className="flex max-h-24 flex-col gap-1 overflow-y-auto">
-        {Array.from(valueGroups.entries()).map(([value, labels], i) => {
-          const uniqueLabelsForValue = [...new Set(labels)];
-          return (
-            <div key={i} className="flex items-center gap-2">
-              {renderBoolean(value)}
-              {uniqueLabelsForValue.length === 1 && (
-                <span className="text-muted-foreground text-xs">
-                  ({uniqueLabelsForValue[0]})
-                </span>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-};
-
-// Create aggregated cell for origins array
-const createOriginsAggregatedCell = () => {
-  // eslint-disable-next-line react/display-name
-  return (info: CellContext<EntityTableRow, unknown>): ReactNode => {
-    const row = info.row;
-    const leafRows = row.getLeafRows();
-    const allOrigins: string[] = [];
-
-    leafRows.forEach((r: Row<EntityTableRow>) => {
-      const origins = r.getValue('origins') as string[];
-      if (Array.isArray(origins)) {
-        allOrigins.push(...origins);
-      }
-    });
-
-    if (allOrigins.length === 0) return 'N/A';
-
-    const uniqueOrigins = [...new Set(allOrigins)];
-
-    return (
-      <div className="flex max-h-24 flex-col gap-1 overflow-y-auto">
-        {uniqueOrigins.map((origin) => (
-          <div key={origin}>{origin}</div>
-        ))}
-      </div>
-    );
-  };
-};
-
 const columnHelper = createColumnHelper<EntityTableRow>();
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const cols: ColumnDef<EntityTableRow, any>[] = [
   columnHelper.accessor('name', {
     id: 'name',
@@ -138,7 +50,7 @@ const cols: ColumnDef<EntityTableRow, any>[] = [
     enableResizing: true,
     filterFn: 'booleanFilterFn',
     cell: (info) => renderBoolean(!!info.getValue()),
-    aggregatedCell: createBooleanAggregatedCell('isFirstParty'),
+    aggregatedCell: createBooleanAggregatedCell('isFirstParty', renderBoolean),
   }),
   columnHelper.accessor('isUnrecognized', {
     id: 'isUnrecognized',
@@ -147,7 +59,7 @@ const cols: ColumnDef<EntityTableRow, any>[] = [
     enableResizing: true,
     filterFn: 'booleanFilterFn',
     cell: (info) => renderBoolean(!!info.getValue()),
-    aggregatedCell: createBooleanAggregatedCell('isUnrecognized'),
+    aggregatedCell: createBooleanAggregatedCell('isUnrecognized', renderBoolean),
   }),
   columnHelper.accessor('origins', {
     id: 'origins',
@@ -164,7 +76,7 @@ const cols: ColumnDef<EntityTableRow, any>[] = [
         </div>
       );
     },
-    aggregatedCell: createOriginsAggregatedCell(),
+    aggregatedCell: createOriginsArrayAggregatedCell<EntityTableRow>(),
   }),
 ];
 
@@ -222,9 +134,7 @@ function EntitiesTableContent({
   });
   return (
     <AccordionItem value={'entities'}>
-      <AccordionTrigger>
-        <div className="text-lg font-bold group-hover:underline">Entities</div>
-      </AccordionTrigger>
+      <AccordionSectionTitleTrigger>Entities</AccordionSectionTitleTrigger>
       <AccordionContent>
         <TableCard title="Third-Party Entities" table={table} />
       </AccordionContent>

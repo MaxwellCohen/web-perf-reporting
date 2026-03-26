@@ -1,23 +1,11 @@
 'use client';
-import { useMemo, useState } from 'react';
-import {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  FilterFn,
-  getCoreRowModel,
-  getFacetedMinMaxValues,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from '@tanstack/react-table';
+import { useMemo } from 'react';
+import { ColumnDef } from '@tanstack/react-table';
 import { Table } from '@/components/ui/table';
 import { DataTableHeader } from '@/features/page-speed-insights/lh-categories/table/DataTableHeader';
 import { DataTableBody } from '@/features/page-speed-insights/lh-categories/table/DataTableBody';
-import { booleanFilterFn } from '@/features/page-speed-insights/lh-categories/table/DataTableNoGrouping';
 import { RenderBytesValue, RenderMSValue } from '@/features/page-speed-insights/lh-categories/table/RenderTableValue';
+import { useSimpleTable } from '@/features/page-speed-insights/shared/useSimpleTable';
 
 interface ResourceItem {
   url?: string;
@@ -36,9 +24,7 @@ interface ResourcesTableProps {
 }
 
 export function ResourcesTable({ items }: ResourcesTableProps) {
-  "use no memo";
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  'use no memo';
 
   const columns = useMemo<ColumnDef<ResourceItem>[]>(() => {
     return [
@@ -213,41 +199,7 @@ export function ResourcesTable({ items }: ResourcesTableProps) {
     ];
   }, []);
 
-  const table = useReactTable({
-    data: items,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    enableSorting: true,
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    enableColumnFilters: true,
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFacetedMinMaxValues: getFacetedMinMaxValues(),
-    enableColumnResizing: true,
-    columnResizeMode: 'onChange',
-    filterFns: {
-      booleanFilterFn,
-      includesString: ((row, columnId, filterValue) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const cellValue = String((row as any).getValue(columnId) || '').toLowerCase();
-        const filter = String(filterValue || '').toLowerCase();
-        return cellValue.includes(filter);
-      }) as FilterFn<ResourceItem>,
-      inNumberRange: ((row, columnId, filterValue) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const cellValue = Number((row as any).getValue(columnId)) || 0;
-        const [min, max] = (filterValue as [number, number]) || [0, Infinity];
-        return cellValue >= min && cellValue <= max;
-      }) as FilterFn<ResourceItem>,
-    } as Record<string, FilterFn<ResourceItem>>,
-    state: {
-      sorting,
-      columnFilters,
-    },
-  });
+  const table = useSimpleTable({ data: items, columns });
 
   return (
     <div className="w-full overflow-x-auto">
@@ -258,4 +210,3 @@ export function ResourcesTable({ items }: ResourcesTableProps) {
     </div>
   );
 }
-

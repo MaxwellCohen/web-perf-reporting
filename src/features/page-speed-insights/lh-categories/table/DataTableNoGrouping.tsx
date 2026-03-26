@@ -1,10 +1,7 @@
 'use client';
 import { Table } from '@/components/ui/table';
-import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
+import { AccordionContent, AccordionItem } from '@/components/ui/accordion';
+import { AccordionSectionTitleTrigger } from '@/components/ui/accordion-section-title-trigger';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTableHeader } from '@/features/page-speed-insights/lh-categories/table/DataTableHeader';
 import { DataTableBody } from '@/features/page-speed-insights/lh-categories/table/DataTableBody';
@@ -27,9 +24,7 @@ export function DataTableNoGrouping<T>({
 
   return (
     <AccordionItem value={title}>
-      <AccordionTrigger>
-        <div className="text-lg font-bold group-hover:underline">{toTitleCase(title)}</div>
-      </AccordionTrigger>
+      <AccordionSectionTitleTrigger>{toTitleCase(title)}</AccordionSectionTitleTrigger>
       <AccordionContent>
         <div className="w-full overflow-x-auto">
           <Table className="w-full" style={{ width: '100%' }}>

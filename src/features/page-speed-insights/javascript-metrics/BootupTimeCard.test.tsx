@@ -20,6 +20,11 @@ vi.mock('@/features/page-speed-insights/shared/tableConfigHelpers', () => ({
 vi.mock('@/features/page-speed-insights/shared/tableColumnHelpers', () => ({
   createURLColumn: () => ({ id: 'url', header: 'URL', cell: () => null }),
   createReportColumn: () => ({ id: 'label', header: 'Report', cell: () => null }),
+  createMSColumn: (_helper: unknown, accessor: string, header: string) => ({
+    id: String(accessor),
+    header,
+    cell: () => null,
+  }),
 }));
 
 import { BootupTimeCard } from '@/features/page-speed-insights/javascript-metrics/BootupTimeCard';

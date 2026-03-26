@@ -1,7 +1,6 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table } from "@/components/ui/table";
-import { RenderBytesValue, RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { TableItem } from "@/lib/schema";
 import { getUrlString, getNumber } from "@/lib/utils";
@@ -13,15 +12,16 @@ import {
 import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
 import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
 import { PaginationCard } from "@/features/page-speed-insights/JSUsage/TableControls";
-import { createNumericAggregatedCell, createBytesAggregatedCell, createStringAggregatedCell } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
+import { createStringAggregatedCell } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
 import { sortByMaxValueComposite } from "@/features/page-speed-insights/shared/dataSortingHelpers";
 import { useStandardTable } from "@/features/page-speed-insights/shared/tableConfigHelpers";
+import {
+  createBytesColumn,
+  createMSColumn,
+  createURLColumn,
+} from "@/features/page-speed-insights/shared/tableColumnHelpers";
 import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
-
-type TopResources = {
-  label: string;
-  topResources: TableItem[];
-};
+import { useNetworkRequestStats } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
 
 type TopResourceTableRow = {
   label: string;
@@ -30,10 +30,6 @@ type TopResourceTableRow = {
   transferSize: number | undefined;
   resourceSize: number | undefined;
   requestTime: number | undefined;
-};
-
-type TopResourcesCardProps = {
-  stats: TopResources[];
 };
 
 const URL_PROTOCOL_REGEX = /^https?:\/\//;
@@ -51,30 +47,9 @@ function resourceToTableRow(label: string, resource: TableItem): TopResourceTabl
   };
 }
 
-function optionalValueCell(
-  Render: React.ComponentType<{ value: number }>,
-  value: number | undefined
-): React.ReactNode {
-  return value !== undefined ? <Render value={value} /> : 'N/A';
-}
-
 const columnHelper = createColumnHelper<TopResourceTableRow>();
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const cols: ColumnDef<TopResourceTableRow, any>[] = [
-  columnHelper.accessor('url', {
-    id: 'url',
-    header: 'URL',
-    enableSorting: true,
-    enableGrouping: true,
-    enableResizing: true,
-    filterFn: 'includesString',
-    aggregationFn: 'unique',
-    cell: (info) => (
-      <div className="max-w-75 truncate" title={info.getValue()}>
-        {info.getValue()}
-      </div>
-    ),
-  }),
+  createURLColumn(columnHelper),
   columnHelper.accessor('resourceType', {
     id: 'resourceType',
     header: 'Type',
@@ -86,41 +61,21 @@ const cols: ColumnDef<TopResourceTableRow, any>[] = [
     cell: (info) => toTitleCase(info.getValue()),
     aggregatedCell: createStringAggregatedCell('resourceType', toTitleCase),
   }),
-  columnHelper.accessor('transferSize', {
-    id: 'transferSize',
-    header: 'Transfer Size',
-    enableSorting: true,
-    enableResizing: true,
-    filterFn: 'inNumberRange',
-    aggregationFn: 'unique',
-    cell: (info) => optionalValueCell(RenderBytesValue, info.getValue()),
-    aggregatedCell: createBytesAggregatedCell('transferSize'),
-  }),
-  columnHelper.accessor('resourceSize', {
-    id: 'resourceSize',
-    header: 'Resource Size',
-    enableSorting: true,
-    enableResizing: true,
-    filterFn: 'inNumberRange',
-    aggregationFn: 'unique',
-    cell: (info) => optionalValueCell(RenderBytesValue, info.getValue()),
-    aggregatedCell: createBytesAggregatedCell('resourceSize'),
-  }),
-  columnHelper.accessor('requestTime', {
-    id: 'requestTime',
-    header: 'Request Time',
-    enableSorting: true,
-    enableResizing: true,
-    filterFn: 'inNumberRange',
-    aggregationFn: 'unique',
-    cell: (info) => optionalValueCell(RenderMSValue, info.getValue()),
-    aggregatedCell: createNumericAggregatedCell('requestTime'),
-  }),
+  createBytesColumn(columnHelper, 'transferSize', 'Transfer Size'),
+  createBytesColumn(columnHelper, 'resourceSize', 'Resource Size'),
+  createMSColumn(columnHelper, 'requestTime', 'Request Time'),
 ];
 
-export function TopResourcesCard({ stats }: TopResourcesCardProps) {
+export function TopResourcesCard() {
   "use no memo";
-  const validStats = useMemo(() => stats.filter(s => s.topResources && s.topResources.length > 0), [stats]);
+  const requestStats = useNetworkRequestStats();
+  const validStats = useMemo(
+    () =>
+      requestStats.filter(
+        (s) => s.topResources && s.topResources.length > 0,
+      ),
+    [requestStats],
+  );
   const showReportColumn = validStats.length > 1;
 
   const data = useMemo<TopResourceTableRow[]>(() => {
@@ -166,4 +121,3 @@ export function TopResourcesCard({ stats }: TopResourcesCardProps) {
     </Card>
   );
 }
-

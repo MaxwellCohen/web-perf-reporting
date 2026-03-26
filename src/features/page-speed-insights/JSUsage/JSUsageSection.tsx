@@ -7,6 +7,7 @@ import { Card, CardHeader } from '@/components/ui/card';
 import { JSUsageTableWithControls } from '@/features/page-speed-insights/JSUsage/JSUsageTable';
 import { ClientOnly } from '@/components/common/ClientOnly';
 import { Details } from '@/components/ui/accordion';
+import { accordionSectionTitleClassName } from '@/components/ui/accordion-section-title-trigger';
 
 export function JSUsageSection() {
   const items = usePageSpeedItems();
@@ -96,7 +97,7 @@ export function JSUsageAccordion({
   return (
     <Details className="col-span-1 w-full lg:col-span-full">
       <summary className=" flex flex-col gap-2">
-      <div className="text-lg font-bold group-hover:underline">{`JS Usage Table`}
+      <div className={accordionSectionTitleClassName}>{`JS Usage Table`}
         {label ? ` for ${label}` : ` `}</div>
       </summary>
       <ClientOnly>

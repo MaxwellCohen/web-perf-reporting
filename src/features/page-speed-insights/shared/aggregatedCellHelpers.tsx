@@ -330,3 +330,94 @@ export function createReportLabelAggregatedCell(labelColumnId: string = 'label')
   };
 }
 
+/**
+ * Aggregated cell for boolean columns in multi-report grouped tables.
+ */
+export function createBooleanAggregatedCell<TData>(
+  columnId: string,
+  renderBoolean: (value: boolean) => React.ReactNode,
+) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, react/display-name
+  return (info: any): React.ReactNode => {
+    const row = info.row as Row<TData>;
+    const valueLabelPairs = extractValueLabelPairs<boolean>(row, columnId);
+
+    if (valueLabelPairs.length === 0) return 'N/A';
+
+    const uniqueValues = [...new Set(valueLabelPairs.map((p) => p.value))];
+    const uniqueLabels = [...new Set(valueLabelPairs.map((p) => p.label))];
+
+    if (uniqueValues.length === 1) {
+      const value = uniqueValues[0];
+      if (uniqueLabels.length > 1) {
+        return (
+          <div className="flex items-center gap-2">
+            {renderBoolean(value)}
+            <span className="text-muted-foreground text-xs">(All Devices)</span>
+          </div>
+        );
+      }
+      return renderBoolean(value);
+    }
+
+    const valueGroups = new Map<boolean, string[]>();
+    valueLabelPairs.forEach(({ value, label }) => {
+      if (!valueGroups.has(value)) {
+        valueGroups.set(value, []);
+      }
+      valueGroups.get(value)!.push(label);
+    });
+
+    return (
+      <div className="flex max-h-24 flex-col gap-1 overflow-y-auto">
+        {Array.from(valueGroups.entries()).map(([value, labels], i) => {
+          const uniqueLabelsForValue = [...new Set(labels)];
+          return (
+            <div key={i} className="flex items-center gap-2">
+              {renderBoolean(value)}
+              {uniqueLabelsForValue.length === 1 && (
+                <span className="text-muted-foreground text-xs">
+                  ({uniqueLabelsForValue[0]})
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+}
+
+/**
+ * Aggregated cell that unions unique origin strings from leaf rows.
+ */
+export function createOriginsArrayAggregatedCell<TData>(
+  originsColumnId: string = 'origins',
+) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, react/display-name
+  return (info: any): React.ReactNode => {
+    const row = info.row as Row<TData>;
+    const leafRows = row.getLeafRows();
+    const allOrigins: string[] = [];
+
+    leafRows.forEach((r: Row<TData>) => {
+      const origins = r.getValue(originsColumnId) as string[];
+      if (Array.isArray(origins)) {
+        allOrigins.push(...origins);
+      }
+    });
+
+    if (allOrigins.length === 0) return 'N/A';
+
+    const uniqueOrigins = [...new Set(allOrigins)];
+
+    return (
+      <div className="flex max-h-24 flex-col gap-1 overflow-y-auto">
+        {uniqueOrigins.map((origin) => (
+          <div key={origin}>{origin}</div>
+        ))}
+      </div>
+    );
+  };
+}
+

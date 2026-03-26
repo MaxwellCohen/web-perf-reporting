@@ -1,6 +1,12 @@
-
 import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { NetworkRequestStatsRow } from '@/features/page-speed-insights/network-metrics/useNetworkMetricsData';
+
+const mockUseNetworkRequestStats = vi.hoisted(() => vi.fn());
+
+vi.mock('@/features/page-speed-insights/network-metrics/useNetworkMetricsStore', () => ({
+  useNetworkRequestStats: () => mockUseNetworkRequestStats(),
+}));
 
 vi.mock('@/components/ui/card', () => ({
   Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -49,26 +55,40 @@ vi.mock('@/features/page-speed-insights/shared/CardWithTable', () => {
 import { TaskSummaryCard } from '@/features/page-speed-insights/javascript-metrics/TaskSummaryCard';
 import { NetworkRequestsSummaryCard } from '@/features/page-speed-insights/network-metrics/NetworkRequestsSummaryCard';
 
+function summaryRow(
+  partial: Pick<
+    NetworkRequestStatsRow,
+    'label' | 'totalRequests' | 'totalTransferSize' | 'totalResourceSize'
+  >,
+): NetworkRequestStatsRow {
+  return {
+    byResourceType: {},
+    topResources: [],
+    ...partial,
+  };
+}
+
 describe('page-speed summary cards', () => {
+  beforeEach(() => {
+    mockUseNetworkRequestStats.mockReset();
+  });
+
   it('renders the network requests summary for one or more reports', () => {
-    const { container } = render(
-      <NetworkRequestsSummaryCard
-        stats={[
-          {
-            label: 'Mobile',
-            totalRequests: 2,
-            totalTransferSize: 300,
-            totalResourceSize: 450,
-          },
-          {
-            label: 'Desktop',
-            totalRequests: 1,
-            totalTransferSize: 150,
-            totalResourceSize: 200,
-          },
-        ]}
-      />,
-    );
+    mockUseNetworkRequestStats.mockReturnValue([
+      summaryRow({
+        label: 'Mobile',
+        totalRequests: 2,
+        totalTransferSize: 300,
+        totalResourceSize: 450,
+      }),
+      summaryRow({
+        label: 'Desktop',
+        totalRequests: 1,
+        totalTransferSize: 150,
+        totalResourceSize: 200,
+      }),
+    ]);
+    const { container } = render(<NetworkRequestsSummaryCard />);
 
     expect(container.firstChild).toMatchSnapshot();
   });

@@ -3,6 +3,10 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Accordion } from '@/components/ui/accordion';
+import {
+  mapItemsToNetworkMetrics,
+  mapNetworkMetricsToStats,
+} from '@/features/page-speed-insights/network-metrics/useNetworkMetricsData';
 
 vi.mock('lucide-react', () => ({
   ChevronDown: () => <span data-testid="chevron" />,
@@ -99,6 +103,18 @@ const extractJSMetricsMock = vi.fn();
 
 vi.mock('@/features/page-speed-insights/PageSpeedContext', () => ({
   usePageSpeedItems: () => pageSpeedItems,
+  usePageSpeedSelector: (selector: (snapshot: { context: unknown }) => unknown) =>
+    selector({
+      context: {
+        items: pageSpeedItems,
+        networkMetricSeries: mapItemsToNetworkMetrics(pageSpeedItems),
+        data: [],
+        labels: [],
+        isLoading: false,
+        reportTitle: '',
+        fullPageScreenshots: {},
+      },
+    }),
 }));
 
 vi.mock('@/features/page-speed-insights/javascript-metrics/javascriptMetricsSelectors', async (importOriginal) => {
@@ -121,69 +137,84 @@ vi.mock('@/components/common/PageSpeedGaugeChart', () => ({
 }));
 
 vi.mock('@/features/page-speed-insights/network-metrics/NetworkRequestsSummaryCard', () => ({
-  NetworkRequestsSummaryCard: ({ stats }: { stats: Array<{ totalRequests: number }> }) => (
-    <div>Network summary: {stats.map((stat) => stat.totalRequests).join(',')}</div>
-  ),
+  NetworkRequestsSummaryCard: () => {
+    const stats = mapNetworkMetricsToStats(mapItemsToNetworkMetrics(pageSpeedItems));
+    return (
+      <div>Network summary: {stats.map((stat) => stat.totalRequests).join(',')}</div>
+    );
+  },
 }));
 
 vi.mock('@/features/page-speed-insights/network-metrics/TimingMetricsCard', () => ({
-  TimingMetricsCard: ({ metrics }: { metrics: Array<{ ttfb: number }> }) => (
-    <div>Timing metrics: {metrics.map((metric) => metric.ttfb).join(',')}</div>
-  ),
+  TimingMetricsCard: () => {
+    const series = mapItemsToNetworkMetrics(pageSpeedItems);
+    return (
+      <div>Timing metrics: {series.map((metric) => metric.ttfb).join(',')}</div>
+    );
+  },
 }));
 
 vi.mock('@/features/page-speed-insights/network-metrics/TimelineCard', () => ({
-  TimelineCard: ({ metrics }: { metrics: Array<{ observedFirstPaint: number }> }) => (
-    <div>Timeline metrics: {metrics.map((metric) => metric.observedFirstPaint).join(',')}</div>
-  ),
+  TimelineCard: () => {
+    const series = mapItemsToNetworkMetrics(pageSpeedItems);
+    return (
+      <div>
+        Timeline metrics: {series.map((metric) => metric.observedFirstPaint).join(',')}
+      </div>
+    );
+  },
 }));
 
 vi.mock('@/features/page-speed-insights/network-metrics/LCPBreakdownCard', () => ({
-  LCPBreakdownCard: ({ metrics }: { metrics: unknown[] }) => (
-    <div>LCP breakdown count: {metrics.length}</div>
+  LCPBreakdownCard: () => (
+    <div>LCP breakdown count: {pageSpeedItems.length}</div>
   ),
 }));
 
 vi.mock('@/features/page-speed-insights/network-metrics/NetworkRTTCard', () => ({
-  NetworkRTTCard: ({ metrics }: { metrics: Array<{ networkRTT: unknown[] }> }) => (
-    <div>RTT metrics: {metrics.map((metric) => metric.networkRTT.length).join(',')}</div>
-  ),
+  NetworkRTTCard: () => {
+    const series = mapItemsToNetworkMetrics(pageSpeedItems);
+    return (
+      <div>RTT metrics: {series.map((metric) => metric.networkRTT.length).join(',')}</div>
+    );
+  },
 }));
 
 vi.mock('@/features/page-speed-insights/network-metrics/ServerLatencyCard', () => ({
-  ServerLatencyCard: ({ metrics }: { metrics: Array<{ serverLatency: unknown[] }> }) => (
-    <div>Server metrics: {metrics.map((metric) => metric.serverLatency.length).join(',')}</div>
-  ),
+  ServerLatencyCard: () => {
+    const series = mapItemsToNetworkMetrics(pageSpeedItems);
+    return (
+      <div>
+        Server metrics: {series.map((metric) => metric.serverLatency.length).join(',')}
+      </div>
+    );
+  },
 }));
 
 vi.mock('@/features/page-speed-insights/network-metrics/ResourceTypeBreakdownCard', () => ({
-  ResourceTypeBreakdownCard: ({
-    stats,
-  }: {
-    stats: Array<{ byResourceType: Record<string, unknown[]> }>;
-  }) => (
-    <div>
-      Resource types:{' '}
-      {stats
-        .map((stat) => Object.keys(stat.byResourceType).sort().join('|'))
-        .join(',')}
-    </div>
-  ),
+  ResourceTypeBreakdownCard: () => {
+    const stats = mapNetworkMetricsToStats(mapItemsToNetworkMetrics(pageSpeedItems));
+    return (
+      <div>
+        Resource types:{' '}
+        {stats
+          .map((stat) => Object.keys(stat.byResourceType).sort().join('|'))
+          .join(',')}
+      </div>
+    );
+  },
 }));
 
 vi.mock('@/features/page-speed-insights/network-metrics/TopResourcesCard', () => ({
-  TopResourcesCard: ({
-    stats,
-  }: {
-    stats: Array<{ topResources: Array<{ url?: string }> }>;
-  }) => (
-    <div>
-      Top resources:{' '}
-      {stats
-        .map((stat) => stat.topResources[0]?.url ?? 'none')
-        .join(',')}
-    </div>
-  ),
+  TopResourcesCard: () => {
+    const stats = mapNetworkMetricsToStats(mapItemsToNetworkMetrics(pageSpeedItems));
+    return (
+      <div>
+        Top resources:{' '}
+        {stats.map((stat) => stat.topResources[0]?.url ?? 'none').join(',')}
+      </div>
+    );
+  },
 }));
 
 vi.mock('@/features/page-speed-insights/javascript-metrics/JavaScriptSummaryCard', () => ({
@@ -300,8 +331,8 @@ vi.mock('@/features/page-speed-insights/RecommendationsSection/RecommendationIte
 
 import { CWVMetricsComponent } from '@/features/page-speed-insights/CWVMetricsComponent';
 import { JavaScriptPerformanceComponent } from '@/features/page-speed-insights/javascript-metrics/JavaScriptPerformanceComponent';
-import { LoadingExperience } from '@/features/page-speed-insights/LoadingExperience';
-import { NetworkMetricsComponent } from '@/features/page-speed-insights/NetworkMetrics';
+import { LoadingExperience } from '@/features/page-speed-insights/loading-experience';
+import { NetworkMetricsComponent } from '@/features/page-speed-insights/network-metrics';
 import { RecommendationsSection } from '@/features/page-speed-insights/RecommendationsSection/RecommendationsSection';
 import {
   ScoreDisplay,

@@ -30,7 +30,7 @@ export function DataTableBody<T>({ table }: { table: TableType<T> }) {
                   <TableCell
                     key={cell.id}
                     className={cn("overflow-x-auto", {
-                      "!p-0 flex items-center justify-center overflow-hidden": isExpanderColumn,
+                      "p-0! flex items-center justify-center overflow-hidden": isExpanderColumn,
                     })}
                     style={{
                       width: `${cell.column.getSize()}px`,

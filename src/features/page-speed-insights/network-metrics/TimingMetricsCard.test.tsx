@@ -1,5 +1,11 @@
 import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const mockUseNetworkMetricSeries = vi.hoisted(() => vi.fn());
+
+vi.mock('@/features/page-speed-insights/network-metrics/useNetworkMetricsStore', () => ({
+  useNetworkMetricSeries: () => mockUseNetworkMetricSeries(),
+}));
 
 vi.mock('@/features/page-speed-insights/lh-categories/table/RenderTableValue', () => ({
   RenderMSValue: ({ value }: { value?: number }) => <span>{value ?? 'N/A'}ms</span>,
@@ -40,38 +46,25 @@ vi.mock('@/components/ui/table', () => {
 import { TimingMetricsCard } from '@/features/page-speed-insights/network-metrics/TimingMetricsCard';
 
 describe('TimingMetricsCard', () => {
+  beforeEach(() => {
+    mockUseNetworkMetricSeries.mockReset();
+  });
+
   it('returns null when metrics have no timing data', () => {
-    const { container } = render(
-      <TimingMetricsCard
-        metrics={[
-          { label: 'Mobile' },
-          { label: 'Desktop' },
-        ]}
-      />
-    );
+    mockUseNetworkMetricSeries.mockReturnValue([
+      { label: 'Mobile' },
+      { label: 'Desktop' },
+    ]);
+    const { container } = render(<TimingMetricsCard />);
     expect(container.firstChild).toBeNull();
   });
 
   it('renders when metrics have ttfb', () => {
-    const { container } = render(
-      <TimingMetricsCard
-        metrics={[
-          { label: 'Mobile', ttfb: 100, ttfbCategory: 'FAST' },
-        ]}
-      />
-    );
+    mockUseNetworkMetricSeries.mockReturnValue([
+      { label: 'Mobile', ttfb: 100, fcp: 0, lcp: 0, speedIndex: 0, totalBlockingTime: 0 },
+    ]);
+    const { container } = render(<TimingMetricsCard />);
     expect(container.textContent).toContain('Page Load Timing Metrics');
     expect(container.textContent).toContain('TTFB');
-  });
-
-  it('renders category badges', () => {
-    const { container } = render(
-      <TimingMetricsCard
-        metrics={[
-          { label: 'Mobile', ttfb: 100, ttfbCategory: 'FAST' },
-        ]}
-      />
-    );
-    expect(container.textContent).toContain('FAST');
   });
 });

@@ -62,7 +62,7 @@ vi.mock('@/components/common/LoadingMessage', () => ({
   LoadingMessage: () => <div>Mock loading message</div>,
 }));
 
-vi.mock('@/features/page-speed-insights/LoadingExperience', () => ({
+vi.mock('@/features/page-speed-insights/loading-experience/LoadingExperience', () => ({
   LoadingExperience: ({ title }: { title: string }) => (
     <div>Loading experience: {title}</div>
   ),
@@ -83,7 +83,7 @@ vi.mock('@/features/page-speed-insights/RenderFilmStrip', () => ({
   RenderFilmStrip: () => <div>Film strip</div>,
 }));
 
-vi.mock('@/features/page-speed-insights/NetworkMetrics', () => ({
+vi.mock('@/features/page-speed-insights/network-metrics', () => ({
   NetworkMetricsComponent: () => <div>Network metrics</div>,
 }));
 

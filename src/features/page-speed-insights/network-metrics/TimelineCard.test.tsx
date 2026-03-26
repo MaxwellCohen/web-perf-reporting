@@ -1,6 +1,11 @@
 import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import { TimelineCard } from '@/features/page-speed-insights/network-metrics/TimelineCard';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const mockUseNetworkMetricSeries = vi.hoisted(() => vi.fn());
+
+vi.mock('@/features/page-speed-insights/network-metrics/useNetworkMetricsStore', () => ({
+  useNetworkMetricSeries: () => mockUseNetworkMetricSeries(),
+}));
 
 vi.mock('@/features/page-speed-insights/lh-categories/table/RenderTableValue', () => ({
   RenderMSValue: ({ value }: { value: number }) => (
@@ -8,65 +13,60 @@ vi.mock('@/features/page-speed-insights/lh-categories/table/RenderTableValue', (
   ),
 }));
 
+import { TimelineCard } from '@/features/page-speed-insights/network-metrics/TimelineCard';
+
 describe('TimelineCard', () => {
+  beforeEach(() => {
+    mockUseNetworkMetricSeries.mockReset();
+  });
+
   it('returns null when metrics is empty', () => {
-    const { container } = render(<TimelineCard metrics={[]} />);
+    mockUseNetworkMetricSeries.mockReturnValue([]);
+    const { container } = render(<TimelineCard />);
     expect(container.firstChild).toBeNull();
   });
 
   it('returns null when metrics have no event data', () => {
-    const { container } = render(
-      <TimelineCard
-        metrics={[
-          { label: 'Desktop' },
-          { label: 'Mobile' },
-        ]}
-      />
-    );
+    mockUseNetworkMetricSeries.mockReturnValue([
+      { label: 'Desktop' },
+      { label: 'Mobile' },
+    ]);
+    const { container } = render(<TimelineCard />);
     expect(container.firstChild).toBeNull();
   });
 
   it('renders card with timeline table when metrics have event data', () => {
-    const { container } = render(
-      <TimelineCard
-        metrics={[
-          {
-            label: 'Desktop',
-            ttfb: 100,
-            fcp: 500,
-            observedNavigationStart: 0,
-          },
-        ]}
-      />
-    );
+    mockUseNetworkMetricSeries.mockReturnValue([
+      {
+        label: 'Desktop',
+        ttfb: 100,
+        fcp: 500,
+        observedNavigationStart: 0,
+      },
+    ]);
+    const { container } = render(<TimelineCard />);
     expect(container.firstChild).toMatchSnapshot();
   });
 
   it('renders multiple report columns when multiple metrics', () => {
-    const { container } = render(
-      <TimelineCard
-        metrics={[
-          { label: 'Desktop', ttfb: 80, fcp: 400, observedNavigationStart: 0 },
-          { label: 'Mobile', ttfb: 120, fcp: 600, observedNavigationStart: 0 },
-        ]}
-      />
-    );
+    mockUseNetworkMetricSeries.mockReturnValue([
+      { label: 'Desktop', ttfb: 80, fcp: 400, observedNavigationStart: 0 },
+      { label: 'Mobile', ttfb: 120, fcp: 600, observedNavigationStart: 0 },
+    ]);
+    const { container } = render(<TimelineCard />);
     expect(container.firstChild).toMatchSnapshot();
   });
 
   it('shows N/A for missing values in report columns', () => {
-    const { container } = render(
-      <TimelineCard
-        metrics={[
-          {
-            label: 'Desktop',
-            ttfb: 100,
-            observedNavigationStart: 0,
-            observedFirstPaint: 200,
-          },
-        ]}
-      />
-    );
+    mockUseNetworkMetricSeries.mockReturnValue([
+      {
+        label: 'Desktop',
+        ttfb: 100,
+        observedNavigationStart: 0,
+        observedFirstPaint: 200,
+      },
+    ]);
+    const { container } = render(<TimelineCard />);
     expect(container.firstChild).toMatchSnapshot();
   });
 });

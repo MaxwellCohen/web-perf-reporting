@@ -31,11 +31,8 @@ import { ExpandAll, ExpandRow } from '@/features/page-speed-insights/JSUsage/JSU
 import { toTitleCase } from '@/features/page-speed-insights/toTitleCase';
 import { DataTableHeader } from '@/features/page-speed-insights/lh-categories/table/DataTableHeader';
 import { booleanFilterFn } from '@/features/page-speed-insights/lh-categories/table/DataTableNoGrouping';
-import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
+import { AccordionContent, AccordionItem } from '@/components/ui/accordion';
+import { AccordionSectionTitleTrigger } from '@/components/ui/accordion-section-title-trigger';
 import { DataTableBody } from '@/features/page-speed-insights/lh-categories/table/DataTableBody';
 import { DetailTableWith1ReportAndNoSubitem } from '@/features/page-speed-insights/lh-categories/table/DetailTableWith1ReportAndNoSubitem';
 import { DetailTableSeparatePerReport } from '@/features/page-speed-insights/lh-categories/table/DetailTableSeparatePerReport';
@@ -714,11 +711,9 @@ function DetailTableWithSubitems({
 
   return (
     <AccordionItem value={title}>
-      <AccordionTrigger>
-        <div className="min-w-0 flex-1 truncate text-lg font-bold group-hover:underline">
-          {toTitleCase(title)}
-        </div>
-      </AccordionTrigger>
+      <AccordionSectionTitleTrigger titleClassName="min-w-0 flex-1 truncate">
+        {toTitleCase(title)}
+      </AccordionSectionTitleTrigger>
       <AccordionContent>
         <div className="w-full overflow-x-auto">
           <Table className="w-full" style={{ width: '100%' }}>

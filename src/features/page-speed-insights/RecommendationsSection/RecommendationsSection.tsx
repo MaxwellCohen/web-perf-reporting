@@ -4,9 +4,9 @@ import { usePageSpeedItems } from '@/features/page-speed-insights/PageSpeedConte
 import {
   Accordion,
   AccordionItem,
-  AccordionTrigger,
   AccordionContent,
 } from '@/components/ui/accordion';
+import { AccordionSectionTitleTrigger } from '@/components/ui/accordion-section-title-trigger';
 import { Badge } from '@/components/ui/badge';
 import { analyzeAudits, hasDetails } from '@/features/page-speed-insights/RecommendationsSection/analyzeAudits';
 import { FilterControls } from '@/features/page-speed-insights/RecommendationsSection/FilterControls';
@@ -77,12 +77,10 @@ export function RecommendationsSection() {
 
   return (
     <AccordionItem value="recommendations">
-      <AccordionTrigger>
-        <div className="flex items-center gap-2 text-lg font-bold group-hover:underline">
-          <span>Recommendations</span>
-          <Badge variant="outline" className="no-underline hover:no-underline">{recommendations.length}</Badge>
-        </div>
-      </AccordionTrigger>
+      <AccordionSectionTitleTrigger titleClassName="flex items-center gap-2">
+        <span>Recommendations</span>
+        <Badge variant="outline" className="no-underline hover:no-underline">{recommendations.length}</Badge>
+      </AccordionSectionTitleTrigger>
       <AccordionContent>
         <div className="p-6">
           <FilterControls

@@ -4,17 +4,9 @@ import {
   SortingState,
   ColumnFiltersState,
   useReactTable,
-  getCoreRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFacetedMinMaxValues,
+  type TableOptions,
 } from '@tanstack/react-table';
-import {
-  booleanFilterFn,
-  standardFilterFns,
-} from '@/features/page-speed-insights/shared/filterFns';
+import { flatTanStackTableSlice } from '@/features/page-speed-insights/shared/flatTanStackTableSlice';
 
 export type SimpleTableOptions<T> = {
   data: T[];
@@ -23,8 +15,8 @@ export type SimpleTableOptions<T> = {
 };
 
 /**
- * Creates a simple TanStack table configuration without grouping or pagination
- * Suitable for basic data tables with sorting, filtering, and column resizing
+ * Flat TanStack table: sorting, filtering, faceting, column resize (no grouping/pagination).
+ * Shares configuration with useStandardTable via flatTanStackTableSlice.
  */
 export function useSimpleTable<T>({ data, columns }: SimpleTableOptions<T>) {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -33,28 +25,14 @@ export function useSimpleTable<T>({ data, columns }: SimpleTableOptions<T>) {
   const table = useReactTable({
     data,
     columns,
-    getCoreRowModel: getCoreRowModel(),
-    enableSorting: true,
+    ...flatTanStackTableSlice,
     onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    enableColumnFilters: true,
     onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFacetedMinMaxValues: getFacetedMinMaxValues(),
-    enableColumnResizing: true,
-    columnResizeMode: 'onChange',
-    filterFns: {
-      booleanFilterFn,
-      ...standardFilterFns,
-    },
     state: {
       sorting,
       columnFilters,
     },
-  });
+  } as TableOptions<T>);
 
   return table;
 }
-

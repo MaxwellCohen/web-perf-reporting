@@ -3,12 +3,12 @@ import { TableItem } from '@/lib/schema';
 import { getUrlString, getNumber } from '@/lib/utils';
 import { useMemo } from 'react';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
-import { createPercentageAggregatedCell } from '@/features/page-speed-insights/shared/aggregatedCellHelpers';
 import { sortByMaxValue } from '@/features/page-speed-insights/shared/dataSortingHelpers';
 import { useStandardTable } from '@/features/page-speed-insights/shared/tableConfigHelpers';
 import {
-  createURLColumn,
   createBytesColumn,
+  createPercentageColumn,
+  createURLColumn,
 } from '@/features/page-speed-insights/shared/tableColumnHelpers';
 import { useTableColumns } from '@/features/page-speed-insights/shared/useTableColumns';
 import { TableCard } from '@/features/page-speed-insights/shared/TableCard';
@@ -32,24 +32,11 @@ type UnusedJavaScriptCardProps = {
 
 const columnHelper = createColumnHelper<UnusedJSTableRow>();
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const cols: ColumnDef<UnusedJSTableRow, any>[] = [
+const cols: ColumnDef<UnusedJSTableRow, unknown>[] = [
   createURLColumn(columnHelper),
   createBytesColumn(columnHelper, 'wastedBytes', 'Wasted Bytes'),
   createBytesColumn(columnHelper, 'totalBytes', 'Total Bytes'),
-  columnHelper.accessor('wastedPercent', {
-    id: 'wastedPercent',
-    header: 'Wasted %',
-    enableSorting: true,
-    enableResizing: true,
-    filterFn: 'inNumberRange',
-    aggregationFn: 'unique',
-    cell: (info) => {
-      const value = info.getValue();
-      return value !== undefined ? `${value.toFixed(1)}%` : 'N/A';
-    },
-    aggregatedCell: createPercentageAggregatedCell('wastedPercent', 1),
-  }),
+  createPercentageColumn(columnHelper, 'wastedPercent', 'Wasted %', 1),
 ];
 
 export function UnusedJavaScriptCard({ metrics }: UnusedJavaScriptCardProps) {

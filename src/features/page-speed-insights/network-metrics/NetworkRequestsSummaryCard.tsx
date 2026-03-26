@@ -6,20 +6,11 @@ import {
 } from "@/components/ui/table";
 import { RenderBytesValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import { CardWithTable } from "@/features/page-speed-insights/shared/CardWithTable";
+import { useNetworkRequestStats } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
 
-type NetworkRequestsSummary = {
-  label: string;
-  totalRequests: number;
-  totalTransferSize: number;
-  totalResourceSize: number;
-};
-
-type NetworkRequestsSummaryCardProps = {
-  stats: NetworkRequestsSummary[];
-};
-
-export function NetworkRequestsSummaryCard({ stats }: NetworkRequestsSummaryCardProps) {
-  const validStats = stats.filter(s => s.totalRequests > 0);
+export function NetworkRequestsSummaryCard() {
+  const requestStats = useNetworkRequestStats();
+  const validStats = requestStats.filter((s) => s.totalRequests > 0);
   if (!validStats.length) {
     return null;
   }

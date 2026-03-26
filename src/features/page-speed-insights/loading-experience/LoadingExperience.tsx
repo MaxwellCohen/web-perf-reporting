@@ -1,9 +1,6 @@
 import { HorizontalGaugeChart } from '@/components/common/PageSpeedGaugeChart';
-import {
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from '@/components/ui/accordion';
+import { AccordionItem, AccordionContent } from '@/components/ui/accordion';
+import { AccordionSectionTitleTrigger } from '@/components/ui/accordion-section-title-trigger';
 import { Fragment } from 'react';
 import { usePageSpeedItems } from '@/features/page-speed-insights/PageSpeedContext';
 import { Card, CardTitle } from '@/components/ui/card';
@@ -48,11 +45,9 @@ export function LoadingExperience({
   return (
     <>
       <AccordionItem value={experienceKey}>
-        <AccordionTrigger>
-          <div className="text-lg font-bold group-hover:underline">
-            {title}: {extraTitle}
-          </div>
-        </AccordionTrigger>
+        <AccordionSectionTitleTrigger>
+          {title}: {extraTitle}
+        </AccordionSectionTitleTrigger>
         <AccordionContent className="-mx-2 grid max-w-full grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] gap-2">
           {metrics.map(({ metric, key }) => {
             return (

@@ -1,7 +1,6 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table } from "@/components/ui/table";
-import { RenderBytesValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { TableItem } from "@/lib/schema";
 import { useMemo } from "react";
@@ -11,15 +10,12 @@ import {
 } from "@tanstack/react-table";
 import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
 import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
-import { createNumericAggregatedCell, createBytesAggregatedCell, createStringAggregatedCell } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
+import { createNumericAggregatedCell, createStringAggregatedCell } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
 import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
 import { useStandardTable } from "@/features/page-speed-insights/shared/tableConfigHelpers";
+import { createBytesColumn } from "@/features/page-speed-insights/shared/tableColumnHelpers";
 import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
-
-type ResourceTypeBreakdown = {
-  label: string;
-  byResourceType: Record<string, TableItem[]>;
-};
+import { useNetworkRequestStats } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
 
 type ResourceTypeTableRow = {
   label: string;
@@ -27,10 +23,6 @@ type ResourceTypeTableRow = {
   count: number;
   transferSize: number;
   resourceSize: number;
-};
-
-type ResourceTypeBreakdownCardProps = {
-  stats: ResourceTypeBreakdown[];
 };
 
 function sumOn<T extends Record<string, unknown>>(items: T[], key: string): number {
@@ -41,7 +33,6 @@ function sumOn<T extends Record<string, unknown>>(items: T[], key: string): numb
 }
 
 const columnHelper = createColumnHelper<ResourceTypeTableRow>();
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const cols: ColumnDef<ResourceTypeTableRow, any>[] = [
   columnHelper.accessor('resourceType', {
     id: 'resourceType',
@@ -62,24 +53,8 @@ const cols: ColumnDef<ResourceTypeTableRow, any>[] = [
     cell: (info) => <span>{info.getValue()}</span>,
     aggregatedCell: createNumericAggregatedCell('count', (value) => <span>{value}</span>),
   }),
-  columnHelper.accessor('transferSize', {
-    id: 'transferSize',
-    header: 'Total Transfer Size',
-    enableSorting: true,
-    enableResizing: true,
-    filterFn: 'inNumberRange',
-    cell: (info) => <RenderBytesValue value={info.getValue()} />,
-    aggregatedCell: createBytesAggregatedCell('transferSize'),
-  }),
-  columnHelper.accessor('resourceSize', {
-    id: 'resourceSize',
-    header: 'Total Resource Size',
-    enableSorting: true,
-    enableResizing: true,
-    filterFn: 'inNumberRange',
-    cell: (info) => <RenderBytesValue value={info.getValue()} />,
-    aggregatedCell: createBytesAggregatedCell('resourceSize'),
-  }),
+  createBytesColumn(columnHelper, 'transferSize', 'Total Transfer Size'),
+  createBytesColumn(columnHelper, 'resourceSize', 'Total Resource Size'),
 ];
 
 function ResourceTypeTable({ label, data }: { label: string; data: ResourceTypeTableRow[] }) {
@@ -105,14 +80,20 @@ function ResourceTypeTable({ label, data }: { label: string; data: ResourceTypeT
   );
 }
 
-export function ResourceTypeBreakdownCard({ stats }: ResourceTypeBreakdownCardProps) {
-  const validStats = useMemo(() => stats.filter(s => s.byResourceType && Object.keys(s.byResourceType).length > 0), [stats]);
+export function ResourceTypeBreakdownCard() {
+  const requestStats = useNetworkRequestStats();
+  const validStats = useMemo(
+    () =>
+      requestStats.filter(
+        (s) => s.byResourceType && Object.keys(s.byResourceType).length > 0,
+      ),
+    [requestStats],
+  );
 
-  // Create data for each report separately
   const dataByReport = useMemo(() => {
     return validStats.map(({ label, byResourceType }) => {
       const rows = Object.entries(byResourceType).map(([type, items]) => {
-        const typedItems = Array.isArray(items) ? items as TableItem[] : [];
+        const typedItems = Array.isArray(items) ? (items as TableItem[]) : [];
         return {
           label,
           resourceType: type,
@@ -121,14 +102,14 @@ export function ResourceTypeBreakdownCard({ stats }: ResourceTypeBreakdownCardPr
           resourceSize: sumOn(typedItems, 'resourceSize'),
         };
       });
-      
+
       return {
         label,
         data: sortByMaxValue(
           rows,
           (row) => row.resourceType,
           (row) => row.transferSize || 0,
-          1
+          1,
         ),
       };
     });
@@ -137,7 +118,7 @@ export function ResourceTypeBreakdownCard({ stats }: ResourceTypeBreakdownCardPr
   if (!validStats.length) {
     return null;
   }
-  
+
   return (
     <Card className="md:col-span-2 lg:col-span-3">
       <CardHeader>
@@ -153,4 +134,3 @@ export function ResourceTypeBreakdownCard({ stats }: ResourceTypeBreakdownCardPr
     </Card>
   );
 }
-

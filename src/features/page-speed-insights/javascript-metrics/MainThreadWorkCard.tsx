@@ -1,5 +1,4 @@
 "use client";
-import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import { TableItem } from "@/lib/schema";
 import { getNumber } from "@/lib/utils";
 import { useMemo } from "react";
@@ -8,9 +7,10 @@ import {
   createColumnHelper,
 } from "@tanstack/react-table";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
-import { createNumericAggregatedCell, createStringAggregatedCell } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
+import { createStringAggregatedCell } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
 import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
 import { useStandardTable } from "@/features/page-speed-insights/shared/tableConfigHelpers";
+import { createMSColumn } from "@/features/page-speed-insights/shared/tableColumnHelpers";
 import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
 import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 
@@ -31,8 +31,7 @@ type MainThreadWorkCardProps = {
 };
 
 const columnHelper = createColumnHelper<MainThreadWorkTableRow>();
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const cols: ColumnDef<MainThreadWorkTableRow, any>[] = [
+const cols: ColumnDef<MainThreadWorkTableRow, unknown>[] = [
   columnHelper.accessor('groupLabel', {
     id: 'groupLabel',
     header: 'Category',
@@ -44,19 +43,7 @@ const cols: ColumnDef<MainThreadWorkTableRow, any>[] = [
     cell: (info) => info.getValue(),
     aggregatedCell: createStringAggregatedCell('groupLabel', undefined, false),
   }),
-  columnHelper.accessor('duration', {
-    id: 'duration',
-    header: 'Time Spent',
-    enableSorting: true,
-    enableResizing: true,
-    filterFn: 'inNumberRange',
-    aggregationFn: 'unique',
-    cell: (info) => {
-      const value = info.getValue();
-      return value !== undefined ? <RenderMSValue value={value} /> : 'N/A';
-    },
-    aggregatedCell: createNumericAggregatedCell('duration'),
-  })
+  createMSColumn(columnHelper, 'duration', 'Time Spent'),
 ];
 
 export function MainThreadWorkCard({ metrics }: MainThreadWorkCardProps) {

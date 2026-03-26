@@ -8,6 +8,10 @@ import {
   getDashboardTitle,
   getFullPageScreenshotMap,
 } from '@/features/page-speed-insights/pageSpeedDashboardHelpers';
+import {
+  mapItemsToNetworkMetrics,
+  type NetworkMetricSeries,
+} from '@/features/page-speed-insights/network-metrics/useNetworkMetricsData';
 import type { InsightsContextItem } from '@/lib/page-speed-insights/types';
 
 type PageSpeedInsightsStoreInput = {
@@ -21,6 +25,7 @@ type PageSpeedInsightsStoreState = {
   labels: string[];
   isLoading: boolean;
   items: InsightsContextItem[];
+  networkMetricSeries: NetworkMetricSeries[];
   reportTitle: string;
   fullPageScreenshots: Record<string, FullPageScreenshot | undefined | null>;
 };
@@ -31,12 +36,14 @@ function createPageSpeedInsightsState({
   isLoading,
 }: PageSpeedInsightsStoreInput): PageSpeedInsightsStoreState {
   const items = getDashboardItems(data, labels);
+  const networkMetricSeries = mapItemsToNetworkMetrics(items);
 
   return {
     data,
     labels,
     isLoading,
     items,
+    networkMetricSeries,
     reportTitle: getDashboardTitle(items),
     fullPageScreenshots: getFullPageScreenshotMap(items),
   };
@@ -74,7 +81,8 @@ export function usePageSpeedInsightsStore(
 }
 
 type PageSpeedInsightsStore = ReturnType<typeof usePageSpeedInsightsStore>;
-type PageSpeedInsightsSnapshot = ReturnType<PageSpeedInsightsStore['getSnapshot']>;
+export type PageSpeedInsightsSnapshot =
+  ReturnType<PageSpeedInsightsStore['getSnapshot']>;
 
 const PageSpeedInsightsStoreContext =
   createContext<PageSpeedInsightsStore | null>(null);
@@ -82,6 +90,10 @@ const PageSpeedInsightsStoreContext =
 export const selectPageSpeedItems = (
   snapshot: PageSpeedInsightsSnapshot,
 ) => snapshot.context.items;
+
+export const selectPageSpeedNetworkMetricSeries = (
+  snapshot: PageSpeedInsightsSnapshot,
+) => snapshot.context.networkMetricSeries;
 
 export const selectPageSpeedReportTitle = (
   snapshot: PageSpeedInsightsSnapshot,

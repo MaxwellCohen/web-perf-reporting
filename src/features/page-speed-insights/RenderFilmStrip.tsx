@@ -1,11 +1,8 @@
 import { AuditDetailFilmstrip } from '@/lib/schema';
 import { Timeline } from '@/features/page-speed-insights/Timeline';
 import { usePageSpeedItems } from '@/features/page-speed-insights/PageSpeedContext';
-import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
+import { AccordionContent, AccordionItem } from '@/components/ui/accordion';
+import { AccordionSectionTitleTrigger } from '@/components/ui/accordion-section-title-trigger';
 
 export function RenderFilmStrip() {
   const items = usePageSpeedItems();
@@ -24,9 +21,7 @@ export function RenderFilmStrip() {
     <AccordionItem
       value={'Screenshots'}
     >
-      <AccordionTrigger>
-        <div className="text-lg font-bold group-hover:underline">Screenshots</div>
-      </AccordionTrigger>
+      <AccordionSectionTitleTrigger>Screenshots</AccordionSectionTitleTrigger>
       <AccordionContent>{timeLines}</AccordionContent>
     </AccordionItem>
   );

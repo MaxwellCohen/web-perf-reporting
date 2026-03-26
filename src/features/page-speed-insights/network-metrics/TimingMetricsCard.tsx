@@ -6,29 +6,7 @@ import {
 } from "@/components/ui/table";
 import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import { CardWithTable } from "@/features/page-speed-insights/shared/CardWithTable";
-
-type TimingMetrics = {
-  label: string;
-  ttfb?: number;
-  ttfbCategory?: string;
-  fcp?: number;
-  fcpCategory?: string;
-  lcp?: number;
-  lcpCategory?: string;
-  speedIndex?: number;
-  totalBlockingTime?: number;
-  domContentLoaded?: number;
-  loadTime?: number;
-  interactive?: number;
-  observedNavigationStart?: number;
-  observedFirstPaint?: number;
-  observedFirstContentfulPaint?: number;
-  observedLargestContentfulPaint?: number;
-};
-
-type TimingMetricsCardProps = {
-  metrics: TimingMetrics[];
-};
+import { useNetworkMetricSeries } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
 
 function TimingValue({ value, category }: { value?: number; category?: string }) {
   if (value === undefined) return <span className="text-muted-foreground">N/A</span>;
@@ -50,9 +28,16 @@ function TimingValue({ value, category }: { value?: number; category?: string })
   );
 }
 
-export function TimingMetricsCard({ metrics }: TimingMetricsCardProps) {
-  const validMetrics = metrics.filter(m => m.ttfb !== undefined || m.fcp !== undefined || m.lcp !== undefined ||
-    m.speedIndex !== undefined || m.totalBlockingTime !== undefined);
+export function TimingMetricsCard() {
+  const series = useNetworkMetricSeries();
+  const validMetrics = series.filter(
+    (m) =>
+      (m.ttfb ?? 0) > 0 ||
+      (m.fcp ?? 0) > 0 ||
+      (m.lcp ?? 0) > 0 ||
+      (m.speedIndex ?? 0) > 0 ||
+      (m.totalBlockingTime ?? 0) > 0,
+  );
 
   if (!validMetrics.length) {
     return null;
@@ -77,26 +62,18 @@ export function TimingMetricsCard({ metrics }: TimingMetricsCardProps) {
         </TableRow>
       }
     >
-      {validMetrics.map(({
-        label,
-        ttfb,
-        ttfbCategory,
-        fcp,
-        fcpCategory,
-        lcp,
-        lcpCategory,
-        speedIndex,
-        totalBlockingTime
-      }) => (
+      {validMetrics.map(
+        ({ label, ttfb, fcp, lcp, speedIndex, totalBlockingTime }) => (
         <TableRow key={label}>
           {showReportColumn && <TableCell className="font-medium min-w-20">{label || 'Unknown'}</TableCell>}
-          <TableCell className="min-w-25"><TimingValue value={ttfb} category={ttfbCategory} /></TableCell>
-          <TableCell className="min-w-25"><TimingValue value={fcp} category={fcpCategory} /></TableCell>
-          <TableCell className="min-w-25"><TimingValue value={lcp} category={lcpCategory} /></TableCell>
+          <TableCell className="min-w-25"><TimingValue value={ttfb} /></TableCell>
+          <TableCell className="min-w-25"><TimingValue value={fcp} /></TableCell>
+          <TableCell className="min-w-25"><TimingValue value={lcp} /></TableCell>
           <TableCell className="min-w-30"><TimingValue value={speedIndex} /></TableCell>
           <TableCell className="min-w-25"><TimingValue value={totalBlockingTime} /></TableCell>
         </TableRow>
-      ))}
+      ),
+      )}
     </CardWithTable>
   );
 }

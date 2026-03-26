@@ -1,6 +1,6 @@
 'use client';
 import { LoadingMessage } from '@/components/common/LoadingMessage';
-import { LoadingExperience } from '@/features/page-speed-insights/LoadingExperience';
+import { LoadingExperiencesSection } from '@/features/page-speed-insights/loading-experience';
 import { EntitiesTable } from '@/features/page-speed-insights/lh-categories/table/EntitiesTable';
 import { CWVMetricsComponent } from '@/features/page-speed-insights/CWVMetricsComponent';
 import {
@@ -19,20 +19,12 @@ import {
 } from '@/features/page-speed-insights/JSUsage/JSUsageTable';
 import { Accordion } from '@/components/ui/accordion';
 import { DropdownFilter } from '@/features/page-speed-insights/JSUsage/TableControls';
-import { NetworkMetricsComponent } from '@/features/page-speed-insights/NetworkMetrics';
+import { NetworkMetricsComponent } from '@/features/page-speed-insights/network-metrics';
 import { JavaScriptPerformanceComponent } from '@/features/page-speed-insights/javascript-metrics/JavaScriptPerformanceComponent';
 import { RecommendationsSection } from '@/features/page-speed-insights/RecommendationsSection';
 import type { InsightsContextItem } from '@/lib/page-speed-insights/types';
 import { PageSpeedInsightsCopyButtons } from '@/features/page-speed-insights/PageSpeedInsightsCopyButtons';
 import { useSelector } from '@xstate/store-react';
-
-const loadingExperiences = [
-  { title: 'Page Loading Experience', experienceKey: 'loadingExperience' },
-  {
-    title: 'Origin Loading Experience',
-    experienceKey: 'originLoadingExperience',
-  },
-] as const;
 
 export function PageSpeedInsightsDashboard({
   data,
@@ -65,13 +57,7 @@ export function PageSpeedInsightsDashboard({
         {reportTitle}
       </h2>
       <Accordion type="multiple">
-        {loadingExperiences.map(({ title, experienceKey }) => (
-          <LoadingExperience
-            key={experienceKey}
-            title={title}
-            experienceKey={experienceKey}
-          />
-        ))}
+        <LoadingExperiencesSection />
         <CWVMetricsComponent />
         <RenderFilmStrip />
         <EntitiesTable />

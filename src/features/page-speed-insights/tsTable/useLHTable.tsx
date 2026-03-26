@@ -1,6 +1,5 @@
 import { PageSpeedInsights } from '@/lib/schema';
 import {
-  createColumnHelper,
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
@@ -11,8 +10,6 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { Fragment, useMemo, useState } from 'react';
-import { HorizontalScoreChart } from '@/components/common/PageSpeedGaugeChart';
-import ReactMarkdown from 'react-markdown';
 import clsx from 'clsx';
 import { AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { AccordionContent } from '@radix-ui/react-accordion';
@@ -21,109 +18,11 @@ import { RenderMetricSavings } from '@/features/page-speed-insights/lh-categorie
 import { RenderDetails } from '@/features/page-speed-insights/lh-categories/RenderDetails';
 import { RenderJSONDetails } from '@/features/page-speed-insights/RenderJSONDetails';
 import { TableDataItem } from '@/features/page-speed-insights/tsTable/TableDataItem';
-import { categorySortFn } from '@/features/page-speed-insights/tsTable/categorySortFn';
-
-const columnHelper = createColumnHelper<TableDataItem>();
-const columns = [
-  columnHelper.accessor((row) => row._category?.title || '', {
-    id: 'category_title',
-    header: 'Category',
-    enableGrouping: true,
-    sortingFn: categorySortFn,
-    cell: (props) => {
-      const category = props.getValue();
-      return <div className="basis-48 text-xl font-bold">{category}</div>;
-    },
-  }),
-  columnHelper.accessor((r) => [r._category.score, r._userLabel].join(':::'), {
-    id: 'category_score',
-    header: 'Category Score',
-    enableGrouping: true,
-    enablePinning: true,
-    aggregationFn: 'unique',
-    cell(props) {
-      let value: string | string[] = props.getValue();
-      if (!value || props.row.groupingValue === 'Core Web Vitals') {
-        return null;
-      }
-      value = Array.isArray(value) ? (value as string[]) : [value];
-
-      return value.map((v) => {
-        const [scoreStr = 0, label = ''] = v.split(':::');
-        const score = +scoreStr;
-        return (
-          <div key={v} className="flex flex-row items-center gap-2">
-            <div className="flex-0 flex grow w-64 flex-col gap-2 align-top hover:no-underline">
-              <div className="text-center text-xs hover:no-underline">
-                {label ? `${label} - ` : ''}
-                {Math.round(score * 100)}
-              </div>
-              <HorizontalScoreChart
-                score={score || 0}
-                className="h-2 min-w-11 flex-1 overflow-hidden"
-              />
-            </div>
-          </div>
-        );
-      });
-    },
-  }),
-
-  columnHelper.accessor('auditRef.group', {
-    id: 'auditGroup',
-    enableGrouping: true,
-    header: 'Audit Group',
-  }),
-  columnHelper.accessor('_userLabel', {
-    id: 'userLabel',
-    enableGrouping: true,
-    enableColumnFilter: true,
-    filterFn: 'arrIncludesSome',
-    sortingFn: 'alphanumeric',
-    header: 'User Label',
-  }),
-  columnHelper.accessor('auditRef.id', {
-    id: 'id',
-    header: 'Id',
-    enableGrouping: true,
-  }),
-  columnHelper.accessor('auditRef.group', {
-    header: 'Group',
-    enableGrouping: false,
-  }),
-  columnHelper.accessor('auditResult.title', {
-    id: 'auditTitle',
-    header: 'Audit Title',
-    enableGrouping: true,
-  }),
-  columnHelper.accessor('auditResult.description', {
-    header: 'Description',
-    enableGrouping: true,
-    cell: (info) => {
-      const str = info.getValue()?.toString() || '';
-      if (!str) {
-        return null;
-      }
-      return (
-        <div className="text-sm font-normal">
-          <ReactMarkdown>{info.getValue()?.toString() || ''}</ReactMarkdown>
-        </div>
-      );
-    },
-  }),
-  columnHelper.accessor('auditResult.score', {
-    header: 'Score',
-    enableGrouping: true,
-  }),
-  columnHelper.accessor('auditResult.displayValue', {
-    header: 'Display Value',
-    enableGrouping: false,
-  }),
-  columnHelper.accessor('auditResult.details', {
-    header: 'Details',
-    enableGrouping: false,
-  }),
-];
+import { LH_AUDIT_TABLE_COLUMNS } from '@/features/page-speed-insights/tsTable/lhAuditTableColumns';
+import {
+  arrIncludesSomeFilter,
+  booleanFilterFn,
+} from '@/features/page-speed-insights/shared/filterFns';
 
 export function useLHTable(
   items: { item: PageSpeedInsights; label: string }[],
@@ -133,7 +32,6 @@ export function useLHTable(
       (
         items
           .map(({ item, label }) => {
-            // flaten the categories
             return Object.values(item.lighthouseResult?.categories || {}).map(
               (category) => {
                 if (!category?.auditRefs?.length) {
@@ -159,7 +57,7 @@ export function useLHTable(
   const [grouping, setGrouping] = useState(['category_title', 'id']);
   return useReactTable({
     data: tableDataArr,
-    columns,
+    columns: LH_AUDIT_TABLE_COLUMNS,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onGroupingChange: setGrouping,
@@ -170,10 +68,11 @@ export function useLHTable(
     manualExpanding: true,
     enableColumnFilters: true,
     enableColumnPinning: true,
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- arrIncludesSome is not in EntitiesTable FilterFns augmentation
     filterFns: {
-      'booleanFilterFn': () => true,
-    },
+      booleanFilterFn,
+      arrIncludesSome: arrIncludesSomeFilter,
+    } as any,
     state: {
       grouping,
     },
@@ -181,7 +80,7 @@ export function useLHTable(
 }
 
 export function CategoryRow({ row }: { row: Row<TableDataItem> }) {
-  'use no memo'
+  'use no memo';
   return (
     <AccordionItem value={row.id} key={row.id}>
       <AccordionTrigger
@@ -219,7 +118,7 @@ export function AuditSummaryRow({ row }: { row: Row<TableDataItem> }) {
   return (
     <AccordionItem
       value={row.id}
-        className={clsx(
+      className={clsx(
         'items-center gap-4 border border-x-4 border-gray-400 py-2',
       )}
     >

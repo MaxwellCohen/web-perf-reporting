@@ -2,7 +2,8 @@ import {
   usePageSpeedItems,
   type InsightsContextItem,
 } from '@/features/page-speed-insights/PageSpeedContext';
-import { AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
+import { AccordionItem, AccordionContent } from '@/components/ui/accordion';
+import { AccordionSectionTitleTrigger } from '@/components/ui/accordion-section-title-trigger';
 import { Details } from '@/components/ui/accordion';
 import { TreeDataItem, TreeView } from '@/components/ui/tree-view';
 import {
@@ -114,11 +115,9 @@ export function RenderNetworkDependencyTree() {
 
   return (
     <AccordionItem value={'networkDependencyTree'}>
-      <AccordionTrigger>
-        <div className="text-lg font-bold group-hover:underline">
-          Network Dependency Tree
-        </div>
-      </AccordionTrigger>
+      <AccordionSectionTitleTrigger>
+        Network Dependency Tree
+      </AccordionSectionTitleTrigger>
       <AccordionContent>
         {networkTrees.map(({ tree, label }) => {
           if (!tree) return null;

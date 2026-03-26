@@ -35,8 +35,26 @@ export const inNumberRangeFilter: FilterFn<unknown> = (row, columnId, filterValu
 };
 
 /**
- * Standard filter functions object for use in TanStack Table
+ * Multi-select style filter: row value is included in the selected filter values (or array overlap).
  */
+export const arrIncludesSomeFilter: FilterFn<unknown> = (
+  row,
+  columnId,
+  filterValue,
+  _addMeta,
+) => {
+  const selected = filterValue as unknown[] | undefined;
+  if (!selected?.length) {
+    return true;
+  }
+  const rowVal = row.getValue(columnId);
+  if (Array.isArray(rowVal)) {
+    return selected.some((f) => rowVal.includes(f));
+  }
+  return selected.includes(rowVal);
+};
+
+/** Built-in-style string keys for TanStack column `filterFn` */
 export const standardFilterFns = {
   booleanFilterFn,
   includesString: includesStringFilter,

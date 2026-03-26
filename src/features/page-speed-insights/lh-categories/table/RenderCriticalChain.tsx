@@ -1,5 +1,6 @@
 import { CriticalRequestChain } from '@/lib/schema';
 import { Details } from '@/components/ui/accordion';
+import { accordionSectionTitleClassName } from '@/components/ui/accordion-section-title-trigger';
 import { TreeDataItem, TreeView } from '@/components/ui/tree-view';
 import { renderTimeValue } from '@/features/page-speed-insights/lh-categories/table/RenderTableValue';
 
@@ -13,7 +14,7 @@ export function RenderCriticalChainData({
   return (
     <Details className="flex flex-col gap-2 print:border-0">
       <summary className="flex flex-col gap-2">
-        <div className="text-lg font-bold group-hover:underline">
+        <div className={accordionSectionTitleClassName}>
           Critical Request Chains
         </div>
       </summary>

@@ -1,7 +1,6 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table } from "@/components/ui/table";
-import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import { TableItem } from "@/lib/schema";
 import { getNumber } from "@/lib/utils";
 import { useMemo } from "react";
@@ -11,15 +10,14 @@ import {
 } from "@tanstack/react-table";
 import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
 import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
-import { createNumericAggregatedCell } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
 import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
 import { useStandardTable } from "@/features/page-speed-insights/shared/tableConfigHelpers";
+import {
+  createMSColumn,
+  createTruncatedTextColumn,
+} from "@/features/page-speed-insights/shared/tableColumnHelpers";
 import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
-
-type NetworkRTTData = {
-  label: string;
-  networkRTT: TableItem[];
-};
+import { useNetworkMetricSeries } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
 
 type RTTTableRow = {
   label: string;
@@ -27,43 +25,25 @@ type RTTTableRow = {
   rtt: number | undefined;
 };
 
-type NetworkRTTCardProps = {
-  metrics: NetworkRTTData[];
-};
-
 const columnHelper = createColumnHelper<RTTTableRow>();
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const cols: ColumnDef<RTTTableRow, any>[] = [
-  columnHelper.accessor('origin', {
+const cols: ColumnDef<RTTTableRow, unknown>[] = [
+  createTruncatedTextColumn(columnHelper, {
+    accessor: 'origin',
     id: 'origin',
     header: 'Origin',
-    enableSorting: true,
+    maxWidthClass: 'max-w-50',
     enableGrouping: true,
-    enableResizing: true,
-    filterFn: 'includesString',
-    cell: (info) => (
-      <div className="truncate max-w-50" title={info.getValue()}>
-        {info.getValue()}
-      </div>
-    ),
   }),
-  columnHelper.accessor('rtt', {
-    id: 'rtt',
-    header: 'RTT',
-    enableSorting: true,
-    enableResizing: true,
-    filterFn: 'inNumberRange',
-    cell: (info) => {
-      const value = info.getValue();
-      return value !== undefined ? <RenderMSValue value={value} /> : 'N/A';
-    },
-    aggregatedCell: createNumericAggregatedCell('rtt'),
-  }),
+  createMSColumn(columnHelper, 'rtt', 'RTT'),
 ];
 
-export function NetworkRTTCard({ metrics }: NetworkRTTCardProps) {
+export function NetworkRTTCard() {
   "use no memo";
-  const validMetrics = useMemo(() => metrics.filter(m => m.networkRTT.length > 0), [metrics]);
+  const series = useNetworkMetricSeries();
+  const validMetrics = useMemo(
+    () => series.filter((m) => m.networkRTT.length > 0),
+    [series],
+  );
 
 
   const showReportColumn = validMetrics.length > 1;
@@ -81,7 +61,7 @@ export function NetworkRTTCard({ metrics }: NetworkRTTCardProps) {
         };
       })
     );
-    
+
     return sortByMaxValue(
       allRows,
       (row) => row.origin,
@@ -97,9 +77,11 @@ export function NetworkRTTCard({ metrics }: NetworkRTTCardProps) {
     columns,
     grouping: ['origin'],
   });
+
   if (!validMetrics.length) {
     return null;
   }
+
   return (
     <Card>
       <CardHeader>
@@ -116,4 +98,3 @@ export function NetworkRTTCard({ metrics }: NetworkRTTCardProps) {
     </Card>
   );
 }
-

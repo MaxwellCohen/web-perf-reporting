@@ -1,5 +1,6 @@
 "use client";
 import { useMemo } from "react";
+import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -23,7 +24,6 @@ import {
   YAxis,
 } from 'recharts';
 import { chartConfig } from '@/components/common/ChartSettings';
-import { PageSpeedInsights } from "@/lib/schema";
 import { getNumber } from "@/lib/utils";
 
 
@@ -44,20 +44,14 @@ const LCP_SUBPART_ORDER = [
   'elementRenderDelay',   // Element render delay
 ];
 
-type LCPBreakdownCardProps = {
-  metrics: Array<{
-    item: PageSpeedInsights;
-    label: string;
-  }>;
-};
-
 type LCPSubpartRow = {
   subpart: string;
   label: string;
   [reportLabel: string]: string | number | undefined;
 };
 
-export function LCPBreakdownCard({ metrics }: LCPBreakdownCardProps) {
+export function LCPBreakdownCard() {
+  const metrics = usePageSpeedItems();
   const breakdownData = useMemo(() => {
     return metrics.map(({ item, label }) => {
       const lcpBreakdownAudit = item?.lighthouseResult?.audits?.['lcp-breakdown-insight'];

@@ -36,10 +36,10 @@ export function LoadingExperienceGauges({
     },
   ];
   return (
-    <div className="grid-auto-rows-[1fr] mt-2 grid grid-cols-[repeat(auto-fill,_minmax(180px,_1fr))] gap-2">
+    <div className="grid-auto-rows-[1fr] mt-2 grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2">
       {metrics.map(({ metric, key }) => (
         <GaugeChart key={key} metric={metric} data={experience.metrics[key]} />
       ))}
     </div>
   );
-} 
+}

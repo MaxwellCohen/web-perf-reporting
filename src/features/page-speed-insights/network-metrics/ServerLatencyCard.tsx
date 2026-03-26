@@ -1,7 +1,6 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table } from "@/components/ui/table";
-import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import { TableItem } from "@/lib/schema";
 import { getNumber } from "@/lib/utils";
 import { useMemo } from "react";
@@ -11,15 +10,14 @@ import {
 } from "@tanstack/react-table";
 import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
 import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
-import { createNumericAggregatedCell } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
 import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
 import { useStandardTable } from "@/features/page-speed-insights/shared/tableConfigHelpers";
+import {
+  createMSColumn,
+  createTruncatedTextColumn,
+} from "@/features/page-speed-insights/shared/tableColumnHelpers";
 import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
-
-type ServerLatencyData = {
-  label: string;
-  serverLatency: TableItem[];
-};
+import { useNetworkMetricSeries } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
 
 type LatencyTableRow = {
   label: string;
@@ -27,49 +25,31 @@ type LatencyTableRow = {
   latency: number | undefined;
 };
 
-type ServerLatencyCardProps = {
-  metrics: ServerLatencyData[];
-};
-
 const columnHelper = createColumnHelper<LatencyTableRow>();
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const cols: ColumnDef<LatencyTableRow, any>[] = [
-  columnHelper.accessor('origin', {
+const cols: ColumnDef<LatencyTableRow, unknown>[] = [
+  createTruncatedTextColumn(columnHelper, {
+    accessor: 'origin',
     id: 'origin',
     header: 'Origin',
-    enableSorting: true,
+    maxWidthClass: 'max-w-50',
     enableGrouping: true,
-    enableResizing: true,
-    filterFn: 'includesString',
-    cell: (info) => (
-      <div className="truncate max-w-50" title={info.getValue()}>
-        {info.getValue()}
-      </div>
-    ),
   }),
-  columnHelper.accessor('latency', {
-    id: 'latency',
-    header: 'Latency',
-    enableSorting: true,
-    enableResizing: true,
-    filterFn: 'inNumberRange',
-    cell: (info) => {
-      const value = info.getValue();
-      return value !== undefined ? <RenderMSValue value={value} /> : 'N/A';
-    },
-    aggregatedCell: createNumericAggregatedCell('latency'),
-  }),
+  createMSColumn(columnHelper, 'latency', 'Latency'),
 ];
 
-export function ServerLatencyCard({ metrics }: ServerLatencyCardProps) {
+export function ServerLatencyCard() {
   "use no memo";
-  const validMetrics = useMemo(() => metrics.filter(m => m.serverLatency.length > 0), [metrics]);
+  const series = useNetworkMetricSeries();
+  const validMetrics = useMemo(
+    () => series.filter((m) => m.serverLatency.length > 0),
+    [series],
+  );
 
 
   const showReportColumn = validMetrics.length > 1;
 
   // Combine all server latency data with labels
-  const data = useMemo<LatencyTableRow[]>(() => {
+  const data = useMemo((): LatencyTableRow[] => {
     const allRows = validMetrics.flatMap(({ label, serverLatency }) =>
       serverLatency.map((item: TableItem) => {
         const origin = typeof item.origin === 'string' ? item.origin : '';
@@ -81,7 +61,7 @@ export function ServerLatencyCard({ metrics }: ServerLatencyCardProps) {
         };
       })
     );
-    
+
     return sortByMaxValue(
       allRows,
       (row) => row.origin,
@@ -118,4 +98,3 @@ export function ServerLatencyCard({ metrics }: ServerLatencyCardProps) {
     </Card>
   );
 }
-

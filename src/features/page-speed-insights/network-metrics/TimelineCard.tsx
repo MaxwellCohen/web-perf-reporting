@@ -7,33 +7,13 @@ import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/tabl
 import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
 import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
 import { useStandardTable } from "@/features/page-speed-insights/shared/tableConfigHelpers";
+import { createOptionalNumericCell } from "@/features/page-speed-insights/shared/tableColumnHelpers";
+import { useNetworkMetricSeries } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
+import type { NetworkMetricSeries } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsData";
 
 type TimelineRow = {
   event: string;
   [reportLabel: string]: string | number | undefined;
-};
-
-type TimelineMetric = {
-  label: string;
-  ttfb?: number;
-  fcp?: number;
-  lcp?: number;
-  domContentLoaded?: number;
-  loadTime?: number;
-  interactive?: number;
-  observedNavigationStart?: number;
-  observedFirstPaint?: number;
-  observedFirstContentfulPaint?: number;
-  observedLargestContentfulPaint?: number;
-  observedFirstContentfulPaintAllFrames?: number;
-  observedFirstVisualChange?: number;
-  observedLargestContentfulPaintAllFrames?: number;
-  observedLastVisualChange?: number;
-  observedTraceEnd?: number;
-};
-
-type TimelineCardProps = {
-  metrics: TimelineMetric[];
 };
 
 const EVENT_MAP: Record<string, string> = {
@@ -92,14 +72,16 @@ function sortNumeric(a: number | undefined, b: number | undefined): number {
   return a - b;
 }
 
-function buildEventDataMap(metrics: TimelineMetric[]): Map<string, Record<string, number | undefined>> {
+function buildEventDataMap(
+  metrics: readonly NetworkMetricSeries[],
+): Map<string, Record<string, number | undefined>> {
   const eventDataMap = new Map<string, Record<string, number | undefined>>();
 
   for (const metric of metrics) {
     const ttfb = metric.ttfb ?? 0;
 
     for (const [eventLabel, propKey] of Object.entries(EVENT_MAP)) {
-      const rawValue = metric[propKey as keyof TimelineMetric] as number | undefined;
+      const rawValue = metric[propKey as keyof NetworkMetricSeries] as number | undefined;
       if (rawValue === undefined) continue;
 
       if (!eventDataMap.has(eventLabel)) {
@@ -146,23 +128,24 @@ function buildTimelineRows(
   return rows;
 }
 
-function optionalMsCell(value: number | undefined): React.ReactNode {
-  if (value === undefined) {
-    return <span className="text-muted-foreground">N/A</span>;
-  }
-  return <RenderMSValue value={value} />;
+function optionalMsCell(value: number | undefined) {
+  return createOptionalNumericCell(RenderMSValue, value);
 }
 
-export function TimelineCard({ metrics }: TimelineCardProps) {
+export function TimelineCard() {
   "use no memo";
 
-  const { data, columns } = useMemo(() => {
-    const reportLabels = metrics.map((m) => m.label);
-    const eventDataMap = buildEventDataMap(metrics);
+  const series = useNetworkMetricSeries();
+
+  const { data, columns } = useMemo((): {
+    data: TimelineRow[];
+    columns: ColumnDef<TimelineRow, any>[];
+  } => {
+    const reportLabels = series.map((m) => m.label);
+    const eventDataMap = buildEventDataMap(series);
     const rows = buildTimelineRows(eventDataMap, reportLabels);
 
     const columnHelper = createColumnHelper<TimelineRow>();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const tableColumns: ColumnDef<TimelineRow, any>[] = [
       columnHelper.accessor('event', {
         id: 'event',
@@ -200,14 +183,14 @@ export function TimelineCard({ metrics }: TimelineCardProps) {
     ];
 
     return { data: rows, columns: tableColumns };
-  }, [metrics]);
+  }, [series]);
 
   const table = useStandardTable({
     data,
     columns,
   });
 
-  if (!metrics.length || data.length === 0) {
+  if (!series.length || data.length === 0) {
     return null;
   }
 

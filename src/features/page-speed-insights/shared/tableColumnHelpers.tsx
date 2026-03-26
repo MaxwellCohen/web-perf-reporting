@@ -1,43 +1,183 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import React from 'react';
+import React, { type ComponentType } from 'react';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
-import { RenderBytesValue } from '@/features/page-speed-insights/lh-categories/table/RenderTableValue';
-import { createBytesAggregatedCell, createStringAggregatedCell, createReportLabelAggregatedCell } from '@/features/page-speed-insights/shared/aggregatedCellHelpers';
+import {
+  RenderBytesValue,
+  RenderMSValue,
+} from '@/features/page-speed-insights/lh-categories/table/RenderTableValue';
+import {
+  createBytesAggregatedCell,
+  createNumericAggregatedCell,
+  createPercentageAggregatedCell,
+  createReportLabelAggregatedCell,
+  createStringAggregatedCell,
+} from '@/features/page-speed-insights/shared/aggregatedCellHelpers';
+
+/** Placeholder for missing numeric / metric values in grouped metric tables */
+export const METRIC_TABLE_EMPTY_DISPLAY = 'N/A' as const;
+
+export function metricTableEmptyDisplay(): React.ReactNode {
+  return METRIC_TABLE_EMPTY_DISPLAY;
+}
+
+export function createOptionalNumericCell(
+  Render: ComponentType<{ value: number }>,
+  value: number | undefined,
+): React.ReactNode {
+  return value !== undefined ? <Render value={value} /> : metricTableEmptyDisplay();
+}
+
+export type TruncatedTextColumnOptions<T> = {
+  accessor: keyof T;
+  id: string;
+  header: string;
+  maxWidthClass?: string;
+  enableGrouping?: boolean;
+};
 
 /**
- * Creates a standard URL column definition
+ * Text column with truncation + title tooltip; string aggregation for grouped rows.
  */
-export function createURLColumn<T extends { url: string }>(
+export function createTruncatedTextColumn<T>(
   columnHelper: ReturnType<typeof createColumnHelper<T>>,
-  maxWidth: string = 'max-w-75',
-): ColumnDef<T, any> {
-  return columnHelper.accessor('url' as any, {
-    id: 'url',
-    header: 'URL',
+  options: TruncatedTextColumnOptions<T>,
+): ColumnDef<T, unknown> {
+  const {
+    accessor,
+    id,
+    header,
+    maxWidthClass = 'max-w-75',
+    enableGrouping = true,
+  } = options;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return columnHelper.accessor(accessor as any, {
+    id,
+    header,
     enableSorting: true,
-    enableGrouping: true,
+    enableGrouping,
     enableResizing: true,
     filterFn: 'includesString',
     aggregationFn: 'unique',
-    cell: (info) => (
-      <div className={`${maxWidth} truncate`} title={info.getValue()}>
-        {info.getValue()}
-      </div>
-    ),
-    aggregatedCell: createStringAggregatedCell('url', undefined, false),
+    cell: (info) => {
+      const raw = info.getValue() as string;
+      return (
+        <div className={`${maxWidthClass} truncate`} title={raw}>
+          {raw}
+        </div>
+      );
+    },
+    aggregatedCell: createStringAggregatedCell(id, undefined, false),
   });
 }
 
 /**
- * Creates a standard bytes column definition
+ * Standard URL column (truncated); expects row shape `{ url: string }`.
+ */
+export function createURLColumn<T extends { url: string }>(
+  columnHelper: ReturnType<typeof createColumnHelper<T>>,
+  maxWidthClass: string = 'max-w-75',
+): ColumnDef<T, unknown> {
+  return createTruncatedTextColumn(columnHelper, {
+    accessor: 'url' as keyof T & string,
+    id: 'url',
+    header: 'URL',
+    maxWidthClass,
+    enableGrouping: true,
+  });
+}
+
+/**
+ * Optional milliseconds column with grouped multi-report aggregation.
+ */
+export function createMSColumn<T>(
+  columnHelper: ReturnType<typeof createColumnHelper<T>>,
+  accessor: keyof T,
+  header: string,
+): ColumnDef<T, unknown> {
+  const id = String(accessor);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return columnHelper.accessor(accessor as any, {
+    id,
+    header,
+    enableSorting: true,
+    enableResizing: true,
+    filterFn: 'inNumberRange',
+    aggregationFn: 'unique',
+    cell: (info) =>
+      createOptionalNumericCell(
+        RenderMSValue,
+        info.getValue() as number | undefined,
+      ),
+    aggregatedCell: createNumericAggregatedCell(id),
+  });
+}
+
+/**
+ * Optional numeric column using a custom renderer (e.g. bytes).
+ */
+export function createOptionalNumericColumn<T>(
+  columnHelper: ReturnType<typeof createColumnHelper<T>>,
+  options: {
+    accessor: keyof T;
+    header: string;
+    Render: ComponentType<{ value: number }>;
+    aggregatedColumnId: string;
+    aggregatedCellFactory?: typeof createNumericAggregatedCell;
+  },
+): ColumnDef<T, unknown> {
+  const {
+    accessor,
+    header,
+    Render,
+    aggregatedColumnId,
+    aggregatedCellFactory = createNumericAggregatedCell,
+  } = options;
+  const id = String(accessor);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return columnHelper.accessor(accessor as any, {
+    id,
+    header,
+    enableSorting: true,
+    enableResizing: true,
+    filterFn: 'inNumberRange',
+    aggregationFn: 'unique',
+    cell: (info) =>
+      createOptionalNumericCell(Render, info.getValue() as number | undefined),
+    aggregatedCell: aggregatedCellFactory(aggregatedColumnId),
+  });
+}
+
+/**
+ * Standard bytes column definition
  */
 export function createBytesColumn<T>(
   columnHelper: ReturnType<typeof createColumnHelper<T>>,
   accessor: keyof T,
   header: string,
-): ColumnDef<T, any> {
+): ColumnDef<T, unknown> {
+  return createOptionalNumericColumn(columnHelper, {
+    accessor,
+    header,
+    Render: RenderBytesValue,
+    aggregatedColumnId: String(accessor),
+    aggregatedCellFactory: createBytesAggregatedCell,
+  });
+}
+
+/**
+ * Percentage column (leaf + aggregated) for grouped metric tables.
+ */
+export function createPercentageColumn<T>(
+  columnHelper: ReturnType<typeof createColumnHelper<T>>,
+  accessor: keyof T,
+  header: string,
+  precision: number = 1,
+): ColumnDef<T, unknown> {
+  const id = String(accessor);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return columnHelper.accessor(accessor as any, {
-    id: String(accessor),
+    id,
     header,
     enableSorting: true,
     enableResizing: true,
@@ -45,18 +185,21 @@ export function createBytesColumn<T>(
     aggregationFn: 'unique',
     cell: (info) => {
       const value = info.getValue() as number | undefined;
-      return value !== undefined ? <RenderBytesValue value={value} /> : 'N/A';
+      return value !== undefined
+        ? `${value.toFixed(precision)}%`
+        : metricTableEmptyDisplay();
     },
-    aggregatedCell: createBytesAggregatedCell(String(accessor)),
+    aggregatedCell: createPercentageAggregatedCell(id, precision),
   });
 }
 
 /**
- * Creates a standard report label column definition
+ * Standard report label column definition
  */
 export function createReportColumn<T extends { label: string }>(
   columnHelper: ReturnType<typeof createColumnHelper<T>>,
-): ColumnDef<T, any> {
+): ColumnDef<T, unknown> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return columnHelper.accessor('label' as any, {
     id: 'label',
     header: 'Report',
@@ -67,4 +210,3 @@ export function createReportColumn<T extends { label: string }>(
     aggregatedCell: createReportLabelAggregatedCell('label'),
   });
 }
-

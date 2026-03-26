@@ -1,6 +1,12 @@
 import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import { TopResourcesCard } from '@/features/page-speed-insights/network-metrics/TopResourcesCard';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { NetworkRequestStatsRow } from '@/features/page-speed-insights/network-metrics/useNetworkMetricsData';
+
+const mockUseNetworkRequestStats = vi.hoisted(() => vi.fn());
+
+vi.mock('@/features/page-speed-insights/network-metrics/useNetworkMetricsStore', () => ({
+  useNetworkRequestStats: () => mockUseNetworkRequestStats(),
+}));
 
 vi.mock('@/features/page-speed-insights/lh-categories/table/RenderTableValue', () => ({
   RenderBytesValue: ({ value }: { value: unknown }) => (
@@ -31,43 +37,62 @@ vi.mock('@/features/page-speed-insights/JSUsage/TableControls', () => ({
   PaginationCard: () => <div data-testid="pagination" />,
 }));
 
+import { TopResourcesCard } from '@/features/page-speed-insights/network-metrics/TopResourcesCard';
+
+function statsRow(
+  partial: Pick<NetworkRequestStatsRow, 'label' | 'topResources'> &
+    Partial<
+      Pick<
+        NetworkRequestStatsRow,
+        'totalRequests' | 'totalTransferSize' | 'totalResourceSize' | 'byResourceType'
+      >
+    >,
+): NetworkRequestStatsRow {
+  return {
+    totalRequests: 0,
+    totalTransferSize: 0,
+    totalResourceSize: 0,
+    byResourceType: {},
+    ...partial,
+  };
+}
+
 describe('TopResourcesCard', () => {
+  beforeEach(() => {
+    mockUseNetworkRequestStats.mockReset();
+  });
+
   it('returns null when stats is empty', () => {
-    const { container } = render(<TopResourcesCard stats={[]} />);
+    mockUseNetworkRequestStats.mockReturnValue([]);
+    const { container } = render(<TopResourcesCard />);
     expect(container.firstChild).toBeNull();
   });
 
   it('returns null when all stats have empty topResources', () => {
-    const { container } = render(
-      <TopResourcesCard
-        stats={[
-          { label: 'A', topResources: [] },
-          { label: 'B', topResources: [] },
-        ]}
-      />
-    );
+    mockUseNetworkRequestStats.mockReturnValue([
+      statsRow({ label: 'A', topResources: [] }),
+      statsRow({ label: 'B', topResources: [] }),
+    ]);
+    const { container } = render(<TopResourcesCard />);
     expect(container.firstChild).toBeNull();
   });
 
   it('renders card with resources', () => {
-    const { container } = render(
-      <TopResourcesCard
-        stats={[
+    mockUseNetworkRequestStats.mockReturnValue([
+      statsRow({
+        label: 'Desktop',
+        topResources: [
           {
-            label: 'Desktop',
-            topResources: [
-              {
-                url: 'https://example.com/script.js',
-                resourceType: 'Script',
-                transferSize: 1024,
-                resourceSize: 2048,
-                networkRequestTime: 50,
-              } as any,
-            ],
-          },
-        ]}
-      />
-    );
+            url: 'https://example.com/script.js',
+            resourceType: 'Script',
+            transferSize: 1024,
+            resourceSize: 2048,
+            networkRequestTime: 50,
+          } as any,
+        ],
+      }),
+    ]);
+    const { container } = render(<TopResourcesCard />);
     expect(container.textContent).toContain('Resources by Transfer Size');
     expect(container.querySelector('[data-testid="data-table-header"]')).toBeTruthy();
   });

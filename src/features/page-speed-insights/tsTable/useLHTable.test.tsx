@@ -11,6 +11,10 @@ import {
   getExpandedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
+import {
+  arrIncludesSomeFilter,
+  booleanFilterFn,
+} from '@/features/page-speed-insights/shared/filterFns';
 
 vi.mock('@/components/common/PageSpeedGaugeChart', () => ({
   HorizontalScoreChart: () => <div data-testid="score-chart" />,
@@ -98,7 +102,8 @@ function CategoryRowWrapper() {
     getCoreRowModel: getCoreRowModel(),
     getGroupedRowModel: getGroupedRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
-    filterFns: { booleanFilterFn: () => true },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    filterFns: { booleanFilterFn, arrIncludesSome: arrIncludesSomeFilter } as any,
   });
   const row = table.getRowModel().rows[0];
   return <CategoryRow row={row as unknown as Row<TableDataItem>} />;
@@ -133,7 +138,8 @@ function AuditSummaryRowWrapper() {
     getCoreRowModel: getCoreRowModel(),
     getGroupedRowModel: getGroupedRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
-    filterFns: { booleanFilterFn: () => true },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    filterFns: { booleanFilterFn, arrIncludesSome: arrIncludesSomeFilter } as any,
   });
   const row = table.getRowModel().rows[0];
   return <AuditSummaryRow row={row as unknown as Row<TableDataItem>} />;

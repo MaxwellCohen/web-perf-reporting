@@ -1,14 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
-import { RenderMSValue } from '@/features/page-speed-insights/lh-categories/table/RenderTableValue';
 import { TableItem } from '@/lib/schema';
 import { getUrlString, getNumber } from '@/lib/utils';
 import { useMemo } from 'react';
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
-import { createNumericAggregatedCell } from '@/features/page-speed-insights/shared/aggregatedCellHelpers';
 import { sortByMaxValue } from '@/features/page-speed-insights/shared/dataSortingHelpers';
 import { useStandardTable } from '@/features/page-speed-insights/shared/tableConfigHelpers';
-import { createURLColumn } from '@/features/page-speed-insights/shared/tableColumnHelpers';
+import {
+  createMSColumn,
+  createURLColumn,
+} from '@/features/page-speed-insights/shared/tableColumnHelpers';
 import { useTableColumns } from '@/features/page-speed-insights/shared/useTableColumns';
 import { TableCard } from '@/features/page-speed-insights/shared/TableCard';
 
@@ -31,39 +32,11 @@ type BootupTimeCardProps = {
 
 const columnHelper = createColumnHelper<BootupTimeTableRow>();
 
-function msCell(info: { getValue: () => number | undefined }) {
-  const value = info.getValue();
-  return value !== undefined ? <RenderMSValue value={value} /> : 'N/A';
-}
-
-const msColumnConfig = {
-  enableSorting: true,
-  enableResizing: true,
-  filterFn: 'inNumberRange' as const,
-  aggregationFn: 'unique' as const,
-  cell: msCell,
-};
-
-const cols: ColumnDef<BootupTimeTableRow, any>[] = [
+const cols: ColumnDef<BootupTimeTableRow, unknown>[] = [
   createURLColumn(columnHelper),
-  columnHelper.accessor('scriptParseCompile', {
-    id: 'scriptParseCompile',
-    header: 'Parse & Compile',
-    ...msColumnConfig,
-    aggregatedCell: createNumericAggregatedCell('scriptParseCompile'),
-  }),
-  columnHelper.accessor('scripting', {
-    id: 'scripting',
-    header: 'Scripting',
-    ...msColumnConfig,
-    aggregatedCell: createNumericAggregatedCell('scripting'),
-  }),
-  columnHelper.accessor('total', {
-    id: 'total',
-    header: 'Total Time',
-    ...msColumnConfig,
-    aggregatedCell: createNumericAggregatedCell('total'),
-  }),
+  createMSColumn(columnHelper, 'scriptParseCompile', 'Parse & Compile'),
+  createMSColumn(columnHelper, 'scripting', 'Scripting'),
+  createMSColumn(columnHelper, 'total', 'Total Time'),
 ];
 
 function itemToRow(label: string, item: TableItem): BootupTimeTableRow {

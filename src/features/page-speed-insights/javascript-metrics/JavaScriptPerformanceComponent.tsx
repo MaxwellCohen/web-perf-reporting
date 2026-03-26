@@ -1,9 +1,6 @@
 'use client';
-import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
+import { AccordionContent, AccordionItem } from '@/components/ui/accordion';
+import { AccordionSectionTitleTrigger } from '@/components/ui/accordion-section-title-trigger';
 import { BootupTimeCard } from '@/features/page-speed-insights/javascript-metrics/BootupTimeCard';
 import { MainThreadWorkCard } from '@/features/page-speed-insights/javascript-metrics/MainThreadWorkCard';
 import { UnusedJavaScriptCard } from '@/features/page-speed-insights/javascript-metrics/UnusedJavaScriptCard';
@@ -21,9 +18,9 @@ export function JavaScriptPerformanceComponent() {
 
   return (
     <AccordionItem value={'javascriptPerformance'}>
-      <AccordionTrigger className="text-lg font-bold group-hover:underline">
+      <AccordionSectionTitleTrigger>
         JavaScript Performance
-      </AccordionTrigger>
+      </AccordionSectionTitleTrigger>
       <AccordionContent className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         <JavaScriptSummaryCard stats={jsStats} />
         <TaskSummaryCard
