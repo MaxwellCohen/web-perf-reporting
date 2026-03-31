@@ -57,12 +57,11 @@ function usePageSpeedInsightsQueryBase(
   defaultData?: PageSpeedInsightsDefaultData,
 ) {
   const hasDefaultData = !!defaultData?.filter(Boolean).length;
-  console.log("hasDefaultData", queryKey);
   const { data, isLoading } = useSuspenseQuery({
     queryKey,
     queryFn,
     initialData: hasDefaultData ? defaultData : undefined,
-    retryDelay: 3000,
+    enabled: !hasDefaultData,
   });
 
   if (hasDefaultData) {

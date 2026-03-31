@@ -10,7 +10,7 @@ function makeQueryClient() {
       queries: {
         staleTime: 60 * 1000, // 1 minute
         retry: true,
-        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+        retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
       },
     },
   });
