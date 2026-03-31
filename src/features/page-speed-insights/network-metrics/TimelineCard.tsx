@@ -34,6 +34,11 @@ const EVENT_MAP: Record<string, string> = {
   "Trace End": "observedTraceEnd",
 };
 
+type EventLabel = keyof typeof EVENT_MAP;
+const EVENT_MAP_ENTRIES = Object.entries(EVENT_MAP) as Array<
+  [EventLabel, keyof NetworkMetricSeries]
+>;
+
 const EVENTS_WITH_TTFB = new Set([
   "DOM Content Loaded",
   "Load",
@@ -91,8 +96,8 @@ function buildEventDataMap(
   for (const metric of metrics) {
     const ttfb = metric.ttfb ?? 0;
 
-    for (const [eventLabel, propKey] of Object.entries(EVENT_MAP)) {
-      const rawValue = metric[propKey as keyof NetworkMetricSeries] as number | undefined;
+    for (const [eventLabel, propKey] of EVENT_MAP_ENTRIES) {
+      const rawValue = metric[propKey] as number | undefined;
       if (rawValue === undefined) continue;
 
       if (!eventDataMap.has(eventLabel)) {
@@ -147,8 +152,6 @@ function optionalMsCell(value: number | undefined) {
 }
 
 export function TimelineCard() {
-  "use no memo";
-
   const series = useNetworkMetricSeries();
 
   const { data, columns } = useMemo((): {
@@ -178,9 +181,10 @@ export function TimelineCard() {
           );
         },
       }),
-      ...reportLabels.map((reportLabel, index) =>
-        columnHelper.accessor((row) => row[reportLabel] as number | undefined, {
-          id: `report_${index}`,
+      ...reportLabels.map((reportLabel, index) => {
+        const columnId = reportLabel ? `report_${reportLabel}` : `report_${index}`;
+        return columnHelper.accessor((row) => row[reportLabel] as number | undefined, {
+          id: columnId,
           header: reportLabel || `Report ${index + 1}`,
           enableSorting: true,
           enableResizing: true,
@@ -190,8 +194,8 @@ export function TimelineCard() {
             return sortNumeric(a, b);
           },
           cell: (info) => optionalMsCell(info.getValue()),
-        }),
-      ),
+        });
+      }),
     ];
 
     return { data: rows, columns: tableColumns };

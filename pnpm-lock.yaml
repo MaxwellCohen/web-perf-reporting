@@ -54,8 +54,8 @@ importers:
         specifier: ^1.28.5
         version: 1.28.5(react-dom@19.3.0-canary-8b2e903a-20260320(react@19.3.0-canary-8b2e903a-20260320))(react@19.3.0-canary-8b2e903a-20260320)
       '@tanstack/react-query':
-        specifier: ^5.94.5
-        version: 5.94.5(react@19.3.0-canary-8b2e903a-20260320)
+        specifier: https://pkg.pr.new/@tanstack/react-query@10366
+        version: https://pkg.pr.new/@tanstack/react-query@10366(react@19.3.0-canary-8b2e903a-20260320)
       '@tanstack/react-table':
         specifier: ^8.21.3
         version: 8.21.3(react-dom@19.3.0-canary-8b2e903a-20260320(react@19.3.0-canary-8b2e903a-20260320))(react@19.3.0-canary-8b2e903a-20260320)
@@ -2707,8 +2707,9 @@ packages:
     resolution: {integrity: sha512-y/xtNPNt/YeyoVxE/JCx+T7yjEzpezmbb+toK8DDD1P4m7Kzs5YR956+7OKexG3f8aXgC3rLZl7b1V+yNUSy5w==}
     engines: {node: '>=18'}
 
-  '@tanstack/query-core@5.94.5':
-    resolution: {integrity: sha512-Vx1JJiBURW/wdNGP45afjrqn0LfxYwL7K/bSrQvNRtyLGF1bxQPgUXCpzscG29e+UeFOh9hz1KOVala0N+bZiA==}
+  '@tanstack/query-core@https://pkg.pr.new/TanStack/query/@tanstack/query-core@a5fec0f':
+    resolution: {tarball: https://pkg.pr.new/TanStack/query/@tanstack/query-core@a5fec0f}
+    version: 5.96.0
 
   '@tanstack/react-form@1.28.5':
     resolution: {integrity: sha512-CL8IeWkeXnEEDsHt5wBuIOZvSYrKiLRtsC9ca0LzfJJ22SYCma9cBmh1UX1EBX0o3gH2U21PmUf+y5f9OJNoEQ==}
@@ -2719,8 +2720,9 @@ packages:
       '@tanstack/react-start':
         optional: true
 
-  '@tanstack/react-query@5.94.5':
-    resolution: {integrity: sha512-1wmrxKFkor+q8l+ygdHmv0Sq5g84Q3p4xvuJ7AdSIAhQQ7udOt+ZSZ19g1Jea3mHqtlTslLGJsmC4vHFgP0P3A==}
+  '@tanstack/react-query@https://pkg.pr.new/@tanstack/react-query@10366':
+    resolution: {tarball: https://pkg.pr.new/@tanstack/react-query@10366}
+    version: 5.96.0
     peerDependencies:
       react: ^18 || ^19
 
@@ -7540,7 +7542,7 @@ snapshots:
 
   '@tanstack/pacer-lite@0.1.1': {}
 
-  '@tanstack/query-core@5.94.5': {}
+  '@tanstack/query-core@https://pkg.pr.new/TanStack/query/@tanstack/query-core@a5fec0f': {}
 
   '@tanstack/react-form@1.28.5(react-dom@19.3.0-canary-8b2e903a-20260320(react@19.3.0-canary-8b2e903a-20260320))(react@19.3.0-canary-8b2e903a-20260320)':
     dependencies:
@@ -7550,9 +7552,9 @@ snapshots:
     transitivePeerDependencies:
       - react-dom
 
-  '@tanstack/react-query@5.94.5(react@19.3.0-canary-8b2e903a-20260320)':
+  '@tanstack/react-query@https://pkg.pr.new/@tanstack/react-query@10366(react@19.3.0-canary-8b2e903a-20260320)':
     dependencies:
-      '@tanstack/query-core': 5.94.5
+      '@tanstack/query-core': https://pkg.pr.new/TanStack/query/@tanstack/query-core@a5fec0f
       react: 19.3.0-canary-8b2e903a-20260320
 
   '@tanstack/react-store@0.9.2(react-dom@19.3.0-canary-8b2e903a-20260320(react@19.3.0-canary-8b2e903a-20260320))(react@19.3.0-canary-8b2e903a-20260320)':
