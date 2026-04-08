@@ -152,6 +152,7 @@ function optionalMsCell(value: number | undefined) {
 }
 
 export function TimelineCard() {
+  'use no memo'
   const series = useNetworkMetricSeries();
 
   const { data, columns } = useMemo((): {

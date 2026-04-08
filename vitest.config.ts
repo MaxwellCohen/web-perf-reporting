@@ -7,6 +7,11 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
     },
   },
+  // Vite 7.3.2+ treats some `next/*` subpath imports as external in the test
+  // pipeline; keep them resolvable like pre-7.3.2 Vitest peers.
+  ssr: {
+    noExternal: ["next"],
+  },
   test: {
     testTimeout: 500,
     pool: "threads",

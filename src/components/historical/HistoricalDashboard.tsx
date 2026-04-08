@@ -24,6 +24,27 @@ function cruxDateToDateString(cruxDate: { year: number; month: number; day: numb
   return `${cruxDate.year}-${month}-${day}`;
 }
 
+function filterCruxReportsByDateRange(
+  reports: CruxReport[],
+  range: { startDate: string | null; endDate: string | null },
+): CruxReport[] {
+  if (!range.startDate && !range.endDate) {
+    return reports;
+  }
+
+  return reports.filter((report) => {
+    const reportDate = cruxDateToDateString(report.record.collectionPeriod.lastDate);
+
+    if (range.startDate && reportDate < range.startDate) {
+      return false;
+    }
+    if (range.endDate && reportDate > range.endDate) {
+      return false;
+    }
+    return true;
+  });
+}
+
 export function HistoricalDashboard({
   reportMap,
 }: {
@@ -60,43 +81,15 @@ export function HistoricalDashboard({
   const activeDateRange = selectedDateRange || dateRange;
 
   // Filter reports based on date range
-  const reports = useMemo(() => {
-    if (!activeDateRange.startDate && !activeDateRange.endDate) {
-      return allReports;
-    }
-
-    return allReports.filter((report) => {
-      const reportDate = cruxDateToDateString(report.record.collectionPeriod.lastDate);
-
-      if (activeDateRange.startDate && reportDate < activeDateRange.startDate) {
-        return false;
-      }
-      if (activeDateRange.endDate && reportDate > activeDateRange.endDate) {
-        return false;
-      }
-      return true;
-    });
-  }, [allReports, activeDateRange]);
+  const reports = useMemo(
+    () => filterCruxReportsByDateRange(allReports, activeDateRange),
+    [allReports, activeDateRange],
+  );
 
   // Get filtered reports for "All" device type to calculate form factors
   const allDeviceReports = useMemo(() => {
     const allDeviceAllReports = reportMap[`${reportScope}All`] || [];
-
-    if (!activeDateRange.startDate && !activeDateRange.endDate) {
-      return allDeviceAllReports;
-    }
-
-    return allDeviceAllReports.filter((report) => {
-      const reportDate = cruxDateToDateString(report.record.collectionPeriod.lastDate);
-
-      if (activeDateRange.startDate && reportDate < activeDateRange.startDate) {
-        return false;
-      }
-      if (activeDateRange.endDate && reportDate > activeDateRange.endDate) {
-        return false;
-      }
-      return true;
-    });
+    return filterCruxReportsByDateRange(allDeviceAllReports, activeDateRange);
   }, [reportMap, reportScope, activeDateRange]);
 
   const data = reports

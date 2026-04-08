@@ -14,28 +14,14 @@ import {
   compareReportLabels,
   formatReportLabelList,
 } from "@/features/page-speed-insights/shared/reportLabels";
+import { recommendationMarkdownComponents } from "@/features/page-speed-insights/RecommendationsSection/recommendationMarkdownComponents";
 
 interface ActionableStepsTableProps {
   rec: Recommendation;
   items: Array<{ label: string }>;
 }
 
-const markdownComponents = {
-  p: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
-  a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-blue-600 dark:text-blue-400 hover:underline"
-    >
-      {children}
-    </a>
-  ),
-  code: ({ children }: { children?: React.ReactNode }) => (
-    <code className="bg-muted px-1 py-0.5 rounded text-xs">{children}</code>
-  ),
-};
+const markdownComponents = recommendationMarkdownComponents({ code: true });
 
 const OTHER_GROUP = "\u200bOther"; // zero-width space prefix so "Other" sorts last
 

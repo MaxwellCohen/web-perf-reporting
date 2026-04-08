@@ -1,15 +1,7 @@
 "use client";
-import { TableItem } from "@/lib/schema";
-import { getNumber } from "@/lib/utils";
-import { useMemo } from "react";
-import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
-import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
-import { createStringAggregatedCell } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
-import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
-import { useStandardTable } from "@/features/page-speed-insights/shared/tableConfigHelpers";
-import { createMSColumn } from "@/features/page-speed-insights/shared/tableColumnHelpers";
-import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
-import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
+
+import type { TableItem } from "@/lib/schema";
+import * as PT from "@/features/page-speed-insights/shared/psiTableToolkit";
 
 type MainThreadWorkData = {
   label: string;
@@ -27,8 +19,8 @@ type MainThreadWorkCardProps = {
   metrics: MainThreadWorkData[];
 };
 
-const columnHelper = createColumnHelper<MainThreadWorkTableRow>();
-const cols: ColumnDef<MainThreadWorkTableRow, unknown>[] = [
+const columnHelper = PT.createColumnHelper<MainThreadWorkTableRow>();
+const cols: PT.ColumnDef<MainThreadWorkTableRow, any>[] = [
   columnHelper.accessor("groupLabel", {
     id: "groupLabel",
     header: "Category",
@@ -38,33 +30,32 @@ const cols: ColumnDef<MainThreadWorkTableRow, unknown>[] = [
     filterFn: "includesString",
     aggregationFn: "unique",
     cell: (info) => info.getValue(),
-    aggregatedCell: createStringAggregatedCell("groupLabel", undefined, false),
+    aggregatedCell: PT.createStringAggregatedCell("groupLabel", undefined, false),
   }),
-  createMSColumn(columnHelper, "duration", "Time Spent"),
+  PT.createMSColumn(columnHelper, "duration", "Time Spent"),
 ];
 
 export function MainThreadWorkCard({ metrics }: MainThreadWorkCardProps) {
   "use no memo";
-  const validMetrics = useMemo(() => metrics.filter((m) => m.mainThreadWork.length > 0), [metrics]);
+  const validMetrics = PT.useMemo(() => metrics.filter((m) => m.mainThreadWork.length > 0), [metrics]);
   const showReportColumn = validMetrics.length > 1;
 
-  // Combine all main thread work data with labels
-  const data = useMemo<MainThreadWorkTableRow[]>(() => {
+  const data = PT.useMemo<MainThreadWorkTableRow[]>(() => {
     const allRows = validMetrics.flatMap(({ label, mainThreadWork }) =>
       mainThreadWork.map((item: TableItem) => {
         const group = typeof item.group === "string" ? item.group : "";
         const groupLabel = typeof item.groupLabel === "string" ? item.groupLabel : group;
-        const duration = getNumber(item.duration);
+        const duration = PT.getNumber(item.duration);
         return {
           label,
           group,
-          groupLabel: groupLabel || toTitleCase(group),
+          groupLabel: groupLabel || PT.toTitleCase(group),
           duration,
         };
       }),
     );
 
-    return sortByMaxValue(
+    return PT.sortByMaxValue(
       allRows,
       (row) => row.groupLabel,
       (row) => row.duration || 0,
@@ -72,9 +63,9 @@ export function MainThreadWorkCard({ metrics }: MainThreadWorkCardProps) {
     );
   }, [validMetrics]);
 
-  const columns = useTableColumns<MainThreadWorkTableRow>(cols, columnHelper, showReportColumn);
+  const columns = PT.useTableColumns<MainThreadWorkTableRow>(cols, columnHelper, showReportColumn);
 
-  const table = useStandardTable({
+  const table = PT.useStandardTable({
     data,
     columns,
     grouping: ["groupLabel"],
@@ -84,5 +75,5 @@ export function MainThreadWorkCard({ metrics }: MainThreadWorkCardProps) {
     return null;
   }
 
-  return <TableCard title="Main Thread Work Breakdown" table={table} />;
+  return <PT.TableCard title="Main Thread Work Breakdown" table={table} />;
 }

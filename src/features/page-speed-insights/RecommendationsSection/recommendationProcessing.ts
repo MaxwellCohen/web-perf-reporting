@@ -10,6 +10,28 @@ import { extractSpecificRecommendations } from "@/features/page-speed-insights/R
 import { getCategoryAndGenericSteps } from "@/features/page-speed-insights/RecommendationsSection/categorySteps";
 import { deduplicateResourcesByUrl } from "@/features/page-speed-insights/RecommendationsSection/deduplicateResources";
 
+type ActionableStepAccumulator = { reports: Set<string>; url?: string; host?: string };
+
+function mergeActionableStepIntoMap(
+  map: Map<string, ActionableStepAccumulator>,
+  step: string,
+  reports: string[],
+  url?: string,
+  host?: string,
+): void {
+  if (!map.has(step)) {
+    map.set(step, { reports: new Set(), url, host });
+  }
+  const entry = map.get(step)!;
+  reports.forEach((r) => entry.reports.add(r));
+  if (url && !entry.url) {
+    entry.url = url;
+  }
+  if (host && !entry.host) {
+    entry.host = host;
+  }
+}
+
 export function collectSpecificRecommendations(
   auditId: string,
   auditEntries: AuditEntry[],
@@ -34,17 +56,7 @@ export function collectSpecificRecommendations(
     );
 
     specificRecs.forEach(({ step, reports, url, host }) => {
-      if (!stepsMap.has(step)) {
-        stepsMap.set(step, { reports: new Set(), url, host });
-      }
-      const entry = stepsMap.get(step)!;
-      reports.forEach((r) => entry.reports.add(r));
-      if (url && !entry.url) {
-        entry.url = url;
-      }
-      if (host && !entry.host) {
-        entry.host = host;
-      }
+      mergeActionableStepIntoMap(stepsMap, step, reports, url, host);
     });
   });
 
@@ -63,17 +75,7 @@ export function combineAndDeduplicateSteps(
   const allStepsMap = new Map<string, { reports: Set<string>; url?: string; host?: string }>();
 
   [...specificRecs, ...genericSteps].forEach(({ step, reports, url, host }) => {
-    if (!allStepsMap.has(step)) {
-      allStepsMap.set(step, { reports: new Set(), url, host });
-    }
-    const entry = allStepsMap.get(step)!;
-    reports.forEach((r) => entry.reports.add(r));
-    if (url && !entry.url) {
-      entry.url = url;
-    }
-    if (host && !entry.host) {
-      entry.host = host;
-    }
+    mergeActionableStepIntoMap(allStepsMap, step, reports, url, host);
   });
 
   return Array.from(allStepsMap.entries()).map(([step, { reports, url, host }]) => ({

@@ -107,19 +107,34 @@ function RenderCodeValue({
   );
 }
 
+function RenderAnchoredOverflowLink({
+  href,
+  title: linkTitle,
+  label,
+  ...props
+}: {
+  href: string;
+  title: string;
+  label: string;
+} & React.HTMLAttributes<HTMLElement>) {
+  return (
+    <a
+      href={href}
+      title={linkTitle}
+      {...props}
+      className={cn("block overflow-auto wrap-break-word break-all", props.className)}
+    >
+      {label}
+    </a>
+  );
+}
+
 function RenderLinkValue({
   value,
   ...props
 }: { value: LinkValue } & React.HTMLAttributes<HTMLElement>) {
   return (
-    <a
-      href={value.url}
-      title={value.text}
-      {...props}
-      className={cn("block overflow-auto wrap-break-word break-all", props.className)}
-    >
-      {value.text}
-    </a>
+    <RenderAnchoredOverflowLink href={value.url} title={value.text} label={value.text} {...props} />
   );
 }
 
@@ -275,16 +290,8 @@ function RenderUrlValue({
   value,
   ...props
 }: { value: UrlValue } & React.HTMLAttributes<HTMLElement>) {
-  return (
-    <a
-      href={value.value}
-      title={value.value}
-      {...props}
-      className={cn("block overflow-auto wrap-break-word break-all", props.className)}
-    >
-      {value.value}
-    </a>
-  );
+  const v = value.value;
+  return <RenderAnchoredOverflowLink href={v} title={v} label={v} {...props} />;
 }
 
 function RenderTextValue({

@@ -123,18 +123,21 @@ const extractJSMetricsMock = vi.fn();
 
 vi.mock("@/features/page-speed-insights/PageSpeedContext", () => ({
   usePageSpeedItems: () => pageSpeedItems,
-  usePageSpeedSelector: (selector: (snapshot: { context: unknown }) => unknown) =>
-    selector({
+  usePageSpeedSelector: (selector: (snapshot: { context: unknown }) => unknown) => {
+    const networkMetricSeries = mapItemsToNetworkMetrics(pageSpeedItems);
+    return selector({
       context: {
         items: pageSpeedItems,
-        networkMetricSeries: mapItemsToNetworkMetrics(pageSpeedItems),
+        networkMetricSeries,
+        networkRequestStats: mapNetworkMetricsToStats(networkMetricSeries),
         data: [],
         labels: [],
         isLoading: false,
         reportTitle: "",
         fullPageScreenshots: {},
       },
-    }),
+    });
+  },
 }));
 
 vi.mock(

@@ -10,7 +10,9 @@ import {
 } from "@/features/page-speed-insights/pageSpeedDashboardHelpers";
 import {
   mapItemsToNetworkMetrics,
+  mapNetworkMetricsToStats,
   type NetworkMetricSeries,
+  type NetworkRequestStatsRow,
 } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsData";
 import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
 
@@ -26,6 +28,7 @@ type PageSpeedInsightsStoreState = {
   isLoading: boolean;
   items: InsightsContextItem[];
   networkMetricSeries: NetworkMetricSeries[];
+  networkRequestStats: NetworkRequestStatsRow[];
   reportTitle: string;
   fullPageScreenshots: Record<string, FullPageScreenshot | undefined | null>;
 };
@@ -37,6 +40,7 @@ function createPageSpeedInsightsState({
 }: PageSpeedInsightsStoreInput): PageSpeedInsightsStoreState {
   const items = getDashboardItems(data, labels);
   const networkMetricSeries = mapItemsToNetworkMetrics(items);
+  const networkRequestStats = mapNetworkMetricsToStats(networkMetricSeries);
 
   return {
     data,
@@ -44,6 +48,7 @@ function createPageSpeedInsightsState({
     isLoading,
     items,
     networkMetricSeries,
+    networkRequestStats,
     reportTitle: getDashboardTitle(items),
     fullPageScreenshots: getFullPageScreenshotMap(items),
   };

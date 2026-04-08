@@ -1,15 +1,69 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
-  numericRangeFilter,
-  ExpandRow,
-  RenderBytesCell,
   ExpandAll,
   useUseJSUsageTable,
   JSUsageTableWithControls,
 } from "@/features/page-speed-insights/JSUsage/JSUsageTable";
-import type { FilterFn } from "@tanstack/react-table";
-import type { Row } from "@tanstack/react-table";
+
+type MockRow = {
+  name: string;
+  resourceBytes: number;
+  unusedBytes?: number;
+  children: { name: string; resourceBytes: number; unusedBytes?: number }[];
+};
+
+vi.mock("@/features/page-speed-insights/JSUsage/jsUsageTableColumns", () => ({
+  columns: [
+    { id: "expander", header: () => null, cell: () => null, size: 40 },
+    {
+      accessorKey: "name",
+      id: "name",
+      header: () => "Name",
+      cell: (c: { getValue: () => unknown }) => String(c.getValue()),
+      size: 200,
+    },
+    {
+      id: "host",
+      accessorFn: (row: MockRow) => {
+        try {
+          return new URL(row.name).hostname;
+        } catch {
+          return "";
+        }
+      },
+      header: () => "Host",
+      enableGrouping: true,
+      size: 100,
+    },
+  ],
+  makeSortingHeading: () => () => null,
+}));
+
+vi.mock("@/features/page-speed-insights/JSUsage/jsUsageTableRow", () => ({
+  JSUsageTableRow: () => (
+    <tr data-testid="mock-usage-row">
+      <td />
+    </tr>
+  ),
+}));
+
+vi.mock("@/features/page-speed-insights/JSUsage/jsUsageTableHeader", () => ({
+  JSUsageTableHeader: () => (
+    <tr data-testid="mock-usage-header">
+      <th />
+    </tr>
+  ),
+}));
+
+vi.mock("@/components/ui/button", () => ({
+  Button: ({
+    children,
+    ...rest
+  }: React.PropsWithChildren<Record<string, unknown>>) => (
+    <button type="button" {...rest}>{children}</button>
+  ),
+}));
 
 vi.mock("@/components/ui/table", () => ({
   Table: ({ children }: { children: React.ReactNode }) => <table>{children}</table>,
@@ -32,58 +86,21 @@ vi.mock("lucide-react", () => ({
   ChevronUp: () => <span data-testid="chevron-up" />,
 }));
 
-vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", () => ({
-  RenderBytesValue: ({ value }: { value: number }) => (
-    <span data-testid="bytes">{value} bytes</span>
-  ),
-}));
-
-const noopAddMeta = () => {};
-
-const mockTreeNodes = [
+const mockTreeNodes: MockRow[] = [
   {
     name: "https://example.com/script.js",
     resourceBytes: 50000,
     unusedBytes: 10000,
-    children: [] as { name: string; resourceBytes: number; unusedBytes?: number }[],
+    children: [],
   },
 ];
 
-function JSUsageTableWrapper({ data }: { data: typeof mockTreeNodes }) {
+function JSUsageTableWrapper({ data }: { data: MockRow[] }) {
   const table = useUseJSUsageTable(data);
   return <div data-testid="table">{table.getRowModel().rows.length} rows</div>;
 }
 
 describe("JSUsageTable", () => {
-  describe("numericRangeFilter", () => {
-    const getRow = (value: number) => ({ getValue: () => value }) as unknown as Row<{ x: number }>;
-    const filter = numericRangeFilter as unknown as FilterFn<{ x: number }>;
-
-    it("returns true when value is within [min, max]", () => {
-      expect(filter(getRow(50), "x", [0, 100], noopAddMeta)).toBe(true);
-      expect(filter(getRow(0), "x", [0, 100], noopAddMeta)).toBe(true);
-      expect(filter(getRow(100), "x", [0, 100], noopAddMeta)).toBe(true);
-    });
-
-    it("returns false when value is below min", () => {
-      expect(filter(getRow(10), "x", [20, 100], noopAddMeta)).toBe(false);
-    });
-
-    it("returns false when value is above max", () => {
-      expect(filter(getRow(150), "x", [0, 100], noopAddMeta)).toBe(false);
-    });
-
-    it("handles undefined min (only max check)", () => {
-      expect(filter(getRow(50), "x", [undefined, 100], noopAddMeta)).toBe(true);
-      expect(filter(getRow(150), "x", [undefined, 100], noopAddMeta)).toBe(false);
-    });
-
-    it("handles undefined max (only min check)", () => {
-      expect(filter(getRow(50), "x", [0, undefined], noopAddMeta)).toBe(true);
-      expect(filter(getRow(0), "x", [10, undefined], noopAddMeta)).toBe(false);
-    });
-  });
-
   describe("ExpandAll", () => {
     function ExpandAllWrapper() {
       const table = useUseJSUsageTable(mockTreeNodes);
@@ -95,87 +112,6 @@ describe("JSUsageTable", () => {
       expect(container.querySelector("button")?.getAttribute("aria-label")).toMatch(
         /Expand all|Collapse all/,
       );
-    });
-  });
-
-  describe("ExpandRow", () => {
-    it("renders placeholder when row is missing", () => {
-      const { container } = render(<ExpandRow />);
-      expect(container.firstChild).toMatchSnapshot();
-    });
-
-    it("renders placeholder when row cannot expand", () => {
-      const row = {
-        getIsExpanded: () => false,
-        getCanExpand: () => false,
-        getToggleExpandedHandler: () => () => {},
-      };
-      const { container } = render(<ExpandRow row={row as any} />);
-      expect(container.firstChild).toMatchSnapshot();
-    });
-
-    it("renders expand button when row can expand", () => {
-      const row = {
-        getIsExpanded: () => false,
-        getCanExpand: () => true,
-        getToggleExpandedHandler: () => () => {},
-      };
-      const { container } = render(<ExpandRow row={row as any} />);
-      expect(container.firstChild).toMatchSnapshot();
-    });
-
-    it("renders collapse label when expanded", () => {
-      const row = {
-        getIsExpanded: () => true,
-        getCanExpand: () => true,
-        getToggleExpandedHandler: () => () => {},
-      };
-      const { container } = render(<ExpandRow row={row as any} />);
-      expect(container.firstChild).toMatchSnapshot();
-    });
-  });
-
-  describe("RenderBytesCell", () => {
-    it("renders N/A for non-number value", () => {
-      const { container } = render(
-        <table>
-          <tbody>
-            <tr>
-              <td>
-                {RenderBytesCell({
-                  getValue: () => "n/a",
-                  row: {} as any,
-                  column: {} as any,
-                  table: {} as any,
-                  renderValue: () => "n/a",
-                } as any)}
-              </td>
-            </tr>
-          </tbody>
-        </table>,
-      );
-      expect(container.textContent).toContain("N/A");
-    });
-
-    it("renders bytes value for number", () => {
-      const { container } = render(
-        <table>
-          <tbody>
-            <tr>
-              <td>
-                {RenderBytesCell({
-                  getValue: () => 1024,
-                  row: {} as any,
-                  column: {} as any,
-                  table: {} as any,
-                  renderValue: () => 1024,
-                } as any)}
-              </td>
-            </tr>
-          </tbody>
-        </table>,
-      );
-      expect(container.textContent).toMatch(/1024 bytes/);
     });
   });
 

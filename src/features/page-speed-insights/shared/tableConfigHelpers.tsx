@@ -33,6 +33,7 @@ export function useStandardTable<T>({
   enablePagination = false,
   defaultPageSize = 10,
 }: TableConfigOptions<T>) {
+  'use no memo'
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [groupingState, setGrouping] = useState<string[]>(grouping);

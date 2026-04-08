@@ -1,8 +1,9 @@
 "use client";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Area, CartesianGrid, ComposedChart, Line, XAxis, YAxis } from "recharts";
+import { CartesianGrid, ComposedChart, Line, XAxis, YAxis } from "recharts";
 import { chartConfig } from "@/components/common/ChartSettings";
 import { CruxHistoryItem } from "@/lib/schema";
+import { HistoricalCruxDensityAreas } from "@/components/historical/historicalCruxDensityLayers";
 
 export function HistoricalPerformanceAreaChart({ chartData }: { chartData: CruxHistoryItem[] }) {
   return (
@@ -12,30 +13,7 @@ export function HistoricalPerformanceAreaChart({ chartData }: { chartData: CruxH
         <XAxis dataKey="date" tickLine={false} axisLine={false} tickFormatter={(value) => value} />
         <YAxis domain={[0, 1]} ticks={[0, 0.5, 0.89, 1]} hide={true} />
         <ChartTooltip cursor={true} content={<ChartTooltipContent indicator="dot" />} />
-        <Area
-          dataKey="good_density"
-          type="linear"
-          fill="var(--color-good_density)"
-          fillOpacity={0.4}
-          stroke="var(--color-good_density)"
-          stackId="a"
-        />
-        <Area
-          dataKey="ni_density"
-          type="linear"
-          fill="var(--color-ni_density)"
-          fillOpacity={0.4}
-          stroke="var(--color-ni_density)"
-          stackId="a"
-        />
-        <Area
-          dataKey="poor_density"
-          type="linear"
-          fill="var(--color-poor_density)"
-          fillOpacity={0.4}
-          stroke="var(--color-poor_density)"
-          stackId="a"
-        />
+        <HistoricalCruxDensityAreas />
       </ComposedChart>
     </ChartContainer>
   );
@@ -62,14 +40,13 @@ export const Dot = ({
   r: number;
   payload: DotProps["payload"];
 }) => {
-  // Determine color based on P75 value
   let dotColor;
   if (payload.P75 <= payload.good_max) {
-    dotColor = "var(--color-good_density)"; // Green for good
+    dotColor = "var(--color-good_density)";
   } else if (payload.P75 <= payload.ni_max) {
-    dotColor = "var(--color-ni_density)"; // Yellow/amber for needs improvement
+    dotColor = "var(--color-ni_density)";
   } else {
-    dotColor = "var(--color-poor_density)"; // Red for poor
+    dotColor = "var(--color-poor_density)";
   }
 
   return <circle cx={cx} cy={cy} r={r} fill={dotColor} stroke="white" strokeWidth={1} />;
@@ -89,9 +66,9 @@ export function HistoricalP75Chart({ chartData }: { chartData: CruxHistoryItem[]
           vertical={true}
           horizontal={true}
           horizontalFill={[
-            "var(--color-poor_density)", // Poor - red with opacity
-            "var(--color-ni_density)", // Needs improvement - yellow/amber with opacity
-            "var(--color-good_density)", // Good - green with opacity
+            "var(--color-poor_density)",
+            "var(--color-ni_density)",
+            "var(--color-good_density)",
           ]}
           syncWithTicks={true}
         />

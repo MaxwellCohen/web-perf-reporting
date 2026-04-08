@@ -2,6 +2,7 @@
 import { TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { flexRender, Table as TableType } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
+import { tanstackTableCellDataProps } from "@/features/page-speed-insights/shared/tanstackTableCellDataProps";
 
 export function DataTableBody<T>({ table }: { table: TableType<T> }) {
   "use no memo";
@@ -34,14 +35,7 @@ export function DataTableBody<T>({ table }: { table: TableType<T> }) {
                         boxSizing: "border-box",
                       }),
                     }}
-                    data-cell-id={cell.id}
-                    data-column-id={cell.column.id}
-                    data-can-expand={`${row.getCanExpand()}`}
-                    data-depth={row.depth}
-                    data-row-expanded={`${row.getIsExpanded()}`}
-                    data-grouped={`${cell.getIsGrouped()}`}
-                    data-aggregated={`${cell.getIsAggregated()}`}
-                    data-placeholder={`${cell.getIsPlaceholder()}`}
+                    {...tanstackTableCellDataProps(cell, row)}
                   >
                     {cellRender}
                   </TableCell>

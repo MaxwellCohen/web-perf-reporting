@@ -1,30 +1,32 @@
-import { act, renderHook } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PageSpeedInsights } from "@/lib/schema";
 import {
   usePageSpeedInsightsQueryByPublicId,
   usePageSpeedInsightsQueryByUrl,
 } from "@/features/page-speed-insights/data/usePageSpeedInsightsQuery";
 
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
+const sharedQueryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      gcTime: 0,
     },
-  });
+  },
+});
+
+const createWrapper = () => {
   return function Wrapper({ children }: { children: React.ReactNode }) {
-    return React.createElement(QueryClientProvider, { client: queryClient }, children);
+    return React.createElement(QueryClientProvider, { client: sharedQueryClient }, children);
   };
 };
 
-/** useSuspenseQuery suspends then throws on failed fetch; capture that for assertions. */
-function createSuspenseErrorWrapper(capture: { error: unknown }) {
+/** useQuery + throwOnError: capture errors for assertions. */
+function createThrowErrorWrapper(capture: { error: unknown }) {
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
+    defaultOptions: { queries: { retry: false, gcTime: 0 } },
   });
 
   class ErrorCatcher extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
@@ -48,22 +50,18 @@ function createSuspenseErrorWrapper(capture: { error: unknown }) {
     return React.createElement(
       QueryClientProvider,
       { client: queryClient },
-      React.createElement(
-        React.Suspense,
-        { fallback: null },
-        React.createElement(ErrorCatcher, null, children),
-      ),
+      React.createElement(ErrorCatcher, null, children),
     );
   };
 }
 
 describe("usePageSpeedInsightsQuery", () => {
   beforeEach(() => {
-    vi.useFakeTimers();
+    sharedQueryClient.clear();
   });
 
   afterEach(() => {
-    vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   describe("url mode", () => {
@@ -107,10 +105,9 @@ describe("usePageSpeedInsightsQuery", () => {
         { wrapper: createWrapper() },
       );
 
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(0);
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
       });
-      expect(result.current.isLoading).toBe(false);
       expect(result.current.data).toEqual([]);
       fetchMock.mockRestore();
     });
@@ -130,10 +127,9 @@ describe("usePageSpeedInsightsQuery", () => {
         wrapper: createWrapper(),
       });
 
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(0);
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
       });
-      expect(result.current.isLoading).toBe(false);
       expect(result.current.data).toEqual(mockData);
       expect(fetchMock).toHaveBeenCalledWith(
         "/api/pagespeed",
@@ -145,22 +141,25 @@ describe("usePageSpeedInsightsQuery", () => {
       fetchMock.mockRestore();
     });
 
-    it("throws when response is not ok (useSuspenseQuery error)", async () => {
+    it("throws when response is not ok (throwOnError + error boundary)", async () => {
       const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
         ok: false,
         status: 500,
         text: async () => "Server error",
       } as Response);
 
+      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
       const capture: { error: unknown } = { error: undefined };
       renderHook(() => usePageSpeedInsightsQueryByUrl("https://example.com"), {
-        wrapper: createSuspenseErrorWrapper(capture),
+        wrapper: createThrowErrorWrapper(capture),
       });
 
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(0);
+      await waitFor(() => {
+        expect(capture.error).toBeDefined();
       });
       expect(capture.error).toMatchObject({ status: 500, message: "Server error" });
+      consoleSpy.mockRestore();
       fetchMock.mockRestore();
     });
 
@@ -176,10 +175,9 @@ describe("usePageSpeedInsightsQuery", () => {
         wrapper: createWrapper(),
       });
 
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(0);
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
       });
-      expect(result.current.isLoading).toBe(false);
       expect(result.current.data).toEqual([]);
       expect(consoleSpy).toHaveBeenCalled();
       fetchMock.mockRestore();
@@ -203,10 +201,9 @@ describe("usePageSpeedInsightsQuery", () => {
         wrapper: createWrapper(),
       });
 
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(0);
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
       });
-      expect(result.current.isLoading).toBe(false);
       expect(result.current.data).toEqual(mockData);
       expect(fetchMock).toHaveBeenCalledWith(
         "/api/pagespeed/public-123",
@@ -228,10 +225,9 @@ describe("usePageSpeedInsightsQuery", () => {
         wrapper: createWrapper(),
       });
 
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(0);
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
       });
-      expect(result.current.isLoading).toBe(false);
       expect(result.current.data).toEqual({ status: "failed" });
       fetchMock.mockRestore();
     });
@@ -248,10 +244,9 @@ describe("usePageSpeedInsightsQuery", () => {
         wrapper: createWrapper(),
       });
 
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(0);
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
       });
-      expect(result.current.isLoading).toBe(false);
       expect(result.current.data).toEqual([]);
       expect(consoleSpy).toHaveBeenCalled();
       fetchMock.mockRestore();

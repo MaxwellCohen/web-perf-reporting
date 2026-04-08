@@ -14,8 +14,7 @@ exports[`app page coverage smoke tests > renders historical crux lookup or dashb
   <h1
     class="mx-auto text-center text-2xl font-extrabold"
   >
-    Historical CrUX reports 
-     for https://example.com 
+    Historical CrUX reports for https://example.com 
   </h1>
   <div>
     Historical charts for 
@@ -46,8 +45,7 @@ exports[`app page coverage smoke tests > renders latest crux results when a norm
   <h1
     class="mx-auto text-center text-2xl font-extrabold"
   >
-    Latest Crux Report 
-     for https://example.com 
+    Latest Crux Report for https://example.com 
   </h1>
   <div>
     Current performance for 

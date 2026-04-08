@@ -8,18 +8,72 @@ import { UserPageLoadMetricV5 } from "@/lib/schema";
 
 const RADIAN = Math.PI / 180;
 
+const segmentLabelTextStyle = {
+  paintOrder: "stroke fill" as const,
+  textShadow: "0 0 3px rgba(0,0,0,0.8), 0 0 1px rgba(0,0,0,0.8)",
+};
+
+function GaugeSegmentBoundaryLabel({
+  xPercent,
+  value,
+  format,
+}: {
+  xPercent: number;
+  value: number;
+  format: "integer" | "decimal";
+}) {
+  const text =
+    value > 1
+      ? value.toFixed(0)
+      : format === "integer"
+        ? String(value)
+        : value.toFixed(2);
+  return (
+    <text
+      x={xPercent}
+      y={12}
+      z={1000}
+      fontSize="8"
+      fontWeight="700"
+      textAnchor="middle"
+      fill="#ffffff"
+      stroke="#000000"
+      strokeWidth="0.5"
+      strokeLinejoin="round"
+      style={segmentLabelTextStyle}
+    >
+      {text}
+    </text>
+  );
+}
+
 type ChartData = [
   { name: string; value: number; fill: string },
   { name: string; value: number; fill: string },
   { name: string; value: number; fill: string },
 ];
 
-export function GaugeChart({ metric, data }: { metric: string; data?: UserPageLoadMetricV5 }) {
+function triBandChartInputs(data?: UserPageLoadMetricV5): {
+  value: number;
+  distributions: UserPageLoadMetricV5["distributions"];
+  category: string;
+} | null {
   if (!data || data.distributions.length !== 3) {
     return null;
   }
-  const value = data.percentile;
-  const distributions = data.distributions;
+  return {
+    value: data.percentile,
+    distributions: data.distributions,
+    category: data.category,
+  };
+}
+
+export function GaugeChart({ metric, data }: { metric: string; data?: UserPageLoadMetricV5 }) {
+  const band = triBandChartInputs(data);
+  if (!band) {
+    return null;
+  }
+  const { value, distributions, category } = band;
   const chartData = [
     {
       name: chartConfig["poor_density"].label,
@@ -101,7 +155,7 @@ export function GaugeChart({ metric, data }: { metric: string; data?: UserPageLo
                         y={(viewBox.cy as number) + 24}
                         className="fill-foreground text-lg font-bold"
                       >
-                        {value.toLocaleString()} {data.category}
+                        {value.toLocaleString()} {category}
                       </tspan>
                       {metric ? (
                         <tspan
@@ -133,11 +187,11 @@ export function HorizontalGaugeChart({
   metric?: string;
   data?: UserPageLoadMetricV5;
 }) {
-  if (!data || data.distributions.length !== 3) {
+  const band = triBandChartInputs(data);
+  if (!band) {
     return null;
   }
-  const value = data.percentile;
-  const distributions = data.distributions;
+  const { value, distributions } = band;
   const chartData: ChartData = [
     {
       name: chartConfig["good_density"].label,
@@ -226,42 +280,16 @@ export function LineChart({ chartData, value }: { chartData: ChartData; value: n
         fill="hsl(var(--muted-foreground))"
       /> */}
 
-      <text
-        x={(chartData[0].value / maxValue) * 100}
-        y="12"
-        z={1000}
-        fontSize="8"
-        fontWeight="700"
-        textAnchor="middle"
-        fill="#ffffff"
-        stroke="#000000"
-        strokeWidth="0.5"
-        strokeLinejoin="round"
-        style={{
-          paintOrder: "stroke fill",
-          textShadow: "0 0 3px rgba(0,0,0,0.8), 0 0 1px rgba(0,0,0,0.8)",
-        }}
-      >
-        {chartData[0].value > 1 ? chartData[0].value.toFixed(0) : chartData[0].value}
-      </text>
-      <text
-        x={(chartData[1].value / maxValue) * 100}
-        y="12"
-        z={1000}
-        fontSize="8"
-        fontWeight="700"
-        textAnchor="middle"
-        fill="#ffffff"
-        stroke="#000000"
-        strokeWidth="0.5"
-        strokeLinejoin="round"
-        style={{
-          paintOrder: "stroke fill",
-          textShadow: "0 0 3px rgba(0,0,0,0.8), 0 0 1px rgba(0,0,0,0.8)",
-        }}
-      >
-        {chartData[1].value > 1 ? chartData[1].value.toFixed(0) : chartData[1].value.toFixed(2)}
-      </text>
+      <GaugeSegmentBoundaryLabel
+        xPercent={(chartData[0].value / maxValue) * 100}
+        value={chartData[0].value}
+        format="integer"
+      />
+      <GaugeSegmentBoundaryLabel
+        xPercent={(chartData[1].value / maxValue) * 100}
+        value={chartData[1].value}
+        format="decimal"
+      />
     </svg>
   );
 }

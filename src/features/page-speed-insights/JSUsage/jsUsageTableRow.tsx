@@ -5,6 +5,7 @@ import { flexRender } from "@tanstack/react-table";
 import type { Row } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
 import type { TreeMapNode } from "@/lib/schema";
+import { tanstackTableCellDataProps } from "@/features/page-speed-insights/shared/tanstackTableCellDataProps";
 
 export function JSUsageTableRow({ row, i }: { row: Row<TreeMapNode>; i: number }) {
   "use no memo";
@@ -37,14 +38,7 @@ export function JSUsageTableRow({ row, i }: { row: Row<TreeMapNode>; i: number }
               <TableCell
                 key={`${cell.id}_${i}_${depth}`}
                 data-key={`${cell.id}_${i}_${depth}`}
-                data-cell-id={cell.id}
-                data-column-id={cell.column.id}
-                data-can-expand={`${row.getCanExpand()}`}
-                data-depth={row.depth}
-                data-row-expanded={`${row.getIsExpanded()}`}
-                data-grouped={`${cell.getIsGrouped()}`}
-                data-aggregated={`${cell.getIsAggregated()}`}
-                data-placeholder={`${cell.getIsPlaceholder()}`}
+                {...tanstackTableCellDataProps(cell, row)}
                 className={cn(
                   "flex flex-row",
                   {

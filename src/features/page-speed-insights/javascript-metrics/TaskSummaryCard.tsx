@@ -1,7 +1,7 @@
 "use client";
 import { TableCell, TableHead, TableRow } from "@/components/ui/table";
 import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
-import { CardWithTable } from "@/features/page-speed-insights/shared/CardWithTable";
+import { WideMetricsSummaryCardTable } from "@/features/page-speed-insights/shared/WideMetricsSummaryCardTable";
 import { TableItem } from "@/lib/schema";
 
 type TaskSummaryData = {
@@ -91,10 +91,8 @@ export function TaskSummaryCard({ metrics }: TaskSummaryCardProps) {
   const showReportColumn = validStats.length > 1;
 
   return (
-    <CardWithTable
+    <WideMetricsSummaryCardTable
       title="Task Summary"
-      className="md:col-span-2 lg:col-span-3"
-      contentClassName="overflow-x-auto"
       tableClassName="table-auto min-w-full"
       header={
         <TableRow>
@@ -135,6 +133,6 @@ export function TaskSummaryCard({ metrics }: TaskSummaryCardProps) {
           <TableCell className="px-3 text-center">{stat.numTasksOver500ms}</TableCell>
         </TableRow>
       ))}
-    </CardWithTable>
+    </WideMetricsSummaryCardTable>
   );
 }

@@ -1,7 +1,8 @@
 "use client";
-import { TableCell, TableHead, TableRow } from "@/components/ui/table";
-import { RenderBytesValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
-import { CardWithTable } from "@/features/page-speed-insights/shared/CardWithTable";
+import {
+  BytesCountSummaryCard,
+  type BytesCountSummaryRow,
+} from "@/features/page-speed-insights/shared/BytesCountSummaryCard";
 
 type JavaScriptSummary = {
   label: string;
@@ -15,38 +16,13 @@ type JavaScriptSummaryCardProps = {
 };
 
 export function JavaScriptSummaryCard({ stats }: JavaScriptSummaryCardProps) {
-  const validStats = stats.filter((s) => s.totalScripts > 0);
-
-  if (!validStats.length) {
-    return null;
-  }
-
-  const showReportColumn = validStats.length > 1;
-
+  const rows: BytesCountSummaryRow[] = stats.map((s) => ({
+    label: s.label,
+    count: s.totalScripts,
+    totalTransferSize: s.totalTransferSize,
+    totalResourceSize: s.totalResourceSize,
+  }));
   return (
-    <CardWithTable
-      title="JavaScript Summary"
-      header={
-        <TableRow>
-          {showReportColumn && <TableHead>Report</TableHead>}
-          <TableHead>Total Scripts</TableHead>
-          <TableHead>Transfer Size</TableHead>
-          <TableHead>Resource Size</TableHead>
-        </TableRow>
-      }
-    >
-      {validStats.map(({ label, totalScripts, totalTransferSize, totalResourceSize }) => (
-        <TableRow key={label}>
-          {showReportColumn && <TableCell className="font-medium">{label || "Unknown"}</TableCell>}
-          <TableCell>{totalScripts}</TableCell>
-          <TableCell>
-            <RenderBytesValue value={totalTransferSize} />
-          </TableCell>
-          <TableCell>
-            <RenderBytesValue value={totalResourceSize} />
-          </TableCell>
-        </TableRow>
-      ))}
-    </CardWithTable>
+    <BytesCountSummaryCard title="JavaScript Summary" countColumnTitle="Total Scripts" rows={rows} />
   );
 }

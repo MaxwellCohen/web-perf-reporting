@@ -1,7 +1,8 @@
-import { cn } from "@/lib/utils";
 import React from "react";
 
-// Table container using div and grid, with ARIA role
+import { cn } from "@/lib/cn";
+import { forwardTableDiv } from "@/components/ui/tablePrimitives";
+
 const Table = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & { wrapperClassName?: string }
@@ -15,94 +16,27 @@ const Table = React.forwardRef<
 ));
 Table.displayName = "Table";
 
-// TableHeader as a rowgroup
-const TableHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("[&_div]:border-b", className)} role="rowgroup" {...props} />
-  ),
+const TableHeader = forwardTableDiv("TableHeader", "rowgroup", "[&_div]:border-b");
+const TableBody = forwardTableDiv("TableBody", "rowgroup", "[&_div:last-child]:border-0");
+const TableFooter = forwardTableDiv(
+  "TableFooter",
+  "rowgroup",
+  "flex flex-col border-t bg-muted/50 font-medium [&>div]:last:border-b-0",
 );
-TableHeader.displayName = "TableHeader";
 
-// TableBody as a rowgroup
-const TableBody = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn("[&_div:last-child]:border-0", className)}
-      role="rowgroup"
-      {...props}
-    />
-  ),
+const TableRow = forwardTableDiv(
+  "TableRow",
+  "row",
+  "flex flex-row border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted border",
 );
-TableBody.displayName = "TableBody";
 
-// TableFooter as a rowgroup
-const TableFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn(
-        "flex flex-col border-t bg-muted/50 font-medium [&>div]:last:border-b-0",
-        className,
-      )}
-      role="rowgroup"
-      {...props}
-    />
-  ),
+const TableHead = forwardTableDiv(
+  "TableHead",
+  "columnheader",
+  "flex h-10 flex-row px-2 text-left align-middle font-medium text-muted-foreground",
 );
-TableFooter.displayName = "TableFooter";
 
-// TableRow as a row
-const TableRow = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn(
-        "flex flex-row border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted border",
-        className,
-      )}
-      role="row"
-      {...props}
-    />
-  ),
-);
-TableRow.displayName = "TableRow";
-
-// TableHead as a columnheader
-const TableHead = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn(
-        "flex h-10 flex-row px-2 text-left align-middle font-medium text-muted-foreground",
-        className,
-      )}
-      role="columnheader"
-      {...props}
-    />
-  ),
-);
-TableHead.displayName = "TableHead";
-
-// TableCell as a cell
-const TableCell = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("p-2 align-middle", className)} role="cell" {...props} />
-  ),
-);
-TableCell.displayName = "TableCell";
-
-// TableCaption as a caption
-const TableCaption = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn("mt-4 text-sm text-muted-foreground", className)}
-      role="caption"
-      {...props}
-    />
-  ),
-);
-TableCaption.displayName = "TableCaption";
+const TableCell = forwardTableDiv("TableCell", "cell", "p-2 align-middle");
+const TableCaption = forwardTableDiv("TableCaption", "caption", "mt-4 text-sm text-muted-foreground");
 
 export { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption };

@@ -1,17 +1,19 @@
 import { fireEvent, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  createColumnHelper,
   getCoreRowModel,
   getFacetedMinMaxValues,
   getFilteredRowModel,
   useReactTable,
-  createColumnHelper,
-  flexRender,
+  type FilterFn,
+  type Row,
 } from "@tanstack/react-table";
 import {
   formatFilterValue,
   RangeFilter,
   useDebouncedCallback,
+  numericRangeFilter,
 } from "@/features/page-speed-insights/JSUsage/jsUsageTableFilters";
 
 vi.mock("@/components/ui/slider", () => ({
@@ -55,6 +57,36 @@ function UseDebouncedCallbackHarness({ delay = 100 }: { delay?: number }) {
 }
 
 describe("jsUsageTableFilters", () => {
+  describe("numericRangeFilter", () => {
+    const noopAddMeta = () => {};
+    const getRow = (value: number) => ({ getValue: () => value }) as unknown as Row<{ x: number }>;
+    const filter = numericRangeFilter as unknown as FilterFn<{ x: number }>;
+
+    it("returns true when value is within [min, max]", () => {
+      expect(filter(getRow(50), "x", [0, 100], noopAddMeta)).toBe(true);
+      expect(filter(getRow(0), "x", [0, 100], noopAddMeta)).toBe(true);
+      expect(filter(getRow(100), "x", [0, 100], noopAddMeta)).toBe(true);
+    });
+
+    it("returns false when value is below min", () => {
+      expect(filter(getRow(10), "x", [20, 100], noopAddMeta)).toBe(false);
+    });
+
+    it("returns false when value is above max", () => {
+      expect(filter(getRow(150), "x", [0, 100], noopAddMeta)).toBe(false);
+    });
+
+    it("handles undefined min (only max check)", () => {
+      expect(filter(getRow(50), "x", [undefined, 100], noopAddMeta)).toBe(true);
+      expect(filter(getRow(150), "x", [undefined, 100], noopAddMeta)).toBe(false);
+    });
+
+    it("handles undefined max (only min check)", () => {
+      expect(filter(getRow(50), "x", [0, undefined], noopAddMeta)).toBe(true);
+      expect(filter(getRow(0), "x", [10, undefined], noopAddMeta)).toBe(false);
+    });
+  });
+
   describe("formatFilterValue", () => {
     it("renders bytes for size column", () => {
       const { container } = render(

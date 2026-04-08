@@ -1,18 +1,10 @@
 import { getHistoricalCruxData } from "@/lib/services";
+import { fetchCruxOriginUrlFormFactorGrid } from "@/lib/cruxOriginUrlFormFactorGrid";
 
 import { HistoricalDashboard } from "@/components/historical/HistoricalDashboard";
 
 export async function HistoricalChartsSection({ url }: { url: string }) {
-  const cruxData = await Promise.all([
-    getHistoricalCruxData({ origin: url, formFactor: undefined }),
-    getHistoricalCruxData({ origin: url, formFactor: "DESKTOP" }),
-    getHistoricalCruxData({ origin: url, formFactor: "TABLET" }),
-    getHistoricalCruxData({ origin: url, formFactor: "PHONE" }),
-    getHistoricalCruxData({ url, formFactor: undefined }),
-    getHistoricalCruxData({ url, formFactor: "DESKTOP" }),
-    getHistoricalCruxData({ url, formFactor: "TABLET" }),
-    getHistoricalCruxData({ url, formFactor: "PHONE" }),
-  ]);
+  const cruxData = await fetchCruxOriginUrlFormFactorGrid(url, getHistoricalCruxData);
   const cruxReport = {
     originAll: cruxData[0],
     originDESKTOP: cruxData[1],

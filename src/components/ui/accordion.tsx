@@ -5,6 +5,7 @@ import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { ChevronDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { accordionContentStyles } from "@/lib/ui-classes";
 
 const Accordion = AccordionPrimitive.Root;
 
@@ -66,7 +67,7 @@ const AccordionContent = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <AccordionPrimitive.Content
     ref={ref}
-    className="overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
+    className={cn(accordionContentStyles, "data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down")}
     {...props}
   >
     <div className={cn("pb-4 pt-0", className)}>{children}</div>
@@ -101,7 +102,6 @@ export const AccordionContentSubgrid = React.forwardRef<
     ref={ref}
     className="col-span-full grid grid-cols-subgrid overflow-hidden text-sm"
     {...props}
-    //data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down
   >
     <div className={cn("pb-4 pt-0", className)}>{children}</div>
   </AccordionPrimitive.Content>

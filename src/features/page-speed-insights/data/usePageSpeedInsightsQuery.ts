@@ -1,5 +1,5 @@
 "use client";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { PageSpeedInsights } from "@/lib/schema";
 import { parsePageSpeedInsightsArrayFromText } from "@/lib/page-speed-insights/parsePageSpeedInsightsResponse";
 
@@ -57,11 +57,12 @@ function usePageSpeedInsightsQueryBase(
   defaultData?: PageSpeedInsightsDefaultData,
 ) {
   const hasDefaultData = !!defaultData?.filter(Boolean).length;
-  const { data, isLoading } = useSuspenseQuery({
+  const { data, isLoading } = useQuery({
     queryKey,
     queryFn,
-    initialData: hasDefaultData ? defaultData : undefined,
     enabled: !hasDefaultData,
+    initialData: hasDefaultData ? (defaultData as PageSpeedInsightsQueryData) : undefined,
+    throwOnError: true,
   });
 
   if (hasDefaultData) {

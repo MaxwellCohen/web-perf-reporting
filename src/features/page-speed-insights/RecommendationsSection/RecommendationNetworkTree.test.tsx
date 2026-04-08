@@ -15,6 +15,7 @@ vi.mock("@/components/ui/accordion", () => ({
 
 vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", () => ({
   renderTimeValue: (ms: number) => `${ms} ms`,
+  formatBytes: (n: number) => `${n} B`,
 }));
 
 vi.mock("@/features/page-speed-insights/RecommendationsSection/utils", () => ({

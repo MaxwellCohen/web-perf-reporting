@@ -17,7 +17,8 @@ exports[`FilterControls > renders Collapse All when all expanded 1`] = `
     <button
       class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-md px-3 text-xs h-9"
     >
-      Filter by Category 
+      Filter by Category
+       
       <span
         data-testid="chevron"
       />
@@ -36,7 +37,7 @@ exports[`FilterControls > renders Collapse All when all expanded 1`] = `
         Accessibility
       </div>
       <div
-        class="border-t pt-1 mt-1"
+        class="mt-1 border-t pt-1"
       >
         <button
           class="inline-flex items-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs w-full justify-start"
@@ -50,7 +51,8 @@ exports[`FilterControls > renders Collapse All when all expanded 1`] = `
     <button
       class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-md px-3 text-xs h-9"
     >
-      Filter by Priority 
+      Filter by Priority
+       
       <span
         data-testid="chevron"
       />
@@ -87,7 +89,7 @@ exports[`FilterControls > renders Collapse All when all expanded 1`] = `
         </span>
       </div>
       <div
-        class="border-t pt-1 mt-1"
+        class="mt-1 border-t pt-1"
       >
         <button
           class="inline-flex items-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs w-full justify-start"
@@ -126,7 +128,8 @@ exports[`FilterControls > renders Reset Filters when any filter is selected 1`] 
     <button
       class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-md px-3 text-xs h-9"
     >
-      Filter by Category 
+      Filter by Category
+       
       <span
         data-testid="chevron"
       />
@@ -145,7 +148,7 @@ exports[`FilterControls > renders Reset Filters when any filter is selected 1`] 
         Accessibility
       </div>
       <div
-        class="border-t pt-1 mt-1"
+        class="mt-1 border-t pt-1"
       >
         <button
           class="inline-flex items-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs w-full justify-start"
@@ -159,7 +162,8 @@ exports[`FilterControls > renders Reset Filters when any filter is selected 1`] 
     <button
       class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-md px-3 text-xs h-9"
     >
-      Filter by Priority 
+      Filter by Priority
+       
       <span
         data-testid="chevron"
       />
@@ -196,7 +200,7 @@ exports[`FilterControls > renders Reset Filters when any filter is selected 1`] 
         </span>
       </div>
       <div
-        class="border-t pt-1 mt-1"
+        class="mt-1 border-t pt-1"
       >
         <button
           class="inline-flex items-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs w-full justify-start"
@@ -240,7 +244,8 @@ exports[`FilterControls > renders default state 1`] = `
     <button
       class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-md px-3 text-xs h-9"
     >
-      Filter by Category 
+      Filter by Category
+       
       <span
         data-testid="chevron"
       />
@@ -259,7 +264,7 @@ exports[`FilterControls > renders default state 1`] = `
         Accessibility
       </div>
       <div
-        class="border-t pt-1 mt-1"
+        class="mt-1 border-t pt-1"
       >
         <button
           class="inline-flex items-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs w-full justify-start"
@@ -273,7 +278,8 @@ exports[`FilterControls > renders default state 1`] = `
     <button
       class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-md px-3 text-xs h-9"
     >
-      Filter by Priority 
+      Filter by Priority
+       
       <span
         data-testid="chevron"
       />
@@ -310,7 +316,7 @@ exports[`FilterControls > renders default state 1`] = `
         </span>
       </div>
       <div
-        class="border-t pt-1 mt-1"
+        class="mt-1 border-t pt-1"
       >
         <button
           class="inline-flex items-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs w-full justify-start"

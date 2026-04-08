@@ -2,6 +2,19 @@ import React from "react";
 
 import { fireEvent } from "@testing-library/react";
 import type { LhJsonFileEntry, LhJsonTextEntry } from "@/components/lh/types";
+import { handleLhJsonFileInputChange } from "@/components/lh/inputs/handleLhJsonFileInputChange";
+
+function patchLhListItem<T extends Record<string, unknown>>(
+  setList: React.Dispatch<React.SetStateAction<T[]>>,
+  index: number,
+  patch: Partial<T>,
+) {
+  setList((prev) => {
+    const next = [...prev];
+    next[index] = { ...next[index], ...patch };
+    return next;
+  });
+}
 
 const TabsContext = React.createContext<{
   value: string;
@@ -165,13 +178,7 @@ function LhTextInputMock({
               id={`json-name-${index}`}
               placeholder="Entry name"
               value={input.name}
-              onChange={(e) =>
-                setJsonInputs((prev) => {
-                  const u = [...prev];
-                  u[index] = { ...u[index], name: e.target.value };
-                  return u;
-                })
-              }
+              onChange={(e) => patchLhListItem(setJsonInputs, index, { name: e.target.value })}
             />
             <Button
               type="button"
@@ -185,13 +192,7 @@ function LhTextInputMock({
                 id={`json-text-${index}`}
                 placeholder='{"example": "Paste your JSON here"}'
                 value={input.content}
-                onChange={(e) =>
-                  setJsonInputs((prev) => {
-                    const u = [...prev];
-                    u[index] = { ...u[index], content: e.target.value };
-                    return u;
-                  })
-                }
+                onChange={(e) => patchLhListItem(setJsonInputs, index, { content: e.target.value })}
               />
             </div>
           </div>
@@ -223,14 +224,7 @@ function LhFileInputMock({
           type="file"
           accept=".json"
           onChange={(e) => {
-            if (e.target.files?.length) {
-              const newFiles = Array.from(e.target.files).map((file) => ({
-                name: file.name.replace(/\.[^/.]+$/, ""),
-                file,
-              }));
-              setJsonFiles((prev) => [...prev, ...newFiles]);
-              e.target.value = "";
-            }
+            handleLhJsonFileInputChange(e, setJsonFiles);
           }}
           multiple
         />
@@ -240,13 +234,7 @@ function LhFileInputMock({
               id={`file-name-${index}`}
               placeholder="Enter a name for this file"
               value={fileEntry.name}
-              onChange={(e) =>
-                setJsonFiles((prev) => {
-                  const u = [...prev];
-                  u[index] = { ...u[index], name: e.target.value };
-                  return u;
-                })
-              }
+              onChange={(e) => patchLhListItem(setJsonFiles, index, { name: e.target.value })}
             />
             <Button
               type="button"

@@ -110,11 +110,8 @@ exports[`PageSpeedInsightsDashboardContent > shows loading when data is empty or
 
 exports[`PageSpeedInsightsDashboardContent > shows loading when isLoading is true 1`] = `
 <div
-  data-testid="page-speed-dashboard"
+  data-testid="loading-message"
 >
-  Dashboard with 
-  0
-   items, labels: 
-  Mobile, Desktop
+  Loading
 </div>
 `;

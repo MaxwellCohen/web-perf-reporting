@@ -2,26 +2,14 @@ import ReactMarkdown from "react-markdown";
 import { Badge } from "@/components/ui/badge";
 import { formatTime } from "@/features/page-speed-insights/RecommendationsSection/utils";
 import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
+import { recommendationMarkdownComponents } from "@/features/page-speed-insights/RecommendationsSection/recommendationMarkdownComponents";
 
 interface RecommendationHeaderProps {
   recommendation: Recommendation;
   priorityColors: Record<string, string>;
 }
 
-const titleMarkdownComponents = {
-  p: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
-  a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-blue-600 hover:underline dark:text-blue-400"
-      onClick={(event) => event.stopPropagation()}
-    >
-      {children}
-    </a>
-  ),
-};
+const titleMarkdownComponents = recommendationMarkdownComponents({ linkStopPropagation: true });
 
 export function RecommendationHeader({
   recommendation,

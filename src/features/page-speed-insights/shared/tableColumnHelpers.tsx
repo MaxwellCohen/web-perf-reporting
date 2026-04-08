@@ -26,6 +26,27 @@ export function createOptionalNumericCell(
   return value !== undefined ? <Render value={value} /> : metricTableEmptyDisplay();
 }
 
+function createBaseNumericColumn<T, TValue = unknown>(
+  columnHelper: ReturnType<typeof createColumnHelper<T>>,
+  accessor: keyof T,
+  header: string,
+  cell: ColumnDef<T, TValue>["cell"],
+  aggregatedCell: ColumnDef<T, TValue>["aggregatedCell"],
+): ColumnDef<T, TValue> {
+  const id = String(accessor);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return columnHelper.accessor(accessor as any, {
+    id,
+    header,
+    enableSorting: true,
+    enableResizing: true,
+    filterFn: "inNumberRange",
+    aggregationFn: "unique",
+    cell,
+    aggregatedCell,
+  });
+}
+
 export type TruncatedTextColumnOptions<T> = {
   accessor: keyof T;
   id: string;
@@ -89,17 +110,13 @@ export function createMSColumn<T>(
   header: string,
 ): ColumnDef<T, unknown> {
   const id = String(accessor);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return columnHelper.accessor(accessor as any, {
-    id,
+  return createBaseNumericColumn(
+    columnHelper,
+    accessor,
     header,
-    enableSorting: true,
-    enableResizing: true,
-    filterFn: "inNumberRange",
-    aggregationFn: "unique",
-    cell: (info) => createOptionalNumericCell(RenderMSValue, info.getValue() as number | undefined),
-    aggregatedCell: createNumericAggregatedCell(id),
-  });
+    (info) => createOptionalNumericCell(RenderMSValue, info.getValue() as number | undefined),
+    createNumericAggregatedCell(id),
+  );
 }
 
 /**
@@ -124,17 +141,13 @@ export function createOptionalNumericColumn<T>(
   } = options;
   const id = String(accessor);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return columnHelper.accessor(accessor as any, {
-    id,
+  return createBaseNumericColumn(
+    columnHelper,
+    accessor,
     header,
-    enableSorting: true,
-    enableResizing: true,
-    filterFn: "inNumberRange",
-    aggregationFn: "unique",
-    cell: (info) => createOptionalNumericCell(Render, info.getValue() as number | undefined),
-    aggregatedCell: aggregatedCellFactory(aggregatedColumnId),
-  });
+    (info) => createOptionalNumericCell(Render, info.getValue() as number | undefined),
+    aggregatedCellFactory(aggregatedColumnId),
+  );
 }
 
 /**
@@ -164,20 +177,16 @@ export function createPercentageColumn<T>(
   precision: number = 1,
 ): ColumnDef<T, unknown> {
   const id = String(accessor);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return columnHelper.accessor(accessor as any, {
-    id,
+  return createBaseNumericColumn(
+    columnHelper,
+    accessor,
     header,
-    enableSorting: true,
-    enableResizing: true,
-    filterFn: "inNumberRange",
-    aggregationFn: "unique",
-    cell: (info) => {
+    (info) => {
       const value = info.getValue() as number | undefined;
       return value !== undefined ? `${value.toFixed(precision)}%` : metricTableEmptyDisplay();
     },
-    aggregatedCell: createPercentageAggregatedCell(id, precision),
-  });
+    createPercentageAggregatedCell(id, precision),
+  );
 }
 
 /**

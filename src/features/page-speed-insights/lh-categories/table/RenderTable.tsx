@@ -40,6 +40,7 @@ import { DetailTableWith1ReportAndNoSubitem } from "@/features/page-speed-insigh
 import { DetailTableSeparatePerReport } from "@/features/page-speed-insights/lh-categories/table/DetailTableSeparatePerReport";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { useStandardTable } from "@/features/page-speed-insights/shared/tableConfigHelpers";
+import { tanstackTableCellDataProps } from "@/features/page-speed-insights/shared/tanstackTableCellDataProps";
 import { shouldShowSeparateTablesPerReport } from "@/features/page-speed-insights/auditTableConfig";
 import {
   UNIQUE_AGG_VALUE_TYPES,
@@ -829,14 +830,7 @@ const renderTableCell = (
   return (
     <TableCell
       key={cell.id}
-      data-cell-id={cell.id}
-      data-column-id={cell.column.id}
-      data-can-expand={`${row.getCanExpand()}`}
-      data-depth={row.depth}
-      data-row-expanded={`${row.getIsExpanded()}`}
-      data-grouped={`${cell.getIsGrouped()}`}
-      data-aggregated={`${cell.getIsAggregated()}`}
-      data-placeholder={`${cell.getIsPlaceholder()}`}
+      {...tanstackTableCellDataProps(cell, row)}
       className={cn("min-w-0 wrap-break-word transition-all duration-300 ease-in-out")}
       style={{
         width: `${cell.column.getSize()}px`,

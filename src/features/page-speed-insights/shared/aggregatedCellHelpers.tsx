@@ -64,6 +64,98 @@ export function extractValueLabelPairs<T>(
   );
 }
 
+function valueLabelUniquesOrNull<T>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  row: Row<any>,
+  columnId: string,
+): {
+  valueLabelPairs: ValueLabelPair<T>[];
+  uniqueValues: T[];
+  uniqueLabels: string[];
+} | null {
+  const valueLabelPairs = extractValueLabelPairs<T>(row, columnId);
+  if (valueLabelPairs.length === 0) return null;
+  return {
+    valueLabelPairs,
+    uniqueValues: [...new Set(valueLabelPairs.map((p) => p.value))],
+    uniqueLabels: [...new Set(valueLabelPairs.map((p) => p.label))],
+  };
+}
+
+function mapLabelsToRows(
+  uniqueLabels: string[],
+  renderRow: (label: string, index: number) => React.ReactNode,
+) {
+  return (
+    <div className="flex flex-col gap-1">
+      {uniqueLabels.map((label, i) => (
+        <React.Fragment key={i}>{renderRow(label, i)}</React.Fragment>
+      ))}
+    </div>
+  );
+}
+
+/** When every leaf shares one value, optionally show one row per device label. */
+function singleUniqueValueAggregatedBranch<T>(
+  uniqueValues: T[],
+  uniqueLabels: string[],
+  splitAcrossDevices: boolean,
+  renderLabeledRow: (value: T, label: string) => React.ReactNode,
+  renderSolo: (value: T) => React.ReactNode,
+): React.ReactNode | undefined {
+  if (uniqueValues.length !== 1) return undefined;
+  const only = uniqueValues[0];
+  if (splitAcrossDevices && uniqueLabels.length > 1) {
+    return mapLabelsToRows(uniqueLabels, (label) => renderLabeledRow(only, label));
+  }
+  return renderSolo(only);
+}
+
+function getAggregatedValueLabelContext<T>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  info: any,
+  columnId: string,
+) {
+  const uniques = valueLabelUniquesOrNull<T>(info.row, columnId);
+  if (!uniques) return null;
+  return uniques;
+}
+
+function groupValueLabelPairs<T>(pairs: ValueLabelPair<T>[]): Map<T, string[]> {
+  const valueGroups = new Map<T, string[]>();
+  pairs.forEach(({ value, label }) => {
+    if (!valueGroups.has(value)) {
+      valueGroups.set(value, []);
+    }
+    valueGroups.get(value)!.push(label);
+  });
+  return valueGroups;
+}
+
+function scrollableValueWithLabelGroups<T>(
+  valueGroups: Map<T, string[]>,
+  renderInner: (value: T) => React.ReactNode,
+  options?: { resolveLabel?: (uniqueLabels: string[]) => string | undefined },
+) {
+  const resolveLabel =
+    options?.resolveLabel ??
+    ((unique: string[]) => (unique.length === 1 ? unique[0] : undefined));
+  return (
+    <div className="flex flex-col gap-1 max-h-24 overflow-y-auto">
+      {Array.from(valueGroups.entries()).map(([value, labels], i) => {
+        const uniqueLabelsForValue = [...new Set(labels)];
+        return (
+          <ValueWithLabel
+            key={i}
+            value={renderInner(value)}
+            label={resolveLabel(uniqueLabelsForValue)}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
 /**
  * Creates an aggregated cell renderer for numeric values (milliseconds)
  */
@@ -126,28 +218,9 @@ export function createNumericAggregatedCell(
       return <ValueWithLabel value={renderValue(uniqueRoundedValues[0])} label={uniqueLabels[0]} />;
     }
 
-    const valueGroups = new Map<number, string[]>();
-    validPairs.forEach(({ value, label }) => {
-      if (!valueGroups.has(value)) {
-        valueGroups.set(value, []);
-      }
-      valueGroups.get(value)!.push(label);
-    });
+    const valueGroups = groupValueLabelPairs(validPairs);
 
-    return (
-      <div className="flex flex-col gap-1 max-h-24 overflow-y-auto">
-        {Array.from(valueGroups.entries()).map(([value, labels], i) => {
-          const uniqueLabelsForValue = [...new Set(labels)];
-          return (
-            <ValueWithLabel
-              key={i}
-              value={renderValue(value)}
-              label={uniqueLabelsForValue.length === 1 ? uniqueLabelsForValue[0] : undefined}
-            />
-          );
-        })}
-      </div>
-    );
+    return scrollableValueWithLabelGroups(valueGroups, (value) => renderValue(value));
   };
 }
 
@@ -171,56 +244,32 @@ export function createStringAggregatedCell(
 ) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, react/display-name
   return (info: any): React.ReactNode => {
-    const row = info.row;
-    const valueLabelPairs = extractValueLabelPairs<string>(row, columnId);
+    const uniques = getAggregatedValueLabelContext<string>(info, columnId);
+    if (!uniques) return "N/A";
 
-    if (valueLabelPairs.length === 0) return "N/A";
+    const { valueLabelPairs, uniqueValues, uniqueLabels } = uniques;
 
-    const uniqueValues = [...new Set(valueLabelPairs.map((p) => p.value))];
-    const uniqueLabels = [...new Set(valueLabelPairs.map((p) => p.label))];
+    const singleBranch = singleUniqueValueAggregatedBranch(
+      uniqueValues,
+      uniqueLabels,
+      showAllDevicesLabel,
+      (only, label) => {
+        const value = transformValue ? transformValue(only) : only;
+        return <ValueWithLabel value={<span>{value}</span>} label={label} />;
+      },
+      (only) => <span>{transformValue ? transformValue(only) : only}</span>,
+    );
+    if (singleBranch !== undefined) return singleBranch;
 
-    if (uniqueValues.length === 1) {
-      const value = transformValue ? transformValue(uniqueValues[0]) : uniqueValues[0];
-      // If value is same for all reports, show each device on separate lines
-      if (showAllDevicesLabel && uniqueLabels.length > 1) {
-        return (
-          <div className="flex flex-col gap-1">
-            {uniqueLabels.map((label, i) => (
-              <ValueWithLabel key={i} value={<span>{value}</span>} label={label} />
-            ))}
-          </div>
-        );
-      }
-      // Single report or label disabled, just show the value
-      return <span>{value}</span>;
-    }
+    const valueGroups = groupValueLabelPairs(valueLabelPairs);
 
-    const valueGroups = new Map<string, string[]>();
-    valueLabelPairs.forEach(({ value, label }) => {
-      if (!valueGroups.has(value)) {
-        valueGroups.set(value, []);
-      }
-      valueGroups.get(value)!.push(label);
-    });
-
-    return (
-      <div className="flex flex-col gap-1 max-h-24 overflow-y-auto">
-        {Array.from(valueGroups.entries()).map(([value, labels], i) => {
-          const uniqueLabelsForValue = [...new Set(labels)];
-          const displayValue = transformValue ? transformValue(value) : value;
-          return (
-            <ValueWithLabel
-              key={i}
-              value={<span>{displayValue}</span>}
-              label={
-                showAllDevicesLabel && uniqueLabelsForValue.length === 1
-                  ? uniqueLabelsForValue[0]
-                  : undefined
-              }
-            />
-          );
-        })}
-      </div>
+    return scrollableValueWithLabelGroups(
+      valueGroups,
+      (value) => <span>{transformValue ? transformValue(value) : value}</span>,
+      {
+        resolveLabel: (unique) =>
+          showAllDevicesLabel && unique.length === 1 ? unique[0] : undefined,
+      },
     );
   };
 }
@@ -231,55 +280,30 @@ export function createStringAggregatedCell(
 export function createPercentageAggregatedCell(columnId: string, precision: number = 2) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, react/display-name
   return (info: any): React.ReactNode => {
-    const row = info.row;
-    const valueLabelPairs = extractValueLabelPairs<number>(row, columnId);
+    const uniques = getAggregatedValueLabelContext<number>(info, columnId);
+    if (!uniques) return "N/A";
 
-    if (valueLabelPairs.length === 0) return "N/A";
+    const { valueLabelPairs, uniqueValues, uniqueLabels } = uniques;
 
-    const uniqueValues = [...new Set(valueLabelPairs.map((p) => p.value))];
-    const uniqueLabels = [...new Set(valueLabelPairs.map((p) => p.label))];
-
-    if (uniqueValues.length === 1) {
-      // If value is same for all reports, show each device on separate lines
-      if (uniqueLabels.length > 1) {
-        return (
-          <div className="flex flex-col gap-1">
-            {uniqueLabels.map((label, i) => (
-              <ValueWithLabel
-                key={i}
-                value={<span>{`${uniqueValues[0].toFixed(precision)}%`}</span>}
-                label={label}
-              />
-            ))}
-          </div>
-        );
-      }
-      // Single report, just show the value
-      return <span>{`${uniqueValues[0].toFixed(precision)}%`}</span>;
-    }
-
-    const valueGroups = new Map<number, string[]>();
-    valueLabelPairs.forEach(({ value, label }) => {
-      if (!valueGroups.has(value)) {
-        valueGroups.set(value, []);
-      }
-      valueGroups.get(value)!.push(label);
-    });
-
-    return (
-      <div className="flex flex-col gap-1 max-h-24 overflow-y-auto">
-        {Array.from(valueGroups.entries()).map(([value, labels], i) => {
-          const uniqueLabelsForValue = [...new Set(labels)];
-          return (
-            <ValueWithLabel
-              key={i}
-              value={<span>{`${value.toFixed(precision)}%`}</span>}
-              label={uniqueLabelsForValue.length === 1 ? uniqueLabelsForValue[0] : undefined}
-            />
-          );
-        })}
-      </div>
+    const singleBranch = singleUniqueValueAggregatedBranch(
+      uniqueValues,
+      uniqueLabels,
+      true,
+      (only, label) => (
+        <ValueWithLabel
+          value={<span>{`${only.toFixed(precision)}%`}</span>}
+          label={label}
+        />
+      ),
+      (only) => <span>{`${only.toFixed(precision)}%`}</span>,
     );
+    if (singleBranch !== undefined) return singleBranch;
+
+    const valueGroups = groupValueLabelPairs(valueLabelPairs);
+
+    return scrollableValueWithLabelGroups(valueGroups, (value) => (
+      <span>{`${value.toFixed(precision)}%`}</span>
+    ));
   };
 }
 
@@ -323,12 +347,10 @@ export function createBooleanAggregatedCell<TData>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, react/display-name
   return (info: any): React.ReactNode => {
     const row = info.row as Row<TData>;
-    const valueLabelPairs = extractValueLabelPairs<boolean>(row, columnId);
+    const uniques = valueLabelUniquesOrNull<boolean>(row, columnId);
+    if (!uniques) return "N/A";
 
-    if (valueLabelPairs.length === 0) return "N/A";
-
-    const uniqueValues = [...new Set(valueLabelPairs.map((p) => p.value))];
-    const uniqueLabels = [...new Set(valueLabelPairs.map((p) => p.label))];
+    const { valueLabelPairs, uniqueValues, uniqueLabels } = uniques;
 
     if (uniqueValues.length === 1) {
       const value = uniqueValues[0];
@@ -343,13 +365,7 @@ export function createBooleanAggregatedCell<TData>(
       return renderBoolean(value);
     }
 
-    const valueGroups = new Map<boolean, string[]>();
-    valueLabelPairs.forEach(({ value, label }) => {
-      if (!valueGroups.has(value)) {
-        valueGroups.set(value, []);
-      }
-      valueGroups.get(value)!.push(label);
-    });
+    const valueGroups = groupValueLabelPairs(valueLabelPairs);
 
     return (
       <div className="flex max-h-24 flex-col gap-1 overflow-y-auto">

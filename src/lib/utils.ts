@@ -286,3 +286,11 @@ export function updateURl(url?: string) {
   }
   return urlSchema.safeParse(url).data ?? "";
 }
+
+/** Next.js `searchParams` prop; normalize the `url` query value for CrUX report pages. */
+export async function normalizedCruxUrlFromSearchParams(
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>,
+): Promise<string> {
+  const params = await searchParams;
+  return updateURl(params.url as string);
+}

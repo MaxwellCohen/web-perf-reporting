@@ -4,8 +4,7 @@ exports[`RenderUnknown > falls back to an unknown type label when details are mi
 <div
   class="overflow-x-auto"
 >
-  We don't know how to render audit details of type
-   
+  We don't know how to render audit details of type 
    unknown 
   The Lighthouse version that collected this data is likely newer than the Lighthouse version of the report renderer. Expand for the raw JSON.
   <pre>
@@ -20,8 +19,7 @@ exports[`RenderUnknown > renders the unknown detail type and raw json 1`] = `
 <div
   class="overflow-x-auto"
 >
-  We don't know how to render audit details of type
-   
+  We don't know how to render audit details of type 
   mystery-detail
   The Lighthouse version that collected this data is likely newer than the Lighthouse version of the report renderer. Expand for the raw JSON.
   <pre>

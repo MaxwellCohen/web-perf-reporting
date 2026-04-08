@@ -1,7 +1,4 @@
-/**
- * Sorts data by maximum value per key when multiple reports exist
- */
-export function sortByMaxValue<T>(
+function sortDataByKeyMaxValue<T>(
   data: T[],
   getKey: (item: T) => string,
   getValue: (item: T) => number,
@@ -20,12 +17,22 @@ export function sortByMaxValue<T>(
   });
 
   return data.sort((a, b) => {
-    const aKey = getKey(a);
-    const bKey = getKey(b);
-    const aMax = keyMaxMap.get(aKey) || 0;
-    const bMax = keyMaxMap.get(bKey) || 0;
+    const aMax = keyMaxMap.get(getKey(a)) || 0;
+    const bMax = keyMaxMap.get(getKey(b)) || 0;
     return bMax - aMax;
   });
+}
+
+/**
+ * Sorts data by maximum value per key when multiple reports exist
+ */
+export function sortByMaxValue<T>(
+  data: T[],
+  getKey: (item: T) => string,
+  getValue: (item: T) => number,
+  numReports: number,
+): T[] {
+  return sortDataByKeyMaxValue(data, getKey, getValue, numReports);
 }
 
 /**
@@ -37,23 +44,5 @@ export function sortByMaxValueComposite<T>(
   getValue: (item: T) => number,
   numReports: number,
 ): T[] {
-  if (numReports <= 1) {
-    return data;
-  }
-
-  const keyMaxMap = new Map<string, number>();
-  data.forEach((item) => {
-    const key = getCompositeKey(item);
-    const value = getValue(item) || 0;
-    const currentMax = keyMaxMap.get(key) || 0;
-    keyMaxMap.set(key, Math.max(currentMax, value));
-  });
-
-  return data.sort((a, b) => {
-    const aKey = getCompositeKey(a);
-    const bKey = getCompositeKey(b);
-    const aMax = keyMaxMap.get(aKey) || 0;
-    const bMax = keyMaxMap.get(bKey) || 0;
-    return bMax - aMax;
-  });
+  return sortDataByKeyMaxValue(data, getCompositeKey, getValue, numReports);
 }

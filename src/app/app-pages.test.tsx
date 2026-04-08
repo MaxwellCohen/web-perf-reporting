@@ -23,6 +23,12 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/lib/utils", () => ({
   updateURl: (value: string | undefined) => updateUrlMock(value),
+  normalizedCruxUrlFromSearchParams: async (
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>,
+  ) => {
+    const params = await searchParams;
+    return updateUrlMock(params.url as string);
+  },
 }));
 
 vi.mock("@/lib/services/pageSpeedInsights.service", () => ({

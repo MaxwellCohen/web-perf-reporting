@@ -1,5 +1,25 @@
 import { fireEvent, render } from "@testing-library/react";
+import React from "react";
 import { describe, expect, it, vi } from "vitest";
+import {
+  createColumnHelper,
+  getCoreRowModel,
+  getFacetedUniqueValues,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+  type Table,
+} from "@tanstack/react-table";
+import {
+  ColumnSelector,
+  DropdownFilter,
+  PageSizeSelector,
+  PaginationCard,
+  PaginationControlsManuelPageSelection,
+  TableControls,
+} from "@/features/page-speed-insights/JSUsage/TableControls";
+import { standardFilterFns } from "@/features/page-speed-insights/shared/filterFns";
 
 vi.mock("lucide-react", () => ({
   ChevronDown: () => <span data-testid="chevron" />,
@@ -10,6 +30,26 @@ vi.mock("@/components/ui/card", () => ({
     <div className={className}>{children}</div>
   ),
 }));
+
+vi.mock("@/components/ui/button", () => {
+  const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement>>(
+    ({ children, ...props }, ref) => (
+      <button ref={ref} type="button" {...props}>
+        {children}
+      </button>
+    ),
+  );
+  Button.displayName = "Button";
+  return { Button };
+});
+
+vi.mock("@/components/ui/input", () => {
+  const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>((props, ref) => (
+    <input ref={ref} {...props} />
+  ));
+  Input.displayName = "Input";
+  return { Input };
+});
 
 vi.mock("@/components/ui/dropdown-menu", () => ({
   DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -46,27 +86,11 @@ vi.mock("@/components/ui/select", () => ({
     <span>{placeholder ?? "selected"}</span>
   ),
 }));
-import {
-  getCoreRowModel,
-  getPaginationRowModel,
-  useReactTable,
-  getSortedRowModel,
-  getFilteredRowModel,
-  getFacetedUniqueValues,
-  createColumnHelper,
-} from "@tanstack/react-table";
-import {
-  TableControls,
-  ColumnSelector,
-  PageSizeSelector,
-  PaginationCard,
-  PaginationControlsManuelPageSelection,
-  DropdownFilter,
-} from "@/features/page-speed-insights/JSUsage/TableControls";
-import { standardFilterFns } from "@/features/page-speed-insights/shared/filterFns";
 
 type Row = { id: number; name: string };
 const columnHelper = createColumnHelper<Row>();
+
+let latestControlsTable: Table<Row> | undefined;
 
 function TableWithControls({ minimal = false }: { minimal?: boolean }) {
   const data = Array.from({ length: minimal ? 2 : 6 }, (_, i) => ({
@@ -91,6 +115,7 @@ function TableWithControls({ minimal = false }: { minimal?: boolean }) {
           initialState: { pagination: { pageSize: 5 } },
         }),
   });
+  latestControlsTable = table;
   return <TableControls table={table} />;
 }
 
@@ -105,24 +130,28 @@ function getButton(container: HTMLElement, name: string | RegExp) {
 describe("TableControls", () => {
   it("renders reset filters and reset sorting buttons", () => {
     const { container } = render(<TableWithControls minimal />);
-    expect(container.firstChild).toMatchSnapshot();
+    expect(getButton(container, /reset filters/i)).toBeTruthy();
+    expect(getButton(container, /reset sorting order/i)).toBeTruthy();
   });
 
   it("calls resetColumnFilters when Reset filters is clicked", () => {
     const { container } = render(<TableWithControls minimal />);
+    const spy = vi.spyOn(latestControlsTable!, "resetColumnFilters");
     fireEvent.click(getButton(container, /reset filters/i)!);
-    expect(container.firstChild).toMatchSnapshot();
+    expect(spy).toHaveBeenCalled();
   });
 
   it("calls resetSorting when Reset Sorting Order is clicked", () => {
     const { container } = render(<TableWithControls minimal />);
+    const spy = vi.spyOn(latestControlsTable!, "resetSorting");
     fireEvent.click(getButton(container, /reset sorting order/i)!);
-    expect(container.firstChild).toMatchSnapshot();
+    expect(spy).toHaveBeenCalled();
   });
 
   it("shows Columns dropdown and pagination when multiple pages", () => {
     const { container } = render(<TableWithControls />);
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container.textContent).toContain("Columns");
+    expect(container.textContent).toMatch(/1 of 2/);
   });
 });
 
@@ -144,7 +173,8 @@ function ColumnSelectorWrapper() {
 describe("ColumnSelector", () => {
   it("renders column toggle dropdown", () => {
     const { container } = render(<ColumnSelectorWrapper />);
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container.textContent).toContain("Columns");
+    expect(container.querySelectorAll('[role="checkbox"]')).toHaveLength(2);
   });
 
   it("toggles column visibility when checkbox clicked", () => {
@@ -177,7 +207,8 @@ function PageSizeSelectorWrapper() {
 describe("PageSizeSelector", () => {
   it("renders page size select", () => {
     const { container } = render(<PageSizeSelectorWrapper />);
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container.textContent).toContain("Page Size");
+    expect(container.textContent).toContain("10 items on page");
   });
 
   it("shows All Items when rowCount matches page size", () => {
@@ -342,6 +373,8 @@ describe("DropdownFilter", () => {
 
   it("renders filter dropdown when column exists", () => {
     const { container } = render(<DropdownFilterWithColumn />);
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container.textContent).toContain("Filter");
+    expect(container.textContent).toContain("Name");
+    expect(container.querySelectorAll('[role="checkbox"]').length).toBeGreaterThan(0);
   });
 });

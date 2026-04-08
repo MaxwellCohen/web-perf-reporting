@@ -1,101 +1,14 @@
-import {
-  usePageSpeedItems,
-  type InsightsContextItem,
-} from "@/features/page-speed-insights/PageSpeedContext";
+import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
 import { AccordionItem, AccordionContent } from "@/components/ui/accordion";
 import { AccordionSectionTitleTrigger } from "@/components/ui/accordion-section-title-trigger";
 import { Details } from "@/components/ui/accordion";
-import { TreeDataItem, TreeView } from "@/components/ui/tree-view";
+import { TreeView } from "@/components/ui/tree-view";
+import { renderTimeValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import {
-  formatBytes,
-  renderTimeValue,
-} from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
-
-// Type definitions for network dependency tree
-type NetworkTreeNode = {
-  url: string;
-  transferSize?: number;
-  navStartToEndTime?: number;
-  isLongest?: boolean;
-  children?: NetworkTreeChains;
-};
-
-type NetworkTreeChains = {
-  [id: string]: NetworkTreeNode;
-};
-
-type NetworkTreeValue = {
-  type: "network-tree";
-  longestChain?: {
-    duration: number;
-  };
-  chains: NetworkTreeChains;
-};
-
-function extractNetworkTreeFromAudit(item: InsightsContextItem): {
-  tree: NetworkTreeValue | null;
-  label: string;
-} {
-  const audit = item.item?.lighthouseResult?.audits?.["network-dependency-tree-insight"];
-  if (!audit?.details || audit.details.type !== "list") {
-    return { tree: null, label: item.label };
-  }
-
-  // Find the network-tree value in the list items
-  const listItems = (audit.details as { items?: Array<{ value?: unknown }> })?.items || [];
-  const networkTreeItem = listItems.find(
-    (item) =>
-      item.value &&
-      typeof item.value === "object" &&
-      "type" in item.value &&
-      item.value.type === "network-tree",
-  );
-
-  if (!networkTreeItem?.value) {
-    return { tree: null, label: item.label };
-  }
-
-  return {
-    tree: networkTreeItem.value as NetworkTreeValue,
-    label: item.label,
-  };
-}
-
-function networkTreeToTreeData(chains: NetworkTreeChains, isRoot = false): TreeDataItem[] {
-  return Object.entries(chains).map(([id, node]) => {
-    const parts: string[] = [];
-
-    // Add URL
-    parts.push(node.url);
-
-    // Add transfer size if available
-    if (node.transferSize !== undefined) {
-      parts.push(`Transfer: ${formatBytes(node.transferSize)}`);
-    }
-
-    // Add nav start to end time if available
-    if (node.navStartToEndTime !== undefined) {
-      parts.push(`Time: ${renderTimeValue(node.navStartToEndTime)}`);
-    }
-
-    // Mark longest chain
-    if (node.isLongest) {
-      parts.push("(Longest Chain)");
-    }
-
-    return {
-      id,
-      name: parts.join(" | "),
-      icon: undefined,
-      selectedIcon: undefined,
-      openIcon: undefined,
-      draggable: false,
-      droppable: false,
-      isRoot: isRoot,
-      children: node.children ? networkTreeToTreeData(node.children, false) : undefined,
-    };
-  });
-}
+  extractNetworkTreeFromAudit,
+  networkTreeToTreeData,
+  type NetworkTreeValue,
+} from "@/features/page-speed-insights/shared/networkDependencyTree";
 
 export function RenderNetworkDependencyTree() {
   const items = usePageSpeedItems();

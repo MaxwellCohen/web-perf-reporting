@@ -1,9 +1,11 @@
 "use client";
+import { LoadingMessage } from "@/components/common/LoadingMessage";
 import { PageSpeedInsightsDashboard } from "@/features/page-speed-insights/pageSpeedInsightsDashboard";
 import { usePageSpeedInsightsQueryByPublicId } from "@/features/page-speed-insights/data/usePageSpeedInsightsQuery";
 
 export function PageSpeedInsightsDashboardContent({ publicId }: { publicId: string }) {
-  const { data } = usePageSpeedInsightsQueryByPublicId(publicId);
+  const { data, isLoading } = usePageSpeedInsightsQueryByPublicId(publicId);
+  if (isLoading) return <LoadingMessage />;
   if (data && !Array.isArray(data)) {
     throw new Error("Failed to load PageSpeed Insights report.");
   }

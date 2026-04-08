@@ -542,6 +542,61 @@ function ElementScreenshot({
   );
 }
 
+function ThumbnailUnavailableFallback({
+  displayWidth,
+  displayHeight,
+}: {
+  displayWidth: number;
+  displayHeight: number;
+}) {
+  return (
+    <div
+      className="flex items-center justify-center overflow-hidden rounded border border-gray-300 bg-gray-100 transition-transform"
+      style={{
+        width: `${displayWidth}px`,
+        height: `${displayHeight}px`,
+      }}
+    >
+      <span className="text-xs text-gray-500">Image unavailable</span>
+    </div>
+  );
+}
+
+function FullScreenshotThumbnail({
+  dataUrl,
+  displayWidth,
+  displayHeight,
+  onImageError,
+}: {
+  dataUrl: string;
+  displayWidth: number;
+  displayHeight: number;
+  onImageError: () => void;
+}) {
+  return (
+    <div
+      className="flex items-center justify-center overflow-hidden rounded border border-gray-300 transition-transform"
+      style={{
+        width: `${displayWidth}px`,
+        height: `${displayHeight}px`,
+        minWidth: `${displayWidth}px`,
+        minHeight: `${displayHeight}px`,
+      }}
+    >
+      <img
+        src={dataUrl}
+        alt="Screenshot"
+        onError={onImageError}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "contain",
+        }}
+      />
+    </div>
+  );
+}
+
 const RenderThumbnails = memo(function RThumbnails({
   screenshot,
   elementRects = [],
@@ -558,40 +613,21 @@ const RenderThumbnails = memo(function RThumbnails({
       // Show full screenshot as fallback when rect doesn't overlap
       if (imageError || !screenshot.data) {
         return (
-          <div
+          <ThumbnailUnavailableFallback
             key={index}
-            className="flex items-center justify-center overflow-hidden rounded border border-gray-300 bg-gray-100 transition-transform"
-            style={{
-              width: `${displayWidth}px`,
-              height: `${displayHeight}px`,
-            }}
-          >
-            <span className="text-xs text-gray-500">Image unavailable</span>
-          </div>
+            displayWidth={displayWidth}
+            displayHeight={displayHeight}
+          />
         );
       }
       return (
-        <div
+        <FullScreenshotThumbnail
           key={index}
-          className="flex items-center justify-center overflow-hidden rounded border border-gray-300 transition-transform"
-          style={{
-            width: `${displayWidth}px`,
-            height: `${displayHeight}px`,
-            minWidth: `${displayWidth}px`,
-            minHeight: `${displayHeight}px`,
-          }}
-        >
-          <img
-            src={screenshot.data}
-            alt="Screenshot"
-            onError={() => setImageError(true)}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "contain",
-            }}
-          />
-        </div>
+          dataUrl={screenshot.data}
+          displayWidth={displayWidth}
+          displayHeight={displayHeight}
+          onImageError={() => setImageError(true)}
+        />
       );
     }
 
@@ -616,39 +652,15 @@ const RenderThumbnails = memo(function RThumbnails({
   // If no element rects provided, show at least the full screenshot
   if (elementRects.length === 0) {
     if (imageError || !screenshot.data) {
-      return (
-        <div
-          className="flex items-center justify-center overflow-hidden rounded border border-gray-300 bg-gray-100 transition-transform"
-          style={{
-            width: `${displayWidth}px`,
-            height: `${displayHeight}px`,
-          }}
-        >
-          <span className="text-xs text-gray-500">Image unavailable</span>
-        </div>
-      );
+      return <ThumbnailUnavailableFallback displayWidth={displayWidth} displayHeight={displayHeight} />;
     }
     return (
-      <div
-        className="flex items-center justify-center overflow-hidden rounded border border-gray-300 transition-transform"
-        style={{
-          width: `${displayWidth}px`,
-          height: `${displayHeight}px`,
-          minWidth: `${displayWidth}px`,
-          minHeight: `${displayHeight}px`,
-        }}
-      >
-        <img
-          src={screenshot.data}
-          alt="Screenshot"
-          onError={() => setImageError(true)}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-          }}
-        />
-      </div>
+      <FullScreenshotThumbnail
+        dataUrl={screenshot.data}
+        displayWidth={displayWidth}
+        displayHeight={displayHeight}
+        onImageError={() => setImageError(true)}
+      />
     );
   }
 

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { TabsContent } from "@/components/ui/tabs";
 import { FileJson } from "lucide-react";
 import type { LhJsonFileEntry } from "@/components/lh/types";
+import { handleLhJsonFileInputChange } from "@/components/lh/inputs/handleLhJsonFileInputChange";
 
 type LhFileInputProps = {
   jsonFiles: LhJsonFileEntry[];
@@ -15,16 +16,7 @@ type LhFileInputProps = {
 
 export function LhFileInput({ jsonFiles, setJsonFiles }: LhFileInputProps) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const newFiles = Array.from(e.target.files).map((file) => ({
-        name: file.name.replace(/\.[^/.]+$/, ""), // Default name is filename without extension
-        file,
-      }));
-      setJsonFiles((prev) => [...prev, ...newFiles]);
-
-      // Reset the file input to allow selecting the same files again
-      e.target.value = "";
-    }
+    handleLhJsonFileInputChange(e, setJsonFiles);
   };
 
   const updateFileName = (index: number, name: string) => {

@@ -317,23 +317,19 @@ export interface TableSubItems {
   items: TableItem[];
 }
 
+const AuditDetailsTableHeadingColumnSchema = z
+  .object({
+    valueType: z.union([z.string(), z.number()]).optional(),
+    key: z.string().optional(),
+    label: z.string().optional(),
+    granularity: z.number().optional(),
+  })
+  .partial();
+
 export const AuditDetailsTableHeading = z.array(
-  z
-    .object({
-      valueType: z.union([z.string(), z.number()]).optional(),
-      key: z.string().optional(),
-      label: z.string().optional(),
-      granularity: z.number().optional(),
-      subItemsHeading: z
-        .object({
-          valueType: z.union([z.string(), z.number()]).optional(),
-          key: z.string().optional(),
-          label: z.string().optional(),
-          granularity: z.number().optional(),
-        })
-        .partial(),
-    })
-    .partial(),
+  AuditDetailsTableHeadingColumnSchema.extend({
+    subItemsHeading: AuditDetailsTableHeadingColumnSchema.optional(),
+  }),
 );
 
 export interface AuditDetailTable extends BaseDetails {

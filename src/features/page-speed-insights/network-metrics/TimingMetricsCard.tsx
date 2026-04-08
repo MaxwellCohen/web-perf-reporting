@@ -1,7 +1,7 @@
 "use client";
 import { TableCell, TableHead, TableRow } from "@/components/ui/table";
 import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
-import { CardWithTable } from "@/features/page-speed-insights/shared/CardWithTable";
+import { WideMetricsSummaryCardTable } from "@/features/page-speed-insights/shared/WideMetricsSummaryCardTable";
 import { useNetworkMetricSeries } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
 
 function TimingValue({ value, category }: { value?: number; category?: string }) {
@@ -46,10 +46,8 @@ export function TimingMetricsCard() {
   const showReportColumn = validMetrics.length > 1;
 
   return (
-    <CardWithTable
+    <WideMetricsSummaryCardTable
       title="Page Load Timing Metrics"
-      className="md:col-span-2 lg:col-span-3"
-      contentClassName="overflow-x-auto"
       tableClassName="table-auto"
       header={
         <TableRow>
@@ -84,6 +82,6 @@ export function TimingMetricsCard() {
           </TableCell>
         </TableRow>
       ))}
-    </CardWithTable>
+    </WideMetricsSummaryCardTable>
   );
 }
