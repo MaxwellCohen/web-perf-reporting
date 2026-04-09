@@ -9,7 +9,7 @@ export function LoadingMessage() {
       setTime((t) => t + 1);
     }, 1000);
     return () => clearInterval(interval);
-  }, [time]);
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center">

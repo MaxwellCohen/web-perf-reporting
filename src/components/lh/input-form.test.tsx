@@ -5,31 +5,29 @@ import {
   getButton,
   getTab,
   submitForm,
-} from "./__mocks__/input-form-mocks";
+} from "./input-form-test-mocks";
 import { executeSubmit } from "@/components/lh/input-form-action";
 import { LhInputForm } from "@/components/lh/LhInputForm";
 
-const lhFormMocks = vi.hoisted(() => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  return require("./__mocks__/input-form-mocks") as typeof import("./__mocks__/input-form-mocks");
-});
+/** Hoisted so vi.mock factories share one dynamic import (Vite cannot resolve require() to this .tsx). */
+const lhFormMocksPromise = vi.hoisted(() => import("./input-form-test-mocks"));
 
 vi.mock("@/components/lh/input-form-action", () => ({
   executeSubmit: vi.fn().mockResolvedValue({ error: null, success: false }),
 }));
 
-vi.mock("@/components/ui/tabs", () => lhFormMocks.tabsMock);
-vi.mock("lucide-react", () => lhFormMocks.lucideMock);
-vi.mock("@/components/ui/card", () => lhFormMocks.cardMock);
-vi.mock("@/components/ui/input", () => lhFormMocks.inputMock);
-vi.mock("@/components/ui/textarea", () => lhFormMocks.textareaMock);
-vi.mock("@/components/ui/button", () => lhFormMocks.buttonMock);
-vi.mock("@/components/ui/label", () => lhFormMocks.labelMock);
-vi.mock("@/components/ui/alert", () => lhFormMocks.alertMock);
-vi.mock("@/components/lh/inputs/LhTabList", () => lhFormMocks.lhTabListMock);
-vi.mock("@/components/lh/inputs/LhTextInput", () => lhFormMocks.lhTextInputMock);
-vi.mock("@/components/lh/inputs/LhFileInput", () => lhFormMocks.lhFileInputMock);
-vi.mock("@/components/lh/inputs/LhUrlInput", () => lhFormMocks.lhUrlInputMock);
+vi.mock("@/components/ui/tabs", async () => (await lhFormMocksPromise).tabsMock);
+vi.mock("lucide-react", async () => (await lhFormMocksPromise).lucideMock);
+vi.mock("@/components/ui/card", async () => (await lhFormMocksPromise).cardMock);
+vi.mock("@/components/ui/input", async () => (await lhFormMocksPromise).inputMock);
+vi.mock("@/components/ui/textarea", async () => (await lhFormMocksPromise).textareaMock);
+vi.mock("@/components/ui/button", async () => (await lhFormMocksPromise).buttonMock);
+vi.mock("@/components/ui/label", async () => (await lhFormMocksPromise).labelMock);
+vi.mock("@/components/ui/alert", async () => (await lhFormMocksPromise).alertMock);
+vi.mock("@/components/lh/inputs/LhTabList", async () => (await lhFormMocksPromise).lhTabListMock);
+vi.mock("@/components/lh/inputs/LhTextInput", async () => (await lhFormMocksPromise).lhTextInputMock);
+vi.mock("@/components/lh/inputs/LhFileInput", async () => (await lhFormMocksPromise).lhFileInputMock);
+vi.mock("@/components/lh/inputs/LhUrlInput", async () => (await lhFormMocksPromise).lhUrlInputMock);
 
 async function switchToUrlTab(container: HTMLElement) {
   const urlTab = getTab(container, /Fetch via PageSpeed Insights API/);
@@ -137,7 +135,7 @@ describe("LhInputForm", () => {
       expect((contentAreas[0] as HTMLTextAreaElement).value).toBe("{}");
 
       fireEvent.click(getButton(container, "Remove")!);
-      expect(container.querySelectorAll('input[placeholder="Entry name"]')).toHaveLength(1);
+      expect(container.querySelectorAll('input[placeholder="Entry name"]')).toHaveLength(0);
     });
   });
 

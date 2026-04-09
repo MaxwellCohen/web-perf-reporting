@@ -16,9 +16,6 @@ export default defineConfig({
     testTimeout: 500,
     pool: "threads",
     isolate: true,
-    sequence: {
-      shuffle: false,
-    },
     environment: "happy-dom",
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
     setupFiles: ["./vitest.setup.ts"],
