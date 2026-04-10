@@ -35,11 +35,13 @@ function MultiSelectFilterDropdown({
             checked={selected.length === 0 || selected.includes(option)}
             onCheckedChange={(checked) => {
               if (checked) {
-                onSelectedChange(
-                  selected.includes(option) ? selected : [...selected, option],
-                );
+                // If adding back the last unchecked item, reset to [] ("all selected")
+                const next = selected.includes(option) ? selected : [...selected, option];
+                onSelectedChange(next.length === options.length ? [] : next);
               } else {
-                onSelectedChange(selected.filter((item) => item !== option));
+                // If currently "all selected" (empty), explicitly select all except this one
+                const base = selected.length === 0 ? options : selected;
+                onSelectedChange(base.filter((item) => item !== option));
               }
             }}
           >

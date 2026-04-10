@@ -7,8 +7,6 @@ import { Check, ChevronRight, Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { radixClassForward } from "@/components/ui/radixClassForward";
 import {
-  overlayStyles,
-  focusRingStyles,
   itemStyles,
   checkableMenuItemStyles,
   itemIndicatorStyles,
@@ -64,7 +62,7 @@ const DropdownMenuContent = React.forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        overlayStyles,
+        dropdownSubContentStyles,
         className,
       )}
       {...props}
