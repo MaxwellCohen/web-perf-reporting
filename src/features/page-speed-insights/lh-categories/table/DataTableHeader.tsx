@@ -5,8 +5,7 @@ import { flexRender, Header, Table as TableType } from "@tanstack/react-table";
 
 import { renderBoolean } from "@/features/page-speed-insights/lh-categories/renderBoolean";
 import { SortingButton } from "@/features/page-speed-insights/lh-categories/table/sortingButton";
-import { Popover } from "@/components/ui/popover";
-import { PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ListFilter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
