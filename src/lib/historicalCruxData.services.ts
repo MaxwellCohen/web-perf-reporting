@@ -1,10 +1,10 @@
 import { db } from "@/db";
-import { CruxHistoryReportSchema } from "@/lib/schema";
 import { convertCruxHistoryToReports, formatDate } from "@/lib/utils";
 import * as Sentry from "@sentry/nextjs";
 import { historicalMetrics } from "@/db/schema";
 import { eq, and, asc } from "drizzle-orm";
 import { formFactor } from "@/lib/services";
+import { parseCruxHistoryResponse, queryCruxHistoryRecord } from "@/lib/crux/googleCruxApi";
 
 export const getHistoricalCruxData = async ({
   url,
@@ -21,38 +21,13 @@ export const getHistoricalCruxData = async ({
   }
 
   try {
-    const API_KEY = process.env.PAGESPEED_INSIGHTS_API;
-    if (!API_KEY) {
-      throw new Error("PAGESPEED_INSIGHTS_API environment variable is not set");
-    }
-
-    const response = await fetch(
-      `https://chromeuxreport.googleapis.com/v1/records:queryHistoryRecord?key=${API_KEY}`,
-      {
-        body: JSON.stringify({
-          url: url || undefined,
-          formFactor: formFactor || undefined,
-          origin: origin || undefined,
-          collectionPeriodCount: 40,
-        }),
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
-      throw new Error(
-        `API request failed: ${response.status} ${response.statusText}${
-          errorData ? ` - ${JSON.stringify(errorData)}` : ""
-        }`,
-      );
-    }
-
-    const data = await response.json();
-    const parseData = CruxHistoryReportSchema.parse(data);
+    const raw = await queryCruxHistoryRecord({
+      url,
+      origin,
+      formFactor,
+      collectionPeriodCount: 40,
+    });
+    const parseData = parseCruxHistoryResponse(raw);
     const reports = convertCruxHistoryToReports(parseData);
 
     if (reports.length) {

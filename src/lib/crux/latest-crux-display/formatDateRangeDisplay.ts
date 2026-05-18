@@ -1,4 +1,4 @@
-import type { DateRange } from "../types";
+import type { DateRange } from "@/components/latest-crux/types";
 
 export function formatDateRangeDisplay(dateRange?: DateRange): string {
   if (!dateRange?.startDate && !dateRange?.endDate) {

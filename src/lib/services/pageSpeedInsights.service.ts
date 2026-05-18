@@ -3,6 +3,7 @@ import * as Sentry from "@sentry/nextjs";
 import { PageSpeedInsightsTable } from "@/db/schema";
 import { db } from "@/db";
 import { PageSpeedInsights } from "@/lib/schema";
+import { fetchWorkerStartMeasurement } from "@/lib/page-speed-insights/pageSpeedWorkerClient";
 import { and, eq } from "drizzle-orm";
 
 type formFactor = "DESKTOP" | "MOBILE";
@@ -71,10 +72,7 @@ async function savePageSpeedData(url: string): Promise<ApiResponse> {
   const date = createRequestDate();
   try {
     // await insertPendingMeasurement(url, date);
-    const requestUrl = new URL("https://web-perf-report-cf.to-email-max.workers.dev");
-    requestUrl.searchParams.append("url", url);
-    requestUrl.searchParams.append("key", process.env.PAGESPEED_INSIGHTS_API ?? "");
-    const x = await fetch(requestUrl.toString());
+    const x = await fetchWorkerStartMeasurement(url, process.env.PAGESPEED_INSIGHTS_API ?? "");
     if (!x.ok) {
       throw new Error(`Failed to fetch: ${x.status}`);
     }

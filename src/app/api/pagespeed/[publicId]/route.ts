@@ -1,8 +1,7 @@
 import { type NextRequest } from "next/server";
-import {
-  fetchWorkerJobEnvelopeByPublicId,
-  type WorkerJobEnvelope,
-} from "@/lib/page-speed-insights/pageSpeedWorkerClient";
+import { fetchWorkerJobEnvelopeByPublicId } from "@/lib/page-speed-insights/pageSpeedWorkerClient";
+import type { WorkerJobEnvelope } from "@/lib/page-speed-insights/pageSpeedWorkerClient";
+import { getWorkerEnvelopeToResponse } from "@/lib/page-speed-insights/workerPagespeedApiAdapter";
 
 export async function GET(
   _request: NextRequest,
@@ -21,25 +20,8 @@ export async function GET(
       return new Response(`Error fetching data!`, { status: 500 });
     }
 
-    const data = (await req.json()) as WorkerJobEnvelope;
-    if (!data) {
-      return new Response("Data is not yet ready no data!!", { status: 404 });
-    }
-
-    if (data.status.toLowerCase() === "failed") {
-      return new Response(`Failed to fetch data! ${data.status}`, { status: 500 });
-    }
-
-    if (data.status.toLowerCase() !== "completed") {
-      return new Response(JSON.stringify(data), { status: 404 });
-    }
-
-    if (data.data) {
-      return new Response(JSON.stringify(data.data), {
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-    return new Response(JSON.stringify(data), { status: 200 });
+    const data = (await req.json()) as WorkerJobEnvelope | null;
+    return getWorkerEnvelopeToResponse(data);
   } catch (error) {
     console.error("Error fetching PageSpeed Insights data:", error);
     return new Response("Internal server error", { status: 500 });

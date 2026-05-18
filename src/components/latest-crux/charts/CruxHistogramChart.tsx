@@ -2,7 +2,7 @@
 
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { chartConfig } from "@/components/common/ChartSettings";
-import { cruxHistogramBarData } from "@/components/latest-crux/lib/cruxHistogramBarData";
+import { cruxHistogramBarData } from "@/lib/crux/latest-crux-display/cruxHistogramBarData";
 import type { CruxHistoryItem } from "@/lib/schema";
 import { useMemo } from "react";
 import { Bar, BarChart, CartesianGrid, Rectangle, XAxis } from "recharts";

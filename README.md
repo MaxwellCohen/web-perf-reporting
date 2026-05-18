@@ -40,6 +40,9 @@ TURSO_CONNECTION_URL=your_turso_database_url
 TURSO_AUTH_TOKEN=your_turso_auth_token
 NEXT_PUBLIC_POSTHOG_KEY=your_posthog_project_key
 NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
+# Optional: override the baked-in Sentry DSN (same value used if unset)
+# SENTRY_DSN=https://...@....ingest.us.sentry.io/...
+# NEXT_PUBLIC_SENTRY_DSN=https://...@....ingest.us.sentry.io/...
 ```
 
 ### 3. Run the app

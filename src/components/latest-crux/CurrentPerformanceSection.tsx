@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { CurrentPerformanceDashboard } from "@/components/latest-crux/PerformanceDashboard";
-import { buildCruxReportMap } from "@/components/latest-crux/lib/buildCruxReportMap";
+import { buildCruxReportMap } from "@/lib/crux/latest-crux-display/buildCruxReportMap";
 import { fetchCruxOriginUrlFormFactorGrid } from "@/lib/cruxOriginUrlFormFactorGrid";
 import { getCurrentCruxData } from "@/lib/services";
 

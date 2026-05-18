@@ -1,5 +1,5 @@
 import type { CruxReport } from "@/lib/schema";
-import type { CruxReportMap } from "../types";
+import type { CruxReportMap } from "@/components/latest-crux/types";
 
 /** Maps the fixed Promise.all order from CurrentPerformanceSection to keyed reports. */
 export function buildCruxReportMap(reports: readonly (CruxReport | null)[]): CruxReportMap {

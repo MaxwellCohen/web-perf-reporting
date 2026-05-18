@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { CruxP75ThresholdBar } from "@/components/latest-crux/charts/CruxP75ThresholdBar";
 import { ChartMap } from "@/components/latest-crux/chartMap";
 import { CurrentPerformanceChartContext } from "@/components/latest-crux/context/CurrentPerformanceChartContext";
-import { p75StatusFromHistogram } from "@/components/latest-crux/lib/p75StatusFromHistogram";
+import { p75StatusFromHistogram } from "@/lib/crux/latest-crux-display/p75StatusFromHistogram";
 import type { CruxHistoryItem } from "@/lib/schema";
 import { useContext, useMemo } from "react";
 

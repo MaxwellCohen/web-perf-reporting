@@ -3,7 +3,7 @@ import type { PageSpeedInsights } from "@/lib/schema";
 export type PageSpeedInsightsArray = (PageSpeedInsights | null | undefined)[];
 
 /**
- * Parses the JSON body from `/api/pagespeed` responses into a PSI array.
+ * Parses JSON text from PageSpeed Insights API responses (see `pageSpeedInsightsApiClient`).
  * Returns [] on parse failure (caller may log).
  */
 export function parsePageSpeedInsightsArrayFromText(text: string): PageSpeedInsightsArray {

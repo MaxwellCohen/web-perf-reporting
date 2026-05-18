@@ -2,71 +2,26 @@
 
 import { createContext, type ReactNode, useContext, useEffect } from "react";
 import { useSelector, useStore } from "@xstate/store-react";
-import type { FullPageScreenshot, NullablePageSpeedInsights } from "@/lib/schema";
 import {
-  getDashboardItems,
-  getDashboardTitle,
-  getFullPageScreenshotMap,
-} from "@/features/page-speed-insights/pageSpeedDashboardHelpers";
-import {
-  mapItemsToNetworkMetrics,
-  mapNetworkMetricsToStats,
-  type NetworkMetricSeries,
-  type NetworkRequestStatsRow,
-} from "@/features/page-speed-insights/network-metrics/useNetworkMetricsData";
-import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
-
-type PageSpeedInsightsStoreInput = {
-  data?: NullablePageSpeedInsights[];
-  labels: string[];
-  isLoading: boolean;
-};
-
-type PageSpeedInsightsStoreState = {
-  data: NullablePageSpeedInsights[];
-  labels: string[];
-  isLoading: boolean;
-  items: InsightsContextItem[];
-  networkMetricSeries: NetworkMetricSeries[];
-  networkRequestStats: NetworkRequestStatsRow[];
-  reportTitle: string;
-  fullPageScreenshots: Record<string, FullPageScreenshot | undefined | null>;
-};
-
-function createPageSpeedInsightsState({
-  data = [],
-  labels,
-  isLoading,
-}: PageSpeedInsightsStoreInput): PageSpeedInsightsStoreState {
-  const items = getDashboardItems(data, labels);
-  const networkMetricSeries = mapItemsToNetworkMetrics(items);
-  const networkRequestStats = mapNetworkMetricsToStats(networkMetricSeries);
-
-  return {
-    data,
-    labels,
-    isLoading,
-    items,
-    networkMetricSeries,
-    networkRequestStats,
-    reportTitle: getDashboardTitle(items),
-    fullPageScreenshots: getFullPageScreenshotMap(items),
-  };
-}
+  buildPageSpeedInsightsStoreState,
+  type PageSpeedInsightsStoreInput,
+  type PageSpeedInsightsStoreState,
+} from "@/features/page-speed-insights/pageSpeedDashboardViewModel";
 
 function createPageSpeedInsightsStoreConfig(input: PageSpeedInsightsStoreInput) {
   return {
-    context: createPageSpeedInsightsState(input),
+    context: buildPageSpeedInsightsStoreState(input),
     on: {
       sync: (
         _context: PageSpeedInsightsStoreState,
         event: PageSpeedInsightsStoreInput,
-      ): PageSpeedInsightsStoreState => createPageSpeedInsightsState(event),
+      ): PageSpeedInsightsStoreState => buildPageSpeedInsightsStoreState(event),
     },
   };
 }
 
 export type { InsightsContextItem } from "@/lib/page-speed-insights/types";
+export type { PageSpeedInsightsStoreInput } from "@/features/page-speed-insights/pageSpeedDashboardViewModel";
 
 export function usePageSpeedInsightsStore(input: PageSpeedInsightsStoreInput) {
   const { data, isLoading, labels } = input;

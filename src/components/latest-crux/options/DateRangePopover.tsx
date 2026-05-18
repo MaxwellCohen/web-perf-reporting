@@ -1,6 +1,6 @@
 "use client";
 
-import { formatDateRangeDisplay } from "@/components/latest-crux/lib/formatDateRangeDisplay";
+import { formatDateRangeDisplay } from "@/lib/crux/latest-crux-display/formatDateRangeDisplay";
 import type { DateRange } from "@/components/latest-crux/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

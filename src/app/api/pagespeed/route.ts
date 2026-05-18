@@ -1,8 +1,7 @@
 import { type NextRequest } from "next/server";
-import {
-  fetchWorkerJobEnvelopeByUrl,
-  type WorkerJobEnvelope,
-} from "@/lib/page-speed-insights/pageSpeedWorkerClient";
+import { fetchWorkerJobEnvelopeByUrl } from "@/lib/page-speed-insights/pageSpeedWorkerClient";
+import type { WorkerJobEnvelope } from "@/lib/page-speed-insights/pageSpeedWorkerClient";
+import { postWorkerEnvelopeToResponse } from "@/lib/page-speed-insights/workerPagespeedApiAdapter";
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,20 +23,8 @@ export async function POST(request: NextRequest) {
     if (!req.ok) {
       return new Response("Error fetching data", { status: req.status });
     }
-    const data = (await req.json()) as WorkerJobEnvelope;
-
-    if (!data) {
-      return new Response("Data is not yet ready no data", { status: 404 });
-    }
-    if (data.status.toLowerCase() !== "completed") {
-      return new Response(`Data is not yet ready! ${data.status}`, { status: 404 });
-    }
-    if (data.data) {
-      return new Response(data.data, {
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-    return new Response(data.data, { status: 500 });
+    const data = (await req.json()) as WorkerJobEnvelope | null;
+    return postWorkerEnvelopeToResponse(data);
   } catch (error) {
     console.error("Error fetching PageSpeed Insights data:", error);
     return new Response("Internal server error", { status: 500 });
