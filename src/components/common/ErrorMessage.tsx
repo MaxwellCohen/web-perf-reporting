@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import type { ErrorInfo } from "next/error";
 import { unstable_catchError } from "next/error";
 import Link from "next/link";
 import { AlertCircle } from "lucide-react";

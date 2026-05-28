@@ -22,7 +22,7 @@ import {
   PercentTable,
   toSentenceCase,
 } from "@/components/common/FormFactorPercentPieChart";
-import Gauge, {
+import {
   GaugeChart,
   HorizontalGaugeChart as HorizontalPageSpeedGaugeChart,
   LineChart,
@@ -65,7 +65,7 @@ describe("common charts", () => {
   it("renders the main page speed gauge variants when valid metric data is provided", () => {
     const { container } = render(
       <div>
-        <Gauge metric="FCP" data={pageLoadMetric as any} />
+        <GaugeChart metric="FCP" data={pageLoadMetric as any} />
         <HorizontalPageSpeedGaugeChart metric="1200 - FAST" data={pageLoadMetric as any} />
       </div>,
     );
@@ -95,7 +95,4 @@ describe("common charts", () => {
     expect(container.textContent).not.toContain("CLS");
   });
 
-  it("exports the default gauge component", () => {
-    expect(Gauge).toBe(GaugeChart);
-  });
 });

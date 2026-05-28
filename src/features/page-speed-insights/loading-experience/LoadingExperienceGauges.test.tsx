@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { LoadingExperienceGauges } from "./LoadingExperienceGauges";
 
 vi.mock("@/components/common/PageSpeedGaugeChart", () => ({
-  default: ({ metric }: { metric: string }) => <div data-testid="gauge">{metric}</div>,
+  GaugeChart: ({ metric }: { metric: string }) => <div data-testid="gauge">{metric}</div>,
 }));
 
 describe("LoadingExperienceGauges", () => {

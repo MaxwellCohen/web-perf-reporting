@@ -29,7 +29,7 @@ import {
 import { RenderTableValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import clsx from "clsx";
 import { cn } from "@/lib/utils";
-import { ExpandAll, ExpandRow } from "@/features/page-speed-insights/JSUsage/JSUsageTable";
+import { ExpandAll, ExpandRow } from "@/features/page-speed-insights/JSUsage/jsUsageTableParts";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
 import { booleanFilterFn } from "@/features/page-speed-insights/lh-categories/table/DataTableNoGrouping";
@@ -725,7 +725,7 @@ const calculateDefaultSorting = (
   availableColumnIds: Set<string>,
 ): SortingState => {
   const sortedByKeys = rows
-    .flatMap((r) => (r.auditResult?.details as AuditDetailTable).sortedBy || [])
+    .flatMap((r) => (r.auditResult?.details as AuditDetailTable)?.sortedBy || [])
     .filter((v, i, a): v is string => !!(v && i === a.indexOf(v)));
 
   // Map sortedBy keys to actual column IDs that exist

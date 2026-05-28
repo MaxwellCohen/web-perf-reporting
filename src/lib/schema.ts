@@ -9,7 +9,7 @@ const cruxHistogramItemSchema = z.object({
   density: coerceNumber,
 });
 
-export const cruxHistogramSchema = z.tuple([
+const cruxHistogramSchema = z.tuple([
   cruxHistogramItemSchema,
   cruxHistogramItemSchema,
   cruxHistogramItemSchema.omit({ end: true }),
@@ -17,7 +17,7 @@ export const cruxHistogramSchema = z.tuple([
 
 export type CruxHistogram = z.infer<typeof cruxHistogramSchema>;
 
-export const cruxDateSchema = z.object({
+const cruxDateSchema = z.object({
   year: coerceNumber,
   month: coerceNumber,
   day: coerceNumber,
@@ -25,13 +25,11 @@ export const cruxDateSchema = z.object({
 
 export type CruxDate = z.infer<typeof cruxDateSchema>;
 
-export const cruxPercentileSchema = z.object({
+const cruxPercentileSchema = z.object({
   p75: coerceNumber,
 });
 
-export type CruxPercentile = z.infer<typeof cruxPercentileSchema>;
-
-export const CruxHistogramItem = z.object({
+const CruxHistogramItem = z.object({
   histogram: cruxHistogramSchema,
   percentiles: cruxPercentileSchema,
 });
@@ -54,13 +52,11 @@ const keySchema = z
   })
   .partial();
 
-export const FormFactorFractionsSchema = z.object({
+const FormFactorFractionsSchema = z.object({
   desktop: coerceNumber,
   phone: coerceNumber,
   tablet: coerceNumber,
 });
-
-export type FormFactorFractions = z.infer<typeof FormFactorFractionsSchema>;
 
 export const cruxReportSchema = z.object({
   record: z.object({
@@ -124,7 +120,7 @@ const cruxHistogramTimeseriesItemSchema = z.object({
   densities: z.array(coerceNumber),
 });
 
-export const CruxHistoryHistogramTimeseries = z.tuple([
+const CruxHistoryHistogramTimeseries = z.tuple([
   cruxHistogramTimeseriesItemSchema,
   cruxHistogramTimeseriesItemSchema,
   cruxHistogramTimeseriesItemSchema.omit({ end: true }),
@@ -132,27 +128,27 @@ export const CruxHistoryHistogramTimeseries = z.tuple([
 
 export type CruxHistoryHistogramTimeseries = z.infer<typeof CruxHistoryHistogramTimeseries>;
 
-export const CruxHistoryPercentilesTimeseries = z.object({
+const CruxHistoryPercentilesTimeseries = z.object({
   p75s: z.array(z.union([z.null(), z.number(), z.string()])).optional(),
 });
 
-export type CruxHistoryPercentilesTimeseries = z.infer<typeof CruxHistoryPercentilesTimeseries>;
+type CruxHistoryPercentilesTimeseries = z.infer<typeof CruxHistoryPercentilesTimeseries>;
 
-export const CruxHistoryReportCollectionPeriods = z.array(
+const CruxHistoryReportCollectionPeriods = z.array(
   z.object({
     firstDate: cruxDateSchema,
     lastDate: cruxDateSchema,
   }),
 );
 
-export type CruxHistoryReportCollectionPeriods = z.infer<typeof CruxHistoryReportCollectionPeriods>;
+type CruxHistoryReportCollectionPeriods = z.infer<typeof CruxHistoryReportCollectionPeriods>;
 
-export const CruxHistoryTimeseries = z.object({
+const CruxHistoryTimeseries = z.object({
   histogramTimeseries: CruxHistoryHistogramTimeseries,
   percentilesTimeseries: CruxHistoryPercentilesTimeseries,
 });
 
-export const CruxFractionsSchema = z.object({
+const CruxFractionsSchema = z.object({
   fractions: z.array(coerceNumber),
 });
 
@@ -222,7 +218,7 @@ export const CruxHistoryReportSchema = z.object({
 
 export type CruxHistoryReport = z.infer<typeof CruxHistoryReportSchema>;
 
-export const UserPageLoadMetricV5schema = z.object({
+const UserPageLoadMetricV5schema = z.object({
   percentile: z.number(),
   distributions: z.array(
     z.object({
@@ -236,7 +232,7 @@ export const UserPageLoadMetricV5schema = z.object({
 
 export type UserPageLoadMetricV5 = z.infer<typeof UserPageLoadMetricV5schema>;
 
-export const PageSpeedApiLoadingExperienceV5schema = z.object({
+const PageSpeedApiLoadingExperienceV5schema = z.object({
   metrics: z.object({
     CUMULATIVE_LAYOUT_SHIFT_SCORE: UserPageLoadMetricV5schema,
     EXPERIMENTAL_TIME_TO_FIRST_BYTE: UserPageLoadMetricV5schema,
@@ -248,13 +244,6 @@ export const PageSpeedApiLoadingExperienceV5schema = z.object({
 });
 
 export type PageSpeedApiLoadingExperience = z.infer<typeof PageSpeedApiLoadingExperienceV5schema>;
-
-export const LighthouseResultV5 = z.object({
-  fetchTime: z.string(),
-  requestedUrl: z.string(),
-  finalUrl: z.string(),
-  lighthouseVersion: z.string(),
-});
 
 const artifactsSchema = z.record(z.any()).optional();
 
@@ -279,14 +268,14 @@ export type DebugData = {
   [p: string]: any;
 };
 
-export const DebugDataSchema = z.custom<DebugData>((v) => {
+const DebugDataSchema = z.custom<DebugData>((v) => {
   if (v.type === "debugdata") {
     return v;
   }
   return null;
 });
 
-export const RectSchema = z.object({
+const RectSchema = z.object({
   width: z.number(),
   height: z.number(),
   top: z.number(),
@@ -297,7 +286,7 @@ export const RectSchema = z.object({
 
 export type Rect = z.infer<typeof RectSchema>;
 
-export const NodeValueSchema = z.object({
+const NodeValueSchema = z.object({
   type: z.literal("node").or(z.literal("text")),
   lhId: z.string().optional(),
   path: z.string().optional(),
@@ -312,25 +301,10 @@ export const NodeValueSchema = z.object({
 export type NodeValue = z.infer<typeof NodeValueSchema>;
 
 /** A table item for rows that are nested within a top-level TableItem (row). */
-export interface TableSubItems {
+interface TableSubItems {
   type: "subitems";
   items: TableItem[];
 }
-
-const AuditDetailsTableHeadingColumnSchema = z
-  .object({
-    valueType: z.union([z.string(), z.number()]).optional(),
-    key: z.string().optional(),
-    label: z.string().optional(),
-    granularity: z.number().optional(),
-  })
-  .partial();
-
-export const AuditDetailsTableHeading = z.array(
-  AuditDetailsTableHeadingColumnSchema.extend({
-    subItemsHeading: AuditDetailsTableHeadingColumnSchema.optional(),
-  }),
-);
 
 export interface AuditDetailTable extends BaseDetails {
   type: "table";
@@ -351,7 +325,7 @@ export interface AuditDetailTable extends BaseDetails {
   skipSumming?: Array<string>;
 }
 
-export const AuditDetailTableSchema = z.custom<AuditDetailTable>((v) => {
+const AuditDetailTableSchema = z.custom<AuditDetailTable>((v) => {
   if (v.type === "table") {
     return v;
   }
@@ -372,14 +346,14 @@ export interface TreeMapData extends BaseDetails {
   nodes: TreeMapNode[];
 }
 
-export const TreeMapDataSchema = z.custom<TreeMapData>((v) => {
+const TreeMapDataSchema = z.custom<TreeMapData>((v) => {
   if (v.type === "treemap-data") {
     return v;
   }
   return null;
 });
 
-export const AuditDetailListSchema = z.object({
+const AuditDetailListSchema = z.object({
   type: z.literal("list"),
   items: z.array(AuditDetailTableSchema.or(DebugDataSchema)),
   debugData: DebugDataSchema.optional(),
@@ -387,7 +361,7 @@ export const AuditDetailListSchema = z.object({
 
 export type AuditDetailList = z.infer<typeof AuditDetailListSchema>;
 
-export const AuditDetailFilmstripSchema = z.object({
+const AuditDetailFilmstripSchema = z.object({
   type: z.literal("filmstrip"),
   items: z.array(
     z.object({
@@ -433,14 +407,14 @@ export interface AuditDetailOpportunity extends BaseDetails {
   overallSavingsBytes?: number;
 }
 
-export const AuditDetailOpportunitySchema = z.custom<AuditDetailOpportunity>((v) => {
+const AuditDetailOpportunitySchema = z.custom<AuditDetailOpportunity>((v) => {
   if (v.type === "opportunity") {
     return v;
   }
   return null;
 });
 
-export interface BaseDetails {
+interface BaseDetails {
   /** Additional information, usually used for including debug or meta information in the LHR */
   debugData?: DebugData;
 }
@@ -455,7 +429,7 @@ export interface CriticalRequestChain extends BaseDetails {
   chains: SimpleCriticalRequestNode;
 }
 
-export type SimpleCriticalRequestNode = {
+type SimpleCriticalRequestNode = {
   [id: string]: {
     request: {
       url: string;
@@ -468,7 +442,7 @@ export type SimpleCriticalRequestNode = {
   };
 };
 
-export const AuditDetailScreenshotSchema = z.object({
+const AuditDetailScreenshotSchema = z.object({
   type: z.literal("screenshot"),
   timing: coerceNumber,
   timestamp: coerceNumber,
@@ -476,10 +450,8 @@ export const AuditDetailScreenshotSchema = z.object({
   debugData: DebugDataSchema.optional(),
 });
 
-export type AuditDetailScreenshot = z.infer<typeof AuditDetailScreenshotSchema>;
-
 /** String enum of possible types of values found within table items. */
-export const ItemValueTypeSchema = z.union([
+const ItemValueTypeSchema = z.union([
   z.literal("bytes"),
   z.literal("ms"),
   z.literal("url"),
@@ -497,8 +469,7 @@ export const ItemValueTypeSchema = z.union([
 /** String enum of possible types of values found within table items. */
 export type ItemValueType = z.infer<typeof ItemValueTypeSchema>;
 
-export const SourceLocationValueSchema = z.object({
-  type: z.literal("source-location"),
+const SourceLocationValueSchema = z.object({  type: z.literal("source-location"),
   url: z.string(),
   urlProvider: z.enum(["network", "comment"]),
   line: z.number(),
@@ -514,7 +485,7 @@ export const SourceLocationValueSchema = z.object({
 
 export type SourceLocationValue = z.infer<typeof SourceLocationValueSchema>;
 
-export const LinkValueSchema = z.object({
+const LinkValueSchema = z.object({
   type: z.literal("link"),
   text: z.string(),
   url: z.string(),
@@ -522,29 +493,29 @@ export const LinkValueSchema = z.object({
 
 export type LinkValue = z.infer<typeof LinkValueSchema>;
 
-export const UrlValueSchema = z.object({
+const UrlValueSchema = z.object({
   type: z.literal("url"),
   value: z.string(),
 });
 
 export type UrlValue = z.infer<typeof UrlValueSchema>;
 
-export const IcuMessageSchema = z.object({
+const IcuMessageSchema = z.object({
   i18nId: z.string(),
   values: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
   formattedDefault: z.string(),
 });
 
-export type IcuMessage = z.infer<typeof IcuMessageSchema>;
+type IcuMessage = z.infer<typeof IcuMessageSchema>;
 
-export const CodeValueSchema = z.object({
+const CodeValueSchema = z.object({
   type: z.literal("code"),
   value: z.union([IcuMessageSchema, z.string()]),
 });
 
 export type CodeValue = z.infer<typeof CodeValueSchema>;
 
-export const NumericValueSchema = z.object({
+const NumericValueSchema = z.object({
   type: z.literal("numeric"),
   value: z.number(),
   granularity: z.number().optional(),
@@ -552,7 +523,7 @@ export const NumericValueSchema = z.object({
 
 export type NumericValue = z.infer<typeof NumericValueSchema>;
 
-export const TextValueSchema = z.object({
+const TextValueSchema = z.object({
   type: z.literal("text"),
   value: z.string(),
 });
@@ -560,7 +531,7 @@ export const TextValueSchema = z.object({
 export type TextValue = z.infer<typeof TextValueSchema>;
 
 /** Possible types of values found within table items. */
-export const ItemValueSchema = z.union([
+const ItemValueSchema = z.union([
   z.string(),
   z.number(),
   z.boolean(),
@@ -609,13 +580,6 @@ export interface TableColumnHeading {
   granularity?: number;
 }
 
-export const TableColumnHeadingSchema = z.custom<TableColumnHeading>((v) => {
-  if (v.key === null) {
-    return v;
-  }
-  return null;
-});
-
 export type TableItem = {
   debugData?: DebugData;
   subItems?: TableSubItems;
@@ -623,7 +587,7 @@ export type TableItem = {
   [key: string]: ItemValue | undefined;
 };
 
-export const AuditDetailChecklistSchema = z.object({
+const AuditDetailChecklistSchema = z.object({
   type: z.literal("checklist"),
   items: z.record(
     z.object({
@@ -636,7 +600,7 @@ export const AuditDetailChecklistSchema = z.object({
 
 export type AuditDetailChecklist = z.infer<typeof AuditDetailChecklistSchema>;
 
-export const AuditDetailCriticalRequestChainSchema = z.custom<CriticalRequestChain>((v) => {
+const AuditDetailCriticalRequestChainSchema = z.custom<CriticalRequestChain>((v) => {
   if (v.type === "criticalrequestchain") {
     return v;
   }
@@ -715,8 +679,6 @@ const categorySchema = z
   })
   .partial();
 
-export type Category = z.infer<typeof categorySchema>;
-
 const entitiesSchema = z.array(
   z
     .object({
@@ -728,7 +690,6 @@ const entitiesSchema = z.array(
     .optional(),
 );
 
-export type Entities = z.infer<typeof entitiesSchema>;
 
 const FullPageScreenshotSchema = z.object({
   nodes: z.record(
@@ -790,7 +751,7 @@ const lighthouseResultV5Schema = z
   })
   .partial();
 
-export const pageSpeedInsightsSchema = z.object({
+const pageSpeedInsightsSchema = z.object({
   kind: z.string(),
   captchaResult: z.string(),
   id: z.string(),
@@ -805,7 +766,7 @@ export const pageSpeedInsightsSchema = z.object({
 export type PageSpeedInsights = z.infer<typeof pageSpeedInsightsSchema>;
 export type NullablePageSpeedInsights = PageSpeedInsights | null | undefined;
 
-export const cruxHistoryItemSchema = z.object({
+const cruxHistoryItemSchema = z.object({
   url: z.string(),
   origin: z.enum(["url", "origin"]),
   formFactor: z.string(),

@@ -41,13 +41,10 @@ const PageSpeedInsightsStoreContext = createContext<PageSpeedInsightsStore | nul
 
 export const selectPageSpeedItems = (snapshot: PageSpeedInsightsSnapshot) => snapshot.context.items;
 
-export const selectPageSpeedNetworkMetricSeries = (snapshot: PageSpeedInsightsSnapshot) =>
-  snapshot.context.networkMetricSeries;
-
 export const selectPageSpeedReportTitle = (snapshot: PageSpeedInsightsSnapshot) =>
   snapshot.context.reportTitle;
 
-export const selectPageSpeedFullPageScreenshots = (snapshot: PageSpeedInsightsSnapshot) =>
+const selectPageSpeedFullPageScreenshots = (snapshot: PageSpeedInsightsSnapshot) =>
   snapshot.context.fullPageScreenshots;
 
 export const selectPageSpeedIsLoading = (snapshot: PageSpeedInsightsSnapshot) =>

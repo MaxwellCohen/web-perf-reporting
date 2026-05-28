@@ -178,8 +178,6 @@ export function GaugeChart({ metric, data }: { metric: string; data?: UserPageLo
   );
 }
 
-export default GaugeChart;
-
 export function HorizontalGaugeChart({
   metric,
   data,

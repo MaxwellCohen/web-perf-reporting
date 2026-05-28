@@ -11,7 +11,7 @@ function getChromeUxApiKey(): string | null {
   return process.env.PAGESPEED_INSIGHTS_API ?? null;
 }
 
-export function requireChromeUxApiKey(): string {
+function requireChromeUxApiKey(): string {
   const apiKey = getChromeUxApiKey();
   if (!apiKey) {
     const err = new Error("PAGESPEED_INSIGHTS_API environment variable is not set");

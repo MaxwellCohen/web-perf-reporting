@@ -43,6 +43,7 @@ export const requestPageSpeedData = async (testURL: string | undefined): Promise
     if (!testURL) {
       return null;
     }
+    console.log(testURL); 
     const result = await savePageSpeedData(testURL);
     if (typeof result.publicId === "string") {
       return result.publicId;

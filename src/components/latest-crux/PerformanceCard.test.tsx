@@ -16,7 +16,7 @@ vi.mock("@/components/ui/chart", () => ({
 }));
 
 vi.mock("@/components/common/PageSpeedGaugeChart", () => ({
-  default: () => <div data-testid="gauge-chart" />,
+  GaugeChart: () => <div data-testid="gauge-chart" />,
 }));
 
 vi.mock("@/components/latest-crux/charts/CruxRadialChart", () => ({

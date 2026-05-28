@@ -7,14 +7,11 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { radixClassForward } from "@/components/ui/radixClassForward";
 import {
-  overlayStyles,
   contentPrimitiveScrollStyles,
   labelStyles,
   separatorStyles,
   itemStyles,
-  checkboxItemStyles,
   itemIndicatorStyles,
-  focusRingStyles,
   selectScrollEdgeButtonStyles,
 } from "@/lib/ui-classes";
 

@@ -259,8 +259,13 @@ describe("utils", () => {
 
   it("normalizes user-provided urls", () => {
     expect(updateURl()).toBe("");
-    expect(updateURl("example.com")).toBe("https://www.example.com");
-    expect(updateURl("https://example.com")).toBe("https://www.example.com");
+    expect(updateURl("example.com")).toBe("https://example.com");
+    expect(updateURl("https://example.com")).toBe("https://example.com");
+    expect(updateURl("https://www.example.com")).toBe("https://www.example.com");
+    expect(updateURl("https://wwwstg.aspendental.com/schedule-an-appointment-2/")).toBe(
+      "https://wwwstg.aspendental.com/schedule-an-appointment-2/",
+    );
+    expect(updateURl("https://staging.example.com/path")).toBe("https://staging.example.com/path");
     expect(updateURl("nota url")).toBe("");
   });
 });

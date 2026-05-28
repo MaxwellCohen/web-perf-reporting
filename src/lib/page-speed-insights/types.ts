@@ -4,7 +4,6 @@ import type { PageSpeedInsights } from "@/lib/schema";
  * Canonical PageSpeed Insights row types for the dashboard feature.
  * Prefer importing from here or `@/lib/schema` — both align on Zod-inferred `PageSpeedInsights`.
  */
-export type { PageSpeedInsights } from "@/lib/schema";
 
 export type PageSpeedDashboardItem = {
   item: PageSpeedInsights;

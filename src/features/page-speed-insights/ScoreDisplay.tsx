@@ -22,7 +22,7 @@ export const ScoreDisplayModes = {
   ERROR: "error",
 } as const;
 
-export const ScoreDisplayModesRanking: Record<
+const ScoreDisplayModesRanking: Record<
   AuditResultsRecord[string]["scoreDisplayMode"] | "empty",
   number
 > = {

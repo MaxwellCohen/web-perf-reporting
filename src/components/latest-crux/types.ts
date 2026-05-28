@@ -8,6 +8,4 @@ export type DateRange = {
   endDate: string | null;
 };
 
-export type CruxReportMapKey = `${Scope}${DeviceType}`;
-
-export type CruxReportMap = Record<CruxReportMapKey, CruxReport | null>;
+export type CruxReportMap = Record<`${Scope}${DeviceType}`, CruxReport | null>;

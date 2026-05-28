@@ -1,3 +1,4 @@
+// oxlint-disable nextjs/no-html-link-for-pages
 import React from "react";
 
 import { render } from "@testing-library/react";

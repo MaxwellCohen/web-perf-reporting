@@ -1,11 +1,9 @@
 "use client";
-import { LoadingMessage } from "@/components/common/LoadingMessage";
 import { LoadingExperiencesSection } from "@/features/page-speed-insights/loading-experience";
 import { EntitiesTable } from "@/features/page-speed-insights/lh-categories/table/EntitiesTable";
 import { CWVMetricsComponent } from "@/features/page-speed-insights/CWVMetricsComponent";
 import {
   PageSpeedInsightsStoreProvider,
-  selectPageSpeedIsLoading,
   selectPageSpeedItems,
   selectPageSpeedReportTitle,
   usePageSpeedInsightsStore,
@@ -14,7 +12,7 @@ import { RenderFilmStrip } from "@/features/page-speed-insights/RenderFilmStrip"
 import { NullablePageSpeedInsights } from "@/lib/schema";
 import { CategoryRow, useLHTable } from "@/features/page-speed-insights/tsTable/useLHTable";
 import { Button } from "@/components/ui/button";
-import { StringFilterHeader } from "@/features/page-speed-insights/JSUsage/JSUsageTable";
+import { StringFilterHeader } from "@/features/page-speed-insights/JSUsage/StringFilterHeader";
 import { Accordion } from "@/components/ui/accordion";
 import { DropdownFilter } from "@/features/page-speed-insights/JSUsage/TableControls";
 import { NetworkMetricsComponent } from "@/features/page-speed-insights/network-metrics";

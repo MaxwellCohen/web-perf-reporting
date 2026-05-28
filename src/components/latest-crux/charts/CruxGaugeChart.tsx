@@ -1,6 +1,6 @@
 "use client";
 
-import GaugeChart from "@/components/common/PageSpeedGaugeChart";
+import { GaugeChart } from "@/components/common/PageSpeedGaugeChart";
 import type { CruxHistoryItem, UserPageLoadMetricV5 } from "@/lib/schema";
 
 export function CruxGaugeChart({ histogramData }: { histogramData: CruxHistoryItem }) {

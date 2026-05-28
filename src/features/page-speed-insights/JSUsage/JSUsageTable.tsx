@@ -26,11 +26,6 @@ import { columns } from "@/features/page-speed-insights/JSUsage/jsUsageTableColu
 import { JSUsageTableHeader } from "@/features/page-speed-insights/JSUsage/jsUsageTableHeader";
 import { JSUsageTableRow } from "@/features/page-speed-insights/JSUsage/jsUsageTableRow";
 
-export { ExpandRow, ExpandAll, RenderBytesCell } from "./jsUsageTableParts";
-export { makeSortingHeading } from "./jsUsageTableColumns";
-export { StringFilterHeader } from "./StringFilterHeader";
-export { RangeFilter, numericRangeFilter } from "./jsUsageTableFilters";
-
 export function useUseJSUsageTable(data: TreeMapData["nodes"]) {
   "use no memo";
   const [sorting, setSorting] = useState<SortingState>([]);

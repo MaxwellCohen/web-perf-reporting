@@ -54,7 +54,7 @@ export function getColumnSize(
 /**
  * Creates a column definition from a TableColumnHeading
  */
-export function createColumnFromHeading<T>(heading: TableColumnHeading): {
+export function createColumnFromHeading(heading: TableColumnHeading): {
   id: string;
   accessorKey: string;
   header: string;

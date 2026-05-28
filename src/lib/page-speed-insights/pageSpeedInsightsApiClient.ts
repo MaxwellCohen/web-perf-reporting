@@ -2,7 +2,7 @@ import type { PageSpeedInsights } from "@/lib/schema";
 import { parsePageSpeedInsightsArrayFromText } from "@/lib/page-speed-insights/parsePageSpeedInsightsResponse";
 
 /** Relative paths for the Next.js `/api/pagespeed` route handlers. */
-export const PAGE_SPEED_INSIGHTS_API = {
+const PAGE_SPEED_INSIGHTS_API = {
   postByUrl: "/api/pagespeed",
   getByPublicId: (publicId: string) => `/api/pagespeed/${encodeURIComponent(publicId)}`,
 } as const;
@@ -44,6 +44,7 @@ export async function getPageSpeedInsightsByPublicId(
   });
 
   if (res.status === 500) {
+    console.log(res.status, await res.text());
     return { status: "failed" as const };
   }
 

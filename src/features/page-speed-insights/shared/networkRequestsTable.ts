@@ -11,7 +11,7 @@ export type NetworkRequestTimeRange = {
 };
 
 export const NETWORK_REQUESTS_AUDIT_ID = "network-requests";
-export const NETWORK_REQUEST_TIMING_KEYS: readonly string[] = [
+const NETWORK_REQUEST_TIMING_KEYS: readonly string[] = [
   "networkRequestTime",
   "networkEndTime",
 ] as const;

@@ -15,9 +15,10 @@ export async function GET(
     }
 
     const req = await fetchWorkerJobEnvelopeByPublicId(publicId);
-
     if (!req.ok) {
-      return new Response(`Error fetching data!`, { status: 500 });
+      console.log('hello');
+      // console.error("Error fetching PageSpeed Insights data:", req.status, await req.text());
+      return new Response(`Error fetching data! ` + await req.text(), { status: 500 });
     }
 
     const data = (await req.json()) as WorkerJobEnvelope | null;

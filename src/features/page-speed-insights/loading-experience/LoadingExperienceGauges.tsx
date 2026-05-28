@@ -1,5 +1,5 @@
 "use client";
-import GaugeChart from "@/components/common/PageSpeedGaugeChart";
+import { GaugeChart } from "@/components/common/PageSpeedGaugeChart";
 import { PageSpeedApiLoadingExperience } from "@/lib/schema";
 
 export function LoadingExperienceGauges({

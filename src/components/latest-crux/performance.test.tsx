@@ -24,7 +24,7 @@ vi.mock("@/components/ui/chart", () => ({
 }));
 
 vi.mock("@/components/common/PageSpeedGaugeChart", () => ({
-  default: ({ metric }: { metric: string }) => <div>Gauge: {metric}</div>,
+  GaugeChart: ({ metric }: { metric: string }) => <div>Gauge: {metric}</div>,
 }));
 
 vi.mock("@/components/common/FormFactorPercentPieChart", () => ({

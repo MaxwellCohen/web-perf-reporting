@@ -10,8 +10,8 @@ import { ListFilter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   RangeFilter,
-  StringFilterHeader,
-} from "@/features/page-speed-insights/JSUsage/JSUsageTable";
+} from "@/features/page-speed-insights/JSUsage/jsUsageTableFilters";
+import { StringFilterHeader } from "@/features/page-speed-insights/JSUsage/StringFilterHeader";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnResizer } from "@/features/page-speed-insights/lh-categories/table/columnResizer";
@@ -33,7 +33,7 @@ export function DataTableHeader<T>({ table }: { table: TableType<T> }) {
   );
 }
 
-export function DataTableHead<T>({ header }: { header: Header<T, unknown> }) {
+function DataTableHead<T>({ header }: { header: Header<T, unknown> }) {
   "use no memo";
   const isExpanderColumn = header.column.id === "expander";
 

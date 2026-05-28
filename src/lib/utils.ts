@@ -277,14 +277,17 @@ export function updateURl(url?: string) {
   if (!url) {
     return "";
   }
-  if (!url.startsWith("http://") && !url.startsWith("https://")) {
-    url = "https://" + url;
+
+  let normalized = url.trim();
+  if (!normalized.startsWith("http://") && !normalized.startsWith("https://")) {
+    normalized = `https://${normalized}`;
   }
-  if (!url.includes("www.")) {
-    const urlParts = url.split("://");
-    url = urlParts[0] + "://www." + urlParts[1];
+
+  try {
+    return normalized;
+  } catch {
+    return "";
   }
-  return urlSchema.safeParse(url).data ?? "";
 }
 
 /** Next.js `searchParams` prop; normalize the `url` query value for CrUX report pages. */

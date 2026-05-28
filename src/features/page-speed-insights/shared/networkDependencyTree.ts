@@ -5,7 +5,7 @@ import {
   renderTimeValue,
 } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 
-export type NetworkTreeNode = {
+type NetworkTreeNode = {
   url: string;
   transferSize?: number;
   navStartToEndTime?: number;

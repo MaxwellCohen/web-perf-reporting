@@ -122,7 +122,7 @@ export function createMSColumn<T>(
 /**
  * Optional numeric column using a custom renderer (e.g. bytes).
  */
-export function createOptionalNumericColumn<T>(
+function createOptionalNumericColumn<T>(
   columnHelper: ReturnType<typeof createColumnHelper<T>>,
   options: {
     accessor: keyof T;
@@ -139,7 +139,6 @@ export function createOptionalNumericColumn<T>(
     aggregatedColumnId,
     aggregatedCellFactory = createNumericAggregatedCell,
   } = options;
-  const id = String(accessor);
 
   return createBaseNumericColumn(
     columnHelper,

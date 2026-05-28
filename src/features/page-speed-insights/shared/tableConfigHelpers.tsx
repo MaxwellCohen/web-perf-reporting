@@ -12,7 +12,7 @@ import {
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import { flatTanStackTableSlice } from "@/features/page-speed-insights/shared/flatTanStackTableSlice";
-import { ExpandAll, ExpandRow } from "@/features/page-speed-insights/JSUsage/JSUsageTable";
+import { ExpandAll, ExpandRow } from "@/features/page-speed-insights/JSUsage/jsUsageTableParts";
 
 export type TableConfigOptions<T> = {
   data: T[];

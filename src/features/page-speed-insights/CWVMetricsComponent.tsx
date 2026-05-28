@@ -3,7 +3,7 @@ import { ScoreDisplay } from "@/features/page-speed-insights/ScoreDisplay";
 import ReactMarkdown from "react-markdown";
 import { HorizontalScoreChart } from "@/components/common/PageSpeedGaugeChart";
 import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { Fragment, useMemo } from "react";
+import { Fragment } from "react";
 import {
   type InsightsContextItem,
   usePageSpeedItems,

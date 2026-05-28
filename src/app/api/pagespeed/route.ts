@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
 
     const req = await fetchWorkerJobEnvelopeByUrl(testURL);
     if (!req.ok) {
+      console.error(req.status, await req.text());
       return new Response("Error fetching data", { status: req.status });
     }
     const data = (await req.json()) as WorkerJobEnvelope | null;

@@ -1,10 +1,10 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
-  ExpandAll,
   useUseJSUsageTable,
   JSUsageTableWithControls,
 } from "@/features/page-speed-insights/JSUsage/JSUsageTable";
+import { ExpandAll, ExpandRow } from "@/features/page-speed-insights/JSUsage/jsUsageTableParts";
 
 type MockRow = {
   name: string;

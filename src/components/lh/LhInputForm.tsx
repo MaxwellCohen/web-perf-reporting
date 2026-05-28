@@ -1,7 +1,5 @@
 "use client";
 
-import type React from "react";
-
 import { useActionState, useRef, useState } from "react";
 import { Tabs } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
