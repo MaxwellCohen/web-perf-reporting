@@ -11,7 +11,37 @@ exports[`PageSpeedInsightsDashboardContent > renders dashboard when client-side 
 </div>
 `;
 
-exports[`PageSpeedInsightsDashboardContent > shows error when data is not an array 1`] = `
+exports[`PageSpeedInsightsDashboardContent > shows loading when data has only null/undefined items 1`] = `
+<div
+  data-testid="page-speed-dashboard"
+>
+  Dashboard with 
+  2
+   items, labels: 
+  Mobile, Desktop
+</div>
+`;
+
+exports[`PageSpeedInsightsDashboardContent > shows loading when data is empty or has no truthy items 1`] = `
+<div
+  data-testid="page-speed-dashboard"
+>
+  Dashboard with 
+  0
+   items, labels: 
+  Mobile, Desktop
+</div>
+`;
+
+exports[`PageSpeedInsightsDashboardContent > shows loading when isLoading is true 1`] = `
+<div
+  data-testid="loading-message"
+>
+  Loading
+</div>
+`;
+
+exports[`PageSpeedInsightsDashboardContent > shows worker error message when report status is failed 1`] = `
 <div
   class="flex flex-col items-center justify-center min-h-100 p-4"
 >
@@ -60,10 +90,27 @@ exports[`PageSpeedInsightsDashboardContent > shows error when data is not an arr
       >
         Failed to Load Report
       </div>
-      <div
-        class="text-sm text-muted-foreground mt-2"
+      <p
+        class="text-sm text-muted-foreground mt-2 text-left break-all"
       >
-        We couldn't load the PageSpeed Insights data. This might be due to a temporary issue or the report might not be available.
+        <span
+          class="font-medium"
+        >
+          URL tested: 
+        </span>
+        <a
+          class="underline hover:text-foreground"
+          href="https://example.com/page"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          https://example.com/page
+        </a>
+      </p>
+      <div
+        class="text-sm text-muted-foreground mt-2 whitespace-pre-wrap text-left"
+      >
+        Lighthouse could not load the page.
       </div>
     </div>
     <div
@@ -83,35 +130,5 @@ exports[`PageSpeedInsightsDashboardContent > shows error when data is not an arr
       </a>
     </div>
   </div>
-</div>
-`;
-
-exports[`PageSpeedInsightsDashboardContent > shows loading when data has only null/undefined items 1`] = `
-<div
-  data-testid="page-speed-dashboard"
->
-  Dashboard with 
-  2
-   items, labels: 
-  Mobile, Desktop
-</div>
-`;
-
-exports[`PageSpeedInsightsDashboardContent > shows loading when data is empty or has no truthy items 1`] = `
-<div
-  data-testid="page-speed-dashboard"
->
-  Dashboard with 
-  0
-   items, labels: 
-  Mobile, Desktop
-</div>
-`;
-
-exports[`PageSpeedInsightsDashboardContent > shows loading when isLoading is true 1`] = `
-<div
-  data-testid="loading-message"
->
-  Loading
 </div>
 `;

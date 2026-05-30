@@ -1,6 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { PageSpeedInsightsDashboardContent } from "./PageSpeedInsightsDashboardWrapper";
 
 const usePageSpeedInsightsQueryMock = vi.fn();
@@ -88,23 +87,45 @@ describe("PageSpeedInsightsDashboardContent", () => {
     });
   });
 
-  it("shows error when data is not an array", async () => {
+  it("shows worker error message when report status is failed", async () => {
     usePageSpeedInsightsQueryMock.mockReturnValue({
-      data: { status: "failed" },
+      data: {
+        status: "failed",
+        error: "Lighthouse could not load the page.",
+        url: "https://example.com/page",
+      },
       isLoading: false,
     });
 
-    const { container } = render(
-      <ErrorMessage>
-        <PageSpeedInsightsDashboardContent publicId="test-id" />
-      </ErrorMessage>,
-    );
+    const { container } = render(<PageSpeedInsightsDashboardContent publicId="test-id" />);
 
     await waitFor(() => {
       expect(container.firstChild).toMatchSnapshot();
     });
     expect(screen.getByText("Failed to Load Report")).toBeInTheDocument();
+    expect(screen.getByText("Lighthouse could not load the page.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "https://example.com/page" })).toHaveAttribute(
+      "href",
+      "https://example.com/page",
+    );
     expect(screen.getByRole("link", { name: "Try Again" })).toBeInTheDocument();
+  });
+
+  it("shows generic error when failed status has no error detail", async () => {
+    usePageSpeedInsightsQueryMock.mockReturnValue({
+      data: { status: "failed" },
+      isLoading: false,
+    });
+
+    render(<PageSpeedInsightsDashboardContent publicId="test-id" />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          "We couldn't load the PageSpeed Insights data. This might be due to a temporary issue or the report might not be available.",
+        ),
+      ).toBeInTheDocument();
+    });
   });
 
   it("renders dashboard when client-side with valid data", async () => {

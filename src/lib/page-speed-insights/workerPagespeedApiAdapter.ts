@@ -1,5 +1,9 @@
 import type { WorkerJobEnvelope } from "@/lib/page-speed-insights/pageSpeedWorkerClient";
-import { getCompletedPayloadFromEnvelope } from "@/lib/page-speed-insights/pageSpeedWorkerClient";
+import {
+  getCompletedPayloadFromEnvelope,
+  getFailureMessageFromEnvelope,
+  getTestUrlFromEnvelope,
+} from "@/lib/page-speed-insights/pageSpeedWorkerClient";
 
 /** Maps a parsed worker envelope to the POST `/api/pagespeed` response (same semantics as before refactor). */
 export function postWorkerEnvelopeToResponse(data: WorkerJobEnvelope | null): Response {
@@ -29,7 +33,15 @@ export function getWorkerEnvelopeToResponse(data: WorkerJobEnvelope | null): Res
   }
   const status = data.status.toLowerCase();
   if (status === "failed") {
-    return new Response(`Failed to fetch data! ${data.status}`, { status: 500 });
+    const url = getTestUrlFromEnvelope(data);
+    return new Response(
+      JSON.stringify({
+        status: "failed",
+        error: getFailureMessageFromEnvelope(data),
+        ...(url ? { url } : {}),
+      }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
   }
   if (status !== "completed") {
     return new Response(JSON.stringify(data), { status: 404 });

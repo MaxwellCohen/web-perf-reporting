@@ -32,6 +32,7 @@ describe("app/api/pagespeed/[publicId] route", () => {
   it("returns 500 when fetch is not ok", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: false,
+      text: async () => "",
     } as Response);
 
     const response = await GET({} as any, {
@@ -56,10 +57,14 @@ describe("app/api/pagespeed/[publicId] route", () => {
     await expect(response.text()).resolves.toBe("Data is not yet ready no data!!");
   });
 
-  it("returns 500 when worker status is failed", async () => {
+  it("returns 500 JSON with worker error when status is failed", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
-      json: async () => ({ status: "failed" }),
+      json: async () => ({
+        status: "failed",
+        url: "https://example.com/page",
+        data: { error: "Lighthouse could not load the page." },
+      }),
     } as Response);
 
     const response = await GET({} as any, {
@@ -67,7 +72,11 @@ describe("app/api/pagespeed/[publicId] route", () => {
     });
 
     expect(response.status).toBe(500);
-    await expect(response.text()).resolves.toContain("Failed to fetch data!");
+    await expect(response.json()).resolves.toEqual({
+      status: "failed",
+      error: "Lighthouse could not load the page.",
+      url: "https://example.com/page",
+    });
   });
 
   it("returns a not-ready response when the worker is still processing", async () => {

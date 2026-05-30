@@ -37,9 +37,18 @@ describe("getWorkerEnvelopeToResponse", () => {
     expect(res.status).toBe(404);
   });
 
-  it("returns 500 when failed", async () => {
-    const res = getWorkerEnvelopeToResponse({ status: "failed" });
+  it("returns 500 JSON with error message and url when failed", async () => {
+    const res = getWorkerEnvelopeToResponse({
+      status: "failed",
+      url: "https://example.com/page",
+      data: { error: "Lighthouse could not load the page." },
+    });
     expect(res.status).toBe(500);
+    await expect(res.json()).resolves.toEqual({
+      status: "failed",
+      error: "Lighthouse could not load the page.",
+      url: "https://example.com/page",
+    });
   });
 
   it("returns 200 JSON for completed with object data", async () => {

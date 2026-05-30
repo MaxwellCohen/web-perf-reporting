@@ -31,10 +31,11 @@ describe("app/api/pagespeed route", () => {
   });
 
   it("returns error when fetch is not ok", async () => {
-    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
     vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: false,
       status: 502,
+      text: async () => "",
     } as Response);
 
     const response = await POST({

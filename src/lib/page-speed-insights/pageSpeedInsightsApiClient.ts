@@ -10,7 +10,7 @@ const PAGE_SPEED_INSIGHTS_API = {
 /** Result when the saved-report API returns an error envelope instead of PSI rows. */
 export type PageSpeedInsightsQueryData =
   | (PageSpeedInsights | null | undefined)[]
-  | { status: "failed" };
+  | { status: "failed"; error?: string; url?: string };
 
 export async function postPageSpeedInsightsByUrl(
   testURL: string,
@@ -44,6 +44,15 @@ export async function getPageSpeedInsightsByPublicId(
   });
 
   if (res.status === 500) {
+    const text = await res.text();
+    try {
+      const body = JSON.parse(text) as { status?: string; error?: string; url?: string };
+      if (body.status === "failed") {
+        return { status: "failed" as const, error: body.error, url: body.url };
+      }
+    } catch {
+      // Non-JSON 500 body — fall through to generic failed status.
+    }
     return { status: "failed" as const };
   }
 

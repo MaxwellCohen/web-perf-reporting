@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   getCompletedPayloadFromEnvelope,
+  getFailureMessageFromEnvelope,
+  getTestUrlFromEnvelope,
   type WorkerJobEnvelope,
 } from "@/lib/page-speed-insights/pageSpeedWorkerClient";
 
@@ -32,5 +34,37 @@ describe("getCompletedPayloadFromEnvelope", () => {
       ok: false,
       reason: "not_ready",
     });
+  });
+});
+
+describe("getTestUrlFromEnvelope", () => {
+  it("reads url from envelope", () => {
+    expect(
+      getTestUrlFromEnvelope({
+        status: "failed",
+        url: "https://example.com/page",
+      }),
+    ).toBe("https://example.com/page");
+  });
+
+  it("returns undefined when url is missing", () => {
+    expect(getTestUrlFromEnvelope({ status: "failed" })).toBeUndefined();
+  });
+});
+
+describe("getFailureMessageFromEnvelope", () => {
+  it("reads error from failed envelope data object", () => {
+    expect(
+      getFailureMessageFromEnvelope({
+        status: "failed",
+        data: { error: "Lighthouse could not load the page." },
+      }),
+    ).toBe("Lighthouse could not load the page.");
+  });
+
+  it("falls back to a generic message when no error detail exists", () => {
+    expect(getFailureMessageFromEnvelope({ status: "failed" })).toBe(
+      "The PageSpeed Insights report could not be generated.",
+    );
   });
 });

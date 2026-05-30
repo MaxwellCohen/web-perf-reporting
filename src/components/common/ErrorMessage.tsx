@@ -12,10 +12,18 @@ export type ErrorMessageProps = {
   children: React.ReactNode;
 };
 
-function ErrorMessageFallback({
+const DEFAULT_REPORT_ERROR_DESCRIPTION =
+  "We couldn't load the PageSpeed Insights data. This might be due to a temporary issue or the report might not be available.";
+
+export function ReportErrorCard({
   title = "Failed to Load Report",
-  description = "We couldn't load the PageSpeed Insights data. This might be due to a temporary issue or the report might not be available.",
-}: Omit<ErrorMessageProps, "children">) {
+  description = DEFAULT_REPORT_ERROR_DESCRIPTION,
+  testUrl,
+}: {
+  title?: string;
+  description?: string;
+  testUrl?: string;
+}) {
   return (
     <div className="flex flex-col items-center justify-center min-h-100 p-4">
       <Card className="w-full max-w-md">
@@ -24,7 +32,22 @@ function ErrorMessageFallback({
             <AlertCircle className="h-12 w-12 text-destructive" />
           </div>
           <CardTitle className="text-xl">{title}</CardTitle>
-          <CardDescription className="mt-2">{description}</CardDescription>
+          {testUrl ? (
+            <p className="text-sm text-muted-foreground mt-2 text-left break-all">
+              <span className="font-medium">URL tested: </span>
+              <a
+                href={testUrl}
+                className="underline hover:text-foreground"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {testUrl}
+              </a>
+            </p>
+          ) : null}
+          <CardDescription className="mt-2 whitespace-pre-wrap text-left">
+            {description}
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <Button asChild className="w-full">
@@ -37,6 +60,13 @@ function ErrorMessageFallback({
       </Card>
     </div>
   );
+}
+
+function ErrorMessageFallback({
+  title,
+  description,
+}: Omit<ErrorMessageProps, "children">) {
+  return <ReportErrorCard title={title} description={description} />;
 }
 
 export const ErrorMessage = unstable_catchError(ErrorMessageFallback);

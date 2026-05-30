@@ -232,6 +232,33 @@ describe("usePageSpeedInsightsQuery", () => {
       fetchMock.mockRestore();
     });
 
+    it("returns failed status with error message from JSON 500 body", async () => {
+      const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+        ok: false,
+        status: 500,
+        text: async () =>
+          JSON.stringify({
+            status: "failed",
+            error: "Lighthouse could not load the page.",
+            url: "https://example.com/page",
+          }),
+      } as Response);
+
+      const { result } = renderHook(() => usePageSpeedInsightsQueryByPublicId("public-123"), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+      expect(result.current.data).toEqual({
+        status: "failed",
+        error: "Lighthouse could not load the page.",
+        url: "https://example.com/page",
+      });
+      fetchMock.mockRestore();
+    });
+
     it("returns empty array when response JSON is invalid", async () => {
       const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
         ok: true,

@@ -1,6 +1,29 @@
 const WORKER_PAGE_SPEED_ORIGIN = "https://web-perf-report-cf.to-email-max.workers.dev";
 
-export type WorkerJobEnvelope = { status: string; data?: unknown };
+export type WorkerJobEnvelope = { status: string; url?: string; data?: unknown };
+
+export function getTestUrlFromEnvelope(data: WorkerJobEnvelope): string | undefined {
+  if (typeof data.url === "string" && data.url.length > 0) {
+    return data.url;
+  }
+  return undefined;
+}
+
+export function getFailureMessageFromEnvelope(data: WorkerJobEnvelope): string {
+  const payload = data.data;
+  if (
+    payload &&
+    typeof payload === "object" &&
+    "error" in payload &&
+    typeof (payload as { error: unknown }).error === "string"
+  ) {
+    return (payload as { error: string }).error;
+  }
+  if (typeof payload === "string" && payload.length > 0) {
+    return payload;
+  }
+  return "The PageSpeed Insights report could not be generated.";
+}
 
 export type CompletedPayloadResult =
   | { ok: true; payload: string }
