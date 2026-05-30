@@ -1,0 +1,308 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Web Performance Report API",
+    "description": "API for generating web performance reports using Google PageSpeed Insights. Create a report by calling the root endpoint, then poll for results using the returned publicId.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Current worker"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "createReport",
+        "summary": "Create a new report request",
+        "description": "Creates a pending record and returns a publicId. The actual PageSpeed report runs on the first call to GET /get-by-id. Returns an existing record if one exists within the cache duration (1 hour).",
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "required": true,
+            "description": "The URL to analyze using google pagespeed insights api",
+            "schema": {
+              "type": "string",
+              "format": "uri",
+              "example": "https://example.com"
+            }
+          },
+          {
+            "name": "key",
+            "in": "query",
+            "required": true,
+            "escription": "API key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Report record (new or existing)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing url parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Missing url parameter"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Unauthorized"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-by-id": {
+      "get": {
+        "operationId": "getReportById",
+        "summary": "Retrieve report by public ID",
+        "description": "Fetches a report by its publicId. On the first call for a pending record, this triggers the full PageSpeed analysis (both desktop and mobile). If the report is still processing, returns the current status.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "description": "The public ID returned from the root endpoint",
+            "schema": {
+              "type": "string",
+              "example": "abc123xyz"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Report record with status and data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing id parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Record not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/debug/list": {
+      "get": {
+        "operationId": "debugListRecords",
+        "summary": "List all records (debug)",
+        "description": "Returns all records stored in KV. Intended for debugging purposes only.",
+        "responses": {
+          "200": {
+            "description": "Array of all records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PageSpeedRecord"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/delete-old": {
+      "get": {
+        "operationId": "deleteOldRecords",
+        "summary": "Delete records older than N days",
+        "description": "Deletes records and their associated R2 blobs that are older than the specified number of days. Defaults to 10 days if not specified.",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "description": "Delete records older than this many days (default: 10)",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 10,
+              "example": 30
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deletion result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid days parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error during deletion",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RecordResponse": {
+        "type": "object",
+        "properties": {
+          "publicId": {
+            "type": "string",
+            "description": "Unique public identifier for the report",
+            "example": "abc123xyz"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "The URL that was analyzed",
+            "example": "https://example.com"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "processing", "completed", "failed"],
+            "description": "Current status of the report"
+          },
+          "dataUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the raw PageSpeed JSON data in R2 (set when completed)"
+          },
+          "data": {
+            "type": "object",
+            "description": "Cached PageSpeed results (desktop + mobile) when completed; error and stack when failed"
+          },
+          "processingStartedAt": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Unix timestamp (ms) when processing began. Used to detect stuck requests."
+          }
+        },
+        "required": ["publicId", "url", "status"]
+      },
+      "PageSpeedRecord": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "publicId": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "formFactor": {
+            "type": "string",
+            "enum": ["DESKTOP", "MOBILE", "ALL"]
+          },
+          "date": {
+            "type": "integer",
+            "description": "Unix timestamp (ms) of record creation"
+          },
+          "data": {
+            "type": "object",
+            "description": "PageSpeed API response data"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "processing", "completed", "failed"]
+          },
+          "dataUrl": {
+            "type": "string",
+            "description": "R2 object URL for the raw JSON result"
+          }
+        }
+      },
+      "DeleteResult": {
+        "type": "object",
+        "properties": {
+          "deletedCount": {
+            "type": "integer",
+            "description": "Number of records deleted from KV"
+          },
+          "deletedBlobs": {
+            "type": "integer",
+            "description": "Number of R2 blobs deleted"
+          },
+          "oldestKeptTimestamp": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Timestamp of the oldest remaining record"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message"
+          }
+        },
+        "required": ["error"]
+      }
+    }
+  }
+}

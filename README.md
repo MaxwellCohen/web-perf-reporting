@@ -1,119 +1,67 @@
-# Web Performance Reporting
+# Web perf reporting (monorepo)
 
-Web Performance Reporting is a Next.js app for inspecting site performance with a mix of real-user and lab data. It combines Chrome UX Report (CrUX) views, PageSpeed Insights analysis, and Lighthouse report exploration in one interface.
+pnpm workspace containing the Next.js dashboard and the Cloudflare PageSpeed worker.
 
-## Features
+| Package | Path | Deploy |
+|---------|------|--------|
+| Web | [`apps/web`](apps/web) | [Vercel](https://vercel.com) — root directory `apps/web` |
+| Worker | [`apps/worker`](apps/worker) | [Cloudflare Workers](https://dash.cloudflare.com) — project root `apps/worker` |
 
-- Latest CrUX metrics for a URL or origin
-- Historical CrUX trend views
-- PageSpeed Insights analysis with audit details and recommendations
-- Lighthouse report viewer
-- UI and helper tests powered by Vitest and Testing Library
+Both apps deploy from this repo via **dashboard Git integrations** (no GitHub Actions required).
 
-## Tech Stack
+## Local development
 
-- Next.js 16
-- React 19
-- TypeScript
-- Tailwind CSS
-- Drizzle ORM
-- Turso / libSQL
-- Vitest + Testing Library
-
-## Getting Started
-
-### 1. Install dependencies
-
-Examples below use `pnpm`.
+From the repo root:
 
 ```bash
 pnpm install
+pnpm dev:web      # Next.js at http://localhost:3000
+pnpm dev:worker   # wrangler dev
 ```
 
-### 2. Create a local env file
+Other root scripts: `pnpm test`, `pnpm typecheck`, `pnpm build:web`, `pnpm check:worker`.
 
-Create `.env` in the project root with the values your local environment needs:
+### Environment
 
-```bash
-PAGESPEED_INSIGHTS_API=your_google_pagespeed_api_key
-TURSO_CONNECTION_URL=your_turso_database_url
-TURSO_AUTH_TOKEN=your_turso_auth_token
-NEXT_PUBLIC_POSTHOG_KEY=your_posthog_project_key
-NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
-# Optional: override the baked-in Sentry DSN (same value used if unset)
-# SENTRY_DSN=https://...@....ingest.us.sentry.io/...
-# NEXT_PUBLIC_SENTRY_DSN=https://...@....ingest.us.sentry.io/...
-```
+| App | Env file | Required variables |
+|-----|----------|-------------------|
+| `apps/web` | `.env` (see [`.env.example`](apps/web/.env.example)) | `PAGESPEED_INSIGHTS_API`, `TURSO_*`, `NEXT_PUBLIC_POSTHOG_*`, `WORKER_URL` |
+| `apps/worker` | `.dev.vars` (see [`.dev.vars.example`](apps/worker/.dev.vars.example)) | `PAGESPEED_INSIGHTS_API` |
 
-### 3. Run the app
+If you still have `.env` at the repo root from before the monorepo move, copy it to `apps/web/.env`.
 
-```bash
-pnpm dev
-```
+## Vercel (`apps/web`)
 
-Open [http://localhost:3000](http://localhost:3000).
+In the Vercel project for **web-perf-reporting**:
 
-## Available Routes
+1. **Root Directory** — `apps/web`
+2. **Install Command** (monorepo lockfile at repo root):
 
-- `/` - overview page
-- `/latest-crux` - current CrUX metrics
-- `/historical-crux` - historical CrUX charts
-- `/page-speed` - PageSpeed Insights lookup flow
-- `/viewer` - Lighthouse report viewer
+   ```bash
+   cd ../.. && pnpm install --frozen-lockfile
+   ```
 
-## Scripts
+3. **Build Command** — `pnpm build` (runs in `apps/web`)
+4. **Environment variables** — include existing vars plus **`WORKER_URL`** (production worker URL, e.g. `https://web-perf-report-cf.<account>.workers.dev`)
+5. **Ignored Build Step** (optional):
 
-```bash
-pnpm dev
-pnpm build
-pnpm start
-pnpm lint
-pnpm typecheck
-pnpm test
-pnpm test:watch
-pnpm test:coverage
-pnpm prettier
-pnpm db:generate
-pnpm db:migrate
-pnpm db:studio
-```
+   ```bash
+   git diff HEAD^ HEAD --quiet -- apps/web pnpm-lock.yaml pnpm-workspace.yaml package.json
+   ```
 
-## Testing
+## Cloudflare Workers (`apps/worker`)
 
-Vitest is configured with:
+In Workers & Pages → **web-perf-report-cf** (or reconnect Git):
 
-- `jsdom` for component and DOM-focused tests
-- alias support for `@/`
-- shared setup in `vitest.setup.ts`
-- coverage reporting through V8
-- global coverage thresholds of 80%
+1. **Repository** — `MaxwellCohen/web-perf-reporting`, branch `main`
+2. **Root directory** — `apps/worker`
+3. **Wrangler config** — `apps/worker/wrangler.toml`
+4. **Secrets** — `PAGESPEED_INSIGHTS_API` (dashboard or `wrangler secret`)
+5. KV/R2 bindings in `wrangler.toml` must match your account
 
-Run the full test suite:
+After migration, archive the standalone [`web-perf-report-cf`](https://github.com/MaxwellCohen/web-perf-report-cf) repo.
 
-```bash
-pnpm test
-```
+## App docs
 
-Run tests in watch mode:
-
-```bash
-pnpm test:watch
-```
-
-Generate a coverage report:
-
-```bash
-pnpm test:coverage
-```
-
-## Database Notes
-
-The app uses Drizzle with a Turso/libSQL database connection. Migration files live in `migrations/`, and the Drizzle config is defined in `drizzle.config.ts`.
-
-## External Services
-
-- Google PageSpeed Insights API
-- Chrome UX Report data sources
-- Turso / libSQL
-- PostHog
-- Sentry
+- Web app details: [`apps/web/README.md`](apps/web/README.md)
+- Worker: [`apps/worker/README.md`](apps/worker/README.md)

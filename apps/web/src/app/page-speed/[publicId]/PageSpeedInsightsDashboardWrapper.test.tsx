@@ -1,0 +1,125 @@
+import { render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { PageSpeedInsightsDashboardContent } from "./PageSpeedInsightsDashboardWrapper";
+
+const usePageSpeedInsightsQueryMock = vi.fn();
+
+vi.mock("@/features/page-speed-insights/data/usePageSpeedInsightsQuery", () => ({
+  usePageSpeedInsightsQueryByPublicId: (publicId: string) =>
+    usePageSpeedInsightsQueryMock(publicId),
+}));
+
+vi.mock("@/features/page-speed-insights/pageSpeedInsightsDashboard", () => ({
+  PageSpeedInsightsDashboard: ({ data, labels }: { data: unknown[]; labels: string[] }) => (
+    <div data-testid="page-speed-dashboard">
+      Dashboard with {data.length} items, labels: {labels.join(", ")}
+    </div>
+  ),
+}));
+
+vi.mock("@/components/common/LoadingMessage", () => ({
+  LoadingMessage: () => <div data-testid="loading-message">Loading</div>,
+}));
+
+const createMockPageSpeedData = () => [
+  {
+    lighthouseResult: { finalDisplayedUrl: "https://example.com" },
+    analysisUTCTimestamp: "2024-01-01T00:00:00.000Z",
+  },
+];
+
+describe("PageSpeedInsightsDashboardContent", () => {
+  beforeEach(() => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.mocked(console.error).mockRestore();
+  });
+
+  it("passes publicId to usePageSpeedInsightsQuery", () => {
+    usePageSpeedInsightsQueryMock.mockReturnValue({ isLoading: true });
+
+    render(<PageSpeedInsightsDashboardContent publicId="test-id-123" />);
+
+    expect(usePageSpeedInsightsQueryMock).toHaveBeenCalledWith("test-id-123");
+  });
+
+  it("shows loading when isLoading is true", async () => {
+    usePageSpeedInsightsQueryMock.mockReturnValue({ isLoading: true });
+
+    const { container } = render(<PageSpeedInsightsDashboardContent publicId="test-id" />);
+
+    await waitFor(() => {
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
+
+  it("renders dashboard with empty ok data", async () => {
+    usePageSpeedInsightsQueryMock.mockReturnValue({
+      isLoading: false,
+      result: { status: "ok", data: [] },
+    });
+
+    const { container } = render(<PageSpeedInsightsDashboardContent publicId="test-id" />);
+
+    await waitFor(() => {
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
+
+  it("shows worker error message when report status is failed", async () => {
+    usePageSpeedInsightsQueryMock.mockReturnValue({
+      isLoading: false,
+      result: {
+        status: "failed",
+        error: "Lighthouse could not load the page.",
+        url: "https://example.com/page",
+      },
+    });
+
+    const { container } = render(<PageSpeedInsightsDashboardContent publicId="test-id" />);
+
+    await waitFor(() => {
+      expect(container.firstChild).toMatchSnapshot();
+    });
+    expect(screen.getByText("Failed to Load Report")).toBeInTheDocument();
+    expect(screen.getByText("Lighthouse could not load the page.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "https://example.com/page" })).toHaveAttribute(
+      "href",
+      "https://example.com/page",
+    );
+    expect(screen.getByRole("link", { name: "Try Again" })).toBeInTheDocument();
+  });
+
+  it("shows generic error when failed status has no error detail", async () => {
+    usePageSpeedInsightsQueryMock.mockReturnValue({
+      isLoading: false,
+      result: { status: "failed" },
+    });
+
+    render(<PageSpeedInsightsDashboardContent publicId="test-id" />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          "We couldn't load the PageSpeed Insights data. This might be due to a temporary issue or the report might not be available.",
+        ),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("renders dashboard when client-side with valid data", async () => {
+    const mockData = createMockPageSpeedData();
+    usePageSpeedInsightsQueryMock.mockReturnValue({
+      isLoading: false,
+      result: { status: "ok", data: mockData },
+    });
+
+    const { container } = render(<PageSpeedInsightsDashboardContent publicId="test-id" />);
+
+    await waitFor(() => {
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
+});
