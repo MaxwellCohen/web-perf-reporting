@@ -1,5 +1,5 @@
 /**
- * PageSpeed Insights API client
+ * PageSpeed Insights API client for the worker
  */
 
 import type { FormFactor, PageSpeedApiResponse } from "../types";
