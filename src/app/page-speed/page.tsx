@@ -14,7 +14,6 @@ export default async function Home({
   if (url) {
     const publicId = await requestPageSpeedData(url);
     if (publicId) {
-      console.log(`redirecting to /page-speed/${publicId}`);
       redirect(`/page-speed/${publicId}`);
     }
   }

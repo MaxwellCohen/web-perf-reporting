@@ -35,7 +35,6 @@ export async function fetchWorkerJobEnvelopeByPublicId(publicId: string): Promis
   const requestUrl = new URL(WORKER_PAGE_SPEED_ORIGIN);
   requestUrl.pathname = "/get-by-id";
   requestUrl.searchParams.append("id", publicId);
-  console.log(requestUrl.toString());
   return fetch(requestUrl);
 }
 

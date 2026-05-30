@@ -44,7 +44,6 @@ export async function getPageSpeedInsightsByPublicId(
   });
 
   if (res.status === 500) {
-    console.log(res.status, await res.text());
     return { status: "failed" as const };
   }
 
