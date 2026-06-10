@@ -1,17 +1,18 @@
 "use client";
-
-import type { CellContext } from "@tanstack/react-table";
+import type { StockCellContext } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import ReactMarkdown from "react-markdown";
 import { HorizontalScoreChart } from "@/components/common/PageSpeedGaugeChart";
 import type { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataItem";
-
-export function LHCategoryTitleCell(props: CellContext<TableDataItem, string>) {
-  const category = props.getValue();
+export function LHCategoryTitleCell(props: StockCellContext<TableDataItem, string>) {
+  const category =
+    props.column.id === props.row.groupingColumnId
+      ? String(props.row.groupingValue ?? "")
+      : props.getValue<string>();
   return <div className="basis-48 text-xl font-bold">{category}</div>;
 }
 
-export function LHCategoryScoreCell(props: CellContext<TableDataItem, string | string[]>) {
-  const raw = props.getValue();
+export function LHCategoryScoreCell(props: StockCellContext<TableDataItem, string | string[]>) {
+  const raw = props.getValue<string | string[]>();
   if (!raw || props.row.groupingValue === "Core Web Vitals") {
     return null;
   }
@@ -37,14 +38,16 @@ export function LHCategoryScoreCell(props: CellContext<TableDataItem, string | s
   });
 }
 
-export function LHAuditDescriptionCell(props: CellContext<TableDataItem, unknown>) {
-  const str = props.getValue()?.toString() || "";
+export function LHAuditDescriptionCell(
+  props: StockCellContext<TableDataItem, string | undefined>,
+) {
+  const str = props.getValue<string | undefined>()?.toString() || "";
   if (!str) {
     return null;
   }
   return (
     <div className="text-sm font-normal">
-      <ReactMarkdown>{props.getValue()?.toString() || ""}</ReactMarkdown>
+      <ReactMarkdown>{props.getValue<string | undefined>()?.toString() || ""}</ReactMarkdown>
     </div>
   );
 }

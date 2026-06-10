@@ -54,9 +54,6 @@ importers:
       '@radix-ui/react-select':
         specifier: ^2.2.6
         version: 2.2.6(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.3.0-canary-f0dfee38-20260529(react@19.3.0-canary-f0dfee38-20260529))(react@19.3.0-canary-f0dfee38-20260529)
-      '@radix-ui/react-slider':
-        specifier: ^1.3.6
-        version: 1.3.6(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.3.0-canary-f0dfee38-20260529(react@19.3.0-canary-f0dfee38-20260529))(react@19.3.0-canary-f0dfee38-20260529)
       '@radix-ui/react-slot':
         specifier: ^1.2.4
         version: 1.2.4(@types/react@19.2.14)(react@19.3.0-canary-f0dfee38-20260529)
@@ -69,9 +66,12 @@ importers:
       '@tanstack/react-query':
         specifier: https://pkg.pr.new/@tanstack/react-query@10366
         version: https://pkg.pr.new/@tanstack/react-query@10366(react@19.3.0-canary-f0dfee38-20260529)
-      '@tanstack/react-table':
-        specifier: ^8.21.3
-        version: 8.21.3(react-dom@19.3.0-canary-f0dfee38-20260529(react@19.3.0-canary-f0dfee38-20260529))(react@19.3.0-canary-f0dfee38-20260529)
+      '@tanstack/react-table-v9':
+        specifier: npm:@tanstack/react-table@9.0.0-beta.1
+        version: '@tanstack/react-table@9.0.0-beta.1(react-dom@19.3.0-canary-f0dfee38-20260529(react@19.3.0-canary-f0dfee38-20260529))(react@19.3.0-canary-f0dfee38-20260529)'
+      '@tanstack/table-core':
+        specifier: 9.0.0-beta.5
+        version: 9.0.0-beta.5
       '@types/pako':
         specifier: ^2.0.4
         version: 2.0.4
@@ -2351,19 +2351,6 @@ packages:
       '@types/react-dom':
         optional: true
 
-  '@radix-ui/react-slider@1.3.6':
-    resolution: {integrity: sha512-JPYb1GuM1bxfjMRlNLE+BcmBC8onfCi60Blk7OBqi2MLTFdS+8401U4uFjnwkOr49BLmXxLC6JHkvAsx5OJvHw==}
-    peerDependencies:
-      '@types/react': '*'
-      '@types/react-dom': '*'
-      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
-      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-      '@types/react-dom':
-        optional: true
-
   '@radix-ui/react-slot@1.2.3':
     resolution: {integrity: sha512-aeNmHnBxbi2St0au6VBVC7JXFlhLlOnvIIlePNniyUNAClzmtAUEY8/pBiK3iHjufOlwA+c20/8jngo7xcrg8A==}
     peerDependencies:
@@ -2936,16 +2923,24 @@ packages:
     peerDependencies:
       react: ^18 || ^19
 
-  '@tanstack/react-table@8.21.3':
-    resolution: {integrity: sha512-5nNMTSETP4ykGegmVkhjcS8tTLW6Vl4axfEGQN3v0zdHYbK4UfoqfPChclTrJ4EoK9QynqAu9oUf8VEmrpZ5Ww==}
-    engines: {node: '>=12'}
+  '@tanstack/react-store@0.11.0':
+    resolution: {integrity: sha512-tX4YXh3PDkmpvGQWkWqKpzs/MSqbtuwY9dWdWhtV9Q50PmO+jOkUKIWIX4G85dwt7lxdHLXsiaEKPdKmC8F41w==}
     peerDependencies:
-      react: '>=16.8'
-      react-dom: '>=16.8'
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  '@tanstack/table-core@8.21.3':
-    resolution: {integrity: sha512-ldZXEhOBb8Is7xLs01fR3YEc3DERiz5silj8tnGkFZytt1abEvl/GhUmCE0PMLaMPTa3Jk4HbKmRlHmu+gCftg==}
-    engines: {node: '>=12'}
+  '@tanstack/react-table@9.0.0-beta.1':
+    resolution: {integrity: sha512-fa2Sq5gPg2OM5ZyfLcohaQo2ZhAmpqpQhXwa3lVf0YRMNrnG5CrrsB2fMhhqC076bZpoNtypvqw5uB5leeOHcw==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      react: '>=18'
+
+  '@tanstack/store@0.11.0':
+    resolution: {integrity: sha512-WlzzCt3xi0G6pCAJu1U+2jiECwabETDpQDi3hfkFZvJii9AuZqEKbOiVarX1/bWhTNjU486yQtJCCasi/0q+Cw==}
+
+  '@tanstack/table-core@9.0.0-beta.5':
+    resolution: {integrity: sha512-C0xCtAET9lVOcmq+j0NXfRn5NlhGsERoazzWNOYlRzrtE7dN7Djkz5FaD5E/yPFC1D+q2XKCP/BfJInayLGNdg==}
+    engines: {node: '>=16'}
 
   '@testing-library/dom@10.4.1':
     resolution: {integrity: sha512-o4PXJQidqJl82ckFaXUeoAW+XysPLauYI43Abki5hABd853iMhitooc6znOnczgbTYmEP6U6/y1ZyKAIsvMKGg==}
@@ -5189,6 +5184,11 @@ packages:
       '@types/react':
         optional: true
 
+  use-sync-external-store@1.6.0:
+    resolution: {integrity: sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
   uuid@9.0.1:
     resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
     deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
@@ -7353,25 +7353,6 @@ snapshots:
       '@types/react': 19.2.14
       '@types/react-dom': 19.2.3(@types/react@19.2.14)
 
-  '@radix-ui/react-slider@1.3.6(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.3.0-canary-f0dfee38-20260529(react@19.3.0-canary-f0dfee38-20260529))(react@19.3.0-canary-f0dfee38-20260529)':
-    dependencies:
-      '@radix-ui/number': 1.1.1
-      '@radix-ui/primitive': 1.1.3
-      '@radix-ui/react-collection': 1.1.7(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.3.0-canary-f0dfee38-20260529(react@19.3.0-canary-f0dfee38-20260529))(react@19.3.0-canary-f0dfee38-20260529)
-      '@radix-ui/react-compose-refs': 1.1.2(@types/react@19.2.14)(react@19.3.0-canary-f0dfee38-20260529)
-      '@radix-ui/react-context': 1.1.2(@types/react@19.2.14)(react@19.3.0-canary-f0dfee38-20260529)
-      '@radix-ui/react-direction': 1.1.1(@types/react@19.2.14)(react@19.3.0-canary-f0dfee38-20260529)
-      '@radix-ui/react-primitive': 2.1.3(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.3.0-canary-f0dfee38-20260529(react@19.3.0-canary-f0dfee38-20260529))(react@19.3.0-canary-f0dfee38-20260529)
-      '@radix-ui/react-use-controllable-state': 1.2.2(@types/react@19.2.14)(react@19.3.0-canary-f0dfee38-20260529)
-      '@radix-ui/react-use-layout-effect': 1.1.1(@types/react@19.2.14)(react@19.3.0-canary-f0dfee38-20260529)
-      '@radix-ui/react-use-previous': 1.1.1(@types/react@19.2.14)(react@19.3.0-canary-f0dfee38-20260529)
-      '@radix-ui/react-use-size': 1.1.1(@types/react@19.2.14)(react@19.3.0-canary-f0dfee38-20260529)
-      react: 19.3.0-canary-f0dfee38-20260529
-      react-dom: 19.3.0-canary-f0dfee38-20260529(react@19.3.0-canary-f0dfee38-20260529)
-    optionalDependencies:
-      '@types/react': 19.2.14
-      '@types/react-dom': 19.2.3(@types/react@19.2.14)
-
   '@radix-ui/react-slot@1.2.3(@types/react@19.2.14)(react@19.3.0-canary-f0dfee38-20260529)':
     dependencies:
       '@radix-ui/react-compose-refs': 1.1.2(@types/react@19.2.14)(react@19.3.0-canary-f0dfee38-20260529)
@@ -7912,13 +7893,26 @@ snapshots:
       '@tanstack/query-core': https://pkg.pr.new/TanStack/query/@tanstack/query-core@a5fec0f
       react: 19.3.0-canary-f0dfee38-20260529
 
-  '@tanstack/react-table@8.21.3(react-dom@19.3.0-canary-f0dfee38-20260529(react@19.3.0-canary-f0dfee38-20260529))(react@19.3.0-canary-f0dfee38-20260529)':
+  '@tanstack/react-store@0.11.0(react-dom@19.3.0-canary-f0dfee38-20260529(react@19.3.0-canary-f0dfee38-20260529))(react@19.3.0-canary-f0dfee38-20260529)':
     dependencies:
-      '@tanstack/table-core': 8.21.3
+      '@tanstack/store': 0.11.0
       react: 19.3.0-canary-f0dfee38-20260529
       react-dom: 19.3.0-canary-f0dfee38-20260529(react@19.3.0-canary-f0dfee38-20260529)
+      use-sync-external-store: 1.6.0(react@19.3.0-canary-f0dfee38-20260529)
 
-  '@tanstack/table-core@8.21.3': {}
+  '@tanstack/react-table@9.0.0-beta.1(react-dom@19.3.0-canary-f0dfee38-20260529(react@19.3.0-canary-f0dfee38-20260529))(react@19.3.0-canary-f0dfee38-20260529)':
+    dependencies:
+      '@tanstack/react-store': 0.11.0(react-dom@19.3.0-canary-f0dfee38-20260529(react@19.3.0-canary-f0dfee38-20260529))(react@19.3.0-canary-f0dfee38-20260529)
+      '@tanstack/table-core': 9.0.0-beta.5
+      react: 19.3.0-canary-f0dfee38-20260529
+    transitivePeerDependencies:
+      - react-dom
+
+  '@tanstack/store@0.11.0': {}
+
+  '@tanstack/table-core@9.0.0-beta.5':
+    dependencies:
+      '@tanstack/store': 0.11.0
 
   '@testing-library/dom@10.4.1':
     dependencies:
@@ -10461,6 +10455,10 @@ snapshots:
       tslib: 2.8.1
     optionalDependencies:
       '@types/react': 19.2.14
+
+  use-sync-external-store@1.6.0(react@19.3.0-canary-f0dfee38-20260529):
+    dependencies:
+      react: 19.3.0-canary-f0dfee38-20260529
 
   uuid@9.0.1: {}
 

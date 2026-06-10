@@ -1,27 +1,28 @@
 "use client";
-"use no memo";
+import type { StockCellContext, StockColumnDef, StockHeader, StockHeaderContext, StockHeaderGroup, StockRow, StockTable, StockCell } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+
 import type { CSSProperties } from "react";
 import { TableRow, TableHead } from "@/components/ui/table";
-import { flexRender } from "@tanstack/react-table";
-import type { Header, HeaderGroup } from "@tanstack/react-table";
+import { flexRender } from "@tanstack/react-table-v9";
+import type { Header, HeaderGroup } from "@tanstack/react-table-v9";
 import { cn } from "@/lib/utils";
 import type { TreeMapNode } from "@/lib/schema";
 
 const DEPTH_OFFSET_REM = 2.25;
 
 type JSUsageTableHeaderProps = {
-  headerGroup: HeaderGroup<TreeMapNode>;
+  headerGroup: StockHeaderGroup<TreeMapNode>;
   depth: number;
   i: number;
 };
 
-function getHeaderCellStyle(header: Header<TreeMapNode, unknown>): CSSProperties | undefined {
+function getHeaderCellStyle(header: StockHeader<TreeMapNode, unknown>): CSSProperties | undefined {
   const size = header.column.getSize();
   return typeof size === "number" ? { width: `${size}px` } : undefined;
 }
 
 export function JSUsageTableHeader({ headerGroup, depth, i }: JSUsageTableHeaderProps) {
-  "use no memo";
+  
 
   const rowKey = `${headerGroup.id}_${i}_${depth}`;
   const style = { "--depthOffset": `${depth * DEPTH_OFFSET_REM}rem` } as CSSProperties;

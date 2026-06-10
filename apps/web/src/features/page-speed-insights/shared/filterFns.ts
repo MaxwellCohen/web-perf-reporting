@@ -1,6 +1,7 @@
-import { FilterFn } from "@tanstack/react-table";
+import type { RowData } from "@tanstack/react-table-v9";
+import type { StockFilterFn } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 
-export const booleanFilterFn: FilterFn<unknown> = (row, columnId, filterValue, _addMeta) => {
+export const booleanFilterFn: StockFilterFn = (row, columnId, filterValue, _addMeta) => {
   if (!filterValue || !filterValue.length) {
     return true;
   }
@@ -12,9 +13,8 @@ export const booleanFilterFn: FilterFn<unknown> = (row, columnId, filterValue, _
 /**
  * Standard filter function for string-based filtering (case-insensitive)
  */
-export const includesStringFilter: FilterFn<unknown> = (row, columnId, filterValue, _addMeta) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const cellValue = String((row as any).getValue(columnId) || "").toLowerCase();
+export const includesStringFilter: StockFilterFn = (row, columnId, filterValue, _addMeta) => {
+  const cellValue = String(row.getValue(columnId) || "").toLowerCase();
   const filter = String(filterValue || "").toLowerCase();
   return cellValue.includes(filter);
 };
@@ -22,9 +22,8 @@ export const includesStringFilter: FilterFn<unknown> = (row, columnId, filterVal
 /**
  * Standard filter function for numeric range filtering
  */
-export const inNumberRangeFilter: FilterFn<unknown> = (row, columnId, filterValue, _addMeta) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const cellValue = Number((row as any).getValue(columnId)) || 0;
+export const inNumberRangeFilter: StockFilterFn = (row, columnId, filterValue, _addMeta) => {
+  const cellValue = Number(row.getValue(columnId)) || 0;
   const [min, max] = (filterValue as [number, number]) || [0, Infinity];
   return cellValue >= min && cellValue <= max;
 };
@@ -32,7 +31,7 @@ export const inNumberRangeFilter: FilterFn<unknown> = (row, columnId, filterValu
 /**
  * Multi-select style filter: row value is included in the selected filter values (or array overlap).
  */
-export const arrIncludesSomeFilter: FilterFn<unknown> = (row, columnId, filterValue, _addMeta) => {
+export const arrIncludesSomeFilter: StockFilterFn = (row, columnId, filterValue, _addMeta) => {
   const selected = filterValue as unknown[] | undefined;
   if (!selected?.length) {
     return true;
@@ -49,4 +48,4 @@ export const standardFilterFns = {
   booleanFilterFn,
   includesString: includesStringFilter,
   inNumberRange: inNumberRangeFilter,
-} as Record<string, FilterFn<unknown>>;
+} as Record<string, StockFilterFn>;

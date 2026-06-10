@@ -2,11 +2,11 @@ import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { DetailTableSeparatePerReport } from "@/features/page-speed-insights/lh-categories/table/DetailTableSeparatePerReport";
 
-vi.mock("@/features/page-speed-insights/lh-categories/table/DataTableHeader", () => ({
+vi.mock("@/features/page-speed-insights/tanstack-table-v9/DataTableHeader", () => ({
   DataTableHeader: () => <thead data-testid="data-table-header" />,
 }));
 
-vi.mock("@/features/page-speed-insights/lh-categories/table/DataTableBody", () => ({
+vi.mock("@/features/page-speed-insights/tanstack-table-v9/DataTableBody", () => ({
   DataTableBody: () => <tbody data-testid="data-table-body" />,
 }));
 

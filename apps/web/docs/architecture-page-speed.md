@@ -1,6 +1,6 @@
 # PageSpeed Insights feature architecture
 
-How the saved-report flow is wired. See `src/lib/page-speed-insights/pageSpeedDataFlows.ts` for a concise path summary.
+How the saved-report flow is wired.
 
 ## Saved report flow
 

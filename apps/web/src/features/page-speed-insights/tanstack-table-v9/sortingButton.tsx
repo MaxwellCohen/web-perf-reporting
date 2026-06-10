@@ -1,12 +1,17 @@
 import { Button } from "@/components/ui/button";
-import { Header } from "@tanstack/react-table";
+import type { Header, RowData } from "@tanstack/react-table-v9";
+import type { StandardTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 
 const IconMap: Record<string, string> = {
   asc: "↑",
   desc: "↓",
 };
 
-export function SortingButton<T>({ header }: { header: Header<T, unknown> }) {
+export function SortingButton<TData extends RowData>({
+  header,
+}: {
+  header: Header<StandardTableFeatures, TData, unknown>;
+}) {
   if (!header.column.getCanSort()) {
     return null;
   }

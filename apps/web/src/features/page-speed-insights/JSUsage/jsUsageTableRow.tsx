@@ -1,14 +1,15 @@
 "use client";
-"use no memo";
+import type { StockCellContext, StockColumnDef, StockHeader, StockHeaderContext, StockHeaderGroup, StockRow, StockTable, StockCell } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+
 import { TableRow, TableCell } from "@/components/ui/table";
-import { flexRender } from "@tanstack/react-table";
-import type { Row } from "@tanstack/react-table";
+import { flexRender } from "@tanstack/react-table-v9";
+import type { Row } from "@tanstack/react-table-v9";
 import { cn } from "@/lib/utils";
 import type { TreeMapNode } from "@/lib/schema";
 import { tanstackTableCellDataProps } from "@/features/page-speed-insights/shared/tanstackTableCellDataProps";
 
-export function JSUsageTableRow({ row, i }: { row: Row<TreeMapNode>; i: number }) {
-  "use no memo";
+export function JSUsageTableRow({ row, i }: { row: StockRow<TreeMapNode>; i: number }) {
+  
   const isExpanded = row.getIsExpanded();
   const depth = row.depth + (isExpanded ? 1 : 0);
   const subRows = row?.getParentRow()?.subRows || [];

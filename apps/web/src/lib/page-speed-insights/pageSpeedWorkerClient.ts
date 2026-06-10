@@ -1,12 +1,3 @@
-export type { WorkerJobEnvelope, CompletedPayloadResult } from "@/lib/page-speed-insights/resolveWorkerEnvelope";
-export {
-  getCompletedPayloadFromEnvelope,
-  getFailureMessageFromEnvelope,
-  getTestUrlFromEnvelope,
-  resolveWorkerEnvelope,
-  type ResolvedWorkerEnvelope,
-} from "@/lib/page-speed-insights/resolveWorkerEnvelope";
-
 const DEFAULT_WORKER_ORIGIN = "https://web-perf-report-cf.to-email-max.workers.dev";
 
 function getWorkerPageSpeedOrigin(): string {

@@ -15,7 +15,7 @@ vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", (
   RenderMSValue: ({ value }: { value: unknown }) => <span data-testid="ms">{String(value)}</span>,
 }));
 
-vi.mock("@/features/page-speed-insights/lh-categories/table/DataTableHeader", () => ({
+vi.mock("@/features/page-speed-insights/tanstack-table-v9/DataTableHeader", () => ({
   DataTableHeader: () => (
     <thead data-testid="data-table-header">
       <tr>
@@ -26,7 +26,7 @@ vi.mock("@/features/page-speed-insights/lh-categories/table/DataTableHeader", ()
   ),
 }));
 
-vi.mock("@/features/page-speed-insights/lh-categories/table/DataTableBody", () => ({
+vi.mock("@/features/page-speed-insights/tanstack-table-v9/DataTableBody", () => ({
   DataTableBody: () => (
     <tbody data-testid="data-table-body">
       <tr>
@@ -37,7 +37,7 @@ vi.mock("@/features/page-speed-insights/lh-categories/table/DataTableBody", () =
   ),
 }));
 
-vi.mock("@/features/page-speed-insights/JSUsage/TableControls", () => ({
+vi.mock("@/features/page-speed-insights/tanstack-table-v9/PaginationCard", () => ({
   PaginationCard: () => <div data-testid="pagination" />,
 }));
 

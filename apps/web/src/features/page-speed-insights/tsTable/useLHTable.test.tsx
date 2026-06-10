@@ -1,25 +1,17 @@
+import type { StockRow } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { PageSpeedInsights } from "@/lib/schema";
-import type { Row } from "@tanstack/react-table";
 import {
   useLHTable,
   CategoryRow,
   AuditSummaryRow,
 } from "@/features/page-speed-insights/tsTable/useLHTable";
 import type { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataItem";
-import {
-  createColumnHelper,
-  getCoreRowModel,
-  getGroupedRowModel,
-  getExpandedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import {
-  arrIncludesSomeFilter,
-  booleanFilterFn,
-} from "@/features/page-speed-insights/shared/filterFns";
-
+import { useTable } from "@tanstack/react-table-v9";
+import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
+import { stockFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
+import { lhTableRowModels } from "@/features/page-speed-insights/tsTable/lhTableRowModels";
 vi.mock("@/components/common/PageSpeedGaugeChart", () => ({
   HorizontalScoreChart: () => <div data-testid="score-chart" />,
 }));
@@ -41,9 +33,6 @@ vi.mock("@/components/ui/accordion", () => ({
       {children}
     </button>
   ),
-}));
-
-vi.mock("@radix-ui/react-accordion", () => ({
   AccordionContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
@@ -67,6 +56,8 @@ const createMockItem = () => ({
   lighthouseResult: {
     categories: {
       performance: {
+        title: "Performance",
+        score: 0.9,
         auditRefs: [
           { id: "fcp", group: "diagnostics", acronym: "FCP" },
           { id: "lcp", group: "diagnostics", acronym: "LCP" },
@@ -98,6 +89,12 @@ describe("useLHTable", () => {
     const { container } = render(<UseLHTableWrapper />);
     expect(container.firstChild).toBeTruthy();
   });
+
+  it("renders audit summaries inside grouped category rows", () => {
+    const { getByText, getAllByTestId } = render(<UseLHTableWrapper />);
+    expect(getByText("Performance")).toBeTruthy();
+    expect(getAllByTestId("audit-summary")).toHaveLength(2);
+  });
 });
 
 function CategoryRowWrapper() {
@@ -109,17 +106,14 @@ function CategoryRowWrapper() {
     }),
   ];
   const data = [{ _category: { title: "Performance" }, _userLabel: "Mobile" }];
-  const table = useReactTable({
+  const table = useTable({
+    features: stockFeatures,
+    rowModels: lhTableRowModels,
     data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getGroupedRowModel: getGroupedRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    filterFns: { booleanFilterFn, arrIncludesSome: arrIncludesSomeFilter } as any,
+    columns: columns as never,
   });
   const row = table.getRowModel().rows[0];
-  return <CategoryRow row={row as unknown as Row<TableDataItem>} />;
+  return <CategoryRow row={row as unknown as StockRow<TableDataItem>} />;
 }
 
 describe("CategoryRow", () => {
@@ -143,17 +137,14 @@ function AuditSummaryRowWrapper() {
       _userLabel: "Mobile",
     },
   ];
-  const table = useReactTable({
+  const table = useTable({
+    features: stockFeatures,
+    rowModels: lhTableRowModels,
     data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getGroupedRowModel: getGroupedRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    filterFns: { booleanFilterFn, arrIncludesSome: arrIncludesSomeFilter } as any,
+    columns: columns as never,
   });
   const row = table.getRowModel().rows[0];
-  return <AuditSummaryRow row={row as unknown as Row<TableDataItem>} />;
+  return <AuditSummaryRow row={row as unknown as StockRow<TableDataItem>} />;
 }
 
 describe("AuditSummaryRow", () => {

@@ -8,7 +8,7 @@ vi.mock("@/components/ui/table", () => ({
   TableCaption: ({ children }: { children: React.ReactNode }) => <caption>{children}</caption>,
 }));
 
-vi.mock("@/features/page-speed-insights/lh-categories/table/DataTableHeader", () => ({
+vi.mock("@/features/page-speed-insights/tanstack-table-v9/DataTableHeader", () => ({
   DataTableHeader: () => (
     <thead data-testid="table-header">
       <tr>
@@ -18,7 +18,7 @@ vi.mock("@/features/page-speed-insights/lh-categories/table/DataTableHeader", ()
   ),
 }));
 
-vi.mock("@/features/page-speed-insights/lh-categories/table/DataTableBody", () => ({
+vi.mock("@/features/page-speed-insights/tanstack-table-v9/DataTableBody", () => ({
   DataTableBody: () => (
     <tbody data-testid="table-body">
       <tr>
@@ -36,7 +36,7 @@ vi.mock("@/features/page-speed-insights/lh-categories/table/NetworkWaterfallCell
   NetworkWaterfallCell: () => <span data-testid="waterfall" />,
 }));
 
-vi.mock("@/features/page-speed-insights/shared/useSimpleTable", () => ({
+vi.mock("@/features/page-speed-insights/tanstack-table-v9/useSimpleTable", () => ({
   useSimpleTable: ({ data, columns }: { data: TableItem[]; columns: unknown[] }) => ({
     getHeaderGroups: () => [{ id: "1", headers: [] }],
     getRowModel: () => ({ rows: data.map((item, i) => ({ id: String(i), original: item })) }),

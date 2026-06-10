@@ -9,13 +9,16 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Table } from "@/components/ui/table";
-import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
-import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
+import { DataTableHeader } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
+import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/DataTableBody";
 import {
   compareReportLabels,
   formatReportTableTitle,
 } from "@/features/page-speed-insights/shared/reportLabels";
-import { useSimpleTable } from "@/features/page-speed-insights/shared/useSimpleTable";
+import {
+  useSimpleTable,
+  type FlatColumnDef,
+} from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
 import {
   flattenDetailItems,
   getAuditId,
@@ -101,7 +104,6 @@ function ReportTable({
   rows: DetailTableItem[];
   auditId?: string;
 }) {
-  "use no memo";
   const timeRange = useMemo(() => getDetailItemsTimeRange(data, auditId), [auditId, data]);
   const reportColumns = useMemo(
     () =>
@@ -113,7 +115,10 @@ function ReportTable({
       }),
     [auditId, reportLabel, rows, timeRange],
   );
-  const table = useSimpleTable({ data, columns: reportColumns });
+  const table = useSimpleTable({
+    data,
+    columns: reportColumns as FlatColumnDef<TableItem | OpportunityItem>[],
+  });
 
   return (
     <div className="w-full overflow-x-auto">

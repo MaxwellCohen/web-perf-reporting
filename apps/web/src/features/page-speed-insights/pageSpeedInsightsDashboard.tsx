@@ -30,8 +30,6 @@ export function PageSpeedInsightsDashboard({
   labels: string[];
   hideReport?: boolean;
 }) {
-  "use no memo";
-
   const dataForStore: NullablePageSpeedInsights[] = Array.isArray(data) ? data : [];
   const store = usePageSpeedInsightsStore({
     data: dataForStore,

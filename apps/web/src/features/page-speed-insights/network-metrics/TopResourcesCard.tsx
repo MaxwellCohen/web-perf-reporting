@@ -5,13 +5,16 @@ import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { TableItem } from "@/lib/schema";
 import { getUrlString, getNumber } from "@/lib/utils";
 import { useMemo } from "react";
-import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
-import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
-import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
-import { PaginationCard } from "@/features/page-speed-insights/JSUsage/TableControls";
+import { DataTableHeader } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
+import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/DataTableBody";
+import { PaginationCard } from "@/features/page-speed-insights/tanstack-table-v9/PaginationCard";
 import { createStringAggregatedCell } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
 import { sortByMaxValueComposite } from "@/features/page-speed-insights/shared/dataSortingHelpers";
-import { useStandardTable } from "@/features/page-speed-insights/shared/tableConfigHelpers";
+import {
+  useStandardTable,
+  type StandardColumnDef,
+} from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import {
   createBytesColumn,
   createMSColumn,
@@ -45,8 +48,8 @@ function resourceToTableRow(label: string, resource: TableItem): TopResourceTabl
   };
 }
 
-const columnHelper = createColumnHelper<TopResourceTableRow>();
-const cols: ColumnDef<TopResourceTableRow, any>[] = [
+const columnHelper = createStockColumnHelper<TopResourceTableRow>();
+const cols: StandardColumnDef<TopResourceTableRow>[] = [
   createURLColumn(columnHelper),
   columnHelper.accessor("resourceType", {
     id: "resourceType",
@@ -65,7 +68,6 @@ const cols: ColumnDef<TopResourceTableRow, any>[] = [
 ];
 
 export function TopResourcesCard() {
-  "use no memo";
   const requestStats = useNetworkRequestStats();
   const validStats = useMemo(
     () => requestStats.filter((s) => s.topResources && s.topResources.length > 0),

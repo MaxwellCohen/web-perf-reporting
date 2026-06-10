@@ -1,13 +1,7 @@
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import {
-  getCoreRowModel,
-  getFacetedMinMaxValues,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  useReactTable,
-  flexRender,
-} from "@tanstack/react-table";
+import { flexRender } from "@tanstack/react-table-v9";
+import { useSimpleTable } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
 import {
   columns,
   makeSortingHeading,
@@ -78,15 +72,7 @@ const mockData: TreeMapNode[] = [
 ];
 
 function TableWithNameHeader() {
-  const table = useReactTable({
-    data: mockData,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFacetedMinMaxValues: getFacetedMinMaxValues(),
-    filterFns: { booleanFilterFn: () => true },
-  });
+  const table = useSimpleTable({ data: mockData, columns: columns as never });
   const headerGroup = table.getHeaderGroups()[0];
   const header = headerGroup.headers.find((h) => h.column.id === "name");
   if (!header) return null;
@@ -94,12 +80,7 @@ function TableWithNameHeader() {
 }
 
 function CellRenderer({ data, columnId }: { data: TreeMapNode[]; columnId: string }) {
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    filterFns: { booleanFilterFn: () => true },
-  });
+  const table = useSimpleTable({ data, columns: columns as never });
   const row = table.getRowModel().rows[0];
   const cell = row.getVisibleCells().find((c) => c.column.id === columnId);
   if (!cell?.column.columnDef.cell) return null;

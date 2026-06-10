@@ -1,5 +1,10 @@
 import React, { type ComponentType } from "react";
-import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
+import type { RowData } from "@tanstack/react-table-v9";
+import type { StockColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import type { StockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
+
+type ColumnDef<T extends RowData, TValue = unknown> = StockColumnDef<T, TValue>;
+type ColumnHelper<T extends RowData> = StockColumnHelper<T>;
 import {
   RenderBytesValue,
   RenderMSValue,
@@ -26,8 +31,8 @@ export function createOptionalNumericCell(
   return value !== undefined ? <Render value={value} /> : metricTableEmptyDisplay();
 }
 
-function createBaseNumericColumn<T, TValue = unknown>(
-  columnHelper: ReturnType<typeof createColumnHelper<T>>,
+function createBaseNumericColumn<T extends RowData, TValue = unknown>(
+  columnHelper: ColumnHelper<T>,
   accessor: keyof T,
   header: string,
   cell: ColumnDef<T, TValue>["cell"],
@@ -58,8 +63,8 @@ export type TruncatedTextColumnOptions<T> = {
 /**
  * Text column with truncation + title tooltip; string aggregation for grouped rows.
  */
-export function createTruncatedTextColumn<T>(
-  columnHelper: ReturnType<typeof createColumnHelper<T>>,
+export function createTruncatedTextColumn<T extends RowData>(
+  columnHelper: ColumnHelper<T>,
   options: TruncatedTextColumnOptions<T>,
 ): ColumnDef<T, unknown> {
   const { accessor, id, header, maxWidthClass = "max-w-75", enableGrouping = true } = options;
@@ -88,8 +93,8 @@ export function createTruncatedTextColumn<T>(
 /**
  * Standard URL column (truncated); expects row shape `{ url: string }`.
  */
-export function createURLColumn<T extends { url: string }>(
-  columnHelper: ReturnType<typeof createColumnHelper<T>>,
+export function createURLColumn<T extends { url: string } & RowData>(
+  columnHelper: ColumnHelper<T>,
   maxWidthClass: string = "max-w-75",
 ): ColumnDef<T, unknown> {
   return createTruncatedTextColumn(columnHelper, {
@@ -104,8 +109,8 @@ export function createURLColumn<T extends { url: string }>(
 /**
  * Optional milliseconds column with grouped multi-report aggregation.
  */
-export function createMSColumn<T>(
-  columnHelper: ReturnType<typeof createColumnHelper<T>>,
+export function createMSColumn<T extends RowData>(
+  columnHelper: ColumnHelper<T>,
   accessor: keyof T,
   header: string,
 ): ColumnDef<T, unknown> {
@@ -122,8 +127,8 @@ export function createMSColumn<T>(
 /**
  * Optional numeric column using a custom renderer (e.g. bytes).
  */
-function createOptionalNumericColumn<T>(
-  columnHelper: ReturnType<typeof createColumnHelper<T>>,
+function createOptionalNumericColumn<T extends RowData>(
+  columnHelper: ColumnHelper<T>,
   options: {
     accessor: keyof T;
     header: string;
@@ -152,8 +157,8 @@ function createOptionalNumericColumn<T>(
 /**
  * Standard bytes column definition
  */
-export function createBytesColumn<T>(
-  columnHelper: ReturnType<typeof createColumnHelper<T>>,
+export function createBytesColumn<T extends RowData>(
+  columnHelper: ColumnHelper<T>,
   accessor: keyof T,
   header: string,
 ): ColumnDef<T, unknown> {
@@ -169,8 +174,8 @@ export function createBytesColumn<T>(
 /**
  * Percentage column (leaf + aggregated) for grouped metric tables.
  */
-export function createPercentageColumn<T>(
-  columnHelper: ReturnType<typeof createColumnHelper<T>>,
+export function createPercentageColumn<T extends RowData>(
+  columnHelper: ColumnHelper<T>,
   accessor: keyof T,
   header: string,
   precision: number = 1,
@@ -191,8 +196,8 @@ export function createPercentageColumn<T>(
 /**
  * Standard report label column definition
  */
-export function createReportColumn<T extends { label: string }>(
-  columnHelper: ReturnType<typeof createColumnHelper<T>>,
+export function createReportColumn<T extends { label: string } & RowData>(
+  columnHelper: ColumnHelper<T>,
 ): ColumnDef<T, unknown> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return columnHelper.accessor("label" as any, {

@@ -4,6 +4,8 @@ import { DataTableNoGrouping } from "@/features/page-speed-insights/lh-categorie
 import { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import { flattenDetailItems } from "@/features/page-speed-insights/lh-categories/table/detailTableData";
 import { createDetailItemColumns } from "@/features/page-speed-insights/lh-categories/table/detailItemColumns";
+import type { FlatColumnDef } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
+import type { OpportunityItem, TableItem } from "@/lib/schema";
 
 export function DetailTableWith1ReportAndNoSubitem({
   rows,
@@ -21,5 +23,11 @@ export function DetailTableWith1ReportAndNoSubitem({
   if (!data.length) {
     return null;
   }
-  return <DataTableNoGrouping data={data} columns={columns} title={title} />;
+  return (
+    <DataTableNoGrouping
+      data={data}
+      columns={columns as FlatColumnDef<TableItem | OpportunityItem>[]}
+      title={title}
+    />
+  );
 }

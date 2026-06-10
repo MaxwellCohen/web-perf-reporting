@@ -1,5 +1,7 @@
+import type { StockCellContext, StockColumnDef, StockHeader, StockHeaderContext, StockHeaderGroup, StockRow, StockTable, StockCell } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { ItemValue, OpportunityItem, TableItem } from "@/lib/schema";
-import { createColumnHelper, ColumnDef } from "@tanstack/react-table";
+import { ColumnDef } from "@tanstack/react-table-v9";
+import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import { RenderTableValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import {
   canGroup,
@@ -33,8 +35,8 @@ function buildBaseColumns(
   rows: DetailTableItem[],
   deviceLabel: string,
   auditId?: string,
-): ColumnDef<DetailRowValue, ItemValue | undefined>[] {
-  const headingsById = new Map<string, ColumnDef<DetailRowValue, ItemValue | undefined>>();
+): StockColumnDef<DetailRowValue, ItemValue | undefined>[] {
+  const headingsById = new Map<string, StockColumnDef<DetailRowValue, ItemValue | undefined>>();
 
   rows.forEach((row) => {
     let headingsToUse = row.auditResult.details.headings;
@@ -71,7 +73,7 @@ function buildBaseColumns(
           id: columnId,
           header: headerLabel,
           enableSorting: canSort(heading.valueType),
-          sortingFn: "alphanumeric",
+          sortFn: "alphanumeric",
           enableColumnFilter: canGroup(heading.valueType) || isNumberColumn(heading.valueType),
           filterFn: canGroup(heading.valueType)
             ? "includesString"
@@ -103,7 +105,7 @@ export function createDetailItemColumns({
   deviceLabel,
   auditId,
   timeRange,
-}: DetailItemColumnsOptions): ColumnDef<DetailRowValue, ItemValue | undefined>[] {
+}: DetailItemColumnsOptions): StockColumnDef<DetailRowValue, ItemValue | undefined>[] {
   const columns = buildBaseColumns(rows, deviceLabel, auditId);
 
   if (!isNetworkRequestsAudit(auditId) || !timeRange) {
@@ -140,7 +142,7 @@ export function createDetailItemColumns({
     },
   });
 
-  return [...columns, waterfallColumn];
+  return [...columns, waterfallColumn] as StockColumnDef<DetailRowValue, ItemValue | undefined>[];
 }
 
 export function getDetailItemsTimeRange(

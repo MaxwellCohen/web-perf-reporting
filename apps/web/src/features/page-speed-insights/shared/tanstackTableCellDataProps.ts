@@ -1,10 +1,19 @@
-import type { Cell, Row } from "@tanstack/react-table";
+type TableCellLike = {
+  id: string;
+  column: { id: string };
+  getIsGrouped: () => boolean;
+  getIsAggregated: () => boolean;
+  getIsPlaceholder: () => boolean;
+};
+
+type TableRowLike = {
+  getCanExpand: () => boolean;
+  depth: number;
+  getIsExpanded: () => boolean;
+};
 
 /** Data attributes used for table cell styling/tests across TanStack table UIs. */
-export function tanstackTableCellDataProps<TData, TValue>(
-  cell: Cell<TData, TValue>,
-  row: Row<TData>,
-) {
+export function tanstackTableCellDataProps(cell: TableCellLike, row: TableRowLike) {
   return {
     "data-cell-id": cell.id,
     "data-column-id": cell.column.id,

@@ -1,7 +1,8 @@
 import React from "react";
 
 import { fireEvent, render } from "@testing-library/react";
-import { createColumnHelper } from "@tanstack/react-table";
+import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
+import { type FlatColumnDef } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Accordion } from "@/components/ui/accordion";
 import { DataTableNoGrouping } from "@/features/page-speed-insights/lh-categories/table/DataTableNoGrouping";
@@ -57,7 +58,7 @@ vi.mock("@/components/ui/accordion", () => {
   return { Accordion: AccordionRoot, AccordionItem, AccordionTrigger, AccordionContent };
 });
 
-vi.mock("@/features/page-speed-insights/lh-categories/table/DataTableHeader", () => ({
+vi.mock("@/features/page-speed-insights/tanstack-table-v9/DataTableHeader", () => ({
   DataTableHeader: ({
     table,
   }: {
@@ -82,7 +83,7 @@ vi.mock("@/features/page-speed-insights/lh-categories/table/DataTableHeader", ()
   ),
 }));
 
-vi.mock("@/features/page-speed-insights/lh-categories/table/DataTableBody", () => ({
+vi.mock("@/features/page-speed-insights/tanstack-table-v9/DataTableBody", () => ({
   DataTableBody: ({
     table,
   }: {
@@ -90,7 +91,7 @@ vi.mock("@/features/page-speed-insights/lh-categories/table/DataTableBody", () =
       getRowModel: () => {
         rows: Array<{
           id: string;
-          getVisibleCells: () => Array<{ id: string; getValue: () => unknown }>;
+          getAllCells: () => Array<{ id: string; getValue: () => unknown }>;
         }>;
       };
     };
@@ -98,7 +99,7 @@ vi.mock("@/features/page-speed-insights/lh-categories/table/DataTableBody", () =
     <tbody>
       {table.getRowModel().rows.map((row) => (
         <tr key={row.id}>
-          {row.getVisibleCells().map((cell) => (
+          {row.getAllCells().map((cell) => (
             <td key={cell.id}>{String(cell.getValue())}</td>
           ))}
         </tr>
@@ -113,7 +114,7 @@ const columnHelper = createColumnHelper<Row>();
 const columns = [
   columnHelper.accessor("id", { header: "ID" }),
   columnHelper.accessor("name", { header: "Name" }),
-];
+] as FlatColumnDef<Row>[];
 
 function wrapInAccordion(children: React.ReactNode) {
   return (

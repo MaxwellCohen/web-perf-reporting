@@ -1,7 +1,8 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { getCoreRowModel, getExpandedRowModel, useReactTable } from "@tanstack/react-table";
-import { createColumnHelper } from "@tanstack/react-table";
+import { createExpandedRowModel, useTable } from "@tanstack/react-table-v9";
+import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
+import { stockFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 import { JSUsageTableRow } from "@/features/page-speed-insights/JSUsage/jsUsageTableRow";
 import type { TreeMapNode } from "@/lib/schema";
 
@@ -55,14 +56,13 @@ const columns = [
 ];
 
 function TableWithRow({ data }: { data: TreeMapNode[] }) {
-  const table = useReactTable({
+  const table = useTable({
+    features: stockFeatures,
+    rowModels: { expandedRowModel: createExpandedRowModel() },
     data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
+    columns: columns as never,
     getSubRows: (row) => (row.children?.length ? row.children : undefined),
     enableExpanding: true,
-    filterFns: { booleanFilterFn: () => true },
   });
   const row = table.getRowModel().rows[0];
   if (!row) return null;

@@ -4,11 +4,14 @@ import { Table } from "@/components/ui/table";
 import { TableItem } from "@/lib/schema";
 import { getNumber } from "@/lib/utils";
 import { useMemo } from "react";
-import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
-import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
-import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
+import { DataTableHeader } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
+import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/DataTableBody";
 import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
-import { useStandardTable } from "@/features/page-speed-insights/shared/tableConfigHelpers";
+import {
+  useStandardTable,
+  type StandardColumnDef,
+} from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import {
   createMSColumn,
   createTruncatedTextColumn,
@@ -22,9 +25,9 @@ type OriginMsRow = {
   ms: number | undefined;
 };
 
-const columnHelper = createColumnHelper<OriginMsRow>();
+const columnHelper = createStockColumnHelper<OriginMsRow>();
 
-function buildColumns(valueColumnHeader: string): ColumnDef<OriginMsRow, unknown>[] {
+function buildColumns(valueColumnHeader: string): StandardColumnDef<OriginMsRow>[] {
   return [
     createTruncatedTextColumn(columnHelper, {
       accessor: "origin",
@@ -53,7 +56,6 @@ export function NetworkOriginMsCard({
   itemsField,
   msItemField,
 }: NetworkOriginMsCardProps) {
-  "use no memo";
   const validMetrics = useMemo(() => series.filter((m) => m[itemsField].length > 0), [series, itemsField]);
 
   const showReportColumn = validMetrics.length > 1;

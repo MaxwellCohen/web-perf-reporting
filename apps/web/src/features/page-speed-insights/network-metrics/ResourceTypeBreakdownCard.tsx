@@ -4,15 +4,18 @@ import { Table } from "@/components/ui/table";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { TableItem } from "@/lib/schema";
 import { useMemo } from "react";
-import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
-import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
-import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
+import { DataTableHeader } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
+import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/DataTableBody";
+import {
+  type StandardColumnDef,
+} from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import {
   createNumericAggregatedCell,
   createStringAggregatedCell,
 } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
 import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
-import { useStandardTable } from "@/features/page-speed-insights/shared/tableConfigHelpers";
+import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
 import { createBytesColumn } from "@/features/page-speed-insights/shared/tableColumnHelpers";
 import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
 import { useNetworkRequestStats } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
@@ -32,8 +35,8 @@ function sumOn<T extends Record<string, unknown>>(items: T[], key: string): numb
   }, 0);
 }
 
-const columnHelper = createColumnHelper<ResourceTypeTableRow>();
-const cols: ColumnDef<ResourceTypeTableRow, any>[] = [
+const columnHelper = createStockColumnHelper<ResourceTypeTableRow>();
+const cols: StandardColumnDef<ResourceTypeTableRow>[] = [
   columnHelper.accessor("resourceType", {
     id: "resourceType",
     header: "Resource Type",
@@ -58,7 +61,6 @@ const cols: ColumnDef<ResourceTypeTableRow, any>[] = [
 ];
 
 function ResourceTypeTable({ label, data }: { label: string; data: ResourceTypeTableRow[] }) {
-  "use no memo";
   const columns = useTableColumns<ResourceTypeTableRow>(cols, columnHelper, false);
   const table = useStandardTable({
     data,

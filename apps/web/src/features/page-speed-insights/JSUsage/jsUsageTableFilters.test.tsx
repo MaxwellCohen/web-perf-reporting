@@ -1,14 +1,8 @@
 import { fireEvent, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  createColumnHelper,
-  getCoreRowModel,
-  getFacetedMinMaxValues,
-  getFilteredRowModel,
-  useReactTable,
-  type FilterFn,
-  type Row,
-} from "@tanstack/react-table";
+import type { StockFilterFn, StockRow } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
+import { useSimpleTable } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
 import {
   formatFilterValue,
   RangeFilter,
@@ -16,28 +10,6 @@ import {
   numericRangeFilter,
 } from "@/features/page-speed-insights/JSUsage/jsUsageTableFilters";
 
-vi.mock("@/components/ui/slider", () => ({
-  Slider2: ({
-    value,
-    onValueChange,
-    min,
-    max,
-  }: {
-    value: number[];
-    onValueChange: (v: number[]) => void;
-    min: number;
-    max: number;
-  }) => (
-    <input
-      data-testid="range-slider"
-      type="range"
-      min={min}
-      max={max}
-      value={value[0]}
-      onChange={(e) => onValueChange([Number(e.target.value), value[1]])}
-    />
-  ),
-}));
 
 vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", () => ({
   RenderBytesValue: ({ value }: { value: number }) => <span data-testid="bytes">{value} B</span>,
@@ -59,31 +31,32 @@ function UseDebouncedCallbackHarness({ delay = 100 }: { delay?: number }) {
 describe("jsUsageTableFilters", () => {
   describe("numericRangeFilter", () => {
     const noopAddMeta = () => {};
-    const getRow = (value: number) => ({ getValue: () => value }) as unknown as Row<{ x: number }>;
-    const filter = numericRangeFilter as unknown as FilterFn<{ x: number }>;
+    const getRow = (value: number) =>
+      ({ getValue: () => value }) as unknown as StockRow<{ x: number }>;
+    const filter = numericRangeFilter as unknown as StockFilterFn;
 
     it("returns true when value is within [min, max]", () => {
-      expect(filter(getRow(50), "x", [0, 100], noopAddMeta)).toBe(true);
-      expect(filter(getRow(0), "x", [0, 100], noopAddMeta)).toBe(true);
-      expect(filter(getRow(100), "x", [0, 100], noopAddMeta)).toBe(true);
+      expect(filter(getRow(50) as never, "x", [0, 100], noopAddMeta)).toBe(true);
+      expect(filter(getRow(0) as never, "x", [0, 100], noopAddMeta)).toBe(true);
+      expect(filter(getRow(100) as never, "x", [0, 100], noopAddMeta)).toBe(true);
     });
 
     it("returns false when value is below min", () => {
-      expect(filter(getRow(10), "x", [20, 100], noopAddMeta)).toBe(false);
+      expect(filter(getRow(10) as never, "x", [20, 100], noopAddMeta)).toBe(false);
     });
 
     it("returns false when value is above max", () => {
-      expect(filter(getRow(150), "x", [0, 100], noopAddMeta)).toBe(false);
+      expect(filter(getRow(150) as never, "x", [0, 100], noopAddMeta)).toBe(false);
     });
 
     it("handles undefined min (only max check)", () => {
-      expect(filter(getRow(50), "x", [undefined, 100], noopAddMeta)).toBe(true);
-      expect(filter(getRow(150), "x", [undefined, 100], noopAddMeta)).toBe(false);
+      expect(filter(getRow(50) as never, "x", [undefined, 100], noopAddMeta)).toBe(true);
+      expect(filter(getRow(150) as never, "x", [undefined, 100], noopAddMeta)).toBe(false);
     });
 
     it("handles undefined max (only min check)", () => {
-      expect(filter(getRow(50), "x", [0, undefined], noopAddMeta)).toBe(true);
-      expect(filter(getRow(0), "x", [10, undefined], noopAddMeta)).toBe(false);
+      expect(filter(getRow(50) as never, "x", [0, undefined], noopAddMeta)).toBe(true);
+      expect(filter(getRow(0) as never, "x", [10, undefined], noopAddMeta)).toBe(false);
     });
   });
 
@@ -134,26 +107,41 @@ describe("jsUsageTableFilters", () => {
         columnHelper.accessor("value", {
           id: "value",
           header: () => null,
+          filterFn: "inNumberRange",
         }),
       ];
-      const table = useReactTable({
-        data,
-        columns: cols,
-        getCoreRowModel: getCoreRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
-        getFacetedMinMaxValues: getFacetedMinMaxValues(),
-        filterFns: { booleanFilterFn: () => true },
-      });
+      const table = useSimpleTable({ data, columns: cols as never });
       const col = table.getColumn("value");
       if (!col) return null;
-      return <RangeFilter column={col} />;
+      return (
+        <>
+          <RangeFilter column={col} />
+          <span data-testid="filter-value">{JSON.stringify(col.getFilterValue() ?? null)}</span>
+        </>
+      );
     }
 
-    it("renders range filter with min/max", () => {
-      const { container } = render(<RangeFilterWrapper />);
-      expect(container.querySelector('[data-testid="range-slider"]')).toBeTruthy();
-      expect(container.textContent).toContain("Min");
-      expect(container.textContent).toContain("Max");
+    it("renders range filter with min/max inputs", () => {
+      const { getByLabelText, getByRole, container } = render(<RangeFilterWrapper />);
+      expect(getByLabelText("Min")).toBeTruthy();
+      expect(getByLabelText("Max")).toBeTruthy();
+      expect(getByRole("button", { name: "Reset range filter" })).toBeTruthy();
+      expect(container.textContent).toContain("Available:");
+    });
+
+    it("reset clears an active range filter", async () => {
+      vi.useFakeTimers();
+      const { getByLabelText, getByRole, getByTestId } = render(<RangeFilterWrapper />);
+
+      fireEvent.change(getByLabelText("Min"), { target: { value: "75" } });
+      await vi.advanceTimersByTimeAsync(300);
+      expect(getByTestId("filter-value").textContent).not.toBe("null");
+
+      fireEvent.click(getByRole("button", { name: "Reset range filter" }));
+      await vi.advanceTimersByTimeAsync(300);
+      expect(getByTestId("filter-value").textContent).toBe("null");
+
+      vi.useRealTimers();
     });
   });
 });

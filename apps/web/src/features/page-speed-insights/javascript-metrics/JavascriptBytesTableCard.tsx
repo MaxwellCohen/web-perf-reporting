@@ -1,7 +1,19 @@
 "use client";
 
+import { useMemo } from "react";
 import type { TableItem } from "@/lib/schema";
-import * as PT from "@/features/page-speed-insights/shared/psiTableToolkit";
+import { getNumber, getUrlString } from "@/lib/utils";
+import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
+import type { StockColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
+import {
+  createBytesColumn,
+  createPercentageColumn,
+  createURLColumn,
+} from "@/features/page-speed-insights/shared/tableColumnHelpers";
+import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
+import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
+import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
 
 export type JavascriptBytesMetric = {
   label: string;
@@ -16,16 +28,16 @@ type JavascriptBytesTableRow = {
   wastedPercent?: number | undefined;
 };
 
-const columnHelper = PT.createColumnHelper<JavascriptBytesTableRow>();
+const columnHelper = createStockColumnHelper<JavascriptBytesTableRow>();
 
-function buildColumnDefs(includeWastedPercent: boolean): PT.ColumnDef<JavascriptBytesTableRow, unknown>[] {
-  const cols: PT.ColumnDef<JavascriptBytesTableRow, unknown>[] = [
-    PT.createURLColumn(columnHelper),
-    PT.createBytesColumn(columnHelper, "wastedBytes", "Wasted Bytes"),
-    PT.createBytesColumn(columnHelper, "totalBytes", "Total Bytes"),
+function buildColumnDefs(includeWastedPercent: boolean): StockColumnDef<JavascriptBytesTableRow, unknown>[] {
+  const cols: StockColumnDef<JavascriptBytesTableRow, unknown>[] = [
+    createURLColumn(columnHelper),
+    createBytesColumn(columnHelper, "wastedBytes", "Wasted Bytes"),
+    createBytesColumn(columnHelper, "totalBytes", "Total Bytes"),
   ];
   if (includeWastedPercent) {
-    cols.push(PT.createPercentageColumn(columnHelper, "wastedPercent", "Wasted %", 1));
+    cols.push(createPercentageColumn(columnHelper, "wastedPercent", "Wasted %", 1));
   }
   return cols;
 }
@@ -42,16 +54,15 @@ export function JavascriptBytesTableCard({
   metrics,
   includeWastedPercent = false,
 }: JavascriptBytesTableCardProps) {
-  "use no memo";
-  const validMetrics = PT.useMemo(() => metrics.filter((m) => m.items.length > 0), [metrics]);
+  const validMetrics = useMemo(() => metrics.filter((m) => m.items.length > 0), [metrics]);
   const showReportColumn = validMetrics.length > 1;
 
-  const data = PT.useMemo<JavascriptBytesTableRow[]>(() => {
+  const data = useMemo<JavascriptBytesTableRow[]>(() => {
     const allRows = validMetrics.flatMap(({ label, items }) =>
       items.map((item: TableItem) => {
-        const url = PT.getUrlString(item.url);
-        const wastedBytes = PT.getNumber(item.wastedBytes);
-        const totalBytes = PT.getNumber(item.totalBytes);
+        const url = getUrlString(item.url);
+        const wastedBytes = getNumber(item.wastedBytes);
+        const totalBytes = getNumber(item.totalBytes);
         const row: JavascriptBytesTableRow = {
           label,
           url: url.replace(/^https?:\/\//, "") || "Unknown",
@@ -59,13 +70,13 @@ export function JavascriptBytesTableCard({
           totalBytes,
         };
         if (includeWastedPercent) {
-          row.wastedPercent = PT.getNumber(item.wastedPercent);
+          row.wastedPercent = getNumber(item.wastedPercent);
         }
         return row;
       }),
     );
 
-    return PT.sortByMaxValue(
+    return sortByMaxValue(
       allRows,
       (row) => row.url,
       (row) => row.wastedBytes || 0,
@@ -73,11 +84,11 @@ export function JavascriptBytesTableCard({
     );
   }, [validMetrics, includeWastedPercent]);
 
-  const cols = PT.useMemo(() => buildColumnDefs(includeWastedPercent), [includeWastedPercent]);
+  const cols = useMemo(() => buildColumnDefs(includeWastedPercent), [includeWastedPercent]);
 
-  const columns = PT.useTableColumns<JavascriptBytesTableRow>(cols, columnHelper, showReportColumn);
+  const columns = useTableColumns<JavascriptBytesTableRow>(cols, columnHelper, showReportColumn);
 
-  const table = PT.useStandardTable({
+  const table = useStandardTable({
     data,
     columns,
     grouping: ["url"],
@@ -89,5 +100,5 @@ export function JavascriptBytesTableCard({
     return null;
   }
 
-  return <PT.TableCard title={title} table={table} showPagination />;
+  return <TableCard title={title} table={table} showPagination />;
 }

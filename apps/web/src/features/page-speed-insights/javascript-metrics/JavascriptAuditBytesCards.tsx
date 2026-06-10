@@ -19,7 +19,6 @@ type UnminifiedJavaScriptData = { label: string; unminifiedJS: TableItem[] };
 type UnusedJavaScriptData = { label: string; unusedJS: TableItem[] };
 
 export function LegacyJavaScriptCard({ metrics }: { metrics: LegacyJavaScriptData[] }) {
-  "use no memo";
   const normalized = useMemo(
     () => mapToBytesMetrics(metrics, (m) => m.legacyJS),
     [metrics],
@@ -28,7 +27,6 @@ export function LegacyJavaScriptCard({ metrics }: { metrics: LegacyJavaScriptDat
 }
 
 export function UnminifiedJavaScriptCard({ metrics }: { metrics: UnminifiedJavaScriptData[] }) {
-  "use no memo";
   const normalized = useMemo(
     () => mapToBytesMetrics(metrics, (m) => m.unminifiedJS),
     [metrics],
@@ -37,7 +35,7 @@ export function UnminifiedJavaScriptCard({ metrics }: { metrics: UnminifiedJavaS
 }
 
 export function UnusedJavaScriptCard({ metrics }: { metrics: UnusedJavaScriptData[] }) {
-  "use no memo";
+  
   const normalized = useMemo(() => mapToBytesMetrics(metrics, (m) => m.unusedJS), [metrics]);
   return (
     <JavascriptBytesTableCard title="Unused JavaScript" metrics={normalized} includeWastedPercent />

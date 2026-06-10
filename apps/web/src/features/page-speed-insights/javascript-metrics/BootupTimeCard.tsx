@@ -1,8 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import { useMemo } from "react";
 import type { TableItem } from "@/lib/schema";
-import * as PT from "@/features/page-speed-insights/shared/psiTableToolkit";
+import { getNumber, getUrlString } from "@/lib/utils";
+import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
+import type { StockColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
+import {
+  createMSColumn,
+  createURLColumn,
+} from "@/features/page-speed-insights/shared/tableColumnHelpers";
+import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
+import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
+import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
 
 type BootupTimeData = {
   label: string;
@@ -21,35 +32,35 @@ type BootupTimeCardProps = {
   metrics: BootupTimeData[];
 };
 
-const columnHelper = PT.createColumnHelper<BootupTimeTableRow>();
+const columnHelper = createStockColumnHelper<BootupTimeTableRow>();
 
-const cols: PT.ColumnDef<BootupTimeTableRow, unknown>[] = [
-  PT.createURLColumn(columnHelper),
-  PT.createMSColumn(columnHelper, "scriptParseCompile", "Parse & Compile"),
-  PT.createMSColumn(columnHelper, "scripting", "Scripting"),
-  PT.createMSColumn(columnHelper, "total", "Total Time"),
+const cols: StockColumnDef<BootupTimeTableRow, unknown>[] = [
+  createURLColumn(columnHelper),
+  createMSColumn(columnHelper, "scriptParseCompile", "Parse & Compile"),
+  createMSColumn(columnHelper, "scripting", "Scripting"),
+  createMSColumn(columnHelper, "total", "Total Time"),
 ];
 
 function itemToRow(label: string, item: TableItem): BootupTimeTableRow {
   return {
     label,
-    url: PT.getUrlString(item.url),
-    total: PT.getNumber(item.total),
-    scripting: PT.getNumber(item.scripting),
-    scriptParseCompile: PT.getNumber(item.scriptParseCompile),
+    url: getUrlString(item.url),
+    total: getNumber(item.total),
+    scripting: getNumber(item.scripting),
+    scriptParseCompile: getNumber(item.scriptParseCompile),
   };
 }
 
 export function BootupTimeCard({ metrics }: BootupTimeCardProps) {
-  const validMetrics = PT.useMemo(() => metrics.filter((m) => m.bootupTime.length > 0), [metrics]);
+  const validMetrics = useMemo(() => metrics.filter((m) => m.bootupTime.length > 0), [metrics]);
   const showReportColumn = validMetrics.length > 1;
 
-  const data = PT.useMemo<BootupTimeTableRow[]>(() => {
+  const data = useMemo<BootupTimeTableRow[]>(() => {
     if (!validMetrics.length) return [];
     const allRows = validMetrics.flatMap(({ label, bootupTime }) =>
       bootupTime.map((item) => itemToRow(label, item)),
     );
-    return PT.sortByMaxValue(
+    return sortByMaxValue(
       allRows,
       (row) => row.url,
       (row) => row.total || 0,
@@ -57,7 +68,7 @@ export function BootupTimeCard({ metrics }: BootupTimeCardProps) {
     );
   }, [validMetrics]);
 
-  const columns = PT.useTableColumns<BootupTimeTableRow>(cols, columnHelper, showReportColumn);
+  const columns = useTableColumns<BootupTimeTableRow>(cols, columnHelper, showReportColumn);
 
   if (!validMetrics.length) return null;
 
@@ -69,10 +80,9 @@ function BootupTimeTable({
   columns,
 }: {
   data: BootupTimeTableRow[];
-  columns: PT.ColumnDef<BootupTimeTableRow, any>[];
+  columns: StockColumnDef<BootupTimeTableRow, any>[];
 }) {
-  "use no memo";
-  const table = PT.useStandardTable({
+  const table = useStandardTable({
     data,
     columns,
     grouping: ["url"],
@@ -80,5 +90,5 @@ function BootupTimeTable({
     defaultPageSize: 10,
   });
 
-  return <PT.TableCard title="JavaScript Bootup Time" table={table} showPagination />;
+  return <TableCard title="JavaScript Bootup Time" table={table} showPagination />;
 }

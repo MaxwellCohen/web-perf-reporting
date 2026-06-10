@@ -1,4 +1,4 @@
-import type { Column } from "@tanstack/react-table";
+import type { Column } from "@tanstack/react-table-v9";
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { StringFilterHeader } from "@/features/page-speed-insights/JSUsage/StringFilterHeader";
@@ -82,7 +82,7 @@ describe("StringFilterHeader", () => {
   it("renders filter UI with column", () => {
     const column = createColumnMock();
     const { container } = render(
-      <StringFilterHeader column={column as unknown as Column<unknown, unknown>} name="Name" />,
+      <StringFilterHeader column={column as never} name="Name" />,
     );
     expect(container.firstChild).toMatchSnapshot();
   });
@@ -90,7 +90,7 @@ describe("StringFilterHeader", () => {
   it("renders with filter value", () => {
     const column = createColumnMock({ getFilterValue: () => "test" });
     const { container } = render(
-      <StringFilterHeader column={column as unknown as Column<unknown, unknown>} name="Host" />,
+      <StringFilterHeader column={column as never} name="Host" />,
     );
     expect(container.firstChild).toMatchSnapshot();
   });
@@ -98,7 +98,7 @@ describe("StringFilterHeader", () => {
   it("calls setFilterValue when clear button is clicked", () => {
     const column = createColumnMock();
     const { container } = render(
-      <StringFilterHeader column={column as unknown as Column<unknown, unknown>} name="Name" />,
+      <StringFilterHeader column={column as never} name="Name" />,
     );
     const button = container.querySelector("button");
     fireEvent.click(button!);
@@ -108,7 +108,7 @@ describe("StringFilterHeader", () => {
   it("wires input onChange to setFilterValue", () => {
     const column = createColumnMock();
     const { container } = render(
-      <StringFilterHeader column={column as unknown as Column<unknown, unknown>} name="Name" />,
+      <StringFilterHeader column={column as never} name="Name" />,
     );
     const input = container.querySelector("input");
     fireEvent.change(input!, { target: { value: "foo" } });
@@ -118,7 +118,7 @@ describe("StringFilterHeader", () => {
   it("associates datalist with input via list attribute", () => {
     const column = createColumnMock({ id: "host" });
     const { container } = render(
-      <StringFilterHeader column={column as unknown as Column<unknown, unknown>} name="Host" />,
+      <StringFilterHeader column={column as never} name="Host" />,
     );
     const datalist = container.querySelector("datalist");
     const input = container.querySelector("input");

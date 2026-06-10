@@ -1,14 +1,16 @@
 "use client";
 import { ReactNode, useMemo } from "react";
-import { ColumnDef } from "@tanstack/react-table";
 import { Table } from "@/components/ui/table";
-import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
-import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
+import { DataTableHeader } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
+import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/DataTableBody";
 import {
   RenderBytesValue,
   RenderMSValue,
 } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
-import { useSimpleTable } from "@/features/page-speed-insights/shared/useSimpleTable";
+import {
+  useSimpleTable,
+  type FlatColumnDef,
+} from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
 
 interface ResourceItem {
   url?: string;
@@ -42,7 +44,7 @@ function resourceNumericColumn(
   header: string,
   sizes: { size: number; minSize: number; maxSize: number },
   getCell: (row: ResourceItem) => ReactNode,
-): ColumnDef<ResourceItem> {
+): FlatColumnDef<ResourceItem> {
   return {
     id,
     accessorKey: id,
@@ -68,9 +70,7 @@ function msCell(get: (row: ResourceItem) => number | undefined) {
 }
 
 export function ResourcesTable({ items }: ResourcesTableProps) {
-  "use no memo";
-
-  const columns = useMemo<ColumnDef<ResourceItem>[]>(() => {
+  const columns = useMemo<FlatColumnDef<ResourceItem>[]>(() => {
     const numericColumns: Array<{
       id: keyof ResourceItem & string;
       header: string;

@@ -4,7 +4,7 @@ Short glossary for this repo. Terms align with modules under `src/lib/page-speed
 
 ## Saved report (`publicId`)
 
-A stable id returned when starting a PageSpeed worker job from the server action flow. The dashboard at `/page-speed/[publicId]` loads rows through GET `/api/pagespeed/:publicId`. Start vs load paths are documented in `src/lib/page-speed-insights/pageSpeedDataFlows.ts`.
+A stable id returned when starting a PageSpeed worker job from the server action flow. The dashboard at `/page-speed/[publicId]` loads rows through GET `/api/pagespeed/:publicId`. Start vs load paths are documented in `docs/architecture-page-speed.md`.
 
 ## Worker job envelope
 

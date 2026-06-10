@@ -2,24 +2,25 @@
 import { Table } from "@/components/ui/table";
 import { AccordionContent, AccordionItem } from "@/components/ui/accordion";
 import { AccordionSectionTitleTrigger } from "@/components/ui/accordion-section-title-trigger";
-import { ColumnDef } from "@tanstack/react-table";
-import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
-import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
+import { DataTableHeader } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
+import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/DataTableBody";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
-import { useSimpleTable } from "@/features/page-speed-insights/shared/useSimpleTable";
+import {
+  useSimpleTable,
+  type FlatColumnDef,
+} from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
+import type { RowData } from "@tanstack/react-table-v9";
 export { booleanFilterFn } from "@/features/page-speed-insights/shared/filterFns";
 
-export function DataTableNoGrouping<T>({
+export function DataTableNoGrouping<T extends RowData>({
   data,
   columns,
   title,
 }: {
   data: T[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  columns: ColumnDef<T, any>[];
+  columns: FlatColumnDef<T>[];
   title: string;
 }) {
-  "use no memo";
   const table = useSimpleTable({ data, columns });
 
   return (

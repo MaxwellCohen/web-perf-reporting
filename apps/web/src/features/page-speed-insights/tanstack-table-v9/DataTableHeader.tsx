@@ -1,23 +1,31 @@
 "use client";
-import { useMemo, ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { flexRender, Header, Table as TableType } from "@tanstack/react-table";
-
-import { renderBoolean } from "@/features/page-speed-insights/lh-categories/renderBoolean";
-import { SortingButton } from "@/features/page-speed-insights/lh-categories/table/sortingButton";
+import {
+  flexRender,
+  Subscribe,
+  type Header,
+  type ReactTable,
+  type RowData,
+  type TableState,
+} from "@tanstack/react-table-v9";
+import { SortingButton } from "@/features/page-speed-insights/tanstack-table-v9/sortingButton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ListFilter } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  RangeFilter,
-} from "@/features/page-speed-insights/JSUsage/jsUsageTableFilters";
-import { StringFilterHeader } from "@/features/page-speed-insights/JSUsage/StringFilterHeader";
+import { StringFilterHeader } from "@/features/page-speed-insights/tanstack-table-v9/StringFilterHeader";
+import { RangeFilter } from "@/features/page-speed-insights/tanstack-table-v9/RangeFilter";
+import { ColumnResizer } from "@/features/page-speed-insights/tanstack-table-v9/columnResizer";
+import { renderBoolean } from "@/features/page-speed-insights/lh-categories/renderBoolean";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ColumnResizer } from "@/features/page-speed-insights/lh-categories/table/columnResizer";
+import type { StandardTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 
-export function DataTableHeader<T>({ table }: { table: TableType<T> }) {
-  "use no memo";
+export function DataTableHeader<TData extends RowData>({
+  table,
+}: {
+  table: ReactTable<StandardTableFeatures, TData, TableState<StandardTableFeatures>>;
+}) {
   return (
     <TableHeader>
       {table.getHeaderGroups().map((headerGroup) => {
@@ -33,8 +41,11 @@ export function DataTableHeader<T>({ table }: { table: TableType<T> }) {
   );
 }
 
-function DataTableHead<T>({ header }: { header: Header<T, unknown> }) {
-  "use no memo";
+function DataTableHead<TData extends RowData>({
+  header,
+}: {
+  header: Header<StandardTableFeatures, TData, unknown>;
+}) {
   const isExpanderColumn = header.column.id === "expander";
 
   return (
@@ -71,8 +82,11 @@ function DataTableHead<T>({ header }: { header: Header<T, unknown> }) {
   );
 }
 
-function FilterPopover<T>({ header }: { header: Header<T, unknown> }) {
-  "use no memo";
+function FilterPopover<TData extends RowData>({
+  header,
+}: {
+  header: Header<StandardTableFeatures, TData, unknown>;
+}) {
   if (!header.column.getCanFilter()) {
     return null;
   }
@@ -103,8 +117,13 @@ function FilterPopover<T>({ header }: { header: Header<T, unknown> }) {
   );
 }
 
-function CheckBoxFilter<T>({ header }: { header: Header<T, unknown> }) {
+function CheckBoxFilter<TData extends RowData>({
+  header,
+}: {
+  header: Header<StandardTableFeatures, TData, unknown>;
+}) {
   const col = header.column;
+  const table = header.getContext().table;
   const sortedUniqueValues = useMemo(
     () =>
       Array.from(col?.getFacetedUniqueValues()?.keys() || [])
@@ -112,35 +131,39 @@ function CheckBoxFilter<T>({ header }: { header: Header<T, unknown> }) {
         .slice(0, 5000),
     [col],
   );
-  const filterValue = (col.getFilterValue() as string[]) || [...sortedUniqueValues];
 
   return (
-    <div className="flex flex-col gap-2">
-      {sortedUniqueValues.map((v) => {
-        return (
-          <Label key={`${v}`} className="flex flex-row items-center gap-3">
-            <Checkbox
-              checked={filterValue.length ? filterValue.findIndex((a) => !!a === !!v) > -1 : true}
-              onCheckedChange={(checked: unknown) => {
-                col.setFilterValue((oldValue: string[]) => {
-                  let previousValue = oldValue;
-                  if (oldValue?.length) {
-                    previousValue = oldValue;
-                  } else {
-                    previousValue = [...sortedUniqueValues];
-                  }
+    <Subscribe source={table.atoms.columnFilters}>
+      {() => {
+        const filterValue = (col.getFilterValue() as boolean[]) || [...sortedUniqueValues];
 
-                  const newFilter = checked
-                    ? [...new Set([...previousValue, !!v])]
-                    : previousValue?.filter((a) => !!a !== !!v);
-                  return newFilter;
-                });
-              }}
-            ></Checkbox>
-            {typeof v === "string" ? v : renderBoolean(!!v)}
-          </Label>
+        return (
+          <div className="flex flex-col gap-2">
+            {sortedUniqueValues.map((v) => {
+              return (
+                <Label key={`${v}`} className="flex flex-row items-center gap-3">
+                  <Checkbox
+                    checked={
+                      filterValue.length ? filterValue.findIndex((a) => !!a === !!v) > -1 : true
+                    }
+                    onCheckedChange={(checked: unknown) => {
+                      col.setFilterValue((oldValue: boolean[] | undefined) => {
+                        const previousValue = oldValue?.length
+                          ? oldValue
+                          : [...sortedUniqueValues];
+                        return checked
+                          ? [...new Set([...previousValue, !!v])]
+                          : previousValue?.filter((a) => !!a !== !!v);
+                      });
+                    }}
+                  ></Checkbox>
+                  {typeof v === "string" ? v : renderBoolean(!!v)}
+                </Label>
+              );
+            })}
+          </div>
         );
-      })}
-    </div>
+      }}
+    </Subscribe>
   );
 }

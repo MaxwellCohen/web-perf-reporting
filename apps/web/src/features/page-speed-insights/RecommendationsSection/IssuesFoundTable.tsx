@@ -1,11 +1,13 @@
 "use client";
 import { useMemo } from "react";
-import { ColumnDef } from "@tanstack/react-table";
 import { Table, TableCaption } from "@/components/ui/table";
-import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
-import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
+import { DataTableHeader } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
+import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/DataTableBody";
 import type { TableColumnHeading, TableItem } from "@/lib/schema";
-import { useSimpleTable } from "@/features/page-speed-insights/shared/useSimpleTable";
+import {
+  useSimpleTable,
+  type FlatColumnDef,
+} from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
 import {
   getFilterFnForValueType,
   getColumnSize,
@@ -76,8 +78,6 @@ function deduplicateRowsByColumnValues(
 }
 
 export function IssuesFoundTable({ headings, items, device }: IssuesFoundTableProps) {
-  "use no memo";
-
   const deduplicatedItems = useMemo(
     () => deduplicateRowsByColumnValues(items, headings),
     [items, headings],
@@ -89,8 +89,7 @@ export function IssuesFoundTable({ headings, items, device }: IssuesFoundTablePr
     [isNetworkRequests, deduplicatedItems],
   );
 
-  // Create column definitions from headings
-  const columns = useMemo<ColumnDef<TableItem>[]>(() => {
+  const columns = useMemo<FlatColumnDef<TableItem>[]>(() => {
     let headingsToUse = isNetworkRequests
       ? headings.filter(
           (heading) =>
@@ -112,7 +111,7 @@ export function IssuesFoundTable({ headings, items, device }: IssuesFoundTablePr
           ? NETWORK_REQUESTS_COLUMN_SIZES[key]
           : getColumnSize(key, label, valueType);
 
-      const columnDef: ColumnDef<TableItem> = {
+      const columnDef: FlatColumnDef<TableItem> = {
         id: key,
         accessorKey: key,
         header: label,
@@ -154,7 +153,7 @@ export function IssuesFoundTable({ headings, items, device }: IssuesFoundTablePr
     });
 
     if (isNetworkRequests && timeRange) {
-      const waterfallColumn: ColumnDef<TableItem> = {
+      const waterfallColumn: FlatColumnDef<TableItem> = {
         id: "waterfall",
         accessorKey: "url",
         header: "Waterfall",

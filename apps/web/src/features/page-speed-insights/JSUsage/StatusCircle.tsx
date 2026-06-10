@@ -1,5 +1,5 @@
 "use client";
-"use no memo";
+
 import { TreeMapNode } from "@/lib/schema";
 
 export function StatusCircle({ node }: { node: TreeMapNode }) {

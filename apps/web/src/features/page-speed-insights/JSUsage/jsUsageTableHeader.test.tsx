@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { createColumnHelper } from "@tanstack/react-table";
+import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
+import { useSimpleTable } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
 import { JSUsageTableHeader } from "@/features/page-speed-insights/JSUsage/jsUsageTableHeader";
 import type { TreeMapNode } from "@/lib/schema";
 
@@ -41,11 +41,9 @@ const columns = [
 ];
 
 function TableWithHeader() {
-  const table = useReactTable({
+  const table = useSimpleTable({
     data: [{ name: "https://a.com/x.js", resourceBytes: 1000 }],
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    filterFns: { booleanFilterFn: () => true },
+    columns: columns as never,
   });
   const headerGroup = table.getHeaderGroups()[0];
   return (
@@ -75,11 +73,9 @@ describe("JSUsageTableHeader", () => {
 
   it("applies self-end class when depth !== 0", () => {
     function HeaderWithDepth() {
-      const table = useReactTable({
+      const table = useSimpleTable({
         data: [{ name: "x", resourceBytes: 0 }],
-        columns,
-        getCoreRowModel: getCoreRowModel(),
-        filterFns: { booleanFilterFn: () => true },
+        columns: columns as never,
       });
       const headerGroup = table.getHeaderGroups()[0];
       return (

@@ -6,14 +6,14 @@ type MockCell = {
   column: { id: string; columnDef: { cell?: (ctx: unknown) => React.ReactNode } };
   getContext: () => unknown;
 };
-type MockRow = { id: string; getVisibleCells: () => MockCell[] };
+type MockRow = { id: string; getAllCells: () => MockCell[] };
 type MockTable = { getRowModel: () => { rows: MockRow[] } };
 
 vi.mock("@/components/ui/table", () => ({
   Table: ({ children }: { children: React.ReactNode }) => <table>{children}</table>,
 }));
 
-vi.mock("@/features/page-speed-insights/lh-categories/table/DataTableHeader", () => ({
+vi.mock("@/features/page-speed-insights/tanstack-table-v9/DataTableHeader", () => ({
   DataTableHeader: ({ table }: { table: { getHeaderGroups: () => unknown[] } }) => (
     <thead data-testid="table-header">
       {table.getHeaderGroups().map(() => (
@@ -25,11 +25,11 @@ vi.mock("@/features/page-speed-insights/lh-categories/table/DataTableHeader", ()
   ),
 }));
 
-vi.mock("@/features/page-speed-insights/lh-categories/table/DataTableBody", () => ({
+vi.mock("@/features/page-speed-insights/tanstack-table-v9/DataTableBody", () => ({
   DataTableBody: ({ table }: { table: MockTable }) => (
     <tbody data-testid="table-body">
       {table.getRowModel().rows.map((row: MockRow) => {
-        const cells = row.getVisibleCells();
+        const cells = row.getAllCells();
         return (
           <tr key={row.id}>
             {cells.map((cell: MockCell) => (

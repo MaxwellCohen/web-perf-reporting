@@ -1,7 +1,8 @@
 import React from "react";
 import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import { RenderBytesValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
-import { Row } from "@tanstack/react-table";
+import type { RowData } from "@tanstack/react-table-v9";
+import type { StockRow } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 
 type ValueLabelPair<T> = {
   value: T;
@@ -37,9 +38,8 @@ function ValueWithLabel({
 /**
  * Extracts value and label pairs from leaf rows for a given column
  */
-export function extractValueLabelPairs<T>(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  row: Row<any>,
+export function extractValueLabelPairs<T, TData extends RowData = RowData>(
+  row: StockRow<TData>,
   columnId: string,
   labelColumnId: string = "label",
 ): ValueLabelPair<T>[] {
@@ -47,7 +47,7 @@ export function extractValueLabelPairs<T>(
   return (
     leafRows
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((r: Row<any>) => {
+      .map((r) => {
         const label =
           (r.original as { label?: string }).label ?? (r.getValue(labelColumnId) as string);
         return {
@@ -64,16 +64,15 @@ export function extractValueLabelPairs<T>(
   );
 }
 
-function valueLabelUniquesOrNull<T>(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  row: Row<any>,
+function valueLabelUniquesOrNull<T, TData extends RowData = RowData>(
+  row: StockRow<TData>,
   columnId: string,
 ): {
   valueLabelPairs: ValueLabelPair<T>[];
   uniqueValues: T[];
   uniqueLabels: string[];
 } | null {
-  const valueLabelPairs = extractValueLabelPairs<T>(row, columnId);
+  const valueLabelPairs = extractValueLabelPairs<T, TData>(row, columnId);
   if (valueLabelPairs.length === 0) return null;
   return {
     valueLabelPairs,
@@ -116,7 +115,7 @@ function getAggregatedValueLabelContext<T>(
   info: any,
   columnId: string,
 ) {
-  const uniques = valueLabelUniquesOrNull<T>(info.row, columnId);
+  const uniques = valueLabelUniquesOrNull<T, RowData>(info.row as StockRow<RowData>, columnId);
   if (!uniques) return null;
   return uniques;
 }
@@ -317,7 +316,7 @@ export function createReportLabelAggregatedCell(labelColumnId: string = "label")
     const leafRows = row.getLeafRows();
     const values: string[] = leafRows
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((r: Row<any>) => r.getValue(labelColumnId))
+      .map((r: StockRow<RowData>) => r.getValue(labelColumnId))
       .filter((v: unknown): v is string => typeof v === "string");
 
     if (values.length === 0) return "N/A";
@@ -340,14 +339,14 @@ export function createReportLabelAggregatedCell(labelColumnId: string = "label")
 /**
  * Aggregated cell for boolean columns in multi-report grouped tables.
  */
-export function createBooleanAggregatedCell<TData>(
+export function createBooleanAggregatedCell<TData extends RowData>(
   columnId: string,
   renderBoolean: (value: boolean) => React.ReactNode,
 ) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, react/display-name
   return (info: any): React.ReactNode => {
-    const row = info.row as Row<TData>;
-    const uniques = valueLabelUniquesOrNull<boolean>(row, columnId);
+    const row = info.row as StockRow<TData>;
+    const uniques = valueLabelUniquesOrNull<boolean, TData>(row, columnId);
     if (!uniques) return "N/A";
 
     const { valueLabelPairs, uniqueValues, uniqueLabels } = uniques;
@@ -388,14 +387,16 @@ export function createBooleanAggregatedCell<TData>(
 /**
  * Aggregated cell that unions unique origin strings from leaf rows.
  */
-export function createOriginsArrayAggregatedCell<TData>(originsColumnId: string = "origins") {
+export function createOriginsArrayAggregatedCell<TData extends RowData>(
+  originsColumnId: string = "origins",
+) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, react/display-name
   return (info: any): React.ReactNode => {
-    const row = info.row as Row<TData>;
+    const row = info.row as StockRow<TData>;
     const leafRows = row.getLeafRows();
     const allOrigins: string[] = [];
 
-    leafRows.forEach((r: Row<TData>) => {
+    leafRows.forEach((r: StockRow<TData>) => {
       const origins = r.getValue(originsColumnId) as string[];
       if (Array.isArray(origins)) {
         allOrigins.push(...origins);

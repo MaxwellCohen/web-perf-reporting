@@ -9,7 +9,7 @@ vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", (
   RenderMSValue: ({ value }: { value: number }) => <span>{value} ms</span>,
 }));
 
-vi.mock("@/features/page-speed-insights/shared/tableConfigHelpers", () => ({
+vi.mock("@/features/page-speed-insights/tanstack-table-v9/useStandardTable", () => ({
   useStandardTable: () => ({
     getHeaderGroups: () => [],
     getRowModel: () => ({ rows: [] }),

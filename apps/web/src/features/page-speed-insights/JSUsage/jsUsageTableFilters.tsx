@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useCallback, useEffect, useId, useRef } from "react";
-import type { HeaderContext } from "@tanstack/react-table";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import type { StockColumnDef, StockHeaderContext } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import type { RowData } from "@tanstack/react-table-v9";
 import {
   RenderBytesValue,
   RenderMSValue,
-  RenderTableValue,
 } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
-import { Slider2 } from "@/components/ui/slider";
-import type { ColumnFiltersColumnDef } from "@tanstack/react-table";
-import type { TreeMapNode } from "@/lib/schema";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import type { TableColumnHeading, TreeMapNode } from "@/lib/schema";
 import type { ReactNode } from "react";
 
 export function useDebouncedCallback(callback: (...arg: any[]) => any, delay = 100) {
@@ -33,15 +34,20 @@ export function useDebouncedCallback(callback: (...arg: any[]) => any, delay = 1
     [delay],
   );
 
-  useEffect(() => {
-    return () => {
-      if (timerIdRef.current) {
-        clearTimeout(timerIdRef.current);
-      }
-    };
+  const cancel = useCallback(() => {
+    if (timerIdRef.current) {
+      clearTimeout(timerIdRef.current);
+      timerIdRef.current = null;
+    }
   }, []);
 
-  return debouncedCallback;
+  useEffect(() => {
+    return () => {
+      cancel();
+    };
+  }, [cancel]);
+
+  return Object.assign(debouncedCallback, { cancel });
 }
 
 const BYTES_KEYWORDS = ["size", "bytes"];
@@ -69,69 +75,169 @@ export function formatFilterValue(value: number, columnId: string, header?: stri
   return <span>{value.toLocaleString("en-US")}</span>;
 }
 
-export function RangeFilter<T>({ column }: Pick<HeaderContext<T, unknown>, "column">) {
+function getRangeInputConfig(columnId: string, header?: string, heading?: TableColumnHeading | null) {
+  if (heading?.valueType === "bytes" || BYTES_KEYWORDS.some((k) => `${columnId} ${header ?? ""}`.toLowerCase().includes(k))) {
+    return {
+      toInputValue: (value: number) => value / 1024,
+      fromInputValue: (value: number) => value * 1024,
+      suffix: "KB",
+      step: 0.01,
+    };
+  }
+
+  if (heading?.valueType === "ms" || MS_KEYWORDS.some((k) => `${columnId} ${header ?? ""}`.toLowerCase().includes(k))) {
+    return {
+      toInputValue: (value: number) => value,
+      fromInputValue: (value: number) => value,
+      suffix: "ms",
+      step: 0.01,
+    };
+  }
+
+  return {
+    toInputValue: (value: number) => value,
+    fromInputValue: (value: number) => value,
+    suffix: undefined,
+    step: "any" as const,
+  };
+}
+
+function clampRange(
+  min: number,
+  max: number,
+  minBound: number,
+  maxBound: number,
+): [number, number] {
+  const clampedMin = Math.max(minBound, Math.min(min, maxBound));
+  const clampedMax = Math.min(maxBound, Math.max(max, minBound));
+  return [Math.min(clampedMin, clampedMax), Math.max(clampedMin, clampedMax)];
+}
+
+type RangeFilterColumn = {
+  id: string;
+  getFacetedMinMaxValues: () => unknown;
+  getFilterValue: () => unknown;
+  getIsFiltered?: () => boolean;
+  setFilterValue: (value: [number, number] | undefined) => void;
+  columnDef: {
+    header?: unknown;
+    meta?: { heading?: { heading?: TableColumnHeading | null } };
+  };
+};
+
+export function RangeFilterInputs({ column }: { column: RangeFilterColumn }) {
   const id = useId();
   const [minValue, maxValue] = (column.getFacetedMinMaxValues() as [number, number]) ?? [0, 100];
   const [fMin, fMax] = (column.getFilterValue() as [number, number]) ?? [minValue, maxValue];
-  const updateFilter = useDebouncedCallback((value: [number, number]) => {
-    column.setFilterValue(value);
-  }, 300);
-
   const columnId = column.id;
   const header = typeof column.columnDef.header === "string" ? column.columnDef.header : undefined;
+  const heading = column.columnDef.meta?.heading?.heading ?? null;
+  const inputConfig = getRangeInputConfig(columnId, header, heading);
+  const inputMin = inputConfig.toInputValue(minValue);
+  const inputMax = inputConfig.toInputValue(maxValue);
+  const displayMin = inputConfig.toInputValue(fMin);
+  const displayMax = inputConfig.toInputValue(fMax);
+  const [localMin, setLocalMin] = useState<string | number>(() => displayMin);
+  const [localMax, setLocalMax] = useState<string | number>(() => displayMax);
+  const rangeRef = useRef({ min: fMin, max: fMax });
+  rangeRef.current = { min: fMin, max: fMax };
 
-  const hasHeadingMeta = !!column.columnDef.meta?.heading?.heading;
+  useEffect(() => {
+    setLocalMin(displayMin);
+    setLocalMax(displayMax);
+  }, [displayMin, displayMax]);
+
+  const updateFilter = useDebouncedCallback((nextMin: number, nextMax: number) => {
+    column.setFilterValue(clampRange(nextMin, nextMax, minValue, maxValue));
+  }, 300);
+
+  const handleMinChange = (value: string) => {
+    setLocalMin(value);
+    const parsed = Number(value);
+    if (Number.isNaN(parsed)) {
+      return;
+    }
+    updateFilter(inputConfig.fromInputValue(parsed), rangeRef.current.max);
+  };
+
+  const handleMaxChange = (value: string) => {
+    setLocalMax(value);
+    const parsed = Number(value);
+    if (Number.isNaN(parsed)) {
+      return;
+    }
+    updateFilter(rangeRef.current.min, inputConfig.fromInputValue(parsed));
+  };
+
+  const hasActiveFilter = column.getIsFiltered?.() ?? column.getFilterValue() !== undefined;
+
+  const handleReset = () => {
+    updateFilter.cancel();
+    column.setFilterValue(undefined);
+  };
 
   return (
-    <div className="box-border w-full min-w-0 max-w-full p-2">
-      <div className="relative w-full min-w-0 space-y-3">
-        <div className="flex min-w-0 items-center justify-between gap-2">
-          <span className="shrink-0 text-xs font-medium text-muted-foreground">Min</span>
-          <div className="min-w-0 truncate text-right text-sm font-semibold">
-            {hasHeadingMeta ? (
-              <RenderTableValue
-                value={fMin}
-                device="header"
-                heading={column.columnDef.meta?.heading?.heading || null}
-              />
-            ) : (
-              formatFilterValue(fMin, columnId, header)
-            )}
-          </div>
-        </div>
-
-        <div className="min-w-0 px-0.5">
-          <Slider2
-            id={`range-slider_${id}`}
-            defaultValue={[minValue, maxValue]}
-            value={[fMin, fMax]}
-            onValueChange={updateFilter}
-            min={minValue}
-            max={maxValue}
-            className="w-full"
+    <div className="flex w-full min-w-0 flex-col gap-3">
+      <div className="grid grid-cols-2 gap-3">
+        <div className="flex min-w-0 flex-col gap-1.5">
+          <Label htmlFor={`range-min_${id}`} className="text-xs text-muted-foreground">
+            Min{inputConfig.suffix ? ` (${inputConfig.suffix})` : ""}
+          </Label>
+          <Input
+            id={`range-min_${id}`}
+            type="number"
+            min={inputMin}
+            max={inputMax}
+            step={inputConfig.step}
+            value={localMin}
+            onChange={(event) => handleMinChange(event.target.value)}
+            className="h-8"
           />
         </div>
-
-        <div className="flex min-w-0 items-center justify-between gap-2">
-          <span className="shrink-0 text-xs font-medium text-muted-foreground">Max</span>
-          <div className="min-w-0 truncate text-right text-sm font-semibold">
-            {hasHeadingMeta ? (
-              <RenderTableValue
-                value={fMax}
-                device="header"
-                heading={column.columnDef.meta?.heading?.heading || null}
-              />
-            ) : (
-              formatFilterValue(fMax, columnId, header)
-            )}
-          </div>
+        <div className="flex min-w-0 flex-col gap-1.5">
+          <Label htmlFor={`range-max_${id}`} className="text-xs text-muted-foreground">
+            Max{inputConfig.suffix ? ` (${inputConfig.suffix})` : ""}
+          </Label>
+          <Input
+            id={`range-max_${id}`}
+            type="number"
+            min={inputMin}
+            max={inputMax}
+            step={inputConfig.step}
+            value={localMax}
+            onChange={(event) => handleMaxChange(event.target.value)}
+            className="h-8"
+          />
         </div>
+      </div>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs text-muted-foreground">
+          Available: {formatFilterValue(minValue, columnId, header)} –{" "}
+          {formatFilterValue(maxValue, columnId, header)}
+        </p>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-7 shrink-0 px-2 text-xs"
+          onClick={handleReset}
+          disabled={!hasActiveFilter}
+          aria-label="Reset range filter"
+        >
+          Reset
+        </Button>
       </div>
     </div>
   );
 }
 
-export const numericRangeFilter: ColumnFiltersColumnDef<TreeMapNode>["filterFn"] = (
+export function RangeFilter<TData extends RowData>({
+  column,
+}: Pick<StockHeaderContext<TData, unknown>, "column">) {
+  return <RangeFilterInputs column={column as RangeFilterColumn} />;
+}
+
+export const numericRangeFilter: StockColumnDef<TreeMapNode>["filterFn"] = (
   row,
   columnId,
   filterValue,

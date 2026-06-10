@@ -1,26 +1,19 @@
 import { fireEvent, render } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
-import {
-  createColumnHelper,
-  getCoreRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-  type Table,
-} from "@tanstack/react-table";
+import type { StockTable } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import { useTable, type RowData } from "@tanstack/react-table-v9";
+import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
+import { stockFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
+import { flatTableRowModels } from "@/features/page-speed-insights/tanstack-table-v9/rowModels";
+import { standardTableRowModels } from "@/features/page-speed-insights/tanstack-table-v9/standardRowModels";
 import {
   ColumnSelector,
   DropdownFilter,
   PageSizeSelector,
   PaginationCard,
-  PaginationControlsManuelPageSelection,
   TableControls,
 } from "@/features/page-speed-insights/JSUsage/TableControls";
-import { standardFilterFns } from "@/features/page-speed-insights/shared/filterFns";
-
 vi.mock("lucide-react", () => ({
   ChevronDown: () => <span data-testid="chevron" />,
 }));
@@ -90,7 +83,23 @@ vi.mock("@/components/ui/select", () => ({
 type Row = { id: number; name: string };
 const columnHelper = createColumnHelper<Row>();
 
-let latestControlsTable: Table<Row> | undefined;
+function useControlsTestTable<T extends RowData>(
+  data: T[],
+  columns: unknown[],
+  options?: { paginated?: boolean; pageSize?: number },
+) {
+  return useTable({
+    features: stockFeatures,
+    rowModels: options?.paginated ? standardTableRowModels : flatTableRowModels,
+    data,
+    columns: columns as never,
+    ...(options?.paginated && {
+      initialState: { pagination: { pageIndex: 0, pageSize: options.pageSize ?? 5 } },
+    }),
+  });
+}
+
+let latestControlsTable: StockTable<Row> | undefined;
 
 function TableWithControls({ minimal = false }: { minimal?: boolean }) {
   const data = Array.from({ length: minimal ? 2 : 6 }, (_, i) => ({
@@ -101,21 +110,8 @@ function TableWithControls({ minimal = false }: { minimal?: boolean }) {
     columnHelper.accessor("id", { id: "id", enableHiding: false }),
     columnHelper.accessor("name", { id: "name", enableHiding: true }),
   ];
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    filterFns: standardFilterFns,
-    ...(minimal
-      ? {}
-      : {
-          getPaginationRowModel: getPaginationRowModel(),
-          getSortedRowModel: getSortedRowModel(),
-          getFilteredRowModel: getFilteredRowModel(),
-          initialState: { pagination: { pageSize: 5 } },
-        }),
-  });
-  latestControlsTable = table;
+  const table = useControlsTestTable(data, columns, minimal ? undefined : { paginated: true });
+  latestControlsTable = table as unknown as StockTable<Row>;
   return <TableControls table={table} />;
 }
 
@@ -161,12 +157,7 @@ function ColumnSelectorWrapper() {
     columnHelper.accessor("id", { id: "id" }),
     columnHelper.accessor("name", { id: "name", enableHiding: true }),
   ];
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    filterFns: standardFilterFns,
-  });
+  const table = useControlsTestTable(data, columns);
   return <ColumnSelector table={table} />;
 }
 
@@ -194,13 +185,7 @@ function PageSizeSelectorWrapper() {
     columnHelper.accessor("id", { id: "id" }),
     columnHelper.accessor("name", { id: "name" }),
   ];
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    filterFns: standardFilterFns,
-  });
+  const table = useControlsTestTable(data, columns, { paginated: true });
   return <PageSizeSelector table={table} />;
 }
 
@@ -221,13 +206,7 @@ describe("PageSizeSelector", () => {
         columnHelper.accessor("id", { id: "id" }),
         columnHelper.accessor("name", { id: "name" }),
       ];
-      const table = useReactTable({
-        data,
-        columns,
-        getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        filterFns: standardFilterFns,
-      });
+      const table = useControlsTestTable(data, columns, { paginated: true });
       return <PageSizeSelector table={table} />;
     }
     const { container } = render(<PageSizeWithFewRows />);
@@ -241,13 +220,7 @@ function PaginationCardSinglePage() {
     columnHelper.accessor("id", { id: "id" }),
     columnHelper.accessor("name", { id: "name" }),
   ];
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    filterFns: standardFilterFns,
-  });
+  const table = useControlsTestTable(data, columns, { paginated: true });
   return <PaginationCard table={table} />;
 }
 
@@ -257,14 +230,7 @@ function PaginationCardMultiPage() {
     columnHelper.accessor("id", { id: "id" }),
     columnHelper.accessor("name", { id: "name" }),
   ];
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    filterFns: standardFilterFns,
-    initialState: { pagination: { pageSize: 5 } },
-  });
+  const table = useControlsTestTable(data, columns, { paginated: true });
   return <PaginationCard table={table} showManualControls />;
 }
 
@@ -300,18 +266,11 @@ function PaginationControlsManualWrapper() {
     columnHelper.accessor("id", { id: "id" }),
     columnHelper.accessor("name", { id: "name" }),
   ];
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    filterFns: standardFilterFns,
-    initialState: { pagination: { pageIndex: 0, pageSize: 5 } },
-  });
-  return <PaginationControlsManuelPageSelection table={table} />;
+  const table = useControlsTestTable(data, columns, { paginated: true });
+  return <PaginationCard table={table} showManualControls />;
 }
 
-describe("PaginationControlsManuelPageSelection", () => {
+describe("PaginationCard manual page selection", () => {
   it("renders page index input", () => {
     const { container } = render(<PaginationControlsManualWrapper />);
     expect(container.textContent).toMatch(/Go to page/);
@@ -332,14 +291,7 @@ function DropdownFilterMissingColumn() {
     columnHelper.accessor("id", { id: "id" }),
     columnHelper.accessor("name", { id: "name" }),
   ];
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    filterFns: standardFilterFns,
-  });
+  const table = useControlsTestTable(data, columns);
   return <DropdownFilter table={table} columnId="missing" />;
 }
 
@@ -352,14 +304,7 @@ function DropdownFilterWithColumn() {
     columnHelper.accessor("id", { id: "id" }),
     columnHelper.accessor("name", { id: "name", header: "Name" }),
   ];
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    filterFns: standardFilterFns,
-  });
+  const table = useControlsTestTable(data, columns);
   return <DropdownFilter table={table} columnId="name" />;
 }
 

@@ -1,17 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useId, useMemo } from "react";
-import type { HeaderContext } from "@tanstack/react-table";
+import type { RowData } from "@tanstack/react-table-v9";
+import type { StockHeaderContext } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { Label } from "@/components/ui/label";
 import { DebouncedInput } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 const MAX_DATALIST_OPTIONS = 5000;
 
-export function StringFilterHeader<T>({
+export function StringFilterHeader<TData extends RowData>({
   column,
   name,
-}: Partial<Pick<HeaderContext<T, unknown>, "column">> & { name: string }) {
+}: Partial<Pick<StockHeaderContext<TData, unknown>, "column">> & { name: string }) {
   const id = useId();
   const uniqueValues = column?.getFacetedUniqueValues();
   const sortedUniqueValues = useMemo(

@@ -1,45 +1,30 @@
 "use client";
+import type { StockCellContext, StockColumnDef, StockRow, StockCell } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { AuditDetailTable, ItemValue, ItemValueType, TableColumnHeading } from "@/lib/schema";
-import {
-  CSSProperties,
-  Fragment,
-  useMemo,
-  useState,
-  startTransition,
-  type ReactElement,
-} from "react";
-import {
-  ColumnDef,
-  useReactTable,
-  getCoreRowModel,
-  getSortedRowModel,
-  SortingState,
-  flexRender,
-  getFilteredRowModel,
-  getGroupedRowModel,
-  getExpandedRowModel,
-  getFacetedMinMaxValues,
-  VisibilityState,
-  CellContext,
-  RowData,
-  Row,
-  createColumnHelper,
-  Cell,
-} from "@tanstack/react-table";
+import { CSSProperties, Fragment, useMemo, type ReactElement } from "react";
+import type { TableFeatures } from "@tanstack/table-core";
+import { SortingState, flexRender, ColumnVisibilityState, RowData, useTable, type CreateRowModels, type DisplayColumnDef, type StockFeatures } from "@tanstack/react-table-v9";
+import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
+import { stockFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
+import { standardTableRowModels } from "@/features/page-speed-insights/tanstack-table-v9/standardRowModels";
 import { RenderTableValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import clsx from "clsx";
 import { cn } from "@/lib/utils";
 import { ExpandAll, ExpandRow } from "@/features/page-speed-insights/JSUsage/jsUsageTableParts";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
-import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
-import { booleanFilterFn } from "@/features/page-speed-insights/lh-categories/table/DataTableNoGrouping";
+import { DataTableHeader } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
+
 import { AccordionContent, AccordionItem } from "@/components/ui/accordion";
 import { AccordionSectionTitleTrigger } from "@/components/ui/accordion-section-title-trigger";
-import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
+import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/DataTableBody";
 import { DetailTableWith1ReportAndNoSubitem } from "@/features/page-speed-insights/lh-categories/table/DetailTableWith1ReportAndNoSubitem";
 import { DetailTableSeparatePerReport } from "@/features/page-speed-insights/lh-categories/table/DetailTableSeparatePerReport";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { useStandardTable } from "@/features/page-speed-insights/shared/tableConfigHelpers";
+import { useStandardTable, type StandardColumnDef } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import {
+  getColumnVisibilityState,
+  getGroupingState,
+} from "@/features/page-speed-insights/tanstack-table-v9/tableStateHelpers";
 import { tanstackTableCellDataProps } from "@/features/page-speed-insights/shared/tanstackTableCellDataProps";
 import { shouldShowSeparateTablesPerReport } from "@/features/page-speed-insights/auditTableConfig";
 import {
@@ -72,9 +57,9 @@ type ColumnHeadingConfig = {
 
 type DeviceValuePair = [string, number];
 
-declare module "@tanstack/react-table" {
+declare module "@tanstack/table-core" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface ColumnMeta<TData extends RowData, TValue> {
+  interface ColumnMeta<TFeatures extends TableFeatures, TData extends RowData, TValue> {
     heading?: { heading: TableColumnHeading; _userLabel?: string };
     defaultVisibility?: boolean;
     rowType?: "main" | "sub";
@@ -85,7 +70,7 @@ declare module "@tanstack/react-table" {
 /**
  * Gets the user label from column meta or row original data
  */
-const getUserLabel = (info: CellContext<DetailTableDataRow, unknown>): string => {
+const getUserLabel = (info: StockCellContext<DetailTableDataRow, unknown>): string => {
   const metaLabel = info.column.columnDef.meta?.heading?._userLabel;
   if (metaLabel) {
     return metaLabel;
@@ -161,7 +146,7 @@ const renderDeviceValuePairs = (
  * Renders sub-rows values when array has less than 2 items
  */
 const renderSubRowValues = (
-  info: CellContext<DetailTableDataRow, unknown>,
+  info: StockCellContext<DetailTableDataRow, unknown>,
   key: string,
   heading: TableColumnHeading | undefined,
 ): (ReactElement | null)[] => {
@@ -188,7 +173,7 @@ const renderSubRowValues = (
 /**
  * Main cell renderer for table cells
  */
-const cell = (info: CellContext<DetailTableDataRow, unknown>) => {
+const cell = (info: StockCellContext<DetailTableDataRow, unknown>) => {
   const value = info.getValue();
   const key = info.column.id;
   const heading = info.column.columnDef.meta?.heading?.heading;
@@ -230,7 +215,7 @@ const cell = (info: CellContext<DetailTableDataRow, unknown>) => {
 /**
  * Simple cell renderer that doesn't handle complex array cases
  */
-export const simpleTableCell = (info: CellContext<DetailTableDataRow, unknown>) => {
+export const simpleTableCell = (info: StockCellContext<DetailTableDataRow, unknown>) => {
   const value = info.getValue();
   const heading = info.column.columnDef.meta?.heading?.heading;
   const _userLabel = getUserLabel(info);
@@ -292,7 +277,7 @@ const setSizeSetting = (type: ItemValueType | string) => {
 /**
  * Custom aggregation function that sums values by device/user label
  */
-const customSum = (aggregationKey: string, rows: Row<DetailTableDataRow>[]): DeviceValuePair[] => {
+const customSum = (aggregationKey: string, rows: StockRow<DetailTableDataRow>[]): DeviceValuePair[] => {
   const aggregationObj = rows.reduce((acc: Record<string, number>, r) => {
     let v = r.getValue(aggregationKey);
 
@@ -361,7 +346,7 @@ const getFilterFn = (
 export const makeColumnDef = (
   h: ColumnHeadingConfig,
   settings: { showUserLabel: boolean },
-): ColumnDef<DetailTableDataRow, unknown>[] => {
+): StockColumnDef<DetailTableDataRow, unknown>[] => {
   const key = h.heading.key;
   const _userLabel = h._userLabel;
   const subItemsHeadingKey = h.heading.subItemsHeading?.key;
@@ -369,7 +354,7 @@ export const makeColumnDef = (
     ...h.heading,
     ...(h.heading.subItemsHeading || {}),
   };
-  const columnDefs: ColumnDef<DetailTableDataRow, unknown>[] = [];
+  const columnDefs: StockColumnDef<DetailTableDataRow, unknown>[] = [];
 
   if (!key) {
     return columnDefs;
@@ -458,7 +443,7 @@ export const makeColumnDef = (
 /**
  * Cell renderer for device/user label column
  */
-function DeviceCell(info: CellContext<DetailTableDataRow, unknown>) {
+function DeviceCell(info: StockCellContext<DetailTableDataRow, unknown>) {
   const value = info.getValue();
 
   if (Array.isArray(value)) {
@@ -530,7 +515,9 @@ function DetailTableWithSubitems({ rows, title }: { rows: DetailTableItem[]; tit
   // Create columns
   const columns = useMemo(() => {
     const sColumnHelper = createColumnHelper<DetailTableDataRow>();
-    const columnDef: ColumnDef<DetailTableDataRow, unknown>[] = [getExpandingControlColumn()];
+    const columnDef: StockColumnDef<DetailTableDataRow, unknown>[] = [
+      getExpandingControlColumn() as unknown as StockColumnDef<DetailTableDataRow, unknown>,
+    ];
 
     const firstRow = rows[0];
     if (!firstRow) {
@@ -620,7 +607,7 @@ function DetailTableWithSubitems({ rows, title }: { rows: DetailTableItem[]; tit
 
   const table = useStandardTable({
     data,
-    columns,
+    columns: columns as StandardColumnDef<DetailTableDataRow>[],
     grouping: defaultGrouping,
     enablePagination: false,
   });
@@ -669,9 +656,14 @@ const extractAllHeadings = (rows: DetailTableItem[]): ColumnHeadingConfig[] => {
 const createColumnsFromHeadings = (
   allHeadings: ColumnHeadingConfig[],
   showUserLabel: boolean,
-): ColumnDef<DetailTableDataRow, unknown>[] => {
-  const columnMap: Record<string, ColumnDef<DetailTableDataRow, unknown>> = {
-    expander: columnHelper.display(getExpandingControlColumn()),
+): StockColumnDef<DetailTableDataRow, unknown>[] => {
+  const columnMap: Record<string, StockColumnDef<DetailTableDataRow, unknown>> = {
+    expander: columnHelper.display(
+      getExpandingControlColumn() as unknown as DisplayColumnDef<
+        StockFeatures,
+        DetailTableDataRow
+      >,
+    ),
   };
 
   // Add base columns (without user label)
@@ -704,13 +696,13 @@ const createColumnsFromHeadings = (
       enableSorting: true,
       aggregationFn: "unique",
       size: DEVICE_COLUMN_SIZE,
-      cell: DeviceCell,
-      aggregatedCell: DeviceCell,
+      cell: DeviceCell as never,
+      aggregatedCell: DeviceCell as never,
       meta: {
         defaultVisibility: false,
       },
     });
-    columnMap.device = deviceColumn as ColumnDef<DetailTableDataRow, unknown>;
+    columnMap.device = deviceColumn as StockColumnDef<DetailTableDataRow, unknown>;
   }
 
   return Object.values(columnMap).filter(Boolean);
@@ -751,7 +743,7 @@ const calculateDefaultSorting = (
  * Calculates default grouping from columns
  */
 const calculateDefaultGrouping = (
-  columns: ColumnDef<DetailTableDataRow, unknown>[],
+  columns: StockColumnDef<DetailTableDataRow, unknown>[],
   showUserLabel: boolean,
 ): string[] => {
   const groupingCandidates = columns
@@ -782,9 +774,9 @@ const calculateDefaultGrouping = (
  * Calculates default column visibility
  */
 const calculateDefaultColumnVisibility = (
-  columns: ColumnDef<DetailTableDataRow, unknown>[],
-): VisibilityState => {
-  return columns.reduce((acc: VisibilityState, col) => {
+  columns: StockColumnDef<DetailTableDataRow, unknown>[],
+): ColumnVisibilityState => {
+  return columns.reduce((acc: ColumnVisibilityState, col) => {
     const id = col.id;
     if (id) {
       acc[id] = !!col.meta?.defaultVisibility;
@@ -797,8 +789,8 @@ const calculateDefaultColumnVisibility = (
  * Renders a table cell based on its state
  */
 const renderTableCell = (
-  cell: Cell<DetailTableDataRow, unknown>,
-  row: Row<DetailTableDataRow>,
+  cell: StockCell<DetailTableDataRow, unknown>,
+  row: StockRow<DetailTableDataRow>,
   groupsList: string[],
 ): ReactElement | null => {
   let cellEl: React.ReactNode = null;
@@ -877,36 +869,9 @@ function DetailTableFull({ rows }: { rows: DetailTableItem[]; title: string }) {
     [columns],
   );
 
-  // Use standard table hook with custom configuration
-  const [sorting, setSorting] = useState<SortingState>(sortbyDefault);
-  const [grouping, setGrouping] = useState<string[]>(defaultGrouping);
-  const [columnVisibility, setColumnVisibility] =
-    useState<VisibilityState>(defaultColumnVisibility);
-
-  // Wrap state updates in startTransition for smooth animations
-  const handleSortingChange = (updater: SortingState | ((old: SortingState) => SortingState)) => {
-    startTransition(() => {
-      setSorting(updater);
-    });
-  };
-
-  const handleGroupingChange = (updater: string[] | ((old: string[]) => string[])) => {
-    startTransition(() => {
-      setGrouping(updater);
-    });
-  };
-
-  const handleColumnVisibilityChange = (
-    updater: VisibilityState | ((old: VisibilityState) => VisibilityState),
-  ) => {
-    startTransition(() => {
-      setColumnVisibility(updater);
-    });
-  };
-
   // Helper function to extract the actual value from a leaf row
   // Leaf rows are not aggregated, so getValue should return the actual value
-  const getOriginalValue = (leafRow: Row<DetailTableDataRow>, columnId: string): unknown => {
+  const getOriginalValue = (leafRow: StockRow<DetailTableDataRow>, columnId: string): unknown => {
     if (!columnId || columnId === "expander" || columnId === "device") {
       return undefined;
     }
@@ -922,13 +887,18 @@ function DetailTableFull({ rows }: { rows: DetailTableItem[]; title: string }) {
   // Create a memoized function to check if rows can expand
   // This checks if leaf rows have different values
   const getRowCanExpandFn = useMemo(() => {
-    return (row: Row<DetailTableDataRow>) => {
+    return (row: StockRow<DetailTableDataRow>) => {
       const leafRows = row.getLeafRows();
 
       // If there's only one or zero leaf rows, no expansion needed
       if (leafRows.length <= 1) {
         return false;
       }
+
+      const columnVisibility = {
+        ...defaultColumnVisibility,
+        ...getColumnVisibilityState(row.table),
+      };
 
       // Get all visible columns (excluding the expander and device columns)
       const visibleColumns = columns.filter((col) => {
@@ -998,34 +968,25 @@ function DetailTableFull({ rows }: { rows: DetailTableItem[]; title: string }) {
       // All columns have the same values across all leaf rows
       return false;
     };
-  }, [columns, columnVisibility]);
+  }, [columns, defaultColumnVisibility]);
 
-  const table = useReactTable({
+  const table = useTable<StockFeatures, DetailTableDataRow>({
+    features: stockFeatures,
+    rowModels: standardTableRowModels as unknown as CreateRowModels<StockFeatures, DetailTableDataRow>,
     columns,
     data,
-    getCoreRowModel: getCoreRowModel(),
-    onSortingChange: handleSortingChange,
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getFacetedMinMaxValues: getFacetedMinMaxValues(),
-    onGroupingChange: handleGroupingChange,
-    getGroupedRowModel: getGroupedRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
     getRowCanExpand: getRowCanExpandFn,
-    onColumnVisibilityChange: handleColumnVisibilityChange,
     columnResizeMode: "onChange",
     manualPagination: true,
     enableSorting: true,
     enableColumnFilters: true,
     enableColumnPinning: true,
-    filterFns: {
-      booleanFilterFn,
-    },
-    state: {
-      sorting,
-      grouping,
-      columnVisibility,
+    initialState: {
+      sorting: sortbyDefault,
+      grouping: defaultGrouping,
+      columnVisibility: defaultColumnVisibility,
       columnPinning: {
+        right: [],
         left: ["expander"],
       },
     },
@@ -1039,7 +1000,7 @@ function DetailTableFull({ rows }: { rows: DetailTableItem[]; title: string }) {
           {table
             .getRowModel()
             .rows.map((row) => {
-              const groupsList = table.getState().grouping;
+              const groupsList = getGroupingState(table);
               const parent = row.getParentRow();
               if (parent && !parent.getCanExpand()) {
                 return null;

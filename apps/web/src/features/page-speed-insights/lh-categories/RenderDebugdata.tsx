@@ -1,3 +1,4 @@
+import type { StockCell, StockColumnDef, StockRow } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import {
   Table,
   TableBody,
@@ -11,15 +12,16 @@ import { renderBoolean } from "@/features/page-speed-insights/lh-categories/rend
 import { camelCaseToSentenceCase } from "@/features/page-speed-insights/lh-categories/camelCaseToSentenceCase";
 import { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataItem";
 import { useMemo } from "react";
-import type { Cell, Row } from "@tanstack/react-table";
 import {
-  createColumnHelper,
+  aggregationFns,
+  createExpandedRowModel,
+  createGroupedRowModel,
   flexRender,
-  getCoreRowModel,
-  getExpandedRowModel,
-  getGroupedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
+  useTable,
+  type StockFeatures,
+} from "@tanstack/react-table-v9";
+import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
+import { stockFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 import {
   RenderBytesValue,
   RenderCountNumber,
@@ -44,8 +46,8 @@ function DebugDataTableCell({
   row,
   rowSpan,
 }: {
-  cell: Cell<DebugDataTableItem, unknown>;
-  row: Row<DebugDataTableItem>;
+  cell: StockCell<DebugDataTableItem, unknown>;
+  row: StockRow<DebugDataTableItem>;
   rowSpan?: number;
 }) {
   return (
@@ -58,7 +60,29 @@ function DebugDataTableCell({
   );
 }
 
+function EmptyDebugDataTable() {
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Item</TableHead>
+          <TableHead>Value</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody />
+    </Table>
+  );
+}
+
 export function RenderDebugData({ items }: { items: TableDataItem[] }) {
+  if (!items.length) {
+    return <EmptyDebugDataTable />;
+  }
+
+  return <RenderDebugDataTable items={items} />;
+}
+
+function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
   const data = useMemo(
     () =>
       items?.reduce((acc: Array<DebugDataTableItem>, i) => {
@@ -87,6 +111,7 @@ export function RenderDebugData({ items }: { items: TableDataItem[] }) {
         aggregationFn: "unique",
       }),
       columnHelper.accessor("value", {
+        id: "value",
         header: "Value",
         aggregationFn: "unique", // unique values for each column
         cell: (props) => {
@@ -96,36 +121,26 @@ export function RenderDebugData({ items }: { items: TableDataItem[] }) {
         },
       }),
       columnHelper.accessor("label", {
+        id: "label",
         enableGrouping: true,
       }),
     ],
     [],
   );
-  const table = useReactTable<DebugDataTableItem>({
-    // core items
-    data, // in the form of an  array
-
-    columns, // column definitions
-    getCoreRowModel: getCoreRowModel(), // basic layout
-
-    // grouping
-    manualPagination: true, // prevents ssr issues with grouping in Next js
-
-    getGroupedRowModel: getGroupedRowModel(), // enable grouping
-    getExpandedRowModel: getExpandedRowModel(),
-
-    // column pinning
-    enableColumnPinning: true,
-    filterFns: {
-      booleanFilterFn: (row, columnId, filterValue) => {
-        const rowValue = row.getValue(columnId);
-        return rowValue === filterValue;
-      },
+  const table = useTable<StockFeatures, DebugDataTableItem>({
+    features: stockFeatures,
+    rowModels: {
+      groupedRowModel: createGroupedRowModel(aggregationFns),
+      expandedRowModel: createExpandedRowModel(),
     },
-    state: {
-      // expanded: true,
+    data,
+    columns: columns as StockColumnDef<DebugDataTableItem>[],
+    manualPagination: true,
+    enableColumnPinning: true,
+    initialState: {
       grouping: ["key"],
       columnPinning: {
+        right: [],
         left: ["key", "value", "label"],
       },
     },

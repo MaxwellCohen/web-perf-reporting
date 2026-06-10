@@ -1,28 +1,17 @@
+import type { StockColumnDef, StockRow } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { PageSpeedInsights } from "@/lib/schema";
-import {
-  flexRender,
-  getCoreRowModel,
-  getExpandedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  getGroupedRowModel,
-  Row,
-  useReactTable,
-} from "@tanstack/react-table";
-import { Fragment, useMemo, useState } from "react";
+import { flexRender, useTable, type CreateRowModels, type StockFeatures } from "@tanstack/react-table-v9";
+import { Fragment, useMemo } from "react";
 import clsx from "clsx";
-import { AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { AccordionContent } from "@radix-ui/react-accordion";
+import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { AuditDetailsSummary } from "@/features/page-speed-insights/lh-categories/AuditDetailsSummary";
 import { RenderMetricSavings } from "@/features/page-speed-insights/lh-categories/RenderMetricSavings";
 import { RenderDetails } from "@/features/page-speed-insights/lh-categories/RenderDetails";
 import { RenderJSONDetails } from "@/features/page-speed-insights/RenderJSONDetails";
 import { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataItem";
 import { LH_AUDIT_TABLE_COLUMNS } from "@/features/page-speed-insights/tsTable/lhAuditTableColumns";
-import {
-  arrIncludesSomeFilter,
-  booleanFilterFn,
-} from "@/features/page-speed-insights/shared/filterFns";
+import { stockFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
+import { lhTableRowModels } from "@/features/page-speed-insights/tsTable/lhTableRowModels";
 
 export function useLHTable(items: { item: PageSpeedInsights; label: string }[]) {
   const tableDataArr = useMemo(
@@ -50,40 +39,25 @@ export function useLHTable(items: { item: PageSpeedInsights; label: string }[]) 
       ).filter((v) => v.auditRef.group !== "metrics"),
     [items],
   );
-  const [grouping, setGrouping] = useState(["category_title", "id"]);
-  return useReactTable({
+  return useTable({
+    features: stockFeatures,
+    rowModels: lhTableRowModels as unknown as CreateRowModels<StockFeatures, TableDataItem>,
     data: tableDataArr,
-    columns: LH_AUDIT_TABLE_COLUMNS,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onGroupingChange: setGrouping,
-    getGroupedRowModel: getGroupedRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
+    columns: LH_AUDIT_TABLE_COLUMNS as StockColumnDef<TableDataItem>[],
     manualPagination: true,
     manualExpanding: true,
     enableColumnFilters: true,
     enableColumnPinning: true,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- arrIncludesSome is not in EntitiesTable FilterFns augmentation
-    filterFns: {
-      booleanFilterFn,
-      arrIncludesSome: arrIncludesSomeFilter,
-    } as any,
-    state: {
-      grouping,
+    initialState: {
+      grouping: ["category_title", "id"],
     },
   });
 }
 
-export function CategoryRow({ row }: { row: Row<TableDataItem> }) {
-  "use no memo";
+export function CategoryRow({ row }: { row: StockRow<TableDataItem> }) {
   return (
     <AccordionItem value={row.id} key={row.id}>
-      <AccordionTrigger
-        className="flex flex-wrap"
-        disabled={!row.getCanExpand()}
-        onClick={row.getToggleExpandedHandler()}
-      >
+      <AccordionTrigger className="flex flex-wrap" disabled={!row.getCanExpand()}>
         {row
           .getAllCells()
           .filter((cell) => ["category_title", "category_score"].includes(cell.column.id))
@@ -96,15 +70,15 @@ export function CategoryRow({ row }: { row: Row<TableDataItem> }) {
           })}
       </AccordionTrigger>
       <AccordionContent>
-        {row.getIsExpanded()
-          ? row.subRows.map((subRow) => <AuditSummaryRow row={subRow} key={subRow.id} />)
-          : null}
+        {row.subRows.map((subRow) => (
+          <AuditSummaryRow row={subRow} key={subRow.id} />
+        ))}
       </AccordionContent>
     </AccordionItem>
   );
 }
 
-export function AuditSummaryRow({ row }: { row: Row<TableDataItem> }) {
+export function AuditSummaryRow({ row }: { row: StockRow<TableDataItem> }) {
   const auditData = row.subRows.map((sr) => sr.original.auditResult || {});
   const labels = row.subRows.map((sr) => sr.original._userLabel || "");
   return (
@@ -112,7 +86,7 @@ export function AuditSummaryRow({ row }: { row: Row<TableDataItem> }) {
       value={row.id}
       className={clsx("items-center gap-4 border border-x-4 border-gray-400 py-2")}
     >
-      <AccordionTrigger disabled={!row.getCanExpand()} onClick={row.getToggleExpandedHandler()}>
+      <AccordionTrigger disabled={!row.getCanExpand()}>
         <AuditDetailsSummary
           auditData={auditData}
           labels={labels}

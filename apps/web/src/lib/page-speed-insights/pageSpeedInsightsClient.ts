@@ -1,6 +1,6 @@
 import type { PageSpeedInsights } from "@/lib/schema";
 
-export type PageSpeedInsightsArray = (PageSpeedInsights | null | undefined)[];
+type PageSpeedInsightsArray = (PageSpeedInsights | null | undefined)[];
 
 /** Result of loading a saved report by `publicId` through the Next API route. */
 export type PageSpeedLoadResult =

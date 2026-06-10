@@ -1,12 +1,15 @@
 "use client";
 import { useMemo } from "react";
-import { createColumnHelper, ColumnDef } from "@tanstack/react-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table } from "@/components/ui/table";
 import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
-import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
-import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
-import { useStandardTable } from "@/features/page-speed-insights/shared/tableConfigHelpers";
+import { DataTableHeader } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
+import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/DataTableBody";
+import {
+  useStandardTable,
+  type StandardColumnDef,
+} from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import { createOptionalNumericCell } from "@/features/page-speed-insights/shared/tableColumnHelpers";
 import { useNetworkMetricSeries } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
 import type { NetworkMetricSeries } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsData";
@@ -151,20 +154,45 @@ function optionalMsCell(value: number | undefined) {
   return createOptionalNumericCell(RenderMSValue, value);
 }
 
+function TimelineCardTable({
+  data,
+  columns,
+}: {
+  data: TimelineRow[];
+  columns: StandardColumnDef<TimelineRow>[];
+}) {
+  const table = useStandardTable({ data, columns });
+
+  return (
+    <Card className="md:col-span-2 lg:col-span-3">
+      <CardHeader>
+        <CardTitle>Timeline of Observed Events</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="overflow-x-auto">
+          <Table className="w-full">
+            <DataTableHeader table={table} />
+            <DataTableBody table={table} />
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function TimelineCard() {
-  'use no memo'
   const series = useNetworkMetricSeries();
 
   const { data, columns } = useMemo((): {
     data: TimelineRow[];
-    columns: ColumnDef<TimelineRow, any>[];
+    columns: StandardColumnDef<TimelineRow>[];
   } => {
     const reportLabels = series.map((m) => m.label);
     const eventDataMap = buildEventDataMap(series);
     const rows = buildTimelineRows(eventDataMap, reportLabels);
 
-    const columnHelper = createColumnHelper<TimelineRow>();
-    const tableColumns: ColumnDef<TimelineRow, any>[] = [
+    const columnHelper = createStockColumnHelper<TimelineRow>();
+    const tableColumns: StandardColumnDef<TimelineRow>[] = [
       columnHelper.accessor("event", {
         id: "event",
         header: () => (
@@ -189,7 +217,7 @@ export function TimelineCard() {
           header: reportLabel || `Report ${index + 1}`,
           enableSorting: true,
           enableResizing: true,
-          sortingFn: (rowA, rowB, columnId) => {
+          sortFn: (rowA, rowB, columnId) => {
             const a = rowA.getValue(columnId) as number | undefined;
             const b = rowB.getValue(columnId) as number | undefined;
             return sortNumeric(a, b);
@@ -202,28 +230,9 @@ export function TimelineCard() {
     return { data: rows, columns: tableColumns };
   }, [series]);
 
-  const table = useStandardTable({
-    data,
-    columns,
-  });
-
   if (!series.length || data.length === 0) {
     return null;
   }
 
-  return (
-    <Card className="md:col-span-2 lg:col-span-3">
-      <CardHeader>
-        <CardTitle>Timeline of Observed Events</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto">
-          <Table className="w-full">
-            <DataTableHeader table={table} />
-            <DataTableBody table={table} />
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
-  );
+  return <TimelineCardTable data={data} columns={columns} />;
 }

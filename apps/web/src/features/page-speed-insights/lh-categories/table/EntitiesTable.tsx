@@ -1,8 +1,11 @@
 "use client";
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
 import { renderBoolean } from "@/features/page-speed-insights/lh-categories/renderBoolean";
-import { ColumnDef, createColumnHelper, FilterFn } from "@tanstack/react-table";
-import { useStandardTable } from "@/features/page-speed-insights/shared/tableConfigHelpers";
+import {
+  useStandardTable,
+  type StandardColumnDef,
+} from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
 import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 import { AccordionContent, AccordionItem } from "@/components/ui/accordion";
@@ -13,11 +16,6 @@ import {
   createStringAggregatedCell,
 } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
 
-declare module "@tanstack/react-table" {
-  interface FilterFns {
-    booleanFilterFn: FilterFn<unknown>;
-  }
-}
 
 type EntityTableRow = {
   label: string;
@@ -27,8 +25,8 @@ type EntityTableRow = {
   origins: string[];
 };
 
-const columnHelper = createColumnHelper<EntityTableRow>();
-const cols: ColumnDef<EntityTableRow, any>[] = [
+const columnHelper = createStockColumnHelper<EntityTableRow>();
+const cols: StandardColumnDef<EntityTableRow>[] = [
   columnHelper.accessor("name", {
     id: "name",
     header: "Name",
@@ -44,6 +42,7 @@ const cols: ColumnDef<EntityTableRow, any>[] = [
     header: "Is First Party",
     enableSorting: true,
     enableResizing: true,
+    // @ts-expect-error v9 custom filter key registered in useStandardTable filterFns
     filterFn: "booleanFilterFn",
     cell: (info) => renderBoolean(!!info.getValue()),
     aggregatedCell: createBooleanAggregatedCell("isFirstParty", renderBoolean),
@@ -53,6 +52,7 @@ const cols: ColumnDef<EntityTableRow, any>[] = [
     header: "Is Unrecognized",
     enableSorting: true,
     enableResizing: true,
+    // @ts-expect-error v9 custom filter key registered in useStandardTable filterFns
     filterFn: "booleanFilterFn",
     cell: (info) => renderBoolean(!!info.getValue()),
     aggregatedCell: createBooleanAggregatedCell("isUnrecognized", renderBoolean),
@@ -114,9 +114,8 @@ function EntitiesTableContent({
   columns,
 }: {
   data: EntityTableRow[];
-  columns: ColumnDef<EntityTableRow>[];
+  columns: StandardColumnDef<EntityTableRow>[];
 }) {
-  "use no memo";
   const table = useStandardTable({
     data,
     columns,

@@ -6,7 +6,7 @@ import {
   makeColumnDef,
   simpleTableCell,
 } from "@/features/page-speed-insights/lh-categories/table/RenderTable";
-import type { CellContext } from "@tanstack/react-table";
+import type { CellContext } from "@tanstack/react-table-v9";
 
 vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", () => ({
   RenderTableValue: ({ value }: { value: unknown }) => (
@@ -14,11 +14,11 @@ vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", (
   ),
 }));
 
-vi.mock("@/features/page-speed-insights/lh-categories/table/DataTableHeader", () => ({
+vi.mock("@/features/page-speed-insights/tanstack-table-v9/DataTableHeader", () => ({
   DataTableHeader: () => <thead data-testid="data-table-header" />,
 }));
 
-vi.mock("@/features/page-speed-insights/lh-categories/table/DataTableBody", () => ({
+vi.mock("@/features/page-speed-insights/tanstack-table-v9/DataTableBody", () => ({
   DataTableBody: () => <tbody data-testid="data-table-body" />,
 }));
 
@@ -94,7 +94,7 @@ describe("simpleTableCell", () => {
       getValue: () => "test",
       column: { columnDef: { meta: { heading: { heading: { valueType: "text" } } } } },
       row: { original: { _userLabel: "" } },
-    } as unknown as CellContext<any, unknown>;
+    } as never;
     const result = simpleTableCell(mockCell);
     expect(result).toBeTruthy();
   });

@@ -5,8 +5,6 @@ import {
   type PageSpeedLoadResult,
 } from "@/lib/page-speed-insights/pageSpeedInsightsClient";
 
-export type { PageSpeedLoadResult };
-
 export type PageSpeedInsightsQueryState =
   | { isLoading: true }
   | { isLoading: false; result: PageSpeedLoadResult };

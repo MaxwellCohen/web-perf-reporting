@@ -1,12 +1,16 @@
 "use client";
-"use no memo";
+
 import { Button } from "@/components/ui/button";
 import { ChevronRightIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { CellContext } from "@tanstack/react-table";
+import type { RowData } from "@tanstack/react-table-v9";
 import type { TreeMapNode } from "@/lib/schema";
 import { RenderBytesValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
-import type { Table as ReactTable } from "@tanstack/react-table";
+import type {
+  StockCellContext,
+  StockRow,
+  StockTable,
+} from "@/features/page-speed-insights/shared/tanstackStockTypes";
 
 function ExpandToggleButton({
   isExpanded,
@@ -48,28 +52,28 @@ function ExpandToggleButton({
   );
 }
 
-export function ExpandRow<T>({
+export function ExpandRow<TData extends RowData>({
   row,
   children,
-}: Pick<Partial<CellContext<T, unknown>>, "row"> & {
+}: Pick<Partial<StockCellContext<TData, unknown>>, "row"> & {
   children?: React.ReactNode;
 }) {
-  "use no memo";
   if (!row) {
     return <div className="h-9 w-9" />;
   }
 
-  const canExpand = row.getCanExpand();
+  const expandableRow = row as StockRow<TData>;
+  const canExpand = expandableRow.getCanExpand();
 
   if (!canExpand) {
     return <div className="h-9 w-9" />;
   }
-  const isExpanded = row.getIsExpanded();
+  const isExpanded = expandableRow.getIsExpanded();
 
   return (
     <ExpandToggleButton
       isExpanded={isExpanded}
-      onClick={row.getToggleExpandedHandler()}
+      onClick={expandableRow.getToggleExpandedHandler()}
       expandLabel="Expand row"
       collapseLabel="Collapse row"
       size={children ? "default" : "icon"}
@@ -80,7 +84,7 @@ export function ExpandRow<T>({
   );
 }
 
-export function RenderBytesCell(info: CellContext<TreeMapNode, unknown>) {
+export function RenderBytesCell(info: StockCellContext<TreeMapNode, unknown>) {
   const value = info.getValue();
 
   if (typeof value !== "number") {
@@ -89,7 +93,7 @@ export function RenderBytesCell(info: CellContext<TreeMapNode, unknown>) {
   return <RenderBytesValue value={value} className="w-full text-right" />;
 }
 
-export function ExpandAll<T>({ table }: { table: ReactTable<T> }) {
+export function ExpandAll<TData extends RowData>({ table }: { table: StockTable<TData> }) {
   return (
     <ExpandToggleButton
       isExpanded={table.getIsAllRowsExpanded()}

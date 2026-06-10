@@ -1,8 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { memo } from "react";
-import type { CellContext, HeaderContext } from "@tanstack/react-table";
-import { createColumnHelper } from "@tanstack/react-table";
+import type {
+  StockCellContext,
+  StockColumnDef,
+  StockHeaderContext,
+} from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import { Button } from "@/components/ui/button";
 import { ArrowUp, MinusIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -10,15 +14,16 @@ import { renderBoolean } from "@/features/page-speed-insights/lh-categories/rend
 import { StatusCircle } from "@/features/page-speed-insights/JSUsage/StatusCircle";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import type { TreeMapNode } from "@/lib/schema";
-import type { RowData } from "@tanstack/react-table";
+import type { TableFeatures } from "@tanstack/table-core";
+import type { RowData } from "@tanstack/react-table-v9";
 import { StringFilterHeader } from "./StringFilterHeader";
 import { RangeFilter, numericRangeFilter } from "./jsUsageTableFilters";
 import { ExpandRow, ExpandAll, RenderBytesCell } from "./jsUsageTableParts";
 import { getHostnameFromUrl } from "@/lib/urlDisplay";
 
-declare module "@tanstack/react-table" {
+declare module "@tanstack/table-core" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface ColumnMeta<TData extends RowData, TValue> {
+  interface ColumnMeta<TFeatures extends TableFeatures, TData extends RowData, TValue> {
     className?: string;
   }
 }
@@ -28,8 +33,10 @@ const getHostName = (row: TreeMapNode) => getHostnameFromUrl(row.name);
 const columnHelper = createColumnHelper<TreeMapNode>();
 
 export function makeSortingHeading(name: string, filterType?: "string" | "range") {
-  return memo(function SortingHeader({ column }: HeaderContext<TreeMapNode, unknown>) {
-    "use no memo";
+  return memo(function SortingHeader({
+    column,
+  }: Pick<StockHeaderContext<TreeMapNode, unknown>, "column">) {
+    
     return (
       <div className="flex h-full min-w-0 w-full flex-col justify-between">
         <div className="my-2">
@@ -62,15 +69,15 @@ export function makeSortingHeading(name: string, filterType?: "string" | "range"
 
 const expanderColumn = columnHelper.display({
   id: "expander",
-  header: ExpandAll,
-  cell: ExpandRow,
+  header: ExpandAll as never,
+  cell: ExpandRow as never,
   size: 40,
   meta: {
     className: "",
   },
 });
 
-const makeStatusColumn = (cell: (info: CellContext<TreeMapNode, unknown>) => React.JSX.Element) =>
+const makeStatusColumn = (cell: (info: StockCellContext<TreeMapNode, unknown>) => React.JSX.Element) =>
   columnHelper.display({
     id: "statusColumn",
     header: () => <></>,
@@ -90,7 +97,7 @@ const makeSortableStringColumn = (column: string) => {
       className: "overflow-scroll-x h-auto",
     },
     size: 700,
-    header: makeSortingHeading(toTitleCase(column), "string"),
+    header: makeSortingHeading(toTitleCase(column), "string") as StockColumnDef<TreeMapNode>["header"],
     aggregationFn: "unique",
     enableSorting: true,
     cell: (info) => {
@@ -129,10 +136,10 @@ const makeBytesColumn = (column: string, title: string, extra = {}) => {
   // @ts-expect-error: Im lazy to do full inference
   return columnHelper.accessor(column, {
     cell: RenderBytesCell,
-    sortingFn: "basic",
+    sortFn: "basic",
     enableSorting: true,
     sortUndefined: "last",
-    header: makeSortingHeading(title, "range"),
+    header: makeSortingHeading(title, "range") as StockColumnDef<TreeMapNode>["header"],
     enableHiding: true,
     filterFn: numericRangeFilter,
     aggregationFn: "sum",
@@ -156,8 +163,8 @@ export const columns = [
     enableGrouping: true,
     enableMultiSort: true,
     enableSorting: true,
-    sortingFn: "basic",
-    header: () => makeSortingHeading("Host"),
+    sortFn: "basic",
+    header: makeSortingHeading("Host") as never,
     meta: {
       className: "",
     },
@@ -187,7 +194,7 @@ export const columns = [
           </div>
         );
       },
-      sortingFn: "alphanumeric",
+      sortFn: "alphanumeric",
       sortUndefined: "last",
       meta: {
         className: "",
@@ -197,7 +204,7 @@ export const columns = [
       enableSorting: true,
       enableHiding: true,
       size: 140,
-      header: makeSortingHeading("Percent"),
+      header: makeSortingHeading("Percent") as never,
     },
   ),
 ];

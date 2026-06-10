@@ -1,4 +1,4 @@
-import { createColumnHelper } from "@tanstack/react-table";
+import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import { categorySortFn } from "@/features/page-speed-insights/tsTable/categorySortFn";
 import {
   LHCategoryScoreCell,
@@ -18,7 +18,7 @@ export const LH_AUDIT_TABLE_COLUMNS = [
     id: "category_title",
     header: "Category",
     enableGrouping: true,
-    sortingFn: categorySortFn,
+    sortFn: categorySortFn,
     cell: LHCategoryTitleCell,
   }),
   columnHelper.accessor((r) => [r._category.score, r._userLabel].join(":::"), {
@@ -39,7 +39,7 @@ export const LH_AUDIT_TABLE_COLUMNS = [
     enableGrouping: true,
     enableColumnFilter: true,
     filterFn: "arrIncludesSome",
-    sortingFn: "alphanumeric",
+    sortFn: "alphanumeric",
     header: "User Label",
   }),
   columnHelper.accessor("auditRef.id", {

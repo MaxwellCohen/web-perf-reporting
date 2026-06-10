@@ -3,7 +3,7 @@ import { NetworkOriginMsCard } from "@/features/page-speed-insights/network-metr
 import { useNetworkMetricSeries } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
 
 export function NetworkRTTCard() {
-  "use no memo";
+  
   const series = useNetworkMetricSeries();
   return (
     <NetworkOriginMsCard

@@ -1,8 +1,8 @@
 "use client";
-"use no memo";
-import { Table as TableType } from "@tanstack/react-table";
+
+import type { StockTable } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import type { RowData } from "@tanstack/react-table-v9";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 // import { Label } from '@/components/ui/label';s
 import {
   Select,
@@ -20,9 +20,17 @@ import {
 import { ChevronDown } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useMemo } from "react";
+import { getPaginationState } from "@/features/page-speed-insights/tanstack-table-v9/tableStateHelpers";
+import { PaginationCard } from "@/features/page-speed-insights/tanstack-table-v9/PaginationCard";
 
-export function TableControls<T>({ table }: { table: TableType<T> }) {
-  "use no memo";
+export { PaginationCard };
+
+export function TableControls<T extends RowData>({
+  table,
+}: {
+  table: StockTable<T>;
+}) {
+  
   // const id = useId();
   return (
     <div className="m-4 flex justify-between">
@@ -57,8 +65,12 @@ export function TableControls<T>({ table }: { table: TableType<T> }) {
   );
 }
 
-export function ColumnSelector<T>({ table }: { table: TableType<T> }) {
-  "use no memo";
+export function ColumnSelector<T extends RowData>({
+  table,
+}: {
+  table: StockTable<T>;
+}) {
+  
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -90,8 +102,14 @@ export function ColumnSelector<T>({ table }: { table: TableType<T> }) {
   );
 }
 
-export function DropdownFilter<T>({ table, columnId }: { table: TableType<T>; columnId: string }) {
-  "use no memo";
+export function DropdownFilter<T extends RowData>({
+  table,
+  columnId,
+}: {
+  table: StockTable<T>;
+  columnId: string;
+}) {
+  
   const col = table.getColumn(columnId);
   const sortedUniqueValues = useMemo(
     () =>
@@ -141,8 +159,12 @@ export function DropdownFilter<T>({ table, columnId }: { table: TableType<T>; co
   );
 }
 
-export function PageSizeSelector<T>({ table }: { table: TableType<T> }) {
-  "use no memo";
+export function PageSizeSelector<T extends RowData>({
+  table,
+}: {
+  table: StockTable<T>;
+}) {
+  
 
   const rowCount = table.getRowCount();
   return (
@@ -150,7 +172,7 @@ export function PageSizeSelector<T>({ table }: { table: TableType<T> }) {
       onValueChange={(e) => {
         table.setPageSize(Number(e) || 10);
       }}
-      defaultValue={`${table.getState().pagination.pageSize}`}
+      defaultValue={`${getPaginationState(table).pageSize}`}
     >
       <SelectTrigger className="w-45">
         <SelectValue placeholder="Page Size" />
@@ -166,71 +188,3 @@ export function PageSizeSelector<T>({ table }: { table: TableType<T> }) {
   );
 }
 
-export function PaginationCard<T>({
-  table,
-  showManualControls,
-}: {
-  table: TableType<T>;
-  showManualControls?: boolean;
-}) {
-  "use no memo";
-  const pageCount = table.getPageCount();
-  if (pageCount <= 1) {
-    return null;
-  }
-  return (
-    <Card className="flex flex-col flex-wrap items-center gap-2 p-2">
-      <div className="flex flex-wrap items-center gap-2">
-        <Button
-          variant="ghost"
-          onClick={() => table.firstPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          {"<<"}
-        </Button>
-        <Button
-          variant="ghost"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          {"<"}
-        </Button>
-        <Button variant="ghost" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-          {">"}
-        </Button>
-        <Button variant="ghost" onClick={() => table.lastPage()} disabled={!table.getCanNextPage()}>
-          {">>"}
-        </Button>
-      </div>
-      {showManualControls ? <PaginationControlsManuelPageSelection table={table} /> : null}
-    </Card>
-  );
-}
-
-export function PaginationControlsManuelPageSelection<T>({ table }: { table: TableType<T> }) {
-  "use no memo";
-  return (
-    <div className="inline-flex items-center gap-1">
-      <span className="flex items-center gap-1">
-        <div>Page</div>
-        <strong>
-          {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-        </strong>
-      </span>
-      <span className="flex items-center gap-1">
-        | Go to page:
-        <Input
-          type="number"
-          min="1"
-          max={table.getPageCount()}
-          defaultValue={table.getState().pagination.pageIndex + 1}
-          onChange={(e) => {
-            const page = e.target.value ? Number(e.target.value) - 1 : 0;
-            table.setPageIndex(page);
-          }}
-          className="w-16 rounded border p-1"
-        />
-      </span>
-    </div>
-  );
-}

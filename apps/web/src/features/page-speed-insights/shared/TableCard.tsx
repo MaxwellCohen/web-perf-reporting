@@ -2,32 +2,29 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { DataTableHeader } from "@/features/page-speed-insights/lh-categories/table/DataTableHeader";
-import { DataTableBody } from "@/features/page-speed-insights/lh-categories/table/DataTableBody";
-import { Table as TableType } from "@tanstack/react-table";
-import { PaginationCard } from "@/features/page-speed-insights/JSUsage/TableControls";
+import { DataTableHeader } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
+import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/DataTableBody";
+import type { ReactTable, RowData, StockFeatures, TableState } from "@tanstack/react-table-v9";
+import { PaginationCard } from "@/features/page-speed-insights/tanstack-table-v9/PaginationCard";
 
-type TableCardProps<T = unknown> = {
+type TableCardProps<TData extends RowData = RowData> = {
   title: string;
-  table: TableType<T>;
+  table: ReactTable<StockFeatures, TData, TableState<StockFeatures>>;
   showPagination?: boolean;
   className?: string;
-  // maxHeight?: string;
   pageSize?: number;
 };
 
 /**
  * A reusable card component for displaying tables
  */
-export function TableCard<T = unknown>({
+export function TableCard<TData extends RowData = RowData>({
   title,
   table,
   showPagination = false,
   className = "md:col-span-2 lg:col-span-3",
-  // maxHeight,
   pageSize = 10,
-}: TableCardProps<T>) {
-  "use no memo";
+}: TableCardProps<TData>) {
   const [showAllResults, setShowAllResults] = useState(false);
   const rowCount = table.getRowCount();
   const canShowAllResults = rowCount > pageSize;
