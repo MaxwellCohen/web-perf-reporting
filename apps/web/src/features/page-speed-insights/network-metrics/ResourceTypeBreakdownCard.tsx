@@ -1,11 +1,9 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table } from "@/components/ui/table";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { TableItem } from "@/lib/schema";
 import { useMemo } from "react";
-import { DataTableHeader } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
-import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/DataTableBody";
+import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 import {
   type StandardColumnDef,
 } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
@@ -71,10 +69,7 @@ function ResourceTypeTable({ label, data }: { label: string; data: ResourceTypeT
     <div>
       <h5 className="font-semibold text-sm mb-2 text-muted-foreground">{label}</h5>
       <div className="w-full overflow-x-auto">
-        <Table className="w-full" style={{ width: "100%" }}>
-          <DataTableHeader table={table} />
-          <DataTableBody table={table} />
-        </Table>
+        <StockDataTable table={table} className="w-full" style={{ width: "100%" }} />
       </div>
     </div>
   );

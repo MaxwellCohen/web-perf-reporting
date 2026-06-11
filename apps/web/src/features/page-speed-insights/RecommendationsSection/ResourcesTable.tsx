@@ -1,8 +1,6 @@
 "use client";
 import { ReactNode, useMemo } from "react";
-import { Table } from "@/components/ui/table";
-import { DataTableHeader } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
-import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/DataTableBody";
+import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 import {
   RenderBytesValue,
   RenderMSValue,
@@ -161,10 +159,7 @@ export function ResourcesTable({ items }: ResourcesTableProps) {
 
   return (
     <div className="w-full overflow-x-auto">
-      <Table className="w-full">
-        <DataTableHeader table={table} />
-        <DataTableBody table={table} />
-      </Table>
+      <StockDataTable table={table} className="w-full" />
     </div>
   );
 }

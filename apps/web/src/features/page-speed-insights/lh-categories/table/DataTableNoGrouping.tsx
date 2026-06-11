@@ -1,9 +1,7 @@
 "use client";
-import { Table } from "@/components/ui/table";
 import { AccordionContent, AccordionItem } from "@/components/ui/accordion";
 import { AccordionSectionTitleTrigger } from "@/components/ui/accordion-section-title-trigger";
-import { DataTableHeader } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
-import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/DataTableBody";
+import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import {
   useSimpleTable,
@@ -28,10 +26,7 @@ export function DataTableNoGrouping<T extends RowData>({
       <AccordionSectionTitleTrigger>{toTitleCase(title)}</AccordionSectionTitleTrigger>
       <AccordionContent>
         <div className="w-full overflow-x-auto">
-          <Table className="w-full" style={{ width: "100%" }}>
-            <DataTableHeader table={table} />
-            <DataTableBody table={table} />
-          </Table>
+          <StockDataTable table={table} className="w-full" style={{ width: "100%" }} />
         </div>
       </AccordionContent>
     </AccordionItem>

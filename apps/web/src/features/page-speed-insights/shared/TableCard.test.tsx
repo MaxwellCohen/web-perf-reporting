@@ -4,23 +4,13 @@ import { createStockColumnHelper as createColumnHelper } from "@/features/page-s
 import { useSimpleTable } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
 import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 
-vi.mock("@/features/page-speed-insights/tanstack-table-v9/DataTableHeader", () => ({
-  DataTableHeader: () => (
-    <thead data-testid="data-table-header">
-      <tr>
-        <th>Col1</th>
-      </tr>
-    </thead>
-  ),
-}));
-
-vi.mock("@/features/page-speed-insights/tanstack-table-v9/DataTableBody", () => ({
-  DataTableBody: () => (
-    <tbody data-testid="data-table-body">
-      <tr>
-        <td>Row1</td>
-      </tr>
-    </tbody>
+vi.mock("@/features/page-speed-insights/tanstack-table-v9/StockDataTable", () => ({
+  StockDataTable: () => (
+    <div data-testid="stock-data-table">
+      <button type="button">Copy table</button>
+      <div data-testid="data-table-header">header</div>
+      <div data-testid="data-table-body">body</div>
+    </div>
   ),
 }));
 
@@ -56,6 +46,11 @@ describe("TableCard", () => {
     const { container } = render(<TableCardWithTable rowCount={2} />);
     expect(container.textContent).toContain("Test Table");
     expect(container.querySelector('[data-testid="data-table-header"]')).toBeTruthy();
+  });
+
+  it("renders a copy table button in the card header", () => {
+    const { container } = render(<TableCardWithTable rowCount={2} />);
+    expect(container.textContent).toContain("Copy table");
   });
 
   it("shows Show all results when rowCount > pageSize and showPagination", () => {

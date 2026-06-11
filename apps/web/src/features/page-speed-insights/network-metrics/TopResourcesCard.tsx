@@ -1,12 +1,10 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table } from "@/components/ui/table";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { TableItem } from "@/lib/schema";
 import { getUrlString, getNumber } from "@/lib/utils";
 import { useMemo } from "react";
-import { DataTableHeader } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
-import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/DataTableBody";
+import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 import { PaginationCard } from "@/features/page-speed-insights/tanstack-table-v9/PaginationCard";
 import { createStringAggregatedCell } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
 import { sortByMaxValueComposite } from "@/features/page-speed-insights/shared/dataSortingHelpers";
@@ -108,10 +106,7 @@ export function TopResourcesCard() {
       </CardHeader>
       <CardContent>
         <div className="w-full overflow-x-auto">
-          <Table className="w-full">
-            <DataTableHeader table={table} />
-            <DataTableBody table={table} />
-          </Table>
+          <StockDataTable table={table} className="w-full" />
         </div>
         <PaginationCard table={table} showManualControls />
       </CardContent>

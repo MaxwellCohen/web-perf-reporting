@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Table,
   TableBody,
@@ -6,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TableWithCopyToolbar } from "@/features/page-speed-insights/tanstack-table-v9/TableWithCopyToolbar";
 import { AuditDetailChecklist } from "@/lib/schema";
 import { renderBoolean } from "@/features/page-speed-insights/lh-categories/renderBoolean";
 import { Details } from "@/components/ui/accordion";
@@ -29,7 +32,9 @@ export function RenderChecklist({ items, title }: { items: TableDataItem[]; titl
         <h4 className="text-md font-bold">{title} Audit Checklist Items</h4>
       </summary>
 
-      <Table>
+      <TableWithCopyToolbar>
+        {({ tableRef }) => (
+      <Table ref={tableRef}>
         <TableHeader>
           <TableRow>
             <TableHead>Checklist Item</TableHead>
@@ -56,6 +61,8 @@ export function RenderChecklist({ items, title }: { items: TableDataItem[]; titl
           })}
         </TableBody>
       </Table>
+        )}
+      </TableWithCopyToolbar>
     </Details>
   );
 }

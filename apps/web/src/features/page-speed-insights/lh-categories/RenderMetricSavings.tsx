@@ -1,3 +1,5 @@
+"use client";
+
 import { Details } from "@/components/ui/accordion";
 import {
   Table,
@@ -7,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TableWithCopyToolbar } from "@/features/page-speed-insights/tanstack-table-v9/TableWithCopyToolbar";
 import { AuditResultsRecord } from "@/lib/schema";
 
 export function RenderMetricSavings({
@@ -40,7 +43,9 @@ export function RenderMetricSavings({
       <summary className="flex flex-col gap-2">
         <h4 className="text-md font-bold">Possible Metric Savings</h4>
       </summary>
-      <Table>
+      <TableWithCopyToolbar>
+        {({ tableRef }) => (
+      <Table ref={tableRef}>
         <TableHeader>
           <TableRow>
             <TableHead>Metric</TableHead>
@@ -60,6 +65,8 @@ export function RenderMetricSavings({
           ))}
         </TableBody>
       </Table>
+        )}
+      </TableWithCopyToolbar>
     </Details>
   );
 }

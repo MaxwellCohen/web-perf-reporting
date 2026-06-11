@@ -54,6 +54,6 @@ describe("RenderEntityTable", () => {
         sortedBy={[]}
       />,
     );
-    expect(container.firstChild).toHaveClass("grid");
+    expect(container.querySelector(".grid")).toBeTruthy();
   });
 });

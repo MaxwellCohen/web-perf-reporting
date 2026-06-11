@@ -22,6 +22,7 @@ import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
 import { JSUsageSection } from "@/features/page-speed-insights/JSUsage/JSUsageSection";
 import { LIGHTHOUSE_SUMMARY_METRIC_DEFS } from "@/features/page-speed-insights/lighthouseSummaryMetricDefinitions";
+import { TableWithCopyToolbar } from "@/features/page-speed-insights/tanstack-table-v9/TableWithCopyToolbar";
 
 const CWV = [
   "firstContentfulPaint",
@@ -181,7 +182,9 @@ function RenderNetworkRequestsSummary() {
   return (
     <Card className="col-span-2">
       <CardHeader className="text-center text-2xl font-bold">Network Request Summary</CardHeader>
-      <Table>
+      <TableWithCopyToolbar>
+        {({ tableRef }) => (
+      <Table ref={tableRef}>
         <TableHeader>
           <TableRow>
             <TableHead> Request Type</TableHead>
@@ -235,6 +238,8 @@ function RenderNetworkRequestsSummary() {
             .filter(Boolean)}
         </TableBody>
       </Table>
+        )}
+      </TableWithCopyToolbar>
     </Card>
   );
 }
@@ -263,7 +268,9 @@ function RenderTable({
   return (
     <Card className="min-w-1/3">
       <CardHeader className="text-center text-2xl font-bold">{title}</CardHeader>
-      <Table>
+      <TableWithCopyToolbar>
+        {({ tableRef }) => (
+      <Table ref={tableRef}>
         <TableHeader>
           <TableRow>
             <TableHead></TableHead>
@@ -296,6 +303,8 @@ function RenderTable({
           })}
         </TableBody>
       </Table>
+        )}
+      </TableWithCopyToolbar>
     </Card>
   );
 }

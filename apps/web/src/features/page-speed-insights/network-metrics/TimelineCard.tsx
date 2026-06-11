@@ -1,10 +1,8 @@
 "use client";
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table } from "@/components/ui/table";
 import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
-import { DataTableHeader } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
-import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/DataTableBody";
+import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 import {
   useStandardTable,
   type StandardColumnDef,
@@ -170,10 +168,7 @@ function TimelineCardTable({
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
-          <Table className="w-full">
-            <DataTableHeader table={table} />
-            <DataTableBody table={table} />
-          </Table>
+          <StockDataTable table={table} className="w-full" />
         </div>
       </CardContent>
     </Card>

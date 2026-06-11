@@ -12,14 +12,13 @@ import clsx from "clsx";
 import { cn } from "@/lib/utils";
 import { ExpandAll, ExpandRow } from "@/features/page-speed-insights/JSUsage/jsUsageTableParts";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
-import { DataTableHeader } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
+import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 
 import { AccordionContent, AccordionItem } from "@/components/ui/accordion";
 import { AccordionSectionTitleTrigger } from "@/components/ui/accordion-section-title-trigger";
-import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/DataTableBody";
 import { DetailTableWith1ReportAndNoSubitem } from "@/features/page-speed-insights/lh-categories/table/DetailTableWith1ReportAndNoSubitem";
 import { DetailTableSeparatePerReport } from "@/features/page-speed-insights/lh-categories/table/DetailTableSeparatePerReport";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { useStandardTable, type StandardColumnDef } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
 import {
   getColumnVisibilityState,
@@ -619,10 +618,7 @@ function DetailTableWithSubitems({ rows, title }: { rows: DetailTableItem[]; tit
       </AccordionSectionTitleTrigger>
       <AccordionContent>
         <div className="w-full overflow-x-auto">
-          <Table className="w-full" style={{ width: "100%" }}>
-            <DataTableHeader table={table} />
-            <DataTableBody table={table} />
-          </Table>
+          <StockDataTable table={table} className="w-full" style={{ width: "100%" }} />
         </div>
       </AccordionContent>
     </AccordionItem>
@@ -994,8 +990,11 @@ function DetailTableFull({ rows }: { rows: DetailTableItem[]; title: string }) {
 
   return (
     <div className="w-full min-w-0">
-      <Table className="w-full max-w-full" style={{ width: "100%" }}>
-        <DataTableHeader table={table} />
+      <StockDataTable
+        table={table}
+        className="w-full max-w-full"
+        style={{ width: "100%" }}
+      >
         <TableBody className="[&_tr:last-child]:border-(length:--border-width)">
           {table
             .getRowModel()
@@ -1030,7 +1029,7 @@ function DetailTableFull({ rows }: { rows: DetailTableItem[]; title: string }) {
             })
             .filter(Boolean)}
         </TableBody>
-      </Table>
+      </StockDataTable>
     </div>
   );
 }

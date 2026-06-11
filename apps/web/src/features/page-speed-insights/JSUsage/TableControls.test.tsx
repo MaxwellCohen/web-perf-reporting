@@ -16,6 +16,8 @@ import {
 } from "@/features/page-speed-insights/JSUsage/TableControls";
 vi.mock("lucide-react", () => ({
   ChevronDown: () => <span data-testid="chevron" />,
+  Copy: () => <span data-testid="copy" />,
+  Check: () => <span data-testid="check" />,
 }));
 
 vi.mock("@/components/ui/card", () => ({

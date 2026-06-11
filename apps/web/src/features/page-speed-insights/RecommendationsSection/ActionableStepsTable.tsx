@@ -1,3 +1,5 @@
+"use client";
+
 import ReactMarkdown from "react-markdown";
 import {
   Table,
@@ -7,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TableWithCopyToolbar } from "@/features/page-speed-insights/tanstack-table-v9/TableWithCopyToolbar";
 import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
 import type { ActionableStep } from "@/features/page-speed-insights/RecommendationsSection/types";
 import {
@@ -98,7 +101,9 @@ export function ActionableStepsTable({ rec, items }: ActionableStepsTableProps) 
 
   return (
     <div className="w-full overflow-x-auto">
-      <Table className="w-full">
+      <TableWithCopyToolbar>
+        {({ tableRef }) => (
+      <Table ref={tableRef} className="w-full">
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             <TableHead className="text-xs font-semibold">Report</TableHead>
@@ -116,6 +121,8 @@ export function ActionableStepsTable({ rec, items }: ActionableStepsTableProps) 
           ))}
         </TableBody>
       </Table>
+        )}
+      </TableWithCopyToolbar>
     </div>
   );
 }

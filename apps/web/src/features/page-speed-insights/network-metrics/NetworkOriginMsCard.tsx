@@ -1,11 +1,9 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table } from "@/components/ui/table";
 import { TableItem } from "@/lib/schema";
 import { getNumber } from "@/lib/utils";
 import { useMemo } from "react";
-import { DataTableHeader } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
-import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/DataTableBody";
+import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
 import {
   useStandardTable,
@@ -103,10 +101,7 @@ export function NetworkOriginMsCard({
       </CardHeader>
       <CardContent>
         <div className="w-full max-h-96 overflow-y-auto">
-          <Table className="w-full" style={{ width: "100%" }}>
-            <DataTableHeader table={table} />
-            <DataTableBody table={table} />
-          </Table>
+          <StockDataTable table={table} className="w-full" style={{ width: "100%" }} />
         </div>
       </CardContent>
     </Card>

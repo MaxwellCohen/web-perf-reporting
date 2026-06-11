@@ -1,3 +1,5 @@
+"use client";
+
 import { AuditResultsRecord } from "@/lib/schema";
 import {
   Table,
@@ -7,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TableWithCopyToolbar } from "@/features/page-speed-insights/tanstack-table-v9/TableWithCopyToolbar";
 import ReactMarkdown from "react-markdown";
 
 export function AuditTable({ audits }: { audits?: AuditResultsRecord | null }) {
@@ -16,7 +19,9 @@ export function AuditTable({ audits }: { audits?: AuditResultsRecord | null }) {
   return (
     <>
       <div className="text-lg font-bold"> Audits </div>
-      <Table>
+      <TableWithCopyToolbar>
+        {({ tableRef }) => (
+      <Table ref={tableRef}>
         <TableHeader>
           <TableRow>
             <TableHead>Key</TableHead>
@@ -41,6 +46,8 @@ export function AuditTable({ audits }: { audits?: AuditResultsRecord | null }) {
           })}
         </TableBody>
       </Table>
+        )}
+      </TableWithCopyToolbar>
     </>
   );
 }

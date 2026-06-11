@@ -12,7 +12,8 @@ import { RenderTableHeader } from "@/features/page-speed-insights/lh-categories/
 import { RenderHeading } from "@/features/page-speed-insights/lh-categories/table/RenderHeading";
 import { RenderTableCell } from "@/features/page-speed-insights/lh-categories/table/RenderTableCell";
 import { RenderTableValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
-import { Fragment, JSX } from "react";
+import { Fragment, JSX, type RefObject } from "react";
+import { GridTableWithCopyToolbar } from "@/features/page-speed-insights/lh-categories/table/GridTableWithCopyToolbar";
 import { cn } from "@/lib/utils";
 import { Details } from "@/components/ui/accordion";
 import { toSentenceCase } from "@/components/common/FormFactorPercentPieChart";
@@ -36,7 +37,9 @@ export function RenderBasicTable({
           <div className="text-lg font-bold">{toSentenceCase(`${title} details`.trim())}</div>
         </div>
       </summary>
-      <TableContainer headings={headings} className="">
+      <GridTableWithCopyToolbar>
+        {({ containerRef }) => (
+      <TableContainer headings={headings} className="" containerRef={containerRef}>
         <RenderTableHeader headings={headings} className={"border-0"} />
         {items.map((item, index) => {
           if (!item.subItems?.items?.length) {
@@ -55,6 +58,8 @@ export function RenderBasicTable({
           );
         })}
       </TableContainer>
+        )}
+      </GridTableWithCopyToolbar>
     </Details>
   );
 }
@@ -63,10 +68,15 @@ export function TableContainer({
   headings,
   children,
   className,
+  containerRef,
   ...props
-}: { headings: TableColumnHeading[] } & JSX.IntrinsicElements["div"]) {
+}: {
+  headings: TableColumnHeading[];
+  containerRef?: RefObject<HTMLDivElement | null>;
+} & JSX.IntrinsicElements["div"]) {
   return (
     <div
+      ref={containerRef}
       {...props}
       className={cn("grid w-full overflow-x-auto", className)}
       style={{

@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { DataTableHeader } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
-import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/DataTableBody";
 import type { ReactTable, RowData, StockFeatures, TableState } from "@tanstack/react-table-v9";
 import { PaginationCard } from "@/features/page-speed-insights/tanstack-table-v9/PaginationCard";
+import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 
 type TableCardProps<TData extends RowData = RowData> = {
   title: string;
@@ -32,11 +30,8 @@ export function TableCard<TData extends RowData = RowData>({
 
   return (
     <TableCardWrapper title={title} className={className}>
-      <div className={`w-full overflow-x-auto`}>
-        <Table className="w-full" style={{ width: "100%" }}>
-          <DataTableHeader table={table} />
-          <DataTableBody table={table} />
-        </Table>
+      <div className="w-full overflow-x-auto">
+        <StockDataTable table={table} className="w-full" style={{ width: "100%" }} />
       </div>
       {showPagination && (
         <div className="mt-4 flex flex-wrap items-center justify-center gap-3">

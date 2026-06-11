@@ -20,6 +20,7 @@ import { JavaScriptPerformanceComponent } from "@/features/page-speed-insights/j
 import { RecommendationsSection } from "@/features/page-speed-insights/RecommendationsSection";
 import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
 import { PageSpeedInsightsCopyButtons } from "@/features/page-speed-insights/PageSpeedInsightsCopyButtons";
+import { CopyTableButton } from "@/features/page-speed-insights/tanstack-table-v9/CopyTableButton";
 import { useSelector } from "@xstate/store-react";
 
 export function PageSpeedInsightsDashboard({
@@ -58,7 +59,10 @@ export function PageSpeedInsightsDashboard({
         <div className="flex flex-col">
           <StringFilterHeader column={table.getColumn("auditTitle")} name="Audit" />
         </div>
-        <div className="mb-2 flex self-end justify-self-end">
+        <div className="mb-2 flex self-end justify-self-end gap-2">
+          <CopyTableButton table={table} variant="ghost" size="default">
+            Copy table
+          </CopyTableButton>
           <Button variant="ghost" onClick={() => table.resetColumnFilters()}>
             Reset filters
           </Button>

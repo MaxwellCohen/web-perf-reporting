@@ -21,6 +21,7 @@ import { ChevronDown } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useMemo } from "react";
 import { getPaginationState } from "@/features/page-speed-insights/tanstack-table-v9/tableStateHelpers";
+import { CopyTableButton } from "@/features/page-speed-insights/tanstack-table-v9/CopyTableButton";
 import { PaginationCard } from "@/features/page-speed-insights/tanstack-table-v9/PaginationCard";
 
 export { PaginationCard };
@@ -53,6 +54,9 @@ export function TableControls<T extends RowData>({
         <Button variant="ghost" onClick={() => table.resetSorting()}>
           Reset Sorting Order
         </Button>
+        <CopyTableButton table={table} variant="ghost" size="default">
+          Copy table
+        </CopyTableButton>
       </div>
       <div className="flex flex-row gap-2">
         <PaginationCard table={table} showManualControls />

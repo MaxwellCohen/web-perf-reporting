@@ -32,6 +32,8 @@ import {
   type LighthouseSummaryMetricDebugFormat,
 } from "@/features/page-speed-insights/lighthouseSummaryMetricDefinitions";
 import { tanstackTableCellDataProps } from "@/features/page-speed-insights/shared/tanstackTableCellDataProps";
+import { CopyTableButton } from "@/features/page-speed-insights/tanstack-table-v9/CopyTableButton";
+import { TableWithCopyToolbar } from "@/features/page-speed-insights/tanstack-table-v9/TableWithCopyToolbar";
 
 type DebugDataTableItem = {
   key: string;
@@ -62,15 +64,19 @@ function DebugDataTableCell({
 
 function EmptyDebugDataTable() {
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Item</TableHead>
-          <TableHead>Value</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody />
-    </Table>
+    <TableWithCopyToolbar>
+      {({ tableRef }) => (
+        <Table ref={tableRef}>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Item</TableHead>
+              <TableHead>Value</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody />
+        </Table>
+      )}
+    </TableWithCopyToolbar>
   );
 }
 
@@ -147,7 +153,11 @@ function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
   });
 
   return (
-    <Table>
+    <>
+      <div className="mb-2 flex justify-end">
+        <CopyTableButton table={table} />
+      </div>
+      <Table>
       <TableHeader>
         {table.getHeaderGroups().map((headerGroup) => {
           return (
@@ -201,6 +211,7 @@ function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
         })}
       </TableBody>
     </Table>
+    </>
   );
 }
 

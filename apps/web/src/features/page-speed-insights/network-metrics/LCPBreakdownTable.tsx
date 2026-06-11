@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TableWithCopyToolbar } from "@/features/page-speed-insights/tanstack-table-v9/TableWithCopyToolbar";
 import type { LCPBreakdownTableRow } from "./lcpBreakdownSelectors";
 
 type Props = {
@@ -18,7 +19,9 @@ type Props = {
 
 export function LCPBreakdownTable({ tableRows, reportLabels }: Props) {
   return (
-    <Table>
+    <TableWithCopyToolbar>
+      {({ tableRef }) => (
+    <Table ref={tableRef}>
       <TableHeader>
         <TableRow>
           <TableHead className="min-w-40">Subpart</TableHead>
@@ -49,6 +52,8 @@ export function LCPBreakdownTable({ tableRows, reportLabels }: Props) {
         ))}
       </TableBody>
     </Table>
+      )}
+    </TableWithCopyToolbar>
   );
 }
 

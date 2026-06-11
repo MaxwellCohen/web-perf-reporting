@@ -5,6 +5,7 @@ import { RenderTableRowContainer } from "@/features/page-speed-insights/lh-categ
 import { RenderTableHeader } from "@/features/page-speed-insights/lh-categories/table/RenderTableHeader";
 import { RenderTableCell } from "@/features/page-speed-insights/lh-categories/table/RenderTableCell";
 import { getEntityGroupItems } from "@/features/page-speed-insights/lh-categories/table/getEntityGroupItems";
+import { GridTableWithCopyToolbar } from "@/features/page-speed-insights/lh-categories/table/GridTableWithCopyToolbar";
 
 export function RenderEntityTable({
   headings = [],
@@ -34,7 +35,10 @@ export function RenderEntityTable({
   );
 
   return (
+    <GridTableWithCopyToolbar>
+      {({ containerRef }) => (
     <div
+      ref={containerRef}
       className="grid overflow-x-auto"
       style={{ gridTemplateColumns: `repeat(${headings?.length || 0}, auto)` }}
     >
@@ -103,5 +107,7 @@ export function RenderEntityTable({
         </Fragment>
       ))}
     </div>
+      )}
+    </GridTableWithCopyToolbar>
   );
 }

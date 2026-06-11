@@ -1,8 +1,7 @@
 "use client";
 import { useMemo } from "react";
-import { Table, TableCaption } from "@/components/ui/table";
-import { DataTableHeader } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
-import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/DataTableBody";
+import { TableCaption } from "@/components/ui/table";
+import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 import type { TableColumnHeading, TableItem } from "@/lib/schema";
 import {
   useSimpleTable,
@@ -204,7 +203,8 @@ export function IssuesFoundTable({ headings, items, device }: IssuesFoundTablePr
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden shadow-sm">
       <div className="w-full overflow-x-auto">
-        <Table
+        <StockDataTable
+          table={table}
           aria-label={isNetworkRequests ? `Network requests for ${device}` : undefined}
           className={cn(
             "w-full text-sm",
@@ -213,16 +213,15 @@ export function IssuesFoundTable({ headings, items, device }: IssuesFoundTablePr
             isNetworkRequests &&
               "[&_tbody_tr:nth-child(even)]:bg-muted/25 [&_tbody_tr:hover]:bg-muted/40",
           )}
-        >
-          {isNetworkRequests && (
-            <TableCaption className="sr-only">
-              {device} – network requests ({deduplicatedItems.length}{" "}
-              {deduplicatedItems.length === 1 ? "request" : "requests"})
-            </TableCaption>
-          )}
-          <DataTableHeader table={table} />
-          <DataTableBody table={table} />
-        </Table>
+          caption={
+            isNetworkRequests ? (
+              <TableCaption className="sr-only">
+                {device} – network requests ({deduplicatedItems.length}{" "}
+                {deduplicatedItems.length === 1 ? "request" : "requests"})
+              </TableCaption>
+            ) : undefined
+          }
+        />
       </div>
       {isNetworkRequests && timeRangeMs && (
         <div className="px-2 py-1 text-[11px] text-muted-foreground border-t border-border bg-muted/20">

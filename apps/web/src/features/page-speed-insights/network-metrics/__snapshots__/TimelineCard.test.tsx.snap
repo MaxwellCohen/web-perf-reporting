@@ -20,210 +20,253 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
       class="overflow-x-auto"
     >
       <div
-        class="relative w-full overflow-auto"
+        class="w-full"
       >
-        <table
-          class="caption-bottom text-sm table-fixed w-full"
+        <div
+          class="mb-2 flex justify-end"
         >
-          <thead
-            class="[&_tr]:border-b"
+          <button
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
+            title="Copy table"
+            type="button"
           >
-            <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            <svg
+              class="lucide lucide-copy h-4 w-4"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <th
-                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
-                style="width: 150px;"
-              >
-                <div
-                  class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
-                >
-                  <div
-                    class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
-                  >
-                    <span
-                      title="Performance events observed during page load, sorted by time"
-                    >
-                      Event
-                    </span>
-                  </div>
-                  <div
-                    class="flex shrink-0 flex-row items-center gap-1"
-                  >
-                    <button
-                      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
-                      title="Sort ascending"
-                      type="button"
-                    >
-                      〰︎
-                    </button>
-                  </div>
-                </div>
-                <div
-                  class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
-                />
-              </th>
-              <th
-                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
-                style="width: 150px;"
-              >
-                <div
-                  class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
-                >
-                  <div
-                    class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
-                  >
-                    Desktop
-                  </div>
-                  <div
-                    class="flex shrink-0 flex-row items-center gap-1"
-                  >
-                    <button
-                      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
-                      title="Sort descending"
-                      type="button"
-                    >
-                      〰︎
-                    </button>
-                  </div>
-                </div>
-                <div
-                  class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
-                />
-              </th>
-            </tr>
-          </thead>
-          <tbody
-            class="[&_tr:last-child]:border-0"
+              <rect
+                height="14"
+                rx="2"
+                ry="2"
+                width="14"
+                x="8"
+                y="8"
+              />
+              <path
+                d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
+              />
+            </svg>
+            <span
+              class="sr-only"
+            >
+              Copy table
+            </span>
+          </button>
+        </div>
+        <div
+          class="relative w-full overflow-auto"
+        >
+          <table
+            class="caption-bottom text-sm table-fixed w-full"
           >
-            <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            <thead
+              class="[&_tr]:border-b"
             >
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
-                data-aggregated="false"
-                data-can-expand="false"
-                data-cell-id="0_event"
-                data-column-id="event"
-                data-depth="0"
-                data-grouped="false"
-                data-placeholder="false"
-                data-row-expanded="false"
-                style="width: 150px;"
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
-                <span
-                  class="font-medium"
-                  title="The time when the browser starts navigating to the page. This is the earliest timestamp in the navigation timing API."
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
+                  style="width: 150px;"
                 >
-                  Navigation Start
-                </span>
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
-                data-aggregated="false"
-                data-can-expand="false"
-                data-cell-id="0_report_Desktop"
-                data-column-id="report_Desktop"
-                data-depth="0"
-                data-grouped="false"
-                data-placeholder="false"
-                data-row-expanded="false"
-                style="width: 150px;"
-              >
-                <span
-                  data-testid="ms-value"
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      <span
+                        title="Performance events observed during page load, sorted by time"
+                      >
+                        Event
+                      </span>
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort ascending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
+                  style="width: 150px;"
                 >
-                  0
-                   ms
-                </span>
-              </td>
-            </tr>
-            <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      Desktop
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                  />
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              class="[&_tr:last-child]:border-0"
             >
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
-                data-aggregated="false"
-                data-can-expand="false"
-                data-cell-id="1_event"
-                data-column-id="event"
-                data-depth="0"
-                data-grouped="false"
-                data-placeholder="false"
-                data-row-expanded="false"
-                style="width: 150px;"
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
-                <span
-                  class="font-medium"
-                  title="Time to First Byte - The time between when the user requests a page and when the first byte of the response is received from the server."
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_event"
+                  data-column-id="event"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px;"
                 >
-                  TTFB
-                </span>
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
-                data-aggregated="false"
-                data-can-expand="false"
-                data-cell-id="1_report_Desktop"
-                data-column-id="report_Desktop"
-                data-depth="0"
-                data-grouped="false"
-                data-placeholder="false"
-                data-row-expanded="false"
-                style="width: 150px;"
+                  <span
+                    class="font-medium"
+                    title="The time when the browser starts navigating to the page. This is the earliest timestamp in the navigation timing API."
+                  >
+                    Navigation Start
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_report_Desktop"
+                  data-column-id="report_Desktop"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px;"
+                >
+                  <span
+                    data-testid="ms-value"
+                  >
+                    0
+                     ms
+                  </span>
+                </td>
+              </tr>
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
-                <span
-                  data-testid="ms-value"
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="1_event"
+                  data-column-id="event"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px;"
                 >
-                  100
-                   ms
-                </span>
-              </td>
-            </tr>
-            <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
-            >
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
-                data-aggregated="false"
-                data-can-expand="false"
-                data-cell-id="2_event"
-                data-column-id="event"
-                data-depth="0"
-                data-grouped="false"
-                data-placeholder="false"
-                data-row-expanded="false"
-                style="width: 150px;"
+                  <span
+                    class="font-medium"
+                    title="Time to First Byte - The time between when the user requests a page and when the first byte of the response is received from the server."
+                  >
+                    TTFB
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="1_report_Desktop"
+                  data-column-id="report_Desktop"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px;"
+                >
+                  <span
+                    data-testid="ms-value"
+                  >
+                    100
+                     ms
+                  </span>
+                </td>
+              </tr>
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
-                <span
-                  class="font-medium"
-                  title="First Contentful Paint - The time when the browser renders the first bit of content from the DOM, such as text, an image, or a canvas element."
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="2_event"
+                  data-column-id="event"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px;"
                 >
-                  FCP
-                </span>
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
-                data-aggregated="false"
-                data-can-expand="false"
-                data-cell-id="2_report_Desktop"
-                data-column-id="report_Desktop"
-                data-depth="0"
-                data-grouped="false"
-                data-placeholder="false"
-                data-row-expanded="false"
-                style="width: 150px;"
-              >
-                <span
-                  data-testid="ms-value"
+                  <span
+                    class="font-medium"
+                    title="First Contentful Paint - The time when the browser renders the first bit of content from the DOM, such as text, an image, or a canvas element."
+                  >
+                    FCP
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="2_report_Desktop"
+                  data-column-id="report_Desktop"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px;"
                 >
-                  500
-                   ms
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                  <span
+                    data-testid="ms-value"
+                  >
+                    500
+                     ms
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -250,295 +293,338 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
       class="overflow-x-auto"
     >
       <div
-        class="relative w-full overflow-auto"
+        class="w-full"
       >
-        <table
-          class="caption-bottom text-sm table-fixed w-full"
+        <div
+          class="mb-2 flex justify-end"
         >
-          <thead
-            class="[&_tr]:border-b"
+          <button
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
+            title="Copy table"
+            type="button"
           >
-            <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            <svg
+              class="lucide lucide-copy h-4 w-4"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <th
-                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
-                style="width: 150px;"
-              >
-                <div
-                  class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
-                >
-                  <div
-                    class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
-                  >
-                    <span
-                      title="Performance events observed during page load, sorted by time"
-                    >
-                      Event
-                    </span>
-                  </div>
-                  <div
-                    class="flex shrink-0 flex-row items-center gap-1"
-                  >
-                    <button
-                      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
-                      title="Sort ascending"
-                      type="button"
-                    >
-                      〰︎
-                    </button>
-                  </div>
-                </div>
-                <div
-                  class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
-                />
-              </th>
-              <th
-                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
-                style="width: 150px;"
-              >
-                <div
-                  class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
-                >
-                  <div
-                    class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
-                  >
-                    Desktop
-                  </div>
-                  <div
-                    class="flex shrink-0 flex-row items-center gap-1"
-                  >
-                    <button
-                      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
-                      title="Sort descending"
-                      type="button"
-                    >
-                      〰︎
-                    </button>
-                  </div>
-                </div>
-                <div
-                  class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
-                />
-              </th>
-              <th
-                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
-                style="width: 150px;"
-              >
-                <div
-                  class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
-                >
-                  <div
-                    class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
-                  >
-                    Mobile
-                  </div>
-                  <div
-                    class="flex shrink-0 flex-row items-center gap-1"
-                  >
-                    <button
-                      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
-                      title="Sort descending"
-                      type="button"
-                    >
-                      〰︎
-                    </button>
-                  </div>
-                </div>
-                <div
-                  class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
-                />
-              </th>
-            </tr>
-          </thead>
-          <tbody
-            class="[&_tr:last-child]:border-0"
+              <rect
+                height="14"
+                rx="2"
+                ry="2"
+                width="14"
+                x="8"
+                y="8"
+              />
+              <path
+                d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
+              />
+            </svg>
+            <span
+              class="sr-only"
+            >
+              Copy table
+            </span>
+          </button>
+        </div>
+        <div
+          class="relative w-full overflow-auto"
+        >
+          <table
+            class="caption-bottom text-sm table-fixed w-full"
           >
-            <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            <thead
+              class="[&_tr]:border-b"
             >
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
-                data-aggregated="false"
-                data-can-expand="false"
-                data-cell-id="0_event"
-                data-column-id="event"
-                data-depth="0"
-                data-grouped="false"
-                data-placeholder="false"
-                data-row-expanded="false"
-                style="width: 150px;"
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
-                <span
-                  class="font-medium"
-                  title="The time when the browser starts navigating to the page. This is the earliest timestamp in the navigation timing API."
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
+                  style="width: 150px;"
                 >
-                  Navigation Start
-                </span>
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
-                data-aggregated="false"
-                data-can-expand="false"
-                data-cell-id="0_report_Desktop"
-                data-column-id="report_Desktop"
-                data-depth="0"
-                data-grouped="false"
-                data-placeholder="false"
-                data-row-expanded="false"
-                style="width: 150px;"
-              >
-                <span
-                  data-testid="ms-value"
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      <span
+                        title="Performance events observed during page load, sorted by time"
+                      >
+                        Event
+                      </span>
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort ascending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
+                  style="width: 150px;"
                 >
-                  0
-                   ms
-                </span>
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
-                data-aggregated="false"
-                data-can-expand="false"
-                data-cell-id="0_report_Mobile"
-                data-column-id="report_Mobile"
-                data-depth="0"
-                data-grouped="false"
-                data-placeholder="false"
-                data-row-expanded="false"
-                style="width: 150px;"
-              >
-                <span
-                  data-testid="ms-value"
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      Desktop
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
+                  style="width: 150px;"
                 >
-                  0
-                   ms
-                </span>
-              </td>
-            </tr>
-            <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      Mobile
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                  />
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              class="[&_tr:last-child]:border-0"
             >
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
-                data-aggregated="false"
-                data-can-expand="false"
-                data-cell-id="1_event"
-                data-column-id="event"
-                data-depth="0"
-                data-grouped="false"
-                data-placeholder="false"
-                data-row-expanded="false"
-                style="width: 150px;"
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
-                <span
-                  class="font-medium"
-                  title="Time to First Byte - The time between when the user requests a page and when the first byte of the response is received from the server."
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_event"
+                  data-column-id="event"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px;"
                 >
-                  TTFB
-                </span>
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
-                data-aggregated="false"
-                data-can-expand="false"
-                data-cell-id="1_report_Desktop"
-                data-column-id="report_Desktop"
-                data-depth="0"
-                data-grouped="false"
-                data-placeholder="false"
-                data-row-expanded="false"
-                style="width: 150px;"
+                  <span
+                    class="font-medium"
+                    title="The time when the browser starts navigating to the page. This is the earliest timestamp in the navigation timing API."
+                  >
+                    Navigation Start
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_report_Desktop"
+                  data-column-id="report_Desktop"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px;"
+                >
+                  <span
+                    data-testid="ms-value"
+                  >
+                    0
+                     ms
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_report_Mobile"
+                  data-column-id="report_Mobile"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px;"
+                >
+                  <span
+                    data-testid="ms-value"
+                  >
+                    0
+                     ms
+                  </span>
+                </td>
+              </tr>
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
-                <span
-                  data-testid="ms-value"
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="1_event"
+                  data-column-id="event"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px;"
                 >
-                  80
-                   ms
-                </span>
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
-                data-aggregated="false"
-                data-can-expand="false"
-                data-cell-id="1_report_Mobile"
-                data-column-id="report_Mobile"
-                data-depth="0"
-                data-grouped="false"
-                data-placeholder="false"
-                data-row-expanded="false"
-                style="width: 150px;"
+                  <span
+                    class="font-medium"
+                    title="Time to First Byte - The time between when the user requests a page and when the first byte of the response is received from the server."
+                  >
+                    TTFB
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="1_report_Desktop"
+                  data-column-id="report_Desktop"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px;"
+                >
+                  <span
+                    data-testid="ms-value"
+                  >
+                    80
+                     ms
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="1_report_Mobile"
+                  data-column-id="report_Mobile"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px;"
+                >
+                  <span
+                    data-testid="ms-value"
+                  >
+                    120
+                     ms
+                  </span>
+                </td>
+              </tr>
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
-                <span
-                  data-testid="ms-value"
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="2_event"
+                  data-column-id="event"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px;"
                 >
-                  120
-                   ms
-                </span>
-              </td>
-            </tr>
-            <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
-            >
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
-                data-aggregated="false"
-                data-can-expand="false"
-                data-cell-id="2_event"
-                data-column-id="event"
-                data-depth="0"
-                data-grouped="false"
-                data-placeholder="false"
-                data-row-expanded="false"
-                style="width: 150px;"
-              >
-                <span
-                  class="font-medium"
-                  title="First Contentful Paint - The time when the browser renders the first bit of content from the DOM, such as text, an image, or a canvas element."
+                  <span
+                    class="font-medium"
+                    title="First Contentful Paint - The time when the browser renders the first bit of content from the DOM, such as text, an image, or a canvas element."
+                  >
+                    FCP
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="2_report_Desktop"
+                  data-column-id="report_Desktop"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px;"
                 >
-                  FCP
-                </span>
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
-                data-aggregated="false"
-                data-can-expand="false"
-                data-cell-id="2_report_Desktop"
-                data-column-id="report_Desktop"
-                data-depth="0"
-                data-grouped="false"
-                data-placeholder="false"
-                data-row-expanded="false"
-                style="width: 150px;"
-              >
-                <span
-                  data-testid="ms-value"
+                  <span
+                    data-testid="ms-value"
+                  >
+                    400
+                     ms
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="2_report_Mobile"
+                  data-column-id="report_Mobile"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px;"
                 >
-                  400
-                   ms
-                </span>
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
-                data-aggregated="false"
-                data-can-expand="false"
-                data-cell-id="2_report_Mobile"
-                data-column-id="report_Mobile"
-                data-depth="0"
-                data-grouped="false"
-                data-placeholder="false"
-                data-row-expanded="false"
-                style="width: 150px;"
-              >
-                <span
-                  data-testid="ms-value"
-                >
-                  600
-                   ms
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                  <span
+                    data-testid="ms-value"
+                  >
+                    600
+                     ms
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -565,210 +651,253 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
       class="overflow-x-auto"
     >
       <div
-        class="relative w-full overflow-auto"
+        class="w-full"
       >
-        <table
-          class="caption-bottom text-sm table-fixed w-full"
+        <div
+          class="mb-2 flex justify-end"
         >
-          <thead
-            class="[&_tr]:border-b"
+          <button
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
+            title="Copy table"
+            type="button"
           >
-            <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            <svg
+              class="lucide lucide-copy h-4 w-4"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <th
-                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
-                style="width: 150px;"
-              >
-                <div
-                  class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
-                >
-                  <div
-                    class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
-                  >
-                    <span
-                      title="Performance events observed during page load, sorted by time"
-                    >
-                      Event
-                    </span>
-                  </div>
-                  <div
-                    class="flex shrink-0 flex-row items-center gap-1"
-                  >
-                    <button
-                      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
-                      title="Sort ascending"
-                      type="button"
-                    >
-                      〰︎
-                    </button>
-                  </div>
-                </div>
-                <div
-                  class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
-                />
-              </th>
-              <th
-                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
-                style="width: 150px;"
-              >
-                <div
-                  class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
-                >
-                  <div
-                    class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
-                  >
-                    Desktop
-                  </div>
-                  <div
-                    class="flex shrink-0 flex-row items-center gap-1"
-                  >
-                    <button
-                      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
-                      title="Sort descending"
-                      type="button"
-                    >
-                      〰︎
-                    </button>
-                  </div>
-                </div>
-                <div
-                  class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
-                />
-              </th>
-            </tr>
-          </thead>
-          <tbody
-            class="[&_tr:last-child]:border-0"
+              <rect
+                height="14"
+                rx="2"
+                ry="2"
+                width="14"
+                x="8"
+                y="8"
+              />
+              <path
+                d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
+              />
+            </svg>
+            <span
+              class="sr-only"
+            >
+              Copy table
+            </span>
+          </button>
+        </div>
+        <div
+          class="relative w-full overflow-auto"
+        >
+          <table
+            class="caption-bottom text-sm table-fixed w-full"
           >
-            <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            <thead
+              class="[&_tr]:border-b"
             >
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
-                data-aggregated="false"
-                data-can-expand="false"
-                data-cell-id="0_event"
-                data-column-id="event"
-                data-depth="0"
-                data-grouped="false"
-                data-placeholder="false"
-                data-row-expanded="false"
-                style="width: 150px;"
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
-                <span
-                  class="font-medium"
-                  title="The time when the browser starts navigating to the page. This is the earliest timestamp in the navigation timing API."
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
+                  style="width: 150px;"
                 >
-                  Navigation Start
-                </span>
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
-                data-aggregated="false"
-                data-can-expand="false"
-                data-cell-id="0_report_Desktop"
-                data-column-id="report_Desktop"
-                data-depth="0"
-                data-grouped="false"
-                data-placeholder="false"
-                data-row-expanded="false"
-                style="width: 150px;"
-              >
-                <span
-                  data-testid="ms-value"
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      <span
+                        title="Performance events observed during page load, sorted by time"
+                      >
+                        Event
+                      </span>
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort ascending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
+                  style="width: 150px;"
                 >
-                  0
-                   ms
-                </span>
-              </td>
-            </tr>
-            <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      Desktop
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                  />
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              class="[&_tr:last-child]:border-0"
             >
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
-                data-aggregated="false"
-                data-can-expand="false"
-                data-cell-id="1_event"
-                data-column-id="event"
-                data-depth="0"
-                data-grouped="false"
-                data-placeholder="false"
-                data-row-expanded="false"
-                style="width: 150px;"
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
-                <span
-                  class="font-medium"
-                  title="Time to First Byte - The time between when the user requests a page and when the first byte of the response is received from the server."
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_event"
+                  data-column-id="event"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px;"
                 >
-                  TTFB
-                </span>
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
-                data-aggregated="false"
-                data-can-expand="false"
-                data-cell-id="1_report_Desktop"
-                data-column-id="report_Desktop"
-                data-depth="0"
-                data-grouped="false"
-                data-placeholder="false"
-                data-row-expanded="false"
-                style="width: 150px;"
+                  <span
+                    class="font-medium"
+                    title="The time when the browser starts navigating to the page. This is the earliest timestamp in the navigation timing API."
+                  >
+                    Navigation Start
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_report_Desktop"
+                  data-column-id="report_Desktop"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px;"
+                >
+                  <span
+                    data-testid="ms-value"
+                  >
+                    0
+                     ms
+                  </span>
+                </td>
+              </tr>
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
-                <span
-                  data-testid="ms-value"
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="1_event"
+                  data-column-id="event"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px;"
                 >
-                  100
-                   ms
-                </span>
-              </td>
-            </tr>
-            <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
-            >
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
-                data-aggregated="false"
-                data-can-expand="false"
-                data-cell-id="2_event"
-                data-column-id="event"
-                data-depth="0"
-                data-grouped="false"
-                data-placeholder="false"
-                data-row-expanded="false"
-                style="width: 150px;"
+                  <span
+                    class="font-medium"
+                    title="Time to First Byte - The time between when the user requests a page and when the first byte of the response is received from the server."
+                  >
+                    TTFB
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="1_report_Desktop"
+                  data-column-id="report_Desktop"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px;"
+                >
+                  <span
+                    data-testid="ms-value"
+                  >
+                    100
+                     ms
+                  </span>
+                </td>
+              </tr>
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
-                <span
-                  class="font-medium"
-                  title="The time when the browser first renders any visual content (pixels) to the screen. This includes background colors, borders, or any visual change."
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="2_event"
+                  data-column-id="event"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px;"
                 >
-                  First Paint
-                </span>
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
-                data-aggregated="false"
-                data-can-expand="false"
-                data-cell-id="2_report_Desktop"
-                data-column-id="report_Desktop"
-                data-depth="0"
-                data-grouped="false"
-                data-placeholder="false"
-                data-row-expanded="false"
-                style="width: 150px;"
-              >
-                <span
-                  data-testid="ms-value"
+                  <span
+                    class="font-medium"
+                    title="The time when the browser first renders any visual content (pixels) to the screen. This includes background colors, borders, or any visual change."
+                  >
+                    First Paint
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="2_report_Desktop"
+                  data-column-id="report_Desktop"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px;"
                 >
-                  300
-                   ms
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                  <span
+                    data-testid="ms-value"
+                  >
+                    300
+                     ms
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
