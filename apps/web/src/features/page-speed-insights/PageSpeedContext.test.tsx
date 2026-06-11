@@ -10,27 +10,33 @@ import {
   usePageSpeedItems,
   usePageSpeedReportTitle,
   usePageSpeedSelector,
+  useRequiredPageSpeedInsightsStore,
 } from "@/features/page-speed-insights/PageSpeedContext";
 
 vi.mock("@xstate/store-react", () => {
   function createStore(config: {
     context: unknown;
-    on: { sync: (ctx: unknown, event: unknown) => unknown };
+    on: Record<string, (ctx: unknown, event?: unknown) => unknown>;
   }) {
     let state = config.context;
     const listeners = new Set<() => void>();
+    const trigger = Object.fromEntries(
+      Object.entries(config.on).map(([eventType, handler]) => [
+        eventType,
+        (event?: unknown) => {
+          state = handler(state, event);
+          listeners.forEach((l) => l());
+        },
+      ]),
+    );
+
     return {
       get: () => ({ context: state }),
       subscribe: (listener: () => void) => {
         listeners.add(listener);
         return () => listeners.delete(listener);
       },
-      trigger: {
-        sync: (event: unknown) => {
-          state = config.on.sync(state, event);
-          listeners.forEach((l) => l());
-        },
-      },
+      trigger,
     };
   }
   return {
@@ -191,6 +197,61 @@ describe("PageSpeedContext", () => {
   it("throws when selectors are used outside the provider", () => {
     expect(() => render(<OutsideProviderConsumer />)).toThrow(
       "PageSpeed insights store is unavailable outside the dashboard provider.",
+    );
+  });
+
+  it("filters store items when user label filter changes", () => {
+    const data = [
+      {
+        lighthouseResult: createLighthouseResult({
+          finalDisplayedUrl: "https://mobile.example.com",
+        }),
+        analysisUTCTimestamp: "2024-02-03T12:00:00.000Z",
+      },
+      {
+        lighthouseResult: createLighthouseResult({
+          finalDisplayedUrl: "https://desktop.example.com",
+          configSettings: { formFactor: "desktop" },
+        }),
+        analysisUTCTimestamp: "2024-02-04T12:00:00.000Z",
+      },
+    ];
+
+    function FilterConsumer() {
+      const store = useRequiredPageSpeedInsightsStore();
+      const items = usePageSpeedItems();
+      const reportTitle = usePageSpeedReportTitle();
+
+      return (
+        <>
+          <div data-testid="item-labels">{items.map((item) => item.label).join(",")}</div>
+          <div data-testid="filtered-report-title">{reportTitle}</div>
+          <button type="button" onClick={() => store.trigger.setUserLabelFilter({ labels: ["Mobile"] })}>
+            Filter mobile
+          </button>
+        </>
+      );
+    }
+
+    const { container, getByRole } = render(
+      <TestProvider data={data} labels={["Mobile", "Desktop"]} isLoading={false}>
+        <FilterConsumer />
+      </TestProvider>,
+    );
+
+    const mobileDate = new Date("2024-02-03T12:00:00.000Z").toLocaleDateString();
+    const desktopDate = new Date("2024-02-04T12:00:00.000Z").toLocaleDateString();
+
+    expect(container.querySelector('[data-testid="item-labels"]')).toHaveTextContent("Mobile,Desktop");
+    expect(container.querySelector('[data-testid="filtered-report-title"]')).toHaveTextContent(
+      `Report for https://mobile.example.com on Mobile at ${mobileDate}, https://desktop.example.com on Desktop at ${desktopDate}`,
+    );
+
+    getByRole("button", { name: "Filter mobile" }).click();
+
+    expect(container.querySelector('[data-testid="item-labels"]')).toHaveTextContent("Mobile");
+    expect(container.querySelector('[data-testid="filtered-report-title"]')).toHaveTextContent(
+      `Report for https://mobile.example.com on Mobile at ${mobileDate}`,
     );
   });
 });

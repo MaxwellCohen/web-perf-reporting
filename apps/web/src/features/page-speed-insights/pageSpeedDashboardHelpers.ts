@@ -88,30 +88,80 @@ export type PageSpeedInsightsStoreState = {
   data: NullablePageSpeedInsights[];
   labels: string[];
   isLoading: boolean;
+  allItems: InsightsContextItem[];
   items: InsightsContextItem[];
+  userLabelFilter: string[] | null;
   networkMetricSeries: NetworkMetricSeries[];
   networkRequestStats: NetworkRequestStatsRow[];
   reportTitle: string;
   fullPageScreenshots: Record<string, FullPageScreenshot | undefined | null>;
 };
 
+export function filterItemsByUserLabel<T extends { label: string }>(
+  items: T[],
+  userLabelFilter: string[] | null,
+): T[] {
+  if (!userLabelFilter || userLabelFilter.length === 0) {
+    return items;
+  }
+
+  return items.filter((item) => userLabelFilter.includes(item.label));
+}
+
+export function deriveFilteredDashboardState(
+  allItems: InsightsContextItem[],
+  userLabelFilter: string[] | null,
+) {
+  const items = filterItemsByUserLabel(allItems, userLabelFilter);
+  const networkMetricSeries = mapItemsToNetworkMetrics(items);
+  const networkRequestStats = mapNetworkMetricsToStats(networkMetricSeries);
+
+  return {
+    items,
+    networkMetricSeries,
+    networkRequestStats,
+    fullPageScreenshots: getFullPageScreenshotMap(items),
+    reportTitle: getDashboardTitle(items),
+  };
+}
+
+function normalizeUserLabelFilter(
+  labels: string[],
+  selectedLabels: string[],
+): string[] | null {
+  if (selectedLabels.length === 0 || selectedLabels.length === labels.length) {
+    return null;
+  }
+
+  return selectedLabels;
+}
+
 export function buildPageSpeedInsightsStoreState({
   data = [],
   labels,
   isLoading,
 }: PageSpeedInsightsStoreInput): PageSpeedInsightsStoreState {
-  const items = getDashboardItems(data, labels);
-  const networkMetricSeries = mapItemsToNetworkMetrics(items);
-  const networkRequestStats = mapNetworkMetricsToStats(networkMetricSeries);
+  const allItems = getDashboardItems(data, labels);
 
   return {
     data,
     labels,
     isLoading,
-    items,
-    networkMetricSeries,
-    networkRequestStats,
-    reportTitle: getDashboardTitle(items),
-    fullPageScreenshots: getFullPageScreenshotMap(items),
+    allItems,
+    userLabelFilter: null,
+    ...deriveFilteredDashboardState(allItems, null),
+  };
+}
+
+export function applyUserLabelFilterToState(
+  state: PageSpeedInsightsStoreState,
+  selectedLabels: string[],
+): PageSpeedInsightsStoreState {
+  const userLabelFilter = normalizeUserLabelFilter(state.labels, selectedLabels);
+
+  return {
+    ...state,
+    userLabelFilter,
+    ...deriveFilteredDashboardState(state.allItems, userLabelFilter),
   };
 }

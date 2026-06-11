@@ -8,7 +8,6 @@ import {
   type FlatColumnDef,
 } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
 import type { RowData } from "@tanstack/react-table-v9";
-export { booleanFilterFn } from "@/features/page-speed-insights/shared/filterFns";
 
 export function DataTableNoGrouping<T extends RowData>({
   data,

@@ -12,6 +12,7 @@ const {
 }));
 
 const resetColumnFiltersMock = vi.fn();
+const resetUserLabelFilterMock = vi.fn();
 
 let dashboardState = {
   isLoading: false,
@@ -28,7 +29,16 @@ vi.mock("@/features/page-speed-insights/PageSpeedContext", () => ({
   selectPageSpeedIsLoading: selectPageSpeedIsLoadingToken,
   selectPageSpeedItems: selectPageSpeedItemsToken,
   selectPageSpeedReportTitle: selectPageSpeedReportTitleToken,
-  usePageSpeedInsightsStore: () => ({ id: "store" }),
+  usePageSpeedInsightsStore: () => ({
+    id: "store",
+    trigger: { resetUserLabelFilter: resetUserLabelFilterMock },
+  }),
+  useRequiredPageSpeedInsightsStore: () => ({
+    id: "store",
+    trigger: { resetUserLabelFilter: resetUserLabelFilterMock },
+  }),
+  usePageSpeedItems: () => dashboardState.items,
+  usePageSpeedReportTitle: () => dashboardState.reportTitle,
 }));
 
 vi.mock("@xstate/store-react", () => ({
@@ -82,8 +92,8 @@ vi.mock("@/features/page-speed-insights/JSUsage/StringFilterHeader", () => ({
   StringFilterHeader: ({ name }: { name: string }) => <div>String filter: {name}</div>,
 }));
 
-vi.mock("@/features/page-speed-insights/JSUsage/TableControls", () => ({
-  DropdownFilter: ({ columnId }: { columnId: string }) => <div>Dropdown filter: {columnId}</div>,
+vi.mock("@/features/page-speed-insights/UserLabelFilter", () => ({
+  UserLabelFilter: () => <div>User label filter</div>,
 }));
 
 vi.mock("@/features/page-speed-insights/PageSpeedInsightsCopyButtons", () => ({
@@ -110,12 +120,14 @@ describe("pageSpeedInsightsDashboard", () => {
     };
     tableRows = [{ id: "row-1" }, { id: "row-2" }];
     resetColumnFiltersMock.mockReset();
+    resetUserLabelFilterMock.mockReset();
   });
 
   it("renders report title and mocked sections", () => {
     render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
 
     expect(screen.getByRole("heading", { level: 2, name: "Loaded report" })).toBeInTheDocument();
+    expect(screen.getByText("User label filter")).toBeInTheDocument();
     expect(screen.getByText("Entities table")).toBeInTheDocument();
     expect(screen.getByText("CWV metrics")).toBeInTheDocument();
     expect(screen.getByText("Category row: row-1")).toBeInTheDocument();
@@ -127,5 +139,6 @@ describe("pageSpeedInsightsDashboard", () => {
     fireEvent.click(screen.getByRole("button", { name: /reset filters/i }));
 
     expect(resetColumnFiltersMock).toHaveBeenCalledTimes(1);
+    expect(resetUserLabelFilterMock).toHaveBeenCalledTimes(1);
   });
 });

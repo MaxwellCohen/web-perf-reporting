@@ -3,7 +3,9 @@
 import { createContext, type ReactNode, useContext, useEffect } from "react";
 import { useSelector, useStore } from "@xstate/store-react";
 import {
+  applyUserLabelFilterToState,
   buildPageSpeedInsightsStoreState,
+  deriveFilteredDashboardState,
   type PageSpeedInsightsStoreInput,
   type PageSpeedInsightsStoreState,
 } from "@/features/page-speed-insights/pageSpeedDashboardHelpers";
@@ -13,9 +15,23 @@ function createPageSpeedInsightsStoreConfig(input: PageSpeedInsightsStoreInput) 
     context: buildPageSpeedInsightsStoreState(input),
     on: {
       sync: (
-        _context: PageSpeedInsightsStoreState,
+        context: PageSpeedInsightsStoreState,
         event: PageSpeedInsightsStoreInput,
-      ): PageSpeedInsightsStoreState => buildPageSpeedInsightsStoreState(event),
+      ): PageSpeedInsightsStoreState => {
+        const next = buildPageSpeedInsightsStoreState(event);
+
+        return {
+          ...next,
+          userLabelFilter: context.userLabelFilter,
+          ...deriveFilteredDashboardState(next.allItems, context.userLabelFilter),
+        };
+      },
+      setUserLabelFilter: (
+        context: PageSpeedInsightsStoreState,
+        event: { labels: string[] },
+      ): PageSpeedInsightsStoreState => applyUserLabelFilterToState(context, event.labels),
+      resetUserLabelFilter: (context: PageSpeedInsightsStoreState): PageSpeedInsightsStoreState =>
+        applyUserLabelFilterToState(context, context.labels),
     },
   };
 }
@@ -39,10 +55,17 @@ export type PageSpeedInsightsSnapshot = ReturnType<PageSpeedInsightsStore["getSn
 
 const PageSpeedInsightsStoreContext = createContext<PageSpeedInsightsStore | null>(null);
 
-export const selectPageSpeedItems = (snapshot: PageSpeedInsightsSnapshot) => snapshot.context.items;
+const selectPageSpeedItems = (snapshot: PageSpeedInsightsSnapshot) =>
+  snapshot.context.items;
 
-export const selectPageSpeedReportTitle = (snapshot: PageSpeedInsightsSnapshot) =>
+const selectPageSpeedReportTitle = (snapshot: PageSpeedInsightsSnapshot) =>
   snapshot.context.reportTitle;
+
+export const selectPageSpeedUserLabels = (snapshot: PageSpeedInsightsSnapshot) =>
+  snapshot.context.labels;
+
+export const selectPageSpeedUserLabelFilter = (snapshot: PageSpeedInsightsSnapshot) =>
+  snapshot.context.userLabelFilter;
 
 const selectPageSpeedFullPageScreenshots = (snapshot: PageSpeedInsightsSnapshot) =>
   snapshot.context.fullPageScreenshots;
@@ -64,7 +87,7 @@ export function PageSpeedInsightsStoreProvider({
   );
 }
 
-function useRequiredPageSpeedInsightsStore() {
+export function useRequiredPageSpeedInsightsStore() {
   const store = useContext(PageSpeedInsightsStoreContext);
 
   if (!store) {

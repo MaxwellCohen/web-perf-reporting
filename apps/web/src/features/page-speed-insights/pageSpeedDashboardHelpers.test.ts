@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import type { NullablePageSpeedInsights } from "@/lib/schema";
 import type { PageSpeedDashboardItem } from "@/lib/page-speed-insights/types";
 import {
+  applyUserLabelFilterToState,
+  deriveFilteredDashboardState,
+  filterItemsByUserLabel,
   getDashboardItems,
   getDashboardTitle,
   getFullPageScreenshotMap,
@@ -162,5 +165,79 @@ describe("pageSpeedDashboardHelpers", () => {
 
   it("returns an empty screenshot map when there are no items", () => {
     expect(getFullPageScreenshotMap([])).toEqual({});
+  });
+
+  it("filters dashboard items by user label", () => {
+    const items = [
+      asDashboardItem({ label: "Mobile", item: {} }),
+      asDashboardItem({ label: "Desktop", item: {} }),
+    ];
+
+    expect(filterItemsByUserLabel(items, null)).toEqual(items);
+    expect(filterItemsByUserLabel(items, ["Mobile"])).toEqual([items[0]]);
+    expect(filterItemsByUserLabel(items, [])).toEqual(items);
+  });
+
+  it("derives filtered store fields from all items", () => {
+    const allItems = [
+      asDashboardItem({ label: "Mobile", item: {} }),
+      asDashboardItem({ label: "Desktop", item: {} }),
+    ];
+
+    const filtered = deriveFilteredDashboardState(allItems, ["Mobile"]);
+
+    expect(filtered.items).toEqual([allItems[0]]);
+    expect(filtered.networkMetricSeries).toHaveLength(1);
+    expect(Object.keys(filtered.fullPageScreenshots)).toEqual(["Mobile"]);
+  });
+
+  it("updates store items when user label filter is applied", () => {
+    const allItems = [
+      asDashboardItem({ label: "Mobile", item: {} }),
+      asDashboardItem({ label: "Desktop", item: {} }),
+    ];
+    const baseState = {
+      data: [],
+      labels: ["Mobile", "Desktop"],
+      isLoading: false,
+      allItems,
+      items: allItems,
+      userLabelFilter: null,
+      networkMetricSeries: [],
+      networkRequestStats: [],
+      reportTitle: "Report",
+      fullPageScreenshots: {},
+    };
+
+    const nextState = applyUserLabelFilterToState(baseState, ["Desktop"]);
+
+    expect(nextState.userLabelFilter).toEqual(["Desktop"]);
+    expect(nextState.items).toEqual([allItems[1]]);
+    expect(nextState.allItems).toEqual(allItems);
+    expect(nextState.reportTitle).toBe(getDashboardTitle([allItems[1]]));
+  });
+
+  it("shows all items when user label filter is cleared", () => {
+    const allItems = [
+      asDashboardItem({ label: "Mobile", item: {} }),
+      asDashboardItem({ label: "Desktop", item: {} }),
+    ];
+    const baseState = {
+      data: [],
+      labels: ["Mobile", "Desktop"],
+      isLoading: false,
+      allItems,
+      items: [allItems[0]],
+      userLabelFilter: ["Mobile"],
+      networkMetricSeries: [],
+      networkRequestStats: [],
+      reportTitle: "Report",
+      fullPageScreenshots: {},
+    };
+
+    const nextState = applyUserLabelFilterToState(baseState, []);
+
+    expect(nextState.userLabelFilter).toBeNull();
+    expect(nextState.items).toEqual(allItems);
   });
 });
