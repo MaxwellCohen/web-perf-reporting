@@ -1,4 +1,3 @@
-import type { RowData } from "@tanstack/react-table-v9";
 import type { StockFilterFn } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 
 export const booleanFilterFn: StockFilterFn = (row, columnId, filterValue, _addMeta) => {

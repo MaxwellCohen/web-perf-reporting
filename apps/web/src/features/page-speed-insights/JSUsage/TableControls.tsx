@@ -23,6 +23,7 @@ import { useMemo } from "react";
 import { getPaginationState } from "@/features/page-speed-insights/tanstack-table-v9/tableStateHelpers";
 import { CopyTableButton } from "@/features/page-speed-insights/tanstack-table-v9/CopyTableButton";
 import { PaginationCard } from "@/features/page-speed-insights/tanstack-table-v9/PaginationCard";
+import { PaginatedTableControls } from "@/features/page-speed-insights/tanstack-table-v9/PaginatedTableControls";
 
 export { PaginationCard };
 
@@ -59,7 +60,7 @@ export function TableControls<T extends RowData>({
         </CopyTableButton>
       </div>
       <div className="flex flex-row gap-2">
-        <PaginationCard table={table} showManualControls />
+        <PaginatedTableControls table={table} showManualControls />
         <Card className="flex flex-col flex-wrap items-center gap-2 p-2">
           <ColumnSelector table={table} />
           <PageSizeSelector table={table} />

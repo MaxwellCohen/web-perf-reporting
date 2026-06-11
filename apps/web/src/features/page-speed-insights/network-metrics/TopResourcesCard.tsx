@@ -5,7 +5,7 @@ import { TableItem } from "@/lib/schema";
 import { getUrlString, getNumber } from "@/lib/utils";
 import { useMemo } from "react";
 import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
-import { PaginationCard } from "@/features/page-speed-insights/tanstack-table-v9/PaginationCard";
+import { PaginatedTableControls } from "@/features/page-speed-insights/tanstack-table-v9/PaginatedTableControls";
 import { createStringAggregatedCell } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
 import { sortByMaxValueComposite } from "@/features/page-speed-insights/shared/dataSortingHelpers";
 import {
@@ -108,7 +108,7 @@ export function TopResourcesCard() {
         <div className="w-full overflow-x-auto">
           <StockDataTable table={table} className="w-full" />
         </div>
-        <PaginationCard table={table} showManualControls />
+        <PaginatedTableControls table={table} showManualControls className="mt-4 justify-center" />
       </CardContent>
     </Card>
   );
