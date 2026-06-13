@@ -1,6 +1,27 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import { type ComponentType, useEffect, useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PageSpeedInsightsDashboardContent } from "./PageSpeedInsightsDashboardWrapper";
+
+vi.mock("next/dynamic", () => ({
+  default: (loader: () => Promise<ComponentType<unknown> | Record<string, ComponentType<unknown>>>) => {
+    return function DynamicComponent(props: Record<string, unknown>) {
+      const [Component, setComponent] = useState<ComponentType<unknown> | null>(null);
+
+      useEffect(() => {
+        void loader().then((resolved) => {
+          const nextComponent =
+            typeof resolved === "function"
+              ? resolved
+              : (resolved.PageSpeedInsightsDashboard ?? resolved.default ?? null);
+          setComponent(() => nextComponent);
+        });
+      }, []);
+
+      return Component ? <Component {...props} /> : null;
+    };
+  },
+}));
 
 const usePageSpeedInsightsQueryMock = vi.fn();
 
@@ -64,8 +85,9 @@ describe("PageSpeedInsightsDashboardContent", () => {
     const { container } = render(<PageSpeedInsightsDashboardContent publicId="test-id" />);
 
     await waitFor(() => {
-      expect(container.firstChild).toMatchSnapshot();
+      expect(screen.getByTestId("page-speed-dashboard")).toBeInTheDocument();
     });
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it("shows worker error message when report status is failed", async () => {
@@ -119,7 +141,8 @@ describe("PageSpeedInsightsDashboardContent", () => {
     const { container } = render(<PageSpeedInsightsDashboardContent publicId="test-id" />);
 
     await waitFor(() => {
-      expect(container.firstChild).toMatchSnapshot();
+      expect(screen.getByTestId("page-speed-dashboard")).toBeInTheDocument();
     });
+    expect(container.firstChild).toMatchSnapshot();
   });
 });

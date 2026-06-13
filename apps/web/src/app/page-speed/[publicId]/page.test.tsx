@@ -1,6 +1,26 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import type { ReactNode } from "react";
+import { type ComponentType, type ReactNode, useEffect, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
+
+vi.mock("next/dynamic", () => ({
+  default: (loader: () => Promise<ComponentType<unknown> | Record<string, ComponentType<unknown>>>) => {
+    return function DynamicComponent(props: Record<string, unknown>) {
+      const [Component, setComponent] = useState<ComponentType<unknown> | null>(null);
+
+      useEffect(() => {
+        void loader().then((resolved) => {
+          const nextComponent =
+            typeof resolved === "function"
+              ? resolved
+              : (resolved.PageSpeedInsightsDashboard ?? resolved.default ?? null);
+          setComponent(() => nextComponent);
+        });
+      }, []);
+
+      return Component ? <Component {...props} /> : null;
+    };
+  },
+}));
 
 const usePageSpeedInsightsQueryMock = vi.fn();
 
@@ -51,8 +71,9 @@ describe("page-speed [publicId] page", () => {
     const { container } = render(component);
 
     await waitFor(() => {
-      expect(container.firstChild).toMatchSnapshot();
+      expect(screen.getByTestId("page-speed-dashboard")).toBeInTheDocument();
     });
+    expect(container.firstChild).toMatchSnapshot();
     expect(usePageSpeedInsightsQueryMock).toHaveBeenCalledWith("report-xyz-123");
   });
 });

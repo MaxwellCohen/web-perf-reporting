@@ -1,8 +1,14 @@
 "use client";
 import { LoadingMessage } from "@/components/common/LoadingMessage";
 import { ReportErrorCard } from "@/components/common/ErrorMessage";
-import { PageSpeedInsightsDashboard } from "@/features/page-speed-insights/pageSpeedInsightsDashboard";
 import { usePageSpeedInsightsQueryByPublicId } from "@/features/page-speed-insights/data/usePageSpeedInsightsQuery";
+import dynamic from "next/dynamic";
+
+const PageSpeedInsightsDashboard = dynamic(() =>
+  import("@/features/page-speed-insights/pageSpeedInsightsDashboard").then(
+    (mod) => mod.PageSpeedInsightsDashboard,
+  ),
+);
 
 export function PageSpeedInsightsDashboardContent({ publicId }: { publicId: string }) {
   const query = usePageSpeedInsightsQueryByPublicId(publicId);

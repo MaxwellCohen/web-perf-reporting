@@ -134,6 +134,7 @@ describe("pageSpeedInsightsDashboard", () => {
   });
 
   it("calls resetColumnFilters when Reset filters is clicked", () => {
+    dashboardState.items = [{ label: "test", item: {} }];
     render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
 
     fireEvent.click(screen.getByRole("button", { name: /reset filters/i }));
