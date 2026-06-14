@@ -13,7 +13,11 @@ exports[`NetworkRequestsSummaryCard > does not show Report column when single va
       Network Requests Summary
     </div>
     <button
+      aria-expanded="false"
+      aria-haspopup="menu"
       class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
+      data-state="closed"
+      id="radix-_r_2_"
       title="Copy table"
       type="button"
     >
@@ -134,7 +138,11 @@ exports[`NetworkRequestsSummaryCard > filters out stats with zero totalRequests 
       Network Requests Summary
     </div>
     <button
+      aria-expanded="false"
+      aria-haspopup="menu"
       class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
+      data-state="closed"
+      id="radix-_r_6_"
       title="Copy table"
       type="button"
     >
@@ -255,7 +263,11 @@ exports[`NetworkRequestsSummaryCard > renders card with title and table when sta
       Network Requests Summary
     </div>
     <button
+      aria-expanded="false"
+      aria-haspopup="menu"
       class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
+      data-state="closed"
+      id="radix-_r_0_"
       title="Copy table"
       type="button"
     >
@@ -376,7 +388,11 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
       Network Requests Summary
     </div>
     <button
+      aria-expanded="false"
+      aria-haspopup="menu"
       class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
+      data-state="closed"
+      id="radix-_r_4_"
       title="Copy table"
       type="button"
     >
@@ -541,7 +557,11 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
       Network Requests Summary
     </div>
     <button
+      aria-expanded="false"
+      aria-haspopup="menu"
       class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
+      data-state="closed"
+      id="radix-_r_8_"
       title="Copy table"
       type="button"
     >

@@ -5,6 +5,7 @@ import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack
 import { useSimpleTable } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
 import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
 import { tableToCsv } from "@/features/page-speed-insights/tanstack-table-v9/tableToCsv";
+import { tableToMarkdown } from "@/features/page-speed-insights/tanstack-table-v9/tableToMarkdown";
 
 type Row = {
   id: string;
@@ -84,5 +85,26 @@ describe("tableToCsv", () => {
     expect(lines[0]).toBe("Name");
     expect(lines[1]).toBe("Row 0");
     expect(lines[5]).toBe("Row 4");
+  });
+});
+
+describe("tableToMarkdown", () => {
+  it("serializes visible columns and displayed rows as a markdown table", () => {
+    const columnHelper = createStockColumnHelper<Row>();
+    const columns = [
+      columnHelper.accessor("id", { header: "ID" }),
+      columnHelper.accessor("name", { header: "Name" }),
+      columnHelper.accessor("score", { header: "Score" }),
+    ];
+    const data: Row[] = [
+      { id: "1", name: "Alpha", score: 90 },
+      { id: "2", name: "Beta", score: 75 },
+    ];
+
+    const { result } = renderHook(() => useSimpleTable({ data, columns: columns as never }));
+
+    expect(tableToMarkdown(result.current as never)).toBe(
+      "| ID | Name | Score |\n| --- | --- | --- |\n| 1 | Alpha | 90 |\n| 2 | Beta | 75 |",
+    );
   });
 });

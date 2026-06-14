@@ -26,7 +26,11 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
           class="mb-2 flex justify-end"
         >
           <button
+            aria-expanded="false"
+            aria-haspopup="menu"
             class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
+            data-state="closed"
+            id="radix-_r_0_"
             title="Copy table"
             type="button"
           >
@@ -299,7 +303,11 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
           class="mb-2 flex justify-end"
         >
           <button
+            aria-expanded="false"
+            aria-haspopup="menu"
             class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
+            data-state="closed"
+            id="radix-_r_2_"
             title="Copy table"
             type="button"
           >
@@ -657,7 +665,11 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
           class="mb-2 flex justify-end"
         >
           <button
+            aria-expanded="false"
+            aria-haspopup="menu"
             class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
+            data-state="closed"
+            id="radix-_r_4_"
             title="Copy table"
             type="button"
           >
