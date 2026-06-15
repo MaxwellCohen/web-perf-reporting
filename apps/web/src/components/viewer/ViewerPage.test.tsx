@@ -2,8 +2,10 @@ import { act, fireEvent, render, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/features/page-speed-insights/pageSpeedInsightsDashboard", () => ({
-  PageSpeedInsightsDashboard: ({ data }: { data: unknown[] }) => (
-    <div data-testid="dashboard">{data.length} reports</div>
+  PageSpeedInsightsDashboard: ({ data, labels }: { data: unknown[]; labels: string[] }) => (
+    <div data-testid="dashboard">
+      {data.length} reports, labels: {labels.join(", ")}
+    </div>
   ),
 }));
 
@@ -25,24 +27,28 @@ describe("ViewerPage", () => {
   beforeEach(() => {
     window.alert = mockAlert;
     window.location.hash = "";
+    mockAlert.mockClear();
   });
 
-  it("renders input form when no data", () => {
+  it("renders upload and paste tabs when no data", () => {
     const { container } = render(<ViewerPage />);
-    expect(container.textContent).toContain("Enter the lighthouse JSON Data here");
-    expect(container.querySelector("textarea")).toBeTruthy();
-    expect(container.querySelector("button")).toBeTruthy();
+    expect(container.textContent).toContain("Upload JSON files");
+    expect(container.textContent).toContain("Paste JSON");
+    expect(container.textContent).toContain("Show Report");
   });
 
-  it("shows dashboard when valid JSON submitted", async () => {
-    const { container } = render(<ViewerPage />);
-    const textarea = container.querySelector("textarea")!;
-    const button = container.querySelector("button")!;
+  it("shows dashboard when JSON files uploaded", async () => {
+    const { container, getByLabelText } = render(<ViewerPage />);
+    const file = new File(
+      [JSON.stringify({ lighthouseResult: { categories: {} } })],
+      "mobile.json",
+      { type: "application/json" },
+    );
 
-    fireEvent.change(textarea, {
-      target: { value: JSON.stringify({ lighthouseResult: { categories: {} } }) },
+    fireEvent.change(getByLabelText("Upload JSON Files"), {
+      target: { files: [file] },
     });
-    fireEvent.click(button);
+    fireEvent.click(container.querySelector("button.w-full")!);
 
     await act(async () => {
       await new Promise((r) => setTimeout(r, 0));
@@ -50,24 +56,22 @@ describe("ViewerPage", () => {
 
     await waitFor(() => {
       expect(container.querySelector('[data-testid="dashboard"]')).toBeTruthy();
+      expect(container.textContent).toContain("labels: mobile");
     });
   });
 
-  it("shows alert when invalid JSON submitted", async () => {
+  it("shows alert when submitting with no files", async () => {
     const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    const { container } = render(<ViewerPage />);
-    const textarea = container.querySelector("textarea")!;
-    const button = container.querySelector("button")!;
+    const { getByText } = render(<ViewerPage />);
 
-    fireEvent.change(textarea, { target: { value: "invalid json" } });
-    fireEvent.click(button);
+    fireEvent.click(getByText("Show Report"));
 
     await act(async () => {
       await new Promise((r) => setTimeout(r, 0));
     });
 
     await waitFor(() => {
-      expect(mockAlert).toHaveBeenCalledWith("Invalid JSON");
+      expect(mockAlert).toHaveBeenCalledWith("Please upload at least one JSON file");
     });
     consoleErrorSpy.mockRestore();
   });

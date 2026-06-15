@@ -1,12 +1,26 @@
 "use client";
 import { PageSpeedInsightsDashboard } from "@/features/page-speed-insights/pageSpeedInsightsDashboard";
 import { PageSpeedInsights } from "@/lib/schema";
-import { useEffect, useRef, useState } from "react";
-import { Details } from "@/components/ui/accordion";
-import { Textarea } from "@/components/ui/textarea";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TextEncoding } from "lighthouse/report/renderer/text-encoding";
 import pako from "pako";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Code, FileJson } from "lucide-react";
+import type { LhJsonFileEntry, LhJsonTextEntry } from "@/components/lh/types";
+import { LhFileInput } from "@/components/lh/inputs/LhFileInput";
+import { LhTextInput } from "@/components/lh/inputs/LhTextInput";
+import { collectViewerReports } from "@/components/viewer/collectViewerReports";
+import { parseViewerJsonString } from "@/components/viewer/parseViewerJson";
+
 if (globalThis.window !== undefined) {
   window.pako = pako;
 }
@@ -32,23 +46,11 @@ function useHash() {
 export default function ViewerPage() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<PageSpeedInsights[]>([]);
-  const textRef = useRef<HTMLTextAreaElement>(null);
+  const [labels, setLabels] = useState<string[]>([]);
+  const [jsonInputs, setJsonInputs] = useState<LhJsonTextEntry[]>([{ name: "", content: "" }]);
+  const [jsonFiles, setJsonFiles] = useState<LhJsonFileEntry[]>([]);
+  const [activeTab, setActiveTab] = useState("file");
   const [hash, setHash] = useHash();
-
-  const handleJsonSubmit = async (jsonString: string) => {
-    try {
-      let rawData = JSON.parse(jsonString) as unknown;
-      rawData = (rawData as PageSpeedInsights).lighthouseResult
-        ? { lighthouseResult: (rawData as PageSpeedInsights).lighthouseResult }
-        : rawData;
-      setData(Array.isArray(rawData) ? rawData : rawData ? [rawData as PageSpeedInsights] : []);
-    } catch (e) {
-      console.error("JSON parsing error:", e);
-      alert("Invalid JSON");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     if (!hash) return;
@@ -57,12 +59,27 @@ export default function ViewerPage() {
 
     try {
       const text = TextEncoding.fromBase64(urlData, { gzip: true });
-      const rawData = JSON.parse(text) as unknown;
-      setData(Array.isArray(rawData) ? rawData : rawData ? [rawData as PageSpeedInsights] : []);
+      const reports = parseViewerJsonString(text);
+      setData(reports);
+      setLabels(reports.map((_, index) => `Report ${index + 1}`));
     } catch (e) {
       console.error("Data parsing error:", e);
     }
   }, [hash]);
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      const result = await collectViewerReports(activeTab, jsonInputs, jsonFiles);
+      setData(result.data);
+      setLabels(result.labels);
+    } catch (e) {
+      console.error("JSON parsing error:", e);
+      alert(e instanceof Error ? e.message : "Invalid JSON");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (Array.isArray(data) && data.length) {
     return (
@@ -72,6 +89,7 @@ export default function ViewerPage() {
             variant="link"
             onClick={() => {
               setData([]);
+              setLabels([]);
               setHash("");
             }}
             className="text-sm text-muted-foreground hover:text-primary"
@@ -79,31 +97,38 @@ export default function ViewerPage() {
             ← Back to input
           </Button>
         </div>
-        <PageSpeedInsightsDashboard data={data} labels={[]} hideReport />
+        <PageSpeedInsightsDashboard data={data} labels={labels} hideReport />
       </div>
     );
   }
 
   return (
-    <Details>
-      <summary className="flex flex-col gap-2">
-        <div className="text-lg font-bold">Enter the lighthouse JSON Data here</div>
-      </summary>
-      <Textarea ref={textRef} />
-      <Button
-        disabled={loading}
-        className="mt-4"
-        type="button"
-        onClick={() => {
-          const value = textRef.current?.value;
-          if (!value) return;
-
-          setLoading(true);
-          setTimeout(() => handleJsonSubmit(value), 0);
-        }}
-      >
-        {loading ? "Loading..." : "Show Report"}
-      </Button>
-    </Details>
+    <Card className="mx-auto w-full max-w-3xl">
+      <CardHeader>
+        <CardTitle>Lighthouse Report Viewer</CardTitle>
+        <CardDescription>Upload or paste one or more Lighthouse JSON reports</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-6 grid grid-cols-2">
+            <TabsTrigger value="file" className="flex items-center gap-2">
+              <FileJson size={16} />
+              <span>Upload JSON files</span>
+            </TabsTrigger>
+            <TabsTrigger value="text" className="flex items-center gap-2">
+              <Code size={16} />
+              <span>Paste JSON</span>
+            </TabsTrigger>
+          </TabsList>
+          <LhFileInput jsonFiles={jsonFiles} setJsonFiles={setJsonFiles} />
+          <LhTextInput jsonInputs={jsonInputs} setJsonInputs={setJsonInputs} />
+        </Tabs>
+      </CardContent>
+      <CardFooter>
+        <Button type="button" className="w-full" disabled={loading} onClick={handleSubmit}>
+          {loading ? "Loading..." : "Show Report"}
+        </Button>
+      </CardFooter>
+    </Card>
   );
 }
