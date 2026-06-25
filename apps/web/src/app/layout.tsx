@@ -6,6 +6,7 @@ import "./globals.css";
 import { PostHogAnalytics } from "@/app/PostHogAnalytics";
 import { PostHogProvider, QueryProvider } from "@/app/providers";
 import { TopNav } from "@/components/navigation/TopNav";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,6 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
   title: "Web Performance Report",
   description: "Web performance report from CRUX data",
 };
