@@ -1,44 +1,9 @@
-import { fireEvent, render } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { flexRender } from "@tanstack/react-table-v9";
 import { useSimpleTable } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
-import {
-  columns,
-  makeSortingHeading,
-} from "@/features/page-speed-insights/JSUsage/jsUsageTableColumns";
+import { columns } from "@/features/page-speed-insights/JSUsage/jsUsageTableColumns";
 import type { TreeMapNode } from "@/lib/schema";
-
-vi.mock("@/components/ui/button", () => ({
-  Button: ({
-    children,
-    onClick,
-    "aria-label": ariaLabel,
-  }: {
-    children: React.ReactNode;
-    onClick?: () => void;
-    "aria-label"?: string;
-  }) => (
-    <button type="button" onClick={onClick} aria-label={ariaLabel}>
-      {children}
-    </button>
-  ),
-}));
-
-vi.mock("lucide-react", () => ({
-  ArrowUp: () => <span data-testid="arrow-up" />,
-  MinusIcon: () => <span data-testid="minus" />,
-}));
-
-vi.mock("@/features/page-speed-insights/JSUsage/StringFilterHeader", () => ({
-  StringFilterHeader: ({ name }: { name: string }) => (
-    <span data-testid="string-filter">{name}</span>
-  ),
-}));
-
-vi.mock("@/features/page-speed-insights/JSUsage/jsUsageTableFilters", () => ({
-  RangeFilter: () => <span data-testid="range-filter" />,
-  numericRangeFilter: () => true,
-}));
 
 vi.mock("@/features/page-speed-insights/JSUsage/jsUsageTableParts", () => ({
   ExpandRow: () => <span data-testid="expand-row" />,
@@ -96,19 +61,20 @@ function CellRenderer({ data, columnId }: { data: TreeMapNode[]; columnId: strin
 }
 
 describe("jsUsageTableColumns", () => {
-  describe("makeSortingHeading", () => {
-    it("renders name and string filter", () => {
+  describe("column headers", () => {
+    it("renders plain string header for name column", () => {
       const { container } = render(<TableWithNameHeader />);
       expect(container.textContent).toContain("Name");
-      expect(container.querySelector('[data-testid="string-filter"]')).toBeTruthy();
     });
 
-    it("sort button is clickable", () => {
-      const { container } = render(<TableWithNameHeader />);
-      const btn = container.querySelector('button[aria-label="Sort column Name"]');
-      expect(btn).toBeTruthy();
-      fireEvent.click(btn!);
-      expect(container.firstChild).toBeTruthy();
+    it("uses includesString filter for name column", () => {
+      const nameColumn = columns[2];
+      expect(nameColumn.filterFn).toBe("includesString");
+    });
+
+    it("uses inNumberRange filter for bytes columns", () => {
+      expect(columns[5].filterFn).toBe("inNumberRange");
+      expect(columns[6].filterFn).toBe("inNumberRange");
     });
   });
 

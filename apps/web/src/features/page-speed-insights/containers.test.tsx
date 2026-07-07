@@ -10,6 +10,7 @@ import {
 
 vi.mock("lucide-react", () => ({
   ChevronDown: () => <span data-testid="chevron" />,
+  ChevronUp: () => <span data-testid="chevron-up" />,
   ListFilter: () => <span data-testid="list-filter" />,
   ArrowUp: () => <span data-testid="arrow-up" />,
   ChevronRightIcon: () => <span data-testid="chevron-right" />,
@@ -171,6 +172,17 @@ vi.mock("@/features/page-speed-insights/network-metrics/TimingMetricsCard", () =
   },
 }));
 
+vi.mock("@/features/page-speed-insights/network-metrics/SupplementaryTimingCard", () => ({
+  SupplementaryTimingCard: () => {
+    const series = mapItemsToNetworkMetrics(pageSpeedItems);
+    return <div>Supplementary timing: {series.map((metric) => metric.ttfb).join(",")}</div>;
+  },
+}));
+
+vi.mock("@/features/page-speed-insights/network-metrics/TimelineChartCard", () => ({
+  TimelineChartCard: () => <div>Timeline chart</div>,
+}));
+
 vi.mock("@/features/page-speed-insights/network-metrics/TimelineCard", () => ({
   TimelineCard: () => {
     const series = mapItemsToNetworkMetrics(pageSpeedItems);
@@ -212,6 +224,16 @@ vi.mock("@/features/page-speed-insights/network-metrics/ResourceTypeBreakdownCar
   },
 }));
 
+vi.mock("@/features/page-speed-insights/network-metrics/ResourceTypeChartCard", () => ({
+  ResourceTypeChartCard: () => <div>Resource type chart</div>,
+}));
+
+vi.mock("@/features/page-speed-insights/network-metrics/OriginLatencyChartCard", () => ({
+  OriginLatencyChartCard: ({ mode }: { mode: string }) => (
+    <div>Origin latency chart: {mode}</div>
+  ),
+}));
+
 vi.mock("@/features/page-speed-insights/network-metrics/TopResourcesCard", () => ({
   TopResourcesCard: () => {
     const stats = mapNetworkMetricsToStats(mapItemsToNetworkMetrics(pageSpeedItems));
@@ -234,6 +256,10 @@ vi.mock("@/features/page-speed-insights/javascript-metrics/JavaScriptSummaryCard
   ),
 }));
 
+vi.mock("@/features/page-speed-insights/javascript-metrics/JavaScriptSummaryChartCard", () => ({
+  JavaScriptSummaryChartCard: () => <div>JavaScript summary chart</div>,
+}));
+
 vi.mock("@/features/page-speed-insights/javascript-metrics/TaskSummaryCard", () => ({
   TaskSummaryCard: ({
     metrics,
@@ -249,16 +275,28 @@ vi.mock("@/features/page-speed-insights/javascript-metrics/TaskSummaryCard", () 
   ),
 }));
 
+vi.mock("@/features/page-speed-insights/javascript-metrics/TaskThresholdChartCard", () => ({
+  TaskThresholdChartCard: () => <div>Task threshold chart</div>,
+}));
+
 vi.mock("@/features/page-speed-insights/javascript-metrics/BootupTimeCard", () => ({
   BootupTimeCard: ({ metrics }: { metrics: Array<{ bootupTime: unknown[] }> }) => (
     <div>Bootup metrics: {metrics.map((metric) => metric.bootupTime.length).join(",")}</div>
   ),
 }));
 
+vi.mock("@/features/page-speed-insights/javascript-metrics/BootupTimeChartCard", () => ({
+  BootupTimeChartCard: () => <div>Bootup time chart</div>,
+}));
+
 vi.mock("@/features/page-speed-insights/javascript-metrics/MainThreadWorkCard", () => ({
   MainThreadWorkCard: ({ metrics }: { metrics: Array<{ mainThreadWork: unknown[] }> }) => (
     <div>Main thread work: {metrics.map((metric) => metric.mainThreadWork.length).join(",")}</div>
   ),
+}));
+
+vi.mock("@/features/page-speed-insights/javascript-metrics/MainThreadWorkChartCard", () => ({
+  MainThreadWorkChartCard: () => <div>Main thread work chart</div>,
 }));
 
 vi.mock("@/features/page-speed-insights/javascript-metrics/UnusedJavaScriptCard", () => ({
@@ -279,8 +317,24 @@ vi.mock("@/features/page-speed-insights/javascript-metrics/LegacyJavaScriptCard"
   ),
 }));
 
+vi.mock("@/features/page-speed-insights/lh-categories/table/EntitiesTable", () => ({
+  EntitiesTableCard: () => <div>Entities table card</div>,
+  useEntitiesTableData: () => ({ data: [], columns: [], hasEntities: false }),
+}));
+
 vi.mock("@/features/page-speed-insights/javascript-metrics/extractJSMetrics", () => ({
   extractJSMetrics: (item: unknown) => extractJSMetricsMock(item),
+}));
+
+vi.mock("@/features/page-speed-insights/JSUsage/JSUsageSection", () => ({
+  JSUsageSection: () => <div>JS usage section</div>,
+  JSUsageCardSection: () => <div>JS usage card section</div>,
+}));
+
+vi.mock("@/features/page-speed-insights/RecommendationsSection/RecommendationsSummary", () => ({
+  RecommendationsSummary: () => <div>Recommendations summary</div>,
+  getQuickWinRecommendations: (recs: Array<{ priority: string; impact?: { savings?: number } }>) =>
+    recs.filter((r) => r.priority === "high" && (r.impact?.savings ?? 0) > 0).slice(0, 5),
 }));
 
 vi.mock("@/features/page-speed-insights/RecommendationsSection/analyzeAudits", () => ({
@@ -320,7 +374,10 @@ vi.mock("@/features/page-speed-insights/RecommendationsSection/RecommendationIte
 import { CWVMetricsComponent } from "@/features/page-speed-insights/CWVMetricsComponent";
 import { JavaScriptPerformanceComponent } from "@/features/page-speed-insights/javascript-metrics/JavaScriptPerformanceComponent";
 import { LoadingExperience } from "@/features/page-speed-insights/loading-experience";
-import { NetworkMetricsComponent } from "@/features/page-speed-insights/network-metrics";
+import {
+  LoadTimelineSection,
+  NetworkResourcesSection,
+} from "@/features/page-speed-insights/network-metrics";
 import { RecommendationsSection } from "@/features/page-speed-insights/RecommendationsSection/RecommendationsSection";
 import {
   ScoreDisplay,
@@ -427,11 +484,23 @@ describe("page-speed container coverage", () => {
 
     const { container } = render(
       <Accordion type="multiple">
-        <NetworkMetricsComponent />
+        <LoadTimelineSection />
       </Accordion>,
     );
 
-    expect(container.querySelector('[value="networkMetrics"]')).toBeNull();
+    expect(container.querySelector('[value="loadTimeline"]')).toBeNull();
+  });
+
+  it("returns null when network resources items is empty", () => {
+    pageSpeedItems = [];
+
+    const { container } = render(
+      <Accordion type="multiple">
+        <NetworkResourcesSection />
+      </Accordion>,
+    );
+
+    expect(container.querySelector('[value="networkResources"]')).toBeNull();
   });
 
   it("renders the cwv summary cards when audits are available", () => {
@@ -495,7 +564,7 @@ describe("page-speed container coverage", () => {
     expect((container.textContent?.match(/Score chart:/g) ?? []).length).toBe(5);
   });
 
-  it("aggregates network metrics before rendering the child cards", () => {
+  it("aggregates load timeline metrics before rendering the child cards", () => {
     pageSpeedItems = [
       {
         label: "Mobile",
@@ -523,6 +592,41 @@ describe("page-speed container coverage", () => {
                       observedLargestContentfulPaintAllFrames: 1250,
                       observedLastVisualChange: 1300,
                       observedTraceEnd: 1500,
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+    ];
+
+    const { container } = render(
+      <Accordion type="multiple" defaultValue={["loadTimeline"]}>
+        <LoadTimelineSection />
+      </Accordion>,
+    );
+
+    expect(container.textContent).toContain("Timeline chart");
+    expect(container.textContent).toContain("Timeline metrics: 150");
+    expect(container.textContent).toContain("Supplementary timing: 100");
+    expect(container.textContent).toContain("LCP breakdown count: 1");
+  });
+
+  it("aggregates network resource metrics before rendering the child cards", () => {
+    pageSpeedItems = [
+      {
+        label: "Mobile",
+        item: {
+          lighthouseResult: {
+            audits: {
+              metrics: {
+                details: {
+                  items: [
+                    {
+                      timeToFirstByte: 100,
+                      observedFirstPaint: 150,
                     },
                   ],
                 },
@@ -556,17 +660,17 @@ describe("page-speed container coverage", () => {
     ];
 
     const { container } = render(
-      <Accordion type="multiple" defaultValue={["networkMetrics"]}>
-        <NetworkMetricsComponent />
+      <Accordion type="multiple" defaultValue={["networkResources"]}>
+        <NetworkResourcesSection />
       </Accordion>,
     );
 
     expect(container.textContent).toContain("Network summary: 2");
-    expect(container.textContent).toContain("Timing metrics: 100");
-    expect(container.textContent).toContain("Timeline metrics: 150");
-    expect(container.textContent).toContain("LCP breakdown count: 1");
+    expect(container.textContent).toContain("Origin latency chart: rtt");
+    expect(container.textContent).toContain("Origin latency chart: latency");
     expect(container.textContent).toContain("RTT metrics: 1");
     expect(container.textContent).toContain("Server metrics: 1");
+    expect(container.textContent).toContain("Resource type chart");
     expect(container.textContent).toContain("Resource types: Script|Stylesheet");
     expect(container.textContent).toContain("Top resources: https://cdn.example.com/app.js");
   });
@@ -605,18 +709,21 @@ describe("page-speed container coverage", () => {
     });
 
     const { container } = render(
-      <Accordion type="multiple" defaultValue={["javascriptPerformance"]}>
+      <Accordion type="multiple" defaultValue={["javascriptPerformance", "scriptOptimizationAudits"]}>
         <JavaScriptPerformanceComponent />
       </Accordion>,
     );
 
     expect(container.textContent).toContain("JavaScript summary: 1/10,0/0");
+    expect(container.textContent).toContain("JavaScript summary chart");
+    expect(container.textContent).toContain("Task threshold chart");
     expect(container.textContent).toContain("Task summary: 1/2,0/0");
+    expect(container.textContent).toContain("Bootup time chart");
     expect(container.textContent).toContain("Bootup metrics: 1,0");
+    expect(container.textContent).toContain("Main thread work chart");
     expect(container.textContent).toContain("Main thread work: 1,0");
-    expect(container.textContent).toContain("Unused JS: 1,0");
-    expect(container.textContent).toContain("Unminified JS: 1,0");
-    expect(container.textContent).toContain("Legacy JS: 1,0");
+    expect(container.textContent).toContain("Script Optimization Audits");
+    expect(container.textContent).toContain("JS usage card section");
   });
 
   it("filters recommendation items down to entries with details and toggles expansion", () => {
@@ -652,6 +759,7 @@ describe("page-speed container coverage", () => {
     );
 
     expect(container.textContent).toContain("Recommendations");
+    expect(container.textContent).toContain("Recommendations summary");
     expect(container.textContent).toContain("Filter summary: 2/2");
     expect(container.textContent).toContain("Compress images");
     expect(container.textContent).toContain("Inline critical CSS");

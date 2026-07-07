@@ -1,5 +1,7 @@
 "use client";
 
+import { getNetworkBarColor } from "@/features/page-speed-insights/shared/networkResourceColors";
+
 type NetworkWaterfallCellProps = {
   /** Start time in ms (e.g. networkRequestTime) */
   requestTime: number;
@@ -18,23 +20,6 @@ type NetworkWaterfallCellProps = {
   /** Show start and end time labels on the waterfall */
   showTimeLabels?: boolean;
 };
-
-const RESOURCE_TYPE_COLORS: Record<string, string> = {
-  Document: "bg-amber-500/90 dark:bg-amber-500/80",
-  Script: "bg-amber-400/90 dark:bg-amber-400/80",
-  Stylesheet: "bg-violet-500/90 dark:bg-violet-400/80",
-  Font: "bg-emerald-600/90 dark:bg-emerald-500/80",
-  Image: "bg-sky-500/90 dark:bg-sky-400/80",
-  Media: "bg-rose-500/90 dark:bg-rose-400/80",
-  XHR: "bg-teal-500/90 dark:bg-teal-400/80",
-  Fetch: "bg-teal-500/90 dark:bg-teal-400/80",
-  Other: "bg-slate-500/80 dark:bg-slate-400/70",
-};
-
-function getBarColor(resourceType?: string): string {
-  if (!resourceType) return RESOURCE_TYPE_COLORS.Other ?? "bg-slate-500/80";
-  return RESOURCE_TYPE_COLORS[resourceType] ?? RESOURCE_TYPE_COLORS.Other;
-}
 
 /**
  * Renders a single horizontal bar in a network waterfall (request start → end on a time axis).
@@ -70,7 +55,7 @@ export function NetworkWaterfallCell({
   const widthPct = (duration / range) * 100;
   const minWidthPct = (2 / range) * 100; // at least 2ms visible
 
-  const colorClass = getBarColor(resourceType);
+  const colorClass = getNetworkBarColor(resourceType);
 
   return (
     <div className="flex flex-col gap-0.5 min-w-0" style={{ width }}>

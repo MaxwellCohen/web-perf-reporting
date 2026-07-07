@@ -1,8 +1,8 @@
 "use client";
 import { TreeMapData } from "@/lib/schema";
 import { useMemo } from "react";
-import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
 import { flattenTreeMapNode } from "@/features/page-speed-insights/flattenTreeMapNode";
+import { useScriptTreemapItems } from "@/features/page-speed-insights/script-treemap/useScriptTreemapItems";
 import { Card, CardHeader } from "@/components/ui/card";
 import { JSUsageTableWithControls } from "@/features/page-speed-insights/JSUsage/JSUsageTable";
 import { ClientOnly } from "@/components/common/ClientOnly";
@@ -10,17 +10,7 @@ import { Details } from "@/components/ui/accordion";
 import { accordionSectionTitleClassName } from "@/components/ui/accordion-section-title-trigger";
 
 export function JSUsageSection() {
-  const items = usePageSpeedItems();
-  const treeDataArr = useMemo(
-    () =>
-      items
-        .map(({ item, label }) => ({
-          treeData: item.lighthouseResult?.audits?.["script-treemap-data"]?.details as TreeMapData,
-          label,
-        }))
-        .filter(({ treeData }) => treeData?.type === "treemap-data"),
-    [items],
-  );
+  const treeDataArr = useScriptTreemapItems();
   if (treeDataArr.length === 0) return null;
   return (
     <>
@@ -32,17 +22,7 @@ export function JSUsageSection() {
 }
 
 export function JSUsageCardSection() {
-  const items = usePageSpeedItems();
-  const treeDataArr = useMemo(
-    () =>
-      items
-        .map(({ item, label }) => ({
-          treeData: item.lighthouseResult?.audits?.["script-treemap-data"]?.details as TreeMapData,
-          label,
-        }))
-        .filter(({ treeData }) => treeData?.type === "treemap-data"),
-    [items],
-  );
+  const treeDataArr = useScriptTreemapItems();
   if (treeDataArr.length === 0) return null;
   return (
     <>

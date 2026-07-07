@@ -10,6 +10,10 @@ import {
 } from "@/features/page-speed-insights/RecommendationsSection/analyzeAudits";
 import { FilterControls } from "@/features/page-speed-insights/RecommendationsSection/FilterControls";
 import { RecommendationItem } from "@/features/page-speed-insights/RecommendationsSection/RecommendationItem";
+import {
+  getQuickWinRecommendations,
+  RecommendationsSummary,
+} from "@/features/page-speed-insights/RecommendationsSection/RecommendationsSummary";
 import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
 
 const priorityColors = {
@@ -18,6 +22,43 @@ const priorityColors = {
   low: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
 };
 
+function RecommendationGroup({
+  title,
+  recs,
+  items,
+  expandedItems,
+  onExpandedChange,
+}: {
+  title: string;
+  recs: Recommendation[];
+  items: ReturnType<typeof usePageSpeedItems>;
+  expandedItems: string[];
+  onExpandedChange: (value: string[]) => void;
+}) {
+  if (!recs.length) return null;
+
+  return (
+    <div className="mb-6">
+      <h3 className="text-lg font-semibold mb-4">{title}</h3>
+      <Accordion
+        type="multiple"
+        value={expandedItems}
+        onValueChange={onExpandedChange}
+        className="space-y-2"
+      >
+        {recs.map((rec) => (
+          <RecommendationItem
+            key={rec.id}
+            rec={rec}
+            items={items}
+            priorityColors={priorityColors}
+          />
+        ))}
+      </Accordion>
+    </div>
+  );
+}
+
 export function RecommendationsSection() {
   const items = usePageSpeedItems();
   const allRecommendations = useMemo(() => analyzeAudits(items), [items]);
@@ -25,6 +66,11 @@ export function RecommendationsSection() {
   const recommendations = useMemo(() => {
     return allRecommendations.filter(hasDetails);
   }, [allRecommendations]);
+
+  const quickWins = useMemo(
+    () => getQuickWinRecommendations(recommendations),
+    [recommendations],
+  );
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedPriorities, setSelectedPriorities] = useState<string[]>([]);
@@ -71,6 +117,8 @@ export function RecommendationsSection() {
     return null;
   }
 
+  const quickWinIds = new Set(quickWins.map((r) => r.id));
+
   return (
     <AccordionItem value="recommendations">
       <AccordionSectionTitleTrigger titleClassName="flex items-center gap-2">
@@ -81,6 +129,7 @@ export function RecommendationsSection() {
       </AccordionSectionTitleTrigger>
       <AccordionContent>
         <div className="p-6">
+          <RecommendationsSummary recommendations={recommendations} />
           <FilterControls
             categories={categories}
             priorities={priorities}
@@ -94,25 +143,27 @@ export function RecommendationsSection() {
             expandedCount={expandedItems.length}
             totalFiltered={filteredRecommendations.length}
           />
+          <RecommendationGroup
+            title="Quick Wins"
+            recs={quickWins.filter(
+              (rec) =>
+                (selectedCategories.length === 0 ||
+                  selectedCategories.includes(rec.category)) &&
+                (selectedPriorities.length === 0 || selectedPriorities.includes(rec.priority)),
+            )}
+            items={items}
+            expandedItems={expandedItems}
+            onExpandedChange={setExpandedItems}
+          />
           {Object.entries(grouped).map(([category, recs]) => (
-            <div key={category} className="mb-6">
-              <h3 className="text-lg font-semibold mb-4">{category}</h3>
-              <Accordion
-                type="multiple"
-                value={expandedItems}
-                onValueChange={setExpandedItems}
-                className="space-y-2"
-              >
-                {recs.map((rec) => (
-                  <RecommendationItem
-                    key={rec.id}
-                    rec={rec}
-                    items={items}
-                    priorityColors={priorityColors}
-                  />
-                ))}
-              </Accordion>
-            </div>
+            <RecommendationGroup
+              key={category}
+              title={category}
+              recs={recs.filter((rec) => !quickWinIds.has(rec.id))}
+              items={items}
+              expandedItems={expandedItems}
+              onExpandedChange={setExpandedItems}
+            />
           ))}
         </div>
       </AccordionContent>

@@ -19,8 +19,8 @@ const mockTreeData = {
   ],
 };
 
-vi.mock("@/features/page-speed-insights/PageSpeedContext", () => ({
-  usePageSpeedItems: vi.fn(() => []),
+vi.mock("@/features/page-speed-insights/script-treemap/useScriptTreemapItems", () => ({
+  useScriptTreemapItems: vi.fn(() => []),
 }));
 
 vi.mock("@/features/page-speed-insights/JSUsage/JSUsageTable", () => ({
@@ -29,31 +29,18 @@ vi.mock("@/features/page-speed-insights/JSUsage/JSUsageTable", () => ({
   ),
 }));
 
-import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
+import { useScriptTreemapItems } from "@/features/page-speed-insights/script-treemap/useScriptTreemapItems";
 
 describe("JSUsageSection", () => {
   it("returns null when no items have script-treemap-data", () => {
-    vi.mocked(usePageSpeedItems).mockReturnValue([
-      { item: { lighthouseResult: { audits: {} } } as any, label: "Mobile" },
-    ]);
+    vi.mocked(useScriptTreemapItems).mockReturnValue([]);
     const { container } = render(<JSUsageSection />);
     expect(container.firstChild).toBeNull();
   });
 
   it("renders a card per item when items have script-treemap-data", async () => {
-    vi.mocked(usePageSpeedItems).mockReturnValue([
-      {
-        item: {
-          lighthouseResult: {
-            audits: {
-              "script-treemap-data": {
-                details: { ...mockTreeData, type: "treemap-data" as const },
-              },
-            },
-          },
-        } as any,
-        label: "Mobile",
-      },
+    vi.mocked(useScriptTreemapItems).mockReturnValue([
+      { label: "Mobile", treeData: mockTreeData },
     ]);
     const { container } = render(<JSUsageSection />);
     expect(container.firstChild).toMatchSnapshot();
@@ -62,21 +49,14 @@ describe("JSUsageSection", () => {
 
 describe("JSUsageCardSection", () => {
   it("returns null when no treemap data", () => {
-    vi.mocked(usePageSpeedItems).mockReturnValue([]);
+    vi.mocked(useScriptTreemapItems).mockReturnValue([]);
     const { container } = render(<JSUsageCardSection />);
     expect(container.firstChild).toBeNull();
   });
 
   it("renders cards when treemap data exists", () => {
-    vi.mocked(usePageSpeedItems).mockReturnValue([
-      {
-        item: {
-          lighthouseResult: {
-            audits: { "script-treemap-data": { details: mockTreeData } },
-          },
-        } as any,
-        label: "Desktop",
-      },
+    vi.mocked(useScriptTreemapItems).mockReturnValue([
+      { label: "Desktop", treeData: mockTreeData },
     ]);
     const { container } = render(<JSUsageCardSection />);
     expect(container.firstChild).toMatchSnapshot();

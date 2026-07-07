@@ -1,11 +1,9 @@
 "use client";
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
 import { renderBoolean } from "@/features/page-speed-insights/lh-categories/renderBoolean";
-import {
-  useStandardTable,
-  type StandardColumnDef,
-} from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
+import type { StockColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
 import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 import { AccordionContent, AccordionItem } from "@/components/ui/accordion";
@@ -26,14 +24,16 @@ type EntityTableRow = {
 };
 
 const columnHelper = createStockColumnHelper<EntityTableRow>();
-const cols: StandardColumnDef<EntityTableRow>[] = [
+const cols: StockColumnDef<EntityTableRow, any>[] = [
   columnHelper.accessor("name", {
     id: "name",
     header: "Name",
     enableSorting: true,
     enableGrouping: true,
     enableResizing: true,
+    // @ts-expect-error v9 custom filter key registered in useStandardTable filterFns
     filterFn: "includesString",
+    // @ts-expect-error v9 custom aggregation key registered in useStandardTable aggregationFns
     aggregationFn: "unique",
     aggregatedCell: createStringAggregatedCell("name", undefined, false),
   }),
@@ -77,6 +77,40 @@ const cols: StandardColumnDef<EntityTableRow>[] = [
 ];
 
 export function EntitiesTable() {
+  const { data, columns, hasEntities } = useEntitiesTableData();
+
+  if (!hasEntities) {
+    return null;
+  }
+  return (
+    <AccordionItem value={"entities"}>
+      <AccordionSectionTitleTrigger>Entities</AccordionSectionTitleTrigger>
+      <AccordionContent>
+        <EntitiesTableCard data={data} columns={columns} />
+      </AccordionContent>
+    </AccordionItem>
+  );
+}
+
+export function EntitiesTableCard({
+  data,
+  columns,
+}: {
+  data: EntityTableRow[];
+  columns: StockColumnDef<EntityTableRow, any>[];
+}) {
+  const table = useStandardTable({
+    data,
+    columns,
+    grouping: ["name"],
+    defaultPageSize: data.length,
+    enablePagination: true,
+  });
+  // @ts-expect-error v9 custom filter key registered in useStandardTable filterFns
+  return <TableCard title="Third-Party Entities" table={table} className="md:col-span-2 lg:col-span-3" />;
+}
+
+export function useEntitiesTableData() {
   const items = usePageSpeedItems();
 
   const validItems = items.filter(({ item }) => {
@@ -99,36 +133,7 @@ export function EntitiesTable() {
   });
 
   const showReportColumn = validItems.length > 1;
-  const hasEntities = validItems.length > 0;
-
   const columns = useTableColumns<EntityTableRow>(cols, columnHelper, showReportColumn);
 
-  if (!hasEntities) {
-    return null;
-  }
-  return <EntitiesTableContent data={data} columns={columns} />;
-}
-
-function EntitiesTableContent({
-  data,
-  columns,
-}: {
-  data: EntityTableRow[];
-  columns: StandardColumnDef<EntityTableRow>[];
-}) {
-  const table = useStandardTable({
-    data,
-    columns,
-    grouping: ["name"],
-    defaultPageSize: data.length,
-    enablePagination: true,
-  });
-  return (
-    <AccordionItem value={"entities"}>
-      <AccordionSectionTitleTrigger>Entities</AccordionSectionTitleTrigger>
-      <AccordionContent>
-        <TableCard title="Third-Party Entities" table={table} />
-      </AccordionContent>
-    </AccordionItem>
-  );
+  return { data, columns, hasEntities: validItems.length > 0 };
 }

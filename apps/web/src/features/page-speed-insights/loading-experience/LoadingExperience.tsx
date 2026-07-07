@@ -1,7 +1,6 @@
 import { HorizontalGaugeChart } from "@/components/common/PageSpeedGaugeChart";
 import { AccordionItem, AccordionContent } from "@/components/ui/accordion";
 import { AccordionSectionTitleTrigger } from "@/components/ui/accordion-section-title-trigger";
-import { Fragment } from "react";
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
 import { Card, CardTitle } from "@/components/ui/card";
 
@@ -45,28 +44,27 @@ export function LoadingExperience({ title, experienceKey }: LoadingExperiencePro
         <AccordionSectionTitleTrigger>
           {title}: {extraTitle}
         </AccordionSectionTitleTrigger>
-        <AccordionContent className="-mx-2 grid max-w-full grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] gap-2">
+        <AccordionContent className="-mx-2 grid max-w-full grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] items-start gap-2">
           {metrics.map(({ metric, key }) => {
             return (
-              <Card key={key} className="flex w-full min-w-64 flex-col gap-2 px-4 py-4">
+              <Card key={key} className="flex min-w-0 w-full flex-col gap-2 overflow-hidden px-4 py-4">
                 <CardTitle className="text-sm font-bold">{metric}</CardTitle>
-                {experiences.map((experience, idx) => {
-                  const metricValue = experience?.item?.metrics?.[key];
-                  if (!metricValue) {
-                    return null;
-                  }
-                  return (
-                    <Fragment key={`${key}_${idx}`}>
-                      {!metricValue ? null : (
+                <div className="flex flex-col gap-3">
+                  {experiences.map((experience, idx) => {
+                    const metricValue = experience?.item?.metrics?.[key];
+                    if (!metricValue) {
+                      return null;
+                    }
+                    return (
+                      <div key={`${key}_${idx}`} className="min-w-0">
                         <HorizontalGaugeChart
-                          key={key}
                           metric={`${metricValue.percentile} - ${metricValue.category} ${experience.label ? `(${experience.label})` : ""}`}
                           data={metricValue}
                         />
-                      )}
-                    </Fragment>
-                  );
-                })}
+                      </div>
+                    );
+                  })}
+                </div>
               </Card>
             );
           })}

@@ -1,6 +1,5 @@
 "use client";
 import { LoadingExperiencesSection } from "@/features/page-speed-insights/loading-experience";
-import { EntitiesTable } from "@/features/page-speed-insights/lh-categories/table/EntitiesTable";
 import { CWVMetricsComponent } from "@/features/page-speed-insights/CWVMetricsComponent";
 import {
   PageSpeedInsightsStoreProvider,
@@ -10,13 +9,18 @@ import {
   useRequiredPageSpeedInsightsStore,
 } from "@/features/page-speed-insights/PageSpeedContext";
 import { RenderFilmStrip } from "@/features/page-speed-insights/RenderFilmStrip";
+import { ScriptTreemapSection } from "@/features/page-speed-insights/script-treemap";
 import { NullablePageSpeedInsights } from "@/lib/schema";
 import { CategoryRow, useLHTable } from "@/features/page-speed-insights/tsTable/useLHTable";
 import { Button } from "@/components/ui/button";
-import { StringFilterHeader } from "@/features/page-speed-insights/JSUsage/StringFilterHeader";
+import { StringFilterHeader } from "@/features/page-speed-insights/tanstack-table-v9/StringFilterHeader";
 import { Accordion } from "@/components/ui/accordion";
 import { UserLabelFilter } from "@/features/page-speed-insights/UserLabelFilter";
-import { NetworkMetricsComponent } from "@/features/page-speed-insights/network-metrics";
+import {
+  LoadTimelineSection,
+  NetworkWaterfallSection,
+  NetworkResourcesSection,
+} from "@/features/page-speed-insights/network-metrics";
 import { JavaScriptPerformanceComponent } from "@/features/page-speed-insights/javascript-metrics/JavaScriptPerformanceComponent";
 import { RecommendationsSection } from "@/features/page-speed-insights/RecommendationsSection";
 import { PageSpeedInsightsCopyButtons } from "@/features/page-speed-insights/PageSpeedInsightsCopyButtons";
@@ -38,8 +42,10 @@ function PageSpeedInsightsDashboardContent() {
         <LoadingExperiencesSection />
         <CWVMetricsComponent />
         <RenderFilmStrip />
-        <EntitiesTable />
-        <NetworkMetricsComponent />
+        <ScriptTreemapSection />
+        <LoadTimelineSection />
+        <NetworkWaterfallSection />
+        <NetworkResourcesSection />
         <JavaScriptPerformanceComponent />
         <RecommendationsSection />
       </Accordion>

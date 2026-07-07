@@ -82,7 +82,7 @@ function DataTableHead<TData extends RowData>({
   );
 }
 
-function FilterPopover<TData extends RowData>({
+export function FilterPopover<TData extends RowData>({
   header,
 }: {
   header: Header<StandardTableFeatures, TData, unknown>;

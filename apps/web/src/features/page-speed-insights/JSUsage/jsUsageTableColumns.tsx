@@ -1,23 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { memo } from "react";
 import type {
   StockCellContext,
   StockColumnDef,
-  StockHeaderContext,
 } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
-import { Button } from "@/components/ui/button";
-import { ArrowUp, MinusIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { renderBoolean } from "@/features/page-speed-insights/lh-categories/renderBoolean";
 import { StatusCircle } from "@/features/page-speed-insights/JSUsage/StatusCircle";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import type { TreeMapNode } from "@/lib/schema";
 import type { TableFeatures } from "@tanstack/table-core";
 import type { RowData } from "@tanstack/react-table-v9";
-import { StringFilterHeader } from "./StringFilterHeader";
-import { RangeFilter, numericRangeFilter } from "./jsUsageTableFilters";
 import { ExpandRow, ExpandAll, RenderBytesCell } from "./jsUsageTableParts";
 import { getHostnameFromUrl } from "@/lib/urlDisplay";
 
@@ -31,41 +24,6 @@ declare module "@tanstack/table-core" {
 const getHostName = (row: TreeMapNode) => getHostnameFromUrl(row.name);
 
 const columnHelper = createColumnHelper<TreeMapNode>();
-
-export function makeSortingHeading(name: string, filterType?: "string" | "range") {
-  return memo(function SortingHeader({
-    column,
-  }: Pick<StockHeaderContext<TreeMapNode, unknown>, "column">) {
-    
-    return (
-      <div className="flex h-full min-w-0 w-full flex-col justify-between">
-        <div className="my-2">
-          <Button
-            variant="ghost"
-            className="px-0 w-auto text-left"
-            onClick={() => {
-              column.toggleSorting(column.getIsSorted() === "asc");
-            }}
-            aria-label={`Sort column ${name}`}
-          >
-            <div className="">{name}</div>
-            {column.getIsSorted() ? (
-              <ArrowUp
-                className={cn("transform transition-all duration-300", {
-                  "rotate-180": column.getIsSorted() !== "asc",
-                })}
-              />
-            ) : (
-              <MinusIcon />
-            )}
-          </Button>
-        </div>
-        {filterType === "string" ? <StringFilterHeader column={column} name={name} /> : null}
-        {filterType === "range" ? <RangeFilter column={column} /> : null}
-      </div>
-    );
-  });
-}
 
 const expanderColumn = columnHelper.display({
   id: "expander",
@@ -97,9 +55,10 @@ const makeSortableStringColumn = (column: string) => {
       className: "overflow-scroll-x h-auto",
     },
     size: 700,
-    header: makeSortingHeading(toTitleCase(column), "string") as StockColumnDef<TreeMapNode>["header"],
+    header: toTitleCase(column),
     aggregationFn: "unique",
     enableSorting: true,
+    filterFn: "includesString",
     cell: (info) => {
       let value = info.getValue();
       if (Array.isArray(value)) {
@@ -139,9 +98,9 @@ const makeBytesColumn = (column: string, title: string, extra = {}) => {
     sortFn: "basic",
     enableSorting: true,
     sortUndefined: "last",
-    header: makeSortingHeading(title, "range") as StockColumnDef<TreeMapNode>["header"],
+    header: title,
     enableHiding: true,
-    filterFn: numericRangeFilter,
+    filterFn: "inNumberRange",
     aggregationFn: "sum",
     size: 140,
     meta: {
@@ -164,7 +123,8 @@ export const columns = [
     enableMultiSort: true,
     enableSorting: true,
     sortFn: "basic",
-    header: makeSortingHeading("Host") as never,
+    header: "Host",
+    filterFn: "includesString",
     meta: {
       className: "",
     },
@@ -204,7 +164,7 @@ export const columns = [
       enableSorting: true,
       enableHiding: true,
       size: 140,
-      header: makeSortingHeading("Percent") as never,
+      header: "Percent",
     },
   ),
 ];

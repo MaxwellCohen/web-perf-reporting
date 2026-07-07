@@ -66,6 +66,8 @@ vi.mock("@/features/page-speed-insights/loading-experience/LoadingExperience", (
 
 vi.mock("@/features/page-speed-insights/lh-categories/table/EntitiesTable", () => ({
   EntitiesTable: () => <div>Entities table</div>,
+  EntitiesTableCard: () => <div>Entities table card</div>,
+  useEntitiesTableData: () => ({ data: [], columns: [], hasEntities: false }),
 }));
 
 vi.mock("@/features/page-speed-insights/CWVMetricsComponent", () => ({
@@ -76,7 +78,14 @@ vi.mock("@/features/page-speed-insights/RenderFilmStrip", () => ({
   RenderFilmStrip: () => <div>Film strip</div>,
 }));
 
+vi.mock("@/features/page-speed-insights/script-treemap", () => ({
+  ScriptTreemapSection: () => <div>Script treemap section</div>,
+}));
+
 vi.mock("@/features/page-speed-insights/network-metrics", () => ({
+  LoadTimelineSection: () => <div>Load timeline section</div>,
+  NetworkWaterfallSection: () => <div>Network waterfall section</div>,
+  NetworkResourcesSection: () => <div>Network resources section</div>,
   NetworkMetricsComponent: () => <div>Network metrics</div>,
 }));
 
@@ -88,7 +97,7 @@ vi.mock("@/features/page-speed-insights/RecommendationsSection", () => ({
   RecommendationsSection: () => <div>Recommendations section</div>,
 }));
 
-vi.mock("@/features/page-speed-insights/JSUsage/StringFilterHeader", () => ({
+vi.mock("@/features/page-speed-insights/tanstack-table-v9/StringFilterHeader", () => ({
   StringFilterHeader: ({ name }: { name: string }) => <div>String filter: {name}</div>,
 }));
 
@@ -128,7 +137,11 @@ describe("pageSpeedInsightsDashboard", () => {
 
     expect(screen.getByRole("heading", { level: 2, name: "Loaded report" })).toBeInTheDocument();
     expect(screen.getByText("User label filter")).toBeInTheDocument();
-    expect(screen.getByText("Entities table")).toBeInTheDocument();
+    expect(screen.getByText("Film strip")).toBeInTheDocument();
+    expect(screen.getByText("Script treemap section")).toBeInTheDocument();
+    expect(screen.getByText("Load timeline section")).toBeInTheDocument();
+    expect(screen.getByText("Network waterfall section")).toBeInTheDocument();
+    expect(screen.getByText("Network resources section")).toBeInTheDocument();
     expect(screen.getByText("CWV metrics")).toBeInTheDocument();
     expect(screen.getByText("Category row: row-1")).toBeInTheDocument();
   });

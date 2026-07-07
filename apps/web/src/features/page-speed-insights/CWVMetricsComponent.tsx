@@ -3,7 +3,6 @@ import { ScoreDisplay } from "@/features/page-speed-insights/ScoreDisplay";
 import ReactMarkdown from "react-markdown";
 import { HorizontalScoreChart } from "@/components/common/PageSpeedGaugeChart";
 import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { Fragment } from "react";
 import {
   type InsightsContextItem,
   usePageSpeedItems,
@@ -90,29 +89,30 @@ export function CWVMetricsComponent() {
   }
 
   return (
-    <AccordionItem value="cwv" className="flex flex-col gap-2 print:border-0">
+    <AccordionItem value="cwv" className="print:border-0">
       <AccordionTrigger>
         <h3 className="text-lg font-bold">Core Web Vitals Summary</h3>
       </AccordionTrigger>
-      <AccordionContent className="-mx-2 grid grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] gap-2">
+      <AccordionContent className="-mx-2 grid grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] items-start gap-2">
         {metricItems.map(({ auditName, title, auditItems, description }) => (
-          <Card key={auditName} className="flex w-full min-w-64 flex-col gap-2 px-4 py-4">
-            <div className="flex w-full flex-col gap-2">
-              <CardTitle className="text-md font-bold">{title}</CardTitle>
-              <div className="contents text-sm">
-                {auditItems.map(({ audit, label }: MetricAuditEntry) => (
-                  <Fragment key={`${auditName}_${label}`}>
-                    <ScoreDisplay audit={audit} device={label} />{" "}
-                    <HorizontalScoreChart score={audit.score ?? 0} />
-                  </Fragment>
-                ))}
-              </div>
-              {description ? (
-                <div className="mt-2 text-xs">
-                  <ReactMarkdown>{description}</ReactMarkdown>
+          <Card
+            key={auditName}
+            className="flex min-w-0 w-full flex-col gap-2 overflow-hidden px-4 py-4"
+          >
+            <CardTitle className="text-md font-bold">{title}</CardTitle>
+            <div className="flex flex-col gap-3 text-sm">
+              {auditItems.map(({ audit, label }: MetricAuditEntry) => (
+                <div key={`${auditName}_${label}`} className="flex min-w-0 flex-col gap-1">
+                  <ScoreDisplay audit={audit} device={label} />
+                  <HorizontalScoreChart score={audit.score ?? 0} />
                 </div>
-              ) : null}
+              ))}
             </div>
+            {description ? (
+              <div className="mt-2 text-xs">
+                <ReactMarkdown>{description}</ReactMarkdown>
+              </div>
+            ) : null}
           </Card>
         ))}
       </AccordionContent>
