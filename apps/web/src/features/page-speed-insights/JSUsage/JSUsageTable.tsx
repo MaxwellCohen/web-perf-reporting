@@ -1,7 +1,7 @@
 "use client";
 
 import { Table, TableBody, TableHeader } from "@/components/ui/table";
-import { useTable, type CreateRowModels, type StockFeatures } from "@tanstack/react-table-v9";
+import { useTable, type CreateRowModels, type StockFeatures } from "@tanstack/react-table";
 import type { TreeMapData, TreeMapNode } from "@/lib/schema";
 import { NoResultsRow } from "@/features/page-speed-insights/JSUsage/NoResultsRow";
 import { TableControls } from "@/features/page-speed-insights/JSUsage/TableControls";

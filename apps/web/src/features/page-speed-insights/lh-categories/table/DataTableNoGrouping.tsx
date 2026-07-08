@@ -7,7 +7,7 @@ import {
   useSimpleTable,
   type FlatColumnDef,
 } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
-import type { RowData } from "@tanstack/react-table-v9";
+import type { RowData } from "@tanstack/react-table";
 
 export function DataTableNoGrouping<T extends RowData>({
   data,

@@ -1,7 +1,7 @@
 "use client";
 import type { CSSProperties } from "react";
 import { TableRow, TableHead } from "@/components/ui/table";
-import { flexRender } from "@tanstack/react-table-v9";
+import { flexRender } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
 import type { TreeMapNode } from "@/lib/schema";
 import type { StockHeader, StockHeaderGroup } from "@/features/page-speed-insights/shared/tanstackStockTypes";

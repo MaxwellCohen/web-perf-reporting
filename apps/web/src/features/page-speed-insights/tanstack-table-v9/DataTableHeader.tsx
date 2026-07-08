@@ -8,7 +8,7 @@ import {
   type ReactTable,
   type RowData,
   type TableState,
-} from "@tanstack/react-table-v9";
+} from "@tanstack/react-table";
 import { SortingButton } from "@/features/page-speed-insights/tanstack-table-v9/sortingButton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ListFilter } from "lucide-react";

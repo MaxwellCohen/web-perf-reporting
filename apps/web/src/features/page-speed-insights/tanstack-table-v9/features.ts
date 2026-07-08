@@ -1,4 +1,4 @@
-import { stockFeatures } from "@tanstack/react-table-v9";
+import { stockFeatures } from "@tanstack/react-table";
 
 export type StandardTableFeatures = typeof stockFeatures;
 export { stockFeatures };

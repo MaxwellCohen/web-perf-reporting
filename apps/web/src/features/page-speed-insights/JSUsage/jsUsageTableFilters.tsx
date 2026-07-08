@@ -2,7 +2,7 @@
 "use client";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import type { StockColumnDef, StockHeaderContext } from "@/features/page-speed-insights/shared/tanstackStockTypes";
-import type { RowData } from "@tanstack/react-table-v9";
+import type { RowData } from "@tanstack/react-table";
 import {
   RenderBytesValue,
   RenderMSValue,

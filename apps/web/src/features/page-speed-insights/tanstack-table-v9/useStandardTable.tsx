@@ -5,7 +5,7 @@ import {
   type ColumnDef,
   type CreateRowModels,
   type RowData,
-} from "@tanstack/react-table-v9";
+} from "@tanstack/react-table";
 import {
   stockFeatures,
   type StandardTableFeatures,

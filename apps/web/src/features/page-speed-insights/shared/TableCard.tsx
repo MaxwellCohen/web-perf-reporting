@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { ReactTable, RowData, StockFeatures, TableState } from "@tanstack/react-table-v9";
+import type { ReactTable, RowData, StockFeatures, TableState } from "@tanstack/react-table";
 import { PaginatedTableControls } from "@/features/page-speed-insights/tanstack-table-v9/PaginatedTableControls";
 import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 

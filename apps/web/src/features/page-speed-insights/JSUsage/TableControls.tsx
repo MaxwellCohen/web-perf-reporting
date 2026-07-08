@@ -1,7 +1,7 @@
 "use client";
 
 import type { StockTable } from "@/features/page-speed-insights/shared/tanstackStockTypes";
-import type { RowData } from "@tanstack/react-table-v9";
+import type { RowData } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 // import { Label } from '@/components/ui/label';s
 import {

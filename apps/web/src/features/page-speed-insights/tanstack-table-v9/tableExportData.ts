@@ -1,4 +1,4 @@
-import type { Column, RowData } from "@tanstack/react-table-v9";
+import type { Column, RowData } from "@tanstack/react-table";
 import type { StockFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 import type { StockTable } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 

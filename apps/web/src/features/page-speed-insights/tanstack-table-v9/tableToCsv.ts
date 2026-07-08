@@ -1,4 +1,4 @@
-import type { RowData } from "@tanstack/react-table-v9";
+import type { RowData } from "@tanstack/react-table";
 import type { StockTable } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { escapeCsvCell } from "@/features/page-speed-insights/tanstack-table-v9/csvCell";
 import { getTableExportData } from "@/features/page-speed-insights/tanstack-table-v9/tableExportData";

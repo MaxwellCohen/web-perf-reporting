@@ -10,7 +10,7 @@ import { StatusCircle } from "@/features/page-speed-insights/JSUsage/StatusCircl
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import type { TreeMapNode } from "@/lib/schema";
 import type { TableFeatures } from "@tanstack/table-core";
-import type { RowData } from "@tanstack/react-table-v9";
+import type { RowData } from "@tanstack/react-table";
 import { ExpandRow, ExpandAll, RenderBytesCell } from "./jsUsageTableParts";
 import { getHostnameFromUrl } from "@/lib/urlDisplay";
 

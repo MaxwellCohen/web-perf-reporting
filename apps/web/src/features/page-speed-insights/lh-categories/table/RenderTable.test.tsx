@@ -6,7 +6,7 @@ import {
   makeColumnDef,
   simpleTableCell,
 } from "@/features/page-speed-insights/lh-categories/table/RenderTable";
-import type { CellContext } from "@tanstack/react-table-v9";
+import type { CellContext } from "@tanstack/react-table";
 
 vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", () => ({
   RenderTableValue: ({ value }: { value: unknown }) => (

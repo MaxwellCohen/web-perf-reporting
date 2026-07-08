@@ -1,7 +1,7 @@
 import React from "react";
 import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import { RenderBytesValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
-import type { RowData } from "@tanstack/react-table-v9";
+import type { RowData } from "@tanstack/react-table";
 import type { StockRow } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 
 type ValueLabelPair<T> = {

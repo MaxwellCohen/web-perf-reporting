@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { RowData } from "@tanstack/react-table-v9";
+import type { RowData } from "@tanstack/react-table";
 import type { StockColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { createReportColumn } from "@/features/page-speed-insights/shared/tableColumnHelpers";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";

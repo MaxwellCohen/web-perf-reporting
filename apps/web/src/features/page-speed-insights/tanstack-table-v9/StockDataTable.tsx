@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { Table } from "@/components/ui/table";
-import type { RowData } from "@tanstack/react-table-v9";
+import type { RowData } from "@tanstack/react-table";
 import { DataTableHeader } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
 import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/DataTableBody";
 import { CopyTableButton } from "@/features/page-speed-insights/tanstack-table-v9/CopyTableButton";

@@ -13,7 +13,7 @@ import {
   type CreateRowModels,
   type RowData,
   type StockFeatures,
-} from "@tanstack/react-table-v9";
+} from "@tanstack/react-table";
 import { booleanFilterFn, standardFilterFns } from "@/features/page-speed-insights/shared/filterFns";
 
 export const standardTableRowModels = {

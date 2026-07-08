@@ -1,6 +1,6 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { flexRender } from "@tanstack/react-table-v9";
+import { flexRender } from "@tanstack/react-table";
 import { useSimpleTable } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
 import { columns } from "@/features/page-speed-insights/JSUsage/jsUsageTableColumns";
 import type { TreeMapNode } from "@/lib/schema";

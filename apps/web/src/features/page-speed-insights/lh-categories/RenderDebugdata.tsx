@@ -19,7 +19,7 @@ import {
   flexRender,
   useTable,
   type StockFeatures,
-} from "@tanstack/react-table-v9";
+} from "@tanstack/react-table";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import { stockFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 import {

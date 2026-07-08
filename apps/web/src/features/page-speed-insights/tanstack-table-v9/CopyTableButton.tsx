@@ -1,6 +1,6 @@
 "use client";
 
-import type { RowData } from "@tanstack/react-table-v9";
+import type { RowData } from "@tanstack/react-table";
 import type { ButtonProps } from "@/components/ui/button";
 import type { StockTable } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { CopyTableMenuButton } from "@/features/page-speed-insights/tanstack-table-v9/CopyTableMenuButton";

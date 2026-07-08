@@ -1,7 +1,7 @@
 "use client";
 import type { ReactNode } from "react";
 import { TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { flexRender, type ReactTable, type RowData, type TableState } from "@tanstack/react-table-v9";
+import { flexRender, type ReactTable, type RowData, type TableState } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
 import { tanstackTableCellDataProps } from "@/features/page-speed-insights/shared/tanstackTableCellDataProps";
 import type { StandardTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";

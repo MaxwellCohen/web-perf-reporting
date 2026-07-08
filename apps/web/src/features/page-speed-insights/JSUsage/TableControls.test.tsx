@@ -2,7 +2,7 @@ import { fireEvent, render } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import type { StockTable } from "@/features/page-speed-insights/shared/tanstackStockTypes";
-import { useTable, type RowData } from "@tanstack/react-table-v9";
+import { useTable, type RowData } from "@tanstack/react-table";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import { stockFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 import { flatTableRowModels } from "@/features/page-speed-insights/tanstack-table-v9/rowModels";

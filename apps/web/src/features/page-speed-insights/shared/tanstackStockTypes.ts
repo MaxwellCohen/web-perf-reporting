@@ -11,7 +11,7 @@ import type {
   RowData,
   StockFeatures,
   TableState,
-} from "@tanstack/react-table-v9";
+} from "@tanstack/react-table";
 
 /** v9 stock-feature table types (`useTable` + `createStockColumnHelper`). */
 export type StockColumnDef<TData extends RowData, TValue = unknown> = ColumnDef<

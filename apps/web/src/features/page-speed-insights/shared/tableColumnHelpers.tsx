@@ -1,5 +1,5 @@
 import React, { type ComponentType } from "react";
-import type { RowData } from "@tanstack/react-table-v9";
+import type { RowData } from "@tanstack/react-table";
 import type { StockColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import type { StockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 

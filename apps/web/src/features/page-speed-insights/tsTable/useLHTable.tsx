@@ -1,6 +1,6 @@
 import type { StockColumnDef, StockRow } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { PageSpeedInsights } from "@/lib/schema";
-import { flexRender, useTable, type CreateRowModels, type StockFeatures } from "@tanstack/react-table-v9";
+import { flexRender, useTable, type CreateRowModels, type StockFeatures } from "@tanstack/react-table";
 import { Fragment, useMemo } from "react";
 import clsx from "clsx";
 import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";

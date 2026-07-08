@@ -8,7 +8,7 @@ import {
   AuditSummaryRow,
 } from "@/features/page-speed-insights/tsTable/useLHTable";
 import type { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataItem";
-import { useTable } from "@tanstack/react-table-v9";
+import { useTable } from "@tanstack/react-table";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import { stockFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 import { lhTableRowModels } from "@/features/page-speed-insights/tsTable/lhTableRowModels";

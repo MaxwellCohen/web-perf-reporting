@@ -66,9 +66,9 @@ importers:
       '@tanstack/react-query':
         specifier: https://pkg.pr.new/@tanstack/react-query@10366
         version: https://pkg.pr.new/@tanstack/react-query@10366(react@19.3.0-canary-e71a6393-20260702)
-      '@tanstack/react-table-v9':
-        specifier: npm:@tanstack/react-table@9.0.0-beta.1
-        version: '@tanstack/react-table@9.0.0-beta.1(react-dom@19.3.0-canary-e71a6393-20260702(react@19.3.0-canary-e71a6393-20260702))(react@19.3.0-canary-e71a6393-20260702)'
+      '@tanstack/react-table':
+        specifier: 9.0.0-beta.1
+        version: 9.0.0-beta.1(react-dom@19.3.0-canary-e71a6393-20260702(react@19.3.0-canary-e71a6393-20260702))(react@19.3.0-canary-e71a6393-20260702)
       '@tanstack/table-core':
         specifier: 9.0.0-beta.5
         version: 9.0.0-beta.5

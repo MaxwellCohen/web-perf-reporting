@@ -1,4 +1,4 @@
-import type { Column } from "@tanstack/react-table-v9";
+import type { Column } from "@tanstack/react-table";
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { StringFilterHeader } from "@/features/page-speed-insights/JSUsage/StringFilterHeader";

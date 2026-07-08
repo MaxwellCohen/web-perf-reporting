@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useId, useMemo } from "react";
-import type { HeaderContext, RowData } from "@tanstack/react-table-v9";
+import type { HeaderContext, RowData } from "@tanstack/react-table";
 import { Label } from "@/components/ui/label";
 import { DebouncedInput } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

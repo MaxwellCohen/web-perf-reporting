@@ -1,5 +1,5 @@
 "use client";
-import type { HeaderContext, RowData } from "@tanstack/react-table-v9";
+import type { HeaderContext, RowData } from "@tanstack/react-table";
 import { RangeFilterInputs } from "@/features/page-speed-insights/JSUsage/jsUsageTableFilters";
 import type { StandardTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 

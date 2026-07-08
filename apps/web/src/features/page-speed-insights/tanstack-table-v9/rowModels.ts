@@ -8,7 +8,7 @@ import {
   sortFns,
   type CreateRowModels,
   type RowData,
-} from "@tanstack/react-table-v9";
+} from "@tanstack/react-table";
 import type { StandardTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 
 export const flatTableRowModels = {

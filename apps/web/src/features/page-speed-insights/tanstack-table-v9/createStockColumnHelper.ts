@@ -2,7 +2,7 @@ import {
   createColumnHelper,
   type RowData,
   type StockFeatures,
-} from "@tanstack/react-table-v9";
+} from "@tanstack/react-table";
 
 /** v9 `createColumnHelper` with `StockFeatures` pre-bound for PSI tables. */
 export function createStockColumnHelper<TData extends RowData>() {

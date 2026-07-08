@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import type { Header, RowData } from "@tanstack/react-table-v9";
+import type { Header, RowData } from "@tanstack/react-table";
 import type { StandardTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 
 const IconMap: Record<string, string> = {
