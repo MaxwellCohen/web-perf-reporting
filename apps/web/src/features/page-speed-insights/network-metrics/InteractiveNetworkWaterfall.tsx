@@ -53,7 +53,12 @@ function WaterfallBarTrack({ row, minStart, maxEnd }: WaterfallBarTrackProps) {
     row.queueStart != null && row.queueEnd != null
       ? getSegmentStyle(row.queueStart, row.queueEnd, minStart, maxEnd)
       : null;
-  const networkStyle = getSegmentStyle(row.networkStart, row.networkEnd, minStart, maxEnd);
+  const networkStyle = getSegmentStyle(
+    row.networkStart,
+    row.networkEnd,
+    minStart,
+    maxEnd,
+  );
 
   return (
     <div
@@ -98,7 +103,11 @@ function getMilestoneItems(milestones?: WaterfallMilestones): MilestoneItem[] {
     items.push({ key: "lcp", label: "LCP", value: milestones.lcp });
   }
   if (milestones.domContentLoaded != null && milestones.domContentLoaded > 0) {
-    items.push({ key: "dcl", label: "DCL", value: milestones.domContentLoaded });
+    items.push({
+      key: "dcl",
+      label: "DCL",
+      value: milestones.domContentLoaded,
+    });
   }
   return items;
 }
@@ -109,14 +118,21 @@ type MilestoneOverlayProps = {
   milestones?: WaterfallMilestones;
 };
 
-function MilestoneOverlay({ minStart, maxEnd, milestones }: MilestoneOverlayProps) {
+function MilestoneOverlay({
+  minStart,
+  maxEnd,
+  milestones,
+}: MilestoneOverlayProps) {
   const items = useMemo(() => getMilestoneItems(milestones), [milestones]);
   const range = maxEnd - minStart;
 
   if (!items.length) return null;
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-[1]" data-testid="waterfall-milestone-overlay">
+    <div
+      className="pointer-events-none absolute inset-0 z-1"
+      data-testid="waterfall-milestone-overlay"
+    >
       {items.map((item) => {
         const leftPct = range > 0 ? ((item.value - minStart) / range) * 100 : 0;
         if (leftPct < 0 || leftPct > 100) return null;
@@ -140,44 +156,87 @@ type TimeAxisProps = {
 };
 
 function TimeAxis({ minStart, maxEnd, milestones }: TimeAxisProps) {
-  const ticks = useMemo(() => buildTimeAxisTicks(minStart, maxEnd, 5), [minStart, maxEnd]);
-  const milestoneItems = useMemo(() => getMilestoneItems(milestones), [milestones]);
-  const range = maxEnd - minStart;
+  const ticks = useMemo(
+    () => buildTimeAxisTicks(minStart, maxEnd, 5),
+    [minStart, maxEnd],
+  );
+  const milestoneItems = useMemo(
+    () => getMilestoneItems(milestones),
+    [milestones],
+  );
+  
 
   return (
     <div
       className="relative w-full min-w-0 border-b border-slate-200/60 dark:border-slate-700/60 pb-1"
       data-testid="waterfall-timeline"
     >
-      <div className="relative h-6">
-        {ticks.map((tick) => {
-          const leftPct = range > 0 ? ((tick - minStart) / range) * 100 : 0;
+      <div className="relative h-5">
+        {ticks.map((tick, index) => {
           return (
-            <span
+            <TimeAxisTick
               key={tick}
-              className="absolute -translate-x-1/2 tabular-nums text-xs text-muted-foreground"
-              style={{ left: `${leftPct}%` }}
-            >
-              {tick}ms
-            </span>
-          );
-        })}
-        {milestoneItems.map((item) => {
-          const leftPct = range > 0 ? ((item.value - minStart) / range) * 100 : 0;
-          if (leftPct < 0 || leftPct > 100) return null;
-          return (
-            <span
-              key={item.key}
-              className="absolute -translate-x-1/2 text-[10px] font-medium text-primary whitespace-nowrap"
-              style={{ left: `${leftPct}%` }}
-              title={`${item.label}: ${formatMs(item.value)}`}
-            >
-              {item.label}
-            </span>
+              tick={tick}
+              index={index}
+              minStart={minStart}
+              maxEnd={maxEnd}
+            />
           );
         })}
       </div>
+      {milestoneItems.length > 0 ? (
+        <div className="relative mt-0.5 h-4">
+          {milestoneItems.map((item) => {
+            return <MilestoneTick key={item.key} item={item} minStart={minStart} maxEnd={maxEnd} />;
+          })}
+        </div>
+      ) : null}
     </div>
+  );
+}
+
+function TimeAxisTick({
+  tick,
+  index,
+  minStart,
+  maxEnd,
+}: {
+  tick: number;
+  index: number;
+  minStart: number;
+  maxEnd: number;
+}) {
+  const range = maxEnd - minStart;
+  if (range <= 0) return null;
+  const leftPct = ((tick - minStart) / range) * 100;
+  if (leftPct < 0 || leftPct > 100) return null;
+  return (
+    <span
+      key={tick}
+      className={cn(
+        "absolute -translate-x-1/2 tabular-nums text-xs text-muted-foreground",
+        { "pl-[3ch]": !index },
+      )}
+      style={{ left: `${leftPct}%` }}
+    >
+      {tick}ms
+    </span>
+  );
+}
+
+
+function MilestoneTick({ item, minStart, maxEnd }: { item: MilestoneItem, minStart: number, maxEnd: number }) {
+  const range = maxEnd - minStart;
+  if (range <= 0) return null;
+  const leftPct = ((item.value - minStart) / range) * 100;
+  if (leftPct < 0 || leftPct > 100) return null;
+  return (
+    <span
+      className="absolute -translate-x-1/2 text-[10px] font-medium text-primary whitespace-nowrap"
+      style={{ left: `${leftPct}%` }}
+    >
+      {item.label}
+    </span>
   );
 }
 
@@ -189,7 +248,9 @@ type RowMetaProps = {
 function RowMeta({ row, compact }: RowMetaProps) {
   const displayUrl = shortenUrl(row.url);
   const sizeLabel =
-    row.transferSize != null && row.transferSize > 0 ? formatBytes(row.transferSize) : null;
+    row.transferSize != null && row.transferSize > 0
+      ? formatBytes(row.transferSize)
+      : null;
 
   return (
     <div className={cn("min-w-0", compact ? "space-y-1" : "pr-2")}>
@@ -199,9 +260,13 @@ function RowMeta({ row, compact }: RowMetaProps) {
         </span>
       </div>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
-        <span className="rounded bg-muted px-1.5 py-0.5">{toTitleCase(row.resourceType)}</span>
+        <span className="rounded bg-muted px-1.5 py-0.5">
+          {toTitleCase(row.resourceType)}
+        </span>
         {sizeLabel ? <span className="tabular-nums">{sizeLabel}</span> : null}
-        {row.statusCode != null ? <span className="tabular-nums">{row.statusCode}</span> : null}
+        {row.statusCode != null ? (
+          <span className="tabular-nums">{row.statusCode}</span>
+        ) : null}
       </div>
     </div>
   );
@@ -213,7 +278,9 @@ type RowDetailProps = {
 
 function RowDetail({ row }: RowDetailProps) {
   const queueMs =
-    row.queueStart != null && row.queueEnd != null ? row.queueEnd - row.queueStart : null;
+    row.queueStart != null && row.queueEnd != null
+      ? row.queueEnd - row.queueStart
+      : null;
 
   return (
     <div className="rounded-md border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
@@ -222,7 +289,9 @@ function RowDetail({ row }: RowDetailProps) {
         {queueMs != null ? <span>Queue: {formatMs(queueMs)}</span> : null}
         <span>Network: {formatMs(row.networkEnd - row.networkStart)}</span>
         <span>Total: {formatMs(row.duration)}</span>
-        {row.transferSize != null ? <span>Transfer: {formatBytes(row.transferSize)}</span> : null}
+        {row.transferSize != null ? (
+          <span>Transfer: {formatBytes(row.transferSize)}</span>
+        ) : null}
         {row.statusCode != null ? <span>Status: {row.statusCode}</span> : null}
       </div>
     </div>
@@ -287,10 +356,14 @@ export function InteractiveNetworkWaterfall({
           </div>
 
           <div
-            className="relative z-[1]"
+            className="relative z-1"
             style={{ gridColumn: 2, gridRow: `2 / ${rows.length + 2}` }}
           >
-            <MilestoneOverlay minStart={minStart} maxEnd={maxEnd} milestones={milestones} />
+            <MilestoneOverlay
+              minStart={minStart}
+              maxEnd={maxEnd}
+              milestones={milestones}
+            />
           </div>
 
           {rows.map((row, index) => {
@@ -323,7 +396,7 @@ export function InteractiveNetworkWaterfall({
                   aria-selected={isSelected}
                   style={{ gridRow, gridColumn: 2 }}
                   className={cn(
-                    "relative z-[2] border-b px-1 py-2 outline-none transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
+                    "relative z-2 border-b px-1 py-2 outline-none transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
                     isSelected ? "bg-muted/50" : "hover:bg-muted/30",
                   )}
                   onClick={() => handleRowActivate(row.id)}
@@ -356,7 +429,11 @@ export function InteractiveNetworkWaterfall({
           </div>
 
           <div className="relative">
-            <MilestoneOverlay minStart={minStart} maxEnd={maxEnd} milestones={milestones} />
+            <MilestoneOverlay
+              minStart={minStart}
+              maxEnd={maxEnd}
+              milestones={milestones}
+            />
 
             {rows.map((row) => {
               const isSelected = selectedId === row.id;
@@ -365,7 +442,7 @@ export function InteractiveNetworkWaterfall({
                   key={row.id}
                   type="button"
                   className={cn(
-                    "relative z-[2] w-full border-b px-1 py-2 text-left transition-colors min-h-11",
+                    "relative z-2 w-full border-b px-1 py-2 text-left transition-colors min-h-11",
                     isSelected ? "bg-muted/50" : "hover:bg-muted/30",
                   )}
                   aria-selected={isSelected}

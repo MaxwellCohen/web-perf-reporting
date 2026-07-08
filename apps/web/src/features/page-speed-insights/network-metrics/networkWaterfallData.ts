@@ -150,14 +150,29 @@ export function getSegmentStyle(
   };
 }
 
+function niceTickStep(roughStep: number): number {
+  const power = 10 ** Math.floor(Math.log10(roughStep));
+  const error = roughStep / power;
+  if (error >= Math.sqrt(50)) return 10 * power;
+  if (error >= Math.sqrt(10)) return 5 * power;
+  if (error >= Math.sqrt(2)) return 2 * power;
+  return power;
+}
+
 export function buildTimeAxisTicks(minStart: number, maxEnd: number, tickCount = 5): number[] {
   const range = maxEnd - minStart;
   if (range <= 0) {
     return [minStart];
   }
 
-  const step = range / (tickCount - 1);
-  return Array.from({ length: tickCount }, (_, index) =>
-    Math.round(minStart + step * index),
-  );
+  const roughStep = range / Math.max(1, tickCount - 1);
+  const step = niceTickStep(roughStep);
+  const start = Math.floor(minStart / step) * step;
+  const end = Math.ceil(maxEnd / step) * step;
+
+  const ticks: number[] = [];
+  for (let tick = start; tick <= end + step * 1e-9; tick += step) {
+    ticks.push(Math.round(tick));
+  }
+  return ticks;
 }

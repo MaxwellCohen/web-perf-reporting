@@ -127,4 +127,8 @@ describe("networkWaterfallData", () => {
   it("builds evenly spaced axis ticks", () => {
     expect(buildTimeAxisTicks(0, 400, 5)).toEqual([0, 100, 200, 300, 400]);
   });
+
+  it("builds nice round axis ticks for larger ranges", () => {
+    expect(buildTimeAxisTicks(0, 2685, 5)).toEqual([0, 500, 1000, 1500, 2000, 2500, 3000]);
+  });
 });
