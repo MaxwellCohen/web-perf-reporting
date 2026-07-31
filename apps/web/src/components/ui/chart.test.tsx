@@ -50,6 +50,7 @@ describe("ui/chart", () => {
               name: "sales",
               value: 42,
               color: "#111111",
+              graphicalItemId: "sales",
               payload: { fill: "#111111" },
             },
           ]}
@@ -75,6 +76,7 @@ describe("ui/chart", () => {
                 name: "visitors",
                 value: 13,
                 color: "#333333",
+                graphicalItemId: "visitors",
                 payload: { visitors: "visitors" },
               },
             ]}

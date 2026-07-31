@@ -23,13 +23,22 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
         class="relative z-10"
       >
         <div
-          class="flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none w-full h-full"
+          class="flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden w-full h-full"
           data-chart="chart-_r_0_"
+          data-slot="chart"
           style="height: 40px;"
         >
           <style>
             
-[data-chart=chart-_r_0_] {
+ [data-chart=chart-_r_0_] {
+  --color-P75: hsl(var(--chart-4));
+  --color-good_density: hsl(var(--chart-1));
+  --color-ni_density: hsl(var(--chart-2));
+  --color-poor_density: hsl(var(--chart-3));
+}
+
+
+.dark [data-chart=chart-_r_0_] {
   --color-P75: hsl(var(--chart-4));
   --color-good_density: hsl(var(--chart-1));
   --color-ni_density: hsl(var(--chart-2));
@@ -39,7 +48,12 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
           </style>
           <div
             data-testid="responsive-container"
-          />
+          >
+            <div
+              class="recharts-wrapper"
+              style="position: relative; cursor: default;"
+            />
+          </div>
         </div>
       </div>
       <div

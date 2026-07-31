@@ -2,12 +2,19 @@
 
 exports[`ui/chart > renders chart children inside a responsive container and injects styles 1`] = `
 <div
-  class="flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none"
+  class="flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden"
   data-chart="chart-revenue"
+  data-slot="chart"
 >
   <style>
     
-[data-chart=chart-revenue] {
+ [data-chart=chart-revenue] {
+  --color-sales: #111111;
+  --color-visitors: #333333;
+}
+
+
+.dark [data-chart=chart-revenue] {
   --color-sales: #111111;
   --color-visitors: #333333;
 }
@@ -25,12 +32,19 @@ exports[`ui/chart > renders chart children inside a responsive container and inj
 
 exports[`ui/chart > renders tooltip content from the provided config and payload 1`] = `
 <div
-  class="flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none"
+  class="flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden"
   data-chart="chart-_r_0_"
+  data-slot="chart"
 >
   <style>
     
-[data-chart=chart-_r_0_] {
+ [data-chart=chart-_r_0_] {
+  --color-sales: #111111;
+  --color-visitors: #333333;
+}
+
+
+.dark [data-chart=chart-_r_0_] {
   --color-sales: #111111;
   --color-visitors: #333333;
 }
@@ -54,7 +68,7 @@ exports[`ui/chart > renders tooltip content from the provided config and payload
           class="flex w-full flex-wrap gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground items-center"
         >
           <div
-            class="shrink-0 rounded-xs border-[--color-border] bg-[--color-bg] h-2.5 w-2.5"
+            class="shrink-0 rounded-xs border-(--color-border) bg-(--color-bg) h-2.5 w-2.5"
             style="--color-bg: #111111; --color-border: #111111;"
           />
           <div
@@ -85,12 +99,19 @@ exports[`ui/chart > renders tooltip content from the provided config and payload
 exports[`ui/chart > returns nothing when there is no color config or inactive tooltip 1`] = `
 <div>
   <div
-    class="flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none"
+    class="flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden"
     data-chart="chart-_r_0_"
+    data-slot="chart"
   >
     <style>
       
-[data-chart=chart-_r_0_] {
+ [data-chart=chart-_r_0_] {
+  --color-sales: #111111;
+  --color-visitors: #333333;
+}
+
+
+.dark [data-chart=chart-_r_0_] {
   --color-sales: #111111;
   --color-visitors: #333333;
 }
@@ -105,12 +126,19 @@ exports[`ui/chart > returns nothing when there is no color config or inactive to
 
 exports[`ui/chart > supports custom label formatting and legend rendering 1`] = `
 <div
-  class="flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none"
+  class="flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden"
   data-chart="chart-_r_0_"
+  data-slot="chart"
 >
   <style>
     
-[data-chart=chart-_r_0_] {
+ [data-chart=chart-_r_0_] {
+  --color-sales: #111111;
+  --color-visitors: #333333;
+}
+
+
+.dark [data-chart=chart-_r_0_] {
   --color-sales: #111111;
   --color-visitors: #333333;
 }
@@ -135,7 +163,7 @@ exports[`ui/chart > supports custom label formatting and legend rendering 1`] = 
             class="flex w-full flex-wrap gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground items-center"
           >
             <div
-              class="shrink-0 rounded-xs border-[--color-border] bg-[--color-bg] h-2.5 w-2.5"
+              class="shrink-0 rounded-xs border-(--color-border) bg-(--color-bg) h-2.5 w-2.5"
               style="--color-bg: #333333; --color-border: #333333;"
             />
             <div

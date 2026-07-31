@@ -30,17 +30,18 @@ export function CruxHistogramChart({ histogramData }: { histogramData: CruxHisto
           />
           <ChartTooltip
             cursor={true}
+            defaultIndex={2}
             content={
               <ChartTooltipContent
-                labelFormatter={(value) => HISTOGRAM_STATUS_LABELS[value] || ""}
-                formatter={(value, _label, payload) => {
+                labelFormatter={(value) => HISTOGRAM_STATUS_LABELS[String(value)] || ""}
+                formatter={(value, _label, item) => {
                   return (
                     <div className="flex items-center gap-1">
                       <div
                         className="size-2 rounded-full"
-                        style={{ backgroundColor: payload.payload.fill }}
+                        style={{ backgroundColor: item.payload.fill }}
                       />
-                      {Math.round((+value || 0) * 100)}%
+                      {Math.round((Number(value) || 0) * 100)}%
                     </div>
                   );
                 }}
@@ -51,7 +52,6 @@ export function CruxHistogramChart({ histogramData }: { histogramData: CruxHisto
             dataKey="density"
             strokeWidth={2}
             radius={8}
-            activeIndex={2}
             activeBar={({ ...props }) => {
               return (
                 <Rectangle

@@ -35,11 +35,15 @@ export const Dot = ({
   r,
   payload,
 }: {
-  cx: number;
-  cy: number;
+  cx?: number;
+  cy?: number;
   r: number;
   payload: DotProps["payload"];
 }) => {
+  if (cx == null || cy == null) {
+    return null;
+  }
+
   let dotColor;
   if (payload.P75 <= payload.good_max) {
     dotColor = "var(--color-good_density)";
@@ -84,7 +88,6 @@ export function HistoricalP75Chart({ chartData }: { chartData: CruxHistoryItem[]
           type="linear"
           stroke="var(--color-good_density)"
           dot={({ key, ...props }) => <Dot key={key} {...props} r={2} />}
-          // @ts-expect-error dot props are not typed
           activeDot={({ key, ...props }) => <Dot key={key} {...props} r={1} />}
         />
       </ComposedChart>
