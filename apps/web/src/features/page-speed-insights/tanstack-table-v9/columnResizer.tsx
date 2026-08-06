@@ -1,11 +1,10 @@
 import type { Header, RowData } from "@tanstack/react-table";
 import clsx from "clsx";
-import type { StandardTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 
 export function ColumnResizer<TData extends RowData>({
   header,
 }: {
-  header: Header<StandardTableFeatures, TData, unknown>;
+  header: Header<any, TData, unknown>;
 }) {
   if (header.column.columnDef.enableResizing === false) {
     return null;

@@ -2,7 +2,6 @@
 "use client";
 import type {
   StockCellContext,
-  StockColumnDef,
 } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import { renderBoolean } from "@/features/page-speed-insights/lh-categories/renderBoolean";
@@ -10,7 +9,7 @@ import { StatusCircle } from "@/features/page-speed-insights/JSUsage/StatusCircl
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import type { TreeMapNode } from "@/lib/schema";
 import type { TableFeatures } from "@tanstack/table-core";
-import type { RowData } from "@tanstack/react-table";
+import { constructAggregationFn, type RowData } from "@tanstack/react-table";
 import { ExpandRow, ExpandAll, RenderBytesCell } from "./jsUsageTableParts";
 import { getHostnameFromUrl } from "@/lib/urlDisplay";
 
@@ -159,7 +158,9 @@ export const columns = [
       meta: {
         className: "",
       },
-      aggregationFn: () => "",
+      aggregationFn: constructAggregationFn({
+        aggregate: () => "",
+      }) as never,
       aggregatedCell: () => <> </>,
       enableSorting: true,
       enableHiding: true,

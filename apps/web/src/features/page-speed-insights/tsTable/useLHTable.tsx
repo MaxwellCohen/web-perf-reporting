@@ -1,6 +1,6 @@
 import type { StockColumnDef, StockRow } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { PageSpeedInsights } from "@/lib/schema";
-import { flexRender, useTable, type CreateRowModels, type StockFeatures } from "@tanstack/react-table";
+import { flexRender, useTable } from "@tanstack/react-table";
 import { Fragment, useMemo } from "react";
 import clsx from "clsx";
 import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -10,8 +10,9 @@ import { RenderDetails } from "@/features/page-speed-insights/lh-categories/Rend
 import { RenderJSONDetails } from "@/features/page-speed-insights/RenderJSONDetails";
 import { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataItem";
 import { LH_AUDIT_TABLE_COLUMNS } from "@/features/page-speed-insights/tsTable/lhAuditTableColumns";
-import { stockFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
-import { lhTableRowModels } from "@/features/page-speed-insights/tsTable/lhTableRowModels";
+import {
+  lhTableFeatures,
+} from "@/features/page-speed-insights/tanstack-table-v9/features";
 
 export function useLHTable(items: { item: PageSpeedInsights; label: string }[]) {
   const tableDataArr = useMemo(
@@ -40,8 +41,7 @@ export function useLHTable(items: { item: PageSpeedInsights; label: string }[]) 
     [items],
   );
   return useTable({
-    features: stockFeatures,
-    rowModels: lhTableRowModels as unknown as CreateRowModels<StockFeatures, TableDataItem>,
+    features: lhTableFeatures,
     data: tableDataArr,
     columns: LH_AUDIT_TABLE_COLUMNS as StockColumnDef<TableDataItem>[],
     manualPagination: true,

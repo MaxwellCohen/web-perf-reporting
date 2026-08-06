@@ -1,5 +1,4 @@
 import type { Column, RowData } from "@tanstack/react-table";
-import type { StockFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 import type { StockTable } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 
 const SKIP_COLUMN_IDS = new Set(["expander"]);
@@ -32,7 +31,7 @@ function formatCellValue(value: unknown): string {
   return String(value);
 }
 
-function getColumnHeaderLabel(column: Column<StockFeatures, RowData, unknown>): string {
+function getColumnHeaderLabel<TData extends RowData>(column: Column<any, TData, unknown>): string {
   const header = column.columnDef.header;
   if (typeof header === "string") {
     return header;

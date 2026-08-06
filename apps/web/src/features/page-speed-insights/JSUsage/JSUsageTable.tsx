@@ -1,7 +1,7 @@
 "use client";
 
 import { Table, TableBody, TableHeader } from "@/components/ui/table";
-import { useTable, type CreateRowModels, type StockFeatures } from "@tanstack/react-table";
+import { useTable } from "@tanstack/react-table";
 import type { TreeMapData, TreeMapNode } from "@/lib/schema";
 import { NoResultsRow } from "@/features/page-speed-insights/JSUsage/NoResultsRow";
 import { TableControls } from "@/features/page-speed-insights/JSUsage/TableControls";
@@ -9,13 +9,11 @@ import { columns } from "@/features/page-speed-insights/JSUsage/jsUsageTableColu
 import { JSUsageTableHeader } from "@/features/page-speed-insights/JSUsage/jsUsageTableHeader";
 import { JSUsageTableRow } from "@/features/page-speed-insights/JSUsage/jsUsageTableRow";
 import type { StockColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
-import { stockFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
-import { standardTableRowModels } from "@/features/page-speed-insights/tanstack-table-v9/standardRowModels";
+import { standardTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 
 export function useUseJSUsageTable(data: TreeMapData["nodes"]) {
-  const table = useTable<StockFeatures, TreeMapNode>({
-    features: stockFeatures,
-    rowModels: standardTableRowModels as unknown as CreateRowModels<StockFeatures, TreeMapNode>,
+  const table = useTable({
+    features: standardTableFeatures,
     columns: columns as StockColumnDef<TreeMapNode>[],
     data,
     getSubRows: (row) => (row.children?.length ? row.children : undefined),
@@ -27,8 +25,8 @@ export function useUseJSUsageTable(data: TreeMapData["nodes"]) {
     columnResizeMode: "onChange",
     initialState: {
       columnPinning: {
-        right: [],
-        left: ["expander", "Usage Status", "name", "host"],
+        end: [],
+        start: ["expander", "Usage Status", "name", "host"],
       },
       pagination: {
         pageIndex: 0,

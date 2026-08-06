@@ -3,19 +3,16 @@ import { useMemo } from "react";
 import {
   useTable,
   type ColumnDef,
-  type CreateRowModels,
   type RowData,
 } from "@tanstack/react-table";
 import {
-  stockFeatures,
-  type StandardTableFeatures,
+  standardTableFeatures,
 } from "@/features/page-speed-insights/tanstack-table-v9/features";
-import { standardTableRowModels } from "@/features/page-speed-insights/tanstack-table-v9/standardRowModels";
 import { ExpandAll, ExpandRow } from "@/features/page-speed-insights/JSUsage/jsUsageTableParts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- mixed accessor TValue per column
 export type StandardColumnDef<TData extends RowData, TValue = any> = ColumnDef<
-  StandardTableFeatures,
+  any,
   TData,
   TValue
 >;
@@ -58,9 +55,8 @@ export function useStandardTable<TData extends RowData>({
     [columns],
   );
 
-  const table = useTable<StandardTableFeatures, TData>({
-    features: stockFeatures,
-    rowModels: standardTableRowModels as CreateRowModels<StandardTableFeatures, TData>,
+  const table = useTable({
+    features: standardTableFeatures,
     data,
     columns: tableColumns,
     enableSorting: true,

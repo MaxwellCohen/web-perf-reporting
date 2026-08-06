@@ -7,7 +7,6 @@ import {
   type Header,
   type ReactTable,
   type RowData,
-  type TableState,
 } from "@tanstack/react-table";
 import { SortingButton } from "@/features/page-speed-insights/tanstack-table-v9/sortingButton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -19,12 +18,11 @@ import { ColumnResizer } from "@/features/page-speed-insights/tanstack-table-v9/
 import { renderBoolean } from "@/features/page-speed-insights/lh-categories/renderBoolean";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { StandardTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 
 export function DataTableHeader<TData extends RowData>({
   table,
 }: {
-  table: ReactTable<StandardTableFeatures, TData, TableState<StandardTableFeatures>>;
+  table: ReactTable<any, TData, any>;
 }) {
   return (
     <TableHeader>
@@ -44,7 +42,7 @@ export function DataTableHeader<TData extends RowData>({
 function DataTableHead<TData extends RowData>({
   header,
 }: {
-  header: Header<StandardTableFeatures, TData, unknown>;
+  header: Header<any, TData, unknown>;
 }) {
   const isExpanderColumn = header.column.id === "expander";
 
@@ -85,7 +83,7 @@ function DataTableHead<TData extends RowData>({
 export function FilterPopover<TData extends RowData>({
   header,
 }: {
-  header: Header<StandardTableFeatures, TData, unknown>;
+  header: Header<any, TData, unknown>;
 }) {
   if (!header.column.getCanFilter()) {
     return null;
@@ -120,7 +118,7 @@ export function FilterPopover<TData extends RowData>({
 function CheckBoxFilter<TData extends RowData>({
   header,
 }: {
-  header: Header<StandardTableFeatures, TData, unknown>;
+  header: Header<any, TData, unknown>;
 }) {
   const col = header.column;
   const table = header.getContext().table;

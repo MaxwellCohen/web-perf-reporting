@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type {
   Cell,
   CellContext,
@@ -9,37 +10,28 @@ import type {
   ReactTable,
   Row,
   RowData,
-  StockFeatures,
-  TableState,
 } from "@tanstack/react-table";
 
-/** v9 stock-feature table types (`useTable` + `createStockColumnHelper`). */
-export type StockColumnDef<TData extends RowData, TValue = unknown> = ColumnDef<
-  StockFeatures,
-  TData,
-  TValue
->;
-export type StockRow<TData extends RowData> = Row<StockFeatures, TData>;
-export type StockCell<TData extends RowData, TValue = unknown> = Cell<StockFeatures, TData, TValue>;
-export type StockTable<TData extends RowData> = ReactTable<
-  StockFeatures,
-  TData,
-  TableState<StockFeatures>
->;
-export type StockHeader<TData extends RowData, TValue = unknown> = Header<
-  StockFeatures,
-  TData,
-  TValue
->;
-export type StockHeaderGroup<TData extends RowData> = HeaderGroup<StockFeatures, TData>;
+/**
+ * Shared PSI table aliases. Column defs use `any` features so string
+ * filter/sort/aggregation keys typecheck; table/row use `any` features too.
+ * Concrete `useTable()` instances may need `as StockTable<T>` where invariant
+ * feature generics block assignability.
+ */
+export type StockColumnDef<TData extends RowData, TValue = unknown> = ColumnDef<any, TData, TValue>;
+export type StockRow<TData extends RowData> = Row<any, TData>;
+export type StockCell<TData extends RowData, TValue = unknown> = Cell<any, TData, TValue>;
+export type StockTable<TData extends RowData> = ReactTable<any, TData, any>;
+export type StockHeader<TData extends RowData, TValue = unknown> = Header<any, TData, TValue>;
+export type StockHeaderGroup<TData extends RowData> = HeaderGroup<any, TData>;
 export type StockCellContext<TData extends RowData, TValue = unknown> = CellContext<
-  StockFeatures,
+  any,
   TData,
   TValue
 >;
 export type StockHeaderContext<TData extends RowData, TValue = unknown> = HeaderContext<
-  StockFeatures,
+  any,
   TData,
   TValue
 >;
-export type StockFilterFn = FilterFn<StockFeatures, RowData>;
+export type StockFilterFn = FilterFn<any, any>;

@@ -3,10 +3,11 @@ import type { StockCellContext, StockColumnDef, StockRow, StockCell } from "@/fe
 import { AuditDetailTable, ItemValue, ItemValueType, TableColumnHeading } from "@/lib/schema";
 import { CSSProperties, Fragment, useMemo, type ReactElement } from "react";
 import type { TableFeatures } from "@tanstack/table-core";
-import { SortingState, flexRender, ColumnVisibilityState, RowData, useTable, type CreateRowModels, type DisplayColumnDef, type StockFeatures } from "@tanstack/react-table";
+import { SortingState, flexRender, ColumnVisibilityState, RowData, useTable, type DisplayColumnDef, constructAggregationFn } from "@tanstack/react-table";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
-import { stockFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
-import { standardTableRowModels } from "@/features/page-speed-insights/tanstack-table-v9/standardRowModels";
+import {
+  standardTableFeatures,
+} from "@/features/page-speed-insights/tanstack-table-v9/features";
 import { RenderTableValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import clsx from "clsx";
 import { cn } from "@/lib/utils";
@@ -276,36 +277,38 @@ const setSizeSetting = (type: ItemValueType | string) => {
 /**
  * Custom aggregation function that sums values by device/user label
  */
-const customSum = (aggregationKey: string, rows: StockRow<DetailTableDataRow>[]): DeviceValuePair[] => {
-  const aggregationObj = rows.reduce((acc: Record<string, number>, r) => {
-    let v = r.getValue(aggregationKey);
+const customSum = constructAggregationFn({
+  aggregate: ({ columnId, rows, getValue }) => {
+    const aggregationObj = rows.reduce((acc: Record<string, number>, r) => {
+      let v: unknown = getValue(r);
 
-    // Extract numeric value from object if needed
-    if (
-      v &&
-      typeof v === "object" &&
-      "value" in v &&
-      typeof (v as { value: unknown }).value === "number"
-    ) {
-      v = (v as { value: number }).value;
-    }
-
-    if (typeof v === "number") {
-      const userLabel = (r.getValue("device") as string) || "";
-      const cell = r.getAllCells().find((c) => c.column.id === aggregationKey);
-      const rowType = cell?.column?.columnDef?.meta?.rowType;
-
-      if (rowType !== "sub") {
-        acc[userLabel] = v;
-      } else {
-        acc[userLabel] = (acc[userLabel] || 0) + v;
+      // Extract numeric value from object if needed
+      if (
+        v &&
+        typeof v === "object" &&
+        "value" in v &&
+        typeof (v as { value: unknown }).value === "number"
+      ) {
+        v = (v as { value: number }).value;
       }
-    }
-    return acc;
-  }, {});
 
-  return Object.entries(aggregationObj) as DeviceValuePair[];
-};
+      if (typeof v === "number") {
+        const userLabel = (r.getValue("device") as string) || "";
+        const cell = r.getAllCells().find((c) => c.column.id === columnId);
+        const rowType = cell?.column?.columnDef?.meta?.rowType;
+
+        if (rowType !== "sub") {
+          acc[userLabel] = v;
+        } else {
+          acc[userLabel] = (acc[userLabel] || 0) + v;
+        }
+      }
+      return acc;
+    }, {});
+
+    return Object.entries(aggregationObj) as DeviceValuePair[];
+  },
+});
 
 const columnHelper = createColumnHelper<DetailTableDataRow>();
 
@@ -656,7 +659,7 @@ const createColumnsFromHeadings = (
   const columnMap: Record<string, StockColumnDef<DetailTableDataRow, unknown>> = {
     expander: columnHelper.display(
       getExpandingControlColumn() as unknown as DisplayColumnDef<
-        StockFeatures,
+        any,
         DetailTableDataRow
       >,
     ),
@@ -966,9 +969,8 @@ function DetailTableFull({ rows }: { rows: DetailTableItem[]; title: string }) {
     };
   }, [columns, defaultColumnVisibility]);
 
-  const table = useTable<StockFeatures, DetailTableDataRow>({
-    features: stockFeatures,
-    rowModels: standardTableRowModels as unknown as CreateRowModels<StockFeatures, DetailTableDataRow>,
+  const table = useTable({
+    features: standardTableFeatures,
     columns,
     data,
     getRowCanExpand: getRowCanExpandFn,
@@ -982,8 +984,8 @@ function DetailTableFull({ rows }: { rows: DetailTableItem[]; title: string }) {
       grouping: defaultGrouping,
       columnVisibility: defaultColumnVisibility,
       columnPinning: {
-        right: [],
-        left: ["expander"],
+        end: [],
+        start: ["expander"],
       },
     },
   });

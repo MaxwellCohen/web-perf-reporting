@@ -13,8 +13,7 @@ describe("useStandardTable boolean filter", () => {
       columnHelper.accessor("flag", {
         id: "flag",
         header: "Flag",
-        // @ts-expect-error v9 custom filter key
-        filterFn: "booleanFilterFn",
+        filterFn: "booleanFilterFn" as never,
       }),
     ];
     const data: Row[] = [
@@ -47,8 +46,7 @@ describe("useStandardTable boolean filter", () => {
       columnHelper.accessor("flag", {
         id: "flag",
         header: "Flag",
-        // @ts-expect-error v9 custom filter key
-        filterFn: "booleanFilterFn",
+        filterFn: "booleanFilterFn" as never,
       }),
     ];
     const data: Row[] = [
@@ -87,8 +85,7 @@ describe("useStandardTable boolean filter", () => {
       columnHelper.accessor("flag", {
         id: "flag",
         header: "Flag",
-        // @ts-expect-error v9 custom filter key
-        filterFn: "booleanFilterFn",
+        filterFn: "booleanFilterFn" as never,
       }),
     ];
     const data: Row[] = [

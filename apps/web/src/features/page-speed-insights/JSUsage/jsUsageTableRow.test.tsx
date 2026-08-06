@@ -1,10 +1,15 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { createExpandedRowModel, useTable } from "@tanstack/react-table";
+import { useTable, tableFeatures, createExpandedRowModel, stockFeatures } from "@tanstack/react-table";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
-import { stockFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 import { JSUsageTableRow } from "@/features/page-speed-insights/JSUsage/jsUsageTableRow";
+import type { StockRow } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import type { TreeMapNode } from "@/lib/schema";
+
+const expandingFeatures = tableFeatures({
+  ...stockFeatures,
+  expandedRowModel: createExpandedRowModel(),
+});
 
 vi.mock("@/components/ui/table", () => ({
   TableRow: ({
@@ -57,8 +62,7 @@ const columns = [
 
 function TableWithRow({ data }: { data: TreeMapNode[] }) {
   const table = useTable({
-    features: stockFeatures,
-    rowModels: { expandedRowModel: createExpandedRowModel() },
+    features: expandingFeatures,
     data,
     columns: columns as never,
     getSubRows: (row) => (row.children?.length ? row.children : undefined),
@@ -69,7 +73,7 @@ function TableWithRow({ data }: { data: TreeMapNode[] }) {
   return (
     <table>
       <tbody>
-        <JSUsageTableRow row={row} i={0} />
+        <JSUsageTableRow row={row as StockRow<TreeMapNode>} i={0} />
       </tbody>
     </table>
   );

@@ -67,11 +67,11 @@ importers:
         specifier: https://pkg.pr.new/@tanstack/react-query@10366
         version: https://pkg.pr.new/@tanstack/react-query@10366(react@19.3.0-canary-e71a6393-20260702)
       '@tanstack/react-table':
-        specifier: 9.0.0-beta.1
-        version: 9.0.0-beta.1(react-dom@19.3.0-canary-e71a6393-20260702(react@19.3.0-canary-e71a6393-20260702))(react@19.3.0-canary-e71a6393-20260702)
+        specifier: 9.0.0
+        version: 9.0.0(react-dom@19.3.0-canary-e71a6393-20260702(react@19.3.0-canary-e71a6393-20260702))(react@19.3.0-canary-e71a6393-20260702)
       '@tanstack/table-core':
-        specifier: 9.0.0-beta.5
-        version: 9.0.0-beta.5
+        specifier: 9.0.0
+        version: 9.0.0
       '@types/pako':
         specifier: ^2.0.4
         version: 2.0.4
@@ -152,7 +152,7 @@ importers:
         specifier: ^20.19.43
         version: 20.19.43
       '@types/react':
-        specifier: ^19.2.17
+        specifier: ^19.2.1
         version: 19.2.17
       '@types/react-dom':
         specifier: ^19.2.3
@@ -2850,18 +2850,18 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  '@tanstack/react-table@9.0.0-beta.1':
-    resolution: {integrity: sha512-fa2Sq5gPg2OM5ZyfLcohaQo2ZhAmpqpQhXwa3lVf0YRMNrnG5CrrsB2fMhhqC076bZpoNtypvqw5uB5leeOHcw==}
-    engines: {node: '>=16'}
+  '@tanstack/react-table@9.0.0':
+    resolution: {integrity: sha512-Q/Z49MQcdMwge67U+LTjSEQJCnQE9/tNWK5IpiYex9JFDzfjNkLIi7yzGA4dfW4UpuMBrtqbSnSzn7oPr60T+w==}
+    engines: {node: '>=20'}
     peerDependencies:
       react: '>=18'
 
   '@tanstack/store@0.11.0':
     resolution: {integrity: sha512-WlzzCt3xi0G6pCAJu1U+2jiECwabETDpQDi3hfkFZvJii9AuZqEKbOiVarX1/bWhTNjU486yQtJCCasi/0q+Cw==}
 
-  '@tanstack/table-core@9.0.0-beta.5':
-    resolution: {integrity: sha512-C0xCtAET9lVOcmq+j0NXfRn5NlhGsERoazzWNOYlRzrtE7dN7Djkz5FaD5E/yPFC1D+q2XKCP/BfJInayLGNdg==}
-    engines: {node: '>=16'}
+  '@tanstack/table-core@9.0.0':
+    resolution: {integrity: sha512-IyKCc4D7d/+I9euQntlVDQ7lnilmFRKpIROBeI5/866adFy+65xWvCFPz76NZ5j2lXe/RFDvFVV7bfETmwHEMA==}
+    engines: {node: '>=20'}
 
   '@testing-library/dom@10.4.1':
     resolution: {integrity: sha512-o4PXJQidqJl82ckFaXUeoAW+XysPLauYI43Abki5hABd853iMhitooc6znOnczgbTYmEP6U6/y1ZyKAIsvMKGg==}
@@ -7793,17 +7793,17 @@ snapshots:
       react-dom: 19.3.0-canary-e71a6393-20260702(react@19.3.0-canary-e71a6393-20260702)
       use-sync-external-store: 1.6.0(react@19.3.0-canary-e71a6393-20260702)
 
-  '@tanstack/react-table@9.0.0-beta.1(react-dom@19.3.0-canary-e71a6393-20260702(react@19.3.0-canary-e71a6393-20260702))(react@19.3.0-canary-e71a6393-20260702)':
+  '@tanstack/react-table@9.0.0(react-dom@19.3.0-canary-e71a6393-20260702(react@19.3.0-canary-e71a6393-20260702))(react@19.3.0-canary-e71a6393-20260702)':
     dependencies:
       '@tanstack/react-store': 0.11.0(react-dom@19.3.0-canary-e71a6393-20260702(react@19.3.0-canary-e71a6393-20260702))(react@19.3.0-canary-e71a6393-20260702)
-      '@tanstack/table-core': 9.0.0-beta.5
+      '@tanstack/table-core': 9.0.0
       react: 19.3.0-canary-e71a6393-20260702
     transitivePeerDependencies:
       - react-dom
 
   '@tanstack/store@0.11.0': {}
 
-  '@tanstack/table-core@9.0.0-beta.5':
+  '@tanstack/table-core@9.0.0':
     dependencies:
       '@tanstack/store': 0.11.0
 

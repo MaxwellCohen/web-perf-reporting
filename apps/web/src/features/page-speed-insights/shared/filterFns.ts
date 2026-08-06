@@ -1,6 +1,9 @@
-import type { StockFilterFn } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import type { FilterFn } from "@tanstack/react-table";
 
-export const booleanFilterFn: StockFilterFn = (row, columnId, filterValue, _addMeta) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AppFilterFn = FilterFn<any, any>;
+
+export const booleanFilterFn: AppFilterFn = (row, columnId, filterValue, _addMeta) => {
   if (!filterValue || !filterValue.length) {
     return true;
   }
@@ -12,7 +15,7 @@ export const booleanFilterFn: StockFilterFn = (row, columnId, filterValue, _addM
 /**
  * Standard filter function for string-based filtering (case-insensitive)
  */
-export const includesStringFilter: StockFilterFn = (row, columnId, filterValue, _addMeta) => {
+export const includesStringFilter: AppFilterFn = (row, columnId, filterValue, _addMeta) => {
   const cellValue = String(row.getValue(columnId) || "").toLowerCase();
   const filter = String(filterValue || "").toLowerCase();
   return cellValue.includes(filter);
@@ -21,7 +24,7 @@ export const includesStringFilter: StockFilterFn = (row, columnId, filterValue, 
 /**
  * Standard filter function for numeric range filtering
  */
-export const inNumberRangeFilter: StockFilterFn = (row, columnId, filterValue, _addMeta) => {
+export const inNumberRangeFilter: AppFilterFn = (row, columnId, filterValue, _addMeta) => {
   const cellValue = Number(row.getValue(columnId)) || 0;
   const [min, max] = (filterValue as [number, number]) || [0, Infinity];
   return cellValue >= min && cellValue <= max;
@@ -30,7 +33,7 @@ export const inNumberRangeFilter: StockFilterFn = (row, columnId, filterValue, _
 /**
  * Multi-select style filter: row value is included in the selected filter values (or array overlap).
  */
-export const arrIncludesSomeFilter: StockFilterFn = (row, columnId, filterValue, _addMeta) => {
+export const arrIncludesSomeFilter: AppFilterFn = (row, columnId, filterValue, _addMeta) => {
   const selected = filterValue as unknown[] | undefined;
   if (!selected?.length) {
     return true;
@@ -47,4 +50,4 @@ export const standardFilterFns = {
   booleanFilterFn,
   includesString: includesStringFilter,
   inNumberRange: inNumberRangeFilter,
-} as Record<string, StockFilterFn>;
+};

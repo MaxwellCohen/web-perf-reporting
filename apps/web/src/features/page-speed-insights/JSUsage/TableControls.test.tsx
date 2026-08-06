@@ -4,9 +4,10 @@ import { describe, expect, it, vi } from "vitest";
 import type { StockTable } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { useTable, type RowData } from "@tanstack/react-table";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
-import { stockFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
-import { flatTableRowModels } from "@/features/page-speed-insights/tanstack-table-v9/rowModels";
-import { standardTableRowModels } from "@/features/page-speed-insights/tanstack-table-v9/standardRowModels";
+import {
+  flatTableFeatures,
+  standardTableFeatures,
+} from "@/features/page-speed-insights/tanstack-table-v9/features";
 import {
   ColumnSelector,
   DropdownFilter,
@@ -102,8 +103,7 @@ function useControlsTestTable<T extends RowData>(
   options?: { paginated?: boolean; pageSize?: number },
 ) {
   return useTable({
-    features: stockFeatures,
-    rowModels: options?.paginated ? standardTableRowModels : flatTableRowModels,
+    features: options?.paginated ? standardTableFeatures : flatTableFeatures,
     data,
     columns: columns as never,
     ...(options?.paginated && {
@@ -125,7 +125,7 @@ function TableWithControls({ minimal = false }: { minimal?: boolean }) {
   ];
   const table = useControlsTestTable(data, columns, minimal ? undefined : { paginated: true });
   latestControlsTable = table as unknown as StockTable<Row>;
-  return <TableControls table={table} />;
+  return <TableControls table={table as StockTable<Row>} />;
 }
 
 function getButton(container: HTMLElement, name: string | RegExp) {
@@ -171,7 +171,7 @@ function ColumnSelectorWrapper() {
     columnHelper.accessor("name", { id: "name", enableHiding: true }),
   ];
   const table = useControlsTestTable(data, columns);
-  return <ColumnSelector table={table} />;
+  return <ColumnSelector table={table as StockTable<Row>} />;
 }
 
 describe("ColumnSelector", () => {
@@ -199,7 +199,7 @@ function PageSizeSelectorWrapper() {
     columnHelper.accessor("name", { id: "name" }),
   ];
   const table = useControlsTestTable(data, columns, { paginated: true });
-  return <PageSizeSelector table={table} />;
+  return <PageSizeSelector table={table as StockTable<Row>} />;
 }
 
 describe("PageSizeSelector", () => {
@@ -220,7 +220,7 @@ describe("PageSizeSelector", () => {
         columnHelper.accessor("name", { id: "name" }),
       ];
       const table = useControlsTestTable(data, columns, { paginated: true });
-      return <PageSizeSelector table={table} />;
+      return <PageSizeSelector table={table as StockTable<Row>} />;
     }
     const { container } = render(<PageSizeWithFewRows />);
     expect(container.textContent).toContain("All Items in 1 page");
@@ -234,7 +234,7 @@ function PaginationCardSinglePage() {
     columnHelper.accessor("name", { id: "name" }),
   ];
   const table = useControlsTestTable(data, columns, { paginated: true });
-  return <PaginationCard table={table} />;
+  return <PaginationCard table={table as StockTable<Row>} />;
 }
 
 function PaginationCardMultiPage() {
@@ -244,7 +244,7 @@ function PaginationCardMultiPage() {
     columnHelper.accessor("name", { id: "name" }),
   ];
   const table = useControlsTestTable(data, columns, { paginated: true });
-  return <PaginationCard table={table} showManualControls />;
+  return <PaginationCard table={table as StockTable<Row>} showManualControls />;
 }
 
 describe("PaginationCard", () => {
@@ -280,7 +280,7 @@ function PaginationControlsManualWrapper() {
     columnHelper.accessor("name", { id: "name" }),
   ];
   const table = useControlsTestTable(data, columns, { paginated: true });
-  return <PaginationCard table={table} showManualControls />;
+  return <PaginationCard table={table as StockTable<Row>} showManualControls />;
 }
 
 describe("PaginationCard manual page selection", () => {
@@ -305,7 +305,7 @@ function DropdownFilterMissingColumn() {
     columnHelper.accessor("name", { id: "name" }),
   ];
   const table = useControlsTestTable(data, columns);
-  return <DropdownFilter table={table} columnId="missing" />;
+  return <DropdownFilter table={table as StockTable<Row>} columnId="missing" />;
 }
 
 function DropdownFilterWithColumn() {
@@ -318,7 +318,7 @@ function DropdownFilterWithColumn() {
     columnHelper.accessor("name", { id: "name", header: "Name" }),
   ];
   const table = useControlsTestTable(data, columns);
-  return <DropdownFilter table={table} columnId="name" />;
+  return <DropdownFilter table={table as StockTable<Row>} columnId="name" />;
 }
 
 describe("DropdownFilter", () => {

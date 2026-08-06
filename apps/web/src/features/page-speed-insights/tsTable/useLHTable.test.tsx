@@ -10,8 +10,7 @@ import {
 import type { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataItem";
 import { useTable } from "@tanstack/react-table";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
-import { stockFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
-import { lhTableRowModels } from "@/features/page-speed-insights/tsTable/lhTableRowModels";
+import { lhTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 vi.mock("@/components/common/PageSpeedGaugeChart", () => ({
   HorizontalScoreChart: () => <div data-testid="score-chart" />,
 }));
@@ -107,8 +106,7 @@ function CategoryRowWrapper() {
   ];
   const data = [{ _category: { title: "Performance" }, _userLabel: "Mobile" }];
   const table = useTable({
-    features: stockFeatures,
-    rowModels: lhTableRowModels,
+    features: lhTableFeatures,
     data,
     columns: columns as never,
   });
@@ -138,8 +136,7 @@ function AuditSummaryRowWrapper() {
     },
   ];
   const table = useTable({
-    features: stockFeatures,
-    rowModels: lhTableRowModels,
+    features: lhTableFeatures,
     data,
     columns: columns as never,
   });

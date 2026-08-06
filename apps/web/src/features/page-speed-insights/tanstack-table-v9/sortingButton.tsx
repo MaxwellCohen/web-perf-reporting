@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
-import type { Header, RowData } from "@tanstack/react-table";
-import type { StandardTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
+import { Subscribe, type Header, type RowData } from "@tanstack/react-table";
 
 const IconMap: Record<string, string> = {
   asc: "↑",
@@ -10,26 +9,36 @@ const IconMap: Record<string, string> = {
 export function SortingButton<TData extends RowData>({
   header,
 }: {
-  header: Header<StandardTableFeatures, TData, unknown>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  header: Header<any, TData, unknown>;
 }) {
   if (!header.column.getCanSort()) {
     return null;
   }
+
+  const table = header.getContext().table;
+
   return (
-    <Button
-      type="button"
-      variant={"ghost"}
-      size={"icon"}
-      onClick={header.column.getToggleSortingHandler()}
-      title={
-        header.column.getNextSortingOrder() === "asc"
-          ? "Sort ascending"
-          : header.column.getNextSortingOrder() === "desc"
-            ? "Sort descending"
-            : "Clear sort"
-      }
-    >
-      {IconMap[header.column.getIsSorted() as string] ?? "〰︎"}
-    </Button>
+    <Subscribe source={table.atoms.sorting}>
+      {() => {
+        const sorted = header.column.getIsSorted();
+        const next = header.column.getNextSortingOrder();
+        return (
+          <Button
+            type="button"
+            variant={"ghost"}
+            size={"icon"}
+            onClick={(event) => {
+              header.column.getToggleSortingHandler()?.(event);
+            }}
+            title={
+              next === "asc" ? "Sort ascending" : next === "desc" ? "Sort descending" : "Clear sort"
+            }
+          >
+            {IconMap[sorted as string] ?? "〰︎"}
+          </Button>
+        );
+      }}
+    </Subscribe>
   );
 }

@@ -1,10 +1,8 @@
 "use client";
-import type { ReactNode } from "react";
 import { TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { flexRender, type ReactTable, type RowData, type TableState } from "@tanstack/react-table";
+import { flexRender, type ReactTable, type RowData } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
 import { tanstackTableCellDataProps } from "@/features/page-speed-insights/shared/tanstackTableCellDataProps";
-import type { StandardTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 
 const rowModelStateSelector = (state: {
   columnFilters: unknown;
@@ -25,7 +23,7 @@ const rowModelStateSelector = (state: {
 export function DataTableBody<TData extends RowData>({
   table,
 }: {
-  table: ReactTable<StandardTableFeatures, TData, TableState<StandardTableFeatures>>;
+  table: ReactTable<any, TData, any>;
 }) {
   return (
     <table.Subscribe selector={rowModelStateSelector}>
@@ -38,7 +36,13 @@ export function DataTableBody<TData extends RowData>({
                   .getVisibleCells()
                   .map((cell) => {
                     let cellRender = flexRender(cell.column.columnDef.cell, cell.getContext());
-                    if (cell.getIsAggregated() || cell.getIsGrouped()) {
+                    // v9: getIsAggregated() is true only when the column has an aggregationFn.
+                    const shouldUseAggregated =
+                      cell.getIsAggregated() ||
+                      (row.subRows.length > 0 &&
+                        !cell.getIsGrouped() &&
+                        !!cell.column.columnDef.aggregatedCell);
+                    if (shouldUseAggregated) {
                       cellRender = flexRender(
                         cell.column.columnDef.aggregatedCell ?? cell.column.columnDef.cell,
                         cell.getContext(),

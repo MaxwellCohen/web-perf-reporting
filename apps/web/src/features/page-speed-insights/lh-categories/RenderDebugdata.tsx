@@ -13,15 +13,13 @@ import { camelCaseToSentenceCase } from "@/features/page-speed-insights/lh-categ
 import { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataItem";
 import { useMemo } from "react";
 import {
-  aggregationFns,
-  createExpandedRowModel,
-  createGroupedRowModel,
   flexRender,
   useTable,
-  type StockFeatures,
 } from "@tanstack/react-table";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
-import { stockFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
+import {
+  debugDataTableFeatures,
+} from "@/features/page-speed-insights/tanstack-table-v9/features";
 import {
   RenderBytesValue,
   RenderCountNumber,
@@ -133,12 +131,8 @@ function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
     ],
     [],
   );
-  const table = useTable<StockFeatures, DebugDataTableItem>({
-    features: stockFeatures,
-    rowModels: {
-      groupedRowModel: createGroupedRowModel(aggregationFns),
-      expandedRowModel: createExpandedRowModel(),
-    },
+  const table = useTable({
+    features: debugDataTableFeatures,
     data,
     columns: columns as StockColumnDef<DebugDataTableItem>[],
     manualPagination: true,
@@ -146,8 +140,8 @@ function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
     initialState: {
       grouping: ["key"],
       columnPinning: {
-        right: [],
-        left: ["key", "value", "label"],
+        end: [],
+        start: ["key", "value", "label"],
       },
     },
   });

@@ -31,9 +31,7 @@ const cols: StockColumnDef<EntityTableRow, any>[] = [
     enableSorting: true,
     enableGrouping: true,
     enableResizing: true,
-    // @ts-expect-error v9 custom filter key registered in useStandardTable filterFns
     filterFn: "includesString",
-    // @ts-expect-error v9 custom aggregation key registered in useStandardTable aggregationFns
     aggregationFn: "unique",
     aggregatedCell: createStringAggregatedCell("name", undefined, false),
   }),
@@ -42,8 +40,8 @@ const cols: StockColumnDef<EntityTableRow, any>[] = [
     header: "Is First Party",
     enableSorting: true,
     enableResizing: true,
-    // @ts-expect-error v9 custom filter key registered in useStandardTable filterFns
-    filterFn: "booleanFilterFn",
+    filterFn: "booleanFilterFn" as never,
+    aggregationFn: "unique",
     cell: (info) => renderBoolean(!!info.getValue()),
     aggregatedCell: createBooleanAggregatedCell("isFirstParty", renderBoolean),
   }),
@@ -52,8 +50,8 @@ const cols: StockColumnDef<EntityTableRow, any>[] = [
     header: "Is Unrecognized",
     enableSorting: true,
     enableResizing: true,
-    // @ts-expect-error v9 custom filter key registered in useStandardTable filterFns
-    filterFn: "booleanFilterFn",
+    filterFn: "booleanFilterFn" as never,
+    aggregationFn: "unique",
     cell: (info) => renderBoolean(!!info.getValue()),
     aggregatedCell: createBooleanAggregatedCell("isUnrecognized", renderBoolean),
   }),
@@ -62,8 +60,12 @@ const cols: StockColumnDef<EntityTableRow, any>[] = [
     header: "Origins",
     enableSorting: false,
     enableResizing: true,
+    aggregationFn: "unique",
     cell: (info) => {
       const origins = info.getValue() as string[];
+      if (!Array.isArray(origins)) {
+        return null;
+      }
       return (
         <div>
           {origins.map((origin, i) => (
@@ -106,7 +108,6 @@ export function EntitiesTableCard({
     defaultPageSize: data.length,
     enablePagination: true,
   });
-  // @ts-expect-error v9 custom filter key registered in useStandardTable filterFns
   return <TableCard title="Third-Party Entities" table={table} className="md:col-span-2 lg:col-span-3" />;
 }
 

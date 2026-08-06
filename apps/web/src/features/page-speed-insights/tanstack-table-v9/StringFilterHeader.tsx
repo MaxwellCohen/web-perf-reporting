@@ -5,14 +5,13 @@ import type { HeaderContext, RowData } from "@tanstack/react-table";
 import { Label } from "@/components/ui/label";
 import { DebouncedInput } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import type { StandardTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 
 const MAX_DATALIST_OPTIONS = 5000;
 
 export function StringFilterHeader<TData extends RowData>({
   column,
   name,
-}: Partial<Pick<HeaderContext<StandardTableFeatures, TData, unknown>, "column">> & {
+}: Partial<Pick<HeaderContext<any, TData, unknown>, "column">> & {
   name: string;
 }) {
   const id = useId();
