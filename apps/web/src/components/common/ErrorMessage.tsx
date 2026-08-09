@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { unstable_catchError } from "next/error";
+import { catchError } from "next/error";
 import Link from "next/link";
 import { AlertCircle } from "lucide-react";
 
@@ -69,4 +69,4 @@ function ErrorMessageFallback({
   return <ReportErrorCard title={title} description={description} />;
 }
 
-export const ErrorMessage = unstable_catchError(ErrorMessageFallback);
+export const ErrorMessage = catchError(ErrorMessageFallback);

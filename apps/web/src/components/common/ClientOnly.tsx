@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use } from "react";
+import { browser } from "react-dom";
 
 export function ClientOnly({ children }: { children: React.ReactNode }) {
-  const [isClient, setIsClient] = useState(false);
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-  return isClient ? <>{children}</> : null;
+  use(browser());
+  return <>{children}</>;
 }

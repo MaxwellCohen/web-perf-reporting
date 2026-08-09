@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
-    viewTransition: true,
+    turbopackRustReactCompiler: true,
   },
   reactCompiler: true,
   typedRoutes: true,
