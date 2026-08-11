@@ -40,10 +40,12 @@ describe("InteractiveNetworkWaterfall", () => {
     );
 
     expect(screen.getByTestId("interactive-network-waterfall")).toBeTruthy();
-    expect(screen.getAllByText(/example.com\/app.js/).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/example.com\/style.css/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText("app.js").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("style.css").length).toBeGreaterThan(0);
     expect(screen.getAllByText("50ms").length).toBeGreaterThan(0);
     expect(screen.getAllByText("250ms").length).toBeGreaterThan(0);
+    expect(screen.getAllByTestId("waterfall-milestone-legend").length).toBeGreaterThan(0);
+    expect(screen.getAllByTestId("waterfall-tick-grid").length).toBeGreaterThan(0);
   });
 
   it("shows detail panel when a row is selected", () => {
@@ -57,9 +59,13 @@ describe("InteractiveNetworkWaterfall", () => {
       />,
     );
 
-    expect(screen.getByTestId("waterfall-row-detail")).toBeTruthy();
-    expect(screen.getByText("Queue: 20 ms")).toBeTruthy();
-    expect(screen.getByText("Network: 150 ms")).toBeTruthy();
+    const detail = screen.getByTestId("waterfall-row-detail");
+    expect(detail).toBeTruthy();
+    expect(detail.textContent).toContain("Queue");
+    expect(detail.textContent).toContain("20 ms");
+    expect(detail.textContent).toContain("Network");
+    expect(detail.textContent).toContain("150 ms");
+    expect(detail.textContent).toContain("https://example.com/app.js");
   });
 
   it("renders milestone lines spanning all request rows", () => {
@@ -97,5 +103,23 @@ describe("InteractiveNetworkWaterfall", () => {
   it("shows empty state when no rows are provided", () => {
     render(<InteractiveNetworkWaterfall rows={[]} timeRange={timeRange} />);
     expect(screen.getByText("No requests match the current filters.")).toBeTruthy();
+  });
+
+  it("applies the selected height size to the scroll container", () => {
+    render(
+      <InteractiveNetworkWaterfall
+        rows={rows}
+        timeRange={timeRange}
+        heightSize="large"
+      />,
+    );
+
+    expect(screen.getByTestId("waterfall-scroll-container")).toHaveAttribute(
+      "data-height-size",
+      "large",
+    );
+    expect(screen.getByTestId("waterfall-scroll-container").className).toContain(
+      "max-h-[80vh]",
+    );
   });
 });

@@ -49,6 +49,10 @@ describe("NetworkWaterfallCard", () => {
     expect(screen.getByText("Network Waterfall")).toBeTruthy();
     expect(screen.getByText("1 of 1 requests")).toBeTruthy();
     expect(screen.getByTestId("interactive-waterfall")).toBeTruthy();
+    expect(screen.getByTestId("waterfall-resource-type-legend")).toBeTruthy();
+    expect(screen.getByText("Document")).toBeTruthy();
+    expect(screen.getByText("Queue")).toBeTruthy();
+    expect(screen.getByLabelText("Waterfall height")).toBeTruthy();
   });
 
   it("renders report picker when multiple series have requests", () => {

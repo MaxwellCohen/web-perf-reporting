@@ -21,20 +21,60 @@ export type WaterfallMilestones = {
   domContentLoaded?: number;
 };
 
+export type WaterfallHeightSize = "default" | "large" | "xl" | "full";
+
+const WATERFALL_HEIGHT_CLASS: Record<WaterfallHeightSize, string> = {
+  default: "max-h-[60vh]",
+  large: "max-h-[80vh]",
+  xl: "max-h-[90vh]",
+  full: "max-h-none",
+};
+
 type InteractiveNetworkWaterfallProps = {
   rows: NetworkWaterfallRow[];
   timeRange: NetworkRequestTimeRange;
   milestones?: WaterfallMilestones;
   selectedId?: string | null;
   onSelectRow?: (id: string | null) => void;
+  heightSize?: WaterfallHeightSize;
 };
 
-const BAR_HEIGHT = 16;
-const LABEL_COLUMN_WIDTH = 260;
+const BAR_HEIGHT = 12;
+const LABEL_COLUMN_WIDTH = 280;
+const META_COLUMN_WIDTH = 88;
 const URL_PROTOCOL_REGEX = /^https?:\/\//;
+const FILENAME_RESOURCE_TYPES = new Set(["Script", "Stylesheet", "Font", "Image", "Media"]);
 
-function shortenUrl(url: string): string {
-  return url.replace(URL_PROTOCOL_REGEX, "");
+const MILESTONE_LINE_CLASS: Record<string, string> = {
+  fcp: "border-l border-dashed border-emerald-500/70",
+  lcp: "border-l border-dashed border-amber-500/80",
+  dcl: "border-l border-dashed border-sky-500/70",
+};
+
+const MILESTONE_DOT_CLASS: Record<string, string> = {
+  fcp: "bg-emerald-500",
+  lcp: "bg-amber-500",
+  dcl: "bg-sky-500",
+};
+
+function shortenUrl(url: string, resourceType: string): string {
+  const withoutProtocol = url.replace(URL_PROTOCOL_REGEX, "");
+  if (!FILENAME_RESOURCE_TYPES.has(resourceType)) {
+    return withoutProtocol;
+  }
+
+  try {
+    const parsed = new URL(url.startsWith("http") ? url : `https://${withoutProtocol}`);
+    const segments = parsed.pathname.split("/").filter(Boolean);
+    const filename = segments.at(-1);
+    if (filename && filename.includes(".")) {
+      return filename.length > 48 ? `${filename.slice(0, 45)}…` : filename;
+    }
+  } catch {
+    // fall through to host/path
+  }
+
+  return withoutProtocol;
 }
 
 function formatMs(value: number): string {
@@ -62,22 +102,19 @@ function WaterfallBarTrack({ row, minStart, maxEnd }: WaterfallBarTrackProps) {
 
   return (
     <div
-      className="relative w-full min-w-0 rounded-md overflow-hidden bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60"
+      className="relative w-full min-w-0 overflow-hidden rounded-sm bg-muted/40 group-hover:bg-muted/55"
       style={{ height: BAR_HEIGHT }}
     >
       {queueStyle ? (
         <div
-          className={cn(
-            "absolute top-0 bottom-0 rounded-[3px] shadow-sm ring-1 ring-black/5 dark:ring-white/10",
-            QUEUE_SEGMENT_COLOR,
-          )}
+          className={cn("absolute top-0 bottom-0 rounded-xs", QUEUE_SEGMENT_COLOR)}
           style={queueStyle}
           aria-label={`Queue ${formatMs(row.queueEnd! - row.queueStart!)}`}
         />
       ) : null}
       <div
         className={cn(
-          "absolute top-0 bottom-0 rounded-[3px] shadow-sm ring-1 ring-black/5 dark:ring-white/10",
+          "absolute top-0 bottom-0 rounded-xs opacity-90 group-hover:opacity-100",
           networkColor,
         )}
         style={networkStyle}
@@ -112,6 +149,40 @@ function getMilestoneItems(milestones?: WaterfallMilestones): MilestoneItem[] {
   return items;
 }
 
+type TickGridOverlayProps = {
+  minStart: number;
+  maxEnd: number;
+};
+
+function TickGridOverlay({ minStart, maxEnd }: TickGridOverlayProps) {
+  const ticks = useMemo(
+    () => buildTimeAxisTicks(minStart, maxEnd, 5),
+    [minStart, maxEnd],
+  );
+  const range = maxEnd - minStart;
+  if (range <= 0) return null;
+
+  return (
+    <div
+      className="pointer-events-none absolute inset-0 z-0"
+      data-testid="waterfall-tick-grid"
+      aria-hidden
+    >
+      {ticks.map((tick) => {
+        const leftPct = ((tick - minStart) / range) * 100;
+        if (leftPct < 0 || leftPct > 100) return null;
+        return (
+          <div
+            key={tick}
+            className="absolute top-0 bottom-0 w-px bg-border/40"
+            style={{ left: `${leftPct}%` }}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
 type MilestoneOverlayProps = {
   minStart: number;
   maxEnd: number;
@@ -139,12 +210,44 @@ function MilestoneOverlay({
         return (
           <div
             key={item.key}
-            className="absolute top-0 bottom-0 w-px bg-primary/60"
+            className={cn(
+              "absolute top-0 bottom-0 w-0",
+              MILESTONE_LINE_CLASS[item.key] ?? "border-l border-dashed border-primary/60",
+            )}
             style={{ left: `${leftPct}%` }}
             title={`${item.label}: ${formatMs(item.value)}`}
           />
         );
       })}
+    </div>
+  );
+}
+
+function MilestoneLegend({ milestones }: { milestones?: WaterfallMilestones }) {
+  const items = useMemo(() => getMilestoneItems(milestones), [milestones]);
+  if (!items.length) return null;
+
+  return (
+    <div
+      className="flex flex-wrap items-center gap-x-3 gap-y-0.5"
+      data-testid="waterfall-milestone-legend"
+    >
+      {items.map((item) => (
+        <span
+          key={item.key}
+          className="inline-flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground"
+          title={`${item.label}: ${formatMs(item.value)}`}
+        >
+          <span
+            className={cn(
+              "h-2 w-2 shrink-0 rounded-full",
+              MILESTONE_DOT_CLASS[item.key] ?? "bg-primary",
+            )}
+          />
+          {item.label}
+          <span className="tabular-nums font-normal">{formatMs(item.value)}</span>
+        </span>
+      ))}
     </div>
   );
 }
@@ -160,37 +263,24 @@ function TimeAxis({ minStart, maxEnd, milestones }: TimeAxisProps) {
     () => buildTimeAxisTicks(minStart, maxEnd, 5),
     [minStart, maxEnd],
   );
-  const milestoneItems = useMemo(
-    () => getMilestoneItems(milestones),
-    [milestones],
-  );
-  
 
   return (
     <div
-      className="relative w-full min-w-0 border-b border-slate-200/60 dark:border-slate-700/60 pb-1"
+      className="relative w-full min-w-0 space-y-1"
       data-testid="waterfall-timeline"
     >
-      <div className="relative h-5">
-        {ticks.map((tick, index) => {
-          return (
-            <TimeAxisTick
-              key={tick}
-              tick={tick}
-              index={index}
-              minStart={minStart}
-              maxEnd={maxEnd}
-            />
-          );
-        })}
+      <div className="relative h-4">
+        {ticks.map((tick, index) => (
+          <TimeAxisTick
+            key={tick}
+            tick={tick}
+            index={index}
+            minStart={minStart}
+            maxEnd={maxEnd}
+          />
+        ))}
       </div>
-      {milestoneItems.length > 0 ? (
-        <div className="relative mt-0.5 h-4">
-          {milestoneItems.map((item) => {
-            return <MilestoneTick key={item.key} item={item} minStart={minStart} maxEnd={maxEnd} />;
-          })}
-        </div>
-      ) : null}
+      <MilestoneLegend milestones={milestones} />
     </div>
   );
 }
@@ -212,9 +302,8 @@ function TimeAxisTick({
   if (leftPct < 0 || leftPct > 100) return null;
   return (
     <span
-      key={tick}
       className={cn(
-        "absolute -translate-x-1/2 tabular-nums text-xs text-muted-foreground",
+        "absolute -translate-x-1/2 tabular-nums text-[11px] text-muted-foreground",
         { "pl-[3ch]": !index },
       )}
       style={{ left: `${leftPct}%` }}
@@ -224,50 +313,68 @@ function TimeAxisTick({
   );
 }
 
+type RowMetaProps = {
+  row: NetworkWaterfallRow;
+  layout?: "desktop" | "mobile";
+};
 
-function MilestoneTick({ item, minStart, maxEnd }: { item: MilestoneItem, minStart: number, maxEnd: number }) {
-  const range = maxEnd - minStart;
-  if (range <= 0) return null;
-  const leftPct = ((item.value - minStart) / range) * 100;
-  if (leftPct < 0 || leftPct > 100) return null;
+function ResourceTypeSwatch({ resourceType }: { resourceType: string }) {
   return (
     <span
-      className="absolute -translate-x-1/2 text-[10px] font-medium text-primary whitespace-nowrap"
-      style={{ left: `${leftPct}%` }}
-    >
-      {item.label}
-    </span>
+      className={cn(
+        "mt-0.5 h-2 w-2 shrink-0 rounded-sm",
+        getNetworkBarColor(resourceType),
+      )}
+      title={toTitleCase(resourceType)}
+      aria-label={toTitleCase(resourceType)}
+    />
   );
 }
 
-type RowMetaProps = {
-  row: NetworkWaterfallRow;
-  compact?: boolean;
-};
-
-function RowMeta({ row, compact }: RowMetaProps) {
-  const displayUrl = shortenUrl(row.url);
+function RowTrailingMeta({ row }: { row: NetworkWaterfallRow }) {
   const sizeLabel =
     row.transferSize != null && row.transferSize > 0
       ? formatBytes(row.transferSize)
-      : null;
+      : "—";
 
   return (
-    <div className={cn("min-w-0", compact ? "space-y-1" : "pr-2")}>
-      <div className="flex min-w-0 items-center gap-2">
-        <span className="truncate text-sm" title={row.url}>
-          {displayUrl}
-        </span>
+    <div className="flex shrink-0 flex-col items-end gap-0.5 tabular-nums text-[10px] leading-tight text-muted-foreground">
+      <span>{sizeLabel}</span>
+      {row.statusCode != null ? <span>{row.statusCode}</span> : null}
+    </div>
+  );
+}
+
+function RowMeta({ row, layout = "desktop" }: RowMetaProps) {
+  const displayUrl = shortenUrl(row.url, row.resourceType);
+
+  if (layout === "mobile") {
+    return (
+      <div className="flex min-w-0 items-start gap-2">
+        <ResourceTypeSwatch resourceType={row.resourceType} />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-xs font-medium" title={row.url}>
+            {displayUrl}
+          </p>
+          <div className="mt-0.5 flex items-center gap-2 text-[10px] tabular-nums text-muted-foreground">
+            <span>{toTitleCase(row.resourceType)}</span>
+            {row.transferSize != null && row.transferSize > 0 ? (
+              <span>{formatBytes(row.transferSize)}</span>
+            ) : null}
+            {row.statusCode != null ? <span>{row.statusCode}</span> : null}
+          </div>
+        </div>
       </div>
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
-        <span className="rounded bg-muted px-1.5 py-0.5">
-          {toTitleCase(row.resourceType)}
-        </span>
-        {sizeLabel ? <span className="tabular-nums">{sizeLabel}</span> : null}
-        {row.statusCode != null ? (
-          <span className="tabular-nums">{row.statusCode}</span>
-        ) : null}
-      </div>
+    );
+  }
+
+  return (
+    <div className="flex min-w-0 items-start gap-2 pr-1">
+      <ResourceTypeSwatch resourceType={row.resourceType} />
+      <span className="min-w-0 flex-1 truncate text-xs leading-4" title={row.url}>
+        {displayUrl}
+      </span>
+      <RowTrailingMeta row={row} />
     </div>
   );
 }
@@ -276,6 +383,15 @@ type RowDetailProps = {
   row: NetworkWaterfallRow;
 };
 
+function DetailChip({ label, value }: { label: string; value: string }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-md border bg-background/80 px-2 py-0.5 tabular-nums">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium text-foreground">{value}</span>
+    </span>
+  );
+}
+
 function RowDetail({ row }: RowDetailProps) {
   const queueMs =
     row.queueStart != null && row.queueEnd != null
@@ -283,16 +399,26 @@ function RowDetail({ row }: RowDetailProps) {
       : null;
 
   return (
-    <div className="rounded-md border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
-      <p className="break-all text-foreground">{row.url}</p>
-      <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 tabular-nums">
-        {queueMs != null ? <span>Queue: {formatMs(queueMs)}</span> : null}
-        <span>Network: {formatMs(row.networkEnd - row.networkStart)}</span>
-        <span>Total: {formatMs(row.duration)}</span>
-        {row.transferSize != null ? (
-          <span>Transfer: {formatBytes(row.transferSize)}</span>
+    <div className="rounded-md border bg-muted/30 px-3 py-2.5 text-xs">
+      <p className="break-all font-mono text-[11px] leading-relaxed text-foreground">
+        {row.url}
+      </p>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        <DetailChip label="Type" value={toTitleCase(row.resourceType)} />
+        {queueMs != null ? (
+          <DetailChip label="Queue" value={formatMs(queueMs)} />
         ) : null}
-        {row.statusCode != null ? <span>Status: {row.statusCode}</span> : null}
+        <DetailChip
+          label="Network"
+          value={formatMs(row.networkEnd - row.networkStart)}
+        />
+        <DetailChip label="Total" value={formatMs(row.duration)} />
+        {row.transferSize != null ? (
+          <DetailChip label="Transfer" value={formatBytes(row.transferSize)} />
+        ) : null}
+        {row.statusCode != null ? (
+          <DetailChip label="Status" value={String(row.statusCode)} />
+        ) : null}
       </div>
     </div>
   );
@@ -304,6 +430,7 @@ export function InteractiveNetworkWaterfall({
   milestones,
   selectedId,
   onSelectRow,
+  heightSize = "default",
 }: InteractiveNetworkWaterfallProps) {
   const { minStart, maxEnd } = timeRange;
   const selectedRow = rows.find((row) => row.id === selectedId) ?? null;
@@ -317,7 +444,7 @@ export function InteractiveNetworkWaterfall({
 
   if (!rows.length) {
     return (
-      <p className="text-sm text-muted-foreground py-4 text-center">
+      <p className="py-4 text-center text-sm text-muted-foreground">
         No requests match the current filters.
       </p>
     );
@@ -326,26 +453,38 @@ export function InteractiveNetworkWaterfall({
   return (
     <div className="w-full min-w-0" data-testid="interactive-network-waterfall">
       <div
-        className="max-h-[60vh] overflow-y-auto touch-pan-y rounded-md border border-border/50"
+        className={cn(
+          "touch-pan-y overflow-y-auto rounded-md border border-border/50",
+          WATERFALL_HEIGHT_CLASS[heightSize],
+        )}
         data-testid="waterfall-scroll-container"
+        data-height-size={heightSize}
         style={{ touchAction: "pan-y" }}
       >
         {/* Desktop: labels + timeline grid */}
         <div
-          className="hidden md:grid w-full min-w-0"
+          className="hidden w-full min-w-0 md:grid"
           style={{
             gridTemplateColumns: `${LABEL_COLUMN_WIDTH}px minmax(0, 1fr)`,
             gridTemplateRows: `auto repeat(${rows.length}, auto)`,
           }}
         >
           <div
-            className="sticky top-0 left-0 z-30 border-b bg-card px-2 py-2 text-xs font-medium text-muted-foreground"
+            className="sticky top-0 left-0 z-30 border-b bg-card px-2 py-1.5 text-[11px] font-medium text-muted-foreground"
             style={{ gridRow: 1, gridColumn: 1 }}
           >
-            Request
+            <div className="flex items-center justify-between gap-2">
+              <span>Request</span>
+              <span
+                className="tabular-nums"
+                style={{ width: META_COLUMN_WIDTH, textAlign: "right" }}
+              >
+                Size / Status
+              </span>
+            </div>
           </div>
           <div
-            className="sticky top-0 z-20 border-b bg-card px-1 py-1"
+            className="sticky top-0 z-20 border-b bg-card px-1 py-1.5"
             style={{ gridRow: 1, gridColumn: 2 }}
           >
             <TimeAxis
@@ -359,6 +498,7 @@ export function InteractiveNetworkWaterfall({
             className="relative z-1"
             style={{ gridColumn: 2, gridRow: `2 / ${rows.length + 2}` }}
           >
+            <TickGridOverlay minStart={minStart} maxEnd={maxEnd} />
             <MilestoneOverlay
               minStart={minStart}
               maxEnd={maxEnd}
@@ -377,8 +517,10 @@ export function InteractiveNetworkWaterfall({
                   aria-selected={isSelected}
                   style={{ gridRow, gridColumn: 1 }}
                   className={cn(
-                    "sticky left-0 z-10 border-b px-2 py-2 outline-none transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
-                    isSelected ? "bg-muted/50" : "bg-card hover:bg-muted/30",
+                    "group sticky left-0 z-10 cursor-pointer border-b border-border/40 px-2 py-1.5 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                    isSelected
+                      ? "bg-muted/60"
+                      : "bg-card hover:bg-muted/30",
                   )}
                   onClick={() => handleRowActivate(row.id)}
                   onKeyDown={(event) => {
@@ -388,7 +530,7 @@ export function InteractiveNetworkWaterfall({
                     }
                   }}
                 >
-                  <RowMeta row={row} />
+                  <RowMeta row={row} layout="desktop" />
                 </div>
                 <div
                   role="button"
@@ -396,8 +538,8 @@ export function InteractiveNetworkWaterfall({
                   aria-selected={isSelected}
                   style={{ gridRow, gridColumn: 2 }}
                   className={cn(
-                    "relative z-2 border-b px-1 py-2 outline-none transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
-                    isSelected ? "bg-muted/50" : "hover:bg-muted/30",
+                    "group relative z-2 cursor-pointer border-b border-border/40 px-1 py-1.5 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                    isSelected ? "bg-muted/60" : "hover:bg-muted/30",
                   )}
                   onClick={() => handleRowActivate(row.id)}
                   onKeyDown={(event) => {
@@ -419,8 +561,8 @@ export function InteractiveNetworkWaterfall({
         </div>
 
         {/* Mobile: timeline on top, stacked rows — same unified scroll */}
-        <div className="relative md:hidden w-full min-w-0">
-          <div className="sticky top-0 z-20 border-b bg-card px-1 py-1">
+        <div className="relative w-full min-w-0 md:hidden">
+          <div className="sticky top-0 z-20 border-b bg-card px-1 py-1.5">
             <TimeAxis
               minStart={minStart}
               maxEnd={maxEnd}
@@ -429,6 +571,7 @@ export function InteractiveNetworkWaterfall({
           </div>
 
           <div className="relative">
+            <TickGridOverlay minStart={minStart} maxEnd={maxEnd} />
             <MilestoneOverlay
               minStart={minStart}
               maxEnd={maxEnd}
@@ -442,14 +585,14 @@ export function InteractiveNetworkWaterfall({
                   key={row.id}
                   type="button"
                   className={cn(
-                    "relative z-2 w-full border-b px-1 py-2 text-left transition-colors min-h-11",
-                    isSelected ? "bg-muted/50" : "hover:bg-muted/30",
+                    "group relative z-2 min-h-11 w-full border-b border-border/40 px-1.5 py-1.5 text-left transition-colors",
+                    isSelected ? "bg-muted/60" : "hover:bg-muted/30",
                   )}
                   aria-selected={isSelected}
                   onClick={() => handleRowActivate(row.id)}
                 >
-                  <RowMeta row={row} compact />
-                  <div className="mt-2">
+                  <RowMeta row={row} layout="mobile" />
+                  <div className="mt-1.5">
                     <WaterfallBarTrack
                       row={row}
                       minStart={minStart}

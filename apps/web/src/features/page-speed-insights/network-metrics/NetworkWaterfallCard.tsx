@@ -19,7 +19,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
-import { InteractiveNetworkWaterfall } from "@/features/page-speed-insights/network-metrics/InteractiveNetworkWaterfall";
+import {
+  InteractiveNetworkWaterfall,
+  type WaterfallHeightSize,
+} from "@/features/page-speed-insights/network-metrics/InteractiveNetworkWaterfall";
 import {
   buildWaterfallRows,
   filterWaterfallRows,
@@ -29,8 +32,36 @@ import {
   type WaterfallSortBy,
 } from "@/features/page-speed-insights/network-metrics/networkWaterfallData";
 import { useNetworkMetricSeries } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
+import { getNetworkBarColor } from "@/features/page-speed-insights/shared/networkResourceColors";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { cn } from "@/lib/utils";
+
+function ResourceTypeLegend({ types }: { types: string[] }) {
+  if (!types.length) return null;
+
+  return (
+    <div
+      className="flex flex-wrap items-center gap-x-3 gap-y-1"
+      data-testid="waterfall-resource-type-legend"
+    >
+      {types.map((type) => (
+        <span
+          key={type}
+          className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground"
+        >
+          <span
+            className={cn("h-2 w-2 shrink-0 rounded-sm", getNetworkBarColor(type))}
+          />
+          {toTitleCase(type)}
+        </span>
+      ))}
+      <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
+        <span className="h-2 w-3 shrink-0 rounded-sm bg-slate-400/60 bg-[repeating-linear-gradient(45deg,transparent,transparent_2px,rgba(0,0,0,0.06)_2px,rgba(0,0,0,0.06)_4px)] dark:bg-slate-500/50" />
+        Queue
+      </span>
+    </div>
+  );
+}
 
 function ResourceTypeFilterDropdown({
   options,
@@ -107,6 +138,7 @@ export function NetworkWaterfallCard() {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<WaterfallSortBy>("start");
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
+  const [heightSize, setHeightSize] = useState<WaterfallHeightSize>("default");
 
   const validSeries = useMemo(
     () => series.filter((entry) => entry.networkRequests.length > 0),
@@ -194,6 +226,26 @@ export function NetworkWaterfallCard() {
             </Select>
           </ToolbarField>
 
+          <ToolbarField>
+            <Select
+              value={heightSize}
+              onValueChange={(value) => setHeightSize(value as WaterfallHeightSize)}
+            >
+              <SelectTrigger
+                className="w-full md:w-[140px]"
+                aria-label="Waterfall height"
+              >
+                <SelectValue placeholder="Height" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="default">Height: Default</SelectItem>
+                <SelectItem value="large">Height: Large</SelectItem>
+                <SelectItem value="xl">Height: Extra large</SelectItem>
+                <SelectItem value="full">Height: Show all</SelectItem>
+              </SelectContent>
+            </Select>
+          </ToolbarField>
+
           <ToolbarField className="md:min-w-[200px] md:flex-1">
             <DebouncedInput
               value={search}
@@ -208,12 +260,15 @@ export function NetworkWaterfallCard() {
           </p>
         </div>
 
+        <ResourceTypeLegend types={resourceTypeOptions} />
+
         <InteractiveNetworkWaterfall
           rows={displayRows}
           timeRange={timeRange}
           milestones={milestones}
           selectedId={selectedRowId}
           onSelectRow={setSelectedRowId}
+          heightSize={heightSize}
         />
       </CardContent>
     </Card>
