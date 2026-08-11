@@ -125,25 +125,21 @@ function computeLcpBreakdownComputed(
     const subpartMap = new Map(subparts.map((s) => [s.subpart, s.duration]));
 
     // Add each subpart in order (using allSubparts which is already sorted)
+    let total = 0;
     allSubparts.forEach((subpart) => {
-      dataPoint[subpart] = subpartMap.get(subpart) || 0;
+      const duration = subpartMap.get(subpart) || 0;
+      dataPoint[subpart] = duration;
+      total += duration;
     });
+    dataPoint.total = total;
 
     return dataPoint;
   });
 
   const reportLabels = breakdownData.map((d) => d.label);
 
-  // Calculate chart height based on number of reports (1rem per report + spacing)
-  const barHeight = 16; // 1rem = 16px
-  const spacing = 24; // spacing between bars (increased to prevent overlap)
-  const topMargin = 12;
-  const bottomMargin = 12;
-  const chartHeight =
-    breakdownData.length * barHeight +
-    (breakdownData.length - 1) * spacing +
-    topMargin +
-    bottomMargin;
+  // Room for stacked bars, axis ticks, and legend
+  const chartHeight = Math.max(160, breakdownData.length * 48 + 88);
 
   // Map subpart keys to their labels for display
   const subpartLabelBySubpart: Record<string, string> = {};

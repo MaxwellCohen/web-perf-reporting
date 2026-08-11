@@ -13,13 +13,15 @@ export function LCPBreakdownCard() {
 
   return (
     <Card className="md:col-span-2 lg:col-span-3">
-      <CardHeader>
+      <CardHeader className="pb-3">
         <CardTitle>LCP Breakdown</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Time spent in each Largest Contentful Paint phase, stacked by report.
+        </p>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {/* Chart Visualization */}
-          <div className="relative z-10">
+          <div className="relative z-10 min-h-40">
             <LCPBreakdownChart
               chartHeight={breakdown.chartHeight}
               chartData={breakdown.chartData}
@@ -28,8 +30,7 @@ export function LCPBreakdownCard() {
             />
           </div>
 
-          {/* Table */}
-          <div className="overflow-x-auto relative z-0">
+          <div className="relative z-0 overflow-x-auto">
             <LCPBreakdownTable tableRows={breakdown.tableRows} reportLabels={breakdown.reportLabels} />
           </div>
         </div>

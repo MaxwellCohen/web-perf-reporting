@@ -5,13 +5,18 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
   class="rounded-xl border bg-card text-card-foreground shadow md:col-span-2 lg:col-span-3"
 >
   <div
-    class="flex flex-col space-y-1.5 p-6"
+    class="flex flex-col space-y-1.5 p-6 pb-3"
   >
     <div
       class="font-semibold leading-none tracking-tight"
     >
       LCP Breakdown
     </div>
+    <p
+      class="text-sm text-muted-foreground"
+    >
+      Time spent in each Largest Contentful Paint phase, stacked by report.
+    </p>
   </div>
   <div
     class="p-6 pt-0"
@@ -20,29 +25,25 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
       class="space-y-6"
     >
       <div
-        class="relative z-10"
+        class="relative z-10 min-h-40"
       >
         <div
-          class="flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden w-full h-full"
+          class="flex text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden aspect-auto w-full justify-start"
           data-chart="chart-_r_0_"
           data-slot="chart"
-          style="height: 40px;"
+          style="height: 160px;"
         >
           <style>
             
  [data-chart=chart-_r_0_] {
-  --color-P75: hsl(var(--chart-4));
-  --color-good_density: hsl(var(--chart-1));
-  --color-ni_density: hsl(var(--chart-2));
-  --color-poor_density: hsl(var(--chart-3));
+  --color-timeToFirstByte: hsl(var(--chart-1));
+  --color-resourceLoadDuration: hsl(var(--chart-2));
 }
 
 
 .dark [data-chart=chart-_r_0_] {
-  --color-P75: hsl(var(--chart-4));
-  --color-good_density: hsl(var(--chart-1));
-  --color-ni_density: hsl(var(--chart-2));
-  --color-poor_density: hsl(var(--chart-3));
+  --color-timeToFirstByte: hsl(var(--chart-1));
+  --color-resourceLoadDuration: hsl(var(--chart-2));
 }
 
           </style>
@@ -57,7 +58,7 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
         </div>
       </div>
       <div
-        class="overflow-x-auto relative z-0"
+        class="relative z-0 overflow-x-auto"
       >
         <div
           class="w-full"

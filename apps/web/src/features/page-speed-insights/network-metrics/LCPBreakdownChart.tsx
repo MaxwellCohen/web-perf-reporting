@@ -1,9 +1,15 @@
 "use client";
 
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { chartConfig } from "@/components/common/ChartSettings";
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 import { renderTimeValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
-import { BarChart, Bar, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
 
 type Props = {
   chartHeight: number;
@@ -12,14 +18,37 @@ type Props = {
   subpartLabelBySubpart: Record<string, string>;
 };
 
-// Color mapping for subparts
-const subpartColors = [
+/** Sequential palette so LCP phases read left→right as a timeline. */
+const SUBPART_COLORS = [
   "hsl(var(--chart-1))",
   "hsl(var(--chart-2))",
-  "hsl(var(--chart-3))",
   "hsl(var(--chart-4))",
+  "hsl(var(--chart-3))",
   "hsl(var(--chart-5))",
-];
+] as const;
+
+function buildChartConfig(
+  allSubparts: string[],
+  subpartLabelBySubpart: Record<string, string>,
+): ChartConfig {
+  return Object.fromEntries(
+    allSubparts.map((subpart, index) => [
+      subpart,
+      {
+        label: subpartLabelBySubpart[subpart] ?? subpart,
+        color: SUBPART_COLORS[index % SUBPART_COLORS.length],
+      },
+    ]),
+  );
+}
+
+function formatAxisMs(value: number) {
+  if (value >= 1000) {
+    const seconds = value / 1000;
+    return `${Number.isInteger(seconds) ? seconds : seconds.toFixed(1)}s`;
+  }
+  return `${Math.round(value)}ms`;
+}
 
 export function LCPBreakdownChart({
   chartHeight,
@@ -27,10 +56,20 @@ export function LCPBreakdownChart({
   allSubparts,
   subpartLabelBySubpart,
 }: Props) {
+  const config = buildChartConfig(allSubparts, subpartLabelBySubpart);
+  const yAxisWidth = Math.min(
+    140,
+    Math.max(
+      72,
+      ...chartData.map((row) => String(row.report ?? "").length * 7 + 16),
+    ),
+  );
+  const lastSubpart = allSubparts[allSubparts.length - 1];
+
   return (
     <ChartContainer
-      config={chartConfig}
-      className="w-full h-full"
+      config={config}
+      className="aspect-auto w-full justify-start"
       style={{ height: `${chartHeight}px` }}
     >
       <BarChart
@@ -38,58 +77,84 @@ export function LCPBreakdownChart({
         data={chartData}
         layout="vertical"
         margin={{
-          left: 120,
-          right: 12,
-          top: 12,
-          bottom: 12,
+          left: 8,
+          right: 48,
+          top: 4,
+          bottom: 4,
         }}
-        barCategoryGap={24}
+        barCategoryGap="28%"
       >
-        <CartesianGrid horizontal={false} />
+        <CartesianGrid horizontal={false} strokeDasharray="3 3" className="stroke-border/40" />
         <XAxis
           type="number"
           tickLine={false}
           axisLine={false}
           tickMargin={8}
-          tickFormatter={(value) => `${value}ms`}
+          tickFormatter={formatAxisMs}
         />
         <YAxis
           type="category"
           dataKey="report"
           tickLine={false}
           axisLine={false}
-          tickMargin={8}
-          width={120}
+          tickMargin={10}
+          width={yAxisWidth}
           interval={0}
+          tick={{ fontSize: 12 }}
         />
         <ChartTooltip
-          cursor={false}
+          cursor={{ fill: "hsl(var(--muted))", opacity: 0.35 }}
           wrapperStyle={{ zIndex: 9999 }}
           content={
             <ChartTooltipContent
-              indicator="line"
+              indicator="dot"
               style={{ zIndex: 9999 }}
               formatter={(value, name) => {
                 const label = subpartLabelBySubpart[String(name)] ?? String(name);
-                const formattedValue = `${renderTimeValue(value)} `;
-                return [formattedValue, label];
+                return [`${renderTimeValue(value)}`, label];
               }}
             />
           }
         />
-        {allSubparts.map((subpart, index) => (
-          <Bar
-            key={subpart}
-            dataKey={subpart}
-            stackId="a"
-            fill={subpartColors[index % subpartColors.length]}
-            fillOpacity={0.8}
-            radius={index === allSubparts.length - 1 ? [0, 4, 4, 0] : 0}
-            barSize={16}
-          />
-        ))}
+        <ChartLegend content={<ChartLegendContent className="flex-wrap gap-x-4 gap-y-2" />} />
+        {allSubparts.map((subpart, index) => {
+          const isFirst = index === 0;
+          const isLast = index === allSubparts.length - 1;
+          return (
+            <Bar
+              key={subpart}
+              dataKey={subpart}
+              name={subpart}
+              stackId="lcp"
+              fill={`var(--color-${subpart})`}
+              stroke="hsl(var(--background))"
+              strokeWidth={allSubparts.length > 1 ? 1 : 0}
+              radius={
+                isFirst && isLast
+                  ? [6, 6, 6, 6]
+                  : isFirst
+                    ? [6, 0, 0, 6]
+                    : isLast
+                      ? [0, 6, 6, 0]
+                      : 0
+              }
+              barSize={22}
+              maxBarSize={28}
+            >
+              {subpart === lastSubpart ? (
+                <LabelList
+                  dataKey="total"
+                  position="right"
+                  className="fill-muted-foreground font-mono text-[10px] tabular-nums"
+                  formatter={(value) =>
+                    typeof value === "number" && value > 0 ? formatAxisMs(value) : ""
+                  }
+                />
+              ) : null}
+            </Bar>
+          );
+        })}
       </BarChart>
     </ChartContainer>
   );
 }
-
