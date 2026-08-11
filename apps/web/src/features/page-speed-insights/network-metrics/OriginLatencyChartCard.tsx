@@ -3,12 +3,21 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { chartConfig } from "@/components/common/ChartSettings";
 import { renderTimeValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import { useNetworkMetricSeries } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
 import type { TableItem } from "@/lib/schema";
 import { getNumber } from "@/lib/utils";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import {
+  barEndRadius,
+  buildKeyedChartConfig,
+  formatAxisMs,
+  horizontalBarChartClassName,
+  horizontalBarChartHeight,
+  mutedBarCursor,
+  truncateLabel,
+  yAxisWidthForLabels,
+} from "@/features/page-speed-insights/shared/horizontalBarChart";
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
 
 const TOP_ORIGINS = 8;
 
@@ -68,58 +77,83 @@ export function OriginLatencyChartCard({
   }
 
   const dataKey = mode === "rtt" ? "rtt" : "latency";
+  const metricLabel = mode === "rtt" ? "RTT" : "Latency";
   const title = mode === "rtt" ? "Top Origins by RTT" : "Top Origins by Server Latency";
-  const chartHeight = Math.max(160, chartData.length * 28 + 48);
+  const description =
+    mode === "rtt"
+      ? "Highest observed round-trip time by origin."
+      : "Highest observed server response time by origin.";
+  const config = buildKeyedChartConfig([{ key: dataKey, label: metricLabel }]);
+  const chartHeight = horizontalBarChartHeight(chartData.length, { rowPx: 36, minPx: 160 });
+  const yAxisWidth = yAxisWidthForLabels(
+    chartData.map((row) => row.origin),
+    { min: 96, max: 140 },
+  );
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-3">
         <CardTitle>{title}</CardTitle>
+        <p className="text-sm text-muted-foreground">{description}</p>
       </CardHeader>
       <CardContent>
         <ChartContainer
-          config={chartConfig}
-          className="w-full"
+          config={config}
+          className={horizontalBarChartClassName}
           style={{ height: `${chartHeight}px` }}
         >
           <BarChart
             accessibilityLayer
             data={chartData}
             layout="vertical"
-            margin={{ left: 120, right: 12, top: 12, bottom: 12 }}
-            barCategoryGap={8}
+            margin={{ left: 8, right: 48, top: 4, bottom: 4 }}
+            barCategoryGap="24%"
           >
-            <CartesianGrid horizontal={false} />
+            <CartesianGrid horizontal={false} strokeDasharray="3 3" className="stroke-border/40" />
             <XAxis
               type="number"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => `${value}ms`}
+              tickFormatter={formatAxisMs}
             />
             <YAxis
               type="category"
               dataKey="origin"
               tickLine={false}
               axisLine={false}
-              tickMargin={8}
-              width={120}
+              tickMargin={10}
+              width={yAxisWidth}
               interval={0}
+              tick={{ fontSize: 12 }}
+              tickFormatter={(value) => truncateLabel(String(value), 22)}
             />
             <ChartTooltip
-              cursor={false}
+              cursor={mutedBarCursor}
               content={
                 <ChartTooltipContent
-                  formatter={(value) => [`${renderTimeValue(value)}`, mode === "rtt" ? "RTT" : "Latency"]}
+                  indicator="dot"
+                  formatter={(value) => [`${renderTimeValue(value)}`, metricLabel]}
                 />
               }
             />
             <Bar
               dataKey={dataKey}
-              fill="hsl(var(--chart-1))"
-              radius={[0, 4, 4, 0]}
-              barSize={12}
-            />
+              name={dataKey}
+              fill={`var(--color-${dataKey})`}
+              radius={barEndRadius}
+              barSize={16}
+              maxBarSize={20}
+            >
+              <LabelList
+                dataKey={dataKey}
+                position="right"
+                className="fill-muted-foreground font-mono text-[10px] tabular-nums"
+                formatter={(value) =>
+                  typeof value === "number" && value > 0 ? formatAxisMs(value) : ""
+                }
+              />
+            </Bar>
           </BarChart>
         </ChartContainer>
       </CardContent>

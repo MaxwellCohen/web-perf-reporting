@@ -5,10 +5,18 @@ import type { TableItem } from "@/lib/schema";
 import { getNumber } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { chartConfig } from "@/components/common/ChartSettings";
 import { renderTimeValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import {
+  barEndRadius,
+  buildKeyedChartConfig,
+  formatAxisMs,
+  horizontalBarChartClassName,
+  horizontalBarChartHeight,
+  mutedBarCursor,
+  yAxisWidthForLabels,
+} from "@/features/page-speed-insights/shared/horizontalBarChart";
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
 
 type MainThreadWorkData = {
   label: string;
@@ -43,55 +51,77 @@ export function MainThreadWorkChartCard({ metrics }: { metrics: MainThreadWorkDa
     return null;
   }
 
-  const chartHeight = Math.max(180, chartData.length * 32 + 48);
+  const config = buildKeyedChartConfig([{ key: "duration", label: "Time spent" }]);
+  const chartHeight = horizontalBarChartHeight(chartData.length, { rowPx: 40, minPx: 180 });
+  const yAxisWidth = yAxisWidthForLabels(
+    chartData.map((row) => row.category),
+    { min: 100, max: 160 },
+  );
 
   return (
     <Card className="md:col-span-2 lg:col-span-3">
-      <CardHeader>
+      <CardHeader className="pb-3">
         <CardTitle>Main Thread Work by Category</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Where the main thread spent time during the lab run.
+        </p>
       </CardHeader>
       <CardContent>
         <ChartContainer
-          config={chartConfig}
-          className="w-full"
+          config={config}
+          className={horizontalBarChartClassName}
           style={{ height: `${chartHeight}px` }}
         >
           <BarChart
             accessibilityLayer
             data={chartData}
             layout="vertical"
-            margin={{ left: 140, right: 12, top: 12, bottom: 12 }}
-            barCategoryGap={8}
+            margin={{ left: 8, right: 48, top: 4, bottom: 4 }}
+            barCategoryGap="24%"
           >
-            <CartesianGrid horizontal={false} />
+            <CartesianGrid horizontal={false} strokeDasharray="3 3" className="stroke-border/40" />
             <XAxis
               type="number"
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value) => `${value}ms`}
+              tickFormatter={formatAxisMs}
             />
             <YAxis
               type="category"
               dataKey="category"
               tickLine={false}
               axisLine={false}
-              width={140}
+              tickMargin={10}
+              width={yAxisWidth}
               interval={0}
+              tick={{ fontSize: 12 }}
             />
             <ChartTooltip
-              cursor={false}
+              cursor={mutedBarCursor}
               content={
                 <ChartTooltipContent
+                  indicator="dot"
                   formatter={(value) => [`${renderTimeValue(value)}`, "Time Spent"]}
                 />
               }
             />
             <Bar
               dataKey="duration"
-              fill="hsl(var(--chart-2))"
-              radius={[0, 4, 4, 0]}
-              barSize={14}
-            />
+              name="duration"
+              fill="var(--color-duration)"
+              radius={barEndRadius}
+              barSize={18}
+              maxBarSize={22}
+            >
+              <LabelList
+                dataKey="duration"
+                position="right"
+                className="fill-muted-foreground font-mono text-[10px] tabular-nums"
+                formatter={(value) =>
+                  typeof value === "number" && value > 0 ? formatAxisMs(value) : ""
+                }
+              />
+            </Bar>
           </BarChart>
         </ChartContainer>
       </CardContent>

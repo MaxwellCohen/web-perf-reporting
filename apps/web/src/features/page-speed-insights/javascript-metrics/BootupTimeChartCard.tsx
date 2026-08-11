@@ -4,10 +4,25 @@ import { useMemo } from "react";
 import type { TableItem } from "@/lib/schema";
 import { getNumber, getUrlString } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { chartConfig } from "@/components/common/ChartSettings";
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import { renderTimeValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
-import { Bar, BarChart, CartesianGrid, Legend, XAxis, YAxis } from "recharts";
+import {
+  buildKeyedChartConfig,
+  formatAxisMs,
+  horizontalBarChartClassName,
+  horizontalBarChartHeight,
+  mutedBarCursor,
+  stackBarRadius,
+  truncateLabel,
+  yAxisWidthForLabels,
+} from "@/features/page-speed-insights/shared/horizontalBarChart";
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
 
 type BootupTimeData = {
   label: string;
@@ -18,9 +33,8 @@ const TOP_SCRIPTS = 8;
 const URL_PROTOCOL_REGEX = /^https?:\/\//;
 
 const SEGMENTS = [
-  { key: "scriptParseCompile", label: "Parse & Compile", color: "hsl(var(--chart-1))" },
-  { key: "scripting", label: "Scripting", color: "hsl(var(--chart-2))" },
-  { key: "total", label: "Total", color: "hsl(var(--chart-3))" },
+  { key: "scriptParseCompile", label: "Parse & Compile" },
+  { key: "scripting", label: "Scripting" },
 ] as const;
 
 export function BootupTimeChartCard({ metrics }: { metrics: BootupTimeData[] }) {
@@ -60,62 +74,92 @@ export function BootupTimeChartCard({ metrics }: { metrics: BootupTimeData[] }) 
     return null;
   }
 
-  const chartHeight = Math.max(200, chartData.length * 36 + 64);
+  const config = buildKeyedChartConfig(SEGMENTS.map(({ key, label }) => ({ key, label })));
+  const chartHeight = horizontalBarChartHeight(chartData.length, {
+    rowPx: 40,
+    chromePx: 64,
+    minPx: 200,
+    legend: true,
+  });
+  const yAxisWidth = yAxisWidthForLabels(
+    chartData.map((row) => truncateLabel(row.url, 24)),
+    { min: 120, max: 168 },
+  );
+  const lastSegment = SEGMENTS[SEGMENTS.length - 1].key;
 
   return (
     <Card className="md:col-span-2 lg:col-span-3">
-      <CardHeader>
+      <CardHeader className="pb-3">
         <CardTitle>Top Scripts by Bootup Time</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Parse/compile vs scripting cost for the heaviest scripts.
+        </p>
       </CardHeader>
       <CardContent>
         <ChartContainer
-          config={chartConfig}
-          className="w-full"
+          config={config}
+          className={horizontalBarChartClassName}
           style={{ height: `${chartHeight}px` }}
         >
           <BarChart
             accessibilityLayer
             data={chartData}
             layout="vertical"
-            margin={{ left: 160, right: 12, top: 12, bottom: 12 }}
-            barCategoryGap={8}
+            margin={{ left: 8, right: 48, top: 4, bottom: 4 }}
+            barCategoryGap="22%"
           >
-            <CartesianGrid horizontal={false} />
+            <CartesianGrid horizontal={false} strokeDasharray="3 3" className="stroke-border/40" />
             <XAxis
               type="number"
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value) => `${value}ms`}
+              tickFormatter={formatAxisMs}
             />
             <YAxis
               type="category"
               dataKey="url"
               tickLine={false}
               axisLine={false}
-              width={160}
+              tickMargin={10}
+              width={yAxisWidth}
               interval={0}
-              tickFormatter={(value) =>
-                value.length > 24 ? `${String(value).slice(0, 24)}…` : value
-              }
+              tick={{ fontSize: 11 }}
+              tickFormatter={(value) => truncateLabel(String(value), 24)}
             />
             <ChartTooltip
-              cursor={false}
+              cursor={mutedBarCursor}
               content={
                 <ChartTooltipContent
+                  indicator="dot"
                   formatter={(value) => [`${renderTimeValue(value)}`, ""]}
                 />
               }
             />
-            <Legend />
-            {SEGMENTS.slice(0, 2).map(({ key, label, color }) => (
+            <ChartLegend content={<ChartLegendContent className="flex-wrap gap-x-4 gap-y-2" />} />
+            {SEGMENTS.map(({ key }, index) => (
               <Bar
                 key={key}
                 dataKey={key}
-                name={label}
-                fill={color}
+                name={key}
+                fill={`var(--color-${key})`}
                 stackId="bootup"
-                barSize={12}
-              />
+                stroke="hsl(var(--background))"
+                strokeWidth={1}
+                radius={stackBarRadius(index, SEGMENTS.length)}
+                barSize={18}
+                maxBarSize={22}
+              >
+                {key === lastSegment ? (
+                  <LabelList
+                    dataKey="total"
+                    position="right"
+                    className="fill-muted-foreground font-mono text-[10px] tabular-nums"
+                    formatter={(value) =>
+                      typeof value === "number" && value > 0 ? formatAxisMs(value) : ""
+                    }
+                  />
+                ) : null}
+              </Bar>
             ))}
           </BarChart>
         </ChartContainer>

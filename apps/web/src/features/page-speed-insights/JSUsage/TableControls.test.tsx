@@ -140,7 +140,7 @@ describe("TableControls", () => {
   it("renders reset filters and reset sorting buttons", () => {
     const { container } = render(<TableWithControls minimal />);
     expect(getButton(container, /reset filters/i)).toBeTruthy();
-    expect(getButton(container, /reset sorting order/i)).toBeTruthy();
+    expect(getButton(container, /reset sorting/i)).toBeTruthy();
   });
 
   it("calls resetColumnFilters when Reset filters is clicked", () => {
@@ -153,7 +153,7 @@ describe("TableControls", () => {
   it("calls resetSorting when Reset Sorting Order is clicked", () => {
     const { container } = render(<TableWithControls minimal />);
     const spy = vi.spyOn(latestControlsTable!, "resetSorting");
-    fireEvent.click(getButton(container, /reset sorting order/i)!);
+    fireEvent.click(getButton(container, /reset sorting/i)!);
     expect(spy).toHaveBeenCalled();
   });
 
@@ -206,7 +206,7 @@ describe("PageSizeSelector", () => {
   it("renders page size select", () => {
     const { container } = render(<PageSizeSelectorWrapper />);
     expect(container.textContent).toContain("Page Size");
-    expect(container.textContent).toContain("10 items on page");
+    expect(container.textContent).toContain("10 per page");
   });
 
   it("shows All Items when rowCount matches page size", () => {
@@ -223,7 +223,7 @@ describe("PageSizeSelector", () => {
       return <PageSizeSelector table={table as StockTable<Row>} />;
     }
     const { container } = render(<PageSizeWithFewRows />);
-    expect(container.textContent).toContain("All Items in 1 page");
+    expect(container.textContent).toContain("All items");
   });
 });
 
@@ -286,7 +286,7 @@ function PaginationControlsManualWrapper() {
 describe("PaginationCard manual page selection", () => {
   it("renders page index input", () => {
     const { container } = render(<PaginationControlsManualWrapper />);
-    expect(container.textContent).toMatch(/Go to page/);
+    expect(container.textContent).toMatch(/Go to/);
     expect(container.querySelector('input[type="number"]')).toHaveValue(1);
   });
 

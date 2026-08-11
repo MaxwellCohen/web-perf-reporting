@@ -38,16 +38,14 @@ export default function RootLayout({
         <PostHogProvider>
           <PostHogAnalytics />
           <QueryProvider>
-            <div className="grid min-h-screen grid-rows-[auto,1fr]">
+            <div>
               <TopNav />
-              <div className="overflow-y-scroll">
-                <main className="mx-auto min-h-screen p-4 print:min-h-0">
-                  <ViewTransition>{children}</ViewTransition>
-                </main>
-                <footer className="w-full text-center print:hidden">
-                  Made by Maxwell Cohen, with data from Google crux report.
-                </footer>
-              </div>
+              <main className="mx-auto min-h-screen w-full p-4">
+                <ViewTransition>{children}</ViewTransition>
+              </main>
+              <footer className="w-full text-center print:hidden">
+                Made by Maxwell Cohen, with data from Google crux report.
+              </footer>
             </div>
           </QueryProvider>
         </PostHogProvider>

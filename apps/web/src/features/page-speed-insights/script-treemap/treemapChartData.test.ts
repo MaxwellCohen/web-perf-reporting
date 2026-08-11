@@ -9,19 +9,19 @@ import {
 
 describe("getTreemapNodeColor", () => {
   it("returns gray when unused bytes are not reported", () => {
-    expect(getTreemapNodeColor(1000)).toBe("hsl(220 9% 46%)");
+    expect(getTreemapNodeColor(1000)).toBe("hsl(220 10% 68%)");
   });
 
   it("returns green for low unused percentage", () => {
-    expect(getTreemapNodeColor(1000, 100)).toBe("hsl(142 71% 45%)");
+    expect(getTreemapNodeColor(1000, 100)).toBe("hsl(142 45% 62%)");
   });
 
   it("returns yellow for moderate unused percentage", () => {
-    expect(getTreemapNodeColor(1000, 300)).toBe("hsl(45 93% 47%)");
+    expect(getTreemapNodeColor(1000, 300)).toBe("hsl(43 85% 62%)");
   });
 
   it("returns red for high unused percentage", () => {
-    expect(getTreemapNodeColor(1000, 950)).toBe("hsl(0 84% 60%)");
+    expect(getTreemapNodeColor(1000, 950)).toBe("hsl(0 70% 68%)");
   });
 });
 
@@ -30,12 +30,36 @@ describe("getTreemapDisplayLabel", () => {
     expect(getTreemapDisplayLabel("(inline) foo")).toEqual({ primary: "(inline) foo" });
   });
 
+  it("keeps the (inline) prefix when truncating", () => {
+    expect(getTreemapDisplayLabel("(inline) self.__next_f.push([1, null])", 18)).toEqual({
+      primary: "(inline) self.__n…",
+    });
+  });
+
   it("prioritizes path segments for URLs", () => {
     expect(
       getTreemapDisplayLabel("https://www.example.com/static/chunks/app-page.js", 40),
     ).toEqual({
       primary: "/chunks/app-page.js",
       secondary: "www.example.com",
+    });
+  });
+
+  it("uses the hostname when the URL path is only /", () => {
+    expect(getTreemapDisplayLabel("https://www.clearchoice.com/", 40)).toEqual({
+      primary: "www.clearchoice.com",
+    });
+  });
+
+  it("keeps useful id query params and drops noisy search strings", () => {
+    expect(
+      getTreemapDisplayLabel(
+        "https://www.googletagmanager.com/gtag/js?id=GTM-PLB42T&l=dataLayer&cx=c",
+        28,
+      ),
+    ).toEqual({
+      primary: "/gtag/js?id=GTM-PLB42T",
+      secondary: "www.googletagmanager.com",
     });
   });
 
@@ -65,9 +89,9 @@ describe("getTreemapLabel", () => {
     expect(label.includes("file.js")).toBe(true);
   });
 
-  it("truncates long non-url strings", () => {
+  it("truncates long non-url strings from the end", () => {
     const label = getTreemapLabel("abcdefghijklmnopqrstuvwxyz", 10);
-    expect(label).toBe("…rstuvwxyz");
+    expect(label).toBe("abcdefghi…");
   });
 });
 

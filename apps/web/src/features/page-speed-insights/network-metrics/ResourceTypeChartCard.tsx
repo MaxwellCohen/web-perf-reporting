@@ -3,12 +3,19 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { chartConfig } from "@/components/common/ChartSettings";
 import { formatBytes } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { useNetworkRequestStats } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
 import type { TableItem } from "@/lib/schema";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import {
+  barEndRadius,
+  buildKeyedChartConfig,
+  horizontalBarChartClassName,
+  horizontalBarChartHeight,
+  mutedBarCursor,
+  yAxisWidthForLabels,
+} from "@/features/page-speed-insights/shared/horizontalBarChart";
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
 
 function sumOn<T extends Record<string, unknown>>(items: T[], key: string): number {
   return items.reduce((acc, curr) => {
@@ -16,14 +23,6 @@ function sumOn<T extends Record<string, unknown>>(items: T[], key: string): numb
     return acc + (typeof value === "number" ? value : 0);
   }, 0);
 }
-
-const typeColors = [
-  "hsl(var(--chart-1))",
-  "hsl(var(--chart-2))",
-  "hsl(var(--chart-3))",
-  "hsl(var(--chart-4))",
-  "hsl(var(--chart-5))",
-];
 
 export function ResourceTypeChartCard() {
   const requestStats = useNetworkRequestStats();
@@ -68,51 +67,74 @@ export function ResourceTypeChartCard() {
     return null;
   }
 
-  const chartHeight = Math.max(180, chartData.length * 32 + 48);
+  const config = buildKeyedChartConfig([
+    { key: "transferSize", label: "Transfer size" },
+  ]);
+  const chartHeight = horizontalBarChartHeight(chartData.length, { rowPx: 40, minPx: 180 });
+  const yAxisWidth = yAxisWidthForLabels(
+    chartData.map((row) => row.resourceType),
+    { min: 88, max: 140 },
+  );
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-3">
         <CardTitle>Resource Type Transfer Size</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Bytes transferred by resource type across the selected reports.
+        </p>
       </CardHeader>
       <CardContent>
         <ChartContainer
-          config={chartConfig}
-          className="w-full"
+          config={config}
+          className={horizontalBarChartClassName}
           style={{ height: `${chartHeight}px` }}
         >
           <BarChart
             accessibilityLayer
             data={chartData}
             layout="vertical"
-            margin={{ left: 100, right: 12, top: 12, bottom: 12 }}
-            barCategoryGap={8}
+            margin={{ left: 8, right: 56, top: 4, bottom: 4 }}
+            barCategoryGap="24%"
           >
-            <CartesianGrid horizontal={false} />
+            <CartesianGrid horizontal={false} strokeDasharray="3 3" className="stroke-border/40" />
             <XAxis type="number" tickLine={false} axisLine={false} tickMargin={8} hide />
             <YAxis
               type="category"
               dataKey="resourceType"
               tickLine={false}
               axisLine={false}
-              tickMargin={8}
-              width={100}
+              tickMargin={10}
+              width={yAxisWidth}
               interval={0}
+              tick={{ fontSize: 12 }}
             />
             <ChartTooltip
-              cursor={false}
+              cursor={mutedBarCursor}
               content={
                 <ChartTooltipContent
+                  indicator="dot"
                   formatter={(value) => [formatBytes(value), "Transfer"]}
                 />
               }
             />
             <Bar
               dataKey="transferSize"
-              fill={typeColors[0]}
-              radius={[0, 4, 4, 0]}
-              barSize={14}
-            />
+              name="transferSize"
+              fill="var(--color-transferSize)"
+              radius={barEndRadius}
+              barSize={18}
+              maxBarSize={22}
+            >
+              <LabelList
+                dataKey="transferSize"
+                position="right"
+                className="fill-muted-foreground font-mono text-[10px] tabular-nums"
+                formatter={(value) =>
+                  typeof value === "number" && value > 0 ? formatBytes(value) : ""
+                }
+              />
+            </Bar>
           </BarChart>
         </ChartContainer>
       </CardContent>

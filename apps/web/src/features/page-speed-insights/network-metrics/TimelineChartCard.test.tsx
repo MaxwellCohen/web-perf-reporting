@@ -11,13 +11,15 @@ vi.mock("@/components/ui/chart", () => ({
   ChartContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   ChartTooltip: () => null,
   ChartTooltipContent: () => null,
+  ChartLegend: () => <div data-testid="chart-legend" />,
+  ChartLegendContent: () => null,
 }));
 
 vi.mock("recharts", () => ({
   BarChart: ({ children }: { children: React.ReactNode }) => <div data-testid="bar-chart">{children}</div>,
-  Bar: () => null,
+  Bar: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
   CartesianGrid: () => null,
-  Legend: () => <div data-testid="chart-legend" />,
+  LabelList: () => null,
   XAxis: () => null,
   YAxis: () => null,
 }));

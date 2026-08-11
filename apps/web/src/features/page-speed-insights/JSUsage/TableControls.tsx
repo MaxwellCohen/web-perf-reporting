@@ -18,7 +18,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { useMemo } from "react";
 import { getPaginationState } from "@/features/page-speed-insights/tanstack-table-v9/tableStateHelpers";
 import { CopyTableButton } from "@/features/page-speed-insights/tanstack-table-v9/CopyTableButton";
@@ -32,39 +31,26 @@ export function TableControls<T extends RowData>({
 }: {
   table: StockTable<T>;
 }) {
-  
-  // const id = useId();
   return (
-    <div className="m-4 flex justify-between">
-      <div className="flex flex-row items-end">
-        {/* <div className="flex flex-col">
-          <Label htmlFor={`filter_${id}`}>Filter</Label>
-          <Input
-            placeholder="Filter files..."
-            id={`filter_${id}`}
-            value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-            onChange={(event) =>
-              table.getColumn('name')?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
-          />
-        </div> */}
-        <Button variant="ghost" onClick={() => table.resetColumnFilters()}>
+    <div className="m-2 flex flex-col gap-3 sm:m-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <Button variant="ghost" size="sm" onClick={() => table.resetColumnFilters()}>
           Reset filters
         </Button>
-        <Button variant="ghost" onClick={() => table.resetSorting()}>
-          Reset Sorting Order
+        <Button variant="ghost" size="sm" onClick={() => table.resetSorting()}>
+          <span className="sm:hidden">Reset sorting</span>
+          <span className="hidden sm:inline">Reset Sorting Order</span>
         </Button>
-        <CopyTableButton table={table} variant="ghost" size="default">
+        <CopyTableButton table={table} variant="ghost" size="sm">
           Copy table
         </CopyTableButton>
       </div>
-      <div className="flex flex-row gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <PaginatedTableControls table={table} showManualControls />
-        <Card className="flex flex-col flex-wrap items-center gap-2 p-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           <ColumnSelector table={table} />
           <PageSizeSelector table={table} />
-        </Card>
+        </div>
       </div>
     </div>
   );
@@ -75,15 +61,11 @@ export function ColumnSelector<T extends RowData>({
 }: {
   table: StockTable<T>;
 }) {
-  
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          className="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
-        >
-          Columns <ChevronDown />
+        <Button variant="outline" size="sm" className="min-w-28 justify-between">
+          Columns <ChevronDown className="size-4 opacity-60" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -169,8 +151,6 @@ export function PageSizeSelector<T extends RowData>({
 }: {
   table: StockTable<T>;
 }) {
-  
-
   const rowCount = table.getRowCount();
   return (
     <Select
@@ -179,13 +159,13 @@ export function PageSizeSelector<T extends RowData>({
       }}
       defaultValue={`${getPaginationState(table).pageSize}`}
     >
-      <SelectTrigger className="w-45">
+      <SelectTrigger className="h-8 w-auto min-w-40 max-w-full">
         <SelectValue placeholder="Page Size" />
       </SelectTrigger>
       <SelectContent>
         {[...new Set([rowCount, 10, 20, 30, 40, 50])].map((pageSize) => (
           <SelectItem key={pageSize} value={`${pageSize}`}>
-            {pageSize === rowCount ? "All Items in 1 page" : `${pageSize} items on page`}
+            {pageSize === rowCount ? "All items" : `${pageSize} per page`}
           </SelectItem>
         ))}
       </SelectContent>

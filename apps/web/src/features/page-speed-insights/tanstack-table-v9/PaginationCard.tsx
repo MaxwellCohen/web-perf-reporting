@@ -30,10 +30,11 @@ export function PaginationCard({
     return null;
   }
   return (
-    <Card className="flex flex-col flex-wrap items-center gap-2 p-2">
-      <div className="flex flex-wrap items-center gap-2">
+    <Card className="flex w-full max-w-full flex-wrap items-center gap-2 p-2 sm:w-auto">
+      <div className="flex flex-wrap items-center gap-1">
         <Button
           variant="ghost"
+          size="sm"
           onClick={() => table.firstPage()}
           disabled={!table.getCanPreviousPage()}
         >
@@ -41,15 +42,26 @@ export function PaginationCard({
         </Button>
         <Button
           variant="ghost"
+          size="sm"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
           {"<"}
         </Button>
-        <Button variant="ghost" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
           {">"}
         </Button>
-        <Button variant="ghost" onClick={() => table.lastPage()} disabled={!table.getCanNextPage()}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => table.lastPage()}
+          disabled={!table.getCanNextPage()}
+        >
           {">>"}
         </Button>
       </div>
@@ -62,25 +74,26 @@ function PaginationControlsManualPageSelection({ table }: { table: PaginatedTabl
   const { pageIndex } = getPaginationState(table);
 
   return (
-    <div className="inline-flex items-center gap-1">
-      <span className="flex items-center gap-1">
-        <div>Page</div>
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+      <span className="inline-flex items-center gap-1 whitespace-nowrap">
+        Page
         <strong>
           {pageIndex + 1} of {table.getPageCount()}
         </strong>
       </span>
-      <span className="flex items-center gap-1">
-        | Go to page:
+      <span className="inline-flex items-center gap-1 whitespace-nowrap">
+        <span className="text-muted-foreground">Go to</span>
         <Input
           type="number"
           min="1"
           max={table.getPageCount()}
           defaultValue={pageIndex + 1}
+          aria-label="Go to page"
           onChange={(e) => {
             const page = e.target.value ? Number(e.target.value) - 1 : 0;
             table.setPageIndex(page);
           }}
-          className="w-16 rounded border p-1"
+          className="h-8 w-14 rounded border px-2 py-1"
         />
       </span>
     </div>

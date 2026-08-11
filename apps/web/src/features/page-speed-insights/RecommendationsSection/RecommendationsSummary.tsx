@@ -3,11 +3,18 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { chartConfig } from "@/components/common/ChartSettings";
 import { RenderBytesValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import { renderTimeValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import {
+  barEndRadius,
+  buildKeyedChartConfig,
+  horizontalBarChartClassName,
+  horizontalBarChartHeight,
+  mutedBarCursor,
+  yAxisWidthForLabels,
+} from "@/features/page-speed-insights/shared/horizontalBarChart";
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
 
 type RecommendationsSummaryProps = {
   recommendations: Recommendation[];
@@ -63,7 +70,15 @@ export function RecommendationsSummary({ recommendations }: RecommendationsSumma
     return null;
   }
 
-  const chartHeight = Math.max(160, categoryChartData.length * 32 + 48);
+  const chartHeight = horizontalBarChartHeight(categoryChartData.length, {
+    rowPx: 40,
+    minPx: 160,
+  });
+  const chartConfig = buildKeyedChartConfig([{ key: "savings", label: "Savings" }]);
+  const yAxisWidth = yAxisWidthForLabels(
+    categoryChartData.map((row) => row.category),
+    { min: 96, max: 160 },
+  );
 
   return (
     <div className="mb-6 space-y-6">
@@ -95,36 +110,42 @@ export function RecommendationsSummary({ recommendations }: RecommendationsSumma
 
       {categoryChartData.length > 0 ? (
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-3">
             <CardTitle>Potential Savings by Category</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Estimated impact rolled up by Lighthouse category.
+            </p>
           </CardHeader>
           <CardContent>
             <ChartContainer
               config={chartConfig}
-              className="w-full"
+              className={horizontalBarChartClassName}
               style={{ height: `${chartHeight}px` }}
             >
               <BarChart
                 accessibilityLayer
                 data={categoryChartData}
                 layout="vertical"
-                margin={{ left: 120, right: 12, top: 12, bottom: 12 }}
-                barCategoryGap={8}
+                margin={{ left: 8, right: 48, top: 4, bottom: 4 }}
+                barCategoryGap="24%"
               >
-                <CartesianGrid horizontal={false} />
+                <CartesianGrid horizontal={false} strokeDasharray="3 3" className="stroke-border/40" />
                 <XAxis type="number" tickLine={false} axisLine={false} hide />
                 <YAxis
                   type="category"
                   dataKey="category"
                   tickLine={false}
                   axisLine={false}
-                  width={120}
+                  tickMargin={10}
+                  width={yAxisWidth}
                   interval={0}
+                  tick={{ fontSize: 12 }}
                 />
                 <ChartTooltip
-                  cursor={false}
+                  cursor={mutedBarCursor}
                   content={
                     <ChartTooltipContent
+                      indicator="dot"
                       formatter={(value, _name, item) => {
                         const rec = item?.payload as { category: string; savings: number };
                         return [`${rec?.savings ?? value}`, "Savings"];
@@ -134,10 +155,18 @@ export function RecommendationsSummary({ recommendations }: RecommendationsSumma
                 />
                 <Bar
                   dataKey="savings"
-                  fill="hsl(var(--chart-1))"
-                  radius={[0, 4, 4, 0]}
-                  barSize={14}
-                />
+                  name="savings"
+                  fill="var(--color-savings)"
+                  radius={barEndRadius}
+                  barSize={18}
+                  maxBarSize={22}
+                >
+                  <LabelList
+                    dataKey="savings"
+                    position="right"
+                    className="fill-muted-foreground font-mono text-[10px] tabular-nums"
+                  />
+                </Bar>
               </BarChart>
             </ChartContainer>
           </CardContent>

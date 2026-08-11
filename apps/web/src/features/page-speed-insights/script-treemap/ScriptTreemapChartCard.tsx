@@ -17,6 +17,10 @@ import {
 } from "@/features/page-speed-insights/script-treemap/treemapChartData";
 import type { TreeMapData } from "@/lib/schema";
 
+type TreemapNodeChild = {
+  name?: string;
+};
+
 type TreemapContentProps = {
   x?: number;
   y?: number;
@@ -28,8 +32,14 @@ type TreemapContentProps = {
   index?: number;
   resourceBytes?: number;
   unusedBytes?: number;
+  /** Nested treemap nodes from Recharts (not React children). */
+  children?: TreemapNodeChild[] | null;
   onCopyName?: (name: string) => void;
 };
+
+function isLeafNode(children: TreemapContentProps["children"]): boolean {
+  return !Array.isArray(children) || children.length === 0;
+}
 
 function TreemapTile({
   x = 0,
@@ -41,29 +51,29 @@ function TreemapTile({
   depth = 0,
   resourceBytes = 0,
   unusedBytes,
+  children,
   onCopyName,
 }: TreemapContentProps) {
-  if (width <= 0 || height <= 0) {
+  if (width <= 0 || height <= 0 || depth === 0 || !isLeafNode(children)) {
     return null;
   }
 
   const scriptName = fullName || name;
   const fill = getTreemapNodeColor(resourceBytes, unusedBytes);
-  const showLabel = width > 48 && height > 24 && depth > 0;
-  const maxChars = Math.max(12, Math.floor(width / 5.5));
-  const displayLabel = getTreemapDisplayLabel(scriptName, maxChars);
-  const showTwoLines = showLabel && Boolean(displayLabel.secondary) && height > 38;
-  const canCopy = Boolean(scriptName && depth > 0);
+  const canCopy = Boolean(scriptName);
+  const clipId = `treemap-clip-${name}`;
 
-  const labelStyle = {
-    fill: "hsl(var(--primary-foreground))",
-    paintOrder: "stroke" as const,
-    stroke: "rgba(0, 0, 0, 0.45)",
-    strokeWidth: 2,
-  };
+  const showLabel = width > 72 && height > 30;
+  const maxChars = Math.max(8, Math.floor((width - 16) / 7.2));
+  const label = showLabel ? getTreemapDisplayLabel(scriptName, maxChars).primary : "";
 
   return (
     <g>
+      <defs>
+        <clipPath id={clipId}>
+          <rect x={x} y={y} width={width} height={height} rx={3} ry={3} />
+        </clipPath>
+      </defs>
       <rect
         x={x}
         y={y}
@@ -71,8 +81,8 @@ function TreemapTile({
         height={height}
         fill={fill}
         stroke="hsl(var(--background))"
-        strokeWidth={2}
-        rx={2}
+        strokeWidth={1}
+        rx={3}
         style={{ cursor: canCopy ? "pointer" : undefined }}
         onDoubleClick={
           canCopy
@@ -86,41 +96,18 @@ function TreemapTile({
         {canCopy ? <title>{`${scriptName}\nDouble-click to copy`}</title> : null}
       </rect>
       {showLabel ? (
-        showTwoLines ? (
-          <>
-            <text
-              x={x + 6}
-              y={y + 15}
-              fontSize={11}
-              fontWeight={600}
-              pointerEvents="none"
-              {...labelStyle}
-            >
-              {displayLabel.primary}
-            </text>
-            <text
-              x={x + 6}
-              y={y + 28}
-              fontSize={9}
-              opacity={0.9}
-              pointerEvents="none"
-              {...labelStyle}
-            >
-              {displayLabel.secondary}
-            </text>
-          </>
-        ) : (
+        <g clipPath={`url(#${clipId})`} pointerEvents="none">
           <text
-            x={x + 6}
+            x={x + 8}
             y={y + 16}
-            fontSize={11}
-            fontWeight={600}
-            pointerEvents="none"
-            {...labelStyle}
+            fill="#000"
+            fontSize={12}
+            fontWeight={400}
+            style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif" }}
           >
-            {displayLabel.primary}
+            {label}
           </text>
-        )
+        </g>
       ) : null}
     </g>
   );
@@ -138,7 +125,7 @@ function TreemapTooltipContent({
   }
 
   const node = payload[0]?.payload;
-  if (!node) {
+  if (!node || (Array.isArray(node.children) && node.children.length > 0)) {
     return null;
   }
 
@@ -149,7 +136,7 @@ function TreemapTooltipContent({
 
   return (
     <div className="rounded-lg border bg-background px-3 py-2 text-sm shadow-md">
-      <div className="max-w-xs truncate font-medium">{node.fullName ?? node.name}</div>
+      <div className="max-w-xs break-all font-medium">{node.fullName ?? node.name}</div>
       <div className="text-muted-foreground">Size: {formatBytes(node.resourceBytes)}</div>
       {node.unusedBytes !== undefined ? (
         <div className="text-muted-foreground">
@@ -209,6 +196,7 @@ export function ScriptTreemapChartCard({
               dataKey="size"
               nameKey="name"
               stroke="hsl(var(--background))"
+              nodeGap={3}
               content={<TreemapTile onCopyName={handleCopyName} />}
               isAnimationActive={false}
             >
