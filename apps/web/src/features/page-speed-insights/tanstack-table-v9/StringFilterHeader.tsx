@@ -31,7 +31,7 @@ export function StringFilterHeader<TData extends RowData>({
   const datalistId = `${column.id}-list-${id}`;
 
   return (
-    <div className="flex flex-col my-2">
+    <div className="my-2 flex w-full min-w-0 flex-col">
       <Label htmlFor={`filter_${id}`} className="mb-2">
         {name} Filter
       </Label>
@@ -40,20 +40,20 @@ export function StringFilterHeader<TData extends RowData>({
           <option value={value} key={value} />
         ))}
       </datalist>
-      <div className="flex flex-row">
+      <div className="flex min-w-0 flex-row items-center">
         <DebouncedInput
           id={`filter_${id}`}
           type="text"
           value={(columnFilterValue ?? "") as string}
           onChange={(value) => column.setFilterValue(value)}
           placeholder={`Search... (${uniqueCount})`}
-          className="rounded border shadow"
+          className="min-w-0 flex-1 rounded border shadow"
           list={datalistId}
           debounce={300}
         />
         <Button
           variant="ghost"
-          className="ml-2"
+          className="ml-2 shrink-0"
           onClick={() => column.setFilterValue("")}
           aria-label={`Clear filter for ${name}`}
         >

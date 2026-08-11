@@ -59,28 +59,15 @@ describe("PageSpeedInsightsDashboardContent", () => {
   });
 
   it("passes publicId to usePageSpeedInsightsQuery", () => {
-    usePageSpeedInsightsQueryMock.mockReturnValue({ isLoading: true });
+    usePageSpeedInsightsQueryMock.mockReturnValue({ status: "ok", data: [] });
 
     render(<PageSpeedInsightsDashboardContent publicId="test-id-123" />);
 
     expect(usePageSpeedInsightsQueryMock).toHaveBeenCalledWith("test-id-123");
   });
 
-  it("shows loading when isLoading is true", async () => {
-    usePageSpeedInsightsQueryMock.mockReturnValue({ isLoading: true });
-
-    const { container } = render(<PageSpeedInsightsDashboardContent publicId="test-id" />);
-
-    await waitFor(() => {
-      expect(container.firstChild).toMatchSnapshot();
-    });
-  });
-
   it("renders dashboard with empty ok data", async () => {
-    usePageSpeedInsightsQueryMock.mockReturnValue({
-      isLoading: false,
-      result: { status: "ok", data: [] },
-    });
+    usePageSpeedInsightsQueryMock.mockReturnValue({ status: "ok", data: [] });
 
     const { container } = render(<PageSpeedInsightsDashboardContent publicId="test-id" />);
 
@@ -92,12 +79,9 @@ describe("PageSpeedInsightsDashboardContent", () => {
 
   it("shows worker error message when report status is failed", async () => {
     usePageSpeedInsightsQueryMock.mockReturnValue({
-      isLoading: false,
-      result: {
-        status: "failed",
-        error: "Lighthouse could not load the page.",
-        url: "https://example.com/page",
-      },
+      status: "failed",
+      error: "Lighthouse could not load the page.",
+      url: "https://example.com/page",
     });
 
     const { container } = render(<PageSpeedInsightsDashboardContent publicId="test-id" />);
@@ -115,10 +99,7 @@ describe("PageSpeedInsightsDashboardContent", () => {
   });
 
   it("shows generic error when failed status has no error detail", async () => {
-    usePageSpeedInsightsQueryMock.mockReturnValue({
-      isLoading: false,
-      result: { status: "failed" },
-    });
+    usePageSpeedInsightsQueryMock.mockReturnValue({ status: "failed" });
 
     render(<PageSpeedInsightsDashboardContent publicId="test-id" />);
 
@@ -133,10 +114,7 @@ describe("PageSpeedInsightsDashboardContent", () => {
 
   it("renders dashboard when client-side with valid data", async () => {
     const mockData = createMockPageSpeedData();
-    usePageSpeedInsightsQueryMock.mockReturnValue({
-      isLoading: false,
-      result: { status: "ok", data: mockData },
-    });
+    usePageSpeedInsightsQueryMock.mockReturnValue({ status: "ok", data: mockData });
 
     const { container } = render(<PageSpeedInsightsDashboardContent publicId="test-id" />);
 
@@ -146,3 +124,4 @@ describe("PageSpeedInsightsDashboardContent", () => {
     expect(container.firstChild).toMatchSnapshot();
   });
 });
+

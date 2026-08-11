@@ -1,26 +1,10 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { use } from "react";
 import {
-  getPageSpeedInsightsByPublicId,
+  fetchPageSpeedInsightsByPublicId,
   type PageSpeedLoadResult,
 } from "@/lib/page-speed-insights/pageSpeedInsightsClient";
 
-export type PageSpeedInsightsQueryState =
-  | { isLoading: true }
-  | { isLoading: false; result: PageSpeedLoadResult };
-
-export function usePageSpeedInsightsQueryByPublicId(
-  publicId: string,
-): PageSpeedInsightsQueryState {
-  const { data, isLoading } = useQuery({
-    queryKey: ["pagespeed", "publicId", publicId] as const,
-    queryFn: ({ signal }) => getPageSpeedInsightsByPublicId(publicId, signal),
-    throwOnError: true,
-  });
-
-  if (isLoading) {
-    return { isLoading: true };
-  }
-
-  return { isLoading: false, result: data! };
+export function usePageSpeedInsightsQueryByPublicId(publicId: string): PageSpeedLoadResult {
+  return use(fetchPageSpeedInsightsByPublicId(publicId));
 }

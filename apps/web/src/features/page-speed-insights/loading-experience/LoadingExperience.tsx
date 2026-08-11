@@ -30,21 +30,34 @@ export function LoadingExperience({ title, experienceKey }: LoadingExperiencePro
     return null;
   }
 
-  const extraTitle = experiences
-    ?.map((experience) => {
-      return `${experience.label ? `${experience.label} - ` : ""}${experience?.item?.overall_category}`;
+  const experienceSummaries = experiences
+    .map((experience) => {
+      const category = experience?.item?.overall_category;
+      if (!category) return null;
+      return {
+        label: experience.label,
+        category,
+        text: `${experience.label ? `${experience.label} - ` : ""}${category}`,
+      };
     })
-    .join(" \n");
+    .filter((summary): summary is { label: string; category: string; text: string } => !!summary);
 
-  if (!extraTitle) return null;
+  if (!experienceSummaries.length) return null;
 
   return (
     <>
       <AccordionItem value={experienceKey}>
-        <AccordionSectionTitleTrigger>
-          {title}: {extraTitle}
+        <AccordionSectionTitleTrigger titleClassName="min-w-0 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2">
+          <span>{title}:</span>
+          <span className="flex flex-wrap gap-x-2 gap-y-1 text-sm font-semibold sm:text-lg">
+            {experienceSummaries.map((summary) => (
+              <span key={`${summary.label}-${summary.category}`} className="whitespace-nowrap">
+                {summary.text}
+              </span>
+            ))}
+          </span>
         </AccordionSectionTitleTrigger>
-        <AccordionContent className="-mx-2 grid max-w-full grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] items-start gap-2">
+        <AccordionContent className="-mx-2 grid max-w-full grid-cols-1 items-start gap-2 min-[22rem]:grid-cols-[repeat(auto-fit,minmax(14rem,1fr))]">
           {metrics.map(({ metric, key }) => {
             return (
               <Card key={key} className="flex min-w-0 w-full flex-col gap-2 overflow-hidden px-4 py-4">

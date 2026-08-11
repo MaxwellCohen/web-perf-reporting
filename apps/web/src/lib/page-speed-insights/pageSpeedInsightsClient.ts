@@ -22,14 +22,10 @@ function parsePageSpeedInsightsArrayFromText(text: string): PageSpeedInsightsArr
   return null;
 }
 
-export async function getPageSpeedInsightsByPublicId(
-  publicId: string,
-  signal?: AbortSignal,
-): Promise<PageSpeedLoadResult> {
+async function getPageSpeedInsightsByPublicId(publicId: string): Promise<PageSpeedLoadResult> {
   const res = await fetch(PAGE_SPEED_GET_BY_PUBLIC_ID(publicId), {
     method: "GET",
     headers: { "Content-Type": "application/json" },
-    signal,
   });
 
   if (res.status === 500) {
@@ -60,4 +56,55 @@ export async function getPageSpeedInsightsByPublicId(
   }
 
   return { status: "ok", data };
+}
+
+type PendingPromise<T> = Promise<T> & {
+  status: "pending";
+};
+
+type FulfilledPromise<T> = Promise<T> & {
+  status: "fulfilled";
+  value: T;
+};
+
+type RejectedPromise<T> = Promise<T> & {
+  status: "rejected";
+  reason: unknown;
+};
+
+type PromiseWithStatus<T> = PendingPromise<T> | FulfilledPromise<T> | RejectedPromise<T>;
+
+/** Module-level cache so `use()` reuses the same Promise across re-renders. */
+const cache = new Map<string, PromiseWithStatus<PageSpeedLoadResult>>();
+
+export function fetchPageSpeedInsightsByPublicId(
+  publicId: string,
+): PromiseWithStatus<PageSpeedLoadResult> {
+  if (!cache.has(publicId)) {
+    const promise = getPageSpeedInsightsByPublicId(publicId) as PromiseWithStatus<PageSpeedLoadResult>;
+    promise.status = "pending";
+    promise.then(
+      (value) => {
+        const fulfilled = promise as FulfilledPromise<PageSpeedLoadResult>;
+        fulfilled.status = "fulfilled";
+        fulfilled.value = value;
+      },
+      (reason: unknown) => {
+        const rejected = promise as RejectedPromise<PageSpeedLoadResult>;
+        rejected.status = "rejected";
+        rejected.reason = reason;
+      },
+    );
+    cache.set(publicId, promise);
+  }
+  return cache.get(publicId)!;
+}
+
+/** Test helper / refresh: drop a cached Promise so the next fetch starts fresh. */
+export function clearPageSpeedInsightsByPublicIdCache(publicId?: string) {
+  if (publicId === undefined) {
+    cache.clear();
+    return;
+  }
+  cache.delete(publicId);
 }

@@ -1,27 +1,50 @@
-import { renderHook, waitFor } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import React from "react";
+import { act, render, screen } from "@testing-library/react";
+import React, { Suspense } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { usePageSpeedInsightsQueryByPublicId } from "@/features/page-speed-insights/data/usePageSpeedInsightsQuery";
+import {
+  clearPageSpeedInsightsByPublicIdCache,
+  type PageSpeedLoadResult,
+} from "@/lib/page-speed-insights/pageSpeedInsightsClient";
 
-const sharedQueryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      gcTime: 0,
-    },
-  },
-});
+function HookProbe({
+  publicId,
+  onResult,
+}: {
+  publicId: string;
+  onResult: (state: PageSpeedLoadResult) => void;
+}) {
+  const state = usePageSpeedInsightsQueryByPublicId(publicId);
+  onResult(state);
+  return React.createElement("div", { "data-testid": "hook-result" }, JSON.stringify(state));
+}
 
-const createWrapper = () => {
-  return function Wrapper({ children }: { children: React.ReactNode }) {
-    return React.createElement(QueryClientProvider, { client: sharedQueryClient }, children);
+async function renderHookProbe(publicId: string) {
+  let latest: PageSpeedLoadResult | undefined;
+  await act(async () => {
+    render(
+      React.createElement(
+        Suspense,
+        {
+          fallback: React.createElement("div", { "data-testid": "suspense-fallback" }, "loading"),
+        },
+        React.createElement(HookProbe, {
+          publicId,
+          onResult: (state) => {
+            latest = state;
+          },
+        }),
+      ),
+    );
+  });
+  return {
+    getLatest: () => latest,
   };
-};
+}
 
 describe("usePageSpeedInsightsQueryByPublicId", () => {
   beforeEach(() => {
-    sharedQueryClient.clear();
+    clearPageSpeedInsightsByPublicIdCache();
   });
 
   afterEach(() => {
@@ -39,47 +62,31 @@ describe("usePageSpeedInsightsQueryByPublicId", () => {
       text: async () => JSON.stringify(mockData),
     } as Response);
 
-    const { result } = renderHook(() => usePageSpeedInsightsQueryByPublicId("public-123"), {
-      wrapper: createWrapper(),
-    });
+    const { getLatest } = await renderHookProbe("public-123");
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
-    expect(result.current).toEqual({
-      isLoading: false,
-      result: { status: "ok", data: mockData },
-    });
+    expect(screen.getByTestId("hook-result")).toBeInTheDocument();
+    expect(getLatest()).toEqual({ status: "ok", data: mockData });
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/pagespeed/public-123",
       expect.objectContaining({ method: "GET" }),
     );
-    fetchMock.mockRestore();
   });
 
   it("returns failed status when response status is 500", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: false,
       status: 500,
       text: async () => "Server error",
     } as Response);
 
-    const { result } = renderHook(() => usePageSpeedInsightsQueryByPublicId("public-123"), {
-      wrapper: createWrapper(),
-    });
+    const { getLatest } = await renderHookProbe("public-123");
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
-    expect(result.current).toEqual({
-      isLoading: false,
-      result: { status: "failed" },
-    });
-    fetchMock.mockRestore();
+    expect(screen.getByTestId("hook-result")).toBeInTheDocument();
+    expect(getLatest()).toEqual({ status: "failed" });
   });
 
   it("returns failed status with error message from JSON 500 body", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: false,
       status: 500,
       text: async () =>
@@ -90,44 +97,40 @@ describe("usePageSpeedInsightsQueryByPublicId", () => {
         }),
     } as Response);
 
-    const { result } = renderHook(() => usePageSpeedInsightsQueryByPublicId("public-123"), {
-      wrapper: createWrapper(),
-    });
+    const { getLatest } = await renderHookProbe("public-123");
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+    expect(screen.getByTestId("hook-result")).toBeInTheDocument();
+    expect(getLatest()).toEqual({
+      status: "failed",
+      error: "Lighthouse could not load the page.",
+      url: "https://example.com/page",
     });
-    expect(result.current).toEqual({
-      isLoading: false,
-      result: {
-        status: "failed",
-        error: "Lighthouse could not load the page.",
-        url: "https://example.com/page",
-      },
-    });
-    fetchMock.mockRestore();
   });
 
   it("returns failed status when response JSON is invalid", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
       text: async () => "invalid json",
     } as Response);
 
-    const { result } = renderHook(() => usePageSpeedInsightsQueryByPublicId("public-123"), {
-      wrapper: createWrapper(),
-    });
+    const { getLatest } = await renderHookProbe("public-123");
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+    expect(screen.getByTestId("hook-result")).toBeInTheDocument();
+    expect(getLatest()).toEqual({
+      status: "failed",
+      error: "The PageSpeed Insights response could not be parsed.",
     });
-    expect(result.current).toEqual({
-      isLoading: false,
-      result: {
-        status: "failed",
-        error: "The PageSpeed Insights response could not be parsed.",
-      },
-    });
-    fetchMock.mockRestore();
+  });
+
+  it("reuses the same Promise across renders for a publicId", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      text: async () => JSON.stringify([]),
+    } as Response);
+
+    await renderHookProbe("public-123");
+    await renderHookProbe("public-123");
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

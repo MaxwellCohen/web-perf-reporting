@@ -93,13 +93,13 @@ export function CWVMetricsComponent() {
       <AccordionTrigger>
         <h3 className="text-lg font-bold">Core Web Vitals Summary</h3>
       </AccordionTrigger>
-      <AccordionContent className="-mx-2 grid grid-cols-[repeat(auto-fit,minmax(14rem,1fr))] items-start gap-2">
+      <AccordionContent className="-mx-2 grid grid-cols-1 items-start gap-2 min-[22rem]:grid-cols-[repeat(auto-fit,minmax(14rem,1fr))]">
         {metricItems.map(({ auditName, title, auditItems, description }) => (
           <Card
             key={auditName}
             className="flex min-w-0 w-full flex-col gap-2 overflow-hidden px-4 py-4"
           >
-            <CardTitle className="text-md font-bold">{title}</CardTitle>
+            <CardTitle className="text-md min-w-0 font-bold wrap-break-word">{title}</CardTitle>
             <div className="flex flex-col gap-3 text-sm">
               {auditItems.map(({ audit, label }: MetricAuditEntry) => (
                 <div key={`${auditName}_${label}`} className="flex min-w-0 flex-col gap-1">

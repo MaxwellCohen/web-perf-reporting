@@ -52,16 +52,13 @@ import PageSpeedPublicIdPage from "./page";
 describe("page-speed [publicId] page", () => {
   it("awaits params and renders wrapper with publicId", async () => {
     usePageSpeedInsightsQueryMock.mockReturnValue({
-      isLoading: false,
-      result: {
-        status: "ok",
-        data: [
-          {
-            lighthouseResult: { finalDisplayedUrl: "https://example.com" },
-            analysisUTCTimestamp: "2024-01-01T00:00:00.000Z",
-          },
-        ],
-      },
+      status: "ok",
+      data: [
+        {
+          lighthouseResult: { finalDisplayedUrl: "https://example.com" },
+          analysisUTCTimestamp: "2024-01-01T00:00:00.000Z",
+        },
+      ],
     });
 
     const component = await PageSpeedPublicIdPage({

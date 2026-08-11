@@ -57,17 +57,19 @@ export function useLHTable(items: { item: PageSpeedInsights; label: string }[]) 
 export function CategoryRow({ row }: { row: StockRow<TableDataItem> }) {
   return (
     <AccordionItem value={row.id} key={row.id}>
-      <AccordionTrigger className="flex flex-wrap" disabled={!row.getCanExpand()}>
-        {row
-          .getAllCells()
-          .filter((cell) => ["category_title", "category_score"].includes(cell.column.id))
-          .map((cell) => {
-            return (
-              <Fragment key={cell.id}>
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </Fragment>
-            );
-          })}
+      <AccordionTrigger className="items-start sm:items-center" disabled={!row.getCanExpand()}>
+        <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          {row
+            .getAllCells()
+            .filter((cell) => ["category_title", "category_score"].includes(cell.column.id))
+            .map((cell) => {
+              return (
+                <Fragment key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </Fragment>
+              );
+            })}
+        </div>
       </AccordionTrigger>
       <AccordionContent>
         {row.subRows.map((subRow) => (

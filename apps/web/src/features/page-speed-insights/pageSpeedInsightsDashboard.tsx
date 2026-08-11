@@ -34,9 +34,13 @@ function PageSpeedInsightsDashboardContent() {
   return (
     <>
       <PageSpeedInsightsCopyButtons items={items} />
-      <div className="mb-2 flex flex-row items-center justify-between gap-4 px-3">
-        <h2 className="text-2xl font-bold">{reportTitle}</h2>
-        <UserLabelFilter />
+      <div className="mb-2 flex flex-col gap-3 px-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <h2 className="min-w-0 flex-1 text-lg font-bold wrap-break-word sm:text-2xl">
+          {reportTitle}
+        </h2>
+        <div className="shrink-0 self-start">
+          <UserLabelFilter />
+        </div>
       </div>
       <Accordion type="multiple">
         <LoadingExperiencesSection />
@@ -49,22 +53,25 @@ function PageSpeedInsightsDashboardContent() {
         <JavaScriptPerformanceComponent />
         <RecommendationsSection />
       </Accordion>
-      {items.length > 0 ? <div className="items-bottom flex flex-row justify-between gap-4 px-3 py-4">
-        <div className="flex flex-col">
-          <StringFilterHeader column={table.getColumn("auditTitle")} name="Audit" />
+      {items.length > 0 ? (
+        <div className="flex flex-col gap-3 px-3 py-4 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+          <div className="min-w-0 flex-1">
+            <StringFilterHeader column={table.getColumn("auditTitle")} name="Audit" />
+          </div>
+          <div className="flex shrink-0 gap-2 sm:mb-2">
+            <Button
+              variant="ghost"
+              className="w-full sm:w-auto"
+              onClick={() => {
+                table.resetColumnFilters();
+                store.trigger.resetUserLabelFilter();
+              }}
+            >
+              Reset filters
+            </Button>
+          </div>
         </div>
-        <div className="mb-2 flex self-end justify-self-end gap-2">
-          <Button
-            variant="ghost"
-            onClick={() => {
-              table.resetColumnFilters();
-              store.trigger.resetUserLabelFilter();
-            }}
-          >
-            Reset filters
-          </Button>
-        </div>
-      </div>: null }
+      ) : null}
       <Accordion type="multiple">
         {table.getRowModel().rows.map((row) => (
           <CategoryRow key={row.id} row={row} />

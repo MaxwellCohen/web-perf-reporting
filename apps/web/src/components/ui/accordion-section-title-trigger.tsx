@@ -19,8 +19,10 @@ export const AccordionSectionTitleTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionTrigger>,
   AccordionSectionTitleTriggerProps
 >(({ className, titleClassName, children, ...props }, ref) => (
-  <AccordionTrigger ref={ref} className={className} {...props}>
-    <div className={cn(accordionSectionTitleClassName, titleClassName)}>{children}</div>
+  <AccordionTrigger ref={ref} className={cn("items-start sm:items-center", className)} {...props}>
+    <div className={cn(accordionSectionTitleClassName, "min-w-0 flex-1", titleClassName)}>
+      {children}
+    </div>
   </AccordionTrigger>
 ));
 AccordionSectionTitleTrigger.displayName = "AccordionSectionTitleTrigger";
