@@ -1,13 +1,16 @@
 "use client";
 
 import { useMemo } from "react";
-import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 import {
   useSimpleTable,
   type FlatColumnDef,
 } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
+import {
+  createOptionalNumericCell,
+} from "@/features/page-speed-insights/shared/tableColumnHelpers";
+import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import type { LCPBreakdownTableRow } from "./lcpBreakdownSelectors";
 
 type Props = {
@@ -40,14 +43,8 @@ export function LCPBreakdownTable({ tableRows, reportLabels }: Props) {
             size: 140,
             minSize: 96,
             filterFn: "inNumberRange",
-            cell: (info) => {
-              const value = info.getValue();
-              return value !== undefined ? (
-                <RenderMSValue value={value} />
-              ) : (
-                <span className="text-muted-foreground">N/A</span>
-              );
-            },
+            cell: (info) =>
+              createOptionalNumericCell(RenderMSValue, info.getValue() as number | undefined),
           }),
         ),
       ] as FlatColumnDef<LCPBreakdownTableRow>[],

@@ -19,6 +19,10 @@ vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", (
   RenderMSValue: ({ value }: { value: number }) => <span>{value} ms</span>,
 }));
 
+vi.mock("@/features/page-speed-insights/shared/ResourceUrlCell", () => ({
+  ResourceUrlCell: ({ url }: { url: string }) => <a href={url}>{url}</a>,
+}));
+
 vi.mock("@/features/page-speed-insights/shared/aggregatedCellHelpers", () => ({
   createBytesAggregatedCell: () => () => null,
   createStringAggregatedCell: () => () => null,
@@ -53,6 +57,7 @@ describe("tableColumnHelpers", () => {
       } as any);
       const { container } = render(<>{cell}</>);
       expect(container.firstChild).toHaveClass("max-w-50");
+      expect(container.querySelector('a[href="https://example.com"]')).toBeTruthy();
     });
   });
 

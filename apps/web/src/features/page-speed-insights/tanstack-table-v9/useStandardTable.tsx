@@ -23,6 +23,11 @@ export type TableConfigOptions<TData extends RowData> = {
   grouping?: string[];
   enablePagination?: boolean;
   defaultPageSize?: number;
+  /**
+   * When true, injects the expander column (hidden by default via columnVisibility).
+   * Defaults to true when grouping is set, otherwise false.
+   */
+  enableExpander?: boolean;
 };
 
 /**
@@ -35,24 +40,28 @@ export function useStandardTable<TData extends RowData>({
   grouping = [],
   enablePagination = false,
   defaultPageSize = 10,
+  enableExpander = grouping.length > 0,
 }: TableConfigOptions<TData>) {
   const tableColumns = useMemo<StandardColumnDef<TData>[]>(
-    () => [
-      {
-        id: "expander",
-        header: (props) => <ExpandAll table={props.table as never} />,
-        cell: ExpandRow as unknown as StandardColumnDef<TData>["cell"],
-        aggregatedCell: ExpandRow as unknown as StandardColumnDef<TData>["aggregatedCell"],
-        size: 40,
-        enableHiding: true,
-        enableGrouping: false,
-        enablePinning: true,
-        enableSorting: false,
-        enableResizing: true,
-      },
-      ...columns,
-    ],
-    [columns],
+    () =>
+      enableExpander
+        ? [
+            {
+              id: "expander",
+              header: (props) => <ExpandAll table={props.table as never} />,
+              cell: ExpandRow as unknown as StandardColumnDef<TData>["cell"],
+              aggregatedCell: ExpandRow as unknown as StandardColumnDef<TData>["aggregatedCell"],
+              size: 40,
+              enableHiding: true,
+              enableGrouping: false,
+              enablePinning: true,
+              enableSorting: false,
+              enableResizing: true,
+            },
+            ...columns,
+          ]
+        : columns,
+    [columns, enableExpander],
   );
 
   const table = useTable({
@@ -63,13 +72,13 @@ export function useStandardTable<TData extends RowData>({
     enableColumnFilters: true,
     enableColumnResizing: true,
     columnResizeMode: "onChange",
-    enableExpanding: true,
+    enableExpanding: enableExpander,
     getRowCanExpand: () => false,
     filterFromLeafRows: true,
     initialState: {
       grouping,
       columnVisibility: {
-        expander: false,
+        ...(enableExpander ? { expander: false } : {}),
         label: false,
       },
       ...(enablePagination && {

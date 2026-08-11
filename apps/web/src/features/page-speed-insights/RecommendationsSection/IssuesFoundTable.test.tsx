@@ -3,28 +3,20 @@ import { describe, expect, it, vi } from "vitest";
 import { IssuesFoundTable } from "@/features/page-speed-insights/RecommendationsSection/IssuesFoundTable";
 import type { TableColumnHeading, TableItem } from "@/lib/schema";
 
-vi.mock("@/components/ui/table", () => ({
-  Table: ({ children }: { children: React.ReactNode }) => <table>{children}</table>,
-  TableCaption: ({ children }: { children: React.ReactNode }) => <caption>{children}</caption>,
-}));
-
-vi.mock("@/features/page-speed-insights/tanstack-table-v9/DataTableHeader", () => ({
-  DataTableHeader: () => (
-    <thead data-testid="table-header">
-      <tr>
-        <th>H</th>
-      </tr>
-    </thead>
-  ),
-}));
-
-vi.mock("@/features/page-speed-insights/tanstack-table-v9/DataTableBody", () => ({
-  DataTableBody: () => (
-    <tbody data-testid="table-body">
-      <tr>
-        <td>Body</td>
-      </tr>
-    </tbody>
+vi.mock("@/features/page-speed-insights/tanstack-table-v9/StockDataTable", () => ({
+  StockDataTable: () => (
+    <table data-testid="stock-table">
+      <thead data-testid="table-header">
+        <tr>
+          <th>H</th>
+        </tr>
+      </thead>
+      <tbody data-testid="table-body">
+        <tr>
+          <td>Body</td>
+        </tr>
+      </tbody>
+    </table>
   ),
 }));
 
@@ -37,7 +29,7 @@ vi.mock("@/features/page-speed-insights/lh-categories/table/NetworkWaterfallCell
 }));
 
 vi.mock("@/features/page-speed-insights/tanstack-table-v9/useSimpleTable", () => ({
-  useSimpleTable: ({ data, columns }: { data: TableItem[]; columns: unknown[] }) => ({
+  useSimpleTable: ({ data }: { data: TableItem[]; columns: unknown[] }) => ({
     getHeaderGroups: () => [{ id: "1", headers: [] }],
     getRowModel: () => ({ rows: data.map((item, i) => ({ id: String(i), original: item })) }),
   }),

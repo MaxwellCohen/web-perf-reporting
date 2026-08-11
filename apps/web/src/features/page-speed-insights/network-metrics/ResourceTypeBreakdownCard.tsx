@@ -1,9 +1,7 @@
 "use client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { TableItem } from "@/lib/schema";
 import { useMemo } from "react";
-import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 import {
   type StandardColumnDef,
 } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
@@ -16,6 +14,10 @@ import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortin
 import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
 import { createBytesColumn } from "@/features/page-speed-insights/shared/tableColumnHelpers";
 import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
+import {
+  LabeledStockTable,
+  MultiReportTableCard,
+} from "@/features/page-speed-insights/shared/TableCard";
 import { useNetworkRequestStats } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
 
 type ResourceTypeTableRow = {
@@ -62,19 +64,8 @@ const cols: StandardColumnDef<ResourceTypeTableRow>[] = [
 
 function ResourceTypeTable({ label, data }: { label: string; data: ResourceTypeTableRow[] }) {
   const columns = useTableColumns<ResourceTypeTableRow>(cols, columnHelper, false);
-  const table = useStandardTable({
-    data,
-    columns,
-  });
-
-  return (
-    <div>
-      <h5 className="font-semibold text-sm mb-2 text-muted-foreground">{label}</h5>
-      <div className="w-full overflow-x-auto">
-        <StockDataTable table={table} />
-      </div>
-    </div>
-  );
+  const table = useStandardTable({ data, columns });
+  return <LabeledStockTable label={label} table={table} />;
 }
 
 export function ResourceTypeBreakdownCard() {
@@ -114,17 +105,13 @@ export function ResourceTypeBreakdownCard() {
   }
 
   return (
-    <Card className="md:col-span-2 lg:col-span-3">
-      <CardHeader>
-        <CardTitle>Resource Type Breakdown</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
-          {dataByReport.map(({ label, data }) => (
-            <ResourceTypeTable key={label} label={label} data={data} />
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+    <MultiReportTableCard
+      title="Resource Type Breakdown"
+      className="md:col-span-2 lg:col-span-3"
+    >
+      {dataByReport.map(({ label, data }) => (
+        <ResourceTypeTable key={label} label={label} data={data} />
+      ))}
+    </MultiReportTableCard>
   );
 }

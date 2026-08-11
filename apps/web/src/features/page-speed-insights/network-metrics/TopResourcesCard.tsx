@@ -1,11 +1,8 @@
 "use client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { TableItem } from "@/lib/schema";
 import { getUrlString, getNumber } from "@/lib/utils";
 import { useMemo } from "react";
-import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
-import { PaginatedTableControls } from "@/features/page-speed-insights/tanstack-table-v9/PaginatedTableControls";
 import { createStringAggregatedCell } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
 import {
   useStandardTable,
@@ -18,6 +15,10 @@ import {
   createURLColumn,
 } from "@/features/page-speed-insights/shared/tableColumnHelpers";
 import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
+import {
+  LabeledStockTable,
+  MultiReportTableCard,
+} from "@/features/page-speed-insights/shared/TableCard";
 import { useNetworkRequestStats } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
 
 type TopResourceTableRow = {
@@ -28,10 +29,8 @@ type TopResourceTableRow = {
   requestTime: number | undefined;
 };
 
-const URL_PROTOCOL_REGEX = /^https?:\/\//;
-
 function resourceToTableRow(resource: TableItem): TopResourceTableRow {
-  const url = getUrlString(resource.url).replace(URL_PROTOCOL_REGEX, "") || "Unknown";
+  const url = getUrlString(resource.url) || "Unknown";
   const resourceType =
     typeof resource.resourceType === "string" ? resource.resourceType : "Unknown";
   return {
@@ -71,15 +70,7 @@ function TopResourcesTable({ label, data }: { label: string; data: TopResourceTa
     defaultPageSize: 10,
   });
 
-  return (
-    <div>
-      <h5 className="mb-2 text-sm font-semibold text-muted-foreground">{label}</h5>
-      <div className="w-full overflow-x-auto">
-        <StockDataTable table={table} />
-      </div>
-      <PaginatedTableControls table={table} showManualControls className="mt-4 justify-center" />
-    </div>
-  );
+  return <LabeledStockTable label={label} table={table} showPagination />;
 }
 
 export function TopResourcesCard() {
@@ -103,17 +94,13 @@ export function TopResourcesCard() {
   }
 
   return (
-    <Card className="md:col-span-2 lg:col-span-3">
-      <CardHeader>
-        <CardTitle>Resources by Transfer Size</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
-          {dataByReport.map(({ label, data }) => (
-            <TopResourcesTable key={label} label={label} data={data} />
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+    <MultiReportTableCard
+      title="Resources by Transfer Size"
+      className="md:col-span-2 lg:col-span-3"
+    >
+      {dataByReport.map(({ label, data }) => (
+        <TopResourcesTable key={label} label={label} data={data} />
+      ))}
+    </MultiReportTableCard>
   );
 }

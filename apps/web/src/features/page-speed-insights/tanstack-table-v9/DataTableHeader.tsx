@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, type ReactNode } from "react";
+import { useMemo, type CSSProperties, type ReactNode } from "react";
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   flexRender,
@@ -18,6 +18,7 @@ import { ColumnResizer } from "@/features/page-speed-insights/tanstack-table-v9/
 import { renderBoolean } from "@/features/page-speed-insights/lh-categories/renderBoolean";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 
 const columnSizeSelector = (state: {
   columnSizing: unknown;
@@ -26,6 +27,8 @@ const columnSizeSelector = (state: {
   columnSizing: state.columnSizing,
   columnResizing: state.columnResizing,
 });
+
+const DEFAULT_COMPACT_COLUMN_IDS = new Set(["expander"]);
 
 export function DataTableHeader<TData extends RowData>({
   table,
@@ -51,26 +54,39 @@ export function DataTableHeader<TData extends RowData>({
   );
 }
 
-function DataTableHead<TData extends RowData>({
-  header,
-}: {
+export type DataTableHeadProps<TData extends RowData> = {
   header: Header<any, TData, unknown>;
-}) {
-  const isExpanderColumn = header.column.id === "expander";
+  className?: string;
+  style?: CSSProperties;
+  /** Column ids that render centered content without sort/filter/resizer chrome. */
+  compactColumnIds?: ReadonlySet<string>;
+};
+
+function defaultHeaderCellStyle(header: Header<any, RowData, unknown>): CSSProperties {
   const size = header.getSize();
-  const columnSizeStyle = {
+  return {
     width: `${size}px`,
     minWidth: `${size}px`,
     maxWidth: `${size}px`,
   };
+}
+
+/**
+ * Shared header cell: title + sort + filter + column resizer.
+ * Compact columns (e.g. expander) only center the header content.
+ */
+export function DataTableHead<TData extends RowData>({
+  header,
+  className,
+  style,
+  compactColumnIds = DEFAULT_COMPACT_COLUMN_IDS,
+}: DataTableHeadProps<TData>) {
+  const isCompact = compactColumnIds.has(header.column.id);
+  const columnSizeStyle = style ?? defaultHeaderCellStyle(header);
 
   return (
-    <TableHead
-      key={header.id}
-      className="relative overflow-hidden"
-      style={columnSizeStyle}
-    >
-      {isExpanderColumn ? (
+    <TableHead className={cn("relative overflow-hidden", className)} style={columnSizeStyle}>
+      {isCompact ? (
         <div className="flex items-center justify-center py-1">
           {flexRender(header.column.columnDef.header, header.getContext())}
         </div>

@@ -17,10 +17,10 @@ exports[`NetworkRTTCard > renders card with title and table when metrics have RT
     class="p-6 pt-0"
   >
     <div
-      class="w-full max-h-96 overflow-y-auto"
+      class="w-full overflow-x-auto max-h-96 overflow-y-auto"
     >
       <div
-        class="w-full"
+        class="w-full min-w-0"
       >
         <div
           class="mb-2 flex justify-end"
@@ -66,11 +66,11 @@ exports[`NetworkRTTCard > renders card with title and table when metrics have RT
           </button>
         </div>
         <div
-          class="relative w-full overflow-auto"
+          class="relative w-full overflow-auto min-w-0"
         >
           <table
-            class="caption-bottom text-sm table-fixed w-full"
-            style="width: 100%;"
+            class="w-full caption-bottom text-sm table-fixed w-max!"
+            style="width: 300px;"
           >
             <thead
               class="[&_tr]:border-b"
@@ -79,8 +79,8 @@ exports[`NetworkRTTCard > renders card with title and table when metrics have RT
                 class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
                 <th
-                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
-                  style="width: 150px;"
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
                     class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
@@ -101,7 +101,6 @@ exports[`NetworkRTTCard > renders card with title and table when metrics have RT
                         〰︎
                       </button>
                       <button
-                        aria-controls="radix-_r_2_"
                         aria-expanded="false"
                         aria-haspopup="dialog"
                         class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
@@ -134,12 +133,12 @@ exports[`NetworkRTTCard > renders card with title and table when metrics have RT
                     </div>
                   </div>
                   <div
-                    class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
                   />
                 </th>
                 <th
-                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
-                  style="width: 150px;"
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
                     class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
@@ -160,7 +159,6 @@ exports[`NetworkRTTCard > renders card with title and table when metrics have RT
                         〰︎
                       </button>
                       <button
-                        aria-controls="radix-_r_3_"
                         aria-expanded="false"
                         aria-haspopup="dialog"
                         class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
@@ -193,7 +191,7 @@ exports[`NetworkRTTCard > renders card with title and table when metrics have RT
                     </div>
                   </div>
                   <div
-                    class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
                   />
                 </th>
               </tr>
@@ -214,11 +212,14 @@ exports[`NetworkRTTCard > renders card with title and table when metrics have RT
                   data-grouped="true"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
-                  <span>
+                  <div
+                    class="max-w-50 truncate"
+                    title="example.com"
+                  >
                     example.com
-                  </span>
+                  </div>
                 </td>
                 <td
                   class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
@@ -230,7 +231,7 @@ exports[`NetworkRTTCard > renders card with title and table when metrics have RT
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
                     class="flex items-center gap-2 basis-full"
@@ -264,11 +265,14 @@ exports[`NetworkRTTCard > renders card with title and table when metrics have RT
                   data-grouped="true"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
-                  <span>
+                  <div
+                    class="max-w-50 truncate"
+                    title="cdn.example.com"
+                  >
                     cdn.example.com
-                  </span>
+                  </div>
                 </td>
                 <td
                   class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
@@ -280,7 +284,7 @@ exports[`NetworkRTTCard > renders card with title and table when metrics have RT
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
                     class="flex items-center gap-2 basis-full"

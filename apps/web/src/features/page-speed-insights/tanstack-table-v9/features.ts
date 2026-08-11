@@ -20,24 +20,6 @@ import {
 } from "@/features/page-speed-insights/shared/filterFns";
 
 /**
- * Flat tables: sorting, filtering, faceting (no grouping/pagination/expansion).
- * v9.0+: row models + filter/sort Fns live on `features` via `tableFeatures()`.
- */
-export const flatTableFeatures = tableFeatures({
-  ...stockFeatures,
-  filteredRowModel: createFilteredRowModel(),
-  sortedRowModel: createSortedRowModel(),
-  facetedRowModel: createFacetedRowModel(),
-  facetedUniqueValues: createFacetedUniqueValues(),
-  facetedMinMaxValues: createFacetedMinMaxValues(),
-  filterFns: {
-    ...filterFns,
-    ...standardFilterFns,
-  },
-  sortFns,
-});
-
-/**
  * Grouped/paginated tables: sorting, filtering, faceting, grouping, expansion, pagination.
  */
 export const standardTableFeatures = tableFeatures({
@@ -57,6 +39,9 @@ export const standardTableFeatures = tableFeatures({
   sortFns,
   aggregationFns,
 });
+
+/** Flat tables share the standard feature bundle (expander disabled at the hook). */
+export const flatTableFeatures = standardTableFeatures;
 
 /**
  * LH audit accordion tables: filtering, grouping, expansion, faceting (no client sort model).

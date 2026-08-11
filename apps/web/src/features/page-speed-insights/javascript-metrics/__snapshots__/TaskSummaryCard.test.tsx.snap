@@ -5,187 +5,754 @@ exports[`TaskSummaryCard > calculates from mainThreadTasks when diagnostics miss
   class="rounded-xl border bg-card text-card-foreground shadow md:col-span-2 lg:col-span-3"
 >
   <div
-    class="p-6 flex flex-row items-center justify-between space-y-0"
+    class="flex flex-col space-y-1.5 p-6"
   >
     <div
       class="font-semibold leading-none tracking-tight"
     >
       Task Summary
     </div>
-    <button
-      aria-expanded="false"
-      aria-haspopup="menu"
-      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
-      data-state="closed"
-      id="radix-_r_2_"
-      title="Copy table"
-      type="button"
-    >
-      <svg
-        class="lucide lucide-copy h-4 w-4"
-        fill="none"
-        height="24"
-        stroke="currentColor"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        viewBox="0 0 24 24"
-        width="24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <rect
-          height="14"
-          rx="2"
-          ry="2"
-          width="14"
-          x="8"
-          y="8"
-        />
-        <path
-          d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
-        />
-      </svg>
-      <span
-        class="sr-only"
-      >
-        Copy table
-      </span>
-    </button>
   </div>
   <div
     class="p-6 pt-0"
   >
     <div
-      class="overflow-x-auto"
+      class="w-full overflow-x-auto"
     >
       <div
-        class="relative w-full overflow-auto"
+        class="w-full min-w-0"
       >
-        <table
-          class="w-full caption-bottom text-sm table-auto min-w-full"
+        <div
+          class="mb-2 flex justify-end"
         >
-          <thead
-            class="[&_tr]:border-b"
+          <button
+            aria-expanded="false"
+            aria-haspopup="menu"
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
+            data-state="closed"
+            id="radix-_r_b_"
+            title="Copy table"
+            type="button"
           >
-            <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            <svg
+              class="lucide lucide-copy h-4 w-4"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <th
-                class="h-10 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-28 whitespace-nowrap px-3"
-              >
-                Total Tasks
-              </th>
-              <th
-                class="h-10 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-24 whitespace-nowrap px-3"
-              >
-                Total Time
-              </th>
-              <th
-                class="h-10 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-28 whitespace-nowrap px-3"
-              >
-                Avg Duration
-              </th>
-              <th
-                class="h-10 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-28 whitespace-nowrap px-3"
-              >
-                Longest Task
-              </th>
-              <th
-                class="h-10 align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-20 whitespace-nowrap px-3 text-center"
-              >
-                &gt;10ms
-              </th>
-              <th
-                class="h-10 align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-20 whitespace-nowrap px-3 text-center"
-              >
-                &gt;25ms
-              </th>
-              <th
-                class="h-10 align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-20 whitespace-nowrap px-3 text-center"
-              >
-                &gt;50ms
-              </th>
-              <th
-                class="h-10 align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-24 whitespace-nowrap px-3 text-center"
-              >
-                &gt;100ms
-              </th>
-              <th
-                class="h-10 align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-24 whitespace-nowrap px-3 text-center"
-              >
-                &gt;500ms
-              </th>
-            </tr>
-          </thead>
-          <tbody
-            class="[&_tr:last-child]:border-0"
+              <rect
+                height="14"
+                rx="2"
+                ry="2"
+                width="14"
+                x="8"
+                y="8"
+              />
+              <path
+                d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
+              />
+            </svg>
+            <span
+              class="sr-only"
+            >
+              Copy table
+            </span>
+          </button>
+        </div>
+        <div
+          class="relative w-full overflow-auto min-w-0"
+        >
+          <table
+            class="w-full caption-bottom text-sm table-fixed w-max!"
+            style="width: 1350px;"
           >
-            <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            <thead
+              class="[&_tr]:border-b"
             >
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3"
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
-                2
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3"
-              >
-                <span
-                  class=""
-                  title="ms"
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
-                  80 ms
-                </span>
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3"
-              >
-                <span
-                  class=""
-                  title="ms"
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      Total Tasks
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
-                  40 ms
-                </span>
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3"
-              >
-                <span
-                  class=""
-                  title="ms"
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      Total Time
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
-                  50 ms
-                </span>
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3 text-center"
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      Avg Duration
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      Longest Task
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      &gt;10ms
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      &gt;25ms
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      &gt;50ms
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      &gt;100ms
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      &gt;500ms
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              class="[&_tr:last-child]:border-0"
+            >
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
-                0
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3 text-center"
-              >
-                0
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3 text-center"
-              >
-                0
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3 text-center"
-              >
-                0
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3 text-center"
-              >
-                0
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_totalTasks"
+                  data-column-id="totalTasks"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  2
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_totalTaskTime"
+                  data-column-id="totalTaskTime"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <span
+                    class=""
+                    title="ms"
+                  >
+                    80 ms
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_averageTaskDuration"
+                  data-column-id="averageTaskDuration"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <span
+                    class=""
+                    title="ms"
+                  >
+                    40 ms
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_longestTaskDuration"
+                  data-column-id="longestTaskDuration"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <span
+                    class=""
+                    title="ms"
+                  >
+                    50 ms
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_numTasksOver10ms"
+                  data-column-id="numTasksOver10ms"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  0
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_numTasksOver25ms"
+                  data-column-id="numTasksOver25ms"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  0
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_numTasksOver50ms"
+                  data-column-id="numTasksOver50ms"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  0
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_numTasksOver100ms"
+                  data-column-id="numTasksOver100ms"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  0
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_numTasksOver500ms"
+                  data-column-id="numTasksOver500ms"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  0
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -197,187 +764,754 @@ exports[`TaskSummaryCard > renders stats from diagnostics item 1`] = `
   class="rounded-xl border bg-card text-card-foreground shadow md:col-span-2 lg:col-span-3"
 >
   <div
-    class="p-6 flex flex-row items-center justify-between space-y-0"
+    class="flex flex-col space-y-1.5 p-6"
   >
     <div
       class="font-semibold leading-none tracking-tight"
     >
       Task Summary
     </div>
-    <button
-      aria-expanded="false"
-      aria-haspopup="menu"
-      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
-      data-state="closed"
-      id="radix-_r_0_"
-      title="Copy table"
-      type="button"
-    >
-      <svg
-        class="lucide lucide-copy h-4 w-4"
-        fill="none"
-        height="24"
-        stroke="currentColor"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        viewBox="0 0 24 24"
-        width="24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <rect
-          height="14"
-          rx="2"
-          ry="2"
-          width="14"
-          x="8"
-          y="8"
-        />
-        <path
-          d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
-        />
-      </svg>
-      <span
-        class="sr-only"
-      >
-        Copy table
-      </span>
-    </button>
   </div>
   <div
     class="p-6 pt-0"
   >
     <div
-      class="overflow-x-auto"
+      class="w-full overflow-x-auto"
     >
       <div
-        class="relative w-full overflow-auto"
+        class="w-full min-w-0"
       >
-        <table
-          class="w-full caption-bottom text-sm table-auto min-w-full"
+        <div
+          class="mb-2 flex justify-end"
         >
-          <thead
-            class="[&_tr]:border-b"
+          <button
+            aria-expanded="false"
+            aria-haspopup="menu"
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
+            data-state="closed"
+            id="radix-_r_0_"
+            title="Copy table"
+            type="button"
           >
-            <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            <svg
+              class="lucide lucide-copy h-4 w-4"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <th
-                class="h-10 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-28 whitespace-nowrap px-3"
-              >
-                Total Tasks
-              </th>
-              <th
-                class="h-10 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-24 whitespace-nowrap px-3"
-              >
-                Total Time
-              </th>
-              <th
-                class="h-10 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-28 whitespace-nowrap px-3"
-              >
-                Avg Duration
-              </th>
-              <th
-                class="h-10 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-28 whitespace-nowrap px-3"
-              >
-                Longest Task
-              </th>
-              <th
-                class="h-10 align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-20 whitespace-nowrap px-3 text-center"
-              >
-                &gt;10ms
-              </th>
-              <th
-                class="h-10 align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-20 whitespace-nowrap px-3 text-center"
-              >
-                &gt;25ms
-              </th>
-              <th
-                class="h-10 align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-20 whitespace-nowrap px-3 text-center"
-              >
-                &gt;50ms
-              </th>
-              <th
-                class="h-10 align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-24 whitespace-nowrap px-3 text-center"
-              >
-                &gt;100ms
-              </th>
-              <th
-                class="h-10 align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-24 whitespace-nowrap px-3 text-center"
-              >
-                &gt;500ms
-              </th>
-            </tr>
-          </thead>
-          <tbody
-            class="[&_tr:last-child]:border-0"
+              <rect
+                height="14"
+                rx="2"
+                ry="2"
+                width="14"
+                x="8"
+                y="8"
+              />
+              <path
+                d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
+              />
+            </svg>
+            <span
+              class="sr-only"
+            >
+              Copy table
+            </span>
+          </button>
+        </div>
+        <div
+          class="relative w-full overflow-auto min-w-0"
+        >
+          <table
+            class="w-full caption-bottom text-sm table-fixed w-max!"
+            style="width: 1350px;"
           >
-            <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            <thead
+              class="[&_tr]:border-b"
             >
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3"
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
-                10
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3"
-              >
-                <span
-                  class=""
-                  title="ms"
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
-                  500 ms
-                </span>
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3"
-              >
-                <span
-                  class=""
-                  title="ms"
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      Total Tasks
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
-                  50 ms
-                </span>
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3"
-              >
-                <span
-                  class=""
-                  title="ms"
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      Total Time
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
-                  0 ms
-                </span>
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3 text-center"
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      Avg Duration
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      Longest Task
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      &gt;10ms
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      &gt;25ms
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      &gt;50ms
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      &gt;100ms
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      &gt;500ms
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              class="[&_tr:last-child]:border-0"
+            >
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
-                2
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3 text-center"
-              >
-                1
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3 text-center"
-              >
-                0
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3 text-center"
-              >
-                0
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 px-3 text-center"
-              >
-                0
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_totalTasks"
+                  data-column-id="totalTasks"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  10
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_totalTaskTime"
+                  data-column-id="totalTaskTime"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <span
+                    class=""
+                    title="ms"
+                  >
+                    500 ms
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_averageTaskDuration"
+                  data-column-id="averageTaskDuration"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <span
+                    class=""
+                    title="ms"
+                  >
+                    50 ms
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_longestTaskDuration"
+                  data-column-id="longestTaskDuration"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <span
+                    class=""
+                    title="ms"
+                  >
+                    0 ms
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_numTasksOver10ms"
+                  data-column-id="numTasksOver10ms"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  2
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_numTasksOver25ms"
+                  data-column-id="numTasksOver25ms"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  1
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_numTasksOver50ms"
+                  data-column-id="numTasksOver50ms"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  0
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_numTasksOver100ms"
+                  data-column-id="numTasksOver100ms"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  0
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_numTasksOver500ms"
+                  data-column-id="numTasksOver500ms"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  0
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

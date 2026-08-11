@@ -9,9 +9,11 @@ import { BootupTimeCard } from "@/features/page-speed-insights/javascript-metric
 import { BootupTimeChartCard } from "@/features/page-speed-insights/javascript-metrics/BootupTimeChartCard";
 import { MainThreadWorkCard } from "@/features/page-speed-insights/javascript-metrics/MainThreadWorkCard";
 import { MainThreadWorkChartCard } from "@/features/page-speed-insights/javascript-metrics/MainThreadWorkChartCard";
-import { UnusedJavaScriptCard } from "@/features/page-speed-insights/javascript-metrics/UnusedJavaScriptCard";
-import { UnminifiedJavaScriptCard } from "@/features/page-speed-insights/javascript-metrics/UnminifiedJavaScriptCard";
-import { LegacyJavaScriptCard } from "@/features/page-speed-insights/javascript-metrics/LegacyJavaScriptCard";
+import {
+  LegacyJavaScriptCard,
+  UnminifiedJavaScriptCard,
+  UnusedJavaScriptCard,
+} from "@/features/page-speed-insights/javascript-metrics/JavascriptAuditBytesCards";
 import { JavaScriptSummaryCard } from "@/features/page-speed-insights/javascript-metrics/JavaScriptSummaryCard";
 import { JavaScriptSummaryChartCard } from "@/features/page-speed-insights/javascript-metrics/JavaScriptSummaryChartCard";
 import { TaskSummaryCard } from "@/features/page-speed-insights/javascript-metrics/TaskSummaryCard";

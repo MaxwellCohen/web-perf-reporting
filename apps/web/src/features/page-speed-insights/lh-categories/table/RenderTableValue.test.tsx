@@ -16,6 +16,10 @@ vi.mock("@/features/page-speed-insights/lh-categories/table/RenderNode", () => (
   ),
 }));
 
+vi.mock("lucide-react", () => ({
+  ExternalLink: () => <span data-testid="external-link" />,
+}));
+
 describe("formatBytes", () => {
   it("formats bytes", () => {
     expect(formatBytes(500)).toBe("500 bytes");

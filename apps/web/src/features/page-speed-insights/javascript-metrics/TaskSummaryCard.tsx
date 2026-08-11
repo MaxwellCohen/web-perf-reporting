@@ -1,7 +1,13 @@
 "use client";
-import { TableCell, TableHead, TableRow } from "@/components/ui/table";
-import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
-import { WideMetricsSummaryCardTable } from "@/features/page-speed-insights/shared/WideMetricsSummaryCardTable";
+import { useMemo } from "react";
+import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
+import {
+  useStandardTable,
+  type StandardColumnDef,
+} from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import { createMSColumn } from "@/features/page-speed-insights/shared/tableColumnHelpers";
+import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
+import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 import {
   computeTaskSummaryStats,
   type TaskSummaryData,
@@ -11,60 +17,46 @@ type TaskSummaryCardProps = {
   metrics: TaskSummaryData[];
 };
 
-export function TaskSummaryCard({ metrics }: TaskSummaryCardProps) {
-  const stats = computeTaskSummaryStats(metrics);
+type TaskSummaryRow = ReturnType<typeof computeTaskSummaryStats>[number];
 
-  const validStats = stats.filter((s) => s.totalTasks > 0);
+const columnHelper = createStockColumnHelper<TaskSummaryRow>();
+
+function countColumn(accessor: keyof TaskSummaryRow & string, header: string): StandardColumnDef<TaskSummaryRow> {
+  return columnHelper.accessor(accessor, {
+    id: accessor,
+    header,
+    enableSorting: true,
+    enableResizing: true,
+    filterFn: "inNumberRange",
+  });
+}
+
+const cols: StandardColumnDef<TaskSummaryRow>[] = [
+  countColumn("totalTasks", "Total Tasks"),
+  createMSColumn(columnHelper, "totalTaskTime", "Total Time"),
+  createMSColumn(columnHelper, "averageTaskDuration", "Avg Duration"),
+  createMSColumn(columnHelper, "longestTaskDuration", "Longest Task"),
+  countColumn("numTasksOver10ms", ">10ms"),
+  countColumn("numTasksOver25ms", ">25ms"),
+  countColumn("numTasksOver50ms", ">50ms"),
+  countColumn("numTasksOver100ms", ">100ms"),
+  countColumn("numTasksOver500ms", ">500ms"),
+];
+
+export function TaskSummaryCard({ metrics }: TaskSummaryCardProps) {
+  const validStats = useMemo(
+    () => computeTaskSummaryStats(metrics).filter((s) => s.totalTasks > 0),
+    [metrics],
+  );
+  const showReportColumn = validStats.length > 1;
+  const columns = useTableColumns(cols, columnHelper, showReportColumn);
+  const table = useStandardTable({ data: validStats, columns });
 
   if (!validStats.length) {
     return null;
   }
 
-  const showReportColumn = validStats.length > 1;
-
   return (
-    <WideMetricsSummaryCardTable
-      title="Task Summary"
-      tableClassName="table-auto min-w-full"
-      header={
-        <TableRow>
-          {showReportColumn && (
-            <TableHead className="min-w-24 whitespace-nowrap px-3">Report</TableHead>
-          )}
-          <TableHead className="min-w-28 whitespace-nowrap px-3">Total Tasks</TableHead>
-          <TableHead className="min-w-24 whitespace-nowrap px-3">Total Time</TableHead>
-          <TableHead className="min-w-28 whitespace-nowrap px-3">Avg Duration</TableHead>
-          <TableHead className="min-w-28 whitespace-nowrap px-3">Longest Task</TableHead>
-          <TableHead className="min-w-20 whitespace-nowrap px-3 text-center">&gt;10ms</TableHead>
-          <TableHead className="min-w-20 whitespace-nowrap px-3 text-center">&gt;25ms</TableHead>
-          <TableHead className="min-w-20 whitespace-nowrap px-3 text-center">&gt;50ms</TableHead>
-          <TableHead className="min-w-24 whitespace-nowrap px-3 text-center">&gt;100ms</TableHead>
-          <TableHead className="min-w-24 whitespace-nowrap px-3 text-center">&gt;500ms</TableHead>
-        </TableRow>
-      }
-    >
-      {validStats.map((stat) => (
-        <TableRow key={stat.label}>
-          {showReportColumn && (
-            <TableCell className="font-medium px-3">{stat.label || "Unknown"}</TableCell>
-          )}
-          <TableCell className="px-3">{stat.totalTasks}</TableCell>
-          <TableCell className="px-3">
-            <RenderMSValue value={stat.totalTaskTime} />
-          </TableCell>
-          <TableCell className="px-3">
-            <RenderMSValue value={stat.averageTaskDuration} />
-          </TableCell>
-          <TableCell className="px-3">
-            <RenderMSValue value={stat.longestTaskDuration} />
-          </TableCell>
-          <TableCell className="px-3 text-center">{stat.numTasksOver10ms}</TableCell>
-          <TableCell className="px-3 text-center">{stat.numTasksOver25ms}</TableCell>
-          <TableCell className="px-3 text-center">{stat.numTasksOver50ms}</TableCell>
-          <TableCell className="px-3 text-center">{stat.numTasksOver100ms}</TableCell>
-          <TableCell className="px-3 text-center">{stat.numTasksOver500ms}</TableCell>
-        </TableRow>
-      ))}
-    </WideMetricsSummaryCardTable>
+    <TableCard title="Task Summary" table={table} className="md:col-span-2 lg:col-span-3" />
   );
 }

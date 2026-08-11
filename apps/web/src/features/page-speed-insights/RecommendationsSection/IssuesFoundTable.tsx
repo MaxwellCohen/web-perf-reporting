@@ -7,10 +7,7 @@ import {
   useSimpleTable,
   type FlatColumnDef,
 } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
-import {
-  getFilterFnForValueType,
-  getColumnSize,
-} from "@/features/page-speed-insights/shared/tableColumnUtils";
+import { createColumnFromHeading } from "@/features/page-speed-insights/shared/tableColumnUtils";
 import { IssuesFoundTableCell } from "@/features/page-speed-insights/RecommendationsSection/IssuesFoundTableCell";
 import { NetworkWaterfallCell } from "@/features/page-speed-insights/lh-categories/table/NetworkWaterfallCell";
 import { cn } from "@/lib/utils";
@@ -103,27 +100,17 @@ export function IssuesFoundTable({ headings, items, device }: IssuesFoundTablePr
       const key = heading.key || "";
       const rawLabel = typeof heading.label === "string" ? heading.label : key;
       const label = getHeaderLabel(key, rawLabel, isNetworkRequests);
-      const valueType = heading.valueType;
-      const filterFn = getFilterFnForValueType(valueType);
+      const base = createColumnFromHeading(heading);
       const initialSize =
         isNetworkRequests && key in NETWORK_REQUESTS_COLUMN_SIZES
           ? NETWORK_REQUESTS_COLUMN_SIZES[key]
-          : getColumnSize(key, label, valueType);
+          : base.size;
 
       const columnDef: FlatColumnDef<TableItem> = {
-        id: key,
-        accessorKey: key,
+        ...base,
         header: label,
         size: initialSize,
-        minSize: isNetworkRequests ? 40 : 50,
-        maxSize: 800,
-        enableResizing: true,
-        ...(filterFn && { filterFn }),
-        meta: {
-          heading: {
-            heading,
-          },
-        },
+        minSize: isNetworkRequests ? 40 : base.minSize,
         cell: ({ row }) => {
           const value = row.original[key];
           const subItems = row.original.subItems;
@@ -144,8 +131,6 @@ export function IssuesFoundTable({ headings, items, device }: IssuesFoundTablePr
           }
           return content;
         },
-        enableSorting: true,
-        enableColumnFilter: true,
       };
 
       return columnDef;

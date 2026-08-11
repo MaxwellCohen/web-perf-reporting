@@ -1,5 +1,5 @@
 import type { Header, RowData } from "@tanstack/react-table";
-import clsx from "clsx";
+import { columnResizerClassName } from "@/features/page-speed-insights/tanstack-table-v9/columnResizerStyles";
 
 export function ColumnResizer<TData extends RowData>({
   header,
@@ -15,12 +15,7 @@ export function ColumnResizer<TData extends RowData>({
       onDoubleClick={() => header.column.resetSize()}
       onMouseDown={handler}
       onTouchStart={handler}
-      className={clsx(
-        "absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200",
-        {
-          "bg-muted": header.column.getIsResizing(),
-        },
-      )}
+      className={columnResizerClassName(header.column.getIsResizing())}
     />
   );
 }

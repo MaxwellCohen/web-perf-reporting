@@ -12,7 +12,7 @@ import {
   TextValue,
   UrlValue,
 } from "@/lib/schema";
-import { parseUrlForDisplay } from "@/lib/urlDisplay";
+import { ResourceUrlCell } from "@/features/page-speed-insights/shared/ResourceUrlCell";
 const URL_PREFIXES = ["http://", "https://", "data:"];
 
 export function formatBytes(value: unknown): string {
@@ -184,21 +184,6 @@ function SourceLocationLink({
   );
 }
 
-function SourceLocationUrlDisplay({ url }: { url: string }) {
-  const parsed = parseUrlForDisplay(url);
-  const path = parsed?.path ?? url;
-  const hostLabel = parsed?.hostLabel ?? "";
-
-  return (
-    <span className="flex flex-wrap items-center">
-      <SourceLocationLink href={url} title={url}>
-        {path}
-      </SourceLocationLink>
-      {hostLabel ? <span className="ml-1 text-gray-600">{hostLabel}</span> : null}
-    </span>
-  );
-}
-
 function SourceLocationContent({
   urlProvider,
   url,
@@ -222,7 +207,7 @@ function SourceLocationContent({
       </SourceLocationLink>
     ) : (
       <span className="flex flex-wrap items-center">
-        <SourceLocationUrlDisplay url={url} />
+        <ResourceUrlCell url={url} className="font-mono text-sm" />
         <span className="ml-0">
           :{line + 1}:{column}
         </span>
@@ -286,11 +271,29 @@ function RenderSourceLocation({
   );
 }
 
+function renderHttpUrl(
+  url: string,
+  props: React.HTMLAttributes<HTMLElement>,
+): React.JSX.Element {
+  return (
+    <div {...props} className={cn("min-w-0", props.className)}>
+      <ResourceUrlCell url={url} />
+    </div>
+  );
+}
+
+function isHttpOrDataUrl(value: string): boolean {
+  return URL_PREFIXES.some((prefix) => value.startsWith(prefix));
+}
+
 function RenderUrlValue({
   value,
   ...props
 }: { value: UrlValue } & React.HTMLAttributes<HTMLElement>) {
   const v = value.value;
+  if (isHttpOrDataUrl(v)) {
+    return renderHttpUrl(v, props);
+  }
   return <RenderAnchoredOverflowLink href={v} title={v} label={v} {...props} />;
 }
 
@@ -449,29 +452,18 @@ function RenderText({ value, ...props }: { value: unknown } & React.HTMLAttribut
 
 function RenderUrl({ value, ...props }: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
   const strValue = String(value);
-  if (URL_PREFIXES.some((prefix) => strValue.startsWith(prefix))) {
-    return (
-      <a
-        href={strValue}
-        title={strValue}
-        {...props}
-        className={cn("block overflow-auto wrap-break-word break-all", props.className)}
-      >
-        {strValue}
-      </a>
-    );
-  } else {
-    // Fall back to <pre> rendering if not actually a URL.
-    return (
-      <span
-        title="url"
-        {...props}
-        className={cn("block overflow-auto wrap-break-word break-all", props.className)}
-      >
-        {strValue}
-      </span>
-    );
+  if (isHttpOrDataUrl(strValue)) {
+    return renderHttpUrl(strValue, props);
   }
+  return (
+    <span
+      title="url"
+      {...props}
+      className={cn("block overflow-auto wrap-break-word break-all", props.className)}
+    >
+      {strValue}
+    </span>
+  );
 }
 
 function RenderThumbnail({

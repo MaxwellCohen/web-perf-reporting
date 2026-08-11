@@ -17,10 +17,10 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
     class="p-6 pt-0"
   >
     <div
-      class="overflow-x-auto"
+      class="w-full overflow-x-auto"
     >
       <div
-        class="w-full"
+        class="w-full min-w-0"
       >
         <div
           class="mb-2 flex justify-end"
@@ -66,10 +66,11 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
           </button>
         </div>
         <div
-          class="relative w-full overflow-auto"
+          class="relative w-full overflow-auto min-w-0"
         >
           <table
-            class="caption-bottom text-sm table-fixed w-full"
+            class="w-full caption-bottom text-sm table-fixed w-max!"
+            style="width: 300px;"
           >
             <thead
               class="[&_tr]:border-b"
@@ -78,8 +79,8 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
                 class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
                 <th
-                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
-                  style="width: 150px;"
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
                     class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
@@ -106,12 +107,12 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
                     </div>
                   </div>
                   <div
-                    class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
                   />
                 </th>
                 <th
-                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
-                  style="width: 150px;"
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
                     class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
@@ -134,7 +135,7 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
                     </div>
                   </div>
                   <div
-                    class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
                   />
                 </th>
               </tr>
@@ -155,7 +156,7 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <span
                     class="font-medium"
@@ -174,7 +175,7 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -197,7 +198,7 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <span
                     class="font-medium"
@@ -216,7 +217,7 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -239,7 +240,7 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <span
                     class="font-medium"
@@ -258,7 +259,7 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -294,10 +295,10 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
     class="p-6 pt-0"
   >
     <div
-      class="overflow-x-auto"
+      class="w-full overflow-x-auto"
     >
       <div
-        class="w-full"
+        class="w-full min-w-0"
       >
         <div
           class="mb-2 flex justify-end"
@@ -343,10 +344,11 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
           </button>
         </div>
         <div
-          class="relative w-full overflow-auto"
+          class="relative w-full overflow-auto min-w-0"
         >
           <table
-            class="caption-bottom text-sm table-fixed w-full"
+            class="w-full caption-bottom text-sm table-fixed w-max!"
+            style="width: 450px;"
           >
             <thead
               class="[&_tr]:border-b"
@@ -355,8 +357,8 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                 class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
                 <th
-                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
-                  style="width: 150px;"
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
                     class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
@@ -383,12 +385,12 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                     </div>
                   </div>
                   <div
-                    class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
                   />
                 </th>
                 <th
-                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
-                  style="width: 150px;"
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
                     class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
@@ -411,12 +413,12 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                     </div>
                   </div>
                   <div
-                    class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
                   />
                 </th>
                 <th
-                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
-                  style="width: 150px;"
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
                     class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
@@ -439,7 +441,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                     </div>
                   </div>
                   <div
-                    class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
                   />
                 </th>
               </tr>
@@ -460,7 +462,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <span
                     class="font-medium"
@@ -479,7 +481,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -498,7 +500,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -521,7 +523,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <span
                     class="font-medium"
@@ -540,7 +542,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -559,7 +561,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -582,7 +584,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <span
                     class="font-medium"
@@ -601,7 +603,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -620,7 +622,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -656,10 +658,10 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
     class="p-6 pt-0"
   >
     <div
-      class="overflow-x-auto"
+      class="w-full overflow-x-auto"
     >
       <div
-        class="w-full"
+        class="w-full min-w-0"
       >
         <div
           class="mb-2 flex justify-end"
@@ -705,10 +707,11 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
           </button>
         </div>
         <div
-          class="relative w-full overflow-auto"
+          class="relative w-full overflow-auto min-w-0"
         >
           <table
-            class="caption-bottom text-sm table-fixed w-full"
+            class="w-full caption-bottom text-sm table-fixed w-max!"
+            style="width: 300px;"
           >
             <thead
               class="[&_tr]:border-b"
@@ -717,8 +720,8 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
                 class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
                 <th
-                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
-                  style="width: 150px;"
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
                     class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
@@ -745,12 +748,12 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
                     </div>
                   </div>
                   <div
-                    class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
                   />
                 </th>
                 <th
-                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative min-w-0 overflow-hidden"
-                  style="width: 150px;"
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
                     class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
@@ -773,7 +776,7 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
                     </div>
                   </div>
                   <div
-                    class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
                   />
                 </th>
               </tr>
@@ -794,7 +797,7 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <span
                     class="font-medium"
@@ -813,7 +816,7 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -836,7 +839,7 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <span
                     class="font-medium"
@@ -855,7 +858,7 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -878,7 +881,7 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <span
                     class="font-medium"
@@ -897,7 +900,7 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px;"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"

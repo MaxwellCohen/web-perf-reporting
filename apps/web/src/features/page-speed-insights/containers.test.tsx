@@ -299,19 +299,13 @@ vi.mock("@/features/page-speed-insights/javascript-metrics/MainThreadWorkChartCa
   MainThreadWorkChartCard: () => <div>Main thread work chart</div>,
 }));
 
-vi.mock("@/features/page-speed-insights/javascript-metrics/UnusedJavaScriptCard", () => ({
+vi.mock("@/features/page-speed-insights/javascript-metrics/JavascriptAuditBytesCards", () => ({
   UnusedJavaScriptCard: ({ metrics }: { metrics: Array<{ unusedJS: unknown[] }> }) => (
     <div>Unused JS: {metrics.map((metric) => metric.unusedJS.length).join(",")}</div>
   ),
-}));
-
-vi.mock("@/features/page-speed-insights/javascript-metrics/UnminifiedJavaScriptCard", () => ({
   UnminifiedJavaScriptCard: ({ metrics }: { metrics: Array<{ unminifiedJS: unknown[] }> }) => (
     <div>Unminified JS: {metrics.map((metric) => metric.unminifiedJS.length).join(",")}</div>
   ),
-}));
-
-vi.mock("@/features/page-speed-insights/javascript-metrics/LegacyJavaScriptCard", () => ({
   LegacyJavaScriptCard: ({ metrics }: { metrics: Array<{ legacyJS: unknown[] }> }) => (
     <div>Legacy JS: {metrics.map((metric) => metric.legacyJS.length).join(",")}</div>
   ),

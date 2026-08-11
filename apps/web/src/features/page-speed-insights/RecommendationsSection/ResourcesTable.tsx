@@ -1,15 +1,17 @@
 "use client";
-import { ReactNode, useMemo } from "react";
+import { useMemo } from "react";
 import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
-import {
-  RenderBytesValue,
-  RenderMSValue,
-} from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import {
   useSimpleTable,
   type FlatColumnDef,
 } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
-import { ResourceUrlCell } from "@/features/page-speed-insights/shared/ResourceUrlCell";
+import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
+import {
+  createBytesColumn,
+  createMSColumn,
+  createPercentageColumn,
+  createURLColumn,
+} from "@/features/page-speed-insights/shared/tableColumnHelpers";
 
 interface ResourceItem {
   url?: string;
@@ -23,135 +25,76 @@ interface ResourceItem {
   [key: string]: unknown;
 }
 
+type ResourceTableRow = ResourceItem & { url: string };
+
 interface ResourcesTableProps {
   items: ResourceItem[];
 }
 
-function emptyNumberCell(): ReactNode {
-  return <span className="text-muted-foreground">—</span>;
-}
+const columnHelper = createStockColumnHelper<ResourceTableRow>();
+const positive = { requirePositive: true } as const;
 
-function positiveNumberCell(
-  value: number | undefined,
-  render: (v: number) => ReactNode,
-): ReactNode {
-  return value !== undefined && value > 0 ? render(value) : emptyNumberCell();
-}
-
-function resourceNumericColumn(
-  id: keyof ResourceItem & string,
-  header: string,
-  sizes: { size: number; minSize: number; maxSize: number },
-  getCell: (row: ResourceItem) => ReactNode,
-): FlatColumnDef<ResourceItem> {
-  return {
-    id,
-    accessorKey: id,
-    header,
-    size: sizes.size,
-    minSize: sizes.minSize,
-    maxSize: sizes.maxSize,
-    enableResizing: true,
-    filterFn: "inNumberRange",
-    cell: ({ row }) => getCell(row.original),
-    enableSorting: true,
-    enableColumnFilter: true,
-  };
-}
-
-function bytesCell(get: (row: ResourceItem) => number | undefined) {
-  return (row: ResourceItem) =>
-    positiveNumberCell(get(row), (v) => <RenderBytesValue value={v} />);
-}
-
-function msCell(get: (row: ResourceItem) => number | undefined) {
-  return (row: ResourceItem) => positiveNumberCell(get(row), (v) => <RenderMSValue value={v} />);
-}
+const NUMERIC_SIZES = {
+  wastedBytes: { size: 120, minSize: 80, maxSize: 200 },
+  wastedMs: { size: 120, minSize: 80, maxSize: 200 },
+  wastedPercent: { size: 100, minSize: 70, maxSize: 150 },
+  totalBytes: { size: 120, minSize: 80, maxSize: 200 },
+  scripting: { size: 130, minSize: 90, maxSize: 200 },
+  scriptParseCompile: { size: 150, minSize: 100, maxSize: 200 },
+  total: { size: 130, minSize: 90, maxSize: 200 },
+} as const;
 
 export function ResourcesTable({ items }: ResourcesTableProps) {
-  const columns = useMemo<FlatColumnDef<ResourceItem>[]>(() => {
-    const numericColumns: Array<{
-      id: keyof ResourceItem & string;
-      header: string;
-      sizes: { size: number; minSize: number; maxSize: number };
-      cell: (row: ResourceItem) => ReactNode;
-    }> = [
-      {
-        id: "wastedBytes",
-        header: "Wasted Bytes",
-        sizes: { size: 120, minSize: 80, maxSize: 200 },
-        cell: bytesCell((r) => r.wastedBytes),
-      },
-      {
-        id: "wastedMs",
-        header: "Wasted Time",
-        sizes: { size: 120, minSize: 80, maxSize: 200 },
-        cell: msCell((r) => r.wastedMs),
-      },
-      {
-        id: "wastedPercent",
-        header: "Wasted %",
-        sizes: { size: 100, minSize: 70, maxSize: 150 },
-        cell: (row) =>
-          positiveNumberCell(row.wastedPercent, (v) => <span>{v.toFixed(1)}%</span>),
-      },
-      {
-        id: "totalBytes",
-        header: "Total Size",
-        sizes: { size: 120, minSize: 80, maxSize: 200 },
-        cell: bytesCell((r) => r.totalBytes),
-      },
-      {
-        id: "scripting",
-        header: "Scripting Time",
-        sizes: { size: 130, minSize: 90, maxSize: 200 },
-        cell: msCell((r) => r.scripting),
-      },
-      {
-        id: "scriptParseCompile",
-        header: "Parse/Compile Time",
-        sizes: { size: 150, minSize: 100, maxSize: 200 },
-        cell: msCell((r) => r.scriptParseCompile),
-      },
-      {
-        id: "total",
-        header: "Total CPU Time",
-        sizes: { size: 130, minSize: 90, maxSize: 200 },
-        cell: msCell((r) => r.total),
-      },
-    ];
+  const data = useMemo<ResourceTableRow[]>(
+    () => items.map((item) => ({ ...item, url: item.url ?? "" })),
+    [items],
+  );
 
-    return [
-      {
-        id: "url",
-        accessorKey: "url",
-        header: "Resource URL",
-        size: 400,
-        minSize: 200,
-        maxSize: 800,
-        enableResizing: true,
-        filterFn: "includesString",
-        cell: ({ row }) => {
-          const url = row.original.url;
-          if (url && url !== "Unattributable") {
-            return (
-              <div className="min-w-0 overflow-hidden">
-                <ResourceUrlCell url={url} />
-              </div>
-            );
-          }
-          return <span className="text-muted-foreground">Unattributable</span>;
-        },
-        enableSorting: true,
-        enableColumnFilter: true,
-      },
-      ...numericColumns.map(({ id, header, sizes, cell }) =>
-        resourceNumericColumn(id, header, sizes, cell),
-      ),
-    ];
-  }, []);
+  const columns = useMemo<FlatColumnDef<ResourceTableRow>[]>(
+    () =>
+      [
+        createURLColumn(columnHelper, {
+          header: "Resource URL",
+          size: 400,
+          minSize: 200,
+          maxSize: 800,
+          emptyLabel: "Unattributable",
+          enableGrouping: false,
+        }),
+        createBytesColumn(columnHelper, "wastedBytes", "Wasted Bytes", {
+          ...positive,
+          ...NUMERIC_SIZES.wastedBytes,
+        }),
+        createMSColumn(columnHelper, "wastedMs", "Wasted Time", {
+          ...positive,
+          ...NUMERIC_SIZES.wastedMs,
+        }),
+        createPercentageColumn(columnHelper, "wastedPercent", "Wasted %", {
+          precision: 1,
+          ...positive,
+          ...NUMERIC_SIZES.wastedPercent,
+        }),
+        createBytesColumn(columnHelper, "totalBytes", "Total Size", {
+          ...positive,
+          ...NUMERIC_SIZES.totalBytes,
+        }),
+        createMSColumn(columnHelper, "scripting", "Scripting Time", {
+          ...positive,
+          ...NUMERIC_SIZES.scripting,
+        }),
+        createMSColumn(columnHelper, "scriptParseCompile", "Parse/Compile Time", {
+          ...positive,
+          ...NUMERIC_SIZES.scriptParseCompile,
+        }),
+        createMSColumn(columnHelper, "total", "Total CPU Time", {
+          ...positive,
+          ...NUMERIC_SIZES.total,
+        }),
+      ] as FlatColumnDef<ResourceTableRow>[],
+    [],
+  );
 
-  const table = useSimpleTable({ data: items, columns });
+  const table = useSimpleTable({ data, columns });
 
   return (
     <div className="w-full overflow-x-auto">

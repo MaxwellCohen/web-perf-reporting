@@ -1,9 +1,7 @@
 "use client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TableItem } from "@/lib/schema";
 import { getNumber } from "@/lib/utils";
 import { useMemo } from "react";
-import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
 import {
   useStandardTable,
@@ -15,6 +13,7 @@ import {
   createTruncatedTextColumn,
 } from "@/features/page-speed-insights/shared/tableColumnHelpers";
 import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
+import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 import type { NetworkMetricSeries } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsData";
 
 type OriginMsRow = {
@@ -95,15 +94,11 @@ export function NetworkOriginMsCard({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="w-full max-h-96 overflow-y-auto">
-          <StockDataTable table={table} />
-        </div>
-      </CardContent>
-    </Card>
+    <TableCard
+      title={title}
+      table={table}
+      className=""
+      tableContainerClassName="max-h-96 overflow-y-auto"
+    />
   );
 }

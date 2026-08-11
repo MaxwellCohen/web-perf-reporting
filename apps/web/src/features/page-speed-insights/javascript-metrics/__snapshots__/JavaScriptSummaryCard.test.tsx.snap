@@ -5,164 +5,373 @@ exports[`JavaScriptSummaryCard > renders Report column when multiple reports 1`]
   class="rounded-xl border bg-card text-card-foreground shadow"
 >
   <div
-    class="p-6 flex flex-row items-center justify-between space-y-0"
+    class="flex flex-col space-y-1.5 p-6"
   >
     <div
       class="font-semibold leading-none tracking-tight"
     >
       JavaScript Summary
     </div>
-    <button
-      aria-expanded="false"
-      aria-haspopup="menu"
-      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
-      data-state="closed"
-      id="radix-_r_2_"
-      title="Copy table"
-      type="button"
-    >
-      <svg
-        class="lucide lucide-copy h-4 w-4"
-        fill="none"
-        height="24"
-        stroke="currentColor"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        viewBox="0 0 24 24"
-        width="24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <rect
-          height="14"
-          rx="2"
-          ry="2"
-          width="14"
-          x="8"
-          y="8"
-        />
-        <path
-          d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
-        />
-      </svg>
-      <span
-        class="sr-only"
-      >
-        Copy table
-      </span>
-    </button>
   </div>
   <div
     class="p-6 pt-0"
   >
-    <div>
+    <div
+      class="w-full overflow-x-auto"
+    >
       <div
-        class="relative w-full overflow-auto"
+        class="w-full min-w-0"
       >
-        <table
-          class="w-full caption-bottom text-sm table-fixed"
+        <div
+          class="mb-2 flex justify-end"
         >
-          <thead
-            class="[&_tr]:border-b"
+          <button
+            aria-expanded="false"
+            aria-haspopup="menu"
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
+            data-state="closed"
+            id="radix-_r_5_"
+            title="Copy table"
+            type="button"
           >
-            <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            <svg
+              class="lucide lucide-copy h-4 w-4"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <th
-                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
-              >
-                Report
-              </th>
-              <th
-                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
-              >
-                Total Scripts
-              </th>
-              <th
-                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
-              >
-                Transfer Size
-              </th>
-              <th
-                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
-              >
-                Resource Size
-              </th>
-            </tr>
-          </thead>
-          <tbody
-            class="[&_tr:last-child]:border-0"
+              <rect
+                height="14"
+                rx="2"
+                ry="2"
+                width="14"
+                x="8"
+                y="8"
+              />
+              <path
+                d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
+              />
+            </svg>
+            <span
+              class="sr-only"
+            >
+              Copy table
+            </span>
+          </button>
+        </div>
+        <div
+          class="relative w-full overflow-auto min-w-0"
+        >
+          <table
+            class="w-full caption-bottom text-sm table-fixed w-max!"
+            style="width: 450px;"
           >
-            <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            <thead
+              class="[&_tr]:border-b"
             >
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 font-medium"
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
-                Mobile
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
-              >
-                3
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
-              >
-                <span
-                  class=""
-                  title="bytes"
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
-                  500 bytes
-                </span>
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
-              >
-                <span
-                  class=""
-                  title="bytes"
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      Total Scripts
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
-                  600 bytes
-                </span>
-              </td>
-            </tr>
-            <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      Transfer Size
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      Resource Size
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              class="[&_tr:last-child]:border-0"
             >
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 font-medium"
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
-                Desktop
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
-              >
-                4
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
-              >
-                <span
-                  class=""
-                  title="bytes"
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_count"
+                  data-column-id="count"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
-                  700 bytes
-                </span>
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
-              >
-                <span
-                  class=""
-                  title="bytes"
+                  3
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_totalTransferSize"
+                  data-column-id="totalTransferSize"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
-                  800 bytes
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                  <span
+                    class=""
+                    title="bytes"
+                  >
+                    500 bytes
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_totalResourceSize"
+                  data-column-id="totalResourceSize"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <span
+                    class=""
+                    title="bytes"
+                  >
+                    600 bytes
+                  </span>
+                </td>
+              </tr>
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+              >
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="1_count"
+                  data-column-id="count"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  4
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="1_totalTransferSize"
+                  data-column-id="totalTransferSize"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <span
+                    class=""
+                    title="bytes"
+                  >
+                    700 bytes
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="1_totalResourceSize"
+                  data-column-id="totalResourceSize"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <span
+                    class=""
+                    title="bytes"
+                  >
+                    800 bytes
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -174,120 +383,317 @@ exports[`JavaScriptSummaryCard > renders table with single report (no Report col
   class="rounded-xl border bg-card text-card-foreground shadow"
 >
   <div
-    class="p-6 flex flex-row items-center justify-between space-y-0"
+    class="flex flex-col space-y-1.5 p-6"
   >
     <div
       class="font-semibold leading-none tracking-tight"
     >
       JavaScript Summary
     </div>
-    <button
-      aria-expanded="false"
-      aria-haspopup="menu"
-      class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
-      data-state="closed"
-      id="radix-_r_0_"
-      title="Copy table"
-      type="button"
-    >
-      <svg
-        class="lucide lucide-copy h-4 w-4"
-        fill="none"
-        height="24"
-        stroke="currentColor"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        viewBox="0 0 24 24"
-        width="24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <rect
-          height="14"
-          rx="2"
-          ry="2"
-          width="14"
-          x="8"
-          y="8"
-        />
-        <path
-          d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
-        />
-      </svg>
-      <span
-        class="sr-only"
-      >
-        Copy table
-      </span>
-    </button>
   </div>
   <div
     class="p-6 pt-0"
   >
-    <div>
+    <div
+      class="w-full overflow-x-auto"
+    >
       <div
-        class="relative w-full overflow-auto"
+        class="w-full min-w-0"
       >
-        <table
-          class="w-full caption-bottom text-sm table-fixed"
+        <div
+          class="mb-2 flex justify-end"
         >
-          <thead
-            class="[&_tr]:border-b"
+          <button
+            aria-expanded="false"
+            aria-haspopup="menu"
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
+            data-state="closed"
+            id="radix-_r_0_"
+            title="Copy table"
+            type="button"
           >
-            <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            <svg
+              class="lucide lucide-copy h-4 w-4"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <th
-                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
-              >
-                Total Scripts
-              </th>
-              <th
-                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
-              >
-                Transfer Size
-              </th>
-              <th
-                class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border"
-              >
-                Resource Size
-              </th>
-            </tr>
-          </thead>
-          <tbody
-            class="[&_tr:last-child]:border-0"
+              <rect
+                height="14"
+                rx="2"
+                ry="2"
+                width="14"
+                x="8"
+                y="8"
+              />
+              <path
+                d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
+              />
+            </svg>
+            <span
+              class="sr-only"
+            >
+              Copy table
+            </span>
+          </button>
+        </div>
+        <div
+          class="relative w-full overflow-auto min-w-0"
+        >
+          <table
+            class="w-full caption-bottom text-sm table-fixed w-max!"
+            style="width: 450px;"
           >
-            <tr
-              class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+            <thead
+              class="[&_tr]:border-b"
             >
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
-                5
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
-              >
-                <span
-                  class=""
-                  title="bytes"
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
-                  1000 bytes
-                </span>
-              </td>
-              <td
-                class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
-              >
-                <span
-                  class=""
-                  title="bytes"
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      Total Scripts
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
-                  1.95 KB
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      Transfer Size
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+                <th
+                  class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <div
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                  >
+                    <div
+                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                    >
+                      Resource Size
+                    </div>
+                    <div
+                      class="flex shrink-0 flex-row items-center gap-1"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        title="Sort descending"
+                        type="button"
+                      >
+                        〰︎
+                      </button>
+                      <button
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        data-state="closed"
+                        type="button"
+                      >
+                        <svg
+                          class="lucide lucide-list-filter"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 6h18"
+                          />
+                          <path
+                            d="M7 12h10"
+                          />
+                          <path
+                            d="M10 18h4"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200 hover:bg-muted"
+                  />
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              class="[&_tr:last-child]:border-0"
+            >
+              <tr
+                class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+              >
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_count"
+                  data-column-id="count"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  5
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_totalTransferSize"
+                  data-column-id="totalTransferSize"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <span
+                    class=""
+                    title="bytes"
+                  >
+                    1000 bytes
+                  </span>
+                </td>
+                <td
+                  class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                  data-aggregated="false"
+                  data-can-expand="false"
+                  data-cell-id="0_totalResourceSize"
+                  data-column-id="totalResourceSize"
+                  data-depth="0"
+                  data-grouped="false"
+                  data-placeholder="false"
+                  data-row-expanded="false"
+                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                >
+                  <span
+                    class=""
+                    title="bytes"
+                  >
+                    1.95 KB
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

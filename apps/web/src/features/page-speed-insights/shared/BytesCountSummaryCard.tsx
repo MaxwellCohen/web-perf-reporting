@@ -1,7 +1,15 @@
 "use client";
-import { TableCell, TableHead, TableRow } from "@/components/ui/table";
-import { RenderBytesValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
-import { CardWithTable } from "@/features/page-speed-insights/shared/CardWithTable";
+import { useMemo } from "react";
+import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
+import {
+  useStandardTable,
+  type StandardColumnDef,
+} from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import {
+  createBytesColumn,
+} from "@/features/page-speed-insights/shared/tableColumnHelpers";
+import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
+import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 
 export type BytesCountSummaryRow = {
   label: string;
@@ -16,39 +24,33 @@ type BytesCountSummaryCardProps = {
   rows: BytesCountSummaryRow[];
 };
 
+const columnHelper = createStockColumnHelper<BytesCountSummaryRow>();
+
 export function BytesCountSummaryCard({ title, countColumnTitle, rows }: BytesCountSummaryCardProps) {
-  const validStats = rows.filter((s) => s.count > 0);
+  const validStats = useMemo(() => rows.filter((s) => s.count > 0), [rows]);
+  const showReportColumn = validStats.length > 1;
+
+  const cols = useMemo<StandardColumnDef<BytesCountSummaryRow>[]>(
+    () => [
+      columnHelper.accessor("count", {
+        id: "count",
+        header: countColumnTitle,
+        enableSorting: true,
+        enableResizing: true,
+        filterFn: "inNumberRange",
+      }),
+      createBytesColumn(columnHelper, "totalTransferSize", "Transfer Size"),
+      createBytesColumn(columnHelper, "totalResourceSize", "Resource Size"),
+    ],
+    [countColumnTitle],
+  );
+
+  const columns = useTableColumns(cols, columnHelper, showReportColumn);
+  const table = useStandardTable({ data: validStats, columns });
 
   if (!validStats.length) {
     return null;
   }
 
-  const showReportColumn = validStats.length > 1;
-
-  return (
-    <CardWithTable
-      title={title}
-      header={
-        <TableRow>
-          {showReportColumn && <TableHead>Report</TableHead>}
-          <TableHead>{countColumnTitle}</TableHead>
-          <TableHead>Transfer Size</TableHead>
-          <TableHead>Resource Size</TableHead>
-        </TableRow>
-      }
-    >
-      {validStats.map(({ label, count, totalTransferSize, totalResourceSize }) => (
-        <TableRow key={label}>
-          {showReportColumn && <TableCell className="font-medium">{label || "Unknown"}</TableCell>}
-          <TableCell>{count}</TableCell>
-          <TableCell>
-            <RenderBytesValue value={totalTransferSize} />
-          </TableCell>
-          <TableCell>
-            <RenderBytesValue value={totalResourceSize} />
-          </TableCell>
-        </TableRow>
-      ))}
-    </CardWithTable>
-  );
+  return <TableCard title={title} table={table} className="" />;
 }

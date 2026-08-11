@@ -1,14 +1,13 @@
 "use client";
 import { useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
-import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 import {
   useStandardTable,
   type StandardColumnDef,
 } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import { createOptionalNumericCell } from "@/features/page-speed-insights/shared/tableColumnHelpers";
+import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 import { useNetworkMetricSeries } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
 import type { NetworkMetricSeries } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsData";
 
@@ -161,18 +160,7 @@ function TimelineCardTable({
 }) {
   const table = useStandardTable({ data, columns });
 
-  return (
-    <Card className="md:col-span-2 lg:col-span-3">
-      <CardHeader>
-        <CardTitle>Timeline of Observed Events</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto">
-          <StockDataTable table={table} />
-        </div>
-      </CardContent>
-    </Card>
-  );
+  return <TableCard title="Timeline of Observed Events" table={table} />;
 }
 
 export function TimelineCard() {

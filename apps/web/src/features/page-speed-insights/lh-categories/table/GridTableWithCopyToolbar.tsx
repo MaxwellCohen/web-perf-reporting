@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, type ReactNode, type RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 import { CopyGridTableButton } from "@/features/page-speed-insights/tanstack-table-v9/CopyGridTableButton";
-import { cn } from "@/lib/utils";
+import { WithCopyToolbar } from "@/features/page-speed-insights/tanstack-table-v9/WithCopyToolbar";
 
 type GridTableWithCopyToolbarProps = {
   children: (props: { containerRef: RefObject<HTMLDivElement | null> }) => ReactNode;
@@ -10,14 +10,12 @@ type GridTableWithCopyToolbarProps = {
 };
 
 export function GridTableWithCopyToolbar({ children, className }: GridTableWithCopyToolbarProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
   return (
-    <div className={cn("w-full", className)}>
-      <div className="mb-2 flex justify-end">
-        <CopyGridTableButton containerRef={containerRef} />
-      </div>
-      {children({ containerRef })}
-    </div>
+    <WithCopyToolbar<HTMLDivElement>
+      className={className}
+      renderButton={(containerRef) => <CopyGridTableButton containerRef={containerRef} />}
+    >
+      {(containerRef) => children({ containerRef })}
+    </WithCopyToolbar>
   );
 }

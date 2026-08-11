@@ -1,7 +1,7 @@
 import type { Column } from "@tanstack/react-table";
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { StringFilterHeader } from "@/features/page-speed-insights/JSUsage/StringFilterHeader";
+import { StringFilterHeader } from "@/features/page-speed-insights/tanstack-table-v9/StringFilterHeader";
 
 vi.mock("@/components/ui/label", () => ({
   Label: ({ children, htmlFor }: { children: React.ReactNode; htmlFor?: string }) => (

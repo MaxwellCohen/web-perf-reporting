@@ -65,7 +65,7 @@ export function JavascriptBytesTableCard({
         const totalBytes = getNumber(item.totalBytes);
         const row: JavascriptBytesTableRow = {
           label,
-          url: url.replace(/^https?:\/\//, "") || "Unknown",
+          url: url || "Unknown",
           wastedBytes,
           totalBytes,
         };

@@ -13,7 +13,7 @@ import {
 } from "react";
 import type { TableColumnHeading } from "@/lib/schema";
 import { showBothDevices } from "@/features/page-speed-insights/lh-categories/table/utils";
-import { cn } from "@/lib/utils";
+import { columnResizerClassName } from "@/features/page-speed-insights/tanstack-table-v9/columnResizerStyles";
 
 type GridColumnResizeContextValue = {
   widths: number[];
@@ -120,10 +120,7 @@ export function GridColumnResizer({ columnIndex }: { columnIndex: number }) {
       aria-orientation="vertical"
       aria-label="Resize column"
       onMouseDown={(event) => ctx.startResize(columnIndex, event)}
-      className={cn(
-        "absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none select-none",
-        "bg-muted/50 transition-opacity duration-200 hover:bg-muted",
-      )}
+      className={columnResizerClassName()}
     />
   );
 }
