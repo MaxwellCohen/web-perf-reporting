@@ -62,7 +62,7 @@ export function CopyTableMenuButton({
         >
           {hasCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
           {children}
-          <span className="sr-only">Copy table</span>
+          {!children ? <span className="sr-only">Copy table</span> : null}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

@@ -18,7 +18,7 @@ export function JSUsageTableRow({ row, i }: { row: StockRow<TreeMapNode>; i: num
     <>
       <TableRow
         data-children={row?.original?.children?.length || 0}
-        className={cn("w-[calc(100% - 4px)] flex overflow-hidden border-muted", {
+        className={cn("flex w-max min-w-full border-muted", {
           "border-b-[length:--depth]": depth && row.index + 1 === (subRows.length || 0),
           "border-r-[length:--depth]": depth,
           "border-r-[length:--depth] border-t-[length:--depth]": isExpanded,
@@ -35,22 +35,26 @@ export function JSUsageTableRow({ row, i }: { row: StockRow<TreeMapNode>; i: num
           .getVisibleCells()
           .map((cell, index) => {
             const cellContent = flexRender(cell.column.columnDef.cell, cell.getContext());
+            const size = cell.column.getSize();
             return (
               <TableCell
                 key={`${cell.id}_${i}_${depth}`}
                 data-key={`${cell.id}_${i}_${depth}`}
                 {...tanstackTableCellDataProps(cell, row)}
                 className={cn(
-                  "flex flex-row",
+                  "flex min-w-0 flex-row overflow-hidden",
                   {
                     "border-l-[length:--depth] border-muted": (depth || isExpanded) && !index,
                   },
                   `${cell.column.columnDef.meta?.className || ""}`,
                 )}
                 style={
-                  typeof cell.column.getSize() === "number"
+                  typeof size === "number"
                     ? {
-                        width: `${cell.column.getSize()}px`,
+                        width: `${size}px`,
+                        minWidth: `${size}px`,
+                        maxWidth: `${size}px`,
+                        flexShrink: 0,
                       }
                     : undefined
                 }

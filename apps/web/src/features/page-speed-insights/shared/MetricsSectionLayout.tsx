@@ -24,7 +24,7 @@ export function FullWidthRow({
   children: ReactNode;
   className?: string;
 }) {
-  return <div className={cn(fullWidthClassName, className)}>{children}</div>;
+  return <div className={cn(fullWidthClassName, "min-w-0", className)}>{children}</div>;
 }
 
 export function ChartTableStack({
@@ -34,7 +34,7 @@ export function ChartTableStack({
   children: ReactNode;
   className?: string;
 }) {
-  return <div className={cn("space-y-6", className)}>{children}</div>;
+  return <div className={cn("min-w-0 space-y-6", className)}>{children}</div>;
 }
 
 export function TwoColumnRow({

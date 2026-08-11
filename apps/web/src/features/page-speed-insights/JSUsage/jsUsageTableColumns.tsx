@@ -51,9 +51,10 @@ const makeSortableStringColumn = (column: string) => {
   return columnHelper.accessor(column, {
     getGroupingValue: (row) => getHostName(row),
     meta: {
-      className: "overflow-scroll-x h-auto",
+      className: "min-w-0 h-auto",
     },
-    size: 700,
+    size: 280,
+    minSize: 160,
     header: toTitleCase(column),
     aggregationFn: "unique",
     enableSorting: true,
@@ -68,8 +69,8 @@ const makeSortableStringColumn = (column: string) => {
         }
       }
       return (
-        <div className="overflow-hidden">
-          <div className="flex flex-row overflow-x-auto">{value as string}</div>
+        <div className="min-w-0 max-w-full overflow-hidden" title={String(value)}>
+          <div className="truncate">{value as string}</div>
         </div>
       );
     },
@@ -79,9 +80,10 @@ const makeSortableStringColumn = (column: string) => {
 const makeBooleanColumn = (column: string, extra = {}) => {
   // @ts-expect-error: Im lazy to do full inference
   return columnHelper.accessor(column, {
-    size: 140,
+    size: 120,
+    minSize: 100,
     meta: {
-      className: "place-content-center my-2",
+      className: "place-content-center my-2 shrink-0",
     },
     cell: function checkboxItem(info) {
       return <>{renderBoolean(!!info.getValue())}</>;
@@ -101,9 +103,10 @@ const makeBytesColumn = (column: string, title: string, extra = {}) => {
     enableHiding: true,
     filterFn: "inNumberRange",
     aggregationFn: "sum",
-    size: 140,
+    size: 120,
+    minSize: 96,
     meta: {
-      className: "h-auto text",
+      className: "h-auto shrink-0",
     },
     ...extra,
   });
@@ -115,7 +118,8 @@ export const columns = [
   makeSortableStringColumn("name"),
   columnHelper.accessor(getHostName, {
     id: "host",
-    size: 300,
+    size: 180,
+    minSize: 120,
     enableHiding: true,
     enablePinning: true,
     enableGrouping: true,
@@ -125,7 +129,7 @@ export const columns = [
     header: "Host",
     filterFn: "includesString",
     meta: {
-      className: "",
+      className: "min-w-0",
     },
   }),
   makeBooleanColumn("duplicatedNormalizedModuleName", {
@@ -148,7 +152,7 @@ export const columns = [
       cell: (info) => {
         const value = info.getValue();
         return (
-          <div className="w-36 text-right">
+          <div className="w-full whitespace-nowrap text-right">
             {typeof value === "number" ? `${value.toFixed(2)} %` : value === "" ? "" : "N/A"}
           </div>
         );
@@ -156,7 +160,7 @@ export const columns = [
       sortFn: "alphanumeric",
       sortUndefined: "last",
       meta: {
-        className: "",
+        className: "shrink-0",
       },
       aggregationFn: constructAggregationFn({
         aggregate: () => "",
@@ -164,7 +168,8 @@ export const columns = [
       aggregatedCell: () => <> </>,
       enableSorting: true,
       enableHiding: true,
-      size: 140,
+      size: 100,
+      minSize: 80,
       header: "Percent",
     },
   ),

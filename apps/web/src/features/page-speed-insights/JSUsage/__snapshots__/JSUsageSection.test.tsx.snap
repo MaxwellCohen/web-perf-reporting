@@ -2,7 +2,7 @@
 
 exports[`JSUsageAccordion > renders accordion with table 1`] = `
 <details
-  class="rounded-2 content-visibility-auto mb-2 min-w-full overflow-hidden rounded-md border-4 p-2 col-span-1 w-full lg:col-span-full"
+  class="rounded-2 content-visibility-auto mb-2 overflow-hidden rounded-md border-4 p-2 col-span-1 w-full min-w-0 lg:col-span-full"
   open=""
 >
   <summary
@@ -16,86 +16,106 @@ exports[`JSUsageAccordion > renders accordion with table 1`] = `
     </div>
   </summary>
   <div
-    data-testid="js-usage-table"
+    class="min-w-0"
   >
-    Table rows: 
-    1
+    <div
+      data-testid="js-usage-table"
+    >
+      Table rows: 
+      1
+    </div>
   </div>
 </details>
 `;
 
 exports[`JSUsageCard > renders card with label 1`] = `
 <div
-  class="rounded-xl border bg-card text-card-foreground shadow col-span-1 w-full lg:col-span-full"
+  class="rounded-xl border bg-card text-card-foreground shadow col-span-1 w-full min-w-0 lg:col-span-full"
 >
   <div
-    class="flex flex-col space-y-1.5 p-6 text-center text-2xl font-bold"
+    class="flex flex-col space-y-1.5 p-6 px-4 text-center text-2xl font-bold sm:px-6"
   >
     JS Usage Table
      for Mobile
   </div>
   <div
-    data-testid="js-usage-table"
+    class="min-w-0 px-2 pb-4 sm:px-6"
   >
-    Table rows: 
-    1
+    <div
+      data-testid="js-usage-table"
+    >
+      Table rows: 
+      1
+    </div>
   </div>
 </div>
 `;
 
 exports[`JSUsageCard > renders without label 1`] = `
 <div
-  class="rounded-xl border bg-card text-card-foreground shadow col-span-1 w-full lg:col-span-full"
+  class="rounded-xl border bg-card text-card-foreground shadow col-span-1 w-full min-w-0 lg:col-span-full"
 >
   <div
-    class="flex flex-col space-y-1.5 p-6 text-center text-2xl font-bold"
+    class="flex flex-col space-y-1.5 p-6 px-4 text-center text-2xl font-bold sm:px-6"
   >
     JS Usage Table
      
   </div>
   <div
-    data-testid="js-usage-table"
+    class="min-w-0 px-2 pb-4 sm:px-6"
   >
-    Table rows: 
-    1
+    <div
+      data-testid="js-usage-table"
+    >
+      Table rows: 
+      1
+    </div>
   </div>
 </div>
 `;
 
 exports[`JSUsageCardSection > renders cards when treemap data exists 1`] = `
 <div
-  class="rounded-xl border bg-card text-card-foreground shadow col-span-1 w-full lg:col-span-full"
+  class="rounded-xl border bg-card text-card-foreground shadow col-span-1 w-full min-w-0 lg:col-span-full"
 >
   <div
-    class="flex flex-col space-y-1.5 p-6 text-center text-2xl font-bold"
+    class="flex flex-col space-y-1.5 p-6 px-4 text-center text-2xl font-bold sm:px-6"
   >
     JS Usage Table
      for Desktop
   </div>
   <div
-    data-testid="js-usage-table"
+    class="min-w-0 px-2 pb-4 sm:px-6"
   >
-    Table rows: 
-    1
+    <div
+      data-testid="js-usage-table"
+    >
+      Table rows: 
+      1
+    </div>
   </div>
 </div>
 `;
 
 exports[`JSUsageSection > renders a card per item when items have script-treemap-data 1`] = `
 <div
-  class="rounded-xl border bg-card text-card-foreground shadow col-span-1 w-full lg:col-span-full"
+  class="rounded-xl border bg-card text-card-foreground shadow col-span-1 w-full min-w-0 lg:col-span-full"
 >
   <div
-    class="flex flex-col space-y-1.5 p-6 text-center text-2xl font-bold"
+    class="flex flex-col space-y-1.5 p-6 px-4 text-center text-2xl font-bold sm:px-6"
   >
     JS Usage Table
      for Mobile
   </div>
   <div
-    data-testid="js-usage-table"
+    class="min-w-0 px-2 pb-4 sm:px-6"
   >
-    Table rows: 
-    1
+    <div
+      data-testid="js-usage-table"
+    >
+      Table rows: 
+      1
+    </div>
   </div>
 </div>
 `;

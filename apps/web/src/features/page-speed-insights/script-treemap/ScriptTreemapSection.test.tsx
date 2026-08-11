@@ -47,6 +47,14 @@ describe("ScriptTreemapSection", () => {
     expect(screen.queryByText("Script Treemap")).toBeNull();
   });
 
+  it("returns null when treemap nodes are empty", () => {
+    vi.mocked(useScriptTreemapItems).mockReturnValue([
+      { label: "Mobile", treeData: { type: "treemap-data", nodes: [] } },
+    ]);
+    renderSection();
+    expect(screen.queryByText("Script Treemap")).toBeNull();
+  });
+
   it("renders chart and table when treemap data exists", () => {
     vi.mocked(useScriptTreemapItems).mockReturnValue([
       { label: "Mobile", treeData: mockTreeData },

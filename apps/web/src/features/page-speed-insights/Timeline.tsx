@@ -44,10 +44,10 @@ export function Timeline({ timeline, device }: TimelineProps) {
       <h3 className="text-lg font-bold">{device ? `${device} - ` : ""} Timeline</h3>
       {/* </summary> */}
       <Dialog>
-        <div className="mt-3 flex flex-row gap-2 align-top">
+        <div className="mt-3 flex flex-row gap-2 align-top overflow-x-auto pb-2">
           {timeline.items.map((item, i) => (
             <DialogTrigger asChild key={`${i}-${item.timestamp}`}>
-              <div>
+              <div className="shrink-0">
                 <button
                   className="rounded-md border-2  p-2 hover:scale-105 z-0"
                   onClick={() => setOpenIndex(i)}
@@ -58,33 +58,32 @@ export function Timeline({ timeline, device }: TimelineProps) {
               </div>
             </DialogTrigger>
           ))}
-          <DialogContent className="h-full w-screen md:w-[74vw] max-w-none">
+          <DialogContent className="flex max-h-[90dvh] w-[calc(100%-2rem)] max-w-5xl flex-col gap-4 overflow-y-auto sm:w-[90vw] md:w-[74vw]">
             <DialogTitle>Timeline</DialogTitle>
-            <Carousel setApi={setApi}>
-              <CarouselContent className="w-3/4">
+            <Carousel setApi={setApi} className="w-full px-10 sm:px-12">
+              <CarouselContent>
                 {timeline.items.map((item, i) => (
                   <CarouselItem
                     onClick={() => setTimeout(() => api?.scrollTo(i + 3), 100)}
                     key={`${i}-${item.timestamp}`}
-                    className="basis-1/2"
+                    className="basis-full sm:basis-1/2"
                   >
-                    <div className="flex flex-col gap-2 justify-center">
+                    <div className="flex flex-col items-center justify-center gap-2">
                       <img
-                        className="max-w-full h-full max-h-[75vh] object-contain"
+                        className="h-auto max-h-[min(60vh,calc(90dvh-12rem))] w-full object-contain"
                         alt={`timeline image at ${item.timing}`}
-                        width={500}
                         src={item.data}
                       />
-                      <div className="text-center">{item.timing} ms</div>
+                      <div className="text-center text-sm sm:text-base">{item.timing} ms</div>
                     </div>
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
+              <CarouselPrevious className="left-0" />
+              <CarouselNext className="right-0" />
             </Carousel>
             <DialogClose asChild>
-              <Button className="w-17" autoFocus>
+              <Button className="w-17 shrink-0" autoFocus>
                 close
               </Button>
             </DialogClose>

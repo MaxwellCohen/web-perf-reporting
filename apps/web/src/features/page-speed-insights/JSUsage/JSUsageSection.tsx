@@ -40,14 +40,16 @@ export function JSUsageCard({ treeData, label }: { treeData: TreeMapData; label?
   }, [treeData]);
 
   return (
-    <Card className="col-span-1 w-full lg:col-span-full">
-      <CardHeader className="text-center text-2xl font-bold">
+    <Card className="col-span-1 w-full min-w-0 lg:col-span-full">
+      <CardHeader className="px-4 text-center text-2xl font-bold sm:px-6">
         {`JS Usage Table`}
         {label ? ` for ${label}` : ` `}
       </CardHeader>
-      <ClientOnly>
-        <JSUsageTableWithControls data={nodes} />
-      </ClientOnly>
+      <div className="min-w-0 px-2 pb-4 sm:px-6">
+        <ClientOnly>
+          <JSUsageTableWithControls data={nodes} />
+        </ClientOnly>
+      </div>
     </Card>
   );
 }
@@ -59,16 +61,18 @@ export function JSUsageAccordion({ treeData, label }: { treeData: TreeMapData; l
   }, [treeData]);
 
   return (
-    <Details className="col-span-1 w-full lg:col-span-full">
+    <Details className="col-span-1 w-full min-w-0 lg:col-span-full">
       <summary className=" flex flex-col gap-2">
         <div className={accordionSectionTitleClassName}>
           {`JS Usage Table`}
           {label ? ` for ${label}` : ` `}
         </div>
       </summary>
-      <ClientOnly>
-        <JSUsageTableWithControls data={nodes} />
-      </ClientOnly>
+      <div className="min-w-0">
+        <ClientOnly>
+          <JSUsageTableWithControls data={nodes} />
+        </ClientOnly>
+      </div>
     </Details>
   );
 }

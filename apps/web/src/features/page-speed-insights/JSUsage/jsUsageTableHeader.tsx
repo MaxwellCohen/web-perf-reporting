@@ -19,7 +19,13 @@ type JSUsageTableHeaderProps = {
 
 function getHeaderCellStyle(header: StockHeader<TreeMapNode, unknown>): CSSProperties | undefined {
   const size = header.column.getSize();
-  return typeof size === "number" ? { width: `${size}px` } : undefined;
+  if (typeof size !== "number") return undefined;
+  return {
+    width: `${size}px`,
+    minWidth: `${size}px`,
+    maxWidth: `${size}px`,
+    flexShrink: 0,
+  };
 }
 
 function JSUsageTableHead({
@@ -71,7 +77,7 @@ export function JSUsageTableHeader({ headerGroup, depth, i }: JSUsageTableHeader
     <TableRow
       key={rowKey}
       className={cn(
-        "flex h-auto w-full overflow-hidden border-2 border-l-0 px-0 py-0",
+        "flex h-auto w-max min-w-full border-2 border-l-0 px-0 py-0",
         depth !== 0 && "self-end",
       )}
       style={style}

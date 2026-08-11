@@ -19,7 +19,12 @@ export function useScriptTreemapItems(): ScriptTreemapItem[] {
           treeData: item.lighthouseResult?.audits?.["script-treemap-data"]?.details as TreeMapData,
           label,
         }))
-        .filter((entry): entry is ScriptTreemapItem => entry.treeData?.type === "treemap-data"),
+        .filter(
+          (entry): entry is ScriptTreemapItem =>
+            entry.treeData?.type === "treemap-data" &&
+            Array.isArray(entry.treeData.nodes) &&
+            entry.treeData.nodes.length > 0,
+        ),
     [items],
   );
 }

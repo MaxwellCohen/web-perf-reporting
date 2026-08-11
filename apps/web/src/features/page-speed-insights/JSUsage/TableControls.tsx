@@ -32,7 +32,7 @@ export function TableControls<T extends RowData>({
   table: StockTable<T>;
 }) {
   return (
-    <div className="m-2 flex flex-col gap-3 sm:m-4">
+    <div className="mb-3 flex min-w-0 flex-col gap-3 px-1 sm:mb-4 sm:px-0">
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="ghost" size="sm" onClick={() => table.resetColumnFilters()}>
           Reset filters
@@ -41,11 +41,13 @@ export function TableControls<T extends RowData>({
           <span className="sm:hidden">Reset sorting</span>
           <span className="hidden sm:inline">Reset Sorting Order</span>
         </Button>
-        <CopyTableButton table={table} variant="ghost" size="sm">
-          Copy table
+        <CopyTableButton table={table} variant="ghost" size="sm" aria-label="Copy table">
+          <span className="hidden sm:inline" aria-hidden="true">
+            Copy table
+          </span>
         </CopyTableButton>
       </div>
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex min-w-0 flex-wrap items-center gap-2">
         <PaginatedTableControls table={table} showManualControls />
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           <ColumnSelector table={table} />
@@ -159,7 +161,7 @@ export function PageSizeSelector<T extends RowData>({
       }}
       defaultValue={`${getPaginationState(table).pageSize}`}
     >
-      <SelectTrigger className="h-8 w-auto min-w-40 max-w-full">
+      <SelectTrigger className="h-8 w-auto min-w-28 max-w-full sm:min-w-40">
         <SelectValue placeholder="Page Size" />
       </SelectTrigger>
       <SelectContent>

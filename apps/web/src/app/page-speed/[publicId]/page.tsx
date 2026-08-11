@@ -15,9 +15,7 @@ export default async function PageSpeedPublicIdPage({
     <ViewTransition>
       <ErrorMessage>
         <Suspense fallback={<LoadingMessage />}>
-          <ClientOnly>
-            <PageSpeedInsightsDashboardContent publicId={publicId} />
-          </ClientOnly>
+          <PageSpeedInsightsDashboardContent publicId={publicId} />
         </Suspense>
       </ErrorMessage>
     </ViewTransition>

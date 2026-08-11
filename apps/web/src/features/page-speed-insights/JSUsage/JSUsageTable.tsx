@@ -55,10 +55,16 @@ export function JSUsageTableWithControls({
   const table = useUseJSUsageTable(data);
   const rows = table.getRowModel().rows;
 
+  const tableWidth = table.getTotalSize();
+
   return (
-    <>
+    <div className="w-full min-w-0">
       {depth === 0 ? <TableControls table={table} /> : null}
-      <Table className="border-none">
+      <Table
+        className="border-none"
+        wrapperClassName="min-w-0"
+        style={{ width: tableWidth, minWidth: "100%" }}
+      >
         <TableHeader className="" suppressHydrationWarning>
           {table.getHeaderGroups().map((headerGroup, i) => (
             <JSUsageTableHeader
@@ -79,6 +85,6 @@ export function JSUsageTableWithControls({
           )}
         </TableBody>
       </Table>
-    </>
+    </div>
   );
 }

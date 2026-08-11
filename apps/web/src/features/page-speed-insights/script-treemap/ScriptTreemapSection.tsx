@@ -26,11 +26,11 @@ function ScriptTreemapTableCard({ treeData, label }: { treeData: TreeMapData; la
   const title = label ? `JS Usage Table (${label})` : "JS Usage Table";
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
+    <Card className="w-full min-w-0">
+      <CardHeader className="px-4 sm:px-6">
+        <CardTitle className="text-lg sm:text-xl">{title}</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-w-0 px-2 pb-4 sm:px-6 sm:pt-0">
         <ClientOnly>
           <JSUsageTableWithControls data={nodes} />
         </ClientOnly>
@@ -41,13 +41,17 @@ function ScriptTreemapTableCard({ treeData, label }: { treeData: TreeMapData; la
 
 export function ScriptTreemapSection() {
   const treemapItems = useScriptTreemapItems();
-
-  const reportValues = useMemo(
-    () => treemapItems.map(({ label }, index) => `${label}_${index}`),
+  const itemsWithData = useMemo(
+    () => treemapItems.filter(({ treeData }) => treeData.nodes?.length > 0),
     [treemapItems],
   );
 
-  if (!treemapItems.length) {
+  const reportValues = useMemo(
+    () => itemsWithData.map(({ label }, index) => `${label}_${index}`),
+    [itemsWithData],
+  );
+
+  if (!itemsWithData.length) {
     return null;
   }
 
@@ -56,7 +60,7 @@ export function ScriptTreemapSection() {
       <AccordionSectionTitleTrigger>Script Treemap</AccordionSectionTitleTrigger>
       <AccordionContent>
         <Accordion type="multiple" defaultValue={reportValues}>
-          {treemapItems.map(({ treeData, label }, index) => {
+          {itemsWithData.map(({ treeData, label }, index) => {
             const value = `${label}_${index}`;
             const reportLabel = label || `Report ${index + 1}`;
 
