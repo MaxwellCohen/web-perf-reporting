@@ -168,7 +168,7 @@ function TimelineCardTable({
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
-          <StockDataTable table={table} className="w-full" />
+          <StockDataTable table={table} />
         </div>
       </CardContent>
     </Card>

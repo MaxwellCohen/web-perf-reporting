@@ -621,7 +621,7 @@ function DetailTableWithSubitems({ rows, title }: { rows: DetailTableItem[]; tit
       </AccordionSectionTitleTrigger>
       <AccordionContent>
         <div className="w-full overflow-x-auto">
-          <StockDataTable table={table} className="w-full" style={{ width: "100%" }} />
+          <StockDataTable table={table} />
         </div>
       </AccordionContent>
     </AccordionItem>
@@ -822,9 +822,11 @@ const renderTableCell = (
     <TableCell
       key={cell.id}
       {...tanstackTableCellDataProps(cell, row)}
-      className={cn("min-w-0 wrap-break-word transition-all duration-300 ease-in-out")}
+      className={cn("wrap-break-word transition-all duration-300 ease-in-out")}
       style={{
         width: `${cell.column.getSize()}px`,
+        minWidth: `${cell.column.getSize()}px`,
+        maxWidth: `${cell.column.getSize()}px`,
         viewTransitionName: `table-cell-${cell.id}`,
       }}
     >
@@ -974,6 +976,7 @@ function DetailTableFull({ rows }: { rows: DetailTableItem[]; title: string }) {
     columns,
     data,
     getRowCanExpand: getRowCanExpandFn,
+    enableColumnResizing: true,
     columnResizeMode: "onChange",
     manualPagination: true,
     enableSorting: true,
@@ -992,11 +995,7 @@ function DetailTableFull({ rows }: { rows: DetailTableItem[]; title: string }) {
 
   return (
     <div className="w-full min-w-0">
-      <StockDataTable
-        table={table}
-        className="w-full max-w-full"
-        style={{ width: "100%" }}
-      >
+      <StockDataTable table={table} className="max-w-full">
         <TableBody className="[&_tr:last-child]:border-(length:--border-width)">
           {table
             .getRowModel()

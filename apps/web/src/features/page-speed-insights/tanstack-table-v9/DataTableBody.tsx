@@ -11,6 +11,8 @@ const rowModelStateSelector = (state: {
   expanded: unknown;
   pagination: unknown;
   globalFilter: unknown;
+  columnSizing: unknown;
+  columnResizing: unknown;
 }) => ({
   columnFilters: state.columnFilters,
   sorting: state.sorting,
@@ -18,6 +20,8 @@ const rowModelStateSelector = (state: {
   expanded: state.expanded,
   pagination: state.pagination,
   globalFilter: state.globalFilter,
+  columnSizing: state.columnSizing,
+  columnResizing: state.columnResizing,
 });
 
 export function DataTableBody<TData extends RowData>({
@@ -50,6 +54,7 @@ export function DataTableBody<TData extends RowData>({
                     }
 
                     const isExpanderColumn = cell.column.id === "expander";
+                    const size = cell.column.getSize();
 
                     return (
                       <TableCell
@@ -58,12 +63,10 @@ export function DataTableBody<TData extends RowData>({
                           "p-0! flex items-center justify-center overflow-hidden": isExpanderColumn,
                         })}
                         style={{
-                          width: `${cell.column.getSize()}px`,
-                          ...(isExpanderColumn && {
-                            minWidth: `${cell.column.getSize()}px`,
-                            maxWidth: `${cell.column.getSize()}px`,
-                            boxSizing: "border-box",
-                          }),
+                          width: `${size}px`,
+                          minWidth: `${size}px`,
+                          maxWidth: `${size}px`,
+                          ...(isExpanderColumn && { boxSizing: "border-box" }),
                         }}
                         {...tanstackTableCellDataProps(cell, row)}
                       >

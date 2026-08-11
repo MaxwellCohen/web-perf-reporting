@@ -18,6 +18,11 @@ import { cn } from "@/lib/utils";
 import { Details } from "@/components/ui/accordion";
 import { toSentenceCase } from "@/components/common/FormFactorPercentPieChart";
 import { getItemDevice } from "@/features/page-speed-insights/lh-categories/table/itemDevice";
+import {
+  GridColumnResizeProvider,
+  gridTemplateColumnsFromWidths,
+  useGridColumnResize,
+} from "@/features/page-speed-insights/lh-categories/table/gridColumnResize";
 
 export function RenderBasicTable({
   headings,
@@ -64,6 +69,40 @@ export function RenderBasicTable({
   );
 }
 
+function TableContainerGrid({
+  headings,
+  children,
+  className,
+  containerRef,
+  ...props
+}: {
+  headings: TableColumnHeading[];
+  containerRef?: RefObject<HTMLDivElement | null>;
+} & JSX.IntrinsicElements["div"]) {
+  const resize = useGridColumnResize();
+  const gridTemplateColumns = resize
+    ? gridTemplateColumnsFromWidths(resize.widths)
+    : headings
+        .map((h) =>
+          showBothDevices(h) ? "140px" : h.label === "Protocol" ? "140px" : "minmax(300px, 1fr)",
+        )
+        .join(" ");
+
+  return (
+    <div
+      ref={containerRef}
+      {...props}
+      className={cn("grid w-full min-w-0 overflow-x-auto", className)}
+      style={{
+        ...(props.style || {}),
+        gridTemplateColumns,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export function TableContainer({
   headings,
   children,
@@ -75,21 +114,16 @@ export function TableContainer({
   containerRef?: RefObject<HTMLDivElement | null>;
 } & JSX.IntrinsicElements["div"]) {
   return (
-    <div
-      ref={containerRef}
-      {...props}
-      className={cn("grid w-full overflow-x-auto", className)}
-      style={{
-        ...(props.style || {}),
-        gridTemplateColumns: headings
-          .map((h) =>
-            showBothDevices(h) ? "140px" : h.label === "Protocol" ? "140px" : "minmax(300px, 1fr)",
-          )
-          .join(" "),
-      }}
-    >
-      {children}
-    </div>
+    <GridColumnResizeProvider headings={headings}>
+      <TableContainerGrid
+        headings={headings}
+        className={className}
+        containerRef={containerRef}
+        {...props}
+      >
+        {children}
+      </TableContainerGrid>
+    </GridColumnResizeProvider>
   );
 }
 

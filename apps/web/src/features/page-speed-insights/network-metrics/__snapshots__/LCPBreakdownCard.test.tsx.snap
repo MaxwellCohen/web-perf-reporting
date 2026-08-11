@@ -61,7 +61,7 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
         class="relative z-0 overflow-x-auto"
       >
         <div
-          class="w-full"
+          class="w-full min-w-0"
         >
           <div
             class="mb-2 flex justify-end"
@@ -107,10 +107,11 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
             </button>
           </div>
           <div
-            class="relative w-full overflow-auto"
+            class="relative w-full overflow-auto min-w-0"
           >
             <table
-              class="w-full caption-bottom text-sm table-fixed"
+              class="w-full caption-bottom text-sm table-fixed w-max!"
+              style="width: 300px;"
             >
               <thead
                 class="[&_tr]:border-b"
@@ -119,14 +120,120 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
                   class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
                 >
                   <th
-                    class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-40"
+                    class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                    style="width: 160px; min-width: 160px; max-width: 160px;"
                   >
-                    Subpart
+                    <div
+                      class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    >
+                      <div
+                        class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      >
+                        Subpart
+                      </div>
+                      <div
+                        class="flex shrink-0 flex-row items-center gap-1"
+                      >
+                        <button
+                          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                          title="Sort ascending"
+                          type="button"
+                        >
+                          〰︎
+                        </button>
+                        <button
+                          aria-expanded="false"
+                          aria-haspopup="dialog"
+                          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                          data-state="closed"
+                          type="button"
+                        >
+                          <svg
+                            class="lucide lucide-list-filter"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M3 6h18"
+                            />
+                            <path
+                              d="M7 12h10"
+                            />
+                            <path
+                              d="M10 18h4"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div
+                      class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                    />
                   </th>
                   <th
-                    class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border min-w-35"
+                    class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
+                    style="width: 140px; min-width: 140px; max-width: 140px;"
                   >
-                    Desktop
+                    <div
+                      class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    >
+                      <div
+                        class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      >
+                        Desktop
+                      </div>
+                      <div
+                        class="flex shrink-0 flex-row items-center gap-1"
+                      >
+                        <button
+                          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                          title="Sort descending"
+                          type="button"
+                        >
+                          〰︎
+                        </button>
+                        <button
+                          aria-expanded="false"
+                          aria-haspopup="dialog"
+                          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                          data-state="closed"
+                          type="button"
+                        >
+                          <svg
+                            class="lucide lucide-list-filter"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M3 6h18"
+                            />
+                            <path
+                              d="M7 12h10"
+                            />
+                            <path
+                              d="M10 18h4"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div
+                      class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none select-none bg-muted/50 transition-opacity duration-200"
+                    />
                   </th>
                 </tr>
               </thead>
@@ -137,12 +244,34 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
                   class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
                 >
                   <td
-                    class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 font-medium"
+                    class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                    data-aggregated="false"
+                    data-can-expand="false"
+                    data-cell-id="0_subpart"
+                    data-column-id="subpart"
+                    data-depth="0"
+                    data-grouped="false"
+                    data-placeholder="false"
+                    data-row-expanded="false"
+                    style="width: 160px; min-width: 160px; max-width: 160px;"
                   >
-                    TTFB
+                    <span
+                      class="font-medium"
+                    >
+                      TTFB
+                    </span>
                   </td>
                   <td
-                    class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+                    class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                    data-aggregated="false"
+                    data-can-expand="false"
+                    data-cell-id="0_Desktop"
+                    data-column-id="Desktop"
+                    data-depth="0"
+                    data-grouped="false"
+                    data-placeholder="false"
+                    data-row-expanded="false"
+                    style="width: 140px; min-width: 140px; max-width: 140px;"
                   >
                     <span
                       class=""
@@ -156,12 +285,34 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
                   class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
                 >
                   <td
-                    class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 font-medium"
+                    class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                    data-aggregated="false"
+                    data-can-expand="false"
+                    data-cell-id="1_subpart"
+                    data-column-id="subpart"
+                    data-depth="0"
+                    data-grouped="false"
+                    data-placeholder="false"
+                    data-row-expanded="false"
+                    style="width: 160px; min-width: 160px; max-width: 160px;"
                   >
-                    Resource Load
+                    <span
+                      class="font-medium"
+                    >
+                      Resource Load
+                    </span>
                   </td>
                   <td
-                    class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5"
+                    class="p-2 align-top [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 overflow-x-auto"
+                    data-aggregated="false"
+                    data-can-expand="false"
+                    data-cell-id="1_Desktop"
+                    data-column-id="Desktop"
+                    data-depth="0"
+                    data-grouped="false"
+                    data-placeholder="false"
+                    data-row-expanded="false"
+                    style="width: 140px; min-width: 140px; max-width: 140px;"
                   >
                     <span
                       class=""

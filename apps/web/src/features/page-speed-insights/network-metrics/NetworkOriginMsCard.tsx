@@ -101,7 +101,7 @@ export function NetworkOriginMsCard({
       </CardHeader>
       <CardContent>
         <div className="w-full max-h-96 overflow-y-auto">
-          <StockDataTable table={table} className="w-full" style={{ width: "100%" }} />
+          <StockDataTable table={table} />
         </div>
       </CardContent>
     </Card>

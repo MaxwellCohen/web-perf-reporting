@@ -120,7 +120,7 @@ function ReportTable({
 
   return (
     <div className="w-full overflow-x-auto">
-      <StockDataTable table={table} className="w-full" style={{ width: "100%" }} />
+      <StockDataTable table={table} />
     </div>
   );
 }

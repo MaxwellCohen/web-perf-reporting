@@ -25,7 +25,7 @@ export function DataTableNoGrouping<T extends RowData>({
       <AccordionSectionTitleTrigger>{toTitleCase(title)}</AccordionSectionTitleTrigger>
       <AccordionContent>
         <div className="w-full overflow-x-auto">
-          <StockDataTable table={table} className="w-full" style={{ width: "100%" }} />
+          <StockDataTable table={table} />
         </div>
       </AccordionContent>
     </AccordionItem>

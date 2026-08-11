@@ -96,12 +96,13 @@ export function analyzeAudits(
       if (recommendation) {
         recommendations.push(recommendation);
       }
-    }
-
-    if (
+    } else if (
       scoreDisplayMode === "informative" &&
       hasActionableDetails(allTableDataItems, allItems, tableHeadings)
     ) {
+      // Informative audits with a passing score can still surface actionable details.
+      // Use else-if so failed informative audits (score 0/null) are not pushed twice
+      // with the same `${auditId}-failed` id.
       const recommendation = processFailedAudit(
         auditId,
         baseAudit,

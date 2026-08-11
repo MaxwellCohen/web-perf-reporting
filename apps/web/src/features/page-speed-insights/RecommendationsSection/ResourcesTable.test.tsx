@@ -60,11 +60,14 @@ describe("ResourcesTable", () => {
     expect(container.querySelector('[data-testid="table-body"]')).toBeTruthy();
   });
 
-  it("renders link for valid url", () => {
-    const items = [{ url: "https://example.com/script.js" }];
+  it("renders compact link for valid url", () => {
+    const items = [{ url: "https://example.com/path/script.js" }];
     const { container } = render(<ResourcesTable items={items} />);
-    const link = container.querySelector('a[href="https://example.com/script.js"]');
+    const link = container.querySelector('a[href="https://example.com/path/script.js"]');
     expect(link).toBeTruthy();
+    expect(link?.getAttribute("title")).toBe("https://example.com/path/script.js");
+    expect(container.textContent).toContain("script.js");
+    expect(container.textContent).toContain("example.com/path/");
   });
 
   it("renders Unattributable for url without host", () => {

@@ -9,6 +9,7 @@ import {
   useSimpleTable,
   type FlatColumnDef,
 } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
+import { ResourceUrlCell } from "@/features/page-speed-insights/shared/ResourceUrlCell";
 
 interface ResourceItem {
   url?: string;
@@ -134,14 +135,9 @@ export function ResourcesTable({ items }: ResourcesTableProps) {
           const url = row.original.url;
           if (url && url !== "Unattributable") {
             return (
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:underline break-all"
-              >
-                {url}
-              </a>
+              <div className="min-w-0 overflow-hidden">
+                <ResourceUrlCell url={url} />
+              </div>
             );
           }
           return <span className="text-muted-foreground">Unattributable</span>;
@@ -159,7 +155,7 @@ export function ResourcesTable({ items }: ResourcesTableProps) {
 
   return (
     <div className="w-full overflow-x-auto">
-      <StockDataTable table={table} className="w-full" />
+      <StockDataTable table={table} />
     </div>
   );
 }

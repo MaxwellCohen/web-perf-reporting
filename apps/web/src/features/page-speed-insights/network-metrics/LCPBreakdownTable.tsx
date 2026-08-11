@@ -1,15 +1,13 @@
 "use client";
 
+import { useMemo } from "react";
 import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
+import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { TableWithCopyToolbar } from "@/features/page-speed-insights/tanstack-table-v9/TableWithCopyToolbar";
+  useSimpleTable,
+  type FlatColumnDef,
+} from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
+import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import type { LCPBreakdownTableRow } from "./lcpBreakdownSelectors";
 
 type Props = {
@@ -17,43 +15,46 @@ type Props = {
   reportLabels: string[];
 };
 
-export function LCPBreakdownTable({ tableRows, reportLabels }: Props) {
-  return (
-    <TableWithCopyToolbar>
-      {({ tableRef }) => (
-    <Table ref={tableRef}>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="min-w-40">Subpart</TableHead>
-          {reportLabels.map((label) => (
-            <TableHead key={label} className="min-w-35">
-              {label}
-            </TableHead>
-          ))}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {tableRows.map((row) => (
-          <TableRow key={row.subpart}>
-            <TableCell className="font-medium">{row.label}</TableCell>
-            {reportLabels.map((label) => {
-              const value = row.valuesByReportLabel[label];
-              return (
-                <TableCell key={label}>
-                  {value !== undefined ? (
-                    <RenderMSValue value={value} />
-                  ) : (
-                    <span className="text-muted-foreground">N/A</span>
-                  )}
-                </TableCell>
-              );
-            })}
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-      )}
-    </TableWithCopyToolbar>
-  );
-}
+const columnHelper = createStockColumnHelper<LCPBreakdownTableRow>();
 
+export function LCPBreakdownTable({ tableRows, reportLabels }: Props) {
+  const columns = useMemo(
+    () =>
+      [
+        columnHelper.accessor("label", {
+          id: "subpart",
+          header: "Subpart",
+          enableSorting: true,
+          enableResizing: true,
+          size: 160,
+          minSize: 100,
+          filterFn: "includesString",
+          cell: (info) => <span className="font-medium">{info.getValue()}</span>,
+        }),
+        ...reportLabels.map((label) =>
+          columnHelper.accessor((row) => row.valuesByReportLabel[label], {
+            id: label,
+            header: label,
+            enableSorting: true,
+            enableResizing: true,
+            size: 140,
+            minSize: 96,
+            filterFn: "inNumberRange",
+            cell: (info) => {
+              const value = info.getValue();
+              return value !== undefined ? (
+                <RenderMSValue value={value} />
+              ) : (
+                <span className="text-muted-foreground">N/A</span>
+              );
+            },
+          }),
+        ),
+      ] as FlatColumnDef<LCPBreakdownTableRow>[],
+    [reportLabels],
+  );
+
+  const table = useSimpleTable({ data: tableRows, columns });
+
+  return <StockDataTable table={table} />;
+}

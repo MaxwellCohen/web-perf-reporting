@@ -69,6 +69,28 @@ describe("analyzeAudits", () => {
     const result = analyzeAudits(items as any);
     expect(result.filter((r) => r.id.includes("main-thread-tasks"))).toHaveLength(0);
   });
+
+  it("emits a single recommendation for failed informative audits", () => {
+    const items = [
+      createItem({
+        "cls-culprits-insight": {
+          id: "cls-culprits-insight",
+          title: "Layout shift culprits",
+          score: 0,
+          scoreDisplayMode: "informative",
+          description: "Layout shifts can be caused by…",
+          details: {
+            type: "table",
+            headings: [{ key: "node", label: "Element" }],
+            items: [{ node: { snippet: "<div>" } }],
+          },
+        },
+      }),
+    ];
+    const result = analyzeAudits(items as any);
+    const matching = result.filter((r) => r.id === "cls-culprits-insight-failed");
+    expect(matching).toHaveLength(1);
+  });
 });
 
 describe("hasDetails", () => {

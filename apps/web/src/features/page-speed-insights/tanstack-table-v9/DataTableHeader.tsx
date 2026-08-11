@@ -19,23 +19,35 @@ import { renderBoolean } from "@/features/page-speed-insights/lh-categories/rend
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 
+const columnSizeSelector = (state: {
+  columnSizing: unknown;
+  columnResizing: unknown;
+}) => ({
+  columnSizing: state.columnSizing,
+  columnResizing: state.columnResizing,
+});
+
 export function DataTableHeader<TData extends RowData>({
   table,
 }: {
   table: ReactTable<any, TData, any>;
 }) {
   return (
-    <TableHeader>
-      {table.getHeaderGroups().map((headerGroup) => {
-        return (
-          <TableRow key={headerGroup.id}>
-            {headerGroup.headers.map((header) => (
-              <DataTableHead key={header.id} header={header} />
-            ))}
-          </TableRow>
-        );
-      })}
-    </TableHeader>
+    <table.Subscribe selector={columnSizeSelector}>
+      {() => (
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => {
+            return (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <DataTableHead key={header.id} header={header} />
+                ))}
+              </TableRow>
+            );
+          })}
+        </TableHeader>
+      )}
+    </table.Subscribe>
   );
 }
 
@@ -45,18 +57,18 @@ function DataTableHead<TData extends RowData>({
   header: Header<any, TData, unknown>;
 }) {
   const isExpanderColumn = header.column.id === "expander";
+  const size = header.getSize();
+  const columnSizeStyle = {
+    width: `${size}px`,
+    minWidth: `${size}px`,
+    maxWidth: `${size}px`,
+  };
 
   return (
     <TableHead
       key={header.id}
-      className="relative min-w-0 overflow-hidden"
-      style={{
-        width: `${header.getSize()}px`,
-        ...(isExpanderColumn && {
-          minWidth: `${header.getSize()}px`,
-          maxWidth: `${header.getSize()}px`,
-        }),
-      }}
+      className="relative overflow-hidden"
+      style={columnSizeStyle}
     >
       {isExpanderColumn ? (
         <div className="flex items-center justify-center py-1">

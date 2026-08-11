@@ -71,7 +71,7 @@ function ResourceTypeTable({ label, data }: { label: string; data: ResourceTypeT
     <div>
       <h5 className="font-semibold text-sm mb-2 text-muted-foreground">{label}</h5>
       <div className="w-full overflow-x-auto">
-        <StockDataTable table={table} className="w-full" style={{ width: "100%" }} />
+        <StockDataTable table={table} />
       </div>
     </div>
   );

@@ -20,6 +20,19 @@ type StockDataTableProps<TData extends RowData> = {
   "aria-label"?: string;
 };
 
+const columnSizeSelector = (state: {
+  columnSizing: unknown;
+  columnResizing: unknown;
+}) => ({
+  columnSizing: state.columnSizing,
+  columnResizing: state.columnResizing,
+});
+
+/**
+ * Shared data table: header + body with per-column resize.
+ * Table width is exactly the sum of column sizes so `table-fixed` does not
+ * redistribute leftover space across every column when one is resized.
+ */
 export function StockDataTable<TData extends RowData>({
   table,
   className,
@@ -31,17 +44,29 @@ export function StockDataTable<TData extends RowData>({
   "aria-label": ariaLabel,
 }: StockDataTableProps<TData>) {
   return (
-    <div className={cn("w-full", wrapperClassName)}>
+    <div className={cn("w-full min-w-0", wrapperClassName)}>
       {showCopy && (
         <div className="mb-2 flex justify-end">
           <CopyTableButton table={table} />
         </div>
       )}
-      <Table className={className} style={style} aria-label={ariaLabel}>
-        {caption}
-        <DataTableHeader table={table} />
-        {children ?? <DataTableBody table={table} />}
-      </Table>
+      <table.Subscribe selector={columnSizeSelector}>
+        {() => (
+          <Table
+            className={cn("w-max!", className)}
+            style={{
+              ...style,
+              width: table.getTotalSize(),
+            }}
+            aria-label={ariaLabel}
+            wrapperClassName="min-w-0"
+          >
+            {caption}
+            <DataTableHeader table={table} />
+            {children ?? <DataTableBody table={table} />}
+          </Table>
+        )}
+      </table.Subscribe>
     </div>
   );
 }

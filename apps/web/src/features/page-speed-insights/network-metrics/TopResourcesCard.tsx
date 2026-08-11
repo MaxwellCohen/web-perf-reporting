@@ -75,7 +75,7 @@ function TopResourcesTable({ label, data }: { label: string; data: TopResourceTa
     <div>
       <h5 className="mb-2 text-sm font-semibold text-muted-foreground">{label}</h5>
       <div className="w-full overflow-x-auto">
-        <StockDataTable table={table} className="w-full" />
+        <StockDataTable table={table} />
       </div>
       <PaginatedTableControls table={table} showManualControls className="mt-4 justify-center" />
     </div>

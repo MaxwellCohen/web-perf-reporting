@@ -32,6 +32,7 @@ import {
 import { tanstackTableCellDataProps } from "@/features/page-speed-insights/shared/tanstackTableCellDataProps";
 import { CopyTableButton } from "@/features/page-speed-insights/tanstack-table-v9/CopyTableButton";
 import { TableWithCopyToolbar } from "@/features/page-speed-insights/tanstack-table-v9/TableWithCopyToolbar";
+import { ColumnResizer } from "@/features/page-speed-insights/tanstack-table-v9/columnResizer";
 
 type DebugDataTableItem = {
   key: string;
@@ -53,6 +54,11 @@ function DebugDataTableCell({
   return (
     <TableCell
       {...(rowSpan != null ? { rowSpan } : {})}
+      style={{
+        width: `${cell.column.getSize()}px`,
+        minWidth: `${cell.column.getSize()}px`,
+        maxWidth: `${cell.column.getSize()}px`,
+      }}
       {...tanstackTableCellDataProps(cell, row)}
     >
       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -107,6 +113,9 @@ function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
       columnHelper.accessor("key", {
         id: "key",
         enableGrouping: true,
+        enableResizing: true,
+        size: 220,
+        minSize: 120,
         header: "Item",
         cell: (props) => {
           const val = props.getValue();
@@ -116,6 +125,9 @@ function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
       }),
       columnHelper.accessor("value", {
         id: "value",
+        enableResizing: true,
+        size: 180,
+        minSize: 100,
         header: "Value",
         aggregationFn: "unique", // unique values for each column
         cell: (props) => {
@@ -127,6 +139,9 @@ function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
       columnHelper.accessor("label", {
         id: "label",
         enableGrouping: true,
+        enableResizing: true,
+        size: 140,
+        minSize: 80,
       }),
     ],
     [],
@@ -137,6 +152,8 @@ function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
     columns: columns as StockColumnDef<DebugDataTableItem>[],
     manualPagination: true,
     enableColumnPinning: true,
+    enableColumnResizing: true,
+    columnResizeMode: "onChange",
     initialState: {
       grouping: ["key"],
       columnPinning: {
@@ -146,20 +163,32 @@ function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
     },
   });
 
+  const tableWidth = table.getTotalSize();
+
   return (
     <>
       <div className="mb-2 flex justify-end">
         <CopyTableButton table={table} />
       </div>
-      <Table>
+      <Table style={{ width: tableWidth }} className="w-max!" wrapperClassName="min-w-0">
       <TableHeader>
         {table.getHeaderGroups().map((headerGroup) => {
           return (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
+                const size = header.getSize();
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead
+                    key={header.id}
+                    className="relative overflow-hidden"
+                    style={{
+                      width: `${size}px`,
+                      minWidth: `${size}px`,
+                      maxWidth: `${size}px`,
+                    }}
+                  >
                     {flexRender(header.column.columnDef.header, header.getContext())}
+                    <ColumnResizer header={header} />
                   </TableHead>
                 );
               })}

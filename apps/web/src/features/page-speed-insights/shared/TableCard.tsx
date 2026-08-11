@@ -26,7 +26,7 @@ export function TableCard<TData extends RowData = RowData>({
   return (
     <TableCardWrapper title={title} className={className}>
       <div className="w-full overflow-x-auto">
-        <StockDataTable table={table} className="w-full" style={{ width: "100%" }} />
+        <StockDataTable table={table} />
       </div>
       {showPagination && (
         <PaginatedTableControls
