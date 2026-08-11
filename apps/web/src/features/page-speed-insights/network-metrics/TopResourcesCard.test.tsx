@@ -98,6 +98,36 @@ describe("TopResourcesCard", () => {
     ]);
     const { container } = render(<TopResourcesCard />);
     expect(container.textContent).toContain("Resources by Transfer Size");
+    expect(container.textContent).toContain("Desktop");
     expect(container.querySelector('[data-testid="data-table-header"]')).toBeTruthy();
+  });
+
+  it("renders a separate table per report", () => {
+    mockUseNetworkRequestStats.mockReturnValue([
+      statsRow({
+        label: "Mobile",
+        topResources: [
+          {
+            url: "https://example.com/mobile.js",
+            resourceType: "Script",
+            transferSize: 500,
+          } as any,
+        ],
+      }),
+      statsRow({
+        label: "Desktop",
+        topResources: [
+          {
+            url: "https://example.com/desktop.js",
+            resourceType: "Script",
+            transferSize: 1000,
+          } as any,
+        ],
+      }),
+    ]);
+    const { container } = render(<TopResourcesCard />);
+    expect(container.textContent).toContain("Mobile");
+    expect(container.textContent).toContain("Desktop");
+    expect(container.querySelectorAll('[data-testid="data-table-header"]')).toHaveLength(2);
   });
 });

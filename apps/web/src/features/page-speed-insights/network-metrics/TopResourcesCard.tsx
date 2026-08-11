@@ -7,7 +7,6 @@ import { useMemo } from "react";
 import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 import { PaginatedTableControls } from "@/features/page-speed-insights/tanstack-table-v9/PaginatedTableControls";
 import { createStringAggregatedCell } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
-import { sortByMaxValueComposite } from "@/features/page-speed-insights/shared/dataSortingHelpers";
 import {
   useStandardTable,
   type StandardColumnDef,
@@ -22,7 +21,6 @@ import { useTableColumns } from "@/features/page-speed-insights/shared/useTableC
 import { useNetworkRequestStats } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
 
 type TopResourceTableRow = {
-  label: string;
   url: string;
   resourceType: string;
   transferSize: number | undefined;
@@ -32,12 +30,11 @@ type TopResourceTableRow = {
 
 const URL_PROTOCOL_REGEX = /^https?:\/\//;
 
-function resourceToTableRow(label: string, resource: TableItem): TopResourceTableRow {
+function resourceToTableRow(resource: TableItem): TopResourceTableRow {
   const url = getUrlString(resource.url).replace(URL_PROTOCOL_REGEX, "") || "Unknown";
   const resourceType =
     typeof resource.resourceType === "string" ? resource.resourceType : "Unknown";
   return {
-    label,
     url,
     resourceType,
     transferSize: getNumber(resource.transferSize),
@@ -65,35 +62,41 @@ const cols: StandardColumnDef<TopResourceTableRow>[] = [
   createMSColumn(columnHelper, "requestTime", "Request Time"),
 ];
 
+function TopResourcesTable({ label, data }: { label: string; data: TopResourceTableRow[] }) {
+  const columns = useTableColumns<TopResourceTableRow>(cols, columnHelper, false);
+  const table = useStandardTable({
+    data,
+    columns,
+    enablePagination: true,
+    defaultPageSize: 10,
+  });
+
+  return (
+    <div>
+      <h5 className="mb-2 text-sm font-semibold text-muted-foreground">{label}</h5>
+      <div className="w-full overflow-x-auto">
+        <StockDataTable table={table} className="w-full" />
+      </div>
+      <PaginatedTableControls table={table} showManualControls className="mt-4 justify-center" />
+    </div>
+  );
+}
+
 export function TopResourcesCard() {
   const requestStats = useNetworkRequestStats();
   const validStats = useMemo(
     () => requestStats.filter((s) => s.topResources && s.topResources.length > 0),
     [requestStats],
   );
-  const showReportColumn = validStats.length > 1;
 
-  const data = useMemo<TopResourceTableRow[]>(() => {
-    const allRows = validStats.flatMap(({ label, topResources }) =>
-      topResources.map((resource: TableItem) => resourceToTableRow(label, resource)),
-    );
-    return sortByMaxValueComposite(
-      allRows,
-      (row) => `${row.url}|${row.resourceType}`,
-      (row) => row.transferSize || 0,
-      validStats.length,
-    );
-  }, [validStats]);
-
-  const columns = useTableColumns<TopResourceTableRow>(cols, columnHelper, showReportColumn);
-
-  const table = useStandardTable({
-    data,
-    columns,
-    grouping: ["url", "resourceType"],
-    enablePagination: true,
-    defaultPageSize: 10,
-  });
+  const dataByReport = useMemo(
+    () =>
+      validStats.map(({ label, topResources }) => ({
+        label,
+        data: topResources.map((resource: TableItem) => resourceToTableRow(resource)),
+      })),
+    [validStats],
+  );
 
   if (!validStats.length) {
     return null;
@@ -105,10 +108,11 @@ export function TopResourcesCard() {
         <CardTitle>Resources by Transfer Size</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="w-full overflow-x-auto">
-          <StockDataTable table={table} className="w-full" />
+        <div className="space-y-6">
+          {dataByReport.map(({ label, data }) => (
+            <TopResourcesTable key={label} label={label} data={data} />
+          ))}
         </div>
-        <PaginatedTableControls table={table} showManualControls className="mt-4 justify-center" />
       </CardContent>
     </Card>
   );
