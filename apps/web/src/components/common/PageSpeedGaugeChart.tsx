@@ -5,46 +5,18 @@ import { Label, Pie, PieChart } from "recharts";
 import { ChartContainer } from "@/components/ui/chart";
 import { chartConfig } from "@/components/common/ChartSettings";
 import { UserPageLoadMetricV5 } from "@/lib/schema";
+import { cn } from "@/lib/utils";
 
 const RADIAN = Math.PI / 180;
 
-const segmentLabelTextStyle = {
-  paintOrder: "stroke fill" as const,
-  textShadow: "0 0 3px rgba(0,0,0,0.8), 0 0 1px rgba(0,0,0,0.8)",
-};
+function formatSegmentBoundary(value: number, format: "integer" | "decimal") {
+  if (value > 1) return value.toFixed(0);
+  if (format === "integer") return String(value);
+  return value.toFixed(2);
+}
 
-function GaugeSegmentBoundaryLabel({
-  xPercent,
-  value,
-  format,
-}: {
-  xPercent: number;
-  value: number;
-  format: "integer" | "decimal";
-}) {
-  const text =
-    value > 1
-      ? value.toFixed(0)
-      : format === "integer"
-        ? String(value)
-        : value.toFixed(2);
-  return (
-    <text
-      x={xPercent}
-      y={12}
-      z={1000}
-      fontSize="8"
-      fontWeight="700"
-      textAnchor="middle"
-      fill="#ffffff"
-      stroke="#000000"
-      strokeWidth="0.5"
-      strokeLinejoin="round"
-      style={segmentLabelTextStyle}
-    >
-      {text}
-    </text>
-  );
+function clampPercent(value: number) {
+  return Math.min(100, Math.max(0, value));
 }
 
 type ChartData = [
@@ -209,86 +181,101 @@ export function HorizontalGaugeChart({
   ];
 
   return (
-    <div className="flex h-full w-full flex-col justify-center">
-      <div className="mb-2 flex w-full items-center gap-2 whitespace-nowrap">
-        <div className="text-sm font-medium">{metric}</div>
-        {/* <div className="whitespace-nowrap text-sm font-bold">
-          {value.toLocaleString()} 
-        </div> */}
-      </div>
+    <div className="flex h-full w-full flex-col justify-center gap-1.5">
+      {metric ? (
+        <div className="truncate text-xs font-medium tracking-wide text-muted-foreground">
+          {metric}
+        </div>
+      ) : null}
       <LineChart chartData={chartData} value={value} />
     </div>
   );
 }
 
 export function LineChart({ chartData, value }: { chartData: ChartData; value: number }) {
-  const maxValue = Math.max(...chartData.map((dist) => dist.value));
+  const maxValue = Math.max(...chartData.map((dist) => dist.value), value, Number.EPSILON);
+  const toPct = (v: number) => clampPercent((v / maxValue) * 100);
+
+  const boundary1 = toPct(chartData[0].value);
+  const boundary2 = toPct(chartData[1].value);
+  const markerPct = toPct(value);
+
+  const segments = [
+    { width: boundary1, fill: chartData[0].fill, name: chartData[0].name },
+    {
+      width: Math.max(0, boundary2 - boundary1),
+      fill: chartData[1].fill,
+      name: chartData[1].name,
+    },
+    {
+      width: Math.max(0, 100 - boundary2),
+      fill: chartData[2].fill,
+      name: chartData[2].name,
+    },
+  ] as const;
+
+  const boundaries = [
+    { pct: boundary1, label: formatSegmentBoundary(chartData[0].value, "integer") },
+    { pct: boundary2, label: formatSegmentBoundary(chartData[1].value, "decimal") },
+  ] as const;
+
   return (
-    <svg
-      width="100%"
-      height="16"
-      viewBox="0 0 100 16"
-      preserveAspectRatio="none"
-      className="rounded-full"
-    >
-      <rect x="0" y="0" width="100" height="16" fill="hsl(var(--muted))" rx="8" ry="8" />
+    <div className="relative w-full select-none">
+      <div className="relative mb-1 h-3.5">
+        {boundaries.map(({ pct, label }) => (
+          <span
+            key={`${label}-${pct}`}
+            className={cn(
+              "absolute top-0 -translate-x-1/2 font-mono text-[10px] leading-none tabular-nums text-muted-foreground",
+              pct < 4 && "translate-x-0",
+              pct > 96 && "-translate-x-full",
+            )}
+            style={{ left: `${pct}%` }}
+          >
+            {label}
+          </span>
+        ))}
+      </div>
 
-      {/* Good segment */}
-      <rect
-        x="0"
-        y="0"
-        width={(chartData[0].value / maxValue) * 100}
-        height="16"
-        fill={chartData[0].fill}
-        rx="0"
-        ry="0"
-      />
+      <div className="relative">
+        <div
+          className="flex h-2.5 w-full overflow-hidden rounded-full bg-muted shadow-[inset_0_0_0_1px_hsl(var(--border)/0.35)]"
+          role="img"
+          aria-label={`Value ${value} on a three-band scale`}
+        >
+          {segments.map((segment) => (
+            <div
+              key={segment.name}
+              className="h-full min-w-0"
+              style={{
+                width: `${segment.width}%`,
+                backgroundColor: segment.fill,
+              }}
+            />
+          ))}
+        </div>
 
-      {/* Needs Improvement segment */}
-      <rect
-        x={(chartData[0].value / maxValue) * 100}
-        y="0"
-        width={((chartData[1].value - chartData[0].value) / maxValue) * 100}
-        height="16"
-        fill={chartData[1].fill}
-      />
+        {boundaries.map(({ pct }) => (
+          <div
+            key={`tick-${pct}`}
+            aria-hidden
+            className="pointer-events-none absolute top-0 h-2.5 w-px -translate-x-1/2 bg-background/55"
+            style={{ left: `${pct}%` }}
+          />
+        ))}
 
-      {/* Poor segment */}
-      <rect
-        x={(chartData[1].value / maxValue) * 100}
-        y="0"
-        width={((maxValue - chartData[1].value) / maxValue) * 100}
-        height="16"
-        fill={chartData[2].fill}
-      />
-      {/* Indicator line for current value */}
-
-      <rect
-        x={value === maxValue ? (value / maxValue) * 96 : (value / maxValue) * 100 - 1}
-        y="0"
-        width={value === maxValue || value === 0 ? 4 : 2}
-        height="16"
-        className="rounded-l-full"
-        fill="hsl(var(--destructive-foreground))"
-      />
-      {/* <circle
-        cx={(value / maxValue) * 100 }
-        cy="7"
-        r="2"
-        fill="hsl(var(--muted-foreground))"
-      /> */}
-
-      <GaugeSegmentBoundaryLabel
-        xPercent={(chartData[0].value / maxValue) * 100}
-        value={chartData[0].value}
-        format="integer"
-      />
-      <GaugeSegmentBoundaryLabel
-        xPercent={(chartData[1].value / maxValue) * 100}
-        value={chartData[1].value}
-        format="decimal"
-      />
-    </svg>
+        <div
+          data-testid="gauge-value-marker"
+          className="pointer-events-none absolute top-1/2 z-10 -translate-x-1/2 -translate-y-1/2"
+          style={{ left: `${markerPct}%` }}
+        >
+          <div className="relative flex h-4 w-3 items-center justify-center">
+            <span className="absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 rounded-full bg-foreground shadow-[0_0_0_1px_hsl(var(--background)/0.85)]" />
+            <span className="absolute top-0 left-1/2 size-1.5 -translate-x-1/2 -translate-y-px rounded-full bg-foreground ring-2 ring-background" />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -71,7 +71,8 @@ describe("common charts", () => {
     );
 
     expect(container.firstChild).toMatchSnapshot();
-    expect(document.querySelectorAll("path, circle, text").length).toBeGreaterThan(0);
+    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
+    expect(container.textContent).toContain("1200 - FAST");
   });
 
   it("renders nothing for invalid gauge data and draws the fallback line chart", () => {
@@ -90,7 +91,7 @@ describe("common charts", () => {
       </div>,
     );
 
-    expect(container.querySelectorAll("svg")).toHaveLength(1);
+    expect(container.querySelectorAll('[data-testid="gauge-value-marker"]')).toHaveLength(1);
     expect(container.textContent).not.toContain("LCP");
     expect(container.textContent).not.toContain("CLS");
   });

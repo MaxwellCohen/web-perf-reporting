@@ -109,13 +109,13 @@ describe("HorizontalGaugeChart", () => {
     const { container } = render(
       <HorizontalGaugeChart metric="LCP" data={validMetricData as any} />,
     );
-    expect(container.querySelector("svg")).toBeTruthy();
+    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
     expect(container.textContent).toContain("LCP");
   });
 
   it("renders without metric when metric is undefined", () => {
     const { container } = render(<HorizontalGaugeChart data={validMetricData as any} />);
-    expect(container.querySelector("svg")).toBeTruthy();
+    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
   });
 
   it("handles distributions with optional max/min", () => {
@@ -131,7 +131,7 @@ describe("HorizontalGaugeChart", () => {
     const { container } = render(
       <HorizontalGaugeChart metric="Test" data={dataWithOptional as any} />,
     );
-    expect(container.querySelector("svg")).toBeTruthy();
+    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
   });
 });
 
@@ -142,20 +142,20 @@ describe("LineChart", () => {
     { name: "Poor", value: 300, fill: "#f00" },
   ];
 
-  it("renders SVG with segments", () => {
+  it("renders segments and a value marker", () => {
     const { container } = render(<LineChart chartData={baseChartData as any} value={150} />);
-    expect(container.querySelector("svg")).toBeTruthy();
-    expect(container.querySelectorAll("rect").length).toBeGreaterThanOrEqual(4);
+    expect(container.querySelector('[role="img"]')).toBeTruthy();
+    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
   });
 
   it("renders when value equals maxValue", () => {
     const { container } = render(<LineChart chartData={baseChartData as any} value={600} />);
-    expect(container.querySelector("svg")).toBeTruthy();
+    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
   });
 
   it("renders when value is 0", () => {
     const { container } = render(<LineChart chartData={baseChartData as any} value={0} />);
-    expect(container.querySelector("svg")).toBeTruthy();
+    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
   });
 
   it("formats small values correctly when value <= 1", () => {
@@ -165,7 +165,7 @@ describe("LineChart", () => {
       { name: "Poor", value: 0.2, fill: "#f00" },
     ];
     const { container } = render(<LineChart chartData={smallData as any} value={0.5} />);
-    expect(container.querySelector("svg")).toBeTruthy();
+    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
     expect(container.textContent).toContain("0.5");
   });
 
@@ -175,52 +175,43 @@ describe("LineChart", () => {
     expect(container.textContent).toContain("200");
   });
 
-  it("renders indicator with width 4 when value equals maxValue", () => {
+  it("positions marker at 100% when value equals maxValue", () => {
     const { container } = render(<LineChart chartData={baseChartData as any} value={300} />);
-    const rects = container.querySelectorAll("rect");
-    const indicatorRect = Array.from(rects).find((r) =>
-      r.getAttribute("class")?.includes("rounded-l-full"),
-    );
-    expect(indicatorRect?.getAttribute("width")).toBe("4");
+    const marker = container.querySelector('[data-testid="gauge-value-marker"]') as HTMLElement;
+    expect(marker.style.left).toBe("100%");
   });
 
-  it("renders indicator with width 4 when value is 0", () => {
+  it("positions marker at 0% when value is 0", () => {
     const { container } = render(<LineChart chartData={baseChartData as any} value={0} />);
-    const rects = container.querySelectorAll("rect");
-    const indicatorRect = Array.from(rects).find((r) =>
-      r.getAttribute("class")?.includes("rounded-l-full"),
-    );
-    expect(indicatorRect?.getAttribute("width")).toBe("4");
+    const marker = container.querySelector('[data-testid="gauge-value-marker"]') as HTMLElement;
+    expect(marker.style.left).toBe("0%");
   });
 
-  it("renders indicator with width 2 when value is between 0 and max", () => {
+  it("positions marker between ends for mid values", () => {
     const { container } = render(<LineChart chartData={baseChartData as any} value={150} />);
-    const rects = container.querySelectorAll("rect");
-    const indicatorRect = Array.from(rects).find((r) =>
-      r.getAttribute("class")?.includes("rounded-l-full"),
-    );
-    expect(indicatorRect?.getAttribute("width")).toBe("2");
+    const marker = container.querySelector('[data-testid="gauge-value-marker"]') as HTMLElement;
+    expect(marker.style.left).toBe("50%");
   });
 });
 
 describe("HorizontalScoreChart", () => {
   it("renders with score", () => {
     const { container } = render(<HorizontalScoreChart score={0.75} />);
-    expect(container.querySelector("svg")).toBeTruthy();
+    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
   });
 
   it("renders with className prop", () => {
     const { container } = render(<HorizontalScoreChart score={0.5} className="custom-class" />);
-    expect(container.querySelector("svg")).toBeTruthy();
+    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
   });
 
   it("renders when score is 0", () => {
     const { container } = render(<HorizontalScoreChart score={0} />);
-    expect(container.querySelector("svg")).toBeTruthy();
+    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
   });
 
   it("renders when score is 1", () => {
     const { container } = render(<HorizontalScoreChart score={1} />);
-    expect(container.querySelector("svg")).toBeTruthy();
+    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
   });
 });
