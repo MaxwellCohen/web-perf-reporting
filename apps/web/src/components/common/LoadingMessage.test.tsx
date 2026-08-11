@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LoadingMessage } from "@/components/common/LoadingMessage";
 
@@ -11,37 +11,27 @@ describe("LoadingMessage", () => {
     vi.useRealTimers();
   });
 
-  it("stays hidden for the first two seconds and then appears", () => {
+  it("renders immediately with the first analysis stage", () => {
     const { container } = render(<LoadingMessage />);
 
-    expect(container.firstChild).toMatchSnapshot();
-
-    act(() => {
-      vi.advanceTimersByTime(1999);
-    });
-    expect(container.firstChild).toMatchSnapshot();
-
-    act(() => {
-      vi.advanceTimersByTime(1);
-    });
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it("increments elapsed time and rotates loading messages over time", () => {
+  it("increments elapsed time and advances analysis stages over time", () => {
     const { container } = render(<LoadingMessage />);
 
     act(() => {
-      vi.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(1000);
     });
     expect(container.firstChild).toMatchSnapshot();
 
     act(() => {
-      vi.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(5000);
     });
     expect(container.firstChild).toMatchSnapshot();
 
     act(() => {
-      vi.advanceTimersByTime(4000);
+      vi.advanceTimersByTime(5000);
     });
     expect(container.firstChild).toMatchSnapshot();
   });

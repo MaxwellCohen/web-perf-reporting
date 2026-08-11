@@ -1,145 +1,271 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`LoadingMessage > increments elapsed time and rotates loading messages over time 1`] = `
+exports[`LoadingMessage > increments elapsed time and advances analysis stages over time 1`] = `
 <div
-  class="flex min-h-[60vh] flex-col items-center justify-center p-4"
+  aria-busy="true"
+  aria-label="Generating PageSpeed Insights report"
+  aria-live="polite"
+  class="relative flex min-h-[70vh] flex-col items-center justify-center overflow-hidden px-4 py-10"
+  role="status"
 >
   <div
-    class="rounded-xl border bg-card text-card-foreground w-full max-w-md shadow-lg"
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-x-0 top-1/3 h-px bg-linear-to-r from-transparent via-border to-transparent"
+  />
+  <div
+    class="relative z-10 flex w-full max-w-lg flex-col items-center gap-8"
   >
     <div
-      class="flex flex-col space-y-1.5 p-6 pb-2 text-center"
+      class="relative grid place-items-center"
     >
-      <div
-        class="mb-4 flex justify-center"
+      <svg
+        aria-hidden="true"
+        class="size-36 -rotate-90 motion-safe:animate-spin [animation-duration:1.4s]"
+        viewBox="0 0 120 120"
       >
-        <svg
-          class="lucide lucide-loader-circle text-primary h-12 w-12 animate-spin"
+        <circle
+          cx="60"
+          cy="60"
           fill="none"
-          height="24"
-          stroke="currentColor"
+          r="54"
+          stroke="hsl(var(--muted))"
+          stroke-width="6"
+        />
+        <circle
+          cx="60"
+          cy="60"
+          fill="none"
+          r="54"
+          stroke="hsl(var(--foreground))"
+          stroke-dasharray="339.29200658769764"
+          stroke-dashoffset="244.2902447431423"
           stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-          width="24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M21 12a9 9 0 1 1-6.219-8.56"
-          />
-        </svg>
-      </div>
+          stroke-width="6"
+        />
+      </svg>
       <div
-        class="font-semibold tracking-tight text-xl"
+        class="absolute inset-0 flex flex-col items-center justify-center"
       >
-        Generating Report
+        <span
+          class="font-mono text-3xl font-semibold tracking-tight tabular-nums"
+        >
+          0:01
+        </span>
+        <span
+          class="text-muted-foreground mt-0.5 text-[11px] tracking-[0.18em] uppercase"
+        >
+          elapsed
+        </span>
       </div>
     </div>
     <div
-      class="p-6 pt-0 space-y-6 text-center"
+      class="space-y-2 text-center"
     >
-      <div
-        class="flex flex-col items-center justify-center space-y-2"
+      <h2
+        class="text-2xl font-extrabold tracking-tight"
       >
-        <div
-          class="text-primary flex items-center font-mono text-3xl font-bold"
-        >
-          <svg
-            class="lucide lucide-clock text-muted-foreground mr-3 h-6 w-6"
-            fill="none"
-            height="24"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle
-              cx="12"
-              cy="12"
-              r="10"
-            />
-            <polyline
-              points="12 6 12 12 16 14"
-            />
-          </svg>
-          0:02
-        </div>
-        <p
-          class="text-muted-foreground text-sm"
-        >
-          Elapsed Time
-        </p>
-      </div>
-      <div
-        class="flex h-12 items-center justify-center"
-      >
-        <p
-          class="text-foreground/80 animate-pulse text-lg font-medium transition-all duration-500"
-        >
-          Initializing performance tests...
-        </p>
-      </div>
+        Generating report
+      </h2>
       <p
-        class="text-muted-foreground mt-4 text-xs"
+        class="text-foreground/85 min-h-6 text-base font-medium motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500"
       >
-        This process may take up to 2 minutes. Please don't close this window.
+        Launching lab tests
+        …
+      </p>
+      <p
+        class="text-muted-foreground text-sm"
+      >
+        Lab runs usually finish within about a minute. Keep this tab open.
       </p>
     </div>
+    <ol
+      class="border-border/60 bg-card/40 w-full space-y-0 overflow-hidden rounded-xl border"
+    >
+      <li
+        class="flex items-center gap-3 border-b border-border/50 px-4 py-3 text-sm last:border-b-0 bg-muted/40 text-foreground"
+      >
+        <span
+          aria-hidden="true"
+          class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-foreground"
+        >
+          <span
+            class="bg-foreground size-1.5 rounded-full motion-safe:animate-pulse"
+          />
+        </span>
+        <span
+          class="font-medium"
+        >
+          Launching lab tests
+        </span>
+        <span
+          class="text-muted-foreground ml-auto font-mono text-[10px] tracking-wider uppercase"
+        >
+          running
+        </span>
+      </li>
+      <li
+        class="flex items-center gap-3 border-b border-border/50 px-4 py-3 text-sm last:border-b-0 text-muted-foreground/55"
+      >
+        <span
+          aria-hidden="true"
+          class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-border"
+        >
+          <span
+            class="size-1 rounded-full bg-transparent"
+          />
+        </span>
+        <span
+          class=""
+        >
+          Measuring Core Web Vitals
+        </span>
+      </li>
+      <li
+        class="flex items-center gap-3 border-b border-border/50 px-4 py-3 text-sm last:border-b-0 text-muted-foreground/55"
+      >
+        <span
+          aria-hidden="true"
+          class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-border"
+        >
+          <span
+            class="size-1 rounded-full bg-transparent"
+          />
+        </span>
+        <span
+          class=""
+        >
+          Auditing resources & network
+        </span>
+      </li>
+      <li
+        class="flex items-center gap-3 border-b border-border/50 px-4 py-3 text-sm last:border-b-0 text-muted-foreground/55"
+      >
+        <span
+          aria-hidden="true"
+          class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-border"
+        >
+          <span
+            class="size-1 rounded-full bg-transparent"
+          />
+        </span>
+        <span
+          class=""
+        >
+          Checking accessibility & SEO
+        </span>
+      </li>
+      <li
+        class="flex items-center gap-3 border-b border-border/50 px-4 py-3 text-sm last:border-b-0 text-muted-foreground/55"
+      >
+        <span
+          aria-hidden="true"
+          class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-border"
+        >
+          <span
+            class="size-1 rounded-full bg-transparent"
+          />
+        </span>
+        <span
+          class=""
+        >
+          Assembling insights
+        </span>
+      </li>
+    </ol>
   </div>
 </div>
 `;
 
-exports[`LoadingMessage > increments elapsed time and rotates loading messages over time 2`] = `
+exports[`LoadingMessage > increments elapsed time and advances analysis stages over time 2`] = `
 <div
-  class="flex min-h-[60vh] flex-col items-center justify-center p-4"
+  aria-busy="true"
+  aria-label="Generating PageSpeed Insights report"
+  aria-live="polite"
+  class="relative flex min-h-[70vh] flex-col items-center justify-center overflow-hidden px-4 py-10"
+  role="status"
 >
   <div
-    class="rounded-xl border bg-card text-card-foreground w-full max-w-md shadow-lg"
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-x-0 top-1/3 h-px bg-linear-to-r from-transparent via-border to-transparent"
+  />
+  <div
+    class="relative z-10 flex w-full max-w-lg flex-col items-center gap-8"
   >
     <div
-      class="flex flex-col space-y-1.5 p-6 pb-2 text-center"
+      class="relative grid place-items-center"
     >
-      <div
-        class="mb-4 flex justify-center"
+      <svg
+        aria-hidden="true"
+        class="size-36 -rotate-90 motion-safe:animate-spin [animation-duration:1.4s]"
+        viewBox="0 0 120 120"
       >
-        <svg
-          class="lucide lucide-loader-circle text-primary h-12 w-12 animate-spin"
+        <circle
+          cx="60"
+          cy="60"
           fill="none"
-          height="24"
-          stroke="currentColor"
+          r="54"
+          stroke="hsl(var(--muted))"
+          stroke-width="6"
+        />
+        <circle
+          cx="60"
+          cy="60"
+          fill="none"
+          r="54"
+          stroke="hsl(var(--foreground))"
+          stroke-dasharray="339.29200658769764"
+          stroke-dashoffset="244.2902447431423"
           stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-          width="24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M21 12a9 9 0 1 1-6.219-8.56"
-          />
-        </svg>
-      </div>
+          stroke-width="6"
+        />
+      </svg>
       <div
-        class="font-semibold tracking-tight text-xl"
+        class="absolute inset-0 flex flex-col items-center justify-center"
       >
-        Generating Report
+        <span
+          class="font-mono text-3xl font-semibold tracking-tight tabular-nums"
+        >
+          0:06
+        </span>
+        <span
+          class="text-muted-foreground mt-0.5 text-[11px] tracking-[0.18em] uppercase"
+        >
+          elapsed
+        </span>
       </div>
     </div>
     <div
-      class="p-6 pt-0 space-y-6 text-center"
+      class="space-y-2 text-center"
     >
-      <div
-        class="flex flex-col items-center justify-center space-y-2"
+      <h2
+        class="text-2xl font-extrabold tracking-tight"
       >
-        <div
-          class="text-primary flex items-center font-mono text-3xl font-bold"
+        Generating report
+      </h2>
+      <p
+        class="text-foreground/85 min-h-6 text-base font-medium motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500"
+      >
+        Measuring Core Web Vitals
+        …
+      </p>
+      <p
+        class="text-muted-foreground text-sm"
+      >
+        Lab runs usually finish within about a minute. Keep this tab open.
+      </p>
+    </div>
+    <ol
+      class="border-border/60 bg-card/40 w-full space-y-0 overflow-hidden rounded-xl border"
+    >
+      <li
+        class="flex items-center gap-3 border-b border-border/50 px-4 py-3 text-sm last:border-b-0 text-muted-foreground"
+      >
+        <span
+          aria-hidden="true"
+          class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-foreground bg-foreground text-background"
         >
           <svg
-            class="lucide lucide-clock text-muted-foreground mr-3 h-6 w-6"
+            class="lucide lucide-check size-3 stroke-3"
             fill="none"
             height="24"
             stroke="currentColor"
@@ -150,89 +276,185 @@ exports[`LoadingMessage > increments elapsed time and rotates loading messages o
             width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <circle
-              cx="12"
-              cy="12"
-              r="10"
-            />
-            <polyline
-              points="12 6 12 12 16 14"
+            <path
+              d="M20 6 9 17l-5-5"
             />
           </svg>
-          0:04
-        </div>
-        <p
-          class="text-muted-foreground text-sm"
+        </span>
+        <span
+          class=""
         >
-          Elapsed Time
-        </p>
-      </div>
-      <div
-        class="flex h-12 items-center justify-center"
+          Launching lab tests
+        </span>
+      </li>
+      <li
+        class="flex items-center gap-3 border-b border-border/50 px-4 py-3 text-sm last:border-b-0 bg-muted/40 text-foreground"
       >
-        <p
-          class="text-foreground/80 animate-pulse text-lg font-medium transition-all duration-500"
+        <span
+          aria-hidden="true"
+          class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-foreground"
         >
-          Analyzing Core Web Vitals...
-        </p>
-      </div>
-      <p
-        class="text-muted-foreground mt-4 text-xs"
+          <span
+            class="bg-foreground size-1.5 rounded-full motion-safe:animate-pulse"
+          />
+        </span>
+        <span
+          class="font-medium"
+        >
+          Measuring Core Web Vitals
+        </span>
+        <span
+          class="text-muted-foreground ml-auto font-mono text-[10px] tracking-wider uppercase"
+        >
+          running
+        </span>
+      </li>
+      <li
+        class="flex items-center gap-3 border-b border-border/50 px-4 py-3 text-sm last:border-b-0 text-muted-foreground/55"
       >
-        This process may take up to 2 minutes. Please don't close this window.
-      </p>
-    </div>
+        <span
+          aria-hidden="true"
+          class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-border"
+        >
+          <span
+            class="size-1 rounded-full bg-transparent"
+          />
+        </span>
+        <span
+          class=""
+        >
+          Auditing resources & network
+        </span>
+      </li>
+      <li
+        class="flex items-center gap-3 border-b border-border/50 px-4 py-3 text-sm last:border-b-0 text-muted-foreground/55"
+      >
+        <span
+          aria-hidden="true"
+          class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-border"
+        >
+          <span
+            class="size-1 rounded-full bg-transparent"
+          />
+        </span>
+        <span
+          class=""
+        >
+          Checking accessibility & SEO
+        </span>
+      </li>
+      <li
+        class="flex items-center gap-3 border-b border-border/50 px-4 py-3 text-sm last:border-b-0 text-muted-foreground/55"
+      >
+        <span
+          aria-hidden="true"
+          class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-border"
+        >
+          <span
+            class="size-1 rounded-full bg-transparent"
+          />
+        </span>
+        <span
+          class=""
+        >
+          Assembling insights
+        </span>
+      </li>
+    </ol>
   </div>
 </div>
 `;
 
-exports[`LoadingMessage > increments elapsed time and rotates loading messages over time 3`] = `
+exports[`LoadingMessage > increments elapsed time and advances analysis stages over time 3`] = `
 <div
-  class="flex min-h-[60vh] flex-col items-center justify-center p-4"
+  aria-busy="true"
+  aria-label="Generating PageSpeed Insights report"
+  aria-live="polite"
+  class="relative flex min-h-[70vh] flex-col items-center justify-center overflow-hidden px-4 py-10"
+  role="status"
 >
   <div
-    class="rounded-xl border bg-card text-card-foreground w-full max-w-md shadow-lg"
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-x-0 top-1/3 h-px bg-linear-to-r from-transparent via-border to-transparent"
+  />
+  <div
+    class="relative z-10 flex w-full max-w-lg flex-col items-center gap-8"
   >
     <div
-      class="flex flex-col space-y-1.5 p-6 pb-2 text-center"
+      class="relative grid place-items-center"
     >
-      <div
-        class="mb-4 flex justify-center"
+      <svg
+        aria-hidden="true"
+        class="size-36 -rotate-90 motion-safe:animate-spin [animation-duration:1.4s]"
+        viewBox="0 0 120 120"
       >
-        <svg
-          class="lucide lucide-loader-circle text-primary h-12 w-12 animate-spin"
+        <circle
+          cx="60"
+          cy="60"
           fill="none"
-          height="24"
-          stroke="currentColor"
+          r="54"
+          stroke="hsl(var(--muted))"
+          stroke-width="6"
+        />
+        <circle
+          cx="60"
+          cy="60"
+          fill="none"
+          r="54"
+          stroke="hsl(var(--foreground))"
+          stroke-dasharray="339.29200658769764"
+          stroke-dashoffset="244.2902447431423"
           stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-          width="24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M21 12a9 9 0 1 1-6.219-8.56"
-          />
-        </svg>
-      </div>
+          stroke-width="6"
+        />
+      </svg>
       <div
-        class="font-semibold tracking-tight text-xl"
+        class="absolute inset-0 flex flex-col items-center justify-center"
       >
-        Generating Report
+        <span
+          class="font-mono text-3xl font-semibold tracking-tight tabular-nums"
+        >
+          0:11
+        </span>
+        <span
+          class="text-muted-foreground mt-0.5 text-[11px] tracking-[0.18em] uppercase"
+        >
+          elapsed
+        </span>
       </div>
     </div>
     <div
-      class="p-6 pt-0 space-y-6 text-center"
+      class="space-y-2 text-center"
     >
-      <div
-        class="flex flex-col items-center justify-center space-y-2"
+      <h2
+        class="text-2xl font-extrabold tracking-tight"
       >
-        <div
-          class="text-primary flex items-center font-mono text-3xl font-bold"
+        Generating report
+      </h2>
+      <p
+        class="text-foreground/85 min-h-6 text-base font-medium motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500"
+      >
+        Auditing resources & network
+        …
+      </p>
+      <p
+        class="text-muted-foreground text-sm"
+      >
+        Lab runs usually finish within about a minute. Keep this tab open.
+      </p>
+    </div>
+    <ol
+      class="border-border/60 bg-card/40 w-full space-y-0 overflow-hidden rounded-xl border"
+    >
+      <li
+        class="flex items-center gap-3 border-b border-border/50 px-4 py-3 text-sm last:border-b-0 text-muted-foreground"
+      >
+        <span
+          aria-hidden="true"
+          class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-foreground bg-foreground text-background"
         >
           <svg
-            class="lucide lucide-clock text-muted-foreground mr-3 h-6 w-6"
+            class="lucide lucide-check size-3 stroke-3"
             fill="none"
             height="24"
             stroke="currentColor"
@@ -243,135 +465,280 @@ exports[`LoadingMessage > increments elapsed time and rotates loading messages o
             width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <circle
-              cx="12"
-              cy="12"
-              r="10"
-            />
-            <polyline
-              points="12 6 12 12 16 14"
+            <path
+              d="M20 6 9 17l-5-5"
             />
           </svg>
-          0:08
-        </div>
-        <p
-          class="text-muted-foreground text-sm"
+        </span>
+        <span
+          class=""
         >
-          Elapsed Time
-        </p>
-      </div>
-      <div
-        class="flex h-12 items-center justify-center"
+          Launching lab tests
+        </span>
+      </li>
+      <li
+        class="flex items-center gap-3 border-b border-border/50 px-4 py-3 text-sm last:border-b-0 text-muted-foreground"
       >
-        <p
-          class="text-foreground/80 animate-pulse text-lg font-medium transition-all duration-500"
+        <span
+          aria-hidden="true"
+          class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-foreground bg-foreground text-background"
         >
-          Checking mobile responsiveness...
-        </p>
-      </div>
-      <p
-        class="text-muted-foreground mt-4 text-xs"
+          <svg
+            class="lucide lucide-check size-3 stroke-3"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M20 6 9 17l-5-5"
+            />
+          </svg>
+        </span>
+        <span
+          class=""
+        >
+          Measuring Core Web Vitals
+        </span>
+      </li>
+      <li
+        class="flex items-center gap-3 border-b border-border/50 px-4 py-3 text-sm last:border-b-0 bg-muted/40 text-foreground"
       >
-        This process may take up to 2 minutes. Please don't close this window.
-      </p>
-    </div>
+        <span
+          aria-hidden="true"
+          class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-foreground"
+        >
+          <span
+            class="bg-foreground size-1.5 rounded-full motion-safe:animate-pulse"
+          />
+        </span>
+        <span
+          class="font-medium"
+        >
+          Auditing resources & network
+        </span>
+        <span
+          class="text-muted-foreground ml-auto font-mono text-[10px] tracking-wider uppercase"
+        >
+          running
+        </span>
+      </li>
+      <li
+        class="flex items-center gap-3 border-b border-border/50 px-4 py-3 text-sm last:border-b-0 text-muted-foreground/55"
+      >
+        <span
+          aria-hidden="true"
+          class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-border"
+        >
+          <span
+            class="size-1 rounded-full bg-transparent"
+          />
+        </span>
+        <span
+          class=""
+        >
+          Checking accessibility & SEO
+        </span>
+      </li>
+      <li
+        class="flex items-center gap-3 border-b border-border/50 px-4 py-3 text-sm last:border-b-0 text-muted-foreground/55"
+      >
+        <span
+          aria-hidden="true"
+          class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-border"
+        >
+          <span
+            class="size-1 rounded-full bg-transparent"
+          />
+        </span>
+        <span
+          class=""
+        >
+          Assembling insights
+        </span>
+      </li>
+    </ol>
   </div>
 </div>
 `;
 
-exports[`LoadingMessage > stays hidden for the first two seconds and then appears 1`] = `null`;
-
-exports[`LoadingMessage > stays hidden for the first two seconds and then appears 2`] = `null`;
-
-exports[`LoadingMessage > stays hidden for the first two seconds and then appears 3`] = `
+exports[`LoadingMessage > renders immediately with the first analysis stage 1`] = `
 <div
-  class="flex min-h-[60vh] flex-col items-center justify-center p-4"
+  aria-busy="true"
+  aria-label="Generating PageSpeed Insights report"
+  aria-live="polite"
+  class="relative flex min-h-[70vh] flex-col items-center justify-center overflow-hidden px-4 py-10"
+  role="status"
 >
   <div
-    class="rounded-xl border bg-card text-card-foreground w-full max-w-md shadow-lg"
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-x-0 top-1/3 h-px bg-linear-to-r from-transparent via-border to-transparent"
+  />
+  <div
+    class="relative z-10 flex w-full max-w-lg flex-col items-center gap-8"
   >
     <div
-      class="flex flex-col space-y-1.5 p-6 pb-2 text-center"
+      class="relative grid place-items-center"
     >
-      <div
-        class="mb-4 flex justify-center"
+      <svg
+        aria-hidden="true"
+        class="size-36 -rotate-90 motion-safe:animate-spin [animation-duration:1.4s]"
+        viewBox="0 0 120 120"
       >
-        <svg
-          class="lucide lucide-loader-circle text-primary h-12 w-12 animate-spin"
+        <circle
+          cx="60"
+          cy="60"
           fill="none"
-          height="24"
-          stroke="currentColor"
+          r="54"
+          stroke="hsl(var(--muted))"
+          stroke-width="6"
+        />
+        <circle
+          cx="60"
+          cy="60"
+          fill="none"
+          r="54"
+          stroke="hsl(var(--foreground))"
+          stroke-dasharray="339.29200658769764"
+          stroke-dashoffset="244.2902447431423"
           stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-          width="24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M21 12a9 9 0 1 1-6.219-8.56"
-          />
-        </svg>
-      </div>
+          stroke-width="6"
+        />
+      </svg>
       <div
-        class="font-semibold tracking-tight text-xl"
+        class="absolute inset-0 flex flex-col items-center justify-center"
       >
-        Generating Report
+        <span
+          class="font-mono text-3xl font-semibold tracking-tight tabular-nums"
+        >
+          0:00
+        </span>
+        <span
+          class="text-muted-foreground mt-0.5 text-[11px] tracking-[0.18em] uppercase"
+        >
+          elapsed
+        </span>
       </div>
     </div>
     <div
-      class="p-6 pt-0 space-y-6 text-center"
+      class="space-y-2 text-center"
     >
-      <div
-        class="flex flex-col items-center justify-center space-y-2"
+      <h2
+        class="text-2xl font-extrabold tracking-tight"
       >
-        <div
-          class="text-primary flex items-center font-mono text-3xl font-bold"
-        >
-          <svg
-            class="lucide lucide-clock text-muted-foreground mr-3 h-6 w-6"
-            fill="none"
-            height="24"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle
-              cx="12"
-              cy="12"
-              r="10"
-            />
-            <polyline
-              points="12 6 12 12 16 14"
-            />
-          </svg>
-          0:02
-        </div>
-        <p
-          class="text-muted-foreground text-sm"
-        >
-          Elapsed Time
-        </p>
-      </div>
-      <div
-        class="flex h-12 items-center justify-center"
-      >
-        <p
-          class="text-foreground/80 animate-pulse text-lg font-medium transition-all duration-500"
-        >
-          Initializing performance tests...
-        </p>
-      </div>
+        Generating report
+      </h2>
       <p
-        class="text-muted-foreground mt-4 text-xs"
+        class="text-foreground/85 min-h-6 text-base font-medium motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500"
       >
-        This process may take up to 2 minutes. Please don't close this window.
+        Launching lab tests
+        …
+      </p>
+      <p
+        class="text-muted-foreground text-sm"
+      >
+        Lab runs usually finish within about a minute. Keep this tab open.
       </p>
     </div>
+    <ol
+      class="border-border/60 bg-card/40 w-full space-y-0 overflow-hidden rounded-xl border"
+    >
+      <li
+        class="flex items-center gap-3 border-b border-border/50 px-4 py-3 text-sm last:border-b-0 bg-muted/40 text-foreground"
+      >
+        <span
+          aria-hidden="true"
+          class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-foreground"
+        >
+          <span
+            class="bg-foreground size-1.5 rounded-full motion-safe:animate-pulse"
+          />
+        </span>
+        <span
+          class="font-medium"
+        >
+          Launching lab tests
+        </span>
+        <span
+          class="text-muted-foreground ml-auto font-mono text-[10px] tracking-wider uppercase"
+        >
+          running
+        </span>
+      </li>
+      <li
+        class="flex items-center gap-3 border-b border-border/50 px-4 py-3 text-sm last:border-b-0 text-muted-foreground/55"
+      >
+        <span
+          aria-hidden="true"
+          class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-border"
+        >
+          <span
+            class="size-1 rounded-full bg-transparent"
+          />
+        </span>
+        <span
+          class=""
+        >
+          Measuring Core Web Vitals
+        </span>
+      </li>
+      <li
+        class="flex items-center gap-3 border-b border-border/50 px-4 py-3 text-sm last:border-b-0 text-muted-foreground/55"
+      >
+        <span
+          aria-hidden="true"
+          class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-border"
+        >
+          <span
+            class="size-1 rounded-full bg-transparent"
+          />
+        </span>
+        <span
+          class=""
+        >
+          Auditing resources & network
+        </span>
+      </li>
+      <li
+        class="flex items-center gap-3 border-b border-border/50 px-4 py-3 text-sm last:border-b-0 text-muted-foreground/55"
+      >
+        <span
+          aria-hidden="true"
+          class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-border"
+        >
+          <span
+            class="size-1 rounded-full bg-transparent"
+          />
+        </span>
+        <span
+          class=""
+        >
+          Checking accessibility & SEO
+        </span>
+      </li>
+      <li
+        class="flex items-center gap-3 border-b border-border/50 px-4 py-3 text-sm last:border-b-0 text-muted-foreground/55"
+      >
+        <span
+          aria-hidden="true"
+          class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-border"
+        >
+          <span
+            class="size-1 rounded-full bg-transparent"
+          />
+        </span>
+        <span
+          class=""
+        >
+          Assembling insights
+        </span>
+      </li>
+    </ol>
   </div>
 </div>
 `;
