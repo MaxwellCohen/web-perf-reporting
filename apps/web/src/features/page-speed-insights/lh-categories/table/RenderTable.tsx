@@ -1,13 +1,24 @@
 "use client";
-import type { StockCellContext, StockColumnDef, StockRow, StockCell } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import type {
+  StockCellContext,
+  StockColumnDef,
+  StockRow,
+  StockCell,
+} from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { AuditDetailTable, ItemValue, ItemValueType, TableColumnHeading } from "@/lib/schema";
-import { CSSProperties, Fragment, useMemo, type ReactElement } from "react";
+import { CSSProperties, Fragment, type ReactElement } from "react";
 import type { TableFeatures } from "@tanstack/table-core";
-import { SortingState, flexRender, ColumnVisibilityState, RowData, useTable, type DisplayColumnDef, constructAggregationFn } from "@tanstack/react-table";
-import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import {
-  standardTableFeatures,
-} from "@/features/page-speed-insights/tanstack-table-v9/features";
+  SortingState,
+  flexRender,
+  ColumnVisibilityState,
+  RowData,
+  useTable,
+  type DisplayColumnDef,
+  constructAggregationFn,
+} from "@tanstack/react-table";
+import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
+import { standardTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 import { RenderTableValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import clsx from "clsx";
 import { cn } from "@/lib/utils";
@@ -20,7 +31,10 @@ import { AccordionSectionTitleTrigger } from "@/components/ui/accordion-section-
 import { DetailTableWith1ReportAndNoSubitem } from "@/features/page-speed-insights/lh-categories/table/DetailTableWith1ReportAndNoSubitem";
 import { DetailTableSeparatePerReport } from "@/features/page-speed-insights/lh-categories/table/DetailTableSeparatePerReport";
 import { TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { useStandardTable, type StandardColumnDef } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import {
+  useStandardTable,
+  type StandardColumnDef,
+} from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
 import {
   getColumnVisibilityState,
   getGroupingState,
@@ -467,7 +481,7 @@ function DeviceCell(info: StockCellContext<DetailTableDataRow, unknown>) {
  * based on the data structure and audit configuration
  */
 export function DetailTable({ rows, title }: { rows: DetailTableItem[]; title: string }) {
-  const hasItems = useMemo(() => hasDetailItems(rows), [rows]);
+  const hasItems = hasDetailItems(rows);
 
   if (!hasItems) {
     return null;
@@ -512,100 +526,92 @@ const combineItemSubItemValue = (itemVal: unknown, subItemVal: unknown): unknown
 };
 
 function DetailTableWithSubitems({ rows, title }: { rows: DetailTableItem[]; title: string }) {
-  const data = useMemo(() => flattenDetailRows(rows), [rows]);
+  const data = flattenDetailRows(rows);
 
   // Create columns
-  const columns = useMemo(() => {
-    const sColumnHelper = createColumnHelper<DetailTableDataRow>();
-    const columnDef: StockColumnDef<DetailTableDataRow, unknown>[] = [
-      getExpandingControlColumn() as unknown as StockColumnDef<DetailTableDataRow, unknown>,
-    ];
-
-    const firstRow = rows[0];
-    if (!firstRow) {
-      return columnDef;
+  const sColumnHelper = createColumnHelper<DetailTableDataRow>();
+  const columnDef: StockColumnDef<DetailTableDataRow, unknown>[] = [
+    getExpandingControlColumn() as unknown as StockColumnDef<DetailTableDataRow, unknown>,
+  ];
+  const firstRow = rows[0];
+  if (firstRow) {
+  firstRow.auditResult.details.headings.forEach((h) => {
+    if (!h.key) {
+      return;
     }
 
-    firstRow.auditResult.details.headings.forEach((h) => {
-      if (!h.key) {
-        return;
-      }
+    const key = h.key;
+    const subItemKey = h.subItemsHeading?.key;
+    if (!subItemKey) {
+      return;
+    }
 
-      const key = h.key;
-      const subItemKey = h.subItemsHeading?.key;
-      if (!subItemKey) {
-        return;
-      }
+    const subItem = {
+      ...h,
+      ...h.subItemsHeading,
+    };
+    const valueType = h.valueType || "text";
 
-      const subItem = {
-        ...h,
-        ...h.subItemsHeading,
-      };
-      const valueType = h.valueType || "text";
-
-      columnDef.push(
-        sColumnHelper.accessor(
-          (r) => {
+    columnDef.push(
+      sColumnHelper.accessor(
+        (r) => {
+          const subItemVal = r.subitem?.[subItemKey];
+          const itemVal = r.item[key];
+          return combineItemSubItemValue(itemVal, subItemVal);
+        },
+        {
+          id: `${key}_${subItemKey}`,
+          header: (subItem.label as string) || "",
+          enableGrouping: canGroup(valueType),
+          enableHiding: true,
+          enableSorting: true,
+          enableMultiSort: true,
+          filterFn: getFilterFn(valueType),
+          getGroupingValue: (r) => {
+            const val = r.item[key];
+            return typeof val === "string" ? val : undefined;
+          },
+          ...setSizeSetting(valueType),
+          cell: (info) => {
+            const r = info.row.original;
             const subItemVal = r.subitem?.[subItemKey];
             const itemVal = r.item[key];
-            return combineItemSubItemValue(itemVal, subItemVal);
-          },
-          {
-            id: `${key}_${subItemKey}`,
-            header: (subItem.label as string) || "",
-            enableGrouping: canGroup(valueType),
-            enableHiding: true,
-            enableSorting: true,
-            enableMultiSort: true,
-            filterFn: getFilterFn(valueType),
-            getGroupingValue: (r) => {
-              const val = r.item[key];
-              return typeof val === "string" ? val : undefined;
-            },
-            ...setSizeSetting(valueType),
-            cell: (info) => {
-              const r = info.row.original;
-              const subItemVal = r.subitem?.[subItemKey];
-              const itemVal = r.item[key];
-              const val = subItemVal ?? itemVal;
+            const val = subItemVal ?? itemVal;
 
-              return (
-                <RenderTableValue
-                  key={JSON.stringify(val)}
-                  value={val as ItemValue}
-                  heading={subItem}
-                  device={r._userLabel || ""}
-                />
-              );
-            },
-            aggregatedCell(props) {
-              const value = props.row.original.item[key];
-              return (
-                <RenderTableValue
-                  value={value as ItemValue}
-                  heading={h}
-                  device={firstRow._userLabel || ""}
-                />
-              );
-            },
-            meta: {
-              heading: {
-                heading: subItem,
-              },
+            return (
+              <RenderTableValue
+                key={JSON.stringify(val)}
+                value={val as ItemValue}
+                heading={subItem}
+                device={r._userLabel || ""}
+              />
+            );
+          },
+          aggregatedCell(props) {
+            const value = props.row.original.item[key];
+            return (
+              <RenderTableValue
+                value={value as ItemValue}
+                heading={h}
+                device={firstRow._userLabel || ""}
+              />
+            );
+          },
+          meta: {
+            heading: {
+              heading: subItem,
             },
           },
-        ),
-      );
-    });
-
-    return columnDef;
-  }, [rows]);
+        },
+      ),
+    );
+  });
+  }
+  const columns = columnDef;
 
   // Calculate default grouping
-  const defaultGrouping = useMemo(() => {
-    const groupableColumn = columns.find((c) => c.id && c.enableGrouping)?.id;
-    return groupableColumn ? [groupableColumn] : [];
-  }, [columns]);
+  const groupableColumn = columns.find((c) => c.id && c.enableGrouping)?.id;
+  const defaultGrouping = groupableColumn ? [groupableColumn] : [];
 
   const table = useStandardTable({
     data,
@@ -658,10 +664,7 @@ const createColumnsFromHeadings = (
 ): StockColumnDef<DetailTableDataRow, unknown>[] => {
   const columnMap: Record<string, StockColumnDef<DetailTableDataRow, unknown>> = {
     expander: columnHelper.display(
-      getExpandingControlColumn() as unknown as DisplayColumnDef<
-        any,
-        DetailTableDataRow
-      >,
+      getExpandingControlColumn() as unknown as DisplayColumnDef<any, DetailTableDataRow>,
     ),
   };
 
@@ -839,36 +842,22 @@ function DetailTableFull({ rows }: { rows: DetailTableItem[]; title: string }) {
   const showUserLabel = rows.length > 1;
 
   // Transform data
-  const data = useMemo<DetailTableDataRow[]>(() => flattenDetailRows(rows), [rows]);
+  const data = flattenDetailRows(rows);
   // Create columns
-  const columns = useMemo(() => {
-    const allHeadings = extractAllHeadings(rows);
-    return createColumnsFromHeadings(allHeadings, showUserLabel);
-  }, [rows, showUserLabel]);
+  const allHeadings = extractAllHeadings(rows);
+  const columns = createColumnsFromHeadings(allHeadings, showUserLabel);
 
   // Get available column IDs for validation
-  const availableColumnIds = useMemo(
-    () => new Set(columns.map((c) => c.id).filter(Boolean) as string[]),
-    [columns],
-  );
+  const availableColumnIds = new Set(columns.map((c) => c.id).filter(Boolean) as string[]);
 
   // Calculate default sorting - only use columns that exist
-  const sortbyDefault = useMemo(
-    () => calculateDefaultSorting(rows, availableColumnIds),
-    [rows, availableColumnIds],
-  );
+  const sortbyDefault = calculateDefaultSorting(rows, availableColumnIds);
 
   // Calculate default grouping
-  const defaultGrouping = useMemo(
-    () => calculateDefaultGrouping(columns, showUserLabel),
-    [columns, showUserLabel],
-  );
+  const defaultGrouping = calculateDefaultGrouping(columns, showUserLabel);
 
   // Calculate column visibility
-  const defaultColumnVisibility = useMemo(
-    () => calculateDefaultColumnVisibility(columns),
-    [columns],
-  );
+  const defaultColumnVisibility = calculateDefaultColumnVisibility(columns);
 
   // Helper function to extract the actual value from a leaf row
   // Leaf rows are not aggregated, so getValue should return the actual value
@@ -887,89 +876,87 @@ function DetailTableFull({ rows }: { rows: DetailTableItem[]; title: string }) {
 
   // Create a memoized function to check if rows can expand
   // This checks if leaf rows have different values
-  const getRowCanExpandFn = useMemo(() => {
-    return (row: StockRow<DetailTableDataRow>) => {
-      const leafRows = row.getLeafRows();
+  const getRowCanExpandFn = (row: StockRow<DetailTableDataRow>) => {
+    const leafRows = row.getLeafRows();
 
-      // If there's only one or zero leaf rows, no expansion needed
-      if (leafRows.length <= 1) {
-        return false;
-      }
+    // If there's only one or zero leaf rows, no expansion needed
+    if (leafRows.length <= 1) {
+      return false;
+    }
 
-      const columnVisibility = {
-        ...defaultColumnVisibility,
-        ...getColumnVisibilityState(row.table),
-      };
+    const columnVisibility = {
+      ...defaultColumnVisibility,
+      ...getColumnVisibilityState(row.table),
+    };
 
-      // Get all visible columns (excluding the expander and device columns)
-      const visibleColumns = columns.filter((col) => {
-        const colId = col.id;
-        if (!colId || colId === "expander" || colId === "device") return false;
-        // Column is visible if visibility is not explicitly set to false
-        return columnVisibility[colId] !== false;
+    // Get all visible columns (excluding the expander and device columns)
+    const visibleColumns = columns.filter((col) => {
+      const colId = col.id;
+      if (!colId || colId === "expander" || colId === "device") return false;
+      // Column is visible if visibility is not explicitly set to false
+      return columnVisibility[colId] !== false;
+    });
+
+    // If no visible columns to compare, don't allow expansion
+    if (visibleColumns.length === 0) {
+      return false;
+    }
+
+    // Compare values across all visible columns using original data
+    for (const column of visibleColumns) {
+      const columnId = column.id;
+      if (!columnId) continue;
+
+      const values = leafRows.map((leafRow) => {
+        try {
+          const value = getOriginalValue(leafRow, columnId);
+          // Normalize values for comparison (handle arrays, objects, etc.)
+          if (value === undefined || value === null) {
+            return null; // Normalize undefined and null to null for comparison
+          }
+          if (Array.isArray(value)) {
+            return JSON.stringify(value);
+          }
+          if (typeof value === "object") {
+            return JSON.stringify(value);
+          }
+          return value;
+        } catch {
+          // If extraction fails, treat as null
+          return null;
+        }
       });
 
-      // If no visible columns to compare, don't allow expansion
-      if (visibleColumns.length === 0) {
-        return false;
-      }
+      // Check if all values are the same
+      if (values.length === 0) continue;
 
-      // Compare values across all visible columns using original data
-      for (const column of visibleColumns) {
-        const columnId = column.id;
-        if (!columnId) continue;
-
-        const values = leafRows.map((leafRow) => {
-          try {
-            const value = getOriginalValue(leafRow, columnId);
-            // Normalize values for comparison (handle arrays, objects, etc.)
-            if (value === undefined || value === null) {
-              return null; // Normalize undefined and null to null for comparison
-            }
-            if (Array.isArray(value)) {
-              return JSON.stringify(value);
-            }
-            if (typeof value === "object") {
-              return JSON.stringify(value);
-            }
-            return value;
-          } catch {
-            // If extraction fails, treat as null
-            return null;
-          }
-        });
-
-        // Check if all values are the same
-        if (values.length === 0) continue;
-
-        const firstValue = values[0];
-        const allSame = values.every((val) => {
-          // Handle null cases (normalized undefined/null)
-          if (firstValue === null) {
-            return val === null;
-          }
-          if (val === null) {
-            return false;
-          }
-          // Deep equality check for objects/arrays (already stringified)
-          if (typeof firstValue === "string" && typeof val === "string") {
-            // Could be stringified objects/arrays, so compare directly
-            return firstValue === val;
-          }
-          // Direct comparison for primitives
-          return firstValue === val;
-        });
-
-        // If any column has different values, allow expansion
-        if (!allSame) {
-          return true;
+      const firstValue = values[0];
+      const allSame = values.every((val) => {
+        // Handle null cases (normalized undefined/null)
+        if (firstValue === null) {
+          return val === null;
         }
-      }
+        if (val === null) {
+          return false;
+        }
+        // Deep equality check for objects/arrays (already stringified)
+        if (typeof firstValue === "string" && typeof val === "string") {
+          // Could be stringified objects/arrays, so compare directly
+          return firstValue === val;
+        }
+        // Direct comparison for primitives
+        return firstValue === val;
+      });
 
-      // All columns have the same values across all leaf rows
-      return false;
-    };
-  }, [columns, defaultColumnVisibility]);
+      // If any column has different values, allow expansion
+      if (!allSame) {
+        return true;
+      }
+    }
+
+    // All columns have the same values across all leaf rows
+    return false;
+  };
 
   const table = useTable({
     features: standardTableFeatures,

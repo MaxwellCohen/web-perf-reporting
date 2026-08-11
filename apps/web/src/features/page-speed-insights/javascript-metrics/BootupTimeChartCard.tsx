@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import type { TableItem } from "@/lib/schema";
 import { getNumber, getUrlString } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,36 +37,32 @@ const SEGMENTS = [
 ] as const;
 
 export function BootupTimeChartCard({ metrics }: { metrics: BootupTimeData[] }) {
-  const chartData = useMemo(() => {
-    const scriptTotals = new Map<
-      string,
-      { scriptParseCompile: number; scripting: number; total: number }
-    >();
-
-    for (const { bootupTime } of metrics) {
-      for (const item of bootupTime) {
-        const url = getUrlString(item.url).replace(URL_PROTOCOL_REGEX, "") || "Unknown";
-        const scriptParseCompile = getNumber(item.scriptParseCompile) ?? 0;
-        const scripting = getNumber(item.scripting) ?? 0;
-        const total = getNumber(item.total) ?? scriptParseCompile + scripting;
-        const existing = scriptTotals.get(url) ?? {
-          scriptParseCompile: 0,
-          scripting: 0,
-          total: 0,
-        };
-        scriptTotals.set(url, {
-          scriptParseCompile: existing.scriptParseCompile + scriptParseCompile,
-          scripting: existing.scripting + scripting,
-          total: existing.total + total,
-        });
-      }
+  const scriptTotals = new Map<
+    string,
+    { scriptParseCompile: number; scripting: number; total: number }
+  >();
+  for (const { bootupTime } of metrics) {
+    for (const item of bootupTime) {
+      const url = getUrlString(item.url).replace(URL_PROTOCOL_REGEX, "") || "Unknown";
+      const scriptParseCompile = getNumber(item.scriptParseCompile) ?? 0;
+      const scripting = getNumber(item.scripting) ?? 0;
+      const total = getNumber(item.total) ?? scriptParseCompile + scripting;
+      const existing = scriptTotals.get(url) ?? {
+        scriptParseCompile: 0,
+        scripting: 0,
+        total: 0,
+      };
+      scriptTotals.set(url, {
+        scriptParseCompile: existing.scriptParseCompile + scriptParseCompile,
+        scripting: existing.scripting + scripting,
+        total: existing.total + total,
+      });
     }
-
-    return Array.from(scriptTotals.entries())
-      .map(([url, values]) => ({ url, ...values }))
-      .sort((a, b) => b.total - a.total)
-      .slice(0, TOP_SCRIPTS);
-  }, [metrics]);
+  }
+  const chartData = Array.from(scriptTotals.entries())
+    .map(([url, values]) => ({ url, ...values }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, TOP_SCRIPTS);
 
   const hasData = metrics.some((m) => m.bootupTime.length > 0);
   if (!hasData || !chartData.length) {
@@ -109,12 +104,7 @@ export function BootupTimeChartCard({ metrics }: { metrics: BootupTimeData[] }) 
             barCategoryGap="22%"
           >
             <CartesianGrid horizontal={false} strokeDasharray="3 3" className="stroke-border/40" />
-            <XAxis
-              type="number"
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={formatAxisMs}
-            />
+            <XAxis type="number" tickLine={false} axisLine={false} tickFormatter={formatAxisMs} />
             <YAxis
               type="category"
               dataKey="url"

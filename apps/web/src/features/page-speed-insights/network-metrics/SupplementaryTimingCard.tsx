@@ -1,5 +1,4 @@
 "use client";
-import { useMemo } from "react";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import {
   useStandardTable,
@@ -39,20 +38,16 @@ function hasSupplementaryData(m: NetworkMetricSeries): boolean {
 
 export function SupplementaryTimingCard() {
   const series = useNetworkMetricSeries();
-  const validMetrics = useMemo(() => series.filter(hasSupplementaryData), [series]);
+  const validMetrics = series.filter(hasSupplementaryData);
   const showReportColumn = validMetrics.length > 1;
 
-  const data = useMemo<SupplementaryTimingRow[]>(
-    () =>
-      validMetrics.map(({ label, ttfb, domContentLoaded, loadTime, interactive }) => ({
-        label,
-        ttfb,
-        domContentLoaded,
-        loadTime,
-        interactive,
-      })),
-    [validMetrics],
-  );
+  const data = validMetrics.map(({ label, ttfb, domContentLoaded, loadTime, interactive }) => ({
+    label,
+    ttfb,
+    domContentLoaded,
+    loadTime,
+    interactive,
+  }));
 
   const columns = useTableColumns(cols, columnHelper, showReportColumn);
   const table = useStandardTable({ data, columns });

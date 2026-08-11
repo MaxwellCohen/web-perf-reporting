@@ -3,7 +3,6 @@ import { sortByScoreDisplayModes } from "@/features/page-speed-insights/ScoreDis
 import { AuditResultsRecord, CategoryResult } from "@/lib/schema";
 import { CategoryScoreInfo } from "@/features/page-speed-insights/lh-categories/CategoryScoreInfo";
 import { AuditDetailsSection } from "@/features/page-speed-insights/lh-categories/AuditDetailsSection";
-import { useMemo } from "react";
 
 const AuditRefsToHide = ["final-screenshot", "script-treemap-data"];
 
@@ -17,14 +16,10 @@ export function CategoryAuditSection({
   labels: string[];
 }) {
   const hasData = category?.some((category) => !!category);
-  const auditRefs = useMemo(
-    () =>
-      category
-        .map((c) => c?.auditRefs || [])
-        .reduce((acc, c) => [...acc, ...c], [])
-        .filter((auditRef, index, arr) => arr.findIndex((a) => a.id === auditRef.id) === index),
-    [category],
-  );
+  const auditRefs = category
+    .map((c) => c?.auditRefs || [])
+    .reduce((acc, c) => [...acc, ...c], [])
+    .filter((auditRef, index, arr) => arr.findIndex((a) => a.id === auditRef.id) === index);
 
   if (!category || !hasData) {
     return null;

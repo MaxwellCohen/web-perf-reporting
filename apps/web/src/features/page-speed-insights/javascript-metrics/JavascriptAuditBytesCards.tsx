@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { TableItem } from "@/lib/schema";
 import {
   JavascriptBytesTableCard,
@@ -19,24 +18,17 @@ type UnminifiedJavaScriptData = { label: string; unminifiedJS: TableItem[] };
 type UnusedJavaScriptData = { label: string; unusedJS: TableItem[] };
 
 export function LegacyJavaScriptCard({ metrics }: { metrics: LegacyJavaScriptData[] }) {
-  const normalized = useMemo(
-    () => mapToBytesMetrics(metrics, (m) => m.legacyJS),
-    [metrics],
-  );
+  const normalized = mapToBytesMetrics(metrics, (m) => m.legacyJS);
   return <JavascriptBytesTableCard title="Legacy JavaScript" metrics={normalized} />;
 }
 
 export function UnminifiedJavaScriptCard({ metrics }: { metrics: UnminifiedJavaScriptData[] }) {
-  const normalized = useMemo(
-    () => mapToBytesMetrics(metrics, (m) => m.unminifiedJS),
-    [metrics],
-  );
+  const normalized = mapToBytesMetrics(metrics, (m) => m.unminifiedJS);
   return <JavascriptBytesTableCard title="Unminified JavaScript" metrics={normalized} />;
 }
 
 export function UnusedJavaScriptCard({ metrics }: { metrics: UnusedJavaScriptData[] }) {
-  
-  const normalized = useMemo(() => mapToBytesMetrics(metrics, (m) => m.unusedJS), [metrics]);
+  const normalized = mapToBytesMetrics(metrics, (m) => m.unusedJS);
   return (
     <JavascriptBytesTableCard title="Unused JavaScript" metrics={normalized} includeWastedPercent />
   );

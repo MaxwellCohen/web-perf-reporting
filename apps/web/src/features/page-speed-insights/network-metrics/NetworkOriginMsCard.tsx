@@ -1,7 +1,6 @@
 "use client";
 import { TableItem } from "@/lib/schema";
 import { getNumber } from "@/lib/utils";
-import { useMemo } from "react";
 import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
 import {
   useStandardTable,
@@ -53,33 +52,29 @@ export function NetworkOriginMsCard({
   itemsField,
   msItemField,
 }: NetworkOriginMsCardProps) {
-  const validMetrics = useMemo(() => series.filter((m) => m[itemsField].length > 0), [series, itemsField]);
+  const validMetrics = series.filter((m) => m[itemsField].length > 0);
 
   const showReportColumn = validMetrics.length > 1;
 
-  const data = useMemo<OriginMsRow[]>(() => {
-    const allRows = validMetrics.flatMap((m) =>
-      m[itemsField].map((item: TableItem) => {
-        const origin = typeof item.origin === "string" ? item.origin : "";
-        const ms =
-          msItemField === "rtt" ? getNumber(item.rtt) : getNumber(item.serverResponseTime);
-        return {
-          label: m.label,
-          origin: origin.replace(/^https?:\/\//, "") || "Unknown",
-          ms,
-        };
-      }),
-    );
+  const allRows = validMetrics.flatMap((m) =>
+    m[itemsField].map((item: TableItem) => {
+      const origin = typeof item.origin === "string" ? item.origin : "";
+      const ms = msItemField === "rtt" ? getNumber(item.rtt) : getNumber(item.serverResponseTime);
+      return {
+        label: m.label,
+        origin: origin.replace(/^https?:\/\//, "") || "Unknown",
+        ms,
+      };
+    }),
+  );
+  const data = sortByMaxValue(
+    allRows,
+    (row) => row.origin,
+    (row) => row.ms || 0,
+    validMetrics.length,
+  );
 
-    return sortByMaxValue(
-      allRows,
-      (row) => row.origin,
-      (row) => row.ms || 0,
-      validMetrics.length,
-    );
-  }, [validMetrics, itemsField, msItemField]);
-
-  const cols = useMemo(() => buildColumns(valueColumnHeader), [valueColumnHeader]);
+  const cols = buildColumns(valueColumnHeader);
 
   const columns = useTableColumns<OriginMsRow>(cols, columnHelper, showReportColumn);
 

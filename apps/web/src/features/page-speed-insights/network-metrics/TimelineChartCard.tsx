@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartContainer,
@@ -27,11 +26,8 @@ import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts"
 export function TimelineChartCard() {
   const series = useNetworkMetricSeries();
 
-  const { chartData, reportLabels } = useMemo(() => {
-    const rows = buildTimelineChartRows(series);
-    const labels = series.map((m) => m.label);
-    return { chartData: rows, reportLabels: labels };
-  }, [series]);
+  const chartData = buildTimelineChartRows(series);
+  const reportLabels = series.map((m) => m.label);
 
   if (!series.length || chartData.length === 0) {
     return null;

@@ -1,6 +1,5 @@
 "use client";
 import { TreeMapData } from "@/lib/schema";
-import { useMemo } from "react";
 import { flattenTreeMapNode } from "@/features/page-speed-insights/flattenTreeMapNode";
 import { useScriptTreemapItems } from "@/features/page-speed-insights/script-treemap/useScriptTreemapItems";
 import { Card, CardHeader } from "@/components/ui/card";
@@ -34,10 +33,7 @@ export function JSUsageCardSection() {
 }
 
 export function JSUsageCard({ treeData, label }: { treeData: TreeMapData; label?: string }) {
-  const nodes = useMemo(() => {
-    const nodes = treeData.nodes;
-    return nodes.map(flattenTreeMapNode);
-  }, [treeData]);
+  const nodes = treeData.nodes.map(flattenTreeMapNode);
 
   return (
     <Card className="col-span-1 w-full min-w-0 lg:col-span-full">
@@ -55,10 +51,7 @@ export function JSUsageCard({ treeData, label }: { treeData: TreeMapData; label?
 }
 
 export function JSUsageAccordion({ treeData, label }: { treeData: TreeMapData; label?: string }) {
-  const nodes = useMemo(() => {
-    const nodes = treeData.nodes;
-    return nodes.map(flattenTreeMapNode);
-  }, [treeData]);
+  const nodes = treeData.nodes.map(flattenTreeMapNode);
 
   return (
     <Details className="col-span-1 w-full min-w-0 lg:col-span-full">

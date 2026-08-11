@@ -11,7 +11,6 @@ import { RenderDebugData } from "@/features/page-speed-insights/lh-categories/Re
 import { RenderCriticalChainData } from "@/features/page-speed-insights/lh-categories/table/RenderCriticalChain";
 import { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataItem";
 import { JSUsageAccordion } from "@/features/page-speed-insights/JSUsage/JSUsageSection";
-import { useMemo } from "react";
 import { RenderNetworkDependencyTree } from "@/features/page-speed-insights/lh-categories/table/RenderNetworkDependencyTree";
 
 export function RenderDetails({ items }: { items: TableDataItem[] }) {
@@ -78,68 +77,52 @@ export function RenderDetails({ items }: { items: TableDataItem[] }) {
 
 function RenderList({ rows }: { rows: TableDataItem[] }) {
   // const auditData = rows.map((a) => a?.auditResult);
-  const items = useMemo(() => {
-    // Early validation of rows having list type details
-    if (!rows.every((r) => r?.auditResult?.details?.type === "list")) {
-      return null;
-    }
+  if (!rows.every((r) => r?.auditResult?.details?.type === "list")) {
+    return null;
+  }
 
-    // Check if any item contains a network-tree value
-    const hasNetworkTree = rows.some((row) => {
-      const details = row?.auditResult?.details as AuditDetailList;
-      const listItems = details?.items;
-      return listItems?.some(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (item: any) =>
-          item?.value &&
-          typeof item.value === "object" &&
-          "type" in item.value &&
-          item.value.type === "network-tree",
-      );
-    });
+  const hasNetworkTree = rows.some((row) => {
+    const details = row?.auditResult?.details as AuditDetailList;
+    const listItems = details?.items;
+    return listItems?.some(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (item: any) =>
+        item?.value &&
+        typeof item.value === "object" &&
+        "type" in item.value &&
+        item.value.type === "network-tree",
+    );
+  });
 
-    // If network-tree is found, render it directly
-    if (hasNetworkTree) {
-      return "network-tree";
-    }
-
-    // Transform and group items in a single pass
-    const groupedItems: TableDataItem[][] = [];
-
-    for (const row of rows) {
-      const details = row?.auditResult?.details as AuditDetailList;
-      const items = details?.items;
-
-      if (!items?.length) continue;
-
-      items.forEach((item, index) => {
-        groupedItems[index] = groupedItems[index] || [];
-        groupedItems[index].push({
-          ...row,
-          auditResult: {
-            ...row.auditResult,
-            details: {
-              ...details,
-              ...item,
-            },
-          },
-        });
-      });
-    }
-
-    return groupedItems;
-  }, [rows]);
-
-  if (!items) return null;
-
-  // Render network dependency tree if detected
-  if (items === "network-tree") {
+  if (hasNetworkTree) {
     return <RenderNetworkDependencyTree />;
+  }
+
+  const groupedItems: TableDataItem[][] = [];
+  for (const row of rows) {
+    const details = row?.auditResult?.details as AuditDetailList;
+    const items = details?.items;
+
+    if (!items?.length) continue;
+
+    items.forEach((item, index) => {
+      groupedItems[index] = groupedItems[index] || [];
+      groupedItems[index].push({
+        ...row,
+        auditResult: {
+          ...row.auditResult,
+          details: {
+            ...details,
+            ...item,
+          },
+        },
+      });
+    });
   }
 
   return (
     <div>
-      {items.map((item, index: number) => (
+      {groupedItems.map((item, index: number) => (
         <RenderDetails key={index} items={item} />
       ))}
     </div>

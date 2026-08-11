@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -22,7 +21,7 @@ import {
 import type { TreeMapData } from "@/lib/schema";
 
 function ScriptTreemapTableCard({ treeData, label }: { treeData: TreeMapData; label?: string }) {
-  const nodes = useMemo(() => treeData.nodes.map(flattenTreeMapNode), [treeData]);
+  const nodes = treeData.nodes.map(flattenTreeMapNode);
   const title = label ? `JS Usage Table (${label})` : "JS Usage Table";
 
   return (
@@ -41,15 +40,9 @@ function ScriptTreemapTableCard({ treeData, label }: { treeData: TreeMapData; la
 
 export function ScriptTreemapSection() {
   const treemapItems = useScriptTreemapItems();
-  const itemsWithData = useMemo(
-    () => treemapItems.filter(({ treeData }) => treeData.nodes?.length > 0),
-    [treemapItems],
-  );
+  const itemsWithData = treemapItems.filter(({ treeData }) => treeData.nodes?.length > 0);
 
-  const reportValues = useMemo(
-    () => itemsWithData.map(({ label }, index) => `${label}_${index}`),
-    [itemsWithData],
-  );
+  const reportValues = itemsWithData.map(({ label }, index) => `${label}_${index}`);
 
   if (!itemsWithData.length) {
     return null;

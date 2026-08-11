@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, type CSSProperties, type ReactNode } from "react";
+import { type CSSProperties, type ReactNode } from "react";
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   flexRender,
@@ -20,10 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
-const columnSizeSelector = (state: {
-  columnSizing: unknown;
-  columnResizing: unknown;
-}) => ({
+const columnSizeSelector = (state: { columnSizing: unknown; columnResizing: unknown }) => ({
   columnSizing: state.columnSizing,
   columnResizing: state.columnResizing,
 });
@@ -62,7 +59,7 @@ export type DataTableHeadProps<TData extends RowData> = {
   compactColumnIds?: ReadonlySet<string>;
 };
 
-function defaultHeaderCellStyle(header: Header<any, RowData, unknown>): CSSProperties {
+function defaultHeaderCellStyle(header: Header<any, any, unknown>): CSSProperties {
   const size = header.getSize();
   return {
     width: `${size}px`,
@@ -82,7 +79,7 @@ export function DataTableHead<TData extends RowData>({
   compactColumnIds = DEFAULT_COMPACT_COLUMN_IDS,
 }: DataTableHeadProps<TData>) {
   const isCompact = compactColumnIds.has(header.column.id);
-  const columnSizeStyle = style ?? defaultHeaderCellStyle(header);
+  const columnSizeStyle = style ?? defaultHeaderCellStyle(header as Header<any, any, unknown>);
 
   return (
     <TableHead className={cn("relative overflow-hidden", className)} style={columnSizeStyle}>
@@ -150,13 +147,9 @@ function CheckBoxFilter<TData extends RowData>({
 }) {
   const col = header.column;
   const table = header.getContext().table;
-  const sortedUniqueValues = useMemo(
-    () =>
-      Array.from(col?.getFacetedUniqueValues()?.keys() || [])
-        .sort()
-        .slice(0, 5000),
-    [col],
-  );
+  const sortedUniqueValues = Array.from(col?.getFacetedUniqueValues()?.keys() || [])
+    .sort()
+    .slice(0, 5000);
 
   return (
     <Subscribe source={table.atoms.columnFilters}>
@@ -174,9 +167,7 @@ function CheckBoxFilter<TData extends RowData>({
                     }
                     onCheckedChange={(checked: unknown) => {
                       col.setFilterValue((oldValue: boolean[] | undefined) => {
-                        const previousValue = oldValue?.length
-                          ? oldValue
-                          : [...sortedUniqueValues];
+                        const previousValue = oldValue?.length ? oldValue : [...sortedUniqueValues];
                         return checked
                           ? [...new Set([...previousValue, !!v])]
                           : previousValue?.filter((a) => !!a !== !!v);

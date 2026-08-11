@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import type { TableItem } from "@/lib/schema";
 import { getNumber } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,25 +25,20 @@ type MainThreadWorkData = {
 const TOP_CATEGORIES = 8;
 
 export function MainThreadWorkChartCard({ metrics }: { metrics: MainThreadWorkData[] }) {
-  const chartData = useMemo(() => {
-    const categoryTotals = new Map<string, number>();
-
-    for (const { mainThreadWork } of metrics) {
-      for (const item of mainThreadWork) {
-        const group = typeof item.group === "string" ? item.group : "";
-        const groupLabel =
-          typeof item.groupLabel === "string" ? item.groupLabel : group || "Other";
-        const label = groupLabel || toTitleCase(group) || "Other";
-        const duration = getNumber(item.duration) ?? 0;
-        categoryTotals.set(label, (categoryTotals.get(label) ?? 0) + duration);
-      }
+  const categoryTotals = new Map<string, number>();
+  for (const { mainThreadWork } of metrics) {
+    for (const item of mainThreadWork) {
+      const group = typeof item.group === "string" ? item.group : "";
+      const groupLabel = typeof item.groupLabel === "string" ? item.groupLabel : group || "Other";
+      const label = groupLabel || toTitleCase(group) || "Other";
+      const duration = getNumber(item.duration) ?? 0;
+      categoryTotals.set(label, (categoryTotals.get(label) ?? 0) + duration);
     }
-
-    return Array.from(categoryTotals.entries())
-      .map(([category, duration]) => ({ category, duration }))
-      .sort((a, b) => b.duration - a.duration)
-      .slice(0, TOP_CATEGORIES);
-  }, [metrics]);
+  }
+  const chartData = Array.from(categoryTotals.entries())
+    .map(([category, duration]) => ({ category, duration }))
+    .sort((a, b) => b.duration - a.duration)
+    .slice(0, TOP_CATEGORIES);
 
   const hasData = metrics.some((m) => m.mainThreadWork.length > 0);
   if (!hasData || !chartData.length) {
@@ -80,12 +74,7 @@ export function MainThreadWorkChartCard({ metrics }: { metrics: MainThreadWorkDa
             barCategoryGap="24%"
           >
             <CartesianGrid horizontal={false} strokeDasharray="3 3" className="stroke-border/40" />
-            <XAxis
-              type="number"
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={formatAxisMs}
-            />
+            <XAxis type="number" tickLine={false} axisLine={false} tickFormatter={formatAxisMs} />
             <YAxis
               type="category"
               dataKey="category"

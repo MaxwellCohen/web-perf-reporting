@@ -1,5 +1,5 @@
 import { TableItem, TableColumnHeading, DeviceType } from "@/lib/schema";
-import { Fragment, useMemo, type ReactNode, type RefObject } from "react";
+import { Fragment, type ReactNode, type RefObject } from "react";
 import { getDerivedSubItemsHeading } from "@/features/page-speed-insights/lh-categories/table/utils";
 import { RenderTableRowContainer } from "@/features/page-speed-insights/lh-categories/table/RenderTableRowContainer";
 import { RenderTableHeader } from "@/features/page-speed-insights/lh-categories/table/RenderTableHeader";
@@ -52,17 +52,13 @@ export function RenderEntityTable({
   skipSumming: string[];
   sortedBy: string[];
 }) {
-  const entityItems = useMemo(
-    () =>
-      getEntityGroupItems({
-        items,
-        headings,
-        isEntityGrouped,
-        skipSumming,
-        sortedBy,
-      }),
-    [items, headings, isEntityGrouped, skipSumming, sortedBy],
-  );
+  const entityItems = getEntityGroupItems({
+    items,
+    headings,
+    isEntityGrouped,
+    skipSumming,
+    sortedBy,
+  });
 
   return (
     <GridTableWithCopyToolbar>

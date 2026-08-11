@@ -1,5 +1,4 @@
 "use client";
-import { useMemo } from "react";
 import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 import {
   useSimpleTable,
@@ -45,54 +44,47 @@ const NUMERIC_SIZES = {
 } as const;
 
 export function ResourcesTable({ items }: ResourcesTableProps) {
-  const data = useMemo<ResourceTableRow[]>(
-    () => items.map((item) => ({ ...item, url: item.url ?? "" })),
-    [items],
-  );
+  const data: ResourceTableRow[] = items.map((item) => ({ ...item, url: item.url ?? "" }));
 
-  const columns = useMemo<FlatColumnDef<ResourceTableRow>[]>(
-    () =>
-      [
-        createURLColumn(columnHelper, {
-          header: "Resource URL",
-          size: 400,
-          minSize: 200,
-          maxSize: 800,
-          emptyLabel: "Unattributable",
-          enableGrouping: false,
-        }),
-        createBytesColumn(columnHelper, "wastedBytes", "Wasted Bytes", {
-          ...positive,
-          ...NUMERIC_SIZES.wastedBytes,
-        }),
-        createMSColumn(columnHelper, "wastedMs", "Wasted Time", {
-          ...positive,
-          ...NUMERIC_SIZES.wastedMs,
-        }),
-        createPercentageColumn(columnHelper, "wastedPercent", "Wasted %", {
-          precision: 1,
-          ...positive,
-          ...NUMERIC_SIZES.wastedPercent,
-        }),
-        createBytesColumn(columnHelper, "totalBytes", "Total Size", {
-          ...positive,
-          ...NUMERIC_SIZES.totalBytes,
-        }),
-        createMSColumn(columnHelper, "scripting", "Scripting Time", {
-          ...positive,
-          ...NUMERIC_SIZES.scripting,
-        }),
-        createMSColumn(columnHelper, "scriptParseCompile", "Parse/Compile Time", {
-          ...positive,
-          ...NUMERIC_SIZES.scriptParseCompile,
-        }),
-        createMSColumn(columnHelper, "total", "Total CPU Time", {
-          ...positive,
-          ...NUMERIC_SIZES.total,
-        }),
-      ] as FlatColumnDef<ResourceTableRow>[],
-    [],
-  );
+  const columns = [
+    createURLColumn(columnHelper, {
+      header: "Resource URL",
+      size: 400,
+      minSize: 200,
+      maxSize: 800,
+      emptyLabel: "Unattributable",
+      enableGrouping: false,
+    }),
+    createBytesColumn(columnHelper, "wastedBytes", "Wasted Bytes", {
+      ...positive,
+      ...NUMERIC_SIZES.wastedBytes,
+    }),
+    createMSColumn(columnHelper, "wastedMs", "Wasted Time", {
+      ...positive,
+      ...NUMERIC_SIZES.wastedMs,
+    }),
+    createPercentageColumn(columnHelper, "wastedPercent", "Wasted %", {
+      precision: 1,
+      ...positive,
+      ...NUMERIC_SIZES.wastedPercent,
+    }),
+    createBytesColumn(columnHelper, "totalBytes", "Total Size", {
+      ...positive,
+      ...NUMERIC_SIZES.totalBytes,
+    }),
+    createMSColumn(columnHelper, "scripting", "Scripting Time", {
+      ...positive,
+      ...NUMERIC_SIZES.scripting,
+    }),
+    createMSColumn(columnHelper, "scriptParseCompile", "Parse/Compile Time", {
+      ...positive,
+      ...NUMERIC_SIZES.scriptParseCompile,
+    }),
+    createMSColumn(columnHelper, "total", "Total CPU Time", {
+      ...positive,
+      ...NUMERIC_SIZES.total,
+    }),
+  ] as FlatColumnDef<ResourceTableRow>[];
 
   const table = useSimpleTable({ data, columns });
 

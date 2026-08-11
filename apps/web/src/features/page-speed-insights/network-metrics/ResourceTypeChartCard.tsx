@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { formatBytes } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
@@ -27,25 +26,23 @@ function sumOn<T extends Record<string, unknown>>(items: T[], key: string): numb
 export function ResourceTypeChartCard() {
   const requestStats = useNetworkRequestStats();
 
-  const chartData = useMemo(() => {
-    const validStats = requestStats.filter(
-      (s) => s.byResourceType && Object.keys(s.byResourceType).length > 0,
-    );
-    if (!validStats.length) return [];
+  const validStats = requestStats.filter(
+    (s) => s.byResourceType && Object.keys(s.byResourceType).length > 0,
+  );
 
-    if (validStats.length === 1) {
-      const { byResourceType } = validStats[0];
-      return Object.entries(byResourceType)
-        .map(([type, items]) => {
-          const typedItems = Array.isArray(items) ? (items as TableItem[]) : [];
-          return {
-            resourceType: toTitleCase(type),
-            transferSize: sumOn(typedItems, "transferSize"),
-          };
-        })
-        .sort((a, b) => b.transferSize - a.transferSize);
-    }
-
+  let chartData: { resourceType: string; transferSize: number }[] = [];
+  if (validStats.length === 1) {
+    const { byResourceType } = validStats[0];
+    chartData = Object.entries(byResourceType)
+      .map(([type, items]) => {
+        const typedItems = Array.isArray(items) ? (items as TableItem[]) : [];
+        return {
+          resourceType: toTitleCase(type),
+          transferSize: sumOn(typedItems, "transferSize"),
+        };
+      })
+      .sort((a, b) => b.transferSize - a.transferSize);
+  } else if (validStats.length > 1) {
     const typeTotals = new Map<string, number>();
     for (const { byResourceType } of validStats) {
       for (const [type, items] of Object.entries(byResourceType)) {
@@ -54,22 +51,19 @@ export function ResourceTypeChartCard() {
         typeTotals.set(type, (typeTotals.get(type) ?? 0) + size);
       }
     }
-
-    return Array.from(typeTotals.entries())
+    chartData = Array.from(typeTotals.entries())
       .map(([type, transferSize]) => ({
         resourceType: toTitleCase(type),
         transferSize,
       }))
       .sort((a, b) => b.transferSize - a.transferSize);
-  }, [requestStats]);
+  }
 
   if (!chartData.length) {
     return null;
   }
 
-  const config = buildKeyedChartConfig([
-    { key: "transferSize", label: "Transfer size" },
-  ]);
+  const config = buildKeyedChartConfig([{ key: "transferSize", label: "Transfer size" }]);
   const chartHeight = horizontalBarChartHeight(chartData.length, { rowPx: 40, minPx: 180 });
   const yAxisWidth = yAxisWidthForLabels(
     chartData.map((row) => row.resourceType),

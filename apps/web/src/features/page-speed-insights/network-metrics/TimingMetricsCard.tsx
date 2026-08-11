@@ -1,5 +1,4 @@
 "use client";
-import { useMemo } from "react";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import {
   useStandardTable,
@@ -42,21 +41,17 @@ function hasTimingData(m: NetworkMetricSeries): boolean {
 
 export function TimingMetricsCard() {
   const series = useNetworkMetricSeries();
-  const validMetrics = useMemo(() => series.filter(hasTimingData), [series]);
+  const validMetrics = series.filter(hasTimingData);
   const showReportColumn = validMetrics.length > 1;
 
-  const data = useMemo<TimingRow[]>(
-    () =>
-      validMetrics.map(({ label, ttfb, fcp, lcp, speedIndex, totalBlockingTime }) => ({
-        label,
-        ttfb,
-        fcp,
-        lcp,
-        speedIndex,
-        totalBlockingTime,
-      })),
-    [validMetrics],
-  );
+  const data = validMetrics.map(({ label, ttfb, fcp, lcp, speedIndex, totalBlockingTime }) => ({
+    label,
+    ttfb,
+    fcp,
+    lcp,
+    speedIndex,
+    totalBlockingTime,
+  }));
 
   const columns = useTableColumns(cols, columnHelper, showReportColumn);
   const table = useStandardTable({ data, columns });
@@ -66,6 +61,10 @@ export function TimingMetricsCard() {
   }
 
   return (
-    <TableCard title="Page Load Timing Metrics" table={table} className="md:col-span-2 lg:col-span-3" />
+    <TableCard
+      title="Page Load Timing Metrics"
+      table={table}
+      className="md:col-span-2 lg:col-span-3"
+    />
   );
 }

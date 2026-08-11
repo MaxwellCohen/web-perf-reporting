@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
 import { Accordion, AccordionItem, AccordionContent } from "@/components/ui/accordion";
 import { AccordionSectionTitleTrigger } from "@/components/ui/accordion-section-title-trigger";
@@ -61,49 +61,35 @@ function RecommendationGroup({
 
 export function RecommendationsSection() {
   const items = usePageSpeedItems();
-  const allRecommendations = useMemo(() => analyzeAudits(items), [items]);
+  const allRecommendations = analyzeAudits(items);
 
-  const recommendations = useMemo(() => {
-    return allRecommendations.filter(hasDetails);
-  }, [allRecommendations]);
+  const recommendations = allRecommendations.filter(hasDetails);
 
-  const quickWins = useMemo(
-    () => getQuickWinRecommendations(recommendations),
-    [recommendations],
-  );
+  const quickWins = getQuickWinRecommendations(recommendations);
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedPriorities, setSelectedPriorities] = useState<string[]>([]);
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
-  const categories = useMemo(() => {
-    return Array.from(new Set(recommendations.map((r) => r.category))).sort();
-  }, [recommendations]);
+  const categories = Array.from(new Set(recommendations.map((r) => r.category))).sort();
 
-  const priorities = useMemo(() => {
-    return Array.from(new Set(recommendations.map((r) => r.priority))).sort();
-  }, [recommendations]);
+  const priorities = Array.from(new Set(recommendations.map((r) => r.priority))).sort();
 
-  const filteredRecommendations = useMemo(() => {
-    return recommendations.filter((rec) => {
-      const categoryMatch =
-        selectedCategories.length === 0 || selectedCategories.includes(rec.category);
-      const priorityMatch =
-        selectedPriorities.length === 0 || selectedPriorities.includes(rec.priority);
-      return categoryMatch && priorityMatch;
-    });
-  }, [recommendations, selectedCategories, selectedPriorities]);
+  const filteredRecommendations = recommendations.filter((rec) => {
+    const categoryMatch =
+      selectedCategories.length === 0 || selectedCategories.includes(rec.category);
+    const priorityMatch =
+      selectedPriorities.length === 0 || selectedPriorities.includes(rec.priority);
+    return categoryMatch && priorityMatch;
+  });
 
-  const grouped = useMemo(() => {
-    const groups: Record<string, Recommendation[]> = {};
-    filteredRecommendations.forEach((rec) => {
-      if (!groups[rec.category]) {
-        groups[rec.category] = [];
-      }
-      groups[rec.category].push(rec);
-    });
-    return groups;
-  }, [filteredRecommendations]);
+  const grouped: Record<string, Recommendation[]> = {};
+  filteredRecommendations.forEach((rec) => {
+    if (!grouped[rec.category]) {
+      grouped[rec.category] = [];
+    }
+    grouped[rec.category].push(rec);
+  });
 
   const toggleAll = () => {
     if (expandedItems.length === filteredRecommendations.length) {
@@ -147,8 +133,7 @@ export function RecommendationsSection() {
             title="Quick Wins"
             recs={quickWins.filter(
               (rec) =>
-                (selectedCategories.length === 0 ||
-                  selectedCategories.includes(rec.category)) &&
+                (selectedCategories.length === 0 || selectedCategories.includes(rec.category)) &&
                 (selectedPriorities.length === 0 || selectedPriorities.includes(rec.priority)),
             )}
             items={items}

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DebouncedInput } from "@/components/ui/input";
@@ -49,9 +49,7 @@ function ResourceTypeLegend({ types }: { types: string[] }) {
           key={type}
           className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground"
         >
-          <span
-            className={cn("h-2 w-2 shrink-0 rounded-sm", getNetworkBarColor(type))}
-          />
+          <span className={cn("h-2 w-2 shrink-0 rounded-sm", getNetworkBarColor(type))} />
           {toTitleCase(type)}
         </span>
       ))}
@@ -121,13 +119,7 @@ function ResourceTypeFilterDropdown({
   );
 }
 
-function ToolbarField({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
+function ToolbarField({ children, className }: { children: ReactNode; className?: string }) {
   return <div className={cn("w-full md:w-auto", className)}>{children}</div>;
 }
 
@@ -140,27 +132,19 @@ export function NetworkWaterfallCard() {
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
   const [heightSize, setHeightSize] = useState<WaterfallHeightSize>("default");
 
-  const validSeries = useMemo(
-    () => series.filter((entry) => entry.networkRequests.length > 0),
-    [series],
-  );
+  const validSeries = series.filter((entry) => entry.networkRequests.length > 0);
 
   const activeIndex = Math.min(selectedReportIndex, Math.max(validSeries.length - 1, 0));
   const activeSeries = validSeries[activeIndex];
 
-  const allRows = useMemo(
-    () => (activeSeries ? buildWaterfallRows(activeSeries.networkRequests) : []),
-    [activeSeries],
-  );
+  const allRows = activeSeries ? buildWaterfallRows(activeSeries.networkRequests) : [];
 
-  const resourceTypeOptions = useMemo(() => getWaterfallResourceTypes(allRows), [allRows]);
+  const resourceTypeOptions = getWaterfallResourceTypes(allRows);
 
-  const displayRows = useMemo(() => {
-    const filtered = filterWaterfallRows(allRows, { resourceTypes, search });
-    return sortWaterfallRows(filtered, sortBy);
-  }, [allRows, resourceTypes, search, sortBy]);
+  const filtered = filterWaterfallRows(allRows, { resourceTypes, search });
+  const displayRows = sortWaterfallRows(filtered, sortBy);
 
-  const timeRange = useMemo(() => getWaterfallTimeRange(displayRows), [displayRows]);
+  const timeRange = getWaterfallTimeRange(displayRows);
 
   const milestones = activeSeries
     ? {
@@ -231,10 +215,7 @@ export function NetworkWaterfallCard() {
               value={heightSize}
               onValueChange={(value) => setHeightSize(value as WaterfallHeightSize)}
             >
-              <SelectTrigger
-                className="w-full md:w-[140px]"
-                aria-label="Waterfall height"
-              >
+              <SelectTrigger className="w-full md:w-[140px]" aria-label="Waterfall height">
                 <SelectValue placeholder="Height" />
               </SelectTrigger>
               <SelectContent>

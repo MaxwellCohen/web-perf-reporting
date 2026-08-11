@@ -1,5 +1,4 @@
 "use client";
-import { useMemo } from "react";
 import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import {
   useStandardTable,
@@ -166,56 +165,47 @@ function TimelineCardTable({
 export function TimelineCard() {
   const series = useNetworkMetricSeries();
 
-  const { data, columns } = useMemo((): {
-    data: TimelineRow[];
-    columns: StandardColumnDef<TimelineRow>[];
-  } => {
-    const reportLabels = series.map((m) => m.label);
-    const eventDataMap = buildEventDataMap(series);
-    const rows = buildTimelineRows(eventDataMap, reportLabels);
-
-    const columnHelper = createStockColumnHelper<TimelineRow>();
-    const tableColumns: StandardColumnDef<TimelineRow>[] = [
-      columnHelper.accessor("event", {
-        id: "event",
-        header: () => (
-          <span title="Performance events observed during page load, sorted by time">Event</span>
-        ),
+  const reportLabels = series.map((m) => m.label);
+  const eventDataMap = buildEventDataMap(series);
+  const rows = buildTimelineRows(eventDataMap, reportLabels);
+  const columnHelper = createStockColumnHelper<TimelineRow>();
+  const tableColumns: StandardColumnDef<TimelineRow>[] = [
+    columnHelper.accessor("event", {
+      id: "event",
+      header: () => (
+        <span title="Performance events observed during page load, sorted by time">Event</span>
+      ),
+      enableSorting: true,
+      enableResizing: true,
+      cell: (info) => {
+        const eventName = info.getValue();
+        const description = EVENT_DESCRIPTIONS[eventName] ?? "";
+        return (
+          <span className="font-medium" title={description}>
+            {eventName}
+          </span>
+        );
+      },
+    }),
+    ...reportLabels.map((reportLabel, index) => {
+      const columnId = reportLabel ? `report_${reportLabel}` : `report_${index}`;
+      return columnHelper.accessor((row) => row[reportLabel] as number | undefined, {
+        id: columnId,
+        header: reportLabel || `Report ${index + 1}`,
         enableSorting: true,
         enableResizing: true,
-        cell: (info) => {
-          const eventName = info.getValue();
-          const description = EVENT_DESCRIPTIONS[eventName] ?? "";
-          return (
-            <span className="font-medium" title={description}>
-              {eventName}
-            </span>
-          );
+        sortFn: (rowA, rowB, columnId) => {
+          const a = rowA.getValue(columnId) as number | undefined;
+          const b = rowB.getValue(columnId) as number | undefined;
+          return sortNumeric(a, b);
         },
-      }),
-      ...reportLabels.map((reportLabel, index) => {
-        const columnId = reportLabel ? `report_${reportLabel}` : `report_${index}`;
-        return columnHelper.accessor((row) => row[reportLabel] as number | undefined, {
-          id: columnId,
-          header: reportLabel || `Report ${index + 1}`,
-          enableSorting: true,
-          enableResizing: true,
-          sortFn: (rowA, rowB, columnId) => {
-            const a = rowA.getValue(columnId) as number | undefined;
-            const b = rowB.getValue(columnId) as number | undefined;
-            return sortNumeric(a, b);
-          },
-          cell: (info) => optionalMsCell(info.getValue()),
-        });
-      }),
-    ];
-
-    return { data: rows, columns: tableColumns };
-  }, [series]);
-
-  if (!series.length || data.length === 0) {
+        cell: (info) => optionalMsCell(info.getValue()),
+      });
+    }),
+  ];
+  if (!series.length || rows.length === 0) {
     return null;
   }
 
-  return <TimelineCardTable data={data} columns={columns} />;
+  return <TimelineCardTable data={rows} columns={tableColumns} />;
 }

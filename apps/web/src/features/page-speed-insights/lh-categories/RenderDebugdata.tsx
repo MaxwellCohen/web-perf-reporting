@@ -1,4 +1,8 @@
-import type { StockCell, StockColumnDef, StockRow } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import type {
+  StockCell,
+  StockColumnDef,
+  StockRow,
+} from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import {
   Table,
   TableBody,
@@ -11,15 +15,9 @@ import { DebugData } from "@/lib/schema";
 import { renderBoolean } from "@/features/page-speed-insights/lh-categories/renderBoolean";
 import { camelCaseToSentenceCase } from "@/features/page-speed-insights/lh-categories/camelCaseToSentenceCase";
 import { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataItem";
-import { useMemo } from "react";
-import {
-  flexRender,
-  useTable,
-} from "@tanstack/react-table";
+import { flexRender, useTable } from "@tanstack/react-table";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
-import {
-  debugDataTableFeatures,
-} from "@/features/page-speed-insights/tanstack-table-v9/features";
+import { debugDataTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 import {
   RenderBytesValue,
   RenderCountNumber,
@@ -93,59 +91,52 @@ export function RenderDebugData({ items }: { items: TableDataItem[] }) {
 }
 
 function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
-  const data = useMemo(
-    () =>
-      items?.reduce((acc: Array<DebugDataTableItem>, i) => {
-        const d = Object.entries(cleanDebugData(i.auditResult.details as DebugData)).map((i2) => {
-          return {
-            key: i2[0],
-            value: i2[1],
-            label: i._userLabel,
-          };
-        });
-        return [...acc, ...d];
-      }, []),
-    [items],
-  );
+  const data = items?.reduce((acc: Array<DebugDataTableItem>, i) => {
+    const d = Object.entries(cleanDebugData(i.auditResult.details as DebugData)).map((i2) => {
+      return {
+        key: i2[0],
+        value: i2[1],
+        label: i._userLabel,
+      };
+    });
+    return [...acc, ...d];
+  }, []);
 
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor("key", {
-        id: "key",
-        enableGrouping: true,
-        enableResizing: true,
-        size: 220,
-        minSize: 120,
-        header: "Item",
-        cell: (props) => {
-          const val = props.getValue();
-          return RenderTitle(val);
-        },
-        aggregationFn: "unique",
-      }),
-      columnHelper.accessor("value", {
-        id: "value",
-        enableResizing: true,
-        size: 180,
-        minSize: 100,
-        header: "Value",
-        aggregationFn: "unique", // unique values for each column
-        cell: (props) => {
-          const val = props.getValue();
-          const key = props.row.getValue("key") as string;
-          return renderItem(val, key);
-        },
-      }),
-      columnHelper.accessor("label", {
-        id: "label",
-        enableGrouping: true,
-        enableResizing: true,
-        size: 140,
-        minSize: 80,
-      }),
-    ],
-    [],
-  );
+  const columns = [
+    columnHelper.accessor("key", {
+      id: "key",
+      enableGrouping: true,
+      enableResizing: true,
+      size: 220,
+      minSize: 120,
+      header: "Item",
+      cell: (props) => {
+        const val = props.getValue();
+        return RenderTitle(val);
+      },
+      aggregationFn: "unique",
+    }),
+    columnHelper.accessor("value", {
+      id: "value",
+      enableResizing: true,
+      size: 180,
+      minSize: 100,
+      header: "Value",
+      aggregationFn: "unique", // unique values for each column
+      cell: (props) => {
+        const val = props.getValue();
+        const key = props.row.getValue("key") as string;
+        return renderItem(val, key);
+      },
+    }),
+    columnHelper.accessor("label", {
+      id: "label",
+      enableGrouping: true,
+      enableResizing: true,
+      size: 140,
+      minSize: 80,
+    }),
+  ];
   const table = useTable({
     features: debugDataTableFeatures,
     data,
@@ -171,69 +162,71 @@ function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
         <CopyTableButton table={table} />
       </div>
       <Table style={{ width: tableWidth }} className="w-max!" wrapperClassName="min-w-0">
-      <TableHeader>
-        {table.getHeaderGroups().map((headerGroup) => {
-          return (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                const size = header.getSize();
-                return (
-                  <TableHead
-                    key={header.id}
-                    className="relative overflow-hidden"
-                    style={{
-                      width: `${size}px`,
-                      minWidth: `${size}px`,
-                      maxWidth: `${size}px`,
-                    }}
-                  >
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                    <ColumnResizer header={header} />
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          );
-        })}
-      </TableHeader>
-      <TableBody>
-        {table.getRowModel().rows.map((row) => {
-          if (row.subRows.length) {
-            return row.subRows
-              .map((sr, i) => {
-                return (
-                  <TableRow key={sr.id}>
-                    {sr.getVisibleCells().map((cell) => {
-                      if (cell.id.includes("key")) {
-                        if (i !== 0) {
-                          return null;
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => {
+            return (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  const size = header.getSize();
+                  return (
+                    <TableHead
+                      key={header.id}
+                      className="relative overflow-hidden"
+                      style={{
+                        width: `${size}px`,
+                        minWidth: `${size}px`,
+                        maxWidth: `${size}px`,
+                      }}
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      <ColumnResizer header={header} />
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            );
+          })}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows.map((row) => {
+            if (row.subRows.length) {
+              return row.subRows
+                .map((sr, i) => {
+                  return (
+                    <TableRow key={sr.id}>
+                      {sr.getVisibleCells().map((cell) => {
+                        if (cell.id.includes("key")) {
+                          if (i !== 0) {
+                            return null;
+                          }
+                          return (
+                            <DebugDataTableCell
+                              key={cell.id}
+                              cell={cell}
+                              row={sr}
+                              rowSpan={row.subRows.length}
+                            />
+                          );
                         }
                         return (
-                          <DebugDataTableCell
-                            key={cell.id}
-                            cell={cell}
-                            row={sr}
-                            rowSpan={row.subRows.length}
-                          />
+                          <DebugDataTableCell key={cell.id} cell={cell} row={sr} rowSpan={1} />
                         );
-                      }
-                      return <DebugDataTableCell key={cell.id} cell={cell} row={sr} rowSpan={1} />;
-                    })}
-                  </TableRow>
-                );
-              })
-              .filter(Boolean);
-          }
-          return (
-            <TableRow key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <DebugDataTableCell key={cell.id} cell={cell} row={row} />
-              ))}
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
+                      })}
+                    </TableRow>
+                  );
+                })
+                .filter(Boolean);
+            }
+            return (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <DebugDataTableCell key={cell.id} cell={cell} row={row} />
+                ))}
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
     </>
   );
 }

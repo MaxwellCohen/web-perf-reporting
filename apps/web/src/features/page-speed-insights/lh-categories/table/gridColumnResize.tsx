@@ -2,10 +2,8 @@
 
 import {
   createContext,
-  useCallback,
   useContext,
   useEffect,
-  useMemo,
   useRef,
   useState,
   type MouseEvent as ReactMouseEvent,
@@ -38,7 +36,9 @@ export function getDefaultGridColumnWidths(headings: TableColumnHeading[]): numb
 }
 
 function headingsIdentity(headings: TableColumnHeading[]): string {
-  return headings.map((h) => `${h.key ?? ""}:${typeof h.label === "string" ? h.label : ""}`).join("|");
+  return headings
+    .map((h) => `${h.key ?? ""}:${typeof h.label === "string" ? h.label : ""}`)
+    .join("|");
 }
 
 export function GridColumnResizeProvider({
@@ -62,7 +62,7 @@ export function GridColumnResizeProvider({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [headingKey]);
 
-  const startResize = useCallback((columnIndex: number, event: ReactMouseEvent) => {
+  const startResize = (columnIndex: number, event: ReactMouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
     setWidths((current) => {
@@ -91,15 +91,12 @@ export function GridColumnResizeProvider({
 
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
-  }, []);
+  };
 
-  const value = useMemo(
-    () => ({
-      widths,
-      startResize,
-    }),
-    [widths, startResize],
-  );
+  const value = {
+    widths,
+    startResize,
+  };
 
   return (
     <GridColumnResizeContext.Provider value={value}>{children}</GridColumnResizeContext.Provider>

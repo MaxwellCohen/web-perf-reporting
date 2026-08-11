@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useCallback, useMemo } from "react";
+import { Fragment } from "react";
 import {
   buildTimeAxisTicks,
   getSegmentStyle,
@@ -93,12 +93,7 @@ function WaterfallBarTrack({ row, minStart, maxEnd }: WaterfallBarTrackProps) {
     row.queueStart != null && row.queueEnd != null
       ? getSegmentStyle(row.queueStart, row.queueEnd, minStart, maxEnd)
       : null;
-  const networkStyle = getSegmentStyle(
-    row.networkStart,
-    row.networkEnd,
-    minStart,
-    maxEnd,
-  );
+  const networkStyle = getSegmentStyle(row.networkStart, row.networkEnd, minStart, maxEnd);
 
   return (
     <div
@@ -155,10 +150,7 @@ type TickGridOverlayProps = {
 };
 
 function TickGridOverlay({ minStart, maxEnd }: TickGridOverlayProps) {
-  const ticks = useMemo(
-    () => buildTimeAxisTicks(minStart, maxEnd, 5),
-    [minStart, maxEnd],
-  );
+  const ticks = buildTimeAxisTicks(minStart, maxEnd, 5);
   const range = maxEnd - minStart;
   if (range <= 0) return null;
 
@@ -189,12 +181,8 @@ type MilestoneOverlayProps = {
   milestones?: WaterfallMilestones;
 };
 
-function MilestoneOverlay({
-  minStart,
-  maxEnd,
-  milestones,
-}: MilestoneOverlayProps) {
-  const items = useMemo(() => getMilestoneItems(milestones), [milestones]);
+function MilestoneOverlay({ minStart, maxEnd, milestones }: MilestoneOverlayProps) {
+  const items = getMilestoneItems(milestones);
   const range = maxEnd - minStart;
 
   if (!items.length) return null;
@@ -224,7 +212,7 @@ function MilestoneOverlay({
 }
 
 function MilestoneLegend({ milestones }: { milestones?: WaterfallMilestones }) {
-  const items = useMemo(() => getMilestoneItems(milestones), [milestones]);
+  const items = getMilestoneItems(milestones);
   if (!items.length) return null;
 
   return (
@@ -259,25 +247,13 @@ type TimeAxisProps = {
 };
 
 function TimeAxis({ minStart, maxEnd, milestones }: TimeAxisProps) {
-  const ticks = useMemo(
-    () => buildTimeAxisTicks(minStart, maxEnd, 5),
-    [minStart, maxEnd],
-  );
+  const ticks = buildTimeAxisTicks(minStart, maxEnd, 5);
 
   return (
-    <div
-      className="relative w-full min-w-0 space-y-1"
-      data-testid="waterfall-timeline"
-    >
+    <div className="relative w-full min-w-0 space-y-1" data-testid="waterfall-timeline">
       <div className="relative h-4">
         {ticks.map((tick, index) => (
-          <TimeAxisTick
-            key={tick}
-            tick={tick}
-            index={index}
-            minStart={minStart}
-            maxEnd={maxEnd}
-          />
+          <TimeAxisTick key={tick} tick={tick} index={index} minStart={minStart} maxEnd={maxEnd} />
         ))}
       </div>
       <MilestoneLegend milestones={milestones} />
@@ -302,10 +278,9 @@ function TimeAxisTick({
   if (leftPct < 0 || leftPct > 100) return null;
   return (
     <span
-      className={cn(
-        "absolute -translate-x-1/2 tabular-nums text-[11px] text-muted-foreground",
-        { "pl-[3ch]": !index },
-      )}
+      className={cn("absolute -translate-x-1/2 tabular-nums text-[11px] text-muted-foreground", {
+        "pl-[3ch]": !index,
+      })}
       style={{ left: `${leftPct}%` }}
     >
       {tick}ms
@@ -321,10 +296,7 @@ type RowMetaProps = {
 function ResourceTypeSwatch({ resourceType }: { resourceType: string }) {
   return (
     <span
-      className={cn(
-        "mt-0.5 h-2 w-2 shrink-0 rounded-sm",
-        getNetworkBarColor(resourceType),
-      )}
+      className={cn("mt-0.5 h-2 w-2 shrink-0 rounded-sm", getNetworkBarColor(resourceType))}
       title={toTitleCase(resourceType)}
       aria-label={toTitleCase(resourceType)}
     />
@@ -333,9 +305,7 @@ function ResourceTypeSwatch({ resourceType }: { resourceType: string }) {
 
 function RowTrailingMeta({ row }: { row: NetworkWaterfallRow }) {
   const sizeLabel =
-    row.transferSize != null && row.transferSize > 0
-      ? formatBytes(row.transferSize)
-      : "—";
+    row.transferSize != null && row.transferSize > 0 ? formatBytes(row.transferSize) : "—";
 
   return (
     <div className="flex shrink-0 flex-col items-end gap-0.5 tabular-nums text-[10px] leading-tight text-muted-foreground">
@@ -394,24 +364,15 @@ function DetailChip({ label, value }: { label: string; value: string }) {
 
 function RowDetail({ row }: RowDetailProps) {
   const queueMs =
-    row.queueStart != null && row.queueEnd != null
-      ? row.queueEnd - row.queueStart
-      : null;
+    row.queueStart != null && row.queueEnd != null ? row.queueEnd - row.queueStart : null;
 
   return (
     <div className="rounded-md border bg-muted/30 px-3 py-2.5 text-xs">
-      <p className="break-all font-mono text-[11px] leading-relaxed text-foreground">
-        {row.url}
-      </p>
+      <p className="break-all font-mono text-[11px] leading-relaxed text-foreground">{row.url}</p>
       <div className="mt-2 flex flex-wrap gap-1.5">
         <DetailChip label="Type" value={toTitleCase(row.resourceType)} />
-        {queueMs != null ? (
-          <DetailChip label="Queue" value={formatMs(queueMs)} />
-        ) : null}
-        <DetailChip
-          label="Network"
-          value={formatMs(row.networkEnd - row.networkStart)}
-        />
+        {queueMs != null ? <DetailChip label="Queue" value={formatMs(queueMs)} /> : null}
+        <DetailChip label="Network" value={formatMs(row.networkEnd - row.networkStart)} />
         <DetailChip label="Total" value={formatMs(row.duration)} />
         {row.transferSize != null ? (
           <DetailChip label="Transfer" value={formatBytes(row.transferSize)} />
@@ -435,12 +396,9 @@ export function InteractiveNetworkWaterfall({
   const { minStart, maxEnd } = timeRange;
   const selectedRow = rows.find((row) => row.id === selectedId) ?? null;
 
-  const handleRowActivate = useCallback(
-    (id: string) => {
-      onSelectRow?.(selectedId === id ? null : id);
-    },
-    [onSelectRow, selectedId],
-  );
+  const handleRowActivate = (id: string) => {
+    onSelectRow?.(selectedId === id ? null : id);
+  };
 
   if (!rows.length) {
     return (
@@ -487,11 +445,7 @@ export function InteractiveNetworkWaterfall({
             className="sticky top-0 z-20 border-b bg-card px-1 py-1.5"
             style={{ gridRow: 1, gridColumn: 2 }}
           >
-            <TimeAxis
-              minStart={minStart}
-              maxEnd={maxEnd}
-              milestones={milestones}
-            />
+            <TimeAxis minStart={minStart} maxEnd={maxEnd} milestones={milestones} />
           </div>
 
           <div
@@ -499,11 +453,7 @@ export function InteractiveNetworkWaterfall({
             style={{ gridColumn: 2, gridRow: `2 / ${rows.length + 2}` }}
           >
             <TickGridOverlay minStart={minStart} maxEnd={maxEnd} />
-            <MilestoneOverlay
-              minStart={minStart}
-              maxEnd={maxEnd}
-              milestones={milestones}
-            />
+            <MilestoneOverlay minStart={minStart} maxEnd={maxEnd} milestones={milestones} />
           </div>
 
           {rows.map((row, index) => {
@@ -518,9 +468,7 @@ export function InteractiveNetworkWaterfall({
                   style={{ gridRow, gridColumn: 1 }}
                   className={cn(
                     "group sticky left-0 z-10 cursor-pointer border-b border-border/40 px-2 py-1.5 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
-                    isSelected
-                      ? "bg-muted/60"
-                      : "bg-card hover:bg-muted/30",
+                    isSelected ? "bg-muted/60" : "bg-card hover:bg-muted/30",
                   )}
                   onClick={() => handleRowActivate(row.id)}
                   onKeyDown={(event) => {
@@ -549,11 +497,7 @@ export function InteractiveNetworkWaterfall({
                     }
                   }}
                 >
-                  <WaterfallBarTrack
-                    row={row}
-                    minStart={minStart}
-                    maxEnd={maxEnd}
-                  />
+                  <WaterfallBarTrack row={row} minStart={minStart} maxEnd={maxEnd} />
                 </div>
               </Fragment>
             );
@@ -563,20 +507,12 @@ export function InteractiveNetworkWaterfall({
         {/* Mobile: timeline on top, stacked rows — same unified scroll */}
         <div className="relative w-full min-w-0 md:hidden">
           <div className="sticky top-0 z-20 border-b bg-card px-1 py-1.5">
-            <TimeAxis
-              minStart={minStart}
-              maxEnd={maxEnd}
-              milestones={milestones}
-            />
+            <TimeAxis minStart={minStart} maxEnd={maxEnd} milestones={milestones} />
           </div>
 
           <div className="relative">
             <TickGridOverlay minStart={minStart} maxEnd={maxEnd} />
-            <MilestoneOverlay
-              minStart={minStart}
-              maxEnd={maxEnd}
-              milestones={milestones}
-            />
+            <MilestoneOverlay minStart={minStart} maxEnd={maxEnd} milestones={milestones} />
 
             {rows.map((row) => {
               const isSelected = selectedId === row.id;
@@ -593,11 +529,7 @@ export function InteractiveNetworkWaterfall({
                 >
                   <RowMeta row={row} layout="mobile" />
                   <div className="mt-1.5">
-                    <WaterfallBarTrack
-                      row={row}
-                      minStart={minStart}
-                      maxEnd={maxEnd}
-                    />
+                    <WaterfallBarTrack row={row} minStart={minStart} maxEnd={maxEnd} />
                   </div>
                 </button>
               );

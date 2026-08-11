@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import type { TableItem } from "@/lib/schema";
 import { getNumber } from "@/lib/utils";
 import { createStringAggregatedCell } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
@@ -46,31 +45,28 @@ const cols: StockColumnDef<MainThreadWorkTableRow, any>[] = [
 ];
 
 export function MainThreadWorkCard({ metrics }: MainThreadWorkCardProps) {
-  const validMetrics = useMemo(() => metrics.filter((m) => m.mainThreadWork.length > 0), [metrics]);
+  const validMetrics = metrics.filter((m) => m.mainThreadWork.length > 0);
   const showReportColumn = validMetrics.length > 1;
 
-  const data = useMemo<MainThreadWorkTableRow[]>(() => {
-    const allRows = validMetrics.flatMap(({ label, mainThreadWork }) =>
-      mainThreadWork.map((item: TableItem) => {
-        const group = typeof item.group === "string" ? item.group : "";
-        const groupLabel = typeof item.groupLabel === "string" ? item.groupLabel : group;
-        const duration = getNumber(item.duration);
-        return {
-          label,
-          group,
-          groupLabel: groupLabel || toTitleCase(group),
-          duration,
-        };
-      }),
-    );
-
-    return sortByMaxValue(
-      allRows,
-      (row) => row.groupLabel,
-      (row) => row.duration || 0,
-      validMetrics.length,
-    );
-  }, [validMetrics]);
+  const allRows = validMetrics.flatMap(({ label, mainThreadWork }) =>
+    mainThreadWork.map((item: TableItem) => {
+      const group = typeof item.group === "string" ? item.group : "";
+      const groupLabel = typeof item.groupLabel === "string" ? item.groupLabel : group;
+      const duration = getNumber(item.duration);
+      return {
+        label,
+        group,
+        groupLabel: groupLabel || toTitleCase(group),
+        duration,
+      };
+    }),
+  );
+  const data = sortByMaxValue(
+    allRows,
+    (row) => row.groupLabel,
+    (row) => row.duration || 0,
+    validMetrics.length,
+  );
 
   const columns = useTableColumns<MainThreadWorkTableRow>(cols, columnHelper, showReportColumn);
 

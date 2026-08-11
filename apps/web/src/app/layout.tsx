@@ -7,6 +7,7 @@ import { PostHogAnalytics } from "@/app/PostHogAnalytics";
 import { PostHogProvider, QueryProvider } from "@/app/providers";
 import { TopNav } from "@/components/navigation/TopNav";
 import { getSiteUrl } from "@/lib/siteUrl";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,6 +32,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
+
       <body
         suppressHydrationWarning={true}
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

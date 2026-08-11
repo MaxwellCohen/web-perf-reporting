@@ -18,7 +18,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
-import { useMemo } from "react";
 import { getPaginationState } from "@/features/page-speed-insights/tanstack-table-v9/tableStateHelpers";
 import { CopyTableButton } from "@/features/page-speed-insights/tanstack-table-v9/CopyTableButton";
 import { PaginationCard } from "@/features/page-speed-insights/tanstack-table-v9/PaginationCard";
@@ -26,11 +25,7 @@ import { PaginatedTableControls } from "@/features/page-speed-insights/tanstack-
 
 export { PaginationCard };
 
-export function TableControls<T extends RowData>({
-  table,
-}: {
-  table: StockTable<T>;
-}) {
+export function TableControls<T extends RowData>({ table }: { table: StockTable<T> }) {
   return (
     <div className="mb-3 flex min-w-0 flex-col gap-3 px-1 sm:mb-4 sm:px-0">
       <div className="flex flex-wrap items-center gap-2">
@@ -58,11 +53,7 @@ export function TableControls<T extends RowData>({
   );
 }
 
-export function ColumnSelector<T extends RowData>({
-  table,
-}: {
-  table: StockTable<T>;
-}) {
+export function ColumnSelector<T extends RowData>({ table }: { table: StockTable<T> }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -98,15 +89,10 @@ export function DropdownFilter<T extends RowData>({
   table: StockTable<T>;
   columnId: string;
 }) {
-  
   const col = table.getColumn(columnId);
-  const sortedUniqueValues = useMemo(
-    () =>
-      Array.from(col?.getFacetedUniqueValues()?.keys() || [])
-        .sort()
-        .slice(0, 5000),
-    [col],
-  );
+  const sortedUniqueValues = Array.from(col?.getFacetedUniqueValues()?.keys() || [])
+    .sort()
+    .slice(0, 5000);
   if (!col) {
     return null;
   }
@@ -148,11 +134,7 @@ export function DropdownFilter<T extends RowData>({
   );
 }
 
-export function PageSizeSelector<T extends RowData>({
-  table,
-}: {
-  table: StockTable<T>;
-}) {
+export function PageSizeSelector<T extends RowData>({ table }: { table: StockTable<T> }) {
   const rowCount = table.getRowCount();
   return (
     <Select
@@ -174,4 +156,3 @@ export function PageSizeSelector<T extends RowData>({
     </Select>
   );
 }
-

@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartContainer,
@@ -41,38 +40,31 @@ type MultiThresholdRow = {
 } & Record<(typeof THRESHOLDS)[number]["key"], number>;
 
 export function TaskThresholdChartCard({ metrics }: { metrics: TaskSummaryData[] }) {
-  const validStats = useMemo(
-    () => computeTaskSummaryStats(metrics).filter((s) => s.totalTasks > 0),
-    [metrics],
-  );
+  const validStats = computeTaskSummaryStats(metrics).filter((s) => s.totalTasks > 0);
   const isSingleReport = validStats.length === 1;
 
-  const singleChartData = useMemo((): SingleThresholdRow[] | null => {
-    if (!isSingleReport) {
-      return null;
-    }
-    const stat = validStats[0];
-    return THRESHOLDS.map(({ key, label }) => ({
-      threshold: label,
-      count: stat[key],
-    }));
-  }, [isSingleReport, validStats]);
+  if (!isSingleReport) {
+    return null;
+  }
+  const stat = validStats[0];
+  const singleChartData = THRESHOLDS.map(({ key, label }) => ({
+    threshold: label,
+    count: stat[key],
+  }));
 
-  const multiChartData = useMemo((): MultiThresholdRow[] | null => {
-    if (isSingleReport) {
-      return null;
-    }
-    return validStats.map((stat) => ({
-      label: stat.label || "Unknown",
-      ...THRESHOLDS.reduce(
-        (acc, { key }) => {
-          acc[key] = stat[key];
-          return acc;
-        },
-        {} as Record<(typeof THRESHOLDS)[number]["key"], number>,
-      ),
-    }));
-  }, [isSingleReport, validStats]);
+  if (isSingleReport) {
+    return null;
+  }
+  const multiChartData = validStats.map((stat) => ({
+    label: stat.label || "Unknown",
+    ...THRESHOLDS.reduce(
+      (acc, { key }) => {
+        acc[key] = stat[key];
+        return acc;
+      },
+      {} as Record<(typeof THRESHOLDS)[number]["key"], number>,
+    ),
+  }));
 
   if (!validStats.length) {
     return null;
@@ -118,7 +110,10 @@ export function TaskThresholdChartCard({ metrics }: { metrics: TaskSummaryData[]
               <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border/40" />
               <XAxis dataKey="threshold" tickLine={false} axisLine={false} tickMargin={8} />
               <YAxis tickLine={false} axisLine={false} tickMargin={8} allowDecimals={false} />
-              <ChartTooltip cursor={mutedBarCursor} content={<ChartTooltipContent indicator="dot" />} />
+              <ChartTooltip
+                cursor={mutedBarCursor}
+                content={<ChartTooltipContent indicator="dot" />}
+              />
               <Bar
                 dataKey="count"
                 name="count"
@@ -141,7 +136,11 @@ export function TaskThresholdChartCard({ metrics }: { metrics: TaskSummaryData[]
               margin={{ left: 8, right: 16, top: 4, bottom: 4 }}
               barCategoryGap="24%"
             >
-              <CartesianGrid horizontal={false} strokeDasharray="3 3" className="stroke-border/40" />
+              <CartesianGrid
+                horizontal={false}
+                strokeDasharray="3 3"
+                className="stroke-border/40"
+              />
               <XAxis type="number" tickLine={false} axisLine={false} allowDecimals={false} />
               <YAxis
                 type="category"
@@ -153,7 +152,10 @@ export function TaskThresholdChartCard({ metrics }: { metrics: TaskSummaryData[]
                 interval={0}
                 tick={{ fontSize: 12 }}
               />
-              <ChartTooltip cursor={mutedBarCursor} content={<ChartTooltipContent indicator="dot" />} />
+              <ChartTooltip
+                cursor={mutedBarCursor}
+                content={<ChartTooltipContent indicator="dot" />}
+              />
               <ChartLegend content={<ChartLegendContent className="flex-wrap gap-x-4 gap-y-2" />} />
               {THRESHOLDS.map(({ key }, index) => (
                 <Bar

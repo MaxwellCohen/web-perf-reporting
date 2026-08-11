@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
-import type { StockColumnDef, StockHeaderContext } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import { useEffect, useId, useRef, useState } from "react";
+import type {
+  StockColumnDef,
+  StockHeaderContext,
+} from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import type { RowData } from "@tanstack/react-table";
 import {
   RenderBytesValue,
@@ -16,36 +19,33 @@ import type { ReactNode } from "react";
 export function useDebouncedCallback(callback: (...arg: any[]) => any, delay = 100) {
   const timerIdRef = useRef<null | ReturnType<typeof setTimeout>>(null);
   const latestCallback = useRef(callback);
+  latestCallback.current = callback;
 
-  useEffect(() => {
-    latestCallback.current = callback;
-  }, [callback]);
+  function debouncedCallback(...args: any[]) {
+    if (timerIdRef.current) {
+      clearTimeout(timerIdRef.current);
+    }
 
-  const debouncedCallback = useCallback(
-    (...args: any[]) => {
-      if (timerIdRef.current) {
-        clearTimeout(timerIdRef.current);
-      }
+    timerIdRef.current = setTimeout(() => {
+      latestCallback.current(...args);
+    }, delay);
+  }
 
-      timerIdRef.current = setTimeout(() => {
-        latestCallback.current(...args);
-      }, delay);
-    },
-    [delay],
-  );
-
-  const cancel = useCallback(() => {
+  function cancel() {
     if (timerIdRef.current) {
       clearTimeout(timerIdRef.current);
       timerIdRef.current = null;
     }
-  }, []);
+  }
 
   useEffect(() => {
     return () => {
-      cancel();
+      if (timerIdRef.current) {
+        clearTimeout(timerIdRef.current);
+        timerIdRef.current = null;
+      }
     };
-  }, [cancel]);
+  }, []);
 
   return Object.assign(debouncedCallback, { cancel });
 }
@@ -75,8 +75,15 @@ export function formatFilterValue(value: number, columnId: string, header?: stri
   return <span>{value.toLocaleString("en-US")}</span>;
 }
 
-function getRangeInputConfig(columnId: string, header?: string, heading?: TableColumnHeading | null) {
-  if (heading?.valueType === "bytes" || BYTES_KEYWORDS.some((k) => `${columnId} ${header ?? ""}`.toLowerCase().includes(k))) {
+function getRangeInputConfig(
+  columnId: string,
+  header?: string,
+  heading?: TableColumnHeading | null,
+) {
+  if (
+    heading?.valueType === "bytes" ||
+    BYTES_KEYWORDS.some((k) => `${columnId} ${header ?? ""}`.toLowerCase().includes(k))
+  ) {
     return {
       toInputValue: (value: number) => value / 1024,
       fromInputValue: (value: number) => value * 1024,
@@ -85,7 +92,10 @@ function getRangeInputConfig(columnId: string, header?: string, heading?: TableC
     };
   }
 
-  if (heading?.valueType === "ms" || MS_KEYWORDS.some((k) => `${columnId} ${header ?? ""}`.toLowerCase().includes(k))) {
+  if (
+    heading?.valueType === "ms" ||
+    MS_KEYWORDS.some((k) => `${columnId} ${header ?? ""}`.toLowerCase().includes(k))
+  ) {
     return {
       toInputValue: (value: number) => value,
       fromInputValue: (value: number) => value,

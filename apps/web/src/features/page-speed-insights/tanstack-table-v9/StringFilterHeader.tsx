@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useId, useMemo } from "react";
+import { useId } from "react";
 import type { HeaderContext, RowData } from "@tanstack/react-table";
 import { Label } from "@/components/ui/label";
 import { DebouncedInput } from "@/components/ui/input";
@@ -16,11 +16,9 @@ export function StringFilterHeader<TData extends RowData>({
 }) {
   const id = useId();
   const uniqueValues = column?.getFacetedUniqueValues();
-  const sortedUniqueValues = useMemo(
-    () =>
-      uniqueValues ? Array.from(uniqueValues.keys()).sort().slice(0, MAX_DATALIST_OPTIONS) : [],
-    [uniqueValues],
-  );
+  const sortedUniqueValues = uniqueValues
+    ? Array.from(uniqueValues.keys()).sort().slice(0, MAX_DATALIST_OPTIONS)
+    : [];
 
   if (!column) {
     return null;

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useMemo } from "react";
 import type { TableItem } from "@/lib/schema";
 import { getNumber, getUrlString } from "@/lib/utils";
 import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
@@ -52,21 +51,18 @@ function itemToRow(label: string, item: TableItem): BootupTimeTableRow {
 }
 
 export function BootupTimeCard({ metrics }: BootupTimeCardProps) {
-  const validMetrics = useMemo(() => metrics.filter((m) => m.bootupTime.length > 0), [metrics]);
+  const validMetrics = metrics.filter((m) => m.bootupTime.length > 0);
   const showReportColumn = validMetrics.length > 1;
 
-  const data = useMemo<BootupTimeTableRow[]>(() => {
-    if (!validMetrics.length) return [];
-    const allRows = validMetrics.flatMap(({ label, bootupTime }) =>
-      bootupTime.map((item) => itemToRow(label, item)),
-    );
-    return sortByMaxValue(
-      allRows,
-      (row) => row.url,
-      (row) => row.total || 0,
-      validMetrics.length,
-    );
-  }, [validMetrics]);
+  const allRows = validMetrics.flatMap(({ label, bootupTime }) =>
+    bootupTime.map((item) => itemToRow(label, item)),
+  );
+  const data = sortByMaxValue(
+    allRows,
+    (row) => row.url,
+    (row) => row.total || 0,
+    validMetrics.length,
+  );
 
   const columns = useTableColumns<BootupTimeTableRow>(cols, columnHelper, showReportColumn);
 

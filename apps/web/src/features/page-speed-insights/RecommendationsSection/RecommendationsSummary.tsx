@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { RenderBytesValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
@@ -29,42 +29,36 @@ function formatSavings(rec: Recommendation): string {
 }
 
 export function RecommendationsSummary({ recommendations }: RecommendationsSummaryProps) {
-  const summary = useMemo(() => {
-    const byPriority = { high: 0, medium: 0, low: 0 };
-    let totalMsSavings = 0;
-    let totalByteSavings = 0;
-
-    for (const rec of recommendations) {
-      byPriority[rec.priority]++;
-      const savings = rec.impact.savings ?? 0;
-      const unit = rec.impact.unit?.toLowerCase() ?? "";
-      if (unit.includes("ms") || unit.includes("millisecond")) {
-        totalMsSavings += savings;
-      } else if (unit.includes("byte")) {
-        totalByteSavings += savings;
-      }
+  const byPriority = { high: 0, medium: 0, low: 0 };
+  let totalMsSavings = 0;
+  let totalByteSavings = 0;
+  for (const rec of recommendations) {
+    byPriority[rec.priority]++;
+    const savings = rec.impact.savings ?? 0;
+    const unit = rec.impact.unit?.toLowerCase() ?? "";
+    if (unit.includes("ms") || unit.includes("millisecond")) {
+      totalMsSavings += savings;
+    } else if (unit.includes("byte")) {
+      totalByteSavings += savings;
     }
+  }
+  const summary = {
+    total: recommendations.length,
+    byPriority,
+    totalMsSavings,
+    totalByteSavings,
+  };
 
-    return {
-      total: recommendations.length,
-      byPriority,
-      totalMsSavings,
-      totalByteSavings,
-    };
-  }, [recommendations]);
-
-  const categoryChartData = useMemo(() => {
-    const byCategory = new Map<string, number>();
-    for (const rec of recommendations) {
-      const savings = rec.impact.savings ?? 0;
-      if (savings <= 0) continue;
-      byCategory.set(rec.category, (byCategory.get(rec.category) ?? 0) + savings);
-    }
-    return Array.from(byCategory.entries())
-      .map(([category, savings]) => ({ category, savings }))
-      .sort((a, b) => b.savings - a.savings)
-      .slice(0, 10);
-  }, [recommendations]);
+  const byCategory = new Map<string, number>();
+  for (const rec of recommendations) {
+    const savings = rec.impact.savings ?? 0;
+    if (savings <= 0) continue;
+    byCategory.set(rec.category, (byCategory.get(rec.category) ?? 0) + savings);
+  }
+  const categoryChartData = Array.from(byCategory.entries())
+    .map(([category, savings]) => ({ category, savings }))
+    .sort((a, b) => b.savings - a.savings)
+    .slice(0, 10);
 
   if (!recommendations.length) {
     return null;
@@ -129,7 +123,11 @@ export function RecommendationsSummary({ recommendations }: RecommendationsSumma
                 margin={{ left: 8, right: 48, top: 4, bottom: 4 }}
                 barCategoryGap="24%"
               >
-                <CartesianGrid horizontal={false} strokeDasharray="3 3" className="stroke-border/40" />
+                <CartesianGrid
+                  horizontal={false}
+                  strokeDasharray="3 3"
+                  className="stroke-border/40"
+                />
                 <XAxis type="number" tickLine={false} axisLine={false} hide />
                 <YAxis
                   type="category"
@@ -176,13 +174,7 @@ export function RecommendationsSummary({ recommendations }: RecommendationsSumma
   );
 }
 
-function SummaryStatCard({
-  label,
-  value,
-}: {
-  label: string;
-  value: ReactNode;
-}) {
+function SummaryStatCard({ label, value }: { label: string; value: ReactNode }) {
   return (
     <Card className="p-4">
       <div className="text-xs text-muted-foreground">{label}</div>

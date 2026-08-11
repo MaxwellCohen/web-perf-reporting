@@ -3,7 +3,6 @@ import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/
 import { ActionableStepsTable } from "@/features/page-speed-insights/RecommendationsSection/ActionableStepsTable";
 import { ResourcesTable } from "@/features/page-speed-insights/RecommendationsSection/ResourcesTable";
 import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
-import { useMemo } from "react";
 import {
   usePageSpeedItems,
   type InsightsContextItem,
@@ -23,9 +22,8 @@ interface RecommendationItemProps {
 export function RecommendationItem({ rec, items, priorityColors }: RecommendationItemProps) {
   const insightsContextItems = usePageSpeedItems();
   const auditId = getRecommendationAuditId(rec.id);
-  const auditDataForAllData = useMemo(
-    () => items.map((item) => item.item?.lighthouseResult?.audits?.[auditId] ?? null),
-    [items, auditId],
+  const auditDataForAllData = items.map(
+    (item) => item.item?.lighthouseResult?.audits?.[auditId] ?? null,
   );
   const reportLabels = items.map((item) => item.label);
 

@@ -1,5 +1,4 @@
 "use client";
-import { useMemo } from "react";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import {
   useStandardTable,
@@ -21,7 +20,10 @@ type TaskSummaryRow = ReturnType<typeof computeTaskSummaryStats>[number];
 
 const columnHelper = createStockColumnHelper<TaskSummaryRow>();
 
-function countColumn(accessor: keyof TaskSummaryRow & string, header: string): StandardColumnDef<TaskSummaryRow> {
+function countColumn(
+  accessor: keyof TaskSummaryRow & string,
+  header: string,
+): StandardColumnDef<TaskSummaryRow> {
   return columnHelper.accessor(accessor, {
     id: accessor,
     header,
@@ -44,10 +46,7 @@ const cols: StandardColumnDef<TaskSummaryRow>[] = [
 ];
 
 export function TaskSummaryCard({ metrics }: TaskSummaryCardProps) {
-  const validStats = useMemo(
-    () => computeTaskSummaryStats(metrics).filter((s) => s.totalTasks > 0),
-    [metrics],
-  );
+  const validStats = computeTaskSummaryStats(metrics).filter((s) => s.totalTasks > 0);
   const showReportColumn = validStats.length > 1;
   const columns = useTableColumns(cols, columnHelper, showReportColumn);
   const table = useStandardTable({ data: validStats, columns });
@@ -56,7 +55,5 @@ export function TaskSummaryCard({ metrics }: TaskSummaryCardProps) {
     return null;
   }
 
-  return (
-    <TableCard title="Task Summary" table={table} className="md:col-span-2 lg:col-span-3" />
-  );
+  return <TableCard title="Task Summary" table={table} className="md:col-span-2 lg:col-span-3" />;
 }

@@ -2,7 +2,6 @@
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { TableItem } from "@/lib/schema";
 import { getUrlString, getNumber } from "@/lib/utils";
-import { useMemo } from "react";
 import { createStringAggregatedCell } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
 import {
   useStandardTable,
@@ -14,7 +13,6 @@ import {
   createMSColumn,
   createURLColumn,
 } from "@/features/page-speed-insights/shared/tableColumnHelpers";
-import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
 import {
   LabeledStockTable,
   MultiReportTableCard,
@@ -62,10 +60,9 @@ const cols: StandardColumnDef<TopResourceTableRow>[] = [
 ];
 
 function TopResourcesTable({ label, data }: { label: string; data: TopResourceTableRow[] }) {
-  const columns = useTableColumns<TopResourceTableRow>(cols, columnHelper, false);
   const table = useStandardTable({
     data,
-    columns,
+    columns: cols,
     enablePagination: true,
     defaultPageSize: 10,
   });
@@ -75,19 +72,12 @@ function TopResourcesTable({ label, data }: { label: string; data: TopResourceTa
 
 export function TopResourcesCard() {
   const requestStats = useNetworkRequestStats();
-  const validStats = useMemo(
-    () => requestStats.filter((s) => s.topResources && s.topResources.length > 0),
-    [requestStats],
-  );
+  const validStats = requestStats.filter((s) => s.topResources && s.topResources.length > 0);
 
-  const dataByReport = useMemo(
-    () =>
-      validStats.map(({ label, topResources }) => ({
-        label,
-        data: topResources.map((resource: TableItem) => resourceToTableRow(resource)),
-      })),
-    [validStats],
-  );
+  const dataByReport = validStats.map(({ label, topResources }) => ({
+    label,
+    data: topResources.map((resource: TableItem) => resourceToTableRow(resource)),
+  }));
 
   if (!validStats.length) {
     return null;

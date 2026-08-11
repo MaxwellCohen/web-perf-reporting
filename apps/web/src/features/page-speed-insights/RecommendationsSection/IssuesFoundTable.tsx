@@ -1,5 +1,4 @@
 "use client";
-import { useMemo } from "react";
 import { TableCaption } from "@/components/ui/table";
 import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 import type { TableColumnHeading, TableItem } from "@/lib/schema";
@@ -74,106 +73,95 @@ function deduplicateRowsByColumnValues(
 }
 
 export function IssuesFoundTable({ headings, items, device }: IssuesFoundTableProps) {
-  const deduplicatedItems = useMemo(
-    () => deduplicateRowsByColumnValues(items, headings),
-    [items, headings],
-  );
+  const deduplicatedItems = deduplicateRowsByColumnValues(items, headings);
 
   const isNetworkRequests = isNetworkRequestsTable(headings);
-  const timeRange = useMemo(
-    () => (isNetworkRequests ? getNetworkRequestsTimeRange(deduplicatedItems) : null),
-    [isNetworkRequests, deduplicatedItems],
-  );
+  const timeRange = isNetworkRequests ? getNetworkRequestsTimeRange(deduplicatedItems) : null;
 
-  const columns = useMemo<FlatColumnDef<TableItem>[]>(() => {
-    let headingsToUse = isNetworkRequests
-      ? headings.filter(
-          (heading) =>
-            heading.key != null && !WATERFALL_REPLACED_NETWORK_REQUEST_KEYS.includes(heading.key),
-        )
-      : headings;
-    if (isNetworkRequests) {
-      headingsToUse = sortHeadingsByKeyOrder(headingsToUse, NETWORK_REQUESTS_COLUMN_ORDER);
-    }
+  let headingsToUse = isNetworkRequests
+    ? headings.filter(
+        (heading) =>
+          heading.key != null && !WATERFALL_REPLACED_NETWORK_REQUEST_KEYS.includes(heading.key),
+      )
+    : headings;
+  if (isNetworkRequests) {
+    headingsToUse = sortHeadingsByKeyOrder(headingsToUse, NETWORK_REQUESTS_COLUMN_ORDER);
+  }
+  const baseColumns = headingsToUse.map((heading) => {
+    const key = heading.key || "";
+    const rawLabel = typeof heading.label === "string" ? heading.label : key;
+    const label = getHeaderLabel(key, rawLabel, isNetworkRequests);
+    const base = createColumnFromHeading(heading);
+    const initialSize =
+      isNetworkRequests && key in NETWORK_REQUESTS_COLUMN_SIZES
+        ? NETWORK_REQUESTS_COLUMN_SIZES[key]
+        : base.size;
 
-    const baseColumns = headingsToUse.map((heading) => {
-      const key = heading.key || "";
-      const rawLabel = typeof heading.label === "string" ? heading.label : key;
-      const label = getHeaderLabel(key, rawLabel, isNetworkRequests);
-      const base = createColumnFromHeading(heading);
-      const initialSize =
-        isNetworkRequests && key in NETWORK_REQUESTS_COLUMN_SIZES
-          ? NETWORK_REQUESTS_COLUMN_SIZES[key]
-          : base.size;
-
-      const columnDef: FlatColumnDef<TableItem> = {
-        ...base,
-        header: label,
-        size: initialSize,
-        minSize: isNetworkRequests ? 40 : base.minSize,
-        cell: ({ row }) => {
-          const value = row.original[key];
-          const subItems = row.original.subItems;
-          const content = (
-            <IssuesFoundTableCell
-              value={value}
-              subItems={subItems}
-              heading={heading}
-              device={device}
-            />
-          );
-          if (key === "url" && value != null) {
-            return (
-              <div className="truncate min-w-0" title={String(value)}>
-                {content}
-              </div>
-            );
-          }
-          return content;
-        },
-      };
-
-      return columnDef;
-    });
-
-    if (isNetworkRequests && timeRange) {
-      const waterfallColumn: FlatColumnDef<TableItem> = {
-        id: "waterfall",
-        accessorKey: "url",
-        header: "Waterfall",
-        size: NETWORK_REQUESTS_COLUMN_SIZES.waterfall,
-        minSize: 100,
-        maxSize: 400,
-        enableResizing: true,
-        enableSorting: false,
-        enableColumnFilter: false,
-        cell: ({ row }) => {
-          const r = row.original as TableItem & {
-            networkRequestTime?: number;
-            networkEndTime?: number;
-            resourceType?: string;
-          };
-          const start = typeof r.networkRequestTime === "number" ? r.networkRequestTime : 0;
-          const end = typeof r.networkEndTime === "number" ? r.networkEndTime : start;
+    const columnDef: FlatColumnDef<TableItem> = {
+      ...base,
+      header: label,
+      size: initialSize,
+      minSize: isNetworkRequests ? 40 : base.minSize,
+      cell: ({ row }) => {
+        const value = row.original[key];
+        const subItems = row.original.subItems;
+        const content = (
+          <IssuesFoundTableCell
+            value={value}
+            subItems={subItems}
+            heading={heading}
+            device={device}
+          />
+        );
+        if (key === "url" && value != null) {
           return (
-            <NetworkWaterfallCell
-              requestTime={start}
-              endTime={end}
-              minStart={timeRange.minStart}
-              maxEnd={timeRange.maxEnd}
-              resourceType={typeof r.resourceType === "string" ? r.resourceType : undefined}
-              width={200}
-              barHeight={12}
-              showTimeLabels
-            />
+            <div className="truncate min-w-0" title={String(value)}>
+              {content}
+            </div>
           );
-        },
-      };
-      baseColumns.push(waterfallColumn);
-    }
+        }
+        return content;
+      },
+    };
 
-    return baseColumns;
-  }, [headings, device, isNetworkRequests, timeRange]);
+    return columnDef;
+  });
+  if (isNetworkRequests && timeRange) {
+    const waterfallColumn: FlatColumnDef<TableItem> = {
+      id: "waterfall",
+      accessorKey: "url",
+      header: "Waterfall",
+      size: NETWORK_REQUESTS_COLUMN_SIZES.waterfall,
+      minSize: 100,
+      maxSize: 400,
+      enableResizing: true,
+      enableSorting: false,
+      enableColumnFilter: false,
+      cell: ({ row }) => {
+        const r = row.original as TableItem & {
+          networkRequestTime?: number;
+          networkEndTime?: number;
+          resourceType?: string;
+        };
+        const start = typeof r.networkRequestTime === "number" ? r.networkRequestTime : 0;
+        const end = typeof r.networkEndTime === "number" ? r.networkEndTime : start;
+        return (
+          <NetworkWaterfallCell
+            requestTime={start}
+            endTime={end}
+            minStart={timeRange.minStart}
+            maxEnd={timeRange.maxEnd}
+            resourceType={typeof r.resourceType === "string" ? r.resourceType : undefined}
+            width={200}
+            barHeight={12}
+            showTimeLabels
+          />
+        );
+      },
+    };
+    baseColumns.push(waterfallColumn);
+  }
+  const columns = baseColumns;
 
   const table = useSimpleTable({
     data: deduplicatedItems,

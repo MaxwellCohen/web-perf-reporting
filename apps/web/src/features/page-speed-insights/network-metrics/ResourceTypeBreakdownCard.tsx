@@ -1,10 +1,7 @@
 "use client";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { TableItem } from "@/lib/schema";
-import { useMemo } from "react";
-import {
-  type StandardColumnDef,
-} from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import { type StandardColumnDef } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import {
   createNumericAggregatedCell,
@@ -70,45 +67,39 @@ function ResourceTypeTable({ label, data }: { label: string; data: ResourceTypeT
 
 export function ResourceTypeBreakdownCard() {
   const requestStats = useNetworkRequestStats();
-  const validStats = useMemo(
-    () => requestStats.filter((s) => s.byResourceType && Object.keys(s.byResourceType).length > 0),
-    [requestStats],
+  const validStats = requestStats.filter(
+    (s) => s.byResourceType && Object.keys(s.byResourceType).length > 0,
   );
 
-  const dataByReport = useMemo(() => {
-    return validStats.map(({ label, byResourceType }) => {
-      const rows = Object.entries(byResourceType).map(([type, items]) => {
-        const typedItems = Array.isArray(items) ? (items as TableItem[]) : [];
-        return {
-          label,
-          resourceType: type,
-          count: typedItems.length,
-          transferSize: sumOn(typedItems, "transferSize"),
-          resourceSize: sumOn(typedItems, "resourceSize"),
-        };
-      });
-
+  const dataByReport = validStats.map(({ label, byResourceType }) => {
+    const rows = Object.entries(byResourceType).map(([type, items]) => {
+      const typedItems = Array.isArray(items) ? (items as TableItem[]) : [];
       return {
         label,
-        data: sortByMaxValue(
-          rows,
-          (row) => row.resourceType,
-          (row) => row.transferSize || 0,
-          1,
-        ),
+        resourceType: type,
+        count: typedItems.length,
+        transferSize: sumOn(typedItems, "transferSize"),
+        resourceSize: sumOn(typedItems, "resourceSize"),
       };
     });
-  }, [validStats]);
+
+    return {
+      label,
+      data: sortByMaxValue(
+        rows,
+        (row) => row.resourceType,
+        (row) => row.transferSize || 0,
+        1,
+      ),
+    };
+  });
 
   if (!validStats.length) {
     return null;
   }
 
   return (
-    <MultiReportTableCard
-      title="Resource Type Breakdown"
-      className="md:col-span-2 lg:col-span-3"
-    >
+    <MultiReportTableCard title="Resource Type Breakdown" className="md:col-span-2 lg:col-span-3">
       {dataByReport.map(({ label, data }) => (
         <ResourceTypeTable key={label} label={label} data={data} />
       ))}

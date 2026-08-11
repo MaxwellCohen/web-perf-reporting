@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import type { RowData } from "@tanstack/react-table";
 import type { StockColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { createReportColumn } from "@/features/page-speed-insights/shared/tableColumnHelpers";
@@ -16,10 +15,8 @@ export function useTableColumns<T extends { label: string } & RowData>(
   showReportColumn: boolean,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): StockColumnDef<T, any>[] {
-  return useMemo(() => {
-    if (showReportColumn) {
-      return [...baseColumns, createReportColumn(columnHelper)];
-    }
-    return baseColumns;
-  }, [baseColumns, columnHelper, showReportColumn]);
+  if (showReportColumn) {
+    return [...baseColumns, createReportColumn(columnHelper)];
+  }
+  return baseColumns;
 }

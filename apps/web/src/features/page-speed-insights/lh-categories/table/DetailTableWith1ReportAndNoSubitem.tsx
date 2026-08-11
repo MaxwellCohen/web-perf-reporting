@@ -1,5 +1,4 @@
 "use client";
-import { useMemo } from "react";
 import { DataTableNoGrouping } from "@/features/page-speed-insights/lh-categories/table/DataTableNoGrouping";
 import { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import { flattenDetailItems } from "@/features/page-speed-insights/lh-categories/table/detailTableData";
@@ -14,11 +13,8 @@ export function DetailTableWith1ReportAndNoSubitem({
   rows: DetailTableItem[];
   title: string;
 }) {
-  const data = useMemo(() => flattenDetailItems(rows), [rows]);
-  const columns = useMemo(
-    () => createDetailItemColumns({ rows, deviceLabel: rows[0]?._userLabel || "" }),
-    [rows],
-  );
+  const data = flattenDetailItems(rows);
+  const columns = createDetailItemColumns({ rows, deviceLabel: rows[0]?._userLabel || "" });
 
   if (!data.length) {
     return null;

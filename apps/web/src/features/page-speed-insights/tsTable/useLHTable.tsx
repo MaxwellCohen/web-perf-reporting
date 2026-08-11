@@ -1,7 +1,10 @@
-import type { StockColumnDef, StockRow } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import type {
+  StockColumnDef,
+  StockRow,
+} from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { PageSpeedInsights } from "@/lib/schema";
 import { flexRender, useTable } from "@tanstack/react-table";
-import { Fragment, useMemo } from "react";
+import { Fragment } from "react";
 import clsx from "clsx";
 import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { AuditDetailsSummary } from "@/features/page-speed-insights/lh-categories/AuditDetailsSummary";
@@ -10,36 +13,30 @@ import { RenderDetails } from "@/features/page-speed-insights/lh-categories/Rend
 import { RenderJSONDetails } from "@/features/page-speed-insights/RenderJSONDetails";
 import { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataItem";
 import { LH_AUDIT_TABLE_COLUMNS } from "@/features/page-speed-insights/tsTable/lhAuditTableColumns";
-import {
-  lhTableFeatures,
-} from "@/features/page-speed-insights/tanstack-table-v9/features";
+import { lhTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 
 export function useLHTable(items: { item: PageSpeedInsights; label: string }[]) {
-  const tableDataArr = useMemo(
-    () =>
-      (
-        items
-          .map(({ item, label }) => {
-            return Object.values(item.lighthouseResult?.categories || {}).map((category) => {
-              if (!category?.auditRefs?.length) {
-                return [] as TableDataItem[];
-              }
-              const { auditRefs = [], ..._category } = category;
-              return auditRefs.map((ar) => {
-                if (!ar.id) return [] as TableDataItem[];
-                return {
-                  _category,
-                  _userLabel: label,
-                  auditRef: ar,
-                  auditResult: item.lighthouseResult?.audits?.[ar.id],
-                };
-              });
-            });
-          })
-          .flat(2) as TableDataItem[]
-      ).filter((v) => v.auditRef.group !== "metrics"),
-    [items],
-  );
+  const tableDataArr = (
+    items
+      .map(({ item, label }) => {
+        return Object.values(item.lighthouseResult?.categories || {}).map((category) => {
+          if (!category?.auditRefs?.length) {
+            return [] as TableDataItem[];
+          }
+          const { auditRefs = [], ..._category } = category;
+          return auditRefs.map((ar) => {
+            if (!ar.id) return [] as TableDataItem[];
+            return {
+              _category,
+              _userLabel: label,
+              auditRef: ar,
+              auditResult: item.lighthouseResult?.audits?.[ar.id],
+            };
+          });
+        });
+      })
+      .flat(2) as TableDataItem[]
+  ).filter((v) => v.auditRef.group !== "metrics");
   return useTable({
     features: lhTableFeatures,
     data: tableDataArr,

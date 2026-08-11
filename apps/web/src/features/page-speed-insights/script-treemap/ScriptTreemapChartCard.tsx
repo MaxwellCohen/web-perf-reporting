@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { Treemap } from "recharts";
 import { ClientOnly } from "@/components/common/ClientOnly";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -157,9 +157,9 @@ export function ScriptTreemapChartCard({
 }) {
   const [copiedName, setCopiedName] = useState<string | null>(null);
 
-  const chartData = useMemo(() => buildTreemapChartNodes(treeData.nodes), [treeData]);
+  const chartData = buildTreemapChartNodes(treeData.nodes);
 
-  const handleCopyName = useCallback(async (name: string) => {
+  const handleCopyName = async (name: string) => {
     const copied = await copyTreemapNodeName(name);
     if (!copied) {
       return;
@@ -169,7 +169,7 @@ export function ScriptTreemapChartCard({
     window.setTimeout(() => {
       setCopiedName((current) => (current === name ? null : current));
     }, 2000);
-  }, []);
+  };
 
   if (!chartData.length) {
     return null;

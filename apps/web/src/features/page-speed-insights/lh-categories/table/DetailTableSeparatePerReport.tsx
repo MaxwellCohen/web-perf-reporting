@@ -1,6 +1,5 @@
 "use client";
 import { OpportunityItem, TableItem } from "@/lib/schema";
-import { useMemo } from "react";
 import { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import {
   Accordion,
@@ -61,7 +60,7 @@ export function DetailTableSeparatePerReport({
   rows: DetailTableItem[];
   title: string;
 }) {
-  const rowsByReport = useMemo(() => groupRowsByReportLabel(rows), [rows]);
+  const rowsByReport = groupRowsByReportLabel(rows);
 
   const sortedReports = getSortedReports(rowsByReport);
   const auditId = getAuditId(rows);
@@ -102,17 +101,13 @@ function ReportTable({
   rows: DetailTableItem[];
   auditId?: string;
 }) {
-  const timeRange = useMemo(() => getDetailItemsTimeRange(data, auditId), [auditId, data]);
-  const reportColumns = useMemo(
-    () =>
-      createDetailItemColumns({
-        rows,
-        deviceLabel: reportLabel,
-        auditId,
-        timeRange,
-      }),
-    [auditId, reportLabel, rows, timeRange],
-  );
+  const timeRange = getDetailItemsTimeRange(data, auditId);
+  const reportColumns = createDetailItemColumns({
+    rows,
+    deviceLabel: reportLabel,
+    auditId,
+    timeRange,
+  });
   const table = useSimpleTable({
     data,
     columns: reportColumns as FlatColumnDef<TableItem | OpportunityItem>[],

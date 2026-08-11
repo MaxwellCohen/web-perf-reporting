@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { renderTimeValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
@@ -58,19 +57,13 @@ function topOriginsFromSeries(
     .slice(0, TOP_ORIGINS);
 }
 
-export function OriginLatencyChartCard({
-  mode,
-}: {
-  mode: "rtt" | "latency";
-}) {
+export function OriginLatencyChartCard({ mode }: { mode: "rtt" | "latency" }) {
   const series = useNetworkMetricSeries();
 
-  const chartData = useMemo(() => {
-    if (mode === "rtt") {
-      return topOriginsFromSeries(series, "networkRTT", "rtt");
-    }
-    return topOriginsFromSeries(series, "serverLatency", "serverResponseTime");
-  }, [series, mode]);
+  const chartData =
+    mode === "rtt"
+      ? topOriginsFromSeries(series, "networkRTT", "rtt")
+      : topOriginsFromSeries(series, "serverLatency", "serverResponseTime");
 
   if (!chartData.length) {
     return null;

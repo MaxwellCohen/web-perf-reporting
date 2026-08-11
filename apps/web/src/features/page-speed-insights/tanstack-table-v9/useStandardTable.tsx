@@ -1,21 +1,10 @@
 "use client";
-import { useMemo } from "react";
-import {
-  useTable,
-  type ColumnDef,
-  type RowData,
-} from "@tanstack/react-table";
-import {
-  standardTableFeatures,
-} from "@/features/page-speed-insights/tanstack-table-v9/features";
+import { useTable, type ColumnDef, type RowData } from "@tanstack/react-table";
+import { standardTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 import { ExpandAll, ExpandRow } from "@/features/page-speed-insights/JSUsage/jsUsageTableParts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- mixed accessor TValue per column
-export type StandardColumnDef<TData extends RowData, TValue = any> = ColumnDef<
-  any,
-  TData,
-  TValue
->;
+export type StandardColumnDef<TData extends RowData, TValue = any> = ColumnDef<any, TData, TValue>;
 
 export type TableConfigOptions<TData extends RowData> = {
   data: TData[];
@@ -42,27 +31,23 @@ export function useStandardTable<TData extends RowData>({
   defaultPageSize = 10,
   enableExpander = grouping.length > 0,
 }: TableConfigOptions<TData>) {
-  const tableColumns = useMemo<StandardColumnDef<TData>[]>(
-    () =>
-      enableExpander
-        ? [
-            {
-              id: "expander",
-              header: (props) => <ExpandAll table={props.table as never} />,
-              cell: ExpandRow as unknown as StandardColumnDef<TData>["cell"],
-              aggregatedCell: ExpandRow as unknown as StandardColumnDef<TData>["aggregatedCell"],
-              size: 40,
-              enableHiding: true,
-              enableGrouping: false,
-              enablePinning: true,
-              enableSorting: false,
-              enableResizing: true,
-            },
-            ...columns,
-          ]
-        : columns,
-    [columns, enableExpander],
-  );
+  const tableColumns = enableExpander
+    ? [
+        {
+          id: "expander",
+          header: (props: { table: unknown }) => <ExpandAll table={props.table as never} />,
+          cell: ExpandRow as unknown as StandardColumnDef<TData>["cell"],
+          aggregatedCell: ExpandRow as unknown as StandardColumnDef<TData>["aggregatedCell"],
+          size: 40,
+          enableHiding: true,
+          enableGrouping: false,
+          enablePinning: true,
+          enableSorting: false,
+          enableResizing: true,
+        },
+        ...columns,
+      ]
+    : columns;
 
   const table = useTable({
     features: standardTableFeatures,

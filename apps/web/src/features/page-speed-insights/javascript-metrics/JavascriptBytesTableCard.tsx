@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import type { TableItem } from "@/lib/schema";
 import { getNumber, getUrlString } from "@/lib/utils";
 import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
@@ -30,7 +29,9 @@ type JavascriptBytesTableRow = {
 
 const columnHelper = createStockColumnHelper<JavascriptBytesTableRow>();
 
-function buildColumnDefs(includeWastedPercent: boolean): StockColumnDef<JavascriptBytesTableRow, unknown>[] {
+function buildColumnDefs(
+  includeWastedPercent: boolean,
+): StockColumnDef<JavascriptBytesTableRow, unknown>[] {
   const cols: StockColumnDef<JavascriptBytesTableRow, unknown>[] = [
     createURLColumn(columnHelper),
     createBytesColumn(columnHelper, "wastedBytes", "Wasted Bytes"),
@@ -54,37 +55,34 @@ export function JavascriptBytesTableCard({
   metrics,
   includeWastedPercent = false,
 }: JavascriptBytesTableCardProps) {
-  const validMetrics = useMemo(() => metrics.filter((m) => m.items.length > 0), [metrics]);
+  const validMetrics = metrics.filter((m) => m.items.length > 0);
   const showReportColumn = validMetrics.length > 1;
 
-  const data = useMemo<JavascriptBytesTableRow[]>(() => {
-    const allRows = validMetrics.flatMap(({ label, items }) =>
-      items.map((item: TableItem) => {
-        const url = getUrlString(item.url);
-        const wastedBytes = getNumber(item.wastedBytes);
-        const totalBytes = getNumber(item.totalBytes);
-        const row: JavascriptBytesTableRow = {
-          label,
-          url: url || "Unknown",
-          wastedBytes,
-          totalBytes,
-        };
-        if (includeWastedPercent) {
-          row.wastedPercent = getNumber(item.wastedPercent);
-        }
-        return row;
-      }),
-    );
+  const allRows = validMetrics.flatMap(({ label, items }) =>
+    items.map((item: TableItem) => {
+      const url = getUrlString(item.url);
+      const wastedBytes = getNumber(item.wastedBytes);
+      const totalBytes = getNumber(item.totalBytes);
+      const row: JavascriptBytesTableRow = {
+        label,
+        url: url || "Unknown",
+        wastedBytes,
+        totalBytes,
+      };
+      if (includeWastedPercent) {
+        row.wastedPercent = getNumber(item.wastedPercent);
+      }
+      return row;
+    }),
+  );
+  const data = sortByMaxValue(
+    allRows,
+    (row) => row.url,
+    (row) => row.wastedBytes || 0,
+    validMetrics.length,
+  );
 
-    return sortByMaxValue(
-      allRows,
-      (row) => row.url,
-      (row) => row.wastedBytes || 0,
-      validMetrics.length,
-    );
-  }, [validMetrics, includeWastedPercent]);
-
-  const cols = useMemo(() => buildColumnDefs(includeWastedPercent), [includeWastedPercent]);
+  const cols = buildColumnDefs(includeWastedPercent);
 
   const columns = useTableColumns<JavascriptBytesTableRow>(cols, columnHelper, showReportColumn);
 

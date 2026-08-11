@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { TreeView } from "@/components/ui/tree-view";
 import { Details } from "@/components/ui/accordion";
 import { renderTimeValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
@@ -19,20 +18,13 @@ export function RecommendationNetworkTree({
   recommendation,
   insightsItems,
 }: RecommendationNetworkTreeProps) {
-  const networkTrees = useMemo(() => {
-    if (!isNetworkDependencyTreeRecommendation(recommendation.id)) {
-      return [];
-    }
-
-    const reportsWithIssues = new Set(
-      recommendation.actionableSteps.flatMap((step) => step.reports),
-    );
-
-    return insightsItems
-      .filter((item) => reportsWithIssues.has(item.label))
-      .map(extractNetworkTreeFromAudit)
-      .filter(({ tree }) => tree !== null);
-  }, [insightsItems, recommendation]);
+  const reportsWithIssues = new Set(recommendation.actionableSteps.flatMap((step) => step.reports));
+  const networkTrees = isNetworkDependencyTreeRecommendation(recommendation.id)
+    ? insightsItems
+        .filter((item) => reportsWithIssues.has(item.label))
+        .map(extractNetworkTreeFromAudit)
+        .filter(({ tree }) => tree !== null)
+    : [];
 
   if (networkTrees.length === 0) {
     return null;

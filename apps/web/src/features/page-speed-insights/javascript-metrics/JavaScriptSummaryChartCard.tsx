@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { formatBytes } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
@@ -22,23 +21,19 @@ type JavaScriptSummary = {
 };
 
 export function JavaScriptSummaryChartCard({ stats }: { stats: JavaScriptSummary[] }) {
-  const chartData = useMemo(() => {
-    return stats
-      .filter((s) => s.totalScripts > 0)
-      .map((s) => ({
-        label: s.label || "Unknown",
-        totalScripts: s.totalScripts,
-        totalTransferSize: s.totalTransferSize,
-      }));
-  }, [stats]);
+  const chartData = stats
+    .filter((s) => s.totalScripts > 0)
+    .map((s) => ({
+      label: s.label || "Unknown",
+      totalScripts: s.totalScripts,
+      totalTransferSize: s.totalTransferSize,
+    }));
 
   if (!chartData.length) {
     return null;
   }
 
-  const config = buildKeyedChartConfig([
-    { key: "totalTransferSize", label: "Transfer size" },
-  ]);
+  const config = buildKeyedChartConfig([{ key: "totalTransferSize", label: "Transfer size" }]);
   const chartHeight = horizontalBarChartHeight(chartData.length, { rowPx: 44, minPx: 160 });
   const yAxisWidth = yAxisWidthForLabels(
     chartData.map((row) => row.label),

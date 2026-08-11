@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
 import type { TreeMapData } from "@/lib/schema";
 
@@ -12,19 +11,15 @@ export type ScriptTreemapItem = {
 export function useScriptTreemapItems(): ScriptTreemapItem[] {
   const items = usePageSpeedItems();
 
-  return useMemo(
-    () =>
-      items
-        .map(({ item, label }) => ({
-          treeData: item.lighthouseResult?.audits?.["script-treemap-data"]?.details as TreeMapData,
-          label,
-        }))
-        .filter(
-          (entry): entry is ScriptTreemapItem =>
-            entry.treeData?.type === "treemap-data" &&
-            Array.isArray(entry.treeData.nodes) &&
-            entry.treeData.nodes.length > 0,
-        ),
-    [items],
-  );
+  return items
+    .map(({ item, label }) => ({
+      treeData: item.lighthouseResult?.audits?.["script-treemap-data"]?.details as TreeMapData,
+      label,
+    }))
+    .filter(
+      (entry): entry is ScriptTreemapItem =>
+        entry.treeData?.type === "treemap-data" &&
+        Array.isArray(entry.treeData.nodes) &&
+        entry.treeData.nodes.length > 0,
+    );
 }
