@@ -1,7 +1,7 @@
 import { LoadingMessage } from "@/components/common/LoadingMessage";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { Suspense, ViewTransition } from "react";
-import { ClientOnly } from "@/components/common/ClientOnly";
+
 import { PageSpeedInsightsDashboardContent } from "./PageSpeedInsightsDashboardWrapper";
 
 export default async function PageSpeedPublicIdPage({
@@ -10,7 +10,7 @@ export default async function PageSpeedPublicIdPage({
   params: Promise<{ publicId: string }>;
 }) {
   const { publicId } = await params;
-
+  console.log("in page.tsx on server");
   return (
     <ViewTransition>
       <ErrorMessage>
