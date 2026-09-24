@@ -20,6 +20,7 @@ vi.mock("react-markdown", () => ({
 }));
 
 vi.mock("@/components/ui/accordion", () => ({
+  Accordion: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   AccordionItem: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   AccordionTrigger: ({
     children,

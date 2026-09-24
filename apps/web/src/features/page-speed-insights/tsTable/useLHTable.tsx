@@ -6,7 +6,12 @@ import { PageSpeedInsights } from "@/lib/schema";
 import { flexRender, useTable } from "@tanstack/react-table";
 import { Fragment } from "react";
 import clsx from "clsx";
-import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { AuditDetailsSummary } from "@/features/page-speed-insights/lh-categories/AuditDetailsSummary";
 import { RenderMetricSavings } from "@/features/page-speed-insights/lh-categories/RenderMetricSavings";
 import { RenderDetails } from "@/features/page-speed-insights/lh-categories/RenderDetails";
@@ -54,7 +59,7 @@ export function useLHTable(items: { item: PageSpeedInsights; label: string }[]) 
 export function CategoryRow({ row }: { row: StockRow<TableDataItem> }) {
   return (
     <AccordionItem value={row.id} key={row.id}>
-      <AccordionTrigger className="items-start sm:items-center" disabled={!row.getCanExpand()}>
+      <AccordionTrigger className="items-start sm:items-center">
         <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           {row
             .getAllCells()
@@ -69,9 +74,11 @@ export function CategoryRow({ row }: { row: StockRow<TableDataItem> }) {
         </div>
       </AccordionTrigger>
       <AccordionContent>
-        {row.subRows.map((subRow) => (
-          <AuditSummaryRow row={subRow} key={subRow.id} />
-        ))}
+        <Accordion type="multiple" className="w-full">
+          {row.subRows.map((subRow) => (
+            <AuditSummaryRow row={subRow} key={subRow.id} />
+          ))}
+        </Accordion>
       </AccordionContent>
     </AccordionItem>
   );
@@ -85,7 +92,7 @@ export function AuditSummaryRow({ row }: { row: StockRow<TableDataItem> }) {
       value={row.id}
       className={clsx("items-center gap-4 border border-x-4 border-gray-400 py-2")}
     >
-      <AccordionTrigger disabled={!row.getCanExpand()}>
+      <AccordionTrigger>
         <AuditDetailsSummary
           auditData={auditData}
           labels={labels}
@@ -100,7 +107,9 @@ export function AuditSummaryRow({ row }: { row: StockRow<TableDataItem> }) {
           title={`All Data for ${auditData[0]?.id}`}
         />
         <RenderMetricSavings auditData={auditData} labels={labels} />
-        <RenderDetails items={row.subRows.map((r) => r.original)} />
+        <Accordion type="multiple" className="w-full">
+          <RenderDetails items={row.subRows.map((r) => r.original)} />
+        </Accordion>
       </AccordionContent>
     </AccordionItem>
   );

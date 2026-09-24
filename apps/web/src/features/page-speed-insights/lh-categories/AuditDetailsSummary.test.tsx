@@ -6,7 +6,32 @@ import {
 } from "@/features/page-speed-insights/lh-categories/AuditDetailsSummary";
 
 vi.mock("react-markdown", () => ({
-  default: ({ children }: { children: string }) => <div>{children}</div>,
+  default: ({
+    children,
+    components,
+  }: {
+    children: string;
+    components?: {
+      a?: (props: { href?: string; children?: React.ReactNode }) => React.ReactNode;
+      p?: (props: { children?: React.ReactNode }) => React.ReactNode;
+    };
+  }) => {
+    const linkMatch = /\[([^\]]+)\]\(([^)]+)\)/.exec(children);
+    if (linkMatch && components?.a) {
+      const [, text, href] = linkMatch;
+      const before = children.slice(0, linkMatch.index);
+      const after = children.slice(linkMatch.index! + linkMatch[0].length);
+      const body = (
+        <>
+          {before}
+          {components.a({ href, children: text })}
+          {after}
+        </>
+      );
+      return components.p ? components.p({ children: body }) : <div>{body}</div>;
+    }
+    return <div>{children}</div>;
+  },
 }));
 
 vi.mock("@/features/page-speed-insights/ScoreDisplay", () => ({
@@ -66,11 +91,35 @@ describe("AuditDetailsSummary", () => {
         title: "A",
         score: null,
         scoreDisplayMode: "numeric" as const,
-        description: "Fix this issue",
+        description: "Fix this issue. [Learn more](https://example.com).",
       },
     ];
-    const { container } = render(<AuditDetailsSummary auditData={auditData} labels={["Mobile"]} />);
+    const { container, getByRole } = render(
+      <AuditDetailsSummary auditData={auditData} labels={["Mobile"]} />,
+    );
     expect(container.textContent).toContain("Fix this issue");
+    const link = getByRole("link", { name: "Learn more" });
+    expect(link.getAttribute("href")).toBe("https://example.com");
+  });
+
+  it("stops link click propagation so accordion triggers still receive clicks", () => {
+    const parentClick = vi.fn();
+    const auditData = [
+      {
+        id: "a1",
+        title: "A",
+        score: null,
+        scoreDisplayMode: "numeric" as const,
+        description: "See [docs](https://example.com/docs).",
+      },
+    ];
+    const { getByRole } = render(
+      <button type="button" onClick={parentClick}>
+        <AuditDetailsSummary auditData={auditData} labels={["Mobile"]} />
+      </button>,
+    );
+    getByRole("link", { name: "docs" }).click();
+    expect(parentClick).not.toHaveBeenCalled();
   });
 });
 

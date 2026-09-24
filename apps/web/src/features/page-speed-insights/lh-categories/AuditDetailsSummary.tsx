@@ -1,6 +1,12 @@
 import ReactMarkdown from "react-markdown";
 import { ScoreDisplay } from "@/features/page-speed-insights/ScoreDisplay";
 import { AuditResultsRecord } from "@/lib/schema";
+import { recommendationMarkdownComponents } from "@/features/page-speed-insights/RecommendationsSection/recommendationMarkdownComponents";
+
+/** Unwrap block tags / stop link bubbling so this can live inside AccordionTrigger buttons. */
+const triggerMarkdownComponents = recommendationMarkdownComponents({
+  linkStopPropagation: true,
+});
 
 export function AuditDetailsSummary({
   auditData,
@@ -41,7 +47,7 @@ export function AuditDetailsSummary({
       </div>
       {description ? (
         <div className="min-w-0 align-top text-sm no-underline hover:no-underline focus:no-underline md:flex-1 md:text-base">
-          <ReactMarkdown>{description}</ReactMarkdown>
+          <ReactMarkdown components={triggerMarkdownComponents}>{description}</ReactMarkdown>
         </div>
       ) : null}
     </div>

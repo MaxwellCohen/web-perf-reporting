@@ -1,13 +1,14 @@
-import { Card, CardTitle } from "@/components/ui/card";
+import { AccordionItem, AccordionContent } from "@/components/ui/accordion";
+import { AccordionSectionTitleTrigger } from "@/components/ui/accordion-section-title-trigger";
 import { ScoreDisplay } from "@/features/page-speed-insights/ScoreDisplay";
 import ReactMarkdown from "react-markdown";
 import { HorizontalScoreChart } from "@/components/common/PageSpeedGaugeChart";
-import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import {
   type InsightsContextItem,
   usePageSpeedItems,
 } from "@/features/page-speed-insights/PageSpeedContext";
 import type { AuditResultsRecord } from "@/lib/schema";
+import { Card, CardTitle } from "@/components/ui/card";
 
 const metricAuditRefId = [
   "first-contentful-paint",
@@ -90,9 +91,7 @@ export function CWVMetricsComponent() {
 
   return (
     <AccordionItem value="cwv" className="print:border-0">
-      <AccordionTrigger>
-        <h3 className="text-lg font-bold">Core Web Vitals Summary</h3>
-      </AccordionTrigger>
+      <AccordionSectionTitleTrigger>Core Web Vitals Summary</AccordionSectionTitleTrigger>
       <AccordionContent className="-mx-2 grid grid-cols-1 items-start gap-2 min-[22rem]:grid-cols-[repeat(auto-fit,minmax(14rem,1fr))]">
         {metricItems.map(({ auditName, title, auditItems, description }) => (
           <Card
