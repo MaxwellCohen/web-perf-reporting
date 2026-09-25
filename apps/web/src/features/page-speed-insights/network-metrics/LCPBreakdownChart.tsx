@@ -88,7 +88,7 @@ export function LCPBreakdownChart({
               style={{ zIndex: 9999 }}
               formatter={(value, name) => {
                 const label = subpartLabelBySubpart[String(name)] ?? String(name);
-                return [`${renderTimeValue(value)}`, label];
+                return `${renderTimeValue(value)} ${label}`;
               }}
             />
           }
