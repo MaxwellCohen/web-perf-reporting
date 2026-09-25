@@ -30,6 +30,57 @@ function insightWithAudits(audits: Record<string, unknown>): NullablePageSpeedIn
   } as unknown as NullablePageSpeedInsights;
 }
 
+const breakdownTable = {
+  "lcp-breakdown-insight": {
+    details: {
+      items: [
+        {
+          type: "table",
+          items: [
+            {
+              subpart: "timeToFirstByte",
+              label: "TTFB",
+              duration: 100,
+            },
+            {
+              subpart: "resourceLoadDuration",
+              label: "Resource Load",
+              duration: 200,
+            },
+          ],
+        },
+      ],
+    },
+  },
+};
+
+const possibleRemountAudits = {
+  "lcp-discovery-insight": { scoreDisplayMode: "notApplicable" },
+  "lcp-breakdown-insight": {
+    details: {
+      items: [
+        {
+          type: "table",
+          items: [
+            { subpart: "timeToFirstByte", label: "TTFB", duration: 50 },
+            { subpart: "elementRenderDelay", label: "Element render delay", duration: 950 },
+          ],
+        },
+      ],
+    },
+  },
+  metrics: {
+    details: {
+      items: [
+        {
+          observedFirstContentfulPaint: 600,
+          observedLargestContentfulPaint: 2600,
+        },
+      ],
+    },
+  },
+};
+
 describe("LCPBreakdownCard", () => {
   it("returns null when metrics empty", () => {
     const { container } = renderWithPageSpeedInsightsStore(<LCPBreakdownCard />, {
@@ -51,34 +102,22 @@ describe("LCPBreakdownCard", () => {
 
   it("renders table and chart when metrics have breakdown data", () => {
     const { container } = renderWithPageSpeedInsightsStore(<LCPBreakdownCard />, {
-      data: [
-        insightWithAudits({
-          "lcp-breakdown-insight": {
-            details: {
-              items: [
-                {
-                  type: "table",
-                  items: [
-                    {
-                      subpart: "timeToFirstByte",
-                      label: "TTFB",
-                      duration: 100,
-                    },
-                    {
-                      subpart: "resourceLoadDuration",
-                      label: "Resource Load",
-                      duration: 200,
-                    },
-                  ],
-                },
-              ],
-            },
-          },
-        }),
-      ],
+      data: [insightWithAudits(breakdownTable)],
       labels: ["Desktop"],
       isLoading: false,
     });
+    expect(container.querySelector('[role="alert"]')).toBeNull();
     expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it("shows possible LCP remount alert when three PSI proxies match", () => {
+    const { container } = renderWithPageSpeedInsightsStore(<LCPBreakdownCard />, {
+      data: [insightWithAudits(possibleRemountAudits)],
+      labels: ["Mobile"],
+      isLoading: false,
+    });
+    const alert = container.querySelector('[role="alert"]');
+    expect(alert?.textContent).toContain("Possible LCP remount");
+    expect(alert?.textContent).toContain("Mobile");
   });
 });
