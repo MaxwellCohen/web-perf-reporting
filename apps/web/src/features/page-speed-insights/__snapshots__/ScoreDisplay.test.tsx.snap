@@ -87,7 +87,6 @@ exports[`ScoreDisplay > renders numeric score with displayValue 1`] = `
   Score: 
   90
    / 100
-   - 1.2 s
 </div>
 `;
 

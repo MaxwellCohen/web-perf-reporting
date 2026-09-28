@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { formatBytes } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import {
+  CHART_SERIES_COLORS,
   barEndRadius,
   buildKeyedChartConfig,
   horizontalBarChartClassName,
@@ -11,7 +12,7 @@ import {
   mutedBarCursor,
   yAxisWidthForLabels,
 } from "@/features/page-speed-insights/shared/horizontalBarChart";
-import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, XAxis, YAxis } from "recharts";
 
 type JavaScriptSummary = {
   label: string;
@@ -94,7 +95,14 @@ export function JavaScriptSummaryChartCard({ stats }: { stats: JavaScriptSummary
               radius={barEndRadius}
               barSize={18}
               maxBarSize={22}
+              isAnimationActive={false}
             >
+              {chartData.map((row, index) => (
+                <Cell
+                  key={`${row.label}-${index}`}
+                  fill={CHART_SERIES_COLORS[index % CHART_SERIES_COLORS.length]}
+                />
+              ))}
               <LabelList
                 dataKey="totalTransferSize"
                 position="right"

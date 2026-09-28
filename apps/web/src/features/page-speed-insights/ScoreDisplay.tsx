@@ -90,7 +90,6 @@ export function ScoreDisplay({
           {labelText}
           {audit.displayValue ? `${audit.displayValue} - ` : ""}
           Score: {Math.round(audit.score * 100)} / 100
-          {audit.displayValue ? ` - ${audit.displayValue}` : ""}
         </div>
       </>
     );

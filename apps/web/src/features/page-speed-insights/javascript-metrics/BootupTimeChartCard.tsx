@@ -11,6 +11,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { renderTimeValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
+import { buildGroupedComparison } from "@/features/page-speed-insights/shared/comparisonChartData";
 import {
   buildKeyedChartConfig,
   formatAxisMs,
@@ -21,6 +22,7 @@ import {
   truncateLabel,
   yAxisWidthForLabels,
 } from "@/features/page-speed-insights/shared/horizontalBarChart";
+import { ReportComparisonBarChart } from "@/features/page-speed-insights/shared/ReportComparisonBarChart";
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
 
 type BootupTimeData = {
@@ -36,36 +38,92 @@ const SEGMENTS = [
   { key: "scripting", label: "Scripting" },
 ] as const;
 
+function scriptUrl(item: TableItem): string {
+  return getUrlString(item.url).replace(URL_PROTOCOL_REGEX, "") || "Unknown";
+}
+
 export function BootupTimeChartCard({ metrics }: { metrics: BootupTimeData[] }) {
+  const reportsWithScripts = metrics.filter((metric) => metric.bootupTime.length > 0);
+  if (!reportsWithScripts.length) {
+    return null;
+  }
+
+  if (reportsWithScripts.length > 1) {
+    return <BootupComparisonChart metrics={metrics} />;
+  }
+
+  return <BootupCompositionChart metric={reportsWithScripts[0]} />;
+}
+
+function BootupComparisonChart({ metrics }: { metrics: BootupTimeData[] }) {
+  const { series, rows } = buildGroupedComparison(
+    metrics.flatMap(({ label, bootupTime }) =>
+      bootupTime.map((item) => {
+        const scriptParseCompile = getNumber(item.scriptParseCompile) ?? 0;
+        const scripting = getNumber(item.scripting) ?? 0;
+        return {
+          label,
+          category: scriptUrl(item),
+          value: getNumber(item.total) ?? scriptParseCompile + scripting,
+        };
+      }),
+    ),
+    {
+      labels: metrics.map((metric) => metric.label),
+      limit: TOP_SCRIPTS,
+    },
+  );
+
+  if (!rows.length) {
+    return null;
+  }
+
+  return (
+    <Card className="md:col-span-2 lg:col-span-3">
+      <CardHeader className="pb-3">
+        <CardTitle>Top Scripts by Bootup Time</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Total bootup time for the heaviest scripts, for each report.
+        </p>
+      </CardHeader>
+      <CardContent>
+        <ReportComparisonBarChart
+          data={rows}
+          series={series}
+          formatValue={formatAxisMs}
+          tickFormatter={(value) => truncateLabel(value, 24)}
+          yAxis={{ min: 120, max: 168 }}
+          showValueAxis
+        />
+      </CardContent>
+    </Card>
+  );
+}
+
+function BootupCompositionChart({ metric }: { metric: BootupTimeData }) {
   const scriptTotals = new Map<
     string,
     { scriptParseCompile: number; scripting: number; total: number }
   >();
-  for (const { bootupTime } of metrics) {
-    for (const item of bootupTime) {
-      const url = getUrlString(item.url).replace(URL_PROTOCOL_REGEX, "") || "Unknown";
-      const scriptParseCompile = getNumber(item.scriptParseCompile) ?? 0;
-      const scripting = getNumber(item.scripting) ?? 0;
-      const total = getNumber(item.total) ?? scriptParseCompile + scripting;
-      const existing = scriptTotals.get(url) ?? {
-        scriptParseCompile: 0,
-        scripting: 0,
-        total: 0,
-      };
-      scriptTotals.set(url, {
-        scriptParseCompile: existing.scriptParseCompile + scriptParseCompile,
-        scripting: existing.scripting + scripting,
-        total: existing.total + total,
-      });
-    }
+  for (const item of metric.bootupTime) {
+    const url = scriptUrl(item);
+    const scriptParseCompile = getNumber(item.scriptParseCompile) ?? 0;
+    const scripting = getNumber(item.scripting) ?? 0;
+    const total = getNumber(item.total) ?? scriptParseCompile + scripting;
+    const existing = scriptTotals.get(url) ?? { scriptParseCompile: 0, scripting: 0, total: 0 };
+    scriptTotals.set(url, {
+      scriptParseCompile: existing.scriptParseCompile + scriptParseCompile,
+      scripting: existing.scripting + scripting,
+      total: existing.total + total,
+    });
   }
+
   const chartData = Array.from(scriptTotals.entries())
     .map(([url, values]) => ({ url, ...values }))
     .sort((a, b) => b.total - a.total)
     .slice(0, TOP_SCRIPTS);
 
-  const hasData = metrics.some((m) => m.bootupTime.length > 0);
-  if (!hasData || !chartData.length) {
+  if (!chartData.length) {
     return null;
   }
 
@@ -138,6 +196,7 @@ export function BootupTimeChartCard({ metrics }: { metrics: BootupTimeData[] }) 
                 radius={stackBarRadius(index, SEGMENTS.length)}
                 barSize={18}
                 maxBarSize={22}
+                isAnimationActive={false}
               >
                 {key === lastSegment ? (
                   <LabelList

@@ -18,9 +18,9 @@ export const barEndRadius: [number, number, number, number] = [0, 6, 6, 0];
 export function formatAxisMs(value: number): string {
   if (value >= 1000) {
     const seconds = value / 1000;
-    return `${Number.isInteger(seconds) ? seconds : seconds.toFixed(1)}s`;
+    return `${Number.isInteger(seconds) ? seconds : seconds.toFixed(1)} s`;
   }
-  return `${Math.round(value)}ms`;
+  return `${Math.round(value)} ms`;
 }
 
 export function horizontalBarChartHeight(

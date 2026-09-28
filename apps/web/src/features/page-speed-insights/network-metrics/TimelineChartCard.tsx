@@ -114,6 +114,7 @@ export function TimelineChartCard() {
                   radius={barEndRadius}
                   barSize={showLegend ? 12 : 20}
                   maxBarSize={24}
+                  isAnimationActive={false}
                 >
                   {!showLegend && key === singleReportKey ? (
                     <LabelList

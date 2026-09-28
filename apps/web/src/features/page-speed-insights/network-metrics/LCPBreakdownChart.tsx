@@ -106,6 +106,7 @@ export function LCPBreakdownChart({
             radius={stackBarRadius(index, allSubparts.length)}
             barSize={22}
             maxBarSize={28}
+            isAnimationActive={false}
           >
             {subpart === lastSubpart ? (
               <LabelList
