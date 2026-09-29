@@ -51,7 +51,7 @@ export function RecommendationNetworkTree({
               ) : null}
             </summary>
             <div className="lh-crc mt-2 w-full overflow-x-auto">
-              <div className="mb-2 text-xs italic text-gray-500 lh-crc-initial-nav">
+              <div className="lh-crc-initial-nav mb-1 font-mono text-[11px] tracking-[0.14em] text-zinc-400 uppercase">
                 Initial Navigation
               </div>
               <TreeView data={treeData} expandAll />

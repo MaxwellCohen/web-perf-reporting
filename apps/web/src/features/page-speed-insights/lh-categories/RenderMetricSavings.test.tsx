@@ -27,6 +27,31 @@ describe("RenderMetricSavings", () => {
     expect(container.firstChild).toBeNull();
   });
 
+  it("returns null when every metric savings value is 0", () => {
+    const { container } = render(
+      <RenderMetricSavings
+        auditData={[
+          {
+            id: "a",
+            score: null,
+            scoreDisplayMode: "metricSavings" as const,
+            title: "A",
+            metricSavings: { LCP: 0, FCP: 0 },
+          },
+          {
+            id: "b",
+            score: null,
+            scoreDisplayMode: "metricSavings" as const,
+            title: "B",
+            metricSavings: { LCP: 0, FCP: 0 },
+          },
+        ]}
+        labels={["Mobile", "Desktop"]}
+      />,
+    );
+    expect(container.firstChild).toBeNull();
+  });
+
   it("returns null when auditData has no metricSavings", () => {
     const { container } = render(
       <RenderMetricSavings

@@ -21,5 +21,6 @@ describe("auditTableConfig", () => {
   it("returns false for audit IDs not in the list", () => {
     expect(shouldShowSeparateTablesPerReport("unknown-audit")).toBe(false);
     expect(shouldShowSeparateTablesPerReport("first-contentful-paint")).toBe(false);
+    expect(shouldShowSeparateTablesPerReport("lcp-breakdown-insight")).toBe(false);
   });
 });

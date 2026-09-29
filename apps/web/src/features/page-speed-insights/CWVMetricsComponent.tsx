@@ -10,21 +10,19 @@ import {
 import type { AuditResultsRecord } from "@/lib/schema";
 import { Card, CardTitle } from "@/components/ui/card";
 import { CHART_SERIES_COLORS } from "@/features/page-speed-insights/shared/horizontalBarChart";
-
-const metricAuditRefId = [
-  "first-contentful-paint",
-  "largest-contentful-paint",
-  "total-blocking-time",
-  "cumulative-layout-shift",
-  "speed-index",
-] as const;
-
-type MetricAuditId = (typeof metricAuditRefId)[number];
-
-type MetricAuditSource = {
-  audits: AuditResultsRecord;
-  label: string;
-};
+import { SectionGrid } from "@/features/page-speed-insights/shared/MetricsSectionLayout";
+import { FcpScreenshotCard } from "@/features/page-speed-insights/FcpScreenshotCard";
+import { LcpElementSummary } from "@/features/page-speed-insights/LcpElementSummary";
+import { MetricCauseCard } from "@/features/page-speed-insights/MetricCauseCard";
+import { collectFcpScreenshots } from "@/features/page-speed-insights/fcpScreenshot";
+import { collectLcpElements } from "@/features/page-speed-insights/lcpElement";
+import {
+  collectCauseAuditsForMetric,
+  METRIC_AUDIT_IDS,
+  METRIC_AUDIT_TO_ACRONYM,
+  type MetricAuditId,
+  type MetricAuditSource,
+} from "@/features/page-speed-insights/metricCauseAudits";
 
 type MetricAuditEntry = {
   audit: AuditResultsRecord[string];
@@ -70,6 +68,31 @@ function createMetricCard(auditName: MetricAuditId, sources: MetricAuditSource[]
   };
 }
 
+function MetricSectionTriggerLabel({
+  title,
+  auditItems,
+}: {
+  title?: string;
+  auditItems: MetricAuditEntry[];
+}) {
+  const displayParts = auditItems
+    .filter((item) => item.audit.displayValue)
+    .map(({ audit, label }) =>
+      auditItems.length > 1 ? `${label}: ${audit.displayValue}` : audit.displayValue,
+    );
+
+  return (
+    <span className="flex min-w-0 flex-col gap-0.5 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-3">
+      <span>{title}</span>
+      {displayParts.length > 0 ? (
+        <span className="text-sm font-normal text-muted-foreground tabular-nums">
+          {displayParts.join(" · ")}
+        </span>
+      ) : null}
+    </span>
+  );
+}
+
 export function CWVMetricsComponent() {
   const items = usePageSpeedItems();
 
@@ -84,42 +107,79 @@ export function CWVMetricsComponent() {
     return null;
   }
 
-  const metricItems = metricAuditRefId.map((auditName) => createMetricCard(auditName, sources));
+  const metricItems = METRIC_AUDIT_IDS.map((auditName) => createMetricCard(auditName, sources));
 
   if (!metricItems.length) {
     return null;
   }
 
   return (
-    <AccordionItem value="cwv" className="print:border-0">
-      <AccordionSectionTitleTrigger>Core Web Vitals Summary</AccordionSectionTitleTrigger>
-      <AccordionContent className="-mx-2 grid grid-cols-1 items-stretch gap-2 min-[22rem]:grid-cols-[repeat(auto-fit,minmax(14rem,1fr))]">
-        {metricItems.map(({ auditName, title, auditItems, description }) => (
-          <Card
-            key={auditName}
-            className="flex h-full min-w-0 w-full flex-col gap-2 overflow-hidden px-4 py-4"
-          >
-            <CardTitle className="text-md min-w-0 font-bold wrap-break-word">{title}</CardTitle>
-            <div className="flex flex-col gap-3 text-sm">
-              {auditItems.map(({ audit, label }, index) => (
-                <MetricAuditRow
-                  key={`${auditName}_${label}`}
-                  audit={audit}
-                  label={label}
-                  index={index}
-                  showSwatch={auditItems.length > 1}
-                />
-              ))}
-            </div>
-            {description ? (
-              <div className="mt-auto pt-2 text-xs text-muted-foreground">
-                <ReactMarkdown>{description}</ReactMarkdown>
+    <>
+      <AccordionItem value="cwv" className="print:border-0">
+        <AccordionSectionTitleTrigger>Core Web Vitals Summary</AccordionSectionTitleTrigger>
+        <AccordionContent className="-mx-2 grid grid-cols-1 items-stretch gap-2 min-[22rem]:grid-cols-[repeat(auto-fit,minmax(14rem,1fr))]">
+          {metricItems.map(({ auditName, title, auditItems, description }) => (
+            <Card
+              key={auditName}
+              className="flex h-full min-w-0 w-full flex-col gap-2 overflow-hidden px-4 py-4"
+            >
+              <CardTitle className="text-md min-w-0 font-bold wrap-break-word">{title}</CardTitle>
+              <div className="flex flex-col gap-3 text-sm">
+                {auditItems.map(({ audit, label }, index) => (
+                  <MetricAuditRow
+                    key={`${auditName}_${label}`}
+                    audit={audit}
+                    label={label}
+                    index={index}
+                    showSwatch={auditItems.length > 1}
+                  />
+                ))}
               </div>
-            ) : null}
-          </Card>
-        ))}
-      </AccordionContent>
-    </AccordionItem>
+              {description ? (
+                <div className="mt-auto pt-2 text-xs text-muted-foreground">
+                  <ReactMarkdown>{description}</ReactMarkdown>
+                </div>
+              ) : null}
+            </Card>
+          ))}
+        </AccordionContent>
+      </AccordionItem>
+
+      {metricItems.map(({ auditName, title, auditItems }) => {
+        const causes = collectCauseAuditsForMetric(auditName, sources);
+        if (!causes.length) {
+          return null;
+        }
+
+        const acronym = METRIC_AUDIT_TO_ACRONYM[auditName];
+
+        return (
+          <AccordionItem key={auditName} value={`cwv-cause-${auditName}`} className="print:border-0">
+            <AccordionSectionTitleTrigger>
+              <MetricSectionTriggerLabel title={title} auditItems={auditItems} />
+            </AccordionSectionTitleTrigger>
+            <AccordionContent>
+              <SectionGrid>
+                {auditName === "first-contentful-paint" ? (
+                  <FcpScreenshotCard screenshots={collectFcpScreenshots(sources)} />
+                ) : null}
+                {auditName === "largest-contentful-paint" ? (
+                  <LcpElementSummary elements={collectLcpElements(sources)} />
+                ) : null}
+                {causes.map((cause) => (
+                  <MetricCauseCard
+                    key={cause.auditId}
+                    cause={cause}
+                    acronym={acronym}
+                    sources={sources}
+                  />
+                ))}
+              </SectionGrid>
+            </AccordionContent>
+          </AccordionItem>
+        );
+      })}
+    </>
   );
 }
 

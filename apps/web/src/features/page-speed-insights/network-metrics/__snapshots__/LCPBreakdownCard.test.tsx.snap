@@ -111,7 +111,7 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
           >
             <table
               class="w-full caption-bottom text-sm table-fixed w-max!"
-              style="width: 300px;"
+              style="width: 340px;"
             >
               <thead
                 class="[&_tr]:border-b"
@@ -179,7 +179,7 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
                   </th>
                   <th
                     class="h-10 px-2 text-left align-top font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 *:[[role=checkbox]]:translate-y-0.5 border relative overflow-hidden"
-                    style="width: 140px; min-width: 140px; max-width: 140px;"
+                    style="width: 180px; min-width: 180px; max-width: 180px;"
                   >
                     <div
                       class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
@@ -271,7 +271,7 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
                     data-grouped="false"
                     data-placeholder="false"
                     data-row-expanded="false"
-                    style="width: 140px; min-width: 140px; max-width: 140px;"
+                    style="width: 180px; min-width: 180px; max-width: 180px;"
                   >
                     <span
                       class=""
@@ -312,7 +312,7 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
                     data-grouped="false"
                     data-placeholder="false"
                     data-row-expanded="false"
-                    style="width: 140px; min-width: 140px; max-width: 140px;"
+                    style="width: 180px; min-width: 180px; max-width: 180px;"
                   >
                     <span
                       class=""

@@ -1,4 +1,5 @@
 import type { PageSpeedInsightsSnapshot } from "@/features/page-speed-insights/PageSpeedContext";
+import { sortReportLabels } from "@/features/page-speed-insights/shared/reportLabels";
 import { getNumber } from "@/lib/utils";
 
 type LCPSubpart = {
@@ -37,6 +38,59 @@ const LCP_SUBPART_ORDER = [
 let lastItemsRef: PageSpeedInsightsSnapshot["context"]["items"] | undefined;
 let lastComputed: LCPBreakdownComputed | null = null;
 
+function sortSubparts<T extends { subpart: string }>(rows: T[]): T[] {
+  return [...rows].sort((a, b) => {
+    const aIndex = LCP_SUBPART_ORDER.indexOf(a.subpart);
+    const bIndex = LCP_SUBPART_ORDER.indexOf(b.subpart);
+    if (aIndex === -1 && bIndex === -1) return 0;
+    if (aIndex === -1) return 1;
+    if (bIndex === -1) return -1;
+    return aIndex - bIndex;
+  });
+}
+
+export function buildLcpBreakdownTableFromDetailRows(
+  rows: Array<{
+    _userLabel: string;
+    auditResult?: {
+      details?: {
+        items?: Array<{ subpart?: string; label?: string; duration?: unknown }>;
+      };
+    };
+  }>,
+): { tableRows: LCPBreakdownTableRow[]; reportLabels: string[] } | null {
+  const subpartMap = new Map<string, LCPBreakdownTableRow>();
+
+  rows.forEach((row) => {
+    const reportLabel = row._userLabel;
+    if (!reportLabel) return;
+
+    (row.auditResult?.details?.items || []).forEach((item) => {
+      const subpart = typeof item.subpart === "string" ? item.subpart : "";
+      if (!subpart) return;
+
+      if (!subpartMap.has(subpart)) {
+        subpartMap.set(subpart, {
+          subpart,
+          label: typeof item.label === "string" ? item.label : subpart,
+          valuesByReportLabel: {},
+        });
+      }
+
+      const tableRow = subpartMap.get(subpart)!;
+      tableRow.valuesByReportLabel[reportLabel] = getNumber(item.duration) || 0;
+    });
+  });
+
+  const tableRows = sortSubparts(Array.from(subpartMap.values()));
+  if (!tableRows.length) return null;
+
+  return {
+    tableRows,
+    reportLabels: sortReportLabels(rows.map((row) => row._userLabel)),
+  };
+}
+
 function computeLcpBreakdownComputed(
   metrics: PageSpeedInsightsSnapshot["context"]["items"],
 ): LCPBreakdownComputed | null {
@@ -68,33 +122,13 @@ function computeLcpBreakdownComputed(
 
   if (!breakdownData.length) return null;
 
-  // Sort & aggregate for the table
-  const subpartMap = new Map<string, LCPBreakdownTableRow>();
-
-  breakdownData.forEach(({ label, subparts }) => {
-    subparts.forEach(({ subpart, label: subpartLabel, duration }) => {
-      if (!subpartMap.has(subpart)) {
-        subpartMap.set(subpart, {
-          subpart,
-          label: subpartLabel,
-          valuesByReportLabel: {},
-        });
-      }
-
-      const row = subpartMap.get(subpart)!;
-      row.valuesByReportLabel[label] = duration;
-    });
-  });
-
-  const tableRows = Array.from(subpartMap.values()).sort((a, b) => {
-    const aIndex = LCP_SUBPART_ORDER.indexOf(a.subpart);
-    const bIndex = LCP_SUBPART_ORDER.indexOf(b.subpart);
-    // If not in order array, put at end
-    if (aIndex === -1 && bIndex === -1) return 0;
-    if (aIndex === -1) return 1;
-    if (bIndex === -1) return -1;
-    return aIndex - bIndex;
-  });
+  const tableRows =
+    buildLcpBreakdownTableFromDetailRows(
+      breakdownData.map(({ label, subparts }) => ({
+        _userLabel: label,
+        auditResult: { details: { items: subparts } },
+      })),
+    )?.tableRows ?? [];
 
   // Get all unique subparts for the chart, sorted by LCP subpart order
   const subpartSet = new Set<string>();
@@ -104,15 +138,9 @@ function computeLcpBreakdownComputed(
     });
   });
 
-  const allSubparts = Array.from(subpartSet).sort((a, b) => {
-    const aIndex = LCP_SUBPART_ORDER.indexOf(a);
-    const bIndex = LCP_SUBPART_ORDER.indexOf(b);
-    // If not in order array, put at end
-    if (aIndex === -1 && bIndex === -1) return 0;
-    if (aIndex === -1) return 1;
-    if (bIndex === -1) return -1;
-    return aIndex - bIndex;
-  });
+  const allSubparts = sortSubparts(Array.from(subpartSet).map((subpart) => ({ subpart }))).map(
+    (row) => row.subpart,
+  );
 
   // Create chart data - one bar per report, with subparts as stacked segments
   // Subparts must be added in the correct order for stacking

@@ -1,84 +1,28 @@
 "use client";
 
-import type { TableItem } from "@/lib/schema";
-import { getNumber } from "@/lib/utils";
-import { createStringAggregatedCell } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
-import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
-import type { StockColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
-import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
-import { createMSColumn } from "@/features/page-speed-insights/shared/tableColumnHelpers";
-import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
-import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
-import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
-import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
-
-type MainThreadWorkData = {
-  label: string;
-  mainThreadWork: TableItem[];
-};
-
-type MainThreadWorkTableRow = {
-  label: string;
-  group: string;
-  groupLabel: string;
-  duration: number | undefined;
-};
+import { TableCardShell } from "@/features/page-speed-insights/shared/TableCard";
+import { MainThreadWorkBreakdownTable } from "@/features/page-speed-insights/javascript-metrics/MainThreadWorkBreakdownTable";
+import {
+  buildMainThreadWorkTable,
+  type MainThreadWorkMetric,
+} from "@/features/page-speed-insights/javascript-metrics/mainThreadWorkTable";
 
 type MainThreadWorkCardProps = {
-  metrics: MainThreadWorkData[];
+  metrics: MainThreadWorkMetric[];
 };
 
-const columnHelper = createStockColumnHelper<MainThreadWorkTableRow>();
-const cols: StockColumnDef<MainThreadWorkTableRow, any>[] = [
-  columnHelper.accessor("groupLabel", {
-    id: "groupLabel",
-    header: "Category",
-    enableSorting: true,
-    enableGrouping: true,
-    enableResizing: true,
-    filterFn: "includesString",
-    aggregationFn: "unique",
-    cell: (info) => info.getValue(),
-    aggregatedCell: createStringAggregatedCell("groupLabel", undefined, false),
-  }),
-  createMSColumn(columnHelper, "duration", "Time Spent"),
-];
-
 export function MainThreadWorkCard({ metrics }: MainThreadWorkCardProps) {
-  const validMetrics = metrics.filter((m) => m.mainThreadWork.length > 0);
-  const showReportColumn = validMetrics.length > 1;
+  const { rows, reportLabels } = buildMainThreadWorkTable(metrics);
 
-  const allRows = validMetrics.flatMap(({ label, mainThreadWork }) =>
-    mainThreadWork.map((item: TableItem) => {
-      const group = typeof item.group === "string" ? item.group : "";
-      const groupLabel = typeof item.groupLabel === "string" ? item.groupLabel : group;
-      const duration = getNumber(item.duration);
-      return {
-        label,
-        group,
-        groupLabel: groupLabel || toTitleCase(group),
-        duration,
-      };
-    }),
-  );
-  const data = sortByMaxValue(
-    allRows,
-    (row) => row.groupLabel,
-    (row) => row.duration || 0,
-    validMetrics.length,
-  );
-
-  const columns = useTableColumns<MainThreadWorkTableRow>(cols, columnHelper, showReportColumn);
-
-  const table = useStandardTable({
-    data,
-    columns,
-    grouping: ["groupLabel"],
-  });
-
-  if (!validMetrics.length) {
+  if (!rows.length) {
     return null;
   }
 
-  return <TableCard title="Main Thread Work Breakdown" table={table} />;
+  return (
+    <TableCardShell title="Main Thread Work Breakdown" className="md:col-span-2 lg:col-span-3">
+      <div className="w-full overflow-x-auto">
+        <MainThreadWorkBreakdownTable rows={rows} reportLabels={reportLabels} />
+      </div>
+    </TableCardShell>
+  );
 }

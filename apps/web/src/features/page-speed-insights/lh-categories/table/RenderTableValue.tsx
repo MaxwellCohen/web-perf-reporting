@@ -325,7 +325,7 @@ export function RenderBytesValue({
   ...props
 }: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
   return (
-    <span title="bytes" {...props} className={cn("", props.className)}>
+    <span title="bytes" {...props} className={cn("whitespace-nowrap tabular-nums", props.className)}>
       {children}
       {formatBytes(value)}
     </span>
@@ -405,7 +405,7 @@ export function RenderMSValue({
   ...props
 }: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
   return (
-    <span title="ms" {...props} className={cn("", props.className)}>
+    <span title="ms" {...props} className={cn("whitespace-nowrap tabular-nums", props.className)}>
       {formatMsValue(value)}
     </span>
   );

@@ -8,7 +8,6 @@ export const AUDITS_WITH_SEPARATE_TABLES_PER_REPORT: string[] = [
   "dom-size-insight",
   "cls-culprits-insight",
   "network-metrics",
-  "lcp-breakdown-insight",
   "resource-summary",
   "long-tasks",
   "third-parties-insight",
@@ -18,10 +17,6 @@ export const AUDITS_WITH_SEPARATE_TABLES_PER_REPORT: string[] = [
   "network-server-latency",
   "network-resource-type-breakdown",
   "network-top-resources",
-  "network-lcp-breakdown",
-  "network-lcp-breakdown-insight",
-  "network-lcp-breakdown-details",
-  "network-lcp-breakdown-insight",
   // Add more audit IDs here as needed
 ];
 

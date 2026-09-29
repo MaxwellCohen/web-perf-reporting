@@ -64,6 +64,119 @@ describe("DetailTable", () => {
     // DetailTable renders AccordionItem with table inside - table may be in collapsed content
     expect(container.textContent).toContain("Test Table");
   });
+
+  it("combines LCP breakdown rows from each report into one table", () => {
+    const rows = ["Mobile", "Desktop"].map((label) =>
+      createMockRow({
+        _userLabel: label,
+        auditResult: {
+          id: "lcp-breakdown-insight",
+          title: "LCP breakdown",
+          details: {
+            type: "table",
+            headings: [
+              { key: "label", valueType: "text", label: "Subpart" },
+              { key: "duration", valueType: "ms", label: "Duration" },
+            ],
+            items: [
+              { subpart: "timeToFirstByte", label: "Time to first byte", duration: 100 },
+              { subpart: "elementRenderDelay", label: "Element render delay", duration: 400 },
+            ],
+          },
+        },
+      }),
+    );
+
+    const { container } = render(<DetailTable rows={rows as any} title="LCP breakdown" />);
+
+    expect(container.querySelectorAll("table")).toHaveLength(1);
+    expect(container.textContent).not.toContain("Table for Mobile");
+    expect(container.textContent).not.toContain("Table for Desktop");
+  });
+
+  it("drops the expand column on render-blocking tables and keeps report labels", () => {
+    const rows = [
+      { label: "Mobile", totalBytes: 7670 },
+      { label: "Desktop", totalBytes: 7670 },
+    ].map(({ label, totalBytes }) =>
+      createMockRow({
+        _userLabel: label,
+        auditResult: {
+          id: "render-blocking-insight",
+          title: "Render blocking requests",
+          details: {
+            type: "table",
+            headings: [
+              { key: "url", valueType: "url", label: "URL" },
+              { key: "totalBytes", valueType: "bytes", label: "Transfer Size" },
+              { key: "wastedMs", valueType: "timespanMs", label: "Duration" },
+            ],
+            items: [
+              {
+                url: "https://solid-books.vercel.app/assets/app.css",
+                totalBytes,
+                wastedMs: 150,
+              },
+            ],
+          },
+        },
+      }),
+    );
+
+    const { container } = render(
+      <DetailTable rows={rows as any} title="Render blocking requests" />,
+    );
+
+    expect(container.querySelector("tbody button")).toBeNull();
+    expect(container.textContent).toContain("(Mobile)");
+    expect(container.textContent).toContain("(Desktop)");
+    expect(container.textContent).toContain("https://solid-books.vercel.app/assets/app.css");
+  });
+
+  it("drops the expand column on bootup-time tables and keeps the metric columns", () => {
+    const rows = [
+      { label: "Mobile", total: 187, scripting: 172, scriptParseCompile: 8 },
+      { label: "Desktop", total: 161, scripting: 149, scriptParseCompile: 4 },
+    ].map(({ label, total, scripting, scriptParseCompile }) =>
+      createMockRow({
+        _userLabel: label,
+        auditResult: {
+          id: "bootup-time",
+          title: "JavaScript execution time",
+          details: {
+            type: "table",
+            headings: [
+              { key: "url", valueType: "url", label: "URL" },
+              { key: "total", valueType: "ms", label: "Total CPU Time" },
+              { key: "scripting", valueType: "ms", label: "Script Evaluation" },
+              { key: "scriptParseCompile", valueType: "ms", label: "Script Parse" },
+            ],
+            items: [
+              {
+                url: "https://solid-books.vercel.app/assets/book-utils.js",
+                total,
+                scripting,
+                scriptParseCompile,
+              },
+            ],
+          },
+        },
+      }),
+    );
+
+    const { container } = render(
+      <DetailTable rows={rows as any} title="JavaScript execution time" />,
+    );
+
+    expect(container.querySelector("tbody button")).toBeNull();
+    expect(container.textContent).toContain("book-utils.js");
+    expect(container.textContent).toContain("187");
+    expect(container.textContent).toContain("172");
+    expect(container.textContent).toContain("8");
+    expect(container.textContent).toContain("(Mobile)");
+    expect(container.textContent).toContain("(Desktop)");
+  });
+
 });
 
 describe("makeColumnDef", () => {

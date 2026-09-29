@@ -1,75 +1,28 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React from "react";
-import * as AccordionPrimitive from "@radix-ui/react-accordion";
-import { ChevronRight } from "lucide-react";
-import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-// Tree marker SVG components matching Lighthouse style
-// Each marker is 12px wide (w-3 = 12px) and 26px tall
-const TreeMarker = {
-  horizDown: () => (
-    <span
-      className="inline-block w-3 h-6.5 bg-no-repeat bg-top-left float-left"
-      style={{
-        backgroundImage: `url("data:image/svg+xml;utf8,<svg width='16' height='26' viewBox='0 0 16 26' xmlns='http://www.w3.org/2000/svg'><g fill='%23D8D8D8' fill-rule='evenodd'><path d='M16 12v2H-2v-2z'/><path d='M9 12v14H7V12z'/></g></svg>")`,
-      }}
-    />
-  ),
-  right: () => (
-    <span
-      className="inline-block w-3 h-6.5 bg-no-repeat bg-top-left float-left"
-      style={{
-        backgroundImage: `url("data:image/svg+xml;utf8,<svg width='16' height='26' viewBox='0 0 16 26' xmlns='http://www.w3.org/2000/svg'><path d='M16 12v2H0v-2z' fill='%23D8D8D8' fill-rule='evenodd'/></svg>")`,
-      }}
-    />
-  ),
-  upRight: () => (
-    <span
-      className="inline-block w-3 h-6.5 bg-no-repeat bg-top-left float-left"
-      style={{
-        backgroundImage: `url("data:image/svg+xml;utf8,<svg width='16' height='26' viewBox='0 0 16 26' xmlns='http://www.w3.org/2000/svg'><path d='M7 0h2v14H7zm2 12h7v2H9z' fill='%23D8D8D8' fill-rule='evenodd'/></svg>")`,
-      }}
-    />
-  ),
-  vertRight: () => (
-    <span
-      className="inline-block w-3 h-6.5 bg-no-repeat bg-top-left float-left"
-      style={{
-        backgroundImage: `url("data:image/svg+xml;utf8,<svg width='16' height='26' viewBox='0 0 16 26' xmlns='http://www.w3.org/2000/svg'><path d='M7 0h2v27H7zm2 12h7v2H9z' fill='%23D8D8D8' fill-rule='evenodd'/></svg>")`,
-      }}
-    />
-  ),
-  vert: () => (
-    <span
-      className="inline-block w-3 h-6.5 bg-no-repeat bg-top-left float-left"
-      style={{
-        backgroundImage: `url("data:image/svg+xml;utf8,<svg width='16' height='26' viewBox='0 0 16 26' xmlns='http://www.w3.org/2000/svg'><path d='M7 0h2v26H7z' fill='%23D8D8D8' fill-rule='evenodd'/></svg>")`,
-      }}
-    />
-  ),
-  empty: () => <span className="inline-block w-3 h-6.5 float-left" />,
+export type TreeMetric = {
+  label: string;
+  value: string;
 };
-
-const selectedTreeVariants = cva("before:opacity-100 before:bg-accent/70 text-accent-foreground");
-
-const dragOverVariants = cva("before:opacity-100 before:bg-primary/20 text-primary-foreground");
 
 interface TreeDataItem {
   id: string;
   name: string;
-  icon?: any;
-  selectedIcon?: any;
-  openIcon?: any;
+  icon?: React.ReactNode;
+  selectedIcon?: React.ReactNode;
+  openIcon?: React.ReactNode;
   children?: TreeDataItem[];
   actions?: React.ReactNode;
   onClick?: () => void;
   draggable?: boolean;
   droppable?: boolean;
   isRoot?: boolean;
+  metrics?: TreeMetric[];
+  /** Marks the longest request chain so it can be scanned without reading the label. */
+  highlight?: boolean;
 }
 
 type TreeProps = React.HTMLAttributes<HTMLDivElement> & {
@@ -77,10 +30,226 @@ type TreeProps = React.HTMLAttributes<HTMLDivElement> & {
   initialSelectedItemId?: string;
   onSelectChange?: (item: TreeDataItem | undefined) => void;
   expandAll?: boolean;
-  defaultNodeIcon?: any;
-  defaultLeafIcon?: any;
+  defaultNodeIcon?: React.ReactNode;
+  defaultLeafIcon?: React.ReactNode;
   onDocumentDrag?: (sourceItem: TreeDataItem, targetItem: TreeDataItem) => void;
 };
+
+type TreeLabelParts = {
+  title: string;
+  metrics: TreeMetric[];
+  highlight: boolean;
+};
+
+const LONGEST_CHAIN_MARKER = "(Longest Chain)";
+
+function splitLegacyName(name: string): TreeLabelParts {
+  const highlight = name.includes(LONGEST_CHAIN_MARKER);
+  const cleaned = name
+    .replace(/\s*\|\s*\(Longest Chain\)\s*/g, "")
+    .replace(LONGEST_CHAIN_MARKER, "")
+    .trim();
+  const parts = cleaned.split(" | ").filter(Boolean);
+  const [title = cleaned, ...rest] = parts;
+
+  const metrics = rest
+    .map((part) => {
+      const colon = part.indexOf(":");
+      if (colon > 0) {
+        return { label: part.slice(0, colon).trim(), value: part.slice(colon + 1).trim() };
+      }
+      const timed = part.match(/^(.+?)\s+(\d.*)$/);
+      if (timed?.[1] && timed[2]) {
+        return { label: timed[1].trim(), value: timed[2].trim() };
+      }
+      return { label: part.trim(), value: "" };
+    })
+    .filter((metric) => metric.label.length > 0 && metric.value.length > 0);
+
+  return { title, metrics, highlight };
+}
+
+function getLabelParts(item: TreeDataItem): TreeLabelParts {
+  if (item.metrics && item.metrics.length > 0) {
+    return {
+      title: item.name.replace(LONGEST_CHAIN_MARKER, "").trim(),
+      metrics: item.metrics,
+      highlight: Boolean(item.highlight) || item.name.includes(LONGEST_CHAIN_MARKER),
+    };
+  }
+  const parsed = splitLegacyName(item.name);
+  return {
+    ...parsed,
+    highlight: Boolean(item.highlight) || parsed.highlight,
+  };
+}
+
+type ResourceDisplay = {
+  primary: string;
+  secondary: string;
+  title: string;
+  href?: string;
+};
+
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+function describeResource(value: string): ResourceDisplay | null {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    return null;
+  }
+
+  const segments = url.pathname.split("/").filter(Boolean);
+  const query = url.search ? safeDecode(url.search) : "";
+
+  if (segments.length === 0) {
+    return {
+      primary: url.host,
+      secondary: query,
+      title: value,
+      href: value,
+    };
+  }
+
+  if (segments.length === 1) {
+    return {
+      primary: `/${safeDecode(segments[0] ?? "")}`,
+      secondary: `${url.host}${query}`,
+      title: value,
+      href: value,
+    };
+  }
+
+  return {
+    primary: safeDecode(segments.at(-1) ?? url.pathname),
+    secondary: `${url.host}/${segments.slice(0, -1).join("/")}/${query}`,
+    title: value,
+    href: value,
+  };
+}
+
+function TreeResourceName({ value }: { value: string }) {
+  const display = describeResource(value);
+  if (!display) {
+    return <span className="font-mono text-[13px] leading-5 break-all text-foreground">{value}</span>;
+  }
+
+  const text = (
+    <span className="block min-w-0" title={display.title}>
+      <span className="font-mono text-[13px] leading-5 font-medium break-all text-foreground">
+        {display.primary}
+      </span>
+      {display.secondary ? (
+        <span className="mt-0.5 block truncate font-mono text-[11px] leading-4 text-zinc-400">
+          {display.secondary}
+        </span>
+      ) : null}
+    </span>
+  );
+
+  if (!display.href) {
+    return text;
+  }
+
+  return (
+    <a
+      href={display.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="no-underline hover:underline"
+    >
+      {text}
+    </a>
+  );
+}
+
+function MetricChip({ metric }: { metric: TreeMetric }) {
+  return (
+    <span className="inline-flex items-baseline gap-1 rounded-sm bg-zinc-800/90 px-1.5 py-0.5 font-mono text-[10px] leading-4">
+      <span className="tracking-wider text-zinc-500 uppercase">{metric.label}</span>
+      <span className="text-zinc-100 tabular-nums">{metric.value}</span>
+    </span>
+  );
+}
+
+type TreeContextValue = {
+  selectedItemId?: string;
+  expandedIds: ReadonlySet<string>;
+  onSelect: (item: TreeDataItem) => void;
+  onDragStart: (item: TreeDataItem) => void;
+  onDrop: (item: TreeDataItem) => void;
+  draggedItem: TreeDataItem | null;
+};
+
+const TreeContext = React.createContext<TreeContextValue | null>(null);
+
+function useTreeContext() {
+  const context = React.useContext(TreeContext);
+  if (!context) {
+    throw new Error("Tree rows must render inside TreeView");
+  }
+  return context;
+}
+
+function collectExpandedIds(data: TreeDataItem[] | TreeDataItem, expandAll?: boolean, initialSelectedItemId?: string) {
+  if (expandAll) {
+    const ids = new Set<string>();
+    const collectAllIds = (items: TreeDataItem[] | TreeDataItem) => {
+      if (items instanceof Array) {
+        items.forEach((item) => {
+          if (item.children) {
+            ids.add(item.id);
+            collectAllIds(item.children);
+          }
+        });
+      } else if (items.children) {
+        ids.add(items.id);
+        collectAllIds(items.children);
+      }
+    };
+    collectAllIds(data);
+    return ids;
+  }
+
+  const ids = new Set<string>();
+  if (!initialSelectedItemId) {
+    return ids;
+  }
+
+  const walkTreeItems = (items: TreeDataItem[] | TreeDataItem, targetId: string): boolean => {
+    if (items instanceof Array) {
+      for (const item of items) {
+        ids.add(item.id);
+        if (walkTreeItems(item, targetId)) {
+          return true;
+        }
+        ids.delete(item.id);
+      }
+      return false;
+    }
+    if (items.id === targetId) {
+      return true;
+    }
+    if (items.children) {
+      return walkTreeItems(items.children, targetId);
+    }
+    return false;
+  };
+
+  walkTreeItems(data, initialSelectedItemId);
+  return ids;
+}
 
 const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
   (
@@ -89,8 +258,8 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
       initialSelectedItemId,
       onSelectChange,
       expandAll,
-      defaultLeafIcon,
-      defaultNodeIcon,
+      defaultLeafIcon: _defaultLeafIcon,
+      defaultNodeIcon: _defaultNodeIcon,
       className,
       onDocumentDrag,
       ...props
@@ -100,15 +269,12 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
     const [selectedItemId, setSelectedItemId] = React.useState<string | undefined>(
       initialSelectedItemId,
     );
-
     const [draggedItem, setDraggedItem] = React.useState<TreeDataItem | null>(null);
 
     const handleSelectChange = React.useCallback(
       (item: TreeDataItem | undefined) => {
         setSelectedItemId(item?.id);
-        if (onSelectChange) {
-          onSelectChange(item);
-        }
+        onSelectChange?.(item);
       },
       [onSelectChange],
     );
@@ -127,390 +293,145 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
       [draggedItem, onDocumentDrag],
     );
 
-    const expandedItemIds = React.useMemo(() => {
-      if (expandAll) {
-        // Collect all item IDs when expandAll is true
-        const ids: string[] = [];
-        function collectAllIds(items: TreeDataItem[] | TreeDataItem) {
-          if (items instanceof Array) {
-            items.forEach((item) => {
-              if (item.children) {
-                ids.push(item.id);
-                collectAllIds(item.children);
-              }
-            });
-          } else if (items.children) {
-            ids.push(items.id);
-            collectAllIds(items.children);
-          }
-        }
-        collectAllIds(data);
-        return ids;
-      }
+    const expandedIds = React.useMemo(
+      () => collectExpandedIds(data, expandAll, initialSelectedItemId),
+      [data, expandAll, initialSelectedItemId],
+    );
 
-      if (!initialSelectedItemId) {
-        return [] as string[];
-      }
+    const items = data instanceof Array ? data : [data];
 
-      const ids: string[] = [];
-
-      function walkTreeItems(items: TreeDataItem[] | TreeDataItem, targetId: string) {
-        if (items instanceof Array) {
-          for (let i = 0; i < items.length; i++) {
-            ids.push(items[i]!.id);
-            if (walkTreeItems(items[i]!, targetId)) {
-              return true;
-            }
-            ids.pop();
-          }
-        } else if (items.id === targetId) {
-          return true;
-        } else if (items.children) {
-          return walkTreeItems(items.children, targetId);
-        }
-      }
-
-      walkTreeItems(data, initialSelectedItemId);
-      return ids;
-    }, [data, expandAll, initialSelectedItemId]);
+    const contextValue = React.useMemo<TreeContextValue>(
+      () => ({
+        selectedItemId,
+        expandedIds,
+        onSelect: handleSelectChange,
+        onDragStart: handleDragStart,
+        onDrop: handleDrop,
+        draggedItem,
+      }),
+      [selectedItemId, expandedIds, handleSelectChange, handleDragStart, handleDrop, draggedItem],
+    );
 
     return (
-      <div className={cn("relative overflow-hidden p-2", className)}>
-        <TreeItem
-          data={data}
-          ref={ref}
-          selectedItemId={selectedItemId}
-          handleSelectChange={handleSelectChange}
-          expandedItemIds={expandedItemIds}
-          // defaultLeafIcon={defaultLeafIcon}
-          defaultNodeIcon={defaultNodeIcon}
-          handleDragStart={handleDragStart}
-          handleDrop={handleDrop}
-          draggedItem={draggedItem}
-          {...props}
-        />
-        <div className="h-12 w-full"></div>
-      </div>
+      <TreeContext.Provider value={contextValue}>
+        <div ref={ref} className={cn("min-w-0", className)} {...props}>
+          <TreeBranch items={items} depth={0} />
+        </div>
+      </TreeContext.Provider>
     );
   },
 );
 TreeView.displayName = "TreeView";
 
-type TreeItemProps = TreeProps & {
-  selectedItemId?: string;
-  handleSelectChange: (item: TreeDataItem | undefined) => void;
-  expandedItemIds: string[];
-  defaultNodeIcon?: any;
-  defaultLeafIcon?: any;
-  handleDragStart?: (item: TreeDataItem) => void;
-  handleDrop?: (item: TreeDataItem) => void;
-  draggedItem: TreeDataItem | null;
-};
-
-// Helper function to generate tree markers based on Lighthouse pattern
-// treeMarkers: boolean array where true = parent has siblings after (needs vertical line)
-// This matches the Lighthouse crc-details-renderer.js pattern exactly
-function generateTreeMarkers(
-  treeMarkers: boolean[],
-  isLast: boolean,
-  hasChildren: boolean,
-): React.ReactNode[] {
-  const markers: React.ReactNode[] = [];
-
-  // For each parent level: add vert (if has siblings) or empty, then always add empty spacer
-  // This creates the vertical lines that continue through parent levels
-  treeMarkers.forEach((separator, i) => {
-    if (separator) {
-      // Parent has siblings after it, so we need vertical continuation line
-      markers.push(<TreeMarker.vert key={`vert-${i}`} />);
-    } else {
-      // No siblings after parent, so empty space (no vertical line needed)
-      markers.push(<TreeMarker.empty key={`empty-${i}`} />);
-    }
-    // Always add an empty spacer marker after each level (matches Lighthouse pattern)
-    markers.push(<TreeMarker.empty key={`spacer-${i}`} />);
-  });
-
-  // Add the connecting marker for this level
-  // Last child uses up-right (L shape), middle child uses vert-right (vertical then right)
-  if (isLast) {
-    markers.push(<TreeMarker.upRight key="connector" />);
-  } else {
-    markers.push(<TreeMarker.vertRight key="connector" />);
-  }
-
-  // Always add horizontal right marker
-  markers.push(<TreeMarker.right key="right" />);
-
-  // Add horiz-down if has children (shows vertical line continues), otherwise another right
-  if (hasChildren) {
-    markers.push(<TreeMarker.horizDown key="end" />);
-  } else {
-    markers.push(<TreeMarker.right key="end" />);
-  }
-
-  return markers;
+function TreeBranch({ items, depth }: { items: TreeDataItem[]; depth: number }) {
+  return (
+    <ul
+      role={depth === 0 ? "tree" : "group"}
+      className={cn(
+        "m-0 list-none p-0",
+        depth > 0 && "ml-2 border-l border-zinc-400",
+      )}
+    >
+      {items.map((item, index) => (
+        <TreeNode key={item.id} item={item} depth={depth} isLast={index === items.length - 1} />
+      ))}
+    </ul>
+  );
 }
 
-const TreeItem = React.forwardRef<HTMLDivElement, TreeItemProps>(
-  (
-    {
-      className,
-      data,
-      selectedItemId,
-      handleSelectChange,
-      expandedItemIds,
-      handleDragStart,
-      handleDrop,
-      draggedItem,
-      defaultNodeIcon,
-      defaultLeafIcon,
-      ...props
-    },
-    ref,
-  ) => {
-    if (!(data instanceof Array)) {
-      data = [data];
-    }
-    return (
-      <div ref={ref} role="tree" className={className} {...props}>
-        <ul className="list-none m-0 p-0">
-          {data.map((item, index) => {
-            const isLast = index === data.length - 1;
-            return item.children ? (
-              <TreeNode
-                key={item.id}
-                item={item}
-                selectedItemId={selectedItemId}
-                expandedItemIds={expandedItemIds}
-                handleSelectChange={handleSelectChange}
-                handleDragStart={handleDragStart}
-                handleDrop={handleDrop}
-                draggedItem={draggedItem}
-                treeMarkers={[]}
-                isLast={isLast}
-              />
-            ) : (
-              <TreeLeaf
-                key={item.id}
-                item={item}
-                selectedItemId={selectedItemId}
-                handleSelectChange={handleSelectChange}
-                handleDragStart={handleDragStart}
-                handleDrop={handleDrop}
-                draggedItem={draggedItem}
-                treeMarkers={[]}
-                isLast={isLast}
-              />
-            );
-          })}
-        </ul>
-      </div>
-    );
-  },
-);
-TreeItem.displayName = "TreeItem";
-
-const TreeNode = ({
-  item,
-  handleSelectChange,
-  expandedItemIds,
-  selectedItemId,
-  handleDragStart,
-  handleDrop,
-  draggedItem,
-  treeMarkers = [],
-  isLast = false,
-}: {
-  item: TreeDataItem;
-  handleSelectChange: (item: TreeDataItem | undefined) => void;
-  expandedItemIds: string[];
-  selectedItemId?: string;
-  handleDragStart?: (item: TreeDataItem) => void;
-  handleDrop?: (item: TreeDataItem) => void;
-  draggedItem: TreeDataItem | null;
-  treeMarkers?: boolean[];
-  isLast?: boolean;
-}) => {
-  const isExpanded = expandedItemIds.includes(item.id);
-  const isLongest = item.name.includes("(Longest Chain)");
-  const hasChildren = !!(item.children && item.children.length > 0);
-  const markers = generateTreeMarkers(treeMarkers, isLast, hasChildren && isExpanded);
+function TreeNode({ item, depth, isLast }: { item: TreeDataItem; depth: number; isLast: boolean }) {
+  const { expandedIds } = useTreeContext();
+  const hasChildren = Boolean(item.children && item.children.length > 0);
+  const isExpanded = hasChildren && expandedIds.has(item.id);
 
   return (
-    <div className="relative">
-      <div
-        className={cn(
-          "flex items-center h-6.5 leading-6.5 whitespace-nowrap scroll-auto",
-          isLongest && "text-red-600 dark:text-red-400",
-        )}
-      >
-        <span className="shrink-0">{markers}</span>
-        <span className={cn("ml-2.5 text-sm", isLongest ? "font-bold" : "")}>
-          {item.name.replace("| (Longest Chain)", "")}
-        </span>
+    <li role="treeitem" aria-expanded={hasChildren ? isExpanded : undefined} className="relative">
+      {depth > 0 ? (
+        <>
+          <span aria-hidden className="absolute top-3.5 -left-px h-px w-1.75 bg-zinc-400" />
+          {isLast ? (
+            <span aria-hidden className="absolute top-3.75 -left-px bottom-0 w-px bg-background" />
+          ) : null}
+        </>
+      ) : null}
+      <div className={cn("min-w-0", depth > 0 && "pl-1.5")}>
+        <TreeRow item={item} depth={depth} />
+        {isExpanded && item.children ? <TreeBranch items={item.children} depth={depth + 1} /> : null}
       </div>
-      {item.children && isExpanded && (
-        <div className="relative">
-          <ul className="list-none m-0 p-0">
-            {item.children.map((child, index) => {
-              const ChildComponent = child.children ? TreeNode : TreeLeaf;
-              const childIsLast = index === item.children!.length - 1;
-              // Build new treeMarkers array: copy existing, add !isLast (true if has siblings after)
-              const newTreeMarkers = [...treeMarkers, !isLast];
-              return (
-                <li key={child.id} className="relative">
-                  <ChildComponent
-                    item={child}
-                    selectedItemId={selectedItemId}
-                    expandedItemIds={expandedItemIds}
-                    handleSelectChange={handleSelectChange}
-                    handleDragStart={handleDragStart}
-                    handleDrop={handleDrop}
-                    draggedItem={draggedItem}
-                    treeMarkers={newTreeMarkers}
-                    isLast={childIsLast}
-                  />
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+    </li>
+  );
+}
+
+function TreeRow({ item, depth }: { item: TreeDataItem; depth: number }) {
+  const { selectedItemId, onSelect, onDragStart, onDrop, draggedItem } = useTreeContext();
+  const [isDragOver, setIsDragOver] = React.useState(false);
+  const { title, metrics, highlight } = getLabelParts(item);
+  const isSelected = selectedItemId === item.id;
+
+  const onDragStartEvent = (event: React.DragEvent) => {
+    if (!item.draggable) {
+      event.preventDefault();
+      return;
+    }
+    event.dataTransfer.setData("text/plain", item.id);
+    onDragStart(item);
+  };
+
+  const onDragOver = (event: React.DragEvent) => {
+    if (item.droppable !== false && draggedItem && draggedItem.id !== item.id) {
+      event.preventDefault();
+      setIsDragOver(true);
+    }
+  };
+
+  return (
+    <div
+      className={cn(
+        "flex min-w-0 items-start gap-2 rounded-md py-1 pr-2",
+        highlight ? "bg-red-950/40 ring-1 ring-red-400/40 ring-inset" : "hover:bg-zinc-800/70",
+        isSelected && "ring-1 ring-zinc-300/70 ring-inset",
+        isDragOver && "bg-primary/15",
       )}
+      onClick={() => {
+        onSelect(item);
+        item.onClick?.();
+      }}
+      draggable={Boolean(item.draggable)}
+      onDragStart={onDragStartEvent}
+      onDragOver={onDragOver}
+      onDragLeave={() => setIsDragOver(false)}
+      onDrop={(event) => {
+        event.preventDefault();
+        setIsDragOver(false);
+        onDrop(item);
+      }}
+    >
+      {depth === 0 ? (
+        <span aria-hidden className="mt-1.5 grid w-4 shrink-0 place-items-center">
+          <span
+            className={cn("size-1.5 rounded-full", highlight ? "bg-red-400" : "bg-zinc-300")}
+          />
+        </span>
+      ) : null}
+      <div className="flex min-w-0 flex-1 flex-wrap items-start justify-between gap-x-3 gap-y-1">
+        <div className="min-w-0 flex-1">
+          <TreeResourceName value={title} />
+        </div>
+        {metrics.length > 0 || highlight ? (
+          <div className="flex shrink-0 flex-wrap items-center gap-1">
+            {metrics.map((metric) => (
+              <MetricChip key={`${metric.label}-${metric.value}`} metric={metric} />
+            ))}
+            {highlight ? (
+              <span className="inline-flex items-center rounded-sm bg-red-500/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-red-300 uppercase">
+                Longest chain
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
-};
-
-const TreeLeaf = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & {
-    item: TreeDataItem;
-    selectedItemId?: string;
-    handleSelectChange: (item: TreeDataItem | undefined) => void;
-    handleDragStart?: (item: TreeDataItem) => void;
-    handleDrop?: (item: TreeDataItem) => void;
-    draggedItem: TreeDataItem | null;
-    treeMarkers?: boolean[];
-    isLast?: boolean;
-  }
->(
-  (
-    {
-      className,
-      item,
-      selectedItemId,
-      handleSelectChange,
-      handleDragStart,
-      handleDrop,
-      draggedItem,
-      treeMarkers = [],
-      isLast = false,
-      ...props
-    },
-    ref,
-  ) => {
-    const [isDragOver, setIsDragOver] = React.useState(false);
-    const isLongest = item.name.includes("(Longest Chain)");
-    const markers = generateTreeMarkers(treeMarkers, isLast, false);
-
-    const onDragStart = (e: React.DragEvent) => {
-      if (!item.draggable) {
-        e.preventDefault();
-        return;
-      }
-      e.dataTransfer.setData("text/plain", item.id);
-      handleDragStart?.(item);
-    };
-
-    const onDragOver = (e: React.DragEvent) => {
-      if (item.droppable !== false && draggedItem && draggedItem.id !== item.id) {
-        e.preventDefault();
-        setIsDragOver(true);
-      }
-    };
-
-    const onDragLeave = () => {
-      setIsDragOver(false);
-    };
-
-    const onDrop = (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragOver(false);
-      handleDrop?.(item);
-    };
-
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          "flex items-center h-6.5 leading-6.5 whitespace-nowrap cursor-pointer",
-          className,
-          selectedItemId === item.id && selectedTreeVariants(),
-          isDragOver && dragOverVariants(),
-        )}
-        onClick={() => {
-          handleSelectChange(item);
-          item.onClick?.();
-        }}
-        draggable={!!item.draggable}
-        onDragStart={onDragStart}
-        onDragOver={onDragOver}
-        onDragLeave={onDragLeave}
-        onDrop={onDrop}
-        {...props}
-      >
-        <span className="shrink-0">{markers}</span>
-        <span
-          className={cn(
-            "ml-2.5 text-xs",
-            isLongest ? "text-red-600 dark:text-red-400 font-bold" : "",
-          )}
-        >
-          {item.name}
-        </span>
-      </div>
-    );
-  },
-);
-TreeLeaf.displayName = "TreeLeaf";
-
-const AccordionTrigger = React.forwardRef<
-  React.ElementRef<typeof AccordionPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
-  <AccordionPrimitive.Header>
-    <AccordionPrimitive.Trigger
-      ref={ref}
-      className={cn(
-        "flex w-full flex-1 items-center py-2 transition-all first:[&[data-state=open]>svg]:rotate-90",
-        className,
-      )}
-      {...props}
-    >
-      <ChevronRight className="mr-1 h-4 w-4 shrink-0 text-accent-foreground/50 transition-transform duration-200" />
-      {children}
-    </AccordionPrimitive.Trigger>
-  </AccordionPrimitive.Header>
-));
-AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName;
-
-const AccordionContent = React.forwardRef<
-  React.ElementRef<typeof AccordionPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Content>
->(({ className, children, ...props }, ref) => (
-  <AccordionPrimitive.Content
-    ref={ref}
-    className={cn(
-      "overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down",
-      className,
-    )}
-    {...props}
-  >
-    <div className="pb-1 pt-0">{children}</div>
-  </AccordionPrimitive.Content>
-));
-AccordionContent.displayName = AccordionPrimitive.Content.displayName;
-
-// TreeIcon and TreeActions removed - not used in Lighthouse-style tree
+}
 
 export { TreeView, type TreeDataItem };

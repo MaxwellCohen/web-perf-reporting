@@ -2,7 +2,10 @@ import { CriticalRequestChain } from "@/lib/schema";
 import { Details } from "@/components/ui/accordion";
 import { accordionSectionTitleClassName } from "@/components/ui/accordion-section-title-trigger";
 import { TreeDataItem, TreeView } from "@/components/ui/tree-view";
-import { renderTimeValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
+import {
+  formatBytes,
+  renderTimeValue,
+} from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 
 export function RenderCriticalChainData({
   desktopDetails,
@@ -56,7 +59,15 @@ function chainToTree(node: CriticalRequestChain["chains"]): TreeDataItem[] {
   return Object.entries(node).map(([key, value]) => {
     return {
       id: key,
-      name: `${value.request.url} | Start Time ${renderTimeValue(value.request.startTime)} | Segment Time ${renderTimeValue((value.request.endTime - value.request.startTime) * 1000)} | Transfer Amount ${value.request.transferSize} bytes`,
+      name: value.request.url,
+      metrics: [
+        { label: "Start", value: renderTimeValue(value.request.startTime) },
+        {
+          label: "Segment",
+          value: renderTimeValue((value.request.endTime - value.request.startTime) * 1000),
+        },
+        { label: "Transfer", value: formatBytes(value.request.transferSize) },
+      ],
       icon: undefined,
       selectedIcon: undefined,
       openIcon: undefined,

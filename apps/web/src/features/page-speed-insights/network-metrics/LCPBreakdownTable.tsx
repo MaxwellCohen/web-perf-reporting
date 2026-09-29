@@ -35,8 +35,8 @@ export function LCPBreakdownTable({ tableRows, reportLabels }: Props) {
         header: label,
         enableSorting: true,
         enableResizing: true,
-        size: 140,
-        minSize: 96,
+        size: 180,
+        minSize: 120,
         filterFn: "inNumberRange",
         cell: (info) =>
           createOptionalNumericCell(RenderMSValue, info.getValue() as number | undefined),

@@ -13,9 +13,12 @@ vi.mock("lucide-react", () => ({
   ChevronUp: () => <span data-testid="chevron-up" />,
   ListFilter: () => <span data-testid="list-filter" />,
   ArrowUp: () => <span data-testid="arrow-up" />,
+  ArrowLeft: () => <span data-testid="arrow-left" />,
+  ArrowRight: () => <span data-testid="arrow-right" />,
   ChevronRightIcon: () => <span data-testid="chevron-right" />,
   MinusIcon: () => <span data-testid="minus" />,
   Copy: () => <span data-testid="copy" />,
+  TriangleAlert: () => <span data-testid="triangle-alert" />,
 }));
 
 vi.mock("@/components/ui/accordion", () => {

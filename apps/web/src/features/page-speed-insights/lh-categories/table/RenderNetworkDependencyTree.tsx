@@ -51,7 +51,9 @@ function NetworkDependencyTreeSection({ tree, label }: { tree: NetworkTreeValue;
         )}
       </summary>
       <div className="lh-crc overflow-x-auto w-full">
-        <div className="lh-crc-initial-nav text-gray-500 italic mb-2">Initial Navigation</div>
+        <div className="lh-crc-initial-nav mb-1 font-mono text-[11px] tracking-[0.14em] text-zinc-400 uppercase">
+          Initial Navigation
+        </div>
         <TreeView data={treeData} expandAll />
       </div>
     </Details>

@@ -41,6 +41,10 @@ import {
 } from "@/features/page-speed-insights/tanstack-table-v9/tableStateHelpers";
 import { tanstackTableCellDataProps } from "@/features/page-speed-insights/shared/tanstackTableCellDataProps";
 import { shouldShowSeparateTablesPerReport } from "@/features/page-speed-insights/auditTableConfig";
+import { MainThreadWorkBreakdownTable } from "@/features/page-speed-insights/javascript-metrics/MainThreadWorkBreakdownTable";
+import { buildMainThreadWorkTableFromDetailRows } from "@/features/page-speed-insights/javascript-metrics/mainThreadWorkTable";
+import { LCPBreakdownTable } from "@/features/page-speed-insights/network-metrics/LCPBreakdownTable";
+import { buildLcpBreakdownTableFromDetailRows } from "@/features/page-speed-insights/network-metrics/lcpBreakdownSelectors";
 import {
   UNIQUE_AGG_VALUE_TYPES,
   COLUMN_SIZE_DEFAULT,
@@ -488,6 +492,31 @@ export function DetailTable({ rows, title }: { rows: DetailTableItem[]; title: s
   }
 
   const auditId = getAuditId(rows);
+  if (auditId === "lcp-breakdown-insight") {
+    const breakdown = buildLcpBreakdownTableFromDetailRows(rows);
+    if (!breakdown) return null;
+
+    return (
+      <div className="w-full overflow-x-auto">
+        <LCPBreakdownTable
+          tableRows={breakdown.tableRows}
+          reportLabels={breakdown.reportLabels}
+        />
+      </div>
+    );
+  }
+
+  if (auditId === "mainthread-work-breakdown") {
+    const breakdown = buildMainThreadWorkTableFromDetailRows(rows);
+    if (!breakdown) return null;
+
+    return (
+      <div className="w-full overflow-x-auto">
+        <MainThreadWorkBreakdownTable rows={breakdown.rows} reportLabels={breakdown.reportLabels} />
+      </div>
+    );
+  }
+
   if (auditId && shouldShowSeparateTablesPerReport(auditId)) {
     return <DetailTableSeparatePerReport rows={rows} title={title} />;
   }
@@ -838,14 +867,23 @@ const renderTableCell = (
   );
 };
 
+const AUDITS_WITHOUT_EXPANDER_COLUMN = new Set([
+  "render-blocking-insight",
+  "render-blocking-resources",
+  "bootup-time",
+]);
+
 function DetailTableFull({ rows }: { rows: DetailTableItem[]; title: string }) {
   const showUserLabel = rows.length > 1;
+  const hideExpander = AUDITS_WITHOUT_EXPANDER_COLUMN.has(getAuditId(rows) ?? "");
 
   // Transform data
   const data = flattenDetailRows(rows);
   // Create columns
   const allHeadings = extractAllHeadings(rows);
-  const columns = createColumnsFromHeadings(allHeadings, showUserLabel);
+  const columns = createColumnsFromHeadings(allHeadings, showUserLabel).filter(
+    (column) => !(hideExpander && column.id === "expander"),
+  );
 
   // Get available column IDs for validation
   const availableColumnIds = new Set(columns.map((c) => c.id).filter(Boolean) as string[]);
@@ -877,6 +915,10 @@ function DetailTableFull({ rows }: { rows: DetailTableItem[]; title: string }) {
   // Create a memoized function to check if rows can expand
   // This checks if leaf rows have different values
   const getRowCanExpandFn = (row: StockRow<DetailTableDataRow>) => {
+    if (hideExpander) {
+      return false;
+    }
+
     const leafRows = row.getLeafRows();
 
     // If there's only one or zero leaf rows, no expansion needed
@@ -975,7 +1017,7 @@ function DetailTableFull({ rows }: { rows: DetailTableItem[]; title: string }) {
       columnVisibility: defaultColumnVisibility,
       columnPinning: {
         end: [],
-        start: ["expander"],
+        start: hideExpander ? [] : ["expander"],
       },
     },
   });

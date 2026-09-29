@@ -1,4 +1,4 @@
-import type { TreeDataItem } from "@/components/ui/tree-view";
+import type { TreeDataItem, TreeMetric } from "@/components/ui/tree-view";
 import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
 import {
   formatBytes,
@@ -56,23 +56,21 @@ export function extractNetworkTreeFromAudit(item: InsightsContextItem): {
 
 export function networkTreeToTreeData(chains: NetworkTreeChains, isRoot = false): TreeDataItem[] {
   return Object.entries(chains).map(([id, node]) => {
-    const parts: string[] = [node.url];
+    const metrics: TreeMetric[] = [];
 
     if (node.transferSize !== undefined) {
-      parts.push(`Transfer: ${formatBytes(node.transferSize)}`);
+      metrics.push({ label: "Transfer", value: formatBytes(node.transferSize) });
     }
 
     if (node.navStartToEndTime !== undefined) {
-      parts.push(`Time: ${renderTimeValue(node.navStartToEndTime)}`);
-    }
-
-    if (node.isLongest) {
-      parts.push("(Longest Chain)");
+      metrics.push({ label: "Time", value: renderTimeValue(node.navStartToEndTime) });
     }
 
     return {
       id,
-      name: parts.join(" | "),
+      name: node.url,
+      metrics,
+      highlight: Boolean(node.isLongest),
       icon: undefined,
       selectedIcon: undefined,
       openIcon: undefined,

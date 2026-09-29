@@ -25,7 +25,11 @@ export function RenderMetricSavings({
       ?.map((a, i) => ({ metricSavings: a?.metricSavings, label: labels[i] }))
       .filter((a) => a.metricSavings) || [];
 
-  if (!metricSavings.length) {
+  const hasSavings = metricSavings.some((entry) =>
+    Object.values(entry.metricSavings || {}).some((value) => value > 0),
+  );
+
+  if (!hasSavings) {
     return null;
   }
 
