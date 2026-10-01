@@ -54,12 +54,23 @@ export function extractNetworkTreeFromAudit(item: InsightsContextItem): {
   };
 }
 
-export function networkTreeToTreeData(chains: NetworkTreeChains, isRoot = false): TreeDataItem[] {
+export function networkTreeToTreeData(
+  chains: NetworkTreeChains,
+  isRoot = false,
+  parentEndTime?: number,
+): TreeDataItem[] {
   return Object.entries(chains).map(([id, node]) => {
     const metrics: TreeMetric[] = [];
 
     if (node.transferSize !== undefined) {
       metrics.push({ label: "Transfer", value: formatBytes(node.transferSize) });
+    }
+
+    if (node.navStartToEndTime !== undefined && parentEndTime !== undefined) {
+      metrics.push({
+        label: "Extends",
+        value: renderTimeValue(node.navStartToEndTime - parentEndTime),
+      });
     }
 
     if (node.navStartToEndTime !== undefined) {
@@ -77,7 +88,9 @@ export function networkTreeToTreeData(chains: NetworkTreeChains, isRoot = false)
       draggable: false,
       droppable: false,
       isRoot,
-      children: node.children ? networkTreeToTreeData(node.children, false) : undefined,
+      children: node.children
+        ? networkTreeToTreeData(node.children, false, node.navStartToEndTime)
+        : undefined,
     };
   });
 }
