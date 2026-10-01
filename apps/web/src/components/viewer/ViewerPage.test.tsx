@@ -12,6 +12,7 @@ vi.mock("@/features/page-speed-insights/pageSpeedInsightsDashboard", () => ({
 vi.mock("lighthouse/report/renderer/text-encoding", () => ({
   TextEncoding: {
     fromBase64: (data: string) => data,
+    toBase64: async (data: string) => data,
   },
 }));
 
@@ -74,5 +75,71 @@ describe("ViewerPage", () => {
       expect(mockAlert).toHaveBeenCalledWith("Please upload at least one JSON file");
     });
     consoleErrorSpy.mockRestore();
+  });
+
+  it("shows dashboard from a local hash without contacting a server", async () => {
+    window.location.hash = JSON.stringify({
+      v: 1,
+      data: [{ lighthouseResult: { categories: {} } }],
+      labels: ["from-hash"],
+    });
+
+    const { container } = render(<ViewerPage />);
+
+    await act(async () => {});
+
+    expect(container.querySelector('[data-testid="dashboard"]')).toBeTruthy();
+    expect(container.textContent).toContain("labels: from-hash");
+  });
+
+  it("writes the report into the URL hash so back restores the input form", async () => {
+    const { container, getByLabelText } = render(<ViewerPage />);
+    const file = new File(
+      [JSON.stringify({ lighthouseResult: { categories: {} } })],
+      "mobile.json",
+      { type: "application/json" },
+    );
+
+    fireEvent.change(getByLabelText("Upload JSON Files"), {
+      target: { files: [file] },
+    });
+    fireEvent.click(container.querySelector("button.w-full")!);
+
+    await waitFor(() => {
+      expect(container.querySelector('[data-testid="dashboard"]')).toBeTruthy();
+    });
+    expect(window.location.hash.length).toBeGreaterThan(1);
+    expect(window.location.hash.includes("http")).toBe(false);
+
+    fireEvent.click(
+      [...container.querySelectorAll("button")].find((el) =>
+        el.textContent?.includes("Back to input"),
+      )!,
+    );
+
+    await waitFor(() => {
+      expect(container.textContent).toContain("Show Report");
+    });
+    expect(window.location.hash === "" || window.location.hash === "#").toBe(true);
+  });
+
+  it("returns to the input form when the hash is cleared (browser back)", async () => {
+    window.location.hash = JSON.stringify({
+      v: 1,
+      data: [{ lighthouseResult: { categories: {} } }],
+      labels: ["from-hash"],
+    });
+
+    const { container } = render(<ViewerPage />);
+
+    await act(async () => {});
+    expect(container.querySelector('[data-testid="dashboard"]')).toBeTruthy();
+
+    act(() => {
+      window.location.hash = "";
+      window.dispatchEvent(new HashChangeEvent("hashchange"));
+    });
+
+    expect(container.textContent).toContain("Show Report");
   });
 });

@@ -3,8 +3,6 @@ import { PageSpeedInsightsDashboard } from "@/features/page-speed-insights/pageS
 import { PageSpeedInsights } from "@/lib/schema";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { TextEncoding } from "lighthouse/report/renderer/text-encoding";
-import pako from "pako";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -19,11 +17,7 @@ import type { LhJsonFileEntry, LhJsonTextEntry } from "@/components/lh/types";
 import { LhFileInput } from "@/components/lh/inputs/LhFileInput";
 import { LhTextInput } from "@/components/lh/inputs/LhTextInput";
 import { collectViewerReports } from "@/components/viewer/collectViewerReports";
-import { parseViewerJsonString } from "@/components/viewer/parseViewerJson";
-
-if (globalThis.window !== undefined) {
-  window.pako = pako;
-}
+import { decodeViewerHash, encodeViewerHash } from "@/components/viewer/viewerHash";
 
 function useHash() {
   const [hash, setHash] = useState("");
@@ -31,14 +25,19 @@ function useHash() {
   useEffect(() => {
     const handleHashChange = () => setHash(window.location.hash);
     window.addEventListener("hashchange", handleHashChange);
+    window.addEventListener("popstate", handleHashChange);
     setHash(window.location.hash);
-    return () => window.removeEventListener("hashchange", handleHashChange);
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+      window.removeEventListener("popstate", handleHashChange);
+    };
   }, []);
 
   return [
     hash,
     (newHash: string) => {
-      window.location.hash = newHash;
+      window.location.hash = newHash.startsWith("#") ? newHash.slice(1) : newHash;
+      setHash(window.location.hash);
     },
   ] as const;
 }
@@ -53,26 +52,21 @@ export default function ViewerPage() {
   const [hash, setHash] = useHash();
 
   useEffect(() => {
-    if (!hash) return;
-    const urlData = hash.substring(1);
-    if (!urlData) return;
-
-    try {
-      const text = TextEncoding.fromBase64(urlData, { gzip: true });
-      const reports = parseViewerJsonString(text);
-      setData(reports);
-      setLabels(reports.map((_, index) => `Report ${index + 1}`));
-    } catch (e) {
-      console.error("Data parsing error:", e);
+    const decoded = decodeViewerHash(hash);
+    if (!decoded) {
+      setData([]);
+      setLabels([]);
+      return;
     }
+    setData(decoded.data);
+    setLabels(decoded.labels);
   }, [hash]);
 
   const handleSubmit = async () => {
     setLoading(true);
     try {
       const result = await collectViewerReports(activeTab, jsonInputs, jsonFiles);
-      setData(result.data);
-      setLabels(result.labels);
+      setHash(await encodeViewerHash(result));
     } catch (e) {
       console.error("JSON parsing error:", e);
       alert(e instanceof Error ? e.message : "Invalid JSON");
@@ -88,8 +82,6 @@ export default function ViewerPage() {
           <Button
             variant="link"
             onClick={() => {
-              setData([]);
-              setLabels([]);
               setHash("");
             }}
             className="text-sm text-muted-foreground hover:text-primary"
