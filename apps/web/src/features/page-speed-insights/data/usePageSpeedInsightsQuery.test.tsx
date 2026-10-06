@@ -1,11 +1,19 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, render, screen } from "@testing-library/react";
-import React, { Suspense } from "react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { Suspense, type ReactNode } from "react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { usePageSpeedInsightsQueryByPublicId } from "@/features/page-speed-insights/data/usePageSpeedInsightsQuery";
-import {
-  clearPageSpeedInsightsByPublicIdCache,
-  type PageSpeedLoadResult,
-} from "@/lib/page-speed-insights/pageSpeedInsightsClient";
+import type { PageSpeedLoadResult } from "@/lib/page-speed-insights/pageSpeedInsightsClient";
+
+function createQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+}
 
 function HookProbe({
   publicId,
@@ -16,25 +24,35 @@ function HookProbe({
 }) {
   const state = usePageSpeedInsightsQueryByPublicId(publicId);
   onResult(state);
-  return React.createElement("div", { "data-testid": "hook-result" }, JSON.stringify(state));
+  return <div data-testid="hook-result">{JSON.stringify(state)}</div>;
 }
 
-async function renderHookProbe(publicId: string) {
+function HookProbeProviders({
+  children,
+  queryClient,
+}: {
+  children: ReactNode;
+  queryClient: QueryClient;
+}) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Suspense fallback={<div data-testid="suspense-fallback">loading</div>}>{children}</Suspense>
+    </QueryClientProvider>
+  );
+}
+
+async function renderHookProbe(publicId: string, queryClient = createQueryClient()) {
   let latest: PageSpeedLoadResult | undefined;
   await act(async () => {
     render(
-      React.createElement(
-        Suspense,
-        {
-          fallback: React.createElement("div", { "data-testid": "suspense-fallback" }, "loading"),
-        },
-        React.createElement(HookProbe, {
-          publicId,
-          onResult: (state) => {
+      <HookProbeProviders queryClient={queryClient}>
+        <HookProbe
+          publicId={publicId}
+          onResult={(state) => {
             latest = state;
-          },
-        }),
-      ),
+          }}
+        />
+      </HookProbeProviders>,
     );
   });
   return {
@@ -43,10 +61,6 @@ async function renderHookProbe(publicId: string) {
 }
 
 describe("usePageSpeedInsightsQueryByPublicId", () => {
-  beforeEach(() => {
-    clearPageSpeedInsightsByPublicIdCache();
-  });
-
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -122,14 +136,15 @@ describe("usePageSpeedInsightsQueryByPublicId", () => {
     });
   });
 
-  it("reuses the same Promise across renders for a publicId", async () => {
+  it("reuses the cached query across renders for a publicId", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
       text: async () => JSON.stringify([]),
     } as Response);
 
-    await renderHookProbe("public-123");
-    await renderHookProbe("public-123");
+    const queryClient = createQueryClient();
+    await renderHookProbe("public-123", queryClient);
+    await renderHookProbe("public-123", queryClient);
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
