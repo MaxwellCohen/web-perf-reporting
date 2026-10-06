@@ -25,6 +25,10 @@ vi.mock("next/link", () => ({
   ),
 }));
 
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/page-speed/report-id",
+}));
+
 describe("navigation components", () => {
   it("renders the top navigation links", () => {
     const { container } = render(<TopNav />);
@@ -38,6 +42,12 @@ describe("navigation components", () => {
     );
     expect(container.querySelector('a[href="/page-speed"]')?.textContent).toContain("Insights");
     expect(container.querySelector('a[href="/viewer"]')?.textContent).toContain("Viewer");
+    expect(container.querySelector('a[href="/page-speed"]')?.getAttribute("aria-current")).toBe(
+      "page",
+    );
+    expect(container.querySelector('a[href="/latest-crux"]')?.hasAttribute("aria-current")).toBe(
+      false,
+    );
   });
 
   it("renders the navigation menu home link", () => {
