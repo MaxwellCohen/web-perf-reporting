@@ -34,6 +34,7 @@ exports[`CWVMetricsSummary > renders Network Request Summary when network-reques
             type="button"
           >
             <svg
+              aria-hidden="true"
               class="lucide lucide-copy h-4 w-4"
               fill="none"
               height="24"
@@ -167,6 +168,7 @@ exports[`CWVMetricsSummary > renders Network Request Summary when network-reques
             type="button"
           >
             <svg
+              aria-hidden="true"
               class="lucide lucide-copy h-4 w-4"
               fill="none"
               height="24"
@@ -270,6 +272,7 @@ exports[`CWVMetricsSummary > renders Network Request Summary when network-reques
             type="button"
           >
             <svg
+              aria-hidden="true"
               class="lucide lucide-copy h-4 w-4"
               fill="none"
               height="24"
@@ -352,6 +355,7 @@ exports[`CWVMetricsSummary > renders Network Request Summary when network-reques
             type="button"
           >
             <svg
+              aria-hidden="true"
               class="lucide lucide-copy h-4 w-4"
               fill="none"
               height="24"
@@ -489,6 +493,7 @@ exports[`CWVMetricsSummary > renders Network Request Summary when network-reques
             type="button"
           >
             <svg
+              aria-hidden="true"
               class="lucide lucide-copy h-4 w-4"
               fill="none"
               height="24"
@@ -599,6 +604,7 @@ exports[`CWVMetricsSummary > renders Network Request Summary when network-reques
             type="button"
           >
             <svg
+              aria-hidden="true"
               class="lucide lucide-copy h-4 w-4"
               fill="none"
               height="24"
@@ -751,6 +757,7 @@ exports[`CWVMetricsSummary > renders Network Request Summary when network-reques
             type="button"
           >
             <svg
+              aria-hidden="true"
               class="lucide lucide-copy h-4 w-4"
               fill="none"
               height="24"
@@ -878,6 +885,7 @@ exports[`CWVMetricsSummary > renders Summary Metrics when items have metrics and
             type="button"
           >
             <svg
+              aria-hidden="true"
               class="lucide lucide-copy h-4 w-4"
               fill="none"
               height="24"
@@ -1011,6 +1019,7 @@ exports[`CWVMetricsSummary > renders Summary Metrics when items have metrics and
             type="button"
           >
             <svg
+              aria-hidden="true"
               class="lucide lucide-copy h-4 w-4"
               fill="none"
               height="24"
@@ -1114,6 +1123,7 @@ exports[`CWVMetricsSummary > renders Summary Metrics when items have metrics and
             type="button"
           >
             <svg
+              aria-hidden="true"
               class="lucide lucide-copy h-4 w-4"
               fill="none"
               height="24"
@@ -1196,6 +1206,7 @@ exports[`CWVMetricsSummary > renders Summary Metrics when items have metrics and
             type="button"
           >
             <svg
+              aria-hidden="true"
               class="lucide lucide-copy h-4 w-4"
               fill="none"
               height="24"
@@ -1333,6 +1344,7 @@ exports[`CWVMetricsSummary > renders Summary Metrics when items have metrics and
             type="button"
           >
             <svg
+              aria-hidden="true"
               class="lucide lucide-copy h-4 w-4"
               fill="none"
               height="24"
@@ -1448,6 +1460,7 @@ exports[`CWVMetricsSummary > renders Summary Metrics when items have metrics and
             type="button"
           >
             <svg
+              aria-hidden="true"
               class="lucide lucide-copy h-4 w-4"
               fill="none"
               height="24"

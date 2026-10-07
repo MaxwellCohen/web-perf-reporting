@@ -265,6 +265,7 @@ exports[`LoadingMessage > increments elapsed time and advances analysis stages o
           class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-foreground bg-foreground text-background"
         >
           <svg
+            aria-hidden="true"
             class="lucide lucide-check size-3 stroke-3"
             fill="none"
             height="24"
@@ -454,6 +455,7 @@ exports[`LoadingMessage > increments elapsed time and advances analysis stages o
           class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-foreground bg-foreground text-background"
         >
           <svg
+            aria-hidden="true"
             class="lucide lucide-check size-3 stroke-3"
             fill="none"
             height="24"
@@ -484,6 +486,7 @@ exports[`LoadingMessage > increments elapsed time and advances analysis stages o
           class="grid size-5 shrink-0 place-items-center rounded-full border text-[10px] border-foreground bg-foreground text-background"
         >
           <svg
+            aria-hidden="true"
             class="lucide lucide-check size-3 stroke-3"
             fill="none"
             height="24"

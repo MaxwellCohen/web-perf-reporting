@@ -36,6 +36,7 @@ exports[`PageSpeedInsightsDashboardContent > shows worker error message when rep
         class="flex justify-center mb-4"
       >
         <svg
+          aria-hidden="true"
           class="lucide lucide-circle-alert h-12 w-12 text-destructive"
           fill="none"
           height="24"

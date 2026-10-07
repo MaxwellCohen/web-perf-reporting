@@ -35,6 +35,7 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
             type="button"
           >
             <svg
+              aria-hidden="true"
               class="lucide lucide-copy h-4 w-4"
               fill="none"
               height="24"
@@ -313,6 +314,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
             type="button"
           >
             <svg
+              aria-hidden="true"
               class="lucide lucide-copy h-4 w-4"
               fill="none"
               height="24"
@@ -676,6 +678,7 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
             type="button"
           >
             <svg
+              aria-hidden="true"
               class="lucide lucide-copy h-4 w-4"
               fill="none"
               height="24"

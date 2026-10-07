@@ -292,10 +292,10 @@ exports[`app page coverage smoke tests > renders the lightweight lh and viewer p
 
 exports[`app page coverage smoke tests > renders the page speed layout shell and nested content 1`] = `
 <div
-  class="mx-auto max-w-screen-2xl"
+  class="mx-auto w-full min-w-0 max-w-screen-2xl"
 >
   <h1
-    class="mx-auto text-center text-2xl font-extrabold"
+    class="mx-auto px-3 text-center text-xl font-extrabold sm:text-2xl"
   >
     Page Speed Insights
   </h1>

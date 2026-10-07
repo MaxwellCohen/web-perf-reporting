@@ -76,6 +76,7 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
               type="button"
             >
               <svg
+                aria-hidden="true"
                 class="lucide lucide-copy h-4 w-4"
                 fill="none"
                 height="24"
@@ -149,6 +150,7 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
                           type="button"
                         >
                           <svg
+                            aria-hidden="true"
                             class="lucide lucide-list-filter"
                             fill="none"
                             height="24"
@@ -161,13 +163,13 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
-                              d="M3 6h18"
+                              d="M2 5h20"
                             />
                             <path
-                              d="M7 12h10"
+                              d="M6 12h12"
                             />
                             <path
-                              d="M10 18h4"
+                              d="M9 19h6"
                             />
                           </svg>
                         </button>
@@ -207,6 +209,7 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
                           type="button"
                         >
                           <svg
+                            aria-hidden="true"
                             class="lucide lucide-list-filter"
                             fill="none"
                             height="24"
@@ -219,13 +222,13 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
-                              d="M3 6h18"
+                              d="M2 5h20"
                             />
                             <path
-                              d="M7 12h10"
+                              d="M6 12h12"
                             />
                             <path
-                              d="M10 18h4"
+                              d="M9 19h6"
                             />
                           </svg>
                         </button>
@@ -274,7 +277,7 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
                     style="width: 180px; min-width: 180px; max-width: 180px;"
                   >
                     <span
-                      class=""
+                      class="whitespace-nowrap tabular-nums"
                       title="ms"
                     >
                       100 ms
@@ -315,7 +318,7 @@ exports[`LCPBreakdownCard > renders table and chart when metrics have breakdown 
                     style="width: 180px; min-width: 180px; max-width: 180px;"
                   >
                     <span
-                      class=""
+                      class="whitespace-nowrap tabular-nums"
                       title="ms"
                     >
                       200 ms

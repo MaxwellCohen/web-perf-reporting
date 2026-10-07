@@ -30,11 +30,12 @@ exports[`NetworkRequestsSummaryCard > does not show Report column when single va
             aria-haspopup="menu"
             class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
             data-state="closed"
-            id="radix-_r_5_"
+            id="radix-_r_b_"
             title="Copy table"
             type="button"
           >
             <svg
+              aria-hidden="true"
               class="lucide lucide-copy h-4 w-4"
               fill="none"
               height="24"
@@ -108,6 +109,7 @@ exports[`NetworkRequestsSummaryCard > does not show Report column when single va
                         type="button"
                       >
                         <svg
+                          aria-hidden="true"
                           class="lucide lucide-list-filter"
                           fill="none"
                           height="24"
@@ -120,13 +122,13 @@ exports[`NetworkRequestsSummaryCard > does not show Report column when single va
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
-                            d="M3 6h18"
+                            d="M2 5h20"
                           />
                           <path
-                            d="M7 12h10"
+                            d="M6 12h12"
                           />
                           <path
-                            d="M10 18h4"
+                            d="M9 19h6"
                           />
                         </svg>
                       </button>
@@ -166,6 +168,7 @@ exports[`NetworkRequestsSummaryCard > does not show Report column when single va
                         type="button"
                       >
                         <svg
+                          aria-hidden="true"
                           class="lucide lucide-list-filter"
                           fill="none"
                           height="24"
@@ -178,13 +181,13 @@ exports[`NetworkRequestsSummaryCard > does not show Report column when single va
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
-                            d="M3 6h18"
+                            d="M2 5h20"
                           />
                           <path
-                            d="M7 12h10"
+                            d="M6 12h12"
                           />
                           <path
-                            d="M10 18h4"
+                            d="M9 19h6"
                           />
                         </svg>
                       </button>
@@ -224,6 +227,7 @@ exports[`NetworkRequestsSummaryCard > does not show Report column when single va
                         type="button"
                       >
                         <svg
+                          aria-hidden="true"
                           class="lucide lucide-list-filter"
                           fill="none"
                           height="24"
@@ -236,13 +240,13 @@ exports[`NetworkRequestsSummaryCard > does not show Report column when single va
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
-                            d="M3 6h18"
+                            d="M2 5h20"
                           />
                           <path
-                            d="M7 12h10"
+                            d="M6 12h12"
                           />
                           <path
-                            d="M10 18h4"
+                            d="M9 19h6"
                           />
                         </svg>
                       </button>
@@ -352,11 +356,12 @@ exports[`NetworkRequestsSummaryCard > filters out stats with zero totalRequests 
             aria-haspopup="menu"
             class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
             data-state="closed"
-            id="radix-_r_f_"
+            id="radix-_r_11_"
             title="Copy table"
             type="button"
           >
             <svg
+              aria-hidden="true"
               class="lucide lucide-copy h-4 w-4"
               fill="none"
               height="24"
@@ -430,6 +435,7 @@ exports[`NetworkRequestsSummaryCard > filters out stats with zero totalRequests 
                         type="button"
                       >
                         <svg
+                          aria-hidden="true"
                           class="lucide lucide-list-filter"
                           fill="none"
                           height="24"
@@ -442,13 +448,13 @@ exports[`NetworkRequestsSummaryCard > filters out stats with zero totalRequests 
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
-                            d="M3 6h18"
+                            d="M2 5h20"
                           />
                           <path
-                            d="M7 12h10"
+                            d="M6 12h12"
                           />
                           <path
-                            d="M10 18h4"
+                            d="M9 19h6"
                           />
                         </svg>
                       </button>
@@ -488,6 +494,7 @@ exports[`NetworkRequestsSummaryCard > filters out stats with zero totalRequests 
                         type="button"
                       >
                         <svg
+                          aria-hidden="true"
                           class="lucide lucide-list-filter"
                           fill="none"
                           height="24"
@@ -500,13 +507,13 @@ exports[`NetworkRequestsSummaryCard > filters out stats with zero totalRequests 
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
-                            d="M3 6h18"
+                            d="M2 5h20"
                           />
                           <path
-                            d="M7 12h10"
+                            d="M6 12h12"
                           />
                           <path
-                            d="M10 18h4"
+                            d="M9 19h6"
                           />
                         </svg>
                       </button>
@@ -546,6 +553,7 @@ exports[`NetworkRequestsSummaryCard > filters out stats with zero totalRequests 
                         type="button"
                       >
                         <svg
+                          aria-hidden="true"
                           class="lucide lucide-list-filter"
                           fill="none"
                           height="24"
@@ -558,13 +566,13 @@ exports[`NetworkRequestsSummaryCard > filters out stats with zero totalRequests 
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
-                            d="M3 6h18"
+                            d="M2 5h20"
                           />
                           <path
-                            d="M7 12h10"
+                            d="M6 12h12"
                           />
                           <path
-                            d="M10 18h4"
+                            d="M9 19h6"
                           />
                         </svg>
                       </button>
@@ -679,6 +687,7 @@ exports[`NetworkRequestsSummaryCard > renders card with title and table when sta
             type="button"
           >
             <svg
+              aria-hidden="true"
               class="lucide lucide-copy h-4 w-4"
               fill="none"
               height="24"
@@ -752,6 +761,7 @@ exports[`NetworkRequestsSummaryCard > renders card with title and table when sta
                         type="button"
                       >
                         <svg
+                          aria-hidden="true"
                           class="lucide lucide-list-filter"
                           fill="none"
                           height="24"
@@ -764,13 +774,13 @@ exports[`NetworkRequestsSummaryCard > renders card with title and table when sta
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
-                            d="M3 6h18"
+                            d="M2 5h20"
                           />
                           <path
-                            d="M7 12h10"
+                            d="M6 12h12"
                           />
                           <path
-                            d="M10 18h4"
+                            d="M9 19h6"
                           />
                         </svg>
                       </button>
@@ -810,6 +820,7 @@ exports[`NetworkRequestsSummaryCard > renders card with title and table when sta
                         type="button"
                       >
                         <svg
+                          aria-hidden="true"
                           class="lucide lucide-list-filter"
                           fill="none"
                           height="24"
@@ -822,13 +833,13 @@ exports[`NetworkRequestsSummaryCard > renders card with title and table when sta
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
-                            d="M3 6h18"
+                            d="M2 5h20"
                           />
                           <path
-                            d="M7 12h10"
+                            d="M6 12h12"
                           />
                           <path
-                            d="M10 18h4"
+                            d="M9 19h6"
                           />
                         </svg>
                       </button>
@@ -868,6 +879,7 @@ exports[`NetworkRequestsSummaryCard > renders card with title and table when sta
                         type="button"
                       >
                         <svg
+                          aria-hidden="true"
                           class="lucide lucide-list-filter"
                           fill="none"
                           height="24"
@@ -880,13 +892,13 @@ exports[`NetworkRequestsSummaryCard > renders card with title and table when sta
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
-                            d="M3 6h18"
+                            d="M2 5h20"
                           />
                           <path
-                            d="M7 12h10"
+                            d="M6 12h12"
                           />
                           <path
-                            d="M10 18h4"
+                            d="M9 19h6"
                           />
                         </svg>
                       </button>
@@ -996,11 +1008,12 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
             aria-haspopup="menu"
             class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
             data-state="closed"
-            id="radix-_r_a_"
+            id="radix-_r_m_"
             title="Copy table"
             type="button"
           >
             <svg
+              aria-hidden="true"
               class="lucide lucide-copy h-4 w-4"
               fill="none"
               height="24"
@@ -1074,6 +1087,7 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
                         type="button"
                       >
                         <svg
+                          aria-hidden="true"
                           class="lucide lucide-list-filter"
                           fill="none"
                           height="24"
@@ -1086,13 +1100,13 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
-                            d="M3 6h18"
+                            d="M2 5h20"
                           />
                           <path
-                            d="M7 12h10"
+                            d="M6 12h12"
                           />
                           <path
-                            d="M10 18h4"
+                            d="M9 19h6"
                           />
                         </svg>
                       </button>
@@ -1132,6 +1146,7 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
                         type="button"
                       >
                         <svg
+                          aria-hidden="true"
                           class="lucide lucide-list-filter"
                           fill="none"
                           height="24"
@@ -1144,13 +1159,13 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
-                            d="M3 6h18"
+                            d="M2 5h20"
                           />
                           <path
-                            d="M7 12h10"
+                            d="M6 12h12"
                           />
                           <path
-                            d="M10 18h4"
+                            d="M9 19h6"
                           />
                         </svg>
                       </button>
@@ -1190,6 +1205,7 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
                         type="button"
                       >
                         <svg
+                          aria-hidden="true"
                           class="lucide lucide-list-filter"
                           fill="none"
                           height="24"
@@ -1202,13 +1218,13 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
-                            d="M3 6h18"
+                            d="M2 5h20"
                           />
                           <path
-                            d="M7 12h10"
+                            d="M6 12h12"
                           />
                           <path
-                            d="M10 18h4"
+                            d="M9 19h6"
                           />
                         </svg>
                       </button>
@@ -1374,11 +1390,12 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
             aria-haspopup="menu"
             class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9 relative"
             data-state="closed"
-            id="radix-_r_k_"
+            id="radix-_r_1c_"
             title="Copy table"
             type="button"
           >
             <svg
+              aria-hidden="true"
               class="lucide lucide-copy h-4 w-4"
               fill="none"
               height="24"
@@ -1452,6 +1469,7 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
                         type="button"
                       >
                         <svg
+                          aria-hidden="true"
                           class="lucide lucide-list-filter"
                           fill="none"
                           height="24"
@@ -1464,13 +1482,13 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
-                            d="M3 6h18"
+                            d="M2 5h20"
                           />
                           <path
-                            d="M7 12h10"
+                            d="M6 12h12"
                           />
                           <path
-                            d="M10 18h4"
+                            d="M9 19h6"
                           />
                         </svg>
                       </button>
@@ -1510,6 +1528,7 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
                         type="button"
                       >
                         <svg
+                          aria-hidden="true"
                           class="lucide lucide-list-filter"
                           fill="none"
                           height="24"
@@ -1522,13 +1541,13 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
-                            d="M3 6h18"
+                            d="M2 5h20"
                           />
                           <path
-                            d="M7 12h10"
+                            d="M6 12h12"
                           />
                           <path
-                            d="M10 18h4"
+                            d="M9 19h6"
                           />
                         </svg>
                       </button>
@@ -1568,6 +1587,7 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
                         type="button"
                       >
                         <svg
+                          aria-hidden="true"
                           class="lucide lucide-list-filter"
                           fill="none"
                           height="24"
@@ -1580,13 +1600,13 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
-                            d="M3 6h18"
+                            d="M2 5h20"
                           />
                           <path
-                            d="M7 12h10"
+                            d="M6 12h12"
                           />
                           <path
-                            d="M10 18h4"
+                            d="M9 19h6"
                           />
                         </svg>
                       </button>

@@ -7,7 +7,7 @@ exports[`RenderFilmStrip > renders Screenshots accordion when filmstrip data exi
       type="button"
     >
       <div
-        class="text-lg font-bold group-hover:underline"
+        class="text-lg font-bold group-hover:underline min-w-0 flex-1"
       >
         Screenshots
       </div>

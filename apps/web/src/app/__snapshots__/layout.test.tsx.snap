@@ -6,7 +6,7 @@ exports[`app/layout > renders the shared layout shell around the page content 1`
     Mock top nav
   </nav>
   <main
-    class="mx-auto w-full p-4"
+    class="mx-auto min-h-screen w-full p-4"
   >
     <div>
       Page content
