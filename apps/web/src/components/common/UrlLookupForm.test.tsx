@@ -1,4 +1,4 @@
-import { fireEvent, render } from "@testing-library/react";
+import { fireEvent, render, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import posthog from "posthog-js";
 import { UrlLookupForm } from "@/components/common/UrlLookupForm";
@@ -18,7 +18,7 @@ describe("UrlLookupForm", () => {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it("captures the submitted URL in analytics", () => {
+  it("captures the submitted URL in analytics", async () => {
     const { container } = render(<UrlLookupForm />);
 
     const input = container.querySelector<HTMLInputElement>('input[type="url"]')!;
@@ -32,8 +32,10 @@ describe("UrlLookupForm", () => {
 
     fireEvent.submit(form);
 
-    expect(posthog.capture).toHaveBeenCalledWith("Search for URL", {
-      search_value: "https://example.com",
+    await waitFor(() => {
+      expect(posthog.capture).toHaveBeenCalledWith("Search for URL", {
+        search_value: "https://example.com",
+      });
     });
   });
 });

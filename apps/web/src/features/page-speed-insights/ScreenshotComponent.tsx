@@ -33,6 +33,8 @@ export function ScreenshotComponent({
       <img
         alt={"fullscreen image"}
         width={80}
+        loading="lazy"
+        decoding="async"
         src={screenshot.data}
         onError={() => setImageError(true)}
         className={`w-20 aspect-[${screenshot.width}/${screenshot.height}]`}

@@ -78,7 +78,7 @@ describe("longTaskItemsFromAudit", () => {
         headings: [],
         items: [{ url: "https://cdn.example/app.js", duration: 90, startTime: 10 }],
       },
-    } as AuditResult;
+    } as unknown as AuditResult;
 
     expect(longTaskItemsFromAudit(audit)).toEqual([
       { url: "https://cdn.example/app.js", duration: 90, startTime: 10 },
@@ -99,7 +99,7 @@ describe("longTaskItemsFromAudit", () => {
           tasks: [{ urlIndex: 0, duration: 90 }],
         },
       },
-    } as AuditResult;
+    } as unknown as AuditResult;
 
     expect(longTaskItemsFromAudit(audit)).toEqual([
       { url: "https://cdn.example/app.js", duration: 90 },
@@ -120,11 +120,11 @@ describe("taskItemsFromAudit", () => {
       id: "main-thread-tasks",
       title: "Tasks",
       details: { type: "table", headings: [], items: [{ duration: 10 }] },
-    } as AuditResult;
+    } as unknown as AuditResult;
 
     expect(taskItemsFromAudit(withItems)).toEqual([{ duration: 10 }]);
     expect(
-      taskItemsFromAudit({ id: "main-thread-tasks", title: "Tasks" } as AuditResult),
+      taskItemsFromAudit({ id: "main-thread-tasks", title: "Tasks" } as unknown as AuditResult),
     ).toEqual([]);
   });
 });

@@ -46,7 +46,7 @@ export function taskItemsFromAudit(audit: AuditResult): TableItem[] {
  * Blocking time is duration past 50 ms, the portion that can add to Total Blocking Time.
  */
 export function summarizeMainThreadTasks(
-  items: readonly { startTime?: unknown; duration?: unknown }[],
+  items: readonly TableItem[],
   limit = LONG_TASKS_SHOWN,
 ): MainThreadTaskSummary {
   const tasks: MainThreadTaskRow[] = [];
@@ -97,7 +97,7 @@ function scriptUrlFromDebugTask(
  */
 export function longTaskItemsFromAudit(
   audit: AuditResult | undefined,
-): Array<{ url?: unknown; duration?: unknown }> {
+): TableItem[] {
   if (!audit) return [];
 
   const items = taskItemsFromAudit(audit);
@@ -117,7 +117,12 @@ export function longTaskItemsFromAudit(
   return debug.tasks.flatMap((task) => {
     if (!task || typeof task !== "object") return [];
     const record = task as { urlIndex?: unknown; duration?: unknown };
-    return [{ url: scriptUrlFromDebugTask(record, debug.urls as unknown[]), duration: record.duration }];
+    return [
+      {
+        url: scriptUrlFromDebugTask(record, debug.urls as unknown[]),
+        duration: record.duration,
+      } as TableItem,
+    ];
   });
 }
 
@@ -126,7 +131,7 @@ export function longTaskItemsFromAudit(
  * Lighthouse attributes a task to the script that was running, or "Unattributable".
  */
 export function summarizeLongTaskScripts(
-  items: readonly { url?: unknown; duration?: unknown }[],
+  items: readonly TableItem[],
 ): ScriptBlockingRow[] {
   const byUrl = new Map<string, ScriptBlockingRow>();
 

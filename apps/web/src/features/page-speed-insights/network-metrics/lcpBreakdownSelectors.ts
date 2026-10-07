@@ -1,6 +1,7 @@
 import type { PageSpeedInsightsSnapshot } from "@/features/page-speed-insights/PageSpeedContext";
 import { sortReportLabels } from "@/features/page-speed-insights/shared/reportLabels";
 import { getNumber } from "@/lib/utils";
+import type { TableItem } from "@/lib/schema";
 
 type LCPSubpart = {
   subpart: string;
@@ -54,7 +55,7 @@ export function buildLcpBreakdownTableFromDetailRows(
     _userLabel: string;
     auditResult?: {
       details?: {
-        items?: Array<{ subpart?: string; label?: string; duration?: unknown }>;
+        items?: TableItem[];
       };
     };
   }>,

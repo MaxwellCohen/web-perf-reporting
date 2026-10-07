@@ -10,7 +10,9 @@ export type FcpScreenshot = {
   fcpMs: number;
 };
 
-type FilmstripFrame = Pick<AuditDetailFilmstrip["items"][number], "timing" | "data">;
+type FilmstripFrame = Pick<AuditDetailFilmstrip["items"][number], "timing" | "data"> & {
+  timestamp?: number;
+};
 
 function filmstripItems(details: unknown): FilmstripFrame[] | undefined {
   if (!details || typeof details !== "object") return undefined;

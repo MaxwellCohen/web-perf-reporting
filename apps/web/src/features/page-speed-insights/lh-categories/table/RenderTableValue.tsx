@@ -471,7 +471,7 @@ function RenderThumbnail({
   ...props
 }: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
   const strValue = `${value}`;
-  return <img src={strValue} title={strValue} alt="" {...props} />;
+  return <img src={strValue} title={strValue} alt="" loading="lazy" decoding="async" {...props} />;
 }
 
 function RenderTimespanMs({

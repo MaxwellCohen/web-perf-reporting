@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { AuditResultsRecord } from "@/lib/schema";
+import type { AuditDetailList, AuditResultsRecord } from "@/lib/schema";
 import { collectLcpElements } from "@/features/page-speed-insights/lcpElement";
 
 const lcpNode = {
@@ -23,7 +23,7 @@ describe("collectLcpElements", () => {
           items: [
             { type: "table", headings: [], items: [] },
             lcpNode,
-          ],
+          ] as unknown as AuditDetailList["items"],
         },
       },
     };
@@ -35,7 +35,7 @@ describe("collectLcpElements", () => {
         scoreDisplayMode: "informative",
         details: {
           type: "list",
-          items: [{ ...lcpNode, nodeLabel: "Desktop hero", lhId: "page-1-IMG" }],
+          items: [{ ...lcpNode, nodeLabel: "Desktop hero", lhId: "page-1-IMG" }] as unknown as AuditDetailList["items"],
         },
       },
     };

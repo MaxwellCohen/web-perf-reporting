@@ -8,8 +8,15 @@ vi.mock("next/font/google", () => ({
 }));
 
 vi.mock("@/app/providers", () => ({
-  PostHogProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   QueryProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+vi.mock("@/app/PostHogProvider", () => ({
+  PostHogProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+vi.mock("@/app/PostHogAnalytics", () => ({
+  PostHogAnalytics: () => null,
 }));
 
 vi.mock("@/components/navigation/TopNav", () => ({

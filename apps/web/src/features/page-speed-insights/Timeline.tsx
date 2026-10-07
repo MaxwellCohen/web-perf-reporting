@@ -52,7 +52,13 @@ export function Timeline({ timeline, device }: TimelineProps) {
                   className="rounded-md border-2  p-2 hover:scale-105 z-0"
                   onClick={() => setOpenIndex(i)}
                 >
-                  <img alt={`timeline image at ${item.timing}`} width={80} src={item.data} />
+                  <img
+                    alt={`timeline image at ${item.timing}`}
+                    width={80}
+                    loading="lazy"
+                    decoding="async"
+                    src={item.data}
+                  />
                   <div>{item.timing} ms</div>
                 </button>
               </div>
@@ -72,6 +78,8 @@ export function Timeline({ timeline, device }: TimelineProps) {
                       <img
                         className="h-auto max-h-[min(60vh,calc(90dvh-12rem))] w-full object-contain"
                         alt={`timeline image at ${item.timing}`}
+                        loading="lazy"
+                        decoding="async"
                         src={item.data}
                       />
                       <div className="text-center text-sm sm:text-base">{item.timing} ms</div>

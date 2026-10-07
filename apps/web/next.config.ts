@@ -1,4 +1,4 @@
-import { withSentryConfig } from "@sentry/nextjs";
+import { withSentryConfig } from "@sentry/nextjs/config";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -11,7 +11,10 @@ const nextConfig: NextConfig = {
     // babel-plugin-react-compiler is not required.
     // See node_modules/next/dist/docs turbopackRustReactCompiler.md
     turbopackRustReactCompiler: true,
-    optimizePackageImports: ["@radix-ui/react-icons", "date-fns"],
+    // lucide-react/date-fns/recharts are already optimized by default;
+    // list only barrel-heavy deps actually imported in src that are not.
+    // See node_modules/next/dist/docs/01-app/03-api-reference/05-config/01-next-config-js/optimizePackageImports.md
+    optimizePackageImports: ["@tanstack/react-table", "embla-carousel-react"],
   },
 };
 

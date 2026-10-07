@@ -4,10 +4,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import { PostHogAnalytics } from "@/app/PostHogAnalytics";
-import { PostHogProvider, QueryProvider } from "@/app/providers";
+import { PostHogProvider } from "@/app/PostHogProvider";
+import { QueryProvider } from "@/app/providers";
 import { TopNav } from "@/components/navigation/TopNav";
 import { getSiteUrl } from "@/lib/siteUrl";
-import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

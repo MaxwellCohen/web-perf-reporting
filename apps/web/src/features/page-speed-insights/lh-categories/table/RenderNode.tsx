@@ -145,6 +145,8 @@ export function RenderNodeImage({
             <img
               src={screenshot.data}
               alt="Screenshot"
+              loading="lazy"
+              decoding="async"
               onError={() => setImageError(true)}
               style={{
                 width: `${displayWidth}px`,

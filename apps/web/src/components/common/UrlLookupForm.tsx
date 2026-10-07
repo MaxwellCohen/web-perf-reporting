@@ -1,15 +1,19 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import posthog from "posthog-js";
 import { useId } from "react";
 
 export const UrlLookupForm = () => {
   const id = useId();
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    posthog.capture("Search for URL", {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      search_value: (e.target as any)?.url?.value,
+    // Dynamic import keeps posthog-js out of the initial client bundle.
+    // Analytics is fire-and-forget; failures must not break form submit.
+    const searchValue = (e.target as HTMLFormElement & { url?: { value?: string } })?.url
+      ?.value;
+    void import("posthog-js").then(({ default: posthog }) => {
+      posthog.capture("Search for URL", {
+        search_value: searchValue,
+      });
     });
   };
 

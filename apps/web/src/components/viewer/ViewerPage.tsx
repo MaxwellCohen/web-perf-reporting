@@ -1,7 +1,7 @@
 "use client";
-import { PageSpeedInsightsDashboard } from "@/features/page-speed-insights/pageSpeedInsightsDashboard";
-import { PageSpeedInsights } from "@/lib/schema";
+import type { PageSpeedInsights } from "@/lib/schema";
 import { useEffect, useState, useSyncExternalStore } from "react";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -18,6 +18,17 @@ import { LhFileInput } from "@/components/lh/inputs/LhFileInput";
 import { LhTextInput } from "@/components/lh/inputs/LhTextInput";
 import { collectViewerReports } from "@/components/viewer/collectViewerReports";
 import { decodeViewerHash, encodeViewerHash } from "@/components/viewer/viewerHash";
+
+// Dashboard pulls recharts + react-markdown + tanstack tables (~730kB
+// client per audit). Viewer input form needs none of it; load the dashboard
+// only after reports are ready, behind a stable loading boundary.
+const PageSpeedInsightsDashboard = dynamic(
+  () =>
+    import("@/features/page-speed-insights/pageSpeedInsightsDashboard").then(
+      (mod) => mod.PageSpeedInsightsDashboard,
+    ),
+  { loading: () => <div className="p-4 text-muted-foreground">Loading report…</div> },
+);
 
 function subscribeToHash(onChange: () => void) {
   window.addEventListener("hashchange", onChange);

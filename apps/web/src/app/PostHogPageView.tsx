@@ -3,24 +3,25 @@
 
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import { usePostHog } from "posthog-js/react";
 
 export default function PostHogPageView() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const posthog = usePostHog();
 
-  // Track pageviews
+  // Track pageviews. Dynamic import keeps posthog-js out of the initial
+  // client bundle; pageview capture is fire-and-forget after hydration.
   useEffect(() => {
-    if (pathname && posthog) {
-      let url = window.origin + pathname;
-      if (searchParams.toString()) {
-        url = url + "?" + searchParams.toString();
-      }
-
-      posthog.capture("$pageview", { $current_url: url });
+    if (!pathname) return;
+    let url = window.origin + pathname;
+    const query = searchParams.toString();
+    if (query) {
+      url = `${url}?${query}`;
     }
-  }, [pathname, searchParams, posthog]);
+
+    void import("posthog-js").then(({ default: posthog }) => {
+      posthog.capture("$pageview", { $current_url: url });
+    });
+  }, [pathname, searchParams]);
 
   return null;
 }

@@ -25,6 +25,8 @@ export function FcpScreenshotCard({ screenshots }: { screenshots: FcpScreenshot[
               <img
                 alt={`${shot.label} at First Contentful Paint, ${formatMs(shot.timing)}`}
                 src={shot.data}
+                loading="lazy"
+                decoding="async"
                 className="h-auto max-h-80 w-auto max-w-full rounded-md border"
               />
               <figcaption className="text-xs text-muted-foreground tabular-nums">

@@ -19,9 +19,9 @@ export function collectLcpElements(sources: MetricAuditSource[]): LcpElement[] {
   const elements: LcpElement[] = [];
 
   for (const { audits, label } of sources) {
-    const details = audits["lcp-breakdown-insight"]?.details;
-    const items = details && "items" in details ? details.items : undefined;
-    if (!Array.isArray(items)) continue;
+    const details = audits["lcp-breakdown-insight"]?.details as { items?: unknown } | undefined;
+    const items = details && Array.isArray(details.items) ? details.items : undefined;
+    if (!items) continue;
 
     for (const item of items) {
       if (isLcpNode(item)) {
