@@ -1,9 +1,6 @@
 "use client";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
-import {
-  useStandardTable,
-  type StandardColumnDef,
-} from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
 import { createBytesColumn } from "@/features/page-speed-insights/shared/tableColumnHelpers";
 import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
 import { TableCard } from "@/features/page-speed-insights/shared/TableCard";

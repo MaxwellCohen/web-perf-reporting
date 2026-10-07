@@ -3,12 +3,12 @@
   "env": {
     "browser": true,
     "node": true,
-    "es2021": true
+    "es2022": true
   },
   "plugins": ["eslint", "nextjs", "react", "typescript", "vitest"],
   "settings": {
     "react": {
-      "version": "19.0.0"
+      "version": "19.3.0"
     }
   },
   "overrides": [

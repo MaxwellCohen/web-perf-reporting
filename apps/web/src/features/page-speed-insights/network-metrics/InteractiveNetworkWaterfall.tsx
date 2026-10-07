@@ -15,7 +15,7 @@ import { formatBytes } from "@/features/page-speed-insights/lh-categories/table/
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { cn } from "@/lib/utils";
 
-export type WaterfallMilestones = {
+type WaterfallMilestones = {
   fcp?: number;
   lcp?: number;
   domContentLoaded?: number;

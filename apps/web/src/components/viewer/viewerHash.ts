@@ -1,7 +1,6 @@
 import { parseViewerJsonEntries, parseViewerJsonString } from "@/components/viewer/parseViewerJson";
 import { PageSpeedInsights } from "@/lib/schema";
-import { TextEncoding } from "lighthouse/report/renderer/text-encoding";
-import pako from "pako";
+import { TextEncoding } from "@/components/viewer/textEncoding";
 
 const VIEWER_HASH_VERSION = 1;
 const LOCAL_PREFIX = "local.";
@@ -18,12 +17,6 @@ type ViewerHashPayload = {
   data: PageSpeedInsights[];
   labels: string[];
 };
-
-function ensurePako() {
-  if (globalThis.window !== undefined) {
-    window.pako = pako;
-  }
-}
 
 function fragmentFromHash(hash: string): string {
   if (!hash || hash === "#") return "";
@@ -77,7 +70,6 @@ export function decodeViewerHash(hash: string): ViewerHashState | null {
     }
   }
 
-  ensurePako();
   try {
     return decodeJsonText(TextEncoding.fromBase64(fragment, { gzip: true }));
   } catch {
@@ -96,7 +88,6 @@ async function shortId(text: string): Promise<string> {
 }
 
 export async function encodeViewerHash(state: ViewerHashState): Promise<string> {
-  ensurePako();
   const json = JSON.stringify({
     v: VIEWER_HASH_VERSION,
     data: state.data,

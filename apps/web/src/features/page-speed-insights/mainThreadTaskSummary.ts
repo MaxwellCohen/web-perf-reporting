@@ -4,9 +4,9 @@ import type { AuditResult, TableItem } from "@/lib/schema";
 export const LONG_TASK_THRESHOLD_MS = 50;
 
 /** How many longest tasks to list before summarizing the rest. */
-export const LONG_TASKS_SHOWN = 8;
+const LONG_TASKS_SHOWN = 8;
 
-export type MainThreadTaskRow = {
+type MainThreadTaskRow = {
   startTime: number;
   duration: number;
   blockingTime: number;

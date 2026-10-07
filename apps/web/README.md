@@ -89,7 +89,7 @@ pnpm db:studio
 
 Vitest is configured with:
 
-- `jsdom` for component and DOM-focused tests
+- `happy-dom` for component and DOM-focused tests
 - alias support for `@/`
 - shared setup in `vitest.setup.ts`
 - coverage reporting through V8

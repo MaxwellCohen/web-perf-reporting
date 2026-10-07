@@ -3,14 +3,16 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  experimental: {
-    turbopackRustReactCompiler: true,
-  },
+  poweredByHeader: false,
   reactCompiler: true,
   typedRoutes: true,
+  experimental: {
+    // Native Rust React Compiler (faster than Babel). When enabled,
+    // babel-plugin-react-compiler is not required.
+    // See node_modules/next/dist/docs turbopackRustReactCompiler.md
+    turbopackRustReactCompiler: true,
+    optimizePackageImports: ["@radix-ui/react-icons", "date-fns"],
+  },
 };
 
 export default withSentryConfig(nextConfig, {
@@ -27,7 +29,7 @@ export default withSentryConfig(nextConfig, {
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
 
   // Upload a larger set of source maps for prettier stack traces (increases build time)
-  widenClientFileUpload: true,
+  widenClientFileUpload: false,
 
   // Automatically annotate React components to show their full name in breadcrumbs and session replay
   reactComponentAnnotation: {

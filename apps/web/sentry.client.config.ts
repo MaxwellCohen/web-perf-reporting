@@ -12,19 +12,11 @@ const SENTRY_DSN =
 Sentry.init({
   dsn: SENTRY_DSN,
 
-  // Add optional integrations for additional features
-  integrations: [Sentry.replayIntegration()],
+  // 10% tracing in production, full in dev. Was 1 (100%) in prod — cost + perf.
+  tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1,
 
-  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-  tracesSampleRate: 1,
-
-  // Define how likely Replay events are sampled.
-  // This sets the sample rate to be 10%. You may want this to be 100% while
-  // in development and sample at a lower rate in production
-  replaysSessionSampleRate: 0,
-
-  // Define how likely Replay events are sampled when an error occurs.
-  replaysOnErrorSampleRate: 0,
+  // Replay disabled (was loading replayIntegration for 0% sessions).
+  // Re-enable with replaysSessionSampleRate > 0 if needed.
 
   // Setting this option to true will print useful information to the console while you're setting up Sentry.
   debug: false,

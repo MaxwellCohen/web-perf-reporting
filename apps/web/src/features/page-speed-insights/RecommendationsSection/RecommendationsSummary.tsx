@@ -20,14 +20,6 @@ type RecommendationsSummaryProps = {
   recommendations: Recommendation[];
 };
 
-function formatSavings(rec: Recommendation): string {
-  const { savings, unit } = rec.impact;
-  if (!savings) return "";
-  if (unit === "ms" || unit === "millisecond") return renderTimeValue(savings);
-  if (unit === "byte" || unit === "bytes") return String(savings);
-  return `${savings}${unit ? ` ${unit}` : ""}`;
-}
-
 export function RecommendationsSummary({ recommendations }: RecommendationsSummaryProps) {
   const byPriority = { high: 0, medium: 0, low: 0 };
   let totalMsSavings = 0;
@@ -192,5 +184,3 @@ export function getQuickWinRecommendations(
     .sort((a, b) => (b.impact.savings ?? 0) - (a.impact.savings ?? 0))
     .slice(0, limit);
 }
-
-export { formatSavings };

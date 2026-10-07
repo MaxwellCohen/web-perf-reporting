@@ -13,8 +13,8 @@ const SENTRY_DSN =
 Sentry.init({
   dsn: SENTRY_DSN,
 
-  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-  tracesSampleRate: 1,
+  // 10% tracing in production, full in dev. Was 1 (100%) in prod — cost + perf.
+  tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1,
 
   // Setting this option to true will print useful information to the console while you're setting up Sentry.
   debug: false,

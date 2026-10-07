@@ -1,6 +1,6 @@
 import type { NetworkMetricSeries } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsData";
 
-export const TIMELINE_EVENT_MAP = {
+const TIMELINE_EVENT_MAP = {
   TTFB: "ttfb",
   FCP: "fcp",
   "FCP (Observed)": "observedFirstContentfulPaint",
@@ -11,7 +11,7 @@ export const TIMELINE_EVENT_MAP = {
   Interactive: "interactive",
 } as const;
 
-export type TimelineEventLabel = keyof typeof TIMELINE_EVENT_MAP;
+type TimelineEventLabel = keyof typeof TIMELINE_EVENT_MAP;
 
 const TIMELINE_EVENT_ENTRIES = Object.entries(TIMELINE_EVENT_MAP) as Array<
   [TimelineEventLabel, keyof NetworkMetricSeries]

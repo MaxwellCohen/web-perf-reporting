@@ -1,9 +1,8 @@
 "use client";
-import type { StockCellContext, StockColumnDef, StockHeader, StockHeaderContext, StockHeaderGroup, StockRow, StockTable, StockCell } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import type { StockRow } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 
 import { TableRow, TableCell } from "@/components/ui/table";
 import { flexRender } from "@tanstack/react-table";
-import type { Row } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
 import type { TreeMapNode } from "@/lib/schema";
 import { tanstackTableCellDataProps } from "@/features/page-speed-insights/shared/tanstackTableCellDataProps";

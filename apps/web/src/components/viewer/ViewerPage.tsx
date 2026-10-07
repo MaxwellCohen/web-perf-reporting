@@ -1,7 +1,7 @@
 "use client";
 import { PageSpeedInsightsDashboard } from "@/features/page-speed-insights/pageSpeedInsightsDashboard";
 import { PageSpeedInsights } from "@/lib/schema";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -19,27 +19,25 @@ import { LhTextInput } from "@/components/lh/inputs/LhTextInput";
 import { collectViewerReports } from "@/components/viewer/collectViewerReports";
 import { decodeViewerHash, encodeViewerHash } from "@/components/viewer/viewerHash";
 
+function subscribeToHash(onChange: () => void) {
+  window.addEventListener("hashchange", onChange);
+  window.addEventListener("popstate", onChange);
+  return () => {
+    window.removeEventListener("hashchange", onChange);
+    window.removeEventListener("popstate", onChange);
+  };
+}
+
+const getHashSnapshot = () => window.location.hash;
+const getServerHashSnapshot = () => "";
+
+function setLocationHash(newHash: string) {
+  window.location.hash = newHash.startsWith("#") ? newHash.slice(1) : newHash;
+}
+
 function useHash() {
-  const [hash, setHash] = useState("");
-
-  useEffect(() => {
-    const handleHashChange = () => setHash(window.location.hash);
-    window.addEventListener("hashchange", handleHashChange);
-    window.addEventListener("popstate", handleHashChange);
-    setHash(window.location.hash);
-    return () => {
-      window.removeEventListener("hashchange", handleHashChange);
-      window.removeEventListener("popstate", handleHashChange);
-    };
-  }, []);
-
-  return [
-    hash,
-    (newHash: string) => {
-      window.location.hash = newHash.startsWith("#") ? newHash.slice(1) : newHash;
-      setHash(window.location.hash);
-    },
-  ] as const;
+  const hash = useSyncExternalStore(subscribeToHash, getHashSnapshot, getServerHashSnapshot);
+  return [hash, setLocationHash] as const;
 }
 
 export default function ViewerPage() {
@@ -51,6 +49,7 @@ export default function ViewerPage() {
   const [activeTab, setActiveTab] = useState("file");
   const [hash, setHash] = useHash();
 
+  // Sync from external system (URL hash) — intentional set-state-in-effect.
   useEffect(() => {
     const decoded = decodeViewerHash(hash);
     if (!decoded) {

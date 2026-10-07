@@ -7,15 +7,11 @@ const fromBase64 = vi.fn<(encoded: string, options?: { gzip: boolean }) => strin
   (encoded) => encoded,
 );
 
-vi.mock("lighthouse/report/renderer/text-encoding", () => ({
+vi.mock("@/components/viewer/textEncoding", () => ({
   TextEncoding: {
     toBase64: (text: string, options: { gzip: boolean }) => toBase64(text, options),
     fromBase64: (encoded: string, options: { gzip: boolean }) => fromBase64(encoded, options),
   },
-}));
-
-vi.mock("pako", () => ({
-  default: {},
 }));
 
 import { PageSpeedInsights } from "@/lib/schema";

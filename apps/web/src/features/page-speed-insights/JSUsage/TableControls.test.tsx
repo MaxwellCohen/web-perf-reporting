@@ -1,5 +1,5 @@
 import { fireEvent, render } from "@testing-library/react";
-import React from "react";
+import React, { useEffect } from "react";
 import { describe, expect, it, vi } from "vitest";
 import type { StockTable } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { useTable, type RowData } from "@tanstack/react-table";
@@ -124,7 +124,11 @@ function TableWithControls({ minimal = false }: { minimal?: boolean }) {
     columnHelper.accessor("name", { id: "name", enableHiding: true }),
   ];
   const table = useControlsTestTable(data, columns, minimal ? undefined : { paginated: true });
-  latestControlsTable = table as unknown as StockTable<Row>;
+  // Test-only capture of table instance for spies. Assigned in an effect so the
+  // render itself stays side-effect free (effect runs before test assertions).
+  useEffect(() => {
+    latestControlsTable = table as unknown as StockTable<Row>;
+  }, [table]);
   return <TableControls table={table as StockTable<Row>} />;
 }
 

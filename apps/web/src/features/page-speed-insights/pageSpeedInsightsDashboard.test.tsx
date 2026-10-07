@@ -86,7 +86,6 @@ vi.mock("@/features/page-speed-insights/network-metrics", () => ({
   LoadTimelineSection: () => <div>Load timeline section</div>,
   NetworkWaterfallSection: () => <div>Network waterfall section</div>,
   NetworkResourcesSection: () => <div>Network resources section</div>,
-  NetworkMetricsComponent: () => <div>Network metrics</div>,
 }));
 
 vi.mock("@/features/page-speed-insights/javascript-metrics/JavaScriptPerformanceComponent", () => ({

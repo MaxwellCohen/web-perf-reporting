@@ -3,9 +3,9 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-export const sectionGridClassName = "grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3";
+const sectionGridClassName = "grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3";
 
-export const fullWidthClassName = "md:col-span-2 lg:col-span-3";
+const fullWidthClassName = "md:col-span-2 lg:col-span-3";
 
 export function SectionGrid({
   children,

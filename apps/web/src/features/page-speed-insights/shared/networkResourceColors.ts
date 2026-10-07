@@ -1,4 +1,4 @@
-export const RESOURCE_TYPE_COLORS: Record<string, string> = {
+const RESOURCE_TYPE_COLORS: Record<string, string> = {
   Document: "bg-amber-500/90 dark:bg-amber-500/80",
   Script: "bg-amber-400/90 dark:bg-amber-400/80",
   Stylesheet: "bg-violet-500/90 dark:bg-violet-400/80",

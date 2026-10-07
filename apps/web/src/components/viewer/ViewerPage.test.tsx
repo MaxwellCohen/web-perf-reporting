@@ -9,15 +9,11 @@ vi.mock("@/features/page-speed-insights/pageSpeedInsightsDashboard", () => ({
   ),
 }));
 
-vi.mock("lighthouse/report/renderer/text-encoding", () => ({
+vi.mock("@/components/viewer/textEncoding", () => ({
   TextEncoding: {
     fromBase64: (data: string) => data,
     toBase64: async (data: string) => data,
   },
-}));
-
-vi.mock("pako", () => ({
-  default: {},
 }));
 
 const mockAlert = vi.fn();

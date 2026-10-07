@@ -33,7 +33,7 @@ export function createOptionalNumericCell(
 }
 
 /** Treat missing or non-positive numbers as empty (recommendations / wasted metrics). */
-export function createOptionalPositiveNumericCell(
+function createOptionalPositiveNumericCell(
   Render: ComponentType<{ value: number }>,
   value: number | undefined,
 ): React.ReactNode {

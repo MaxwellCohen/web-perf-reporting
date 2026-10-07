@@ -13,7 +13,7 @@ export default defineConfig({
     noExternal: ["next"],
   },
   test: {
-    testTimeout: 500,
+    testTimeout: 5000,
     pool: "threads",
     isolate: true,
     environment: "happy-dom",

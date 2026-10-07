@@ -4,5 +4,10 @@
     "config": "vitest.config.ts"
   },
   "ignore": ["src/components/ui/*.tsx"],
-  "ignoreBinaries": ["fallow"]
+  "ignoreBinaries": ["fallow"],
+  "rules": {
+    // flatTableFeatures intentionally aliases standardTableFeatures (same bundle,
+    // expander disabled at the hook). Not a copy-paste duplicate.
+    "duplicates": "off"
+  }
 }

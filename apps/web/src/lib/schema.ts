@@ -34,7 +34,7 @@ const CruxHistogramItem = z.object({
   percentiles: cruxPercentileSchema,
 });
 
-export const urlSchema = z.string().url();
+const urlSchema = z.string().url();
 
 const urlNormalizationDetails = z
   .object({

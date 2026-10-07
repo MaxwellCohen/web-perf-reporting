@@ -9,7 +9,8 @@ function makeQueryClient() {
     defaultOptions: {
       queries: {
         staleTime: 60 * 1000, // 1 minute
-        retry: true,
+        gcTime: 5 * 60 * 1000, // 5 minutes
+        retry: 1,
         retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
       },
     },
@@ -33,7 +34,9 @@ export function QueryProvider({ children }: { children: ReactNode }) {
 
 export function PostHogProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
-    posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY ?? "", {
+    const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+    if (!key) return;
+    posthog.init(key, {
       api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
       person_profiles: "identified_only", // or 'always' to create profiles for anonymous users as well
       capture_pageview: false, // Disable automatic pageview capture, as we capture manually

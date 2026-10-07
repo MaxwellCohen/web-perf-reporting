@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { Tabs } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,7 +33,10 @@ export function LhInputForm() {
     jsonUrl,
     activeTab,
   });
-  formStateRef.current = { jsonInputs, jsonFiles, jsonUrl, activeTab };
+
+  useEffect(() => {
+    formStateRef.current = { jsonInputs, jsonFiles, jsonUrl, activeTab };
+  }, [jsonInputs, jsonFiles, jsonUrl, activeTab]);
 
   const submitAction = async (prevState: FormState, formData: FormData) => {
     void formData;

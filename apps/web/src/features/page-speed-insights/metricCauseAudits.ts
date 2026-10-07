@@ -1,6 +1,6 @@
 import type { AuditResult, AuditResultsRecord } from "@/lib/schema";
 
-export const CWV_METRIC_ACRONYMS = ["FCP", "LCP", "TBT", "CLS", "SI"] as const;
+const CWV_METRIC_ACRONYMS = ["FCP", "LCP", "TBT", "CLS", "SI"] as const;
 export type CwvMetricAcronym = (typeof CWV_METRIC_ACRONYMS)[number];
 
 export const METRIC_AUDIT_IDS = [

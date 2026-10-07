@@ -4,7 +4,7 @@ import type { CauseAuditEntry } from "@/features/page-speed-insights/metricCause
 const RESPONSIVE_SIZE =
   /larger than it needs to be \((\d+)x(\d+)\) for its displayed dimensions \((\d+)x(\d+)\)/i;
 
-export type ImageDeliveryOptimizationId = "modern-format" | "responsive-size";
+type ImageDeliveryOptimizationId = "modern-format" | "responsive-size";
 
 export type ImageDeliveryReportSize = {
   label: string;

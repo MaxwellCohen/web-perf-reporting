@@ -1,7 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
-import { PageSpeedInsightsTable } from "@/db/schema";
 import { db } from "@/db";
-import { and, eq, gt } from "drizzle-orm";
+import { gt } from "drizzle-orm";
 
 type FormFactor = "DESKTOP" | "MOBILE";
 

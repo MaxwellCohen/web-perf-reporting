@@ -69,12 +69,3 @@ export const debugDataTableFeatures = tableFeatures({
   expandedRowModel: createExpandedRowModel(),
   aggregationFns,
 });
-
-export type FlatTableFeatures = typeof flatTableFeatures;
-export type StandardTableFeatures = typeof standardTableFeatures;
-export type LhTableFeatures = typeof lhTableFeatures;
-export type DebugDataTableFeatures = typeof debugDataTableFeatures;
-
-/** @deprecated Prefer flatTableFeatures / standardTableFeatures / lhTableFeatures */
-export { stockFeatures };
-export type { StockFeatures } from "@tanstack/react-table";

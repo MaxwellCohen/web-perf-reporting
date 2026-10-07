@@ -37,7 +37,7 @@ function uniqueLabels(labels: string[]): string[] {
   return unique;
 }
 
-export function comparisonSeriesFromLabels(labels: string[]): ComparisonSeries[] {
+function comparisonSeriesFromLabels(labels: string[]): ComparisonSeries[] {
   return labels.map((label, index) => ({
     key: `r${index}`,
     label: label.trim() || `Report ${index + 1}`,
