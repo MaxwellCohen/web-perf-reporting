@@ -1,5 +1,3 @@
-import pako from "pako";
-
 function bytesToBinaryString(bytes: Uint8Array): string {
   let binaryString = "";
   const chunkSize = 5000;
@@ -32,19 +30,21 @@ export const TextEncoding = {
         const compAb = await new Response(cs.readable).arrayBuffer();
         bytes = new Uint8Array(compAb);
       } else {
-        bytes = pako.gzip(string);
+        const { gzip } = await import("pako");
+        bytes = gzip(string);
       }
     }
 
     return base64Encode(bytesToBinaryString(bytes));
   },
 
-  fromBase64(encoded: string, options: { gzip: boolean }): string {
+  async fromBase64(encoded: string, options: { gzip: boolean }): Promise<string> {
     const binaryString = base64Decode(encoded);
     const bytes = Uint8Array.from(binaryString, (c) => c.charCodeAt(0));
 
     if (options.gzip) {
-      return pako.ungzip(bytes, { to: "string" }) as string;
+      const { ungzip } = await import("pako");
+      return ungzip(bytes, { to: "string" }) as string;
     }
     return new TextDecoder().decode(bytes);
   },

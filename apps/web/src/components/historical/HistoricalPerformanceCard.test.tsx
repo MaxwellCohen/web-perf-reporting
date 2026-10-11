@@ -16,21 +16,6 @@ vi.mock("@/components/latest-crux/PerformanceCard", () => ({
   },
 }));
 
-vi.mock("@/components/historical/HistoricalPerformanceAreaChart", () => ({
-  HistoricalP75Chart: ({ chartData }: { chartData: unknown[] }) => (
-    <div data-testid="p75-chart">P75: {chartData?.length ?? 0}</div>
-  ),
-  HistoricalPerformanceAreaChart: ({ chartData }: { chartData: unknown[] }) => (
-    <div data-testid="area-chart">Area: {chartData?.length ?? 0}</div>
-  ),
-}));
-
-vi.mock("@/components/historical/HistoricalPerformanceBarChart", () => ({
-  HistoricalPerformanceBarChart: ({ chartData }: { chartData: unknown[] }) => (
-    <div data-testid="bar-chart">Bar: {chartData?.length ?? 0}</div>
-  ),
-}));
-
 import {
   HistoricalPerformanceCard,
   ChartMap,
@@ -75,8 +60,8 @@ describe("HistoricalPerformanceCard", () => {
     expect(container.textContent).toContain("Good:");
     expect(container.textContent).toContain("1000");
     expect(container.textContent).toContain("2000");
-    expect(container.querySelector('[data-testid="dynamic-chart"]')).toBeTruthy();
-    expect(container.querySelector('[data-testid="p75-chart"]')).toBeTruthy();
+    // Density + P75 charts both load through next/dynamic (mocked above).
+    expect(container.querySelectorAll('[data-testid="dynamic-chart"]')).toHaveLength(2);
   });
 
   it("uses Stacked Bar when context is Stacked Bar", () => {

@@ -136,6 +136,8 @@ describe("ViewerPage", () => {
       window.dispatchEvent(new HashChangeEvent("hashchange"));
     });
 
-    expect(container.textContent).toContain("Show Report");
+    await waitFor(() => {
+      expect(container.textContent).toContain("Show Report");
+    });
   });
 });

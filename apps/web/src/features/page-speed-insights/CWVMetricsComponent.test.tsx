@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render } from "@testing-library/react";
+import { fireEvent, render, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ScoreDisplayModes } from "@/features/page-speed-insights/ScoreDisplay";
 
@@ -14,13 +14,7 @@ vi.mock("@/components/common/PageSpeedGaugeChart", () => ({
 }));
 
 vi.mock("@/features/page-speed-insights/lh-categories/table/RenderNode", () => ({
-  NodeComponent: ({
-    item,
-    device,
-  }: {
-    item: { nodeLabel?: string };
-    device: string;
-  }) => (
+  NodeComponent: ({ item, device }: { item: { nodeLabel?: string }; device: string }) => (
     <div data-testid="lcp-node">
       {device}: {item.nodeLabel}
     </div>
@@ -66,9 +60,7 @@ vi.mock("@/components/ui/accordion", () => {
       Array.isArray(defaultValue) ? defaultValue : defaultValue ? [defaultValue] : [],
     );
     return (
-      <AccordionContext.Provider
-        value={{ value: internal, onValueChange: setInternal, type }}
-      >
+      <AccordionContext.Provider value={{ value: internal, onValueChange: setInternal, type }}>
         <div data-accordion>{children}</div>
       </AccordionContext.Provider>
     );
@@ -136,11 +128,7 @@ vi.mock("@/components/ui/accordion", () => {
 import { Accordion } from "@/components/ui/accordion";
 import { CWVMetricsComponent } from "@/features/page-speed-insights/CWVMetricsComponent";
 
-function metricAudit(
-  id: string,
-  title: string,
-  extras: Record<string, unknown> = {},
-) {
+function metricAudit(id: string, title: string, extras: Record<string, unknown> = {}) {
   return {
     id,
     title,
@@ -186,7 +174,7 @@ describe("CWVMetricsComponent", () => {
     expect(container.querySelector('[data-value="cwv"]')).toBeNull();
   });
 
-  it("keeps Core Web Vitals Summary and adds cause sections when audits exist", () => {
+  it("keeps Core Web Vitals Summary and adds cause sections when audits exist", async () => {
     pageSpeedItems = [
       {
         label: "Mobile",
@@ -251,7 +239,9 @@ describe("CWVMetricsComponent", () => {
     expect(container.textContent).toContain("Core Web Vitals Summary");
     expect(container.querySelector('[data-value="cwv"]')).not.toBeNull();
 
-    expect(container.querySelector('[data-value="cwv-cause-first-contentful-paint"]')).not.toBeNull();
+    expect(
+      container.querySelector('[data-value="cwv-cause-first-contentful-paint"]'),
+    ).not.toBeNull();
     expect(
       container.querySelector('[data-value="cwv-cause-largest-contentful-paint"]'),
     ).not.toBeNull();
@@ -261,16 +251,18 @@ describe("CWVMetricsComponent", () => {
     ).not.toBeNull();
     expect(container.querySelector('[data-value="cwv-cause-speed-index"]')).not.toBeNull();
 
-    expect(container.querySelector('[data-testid="cause-lcp-breakdown-insight"]')?.textContent).toContain(
-      "LCP breakdown",
-    );
+    await waitFor(() => {
+      expect(
+        container.querySelector('[data-testid="cause-lcp-breakdown-insight"]')?.textContent,
+      ).toContain("LCP breakdown");
+    });
     expect(container.querySelector('[data-testid="cause-bootup-time"]')?.textContent).toContain(
       "TBT",
     );
     expect(container.querySelector('[data-testid="cause-cls-culprits-insight"]')).not.toBeNull();
-    expect(container.querySelector('[data-testid="cause-unused-css-rules"]')?.textContent).toContain(
-      "SI",
-    );
+    expect(
+      container.querySelector('[data-testid="cause-unused-css-rules"]')?.textContent,
+    ).toContain("SI");
     expect(
       container.querySelector('[data-testid="cause-render-blocking-insight"]')?.textContent,
     ).toContain("FCP");
@@ -321,7 +313,7 @@ describe("CWVMetricsComponent", () => {
     expect(container.querySelector('[data-value="cwv-cause-total-blocking-time"]')).toBeNull();
   });
 
-  it("shows display values on the cause section trigger", () => {
+  it("shows display values on the cause section trigger", async () => {
     pageSpeedItems = [
       {
         label: "Mobile",
@@ -357,19 +349,19 @@ describe("CWVMetricsComponent", () => {
       </Accordion>,
     );
 
-    const lcpSection = container.querySelector(
-      '[data-value="cwv-cause-largest-contentful-paint"]',
-    );
+    const lcpSection = container.querySelector('[data-value="cwv-cause-largest-contentful-paint"]');
     expect(lcpSection?.textContent).toContain("Largest Contentful Paint");
     expect(lcpSection?.textContent).toContain("2.4 s");
 
     const trigger = lcpSection?.querySelector("button");
     expect(trigger).not.toBeNull();
     fireEvent.click(trigger!);
-    expect(container.querySelector('[data-testid="cause-lcp-breakdown-insight"]')).not.toBeNull();
+    await waitFor(() => {
+      expect(container.querySelector('[data-testid="cause-lcp-breakdown-insight"]')).not.toBeNull();
+    });
   });
 
-  it("shows the LCP element before other LCP cause cards", () => {
+  it("shows the LCP element before other LCP cause cards", async () => {
     pageSpeedItems = [
       {
         label: "Mobile",
@@ -416,15 +408,17 @@ describe("CWVMetricsComponent", () => {
 
     const section = container.querySelector('[data-value="cwv-cause-largest-contentful-paint"]');
     const element = section?.querySelector('[data-testid="lcp-element"]');
-    const breakdown = section?.querySelector('[data-testid="cause-lcp-breakdown-insight"]');
     expect(element?.textContent).toContain("Hero headline");
-    expect(breakdown).not.toBeNull();
+    await waitFor(() => {
+      expect(section?.querySelector('[data-testid="cause-lcp-breakdown-insight"]')).not.toBeNull();
+    });
+    const breakdown = section?.querySelector('[data-testid="cause-lcp-breakdown-insight"]');
     expect(
       element!.compareDocumentPosition(breakdown!) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
   });
 
-  it("shows the filmstrip frame nearest FCP before other FCP cause cards", () => {
+  it("shows the filmstrip frame nearest FCP before other FCP cause cards", async () => {
     pageSpeedItems = [
       {
         label: "Mobile",
@@ -470,12 +464,16 @@ describe("CWVMetricsComponent", () => {
 
     const section = container.querySelector('[data-value="cwv-cause-first-contentful-paint"]');
     const screenshot = section?.querySelector('[data-testid="fcp-screenshot"]');
-    const cause = section?.querySelector('[data-testid="cause-render-blocking-insight"]');
     const image = screenshot?.querySelector("img");
 
     expect(screenshot?.textContent).toContain("Screenshot at FCP");
     expect(image).toHaveAttribute("src", "data:image/jpeg;base64,paint");
-    expect(cause).not.toBeNull();
+    await waitFor(() => {
+      expect(
+        section?.querySelector('[data-testid="cause-render-blocking-insight"]'),
+      ).not.toBeNull();
+    });
+    const cause = section?.querySelector('[data-testid="cause-render-blocking-insight"]');
     expect(
       screenshot!.compareDocumentPosition(cause!) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();

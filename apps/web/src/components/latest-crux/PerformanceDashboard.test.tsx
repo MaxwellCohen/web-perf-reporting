@@ -10,7 +10,7 @@ vi.mock("@/lib/utils", () => ({
   groupBy: (...args: unknown[]) => groupByMock(...args),
 }));
 
-vi.mock("@/components/common/FormFactorPercentPieChart", () => ({
+vi.mock("@/components/common/PercentTable", () => ({
   PercentTable: ({ title, dateRange }: { title: string; dateRange?: string }) => (
     <div data-testid="percent-table">
       {title}

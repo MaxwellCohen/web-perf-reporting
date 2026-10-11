@@ -1,82 +1,69 @@
 "use client";
-import { LoadingExperiencesSection } from "@/features/page-speed-insights/loading-experience";
-import { CWVMetricsComponent } from "@/features/page-speed-insights/CWVMetricsComponent";
+import dynamic from "next/dynamic";
+import { LayoutDashboard, List } from "lucide-react";
 import {
   PageSpeedInsightsStoreProvider,
   usePageSpeedInsightsStore,
   usePageSpeedItems,
   usePageSpeedReportTitle,
-  useRequiredPageSpeedInsightsStore,
 } from "@/features/page-speed-insights/PageSpeedContext";
-import { RenderFilmStrip } from "@/features/page-speed-insights/RenderFilmStrip";
-import { ScriptTreemapSection } from "@/features/page-speed-insights/script-treemap";
 import { NullablePageSpeedInsights } from "@/lib/schema";
-import { CategoryRow, useLHTable } from "@/features/page-speed-insights/tsTable/useLHTable";
-import { Button } from "@/components/ui/button";
-import { StringFilterHeader } from "@/features/page-speed-insights/tanstack-table-v9/StringFilterHeader";
-import { Accordion } from "@/components/ui/accordion";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserLabelFilter } from "@/features/page-speed-insights/UserLabelFilter";
-import {
-  LoadTimelineSection,
-  NetworkWaterfallSection,
-  NetworkResourcesSection,
-} from "@/features/page-speed-insights/network-metrics";
-import { JavaScriptPerformanceComponent } from "@/features/page-speed-insights/javascript-metrics/JavaScriptPerformanceComponent";
-import { RecommendationsSection } from "@/features/page-speed-insights/RecommendationsSection";
 import { PageSpeedInsightsCopyButtons } from "@/features/page-speed-insights/PageSpeedInsightsCopyButtons";
+import { DashboardPanelFallback } from "@/features/page-speed-insights/dashboard-view/DashboardPanelFallback";
+import { PageSpeedDashboardView } from "@/features/page-speed-insights/dashboard-view/PageSpeedDashboardView";
+import {
+  isDashboardViewMode,
+  useDashboardViewMode,
+} from "@/features/page-speed-insights/dashboard-view/useDashboardViewMode";
+
+const ClassicView = dynamic(() => import("./ClassicView").then((mod) => mod.ClassicView), {
+  loading: () => <DashboardPanelFallback label="classic layout" />,
+});
+
+function ViewModeToggle() {
+  const [viewMode, setViewMode] = useDashboardViewMode();
+
+  return (
+    <Tabs
+      value={viewMode}
+      onValueChange={(value) => {
+        if (isDashboardViewMode(value)) setViewMode(value);
+      }}
+    >
+      <TabsList aria-label="Report layout">
+        <TabsTrigger value="dashboard" className="gap-1.5">
+          <LayoutDashboard className="size-4" aria-hidden />
+          Dashboard
+        </TabsTrigger>
+        <TabsTrigger value="classic" className="gap-1.5">
+          <List className="size-4" aria-hidden />
+          Classic
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
+  );
+}
 
 function PageSpeedInsightsDashboardContent() {
-  const store = useRequiredPageSpeedInsightsStore();
   const items = usePageSpeedItems();
   const reportTitle = usePageSpeedReportTitle();
-  const table = useLHTable(items);
+  const [viewMode] = useDashboardViewMode();
 
   return (
     <>
       <PageSpeedInsightsCopyButtons items={items} />
-      <div className="mb-2 flex flex-col gap-3 px-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-        <h2 className="min-w-0 flex-1 text-lg font-bold wrap-break-word sm:text-2xl">
-          {reportTitle}
-        </h2>
-        <div className="shrink-0 self-start">
-          <UserLabelFilter />
+      <div className="mb-4 flex flex-col gap-3 px-3">
+        <h2 className="min-w-0 text-lg font-bold wrap-break-word sm:text-2xl">{reportTitle}</h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <ViewModeToggle />
+          <div className="shrink-0">
+            <UserLabelFilter />
+          </div>
         </div>
       </div>
-      <Accordion type="multiple">
-        <LoadingExperiencesSection />
-        <CWVMetricsComponent />
-        <RenderFilmStrip />
-        <ScriptTreemapSection />
-        <LoadTimelineSection />
-        <NetworkWaterfallSection />
-        <NetworkResourcesSection />
-        <JavaScriptPerformanceComponent />
-        <RecommendationsSection />
-      </Accordion>
-      {items.length > 0 ? (
-        <div className="flex flex-col gap-3 px-3 py-4 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
-          <div className="min-w-0 flex-1">
-            <StringFilterHeader column={table.getColumn("auditTitle")} name="Audit" />
-          </div>
-          <div className="flex shrink-0 gap-2 sm:mb-2">
-            <Button
-              variant="ghost"
-              className="w-full sm:w-auto"
-              onClick={() => {
-                table.resetColumnFilters();
-                store.trigger.resetUserLabelFilter();
-              }}
-            >
-              Reset filters
-            </Button>
-          </div>
-        </div>
-      ) : null}
-      <Accordion type="multiple">
-        {table.getRowModel().rows.map((row) => (
-          <CategoryRow key={row.id} row={row} />
-        ))}
-      </Accordion>
+      {viewMode === "dashboard" ? <PageSpeedDashboardView /> : <ClassicView />}
     </>
   );
 }

@@ -46,9 +46,7 @@ function decodeJsonText(text: string): ViewerHashState | null {
       labels: parsed.labels,
     };
   }
-  const data = Array.isArray(parsed)
-    ? parseViewerJsonEntries(parsed)
-    : parseViewerJsonString(text);
+  const data = Array.isArray(parsed) ? parseViewerJsonEntries(parsed) : parseViewerJsonString(text);
   if (!data.length) return null;
   return {
     data,
@@ -56,7 +54,7 @@ function decodeJsonText(text: string): ViewerHashState | null {
   };
 }
 
-export function decodeViewerHash(hash: string): ViewerHashState | null {
+export async function decodeViewerHash(hash: string): Promise<ViewerHashState | null> {
   const fragment = fragmentFromHash(hash);
   if (!fragment) return null;
 
@@ -71,7 +69,7 @@ export function decodeViewerHash(hash: string): ViewerHashState | null {
   }
 
   try {
-    return decodeJsonText(TextEncoding.fromBase64(fragment, { gzip: true }));
+    return decodeJsonText(await TextEncoding.fromBase64(fragment, { gzip: true }));
   } catch {
     return null;
   }

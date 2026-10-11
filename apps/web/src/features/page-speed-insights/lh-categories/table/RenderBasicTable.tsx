@@ -16,7 +16,7 @@ import { Fragment, JSX, type RefObject } from "react";
 import { GridTableWithCopyToolbar } from "@/features/page-speed-insights/lh-categories/table/GridTableWithCopyToolbar";
 import { cn } from "@/lib/utils";
 import { Details } from "@/components/ui/accordion";
-import { toSentenceCase } from "@/components/common/FormFactorPercentPieChart";
+import { toSentenceCase } from "@/components/common/PercentTable";
 import { getItemDevice } from "@/features/page-speed-insights/lh-categories/table/itemDevice";
 import {
   GridColumnResizeProvider,

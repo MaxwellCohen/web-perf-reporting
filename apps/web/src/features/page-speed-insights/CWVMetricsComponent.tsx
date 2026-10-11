@@ -1,8 +1,12 @@
+"use client";
+
+import dynamic from "next/dynamic";
 import { AccordionItem, AccordionContent } from "@/components/ui/accordion";
 import { AccordionSectionTitleTrigger } from "@/components/ui/accordion-section-title-trigger";
 import { ScoreDisplay } from "@/features/page-speed-insights/ScoreDisplay";
 import ReactMarkdown from "react-markdown";
 import { HorizontalScoreChart } from "@/components/common/PageSpeedGaugeChart";
+import { DashboardPanelFallback } from "@/features/page-speed-insights/dashboard-view/DashboardPanelFallback";
 import {
   type InsightsContextItem,
   usePageSpeedItems,
@@ -13,7 +17,6 @@ import { CHART_SERIES_COLORS } from "@/features/page-speed-insights/shared/horiz
 import { SectionGrid } from "@/features/page-speed-insights/shared/MetricsSectionLayout";
 import { FcpScreenshotCard } from "@/features/page-speed-insights/FcpScreenshotCard";
 import { LcpElementSummary } from "@/features/page-speed-insights/LcpElementSummary";
-import { MetricCauseCard } from "@/features/page-speed-insights/MetricCauseCard";
 import { collectFcpScreenshots } from "@/features/page-speed-insights/fcpScreenshot";
 import { collectLcpElements } from "@/features/page-speed-insights/lcpElement";
 import {
@@ -23,6 +26,11 @@ import {
   type MetricAuditId,
   type MetricAuditSource,
 } from "@/features/page-speed-insights/metricCauseAudits";
+
+const MetricCauseCard = dynamic(
+  () => import("@/features/page-speed-insights/MetricCauseCard").then((mod) => mod.MetricCauseCard),
+  { loading: () => <DashboardPanelFallback label="audit details" /> },
+);
 
 type MetricAuditEntry = {
   audit: AuditResultsRecord[string];
@@ -154,7 +162,11 @@ export function CWVMetricsComponent() {
         const acronym = METRIC_AUDIT_TO_ACRONYM[auditName];
 
         return (
-          <AccordionItem key={auditName} value={`cwv-cause-${auditName}`} className="print:border-0">
+          <AccordionItem
+            key={auditName}
+            value={`cwv-cause-${auditName}`}
+            className="print:border-0"
+          >
             <AccordionSectionTitleTrigger>
               <MetricSectionTriggerLabel title={title} auditItems={auditItems} />
             </AccordionSectionTitleTrigger>

@@ -39,32 +39,32 @@ describe("viewerHash", () => {
     });
 
     expect(toBase64).toHaveBeenCalledWith(expect.any(String), { gzip: true });
-    expect(decodeViewerHash(`#${fragment}`)).toEqual({
+    await expect(decodeViewerHash(`#${fragment}`)).resolves.toEqual({
       data: [{ lighthouseResult: { categories: {} } }],
       labels: ["mobile"],
     });
   });
 
-  it("decodes a legacy hash that is raw Lighthouse JSON", () => {
+  it("decodes a legacy hash that is raw Lighthouse JSON", async () => {
     const encoded = JSON.stringify(report);
 
-    expect(decodeViewerHash(`#${encoded}`)).toEqual({
+    await expect(decodeViewerHash(`#${encoded}`)).resolves.toEqual({
       data: [{ lighthouseResult: { categories: {} } }],
       labels: ["Report 1"],
     });
   });
 
-  it("returns null for an empty hash so the input form can show", () => {
-    expect(decodeViewerHash("")).toBeNull();
-    expect(decodeViewerHash("#")).toBeNull();
+  it("returns null for an empty hash so the input form can show", async () => {
+    await expect(decodeViewerHash("")).resolves.toBeNull();
+    await expect(decodeViewerHash("#")).resolves.toBeNull();
   });
 
-  it("decodes a percent-encoded location.hash fragment", () => {
+  it("decodes a percent-encoded location.hash fragment", async () => {
     const encoded = encodeURIComponent(
       JSON.stringify({ v: 1, data: [report], labels: ["from-hash"] }),
     );
 
-    expect(decodeViewerHash(`#${encoded}`)).toEqual({
+    await expect(decodeViewerHash(`#${encoded}`)).resolves.toEqual({
       data: [{ lighthouseResult: { categories: {} } }],
       labels: ["from-hash"],
     });
@@ -80,7 +80,7 @@ describe("viewerHash", () => {
 
     expect(fragment.startsWith("local.")).toBe(true);
     expect(fragment.includes("http")).toBe(false);
-    expect(decodeViewerHash(`#${fragment}`)).toEqual({
+    await expect(decodeViewerHash(`#${fragment}`)).resolves.toEqual({
       data: [{ lighthouseResult: { categories: {} } }],
       labels: ["desktop"],
     });

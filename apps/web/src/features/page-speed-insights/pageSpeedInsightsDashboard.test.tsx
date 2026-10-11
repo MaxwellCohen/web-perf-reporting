@@ -129,14 +129,92 @@ describe("pageSpeedInsightsDashboard", () => {
     tableRows = [{ id: "row-1" }, { id: "row-2" }];
     resetColumnFiltersMock.mockReset();
     resetUserLabelFilterMock.mockReset();
+    window.localStorage.clear();
   });
 
-  it("renders report title and mocked sections", () => {
+  function selectTab(name: string | RegExp) {
+    fireEvent.mouseDown(screen.getByRole("tab", { name }));
+  }
+
+  it("defaults to the dashboard view with the overview tab", () => {
     render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
+
+    expect(screen.getByRole("tab", { name: /dashboard/i })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    expect(screen.getByText("CWV metrics")).toBeInTheDocument();
+    expect(screen.getByText("Loading experience: Page Loading Experience")).toBeInTheDocument();
+    expect(screen.queryByText("Film strip")).not.toBeInTheDocument();
+    expect(screen.queryByText("Category row: row-1")).not.toBeInTheDocument();
+  });
+
+  it("shows grouped sections when switching dashboard tabs", async () => {
+    render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
+
+    selectTab("Loading");
+    expect(await screen.findByText("Film strip")).toBeInTheDocument();
+    expect(screen.getByText("Load timeline section")).toBeInTheDocument();
+
+    selectTab("Network");
+    expect(await screen.findByText("Network waterfall section")).toBeInTheDocument();
+    expect(screen.getByText("Network resources section")).toBeInTheDocument();
+
+    selectTab("JavaScript");
+    expect(await screen.findByText("Script treemap section")).toBeInTheDocument();
+    expect(screen.getByText("JavaScript metrics")).toBeInTheDocument();
+
+    selectTab("Recommendations");
+    expect(await screen.findByText("Recommendations section")).toBeInTheDocument();
+
+    selectTab("Audits");
+    expect(await screen.findByText("Category row: row-1")).toBeInTheDocument();
+  });
+
+  it("renders score overview cards for each report", () => {
+    dashboardState.items = [
+      {
+        label: "Mobile",
+        item: {
+          lighthouseResult: {
+            categories: { performance: { title: "Performance", score: 0.42 } },
+            audits: {
+              "largest-contentful-paint": {
+                title: "Largest Contentful Paint",
+                displayValue: "4.1 s",
+                score: 0.3,
+              },
+            },
+          },
+        },
+      },
+    ];
+    render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
+
+    const overview = screen.getByRole("region", { name: "Score overview" });
+    expect(overview).toHaveTextContent("Mobile");
+    expect(screen.getByRole("img", { name: "Performance: 42" })).toBeInTheDocument();
+    expect(overview).toHaveTextContent("LCP");
+    expect(overview).toHaveTextContent("4.1 s");
+  });
+
+  it("remembers the classic view choice", () => {
+    const { unmount } = render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
+    selectTab(/classic/i);
+    unmount();
+
+    render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
+    expect(screen.getByRole("tab", { name: /classic/i })).toHaveAttribute("aria-selected", "true");
+    expect(screen.queryByRole("region", { name: "Score overview" })).not.toBeInTheDocument();
+  });
+
+  it("renders report title and mocked sections in the classic view", async () => {
+    render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
+    selectTab(/classic/i);
 
     expect(screen.getByRole("heading", { level: 2, name: "Loaded report" })).toBeInTheDocument();
     expect(screen.getByText("User label filter")).toBeInTheDocument();
-    expect(screen.getByText("Film strip")).toBeInTheDocument();
+    expect(await screen.findByText("Film strip")).toBeInTheDocument();
     expect(screen.getByText("Script treemap section")).toBeInTheDocument();
     expect(screen.getByText("Load timeline section")).toBeInTheDocument();
     expect(screen.getByText("Network waterfall section")).toBeInTheDocument();
@@ -145,11 +223,12 @@ describe("pageSpeedInsightsDashboard", () => {
     expect(screen.getByText("Category row: row-1")).toBeInTheDocument();
   });
 
-  it("calls resetColumnFilters when Reset filters is clicked", () => {
+  it("calls resetColumnFilters when Reset filters is clicked", async () => {
     dashboardState.items = [{ label: "test", item: {} }];
     render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
+    selectTab(/classic/i);
 
-    fireEvent.click(screen.getByRole("button", { name: /reset filters/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /reset filters/i }));
 
     expect(resetColumnFiltersMock).toHaveBeenCalledTimes(1);
     expect(resetUserLabelFilterMock).toHaveBeenCalledTimes(1);

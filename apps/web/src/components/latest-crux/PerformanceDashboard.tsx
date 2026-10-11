@@ -7,7 +7,7 @@ import {
 } from "@/components/latest-crux/PerformanceCard";
 import { PerformanceOptions } from "@/components/latest-crux/PerformanceOptions";
 import type { CruxReportMap, DeviceType, Scope } from "@/components/latest-crux/types";
-import { PercentTable } from "@/components/common/FormFactorPercentPieChart";
+import { PercentTable } from "@/components/common/PercentTable";
 import { formatCruxReport, formatDate, groupBy } from "@/lib/utils";
 import { useState } from "react";
 

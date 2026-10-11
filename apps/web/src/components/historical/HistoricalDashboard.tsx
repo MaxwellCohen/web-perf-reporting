@@ -14,7 +14,7 @@ import {
   ChartMap,
   HistoricalPerformanceCard,
 } from "@/components/historical/HistoricalPerformanceCard";
-import { PercentTable } from "@/components/common/FormFactorPercentPieChart";
+import { PercentTable } from "@/components/common/PercentTable";
 import { Details } from "@/components/ui/accordion";
 
 // Helper function to convert CruxDate to YYYY-MM-DD string

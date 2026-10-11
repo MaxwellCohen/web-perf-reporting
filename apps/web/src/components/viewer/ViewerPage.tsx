@@ -61,15 +61,22 @@ export default function ViewerPage() {
   const [hash, setHash] = useHash();
 
   // Sync from external system (URL hash) — intentional set-state-in-effect.
+  // Decode stays async so gzip (pako) loads only when a hash is present.
   useEffect(() => {
-    const decoded = decodeViewerHash(hash);
-    if (!decoded) {
-      setData([]);
-      setLabels([]);
-      return;
-    }
-    setData(decoded.data);
-    setLabels(decoded.labels);
+    let cancelled = false;
+    void decodeViewerHash(hash).then((decoded) => {
+      if (cancelled) return;
+      if (!decoded) {
+        setData([]);
+        setLabels([]);
+        return;
+      }
+      setData(decoded.data);
+      setLabels(decoded.labels);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [hash]);
 
   const handleSubmit = async () => {

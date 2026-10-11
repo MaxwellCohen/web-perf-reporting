@@ -28,7 +28,7 @@ vi.mock("@/components/ui/chart", () => ({
   ChartTooltipContent: () => <div>Tooltip content</div>,
 }));
 
-vi.mock("@/components/common/FormFactorPercentPieChart", () => ({
+vi.mock("@/components/common/PercentTable", () => ({
   PercentTable: ({ title, dateRange }: { title: string; dateRange?: string }) => (
     <div>
       {title}

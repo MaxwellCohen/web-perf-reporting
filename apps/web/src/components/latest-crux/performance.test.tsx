@@ -27,7 +27,7 @@ vi.mock("@/components/common/PageSpeedGaugeChart", () => ({
   GaugeChart: ({ metric }: { metric: string }) => <div>Gauge: {metric}</div>,
 }));
 
-vi.mock("@/components/common/FormFactorPercentPieChart", () => ({
+vi.mock("@/components/common/PercentTable", () => ({
   PercentTable: ({ title, dateRange }: { title: string; dateRange?: string }) => (
     <div>
       {title}

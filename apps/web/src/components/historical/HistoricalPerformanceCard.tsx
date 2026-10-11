@@ -5,13 +5,24 @@ import { useContext, useMemo } from "react";
 import { HistoricalPerformanceChartData } from "@/components/common/ChartSettings";
 import dynamic from "next/dynamic";
 import { CurrentPerformanceChartContext } from "@/components/latest-crux/PerformanceCard";
-import { HistoricalP75Chart } from "@/components/historical/HistoricalPerformanceAreaChart";
 
-const HistoricalPerformanceBarChart = dynamic(() =>
-  import("./HistoricalPerformanceBarChart").then((mod) => mod.HistoricalPerformanceBarChart),
+function ChartFallback() {
+  return (
+    <div className="h-24 animate-pulse rounded-md bg-muted" role="status" aria-label="Loading chart" />
+  );
+}
+
+const HistoricalPerformanceBarChart = dynamic(
+  () => import("./HistoricalPerformanceBarChart").then((mod) => mod.HistoricalPerformanceBarChart),
+  { loading: ChartFallback },
 );
-const HistoricalPerformanceAreaChart = dynamic(() =>
-  import("./HistoricalPerformanceAreaChart").then((mod) => mod.HistoricalPerformanceAreaChart),
+const HistoricalPerformanceAreaChart = dynamic(
+  () => import("./HistoricalPerformanceAreaChart").then((mod) => mod.HistoricalPerformanceAreaChart),
+  { loading: ChartFallback },
+);
+const HistoricalP75Chart = dynamic(
+  () => import("./HistoricalPerformanceAreaChart").then((mod) => mod.HistoricalP75Chart),
+  { loading: ChartFallback },
 );
 
 export const ChartMap: Record<string, typeof HistoricalPerformanceAreaChart> = {
