@@ -31,59 +31,17 @@ function filmstripItems(details: unknown): FilmstripFrame[] | undefined {
 }
 
 /**
- * Filmstrip frames are sparse. The frame nearest FCP is the page as it looked
- * when first content painted. Ties prefer the earlier frame.
- */
-export function frameClosestToTime(
-  items: FilmstripFrame[],
-  timeMs: number,
-): FilmstripFrame | undefined {
-  let best: FilmstripFrame | undefined;
-  let bestDistance = Infinity;
-
-  for (const item of items) {
-    if (!item.data) continue;
-
-    const distance = Math.abs(item.timing - timeMs);
-    const preferEarlier =
-      distance === bestDistance &&
-      best !== undefined &&
-      item.timing <= timeMs &&
-      best.timing > timeMs;
-
-    if (distance < bestDistance || preferEarlier) {
-      best = item;
-      bestDistance = distance;
-    }
-  }
-
-  return best;
-}
-
-/** How far past FCP we'll look for a filmstrip frame that is no longer blank. */
-const BLANK_FRAME_LOOKAHEAD_MS = 1000;
-
-/**
- * Lighthouse often repeats the initial blank screenshot until the next sample.
- * When the frame nearest FCP is still that blank, use the first later frame
- * that shows a change.
+ * Filmstrip frames are sparse, so a frame rarely lands exactly on FCP. The
+ * first frame at or after FCP is the page as it looked once first content had
+ * painted.
  */
 export function frameAtFcp(
   items: FilmstripFrame[],
   timeMs: number,
 ): FilmstripFrame | undefined {
   const frames = items.filter((item) => item.data && Number.isFinite(item.timing));
-  const closest = frameClosestToTime(frames, timeMs);
-  if (!closest) return undefined;
 
-  const initial = frames[0];
-  const initialIsRepeated = frames.filter((frame) => frame.data === initial.data).length > 1;
-  if (!initialIsRepeated || closest.data !== initial.data) return closest;
-
-  const firstChange = frames.find((frame) => frame.data !== initial.data);
-  if (!firstChange || firstChange.timing - timeMs > BLANK_FRAME_LOOKAHEAD_MS) return closest;
-
-  return firstChange;
+  return frames.find((frame) => frame.timing >= timeMs) ?? frames[frames.length - 1];
 }
 
 export function collectFcpScreenshots(sources: MetricAuditSource[]): FcpScreenshot[] {

@@ -418,7 +418,7 @@ describe("CWVMetricsComponent", () => {
     ).toBeTruthy();
   });
 
-  it("shows the filmstrip frame nearest FCP before other FCP cause cards", async () => {
+  it("shows the first filmstrip frame after FCP before other FCP cause cards", async () => {
     pageSpeedItems = [
       {
         label: "Mobile",
@@ -441,7 +441,7 @@ describe("CWVMetricsComponent", () => {
                   scale: 1,
                   items: [
                     { data: "data:image/jpeg;base64,blank", timing: 200, timestamp: 200 },
-                    { data: "data:image/jpeg;base64,paint", timing: 1100, timestamp: 1100 },
+                    { data: "data:image/jpeg;base64,paint", timing: 1400, timestamp: 1400 },
                   ],
                 },
               },

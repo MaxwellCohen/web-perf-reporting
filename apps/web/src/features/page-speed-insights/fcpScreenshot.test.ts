@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AuditResultsRecord } from "@/lib/schema";
-import {
-  collectFcpScreenshots,
-  frameAtFcp,
-  frameClosestToTime,
-} from "@/features/page-speed-insights/fcpScreenshot";
+import { collectFcpScreenshots, frameAtFcp } from "@/features/page-speed-insights/fcpScreenshot";
 
 const frames = [
   { data: "blank", timing: 200, timestamp: 200 },
@@ -34,22 +30,32 @@ function auditsWithFilmstrip(
   };
 }
 
-describe("frameClosestToTime", () => {
-  it("picks the frame nearest the given time", () => {
-    expect(frameClosestToTime(frames, 1200)?.data).toBe("paint");
+describe("frameAtFcp", () => {
+  it("uses the first frame after FCP", () => {
+    expect(frameAtFcp(frames, 1200)?.data).toBe("later");
   });
 
-  it("prefers the earlier frame when two are equally close", () => {
-    const tied = [
-      { data: "before", timing: 1000, timestamp: 1000 },
-      { data: "after", timing: 1400, timestamp: 1400 },
-    ];
-    expect(frameClosestToTime(tied, 1200)?.data).toBe("before");
+  it("uses the frame captured exactly at FCP", () => {
+    expect(frameAtFcp(frames, 1100)?.data).toBe("paint");
+  });
+
+  it("skips frames before FCP even when they are nearer", () => {
+    expect(frameAtFcp(frames, 1300)?.data).toBe("later");
+  });
+
+  it("falls back to the last frame when FCP is past the filmstrip", () => {
+    expect(frameAtFcp(frames, 2000)?.data).toBe("later");
+  });
+
+  it("returns the only frame when FCP lands inside it", () => {
+    const filmstrip = [{ data: "blank", timing: 375, timestamp: 375 }];
+
+    expect(frameAtFcp(filmstrip, 500)?.data).toBe("blank");
   });
 
   it("skips frames with no image data", () => {
     expect(
-      frameClosestToTime(
+      frameAtFcp(
         [
           { data: "", timing: 1200, timestamp: 1200 },
           { data: "paint", timing: 1800, timestamp: 1800 },
@@ -58,44 +64,23 @@ describe("frameClosestToTime", () => {
       )?.data,
     ).toBe("paint");
   });
-});
 
-describe("frameAtFcp", () => {
-  it("uses the nearest frame when it already shows a change", () => {
-    expect(frameAtFcp(frames, 1200)?.data).toBe("paint");
-  });
-
-  it("skips repeated blank frames and uses the first frame that changes", () => {
-    const filmstrip = [
-      { data: "blank", timing: 375, timestamp: 375 },
-      { data: "blank", timing: 750, timestamp: 750 },
-      { data: "content", timing: 1125, timestamp: 1125 },
-    ];
-
-    expect(frameAtFcp(filmstrip, 692)?.data).toBe("content");
-  });
-
-  it("keeps the nearest frame when the next change is much later", () => {
-    const filmstrip = [
-      { data: "blank", timing: 375, timestamp: 375 },
-      { data: "blank", timing: 750, timestamp: 750 },
-      { data: "content", timing: 3000, timestamp: 3000 },
-    ];
-
-    expect(frameAtFcp(filmstrip, 692)?.data).toBe("blank");
+  it("returns nothing when there are no usable frames", () => {
+    expect(frameAtFcp([], 1200)).toBeUndefined();
+    expect(frameAtFcp([{ data: "", timing: 1200 }], 1200)).toBeUndefined();
   });
 });
 
 describe("collectFcpScreenshots", () => {
-  it("returns the filmstrip frame nearest each report's FCP", () => {
+  it("returns the first filmstrip frame after each report's FCP", () => {
     const screenshots = collectFcpScreenshots([
       { audits: auditsWithFilmstrip(1200), label: "Mobile" },
-      { audits: auditsWithFilmstrip(1900), label: "Desktop" },
+      { audits: auditsWithFilmstrip(1700), label: "Desktop" },
     ]);
 
     expect(screenshots).toEqual([
-      { label: "Mobile", data: "paint", timing: 1100, fcpMs: 1200 },
-      { label: "Desktop", data: "later", timing: 1800, fcpMs: 1900 },
+      { label: "Mobile", data: "later", timing: 1800, fcpMs: 1200 },
+      { label: "Desktop", data: "later", timing: 1800, fcpMs: 1700 },
     ]);
   });
 
