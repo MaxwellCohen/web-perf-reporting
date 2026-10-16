@@ -13,6 +13,10 @@ const OVERVIEW_OPEN = ["cwv", "loadingExperience", "originLoadingExperience"];
 
 const tabTriggerClassName = "px-3 sm:px-4";
 
+const TimelineTabPanel = dynamic(
+  () => import("./TimelineTabPanel").then((mod) => mod.TimelineTabPanel),
+  { loading: () => <DashboardPanelFallback label="timeline" /> },
+);
 const LoadingTabPanel = dynamic(
   () => import("./LoadingTabPanel").then((mod) => mod.LoadingTabPanel),
   { loading: () => <DashboardPanelFallback label="loading" /> },
@@ -51,6 +55,9 @@ export function PageSpeedDashboardView() {
             <TabsTrigger className={tabTriggerClassName} value="overview">
               Overview
             </TabsTrigger>
+            <TabsTrigger className={tabTriggerClassName} value="timeline">
+              Timeline
+            </TabsTrigger>
             <TabsTrigger className={tabTriggerClassName} value="loading">
               Loading
             </TabsTrigger>
@@ -73,6 +80,9 @@ export function PageSpeedDashboardView() {
             <CWVMetricsComponent />
             <LoadingExperiencesSection />
           </SectionStack>
+        </TabPanel>
+        <TabPanel value="timeline">
+          <TimelineTabPanel />
         </TabPanel>
         <TabPanel value="loading">
           <LoadingTabPanel />

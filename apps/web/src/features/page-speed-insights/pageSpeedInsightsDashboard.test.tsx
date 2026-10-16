@@ -78,6 +78,10 @@ vi.mock("@/features/page-speed-insights/RenderFilmStrip", () => ({
   RenderFilmStrip: () => <div>Film strip</div>,
 }));
 
+vi.mock("@/features/page-speed-insights/page-load-timeline", () => ({
+  PageLoadTimeline: () => <div>Page load timeline</div>,
+}));
+
 vi.mock("@/features/page-speed-insights/script-treemap", () => ({
   ScriptTreemapSection: () => <div>Script treemap section</div>,
 }));
@@ -151,6 +155,9 @@ describe("pageSpeedInsightsDashboard", () => {
 
   it("shows grouped sections when switching dashboard tabs", async () => {
     render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
+
+    selectTab("Timeline");
+    expect(await screen.findByText("Page load timeline")).toBeInTheDocument();
 
     selectTab("Loading");
     expect(await screen.findByText("Film strip")).toBeInTheDocument();
