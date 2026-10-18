@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { formatBytes } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
+import { formatBytes } from "@/features/page-speed-insights/shared/format";
 import {
   CHART_SERIES_COLORS,
   barEndRadius,

@@ -11,7 +11,7 @@ import {
   getNetworkBarColor,
   QUEUE_SEGMENT_COLOR,
 } from "@/features/page-speed-insights/shared/networkResourceColors";
-import { formatBytes } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
+import { formatBytes, formatMs } from "@/features/page-speed-insights/shared/format";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { cn } from "@/lib/utils";
 
@@ -75,10 +75,6 @@ function shortenUrl(url: string, resourceType: string): string {
   }
 
   return withoutProtocol;
-}
-
-function formatMs(value: number): string {
-  return `${Math.round(value)} ms`;
 }
 
 type WaterfallBarTrackProps = {

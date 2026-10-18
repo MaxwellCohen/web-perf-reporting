@@ -15,13 +15,7 @@ export const mutedBarCursor = { fill: "hsl(var(--muted))", opacity: 0.35 };
 
 export const barEndRadius: [number, number, number, number] = [0, 6, 6, 0];
 
-export function formatAxisMs(value: number): string {
-  if (value >= 1000) {
-    const seconds = value / 1000;
-    return `${Number.isInteger(seconds) ? seconds : seconds.toFixed(1)} s`;
-  }
-  return `${Math.round(value)} ms`;
-}
+export { formatMs as formatAxisMs } from "@/features/page-speed-insights/shared/format";
 
 export function horizontalBarChartHeight(
   rowCount: number,

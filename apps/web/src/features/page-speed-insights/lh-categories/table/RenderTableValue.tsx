@@ -12,17 +12,9 @@ import {
   TextValue,
   UrlValue,
 } from "@/lib/schema";
+import { formatBytes, formatMs } from "@/features/page-speed-insights/shared/format";
 import { ResourceUrlCell } from "@/features/page-speed-insights/shared/ResourceUrlCell";
 const URL_PREFIXES = ["http://", "https://", "data:"];
-
-export function formatBytes(value: unknown): string {
-  const bytes = Math.floor(Number(value));
-  const kb = bytes / 1024;
-  const mb = kb / 1024;
-  if (mb > 1) return `${mb.toFixed(2)} MB`;
-  if (kb > 1) return `${kb.toFixed(2)} KB`;
-  return `${bytes} bytes`;
-}
 
 /**
  * Render a details item value for embedding in a table. Renders the value
@@ -327,7 +319,7 @@ export function RenderBytesValue({
   return (
     <span title="bytes" {...props} className={cn("whitespace-nowrap tabular-nums", props.className)}>
       {children}
-      {formatBytes(value)}
+      {formatBytes(Number(value))}
     </span>
   );
 }
@@ -345,68 +337,13 @@ function RenderCode({ value, ...props }: { value: unknown } & React.HTMLAttribut
   );
 }
 
-export function renderTimeValue(msU: unknown) {
-  const ms = Number(msU);
-  // Normalize values very close to zero to avoid "-0 ms" display
-  const normalizedMs = Math.abs(ms) < 0.001 ? 0 : ms;
-  if (Number.isNaN(normalizedMs) || normalizedMs <= 0) {
-    return "0 ms";
-  }
-
-  const milliseconds = Math.floor(normalizedMs % 1000);
-  const seconds = Math.floor((normalizedMs / 1000) % 60);
-  const minutes = Math.floor((normalizedMs / (1000 * 60)) % 60);
-  const hours = Math.floor((normalizedMs / (1000 * 60 * 60)) % 24);
-  const days = Math.floor(normalizedMs / (1000 * 60 * 60 * 24));
-
-  const parts = [];
-
-  if (days > 0) {
-    parts.push(`${days} d`);
-  }
-
-  if (hours > 0) {
-    parts.push(`${hours} h`);
-  }
-
-  if (minutes > 0) {
-    parts.push(`${minutes} m`);
-  }
-
-  if (seconds > 0) {
-    parts.push(`${seconds}.${milliseconds || 0} s`);
-    return `${parts.join(" ")}`;
-  }
-
-  if (milliseconds > 0 || parts.length === 0) {
-    parts.push(`${milliseconds} ms`);
-  }
-
-  return `${parts.join(" ")}`;
-}
-
-function formatMsValue(value: unknown): string {
-  const ms = Number(value);
-  if (Number.isNaN(ms)) return "N/A";
-  const normalizedMs = Math.abs(ms) < 0.001 ? 0 : ms;
-  if (normalizedMs < 1000) {
-    const displayMs = Math.abs(normalizedMs) < 0.5 ? 0 : normalizedMs;
-    return `${displayMs.toFixed(0)} ms`;
-  }
-  const s = normalizedMs / 1000;
-  if (s < 60) return `${s.toFixed(2)} s`;
-  const m = s / 60;
-  if (m < 60) return `${m.toFixed(2)} min`;
-  return `${(m / 60).toFixed(2)} h`;
-}
-
 export function RenderMSValue({
   value,
   ...props
 }: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
   return (
     <span title="ms" {...props} className={cn("whitespace-nowrap tabular-nums", props.className)}>
-      {formatMsValue(value)}
+      {formatMs(Number(value))}
     </span>
   );
 }

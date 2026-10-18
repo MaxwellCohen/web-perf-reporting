@@ -6,7 +6,7 @@ import { ClientOnly } from "@/components/common/ClientOnly";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { chartConfig } from "@/components/common/ChartSettings";
-import { formatBytes } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
+import { formatBytes } from "@/features/page-speed-insights/shared/format";
 import {
   buildTreemapChartNodes,
   copyTreemapNodeName,

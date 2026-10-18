@@ -2,12 +2,10 @@ import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { ItemValue } from "@/lib/schema";
 import {
-  formatBytes,
   RenderBytesValue,
   RenderCountNumber,
   RenderMSValue,
   RenderTableValue,
-  renderTimeValue,
 } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 
 vi.mock("@/features/page-speed-insights/lh-categories/table/RenderNode", () => ({
@@ -19,38 +17,6 @@ vi.mock("@/features/page-speed-insights/lh-categories/table/RenderNode", () => (
 vi.mock("lucide-react", () => ({
   ExternalLink: () => <span data-testid="external-link" />,
 }));
-
-describe("formatBytes", () => {
-  it("formats bytes", () => {
-    expect(formatBytes(500)).toBe("500 bytes");
-  });
-
-  it("formats KB", () => {
-    expect(formatBytes(2048)).toBe("2.00 KB");
-  });
-
-  it("formats MB", () => {
-    expect(formatBytes(2 * 1024 * 1024)).toBe("2.00 MB");
-  });
-});
-
-describe("renderTimeValue", () => {
-  it("returns 0 ms for zero", () => {
-    expect(renderTimeValue(0)).toBe("0 ms");
-  });
-
-  it("formats milliseconds", () => {
-    expect(renderTimeValue(500)).toBe("500 ms");
-  });
-
-  it("formats seconds", () => {
-    expect(renderTimeValue(1500)).toBe("1.500 s");
-  });
-
-  it("formats minutes", () => {
-    expect(renderTimeValue(125000)).toBe("2 m 5.0 s");
-  });
-});
 
 describe("RenderCountNumber", () => {
   it("renders number", () => {
@@ -65,7 +31,7 @@ describe("RenderCountNumber", () => {
 describe("RenderBytesValue", () => {
   it("renders bytes value", () => {
     const { container } = render(<RenderBytesValue value={2048} />);
-    expect(container.textContent).toContain("2.00 KB");
+    expect(container.textContent).toContain("2.0 KiB");
   });
 });
 
@@ -73,6 +39,11 @@ describe("RenderMSValue", () => {
   it("renders ms value", () => {
     const { container } = render(<RenderMSValue value={100} />);
     expect(container.textContent).toContain("100 ms");
+  });
+
+  it("renders seconds for values >= 1000", () => {
+    const { container } = render(<RenderMSValue value={1500} />);
+    expect(container.textContent).toContain("1.50 s");
   });
 });
 
@@ -97,7 +68,7 @@ describe("RenderTableValue", () => {
         device=""
       />,
     );
-    expect(container.textContent).toContain("2.00 KB");
+    expect(container.textContent).toContain("2.0 KiB");
   });
 
   it("renders text with heading valueType", () => {

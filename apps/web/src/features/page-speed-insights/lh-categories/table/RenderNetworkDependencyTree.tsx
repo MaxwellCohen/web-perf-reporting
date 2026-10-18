@@ -3,7 +3,7 @@ import { AccordionItem, AccordionContent } from "@/components/ui/accordion";
 import { AccordionSectionTitleTrigger } from "@/components/ui/accordion-section-title-trigger";
 import { Details } from "@/components/ui/accordion";
 import { TreeView } from "@/components/ui/tree-view";
-import { renderTimeValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
+import { formatMs } from "@/features/page-speed-insights/shared/format";
 import {
   extractNetworkTreeFromAudit,
   networkTreeToTreeData,
@@ -46,7 +46,7 @@ function NetworkDependencyTreeSection({ tree, label }: { tree: NetworkTreeValue;
         <div className="text-lg font-bold">Network Dependency Tree for {label}</div>
         {tree.longestChain && (
           <div className="text-sm">
-            Longest Chain Duration: {renderTimeValue(tree.longestChain.duration)}
+            Longest Chain Duration: {formatMs(tree.longestChain.duration)}
           </div>
         )}
       </summary>

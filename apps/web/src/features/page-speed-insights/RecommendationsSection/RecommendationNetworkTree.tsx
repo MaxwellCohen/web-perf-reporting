@@ -1,7 +1,7 @@
 import { TreeView } from "@/components/ui/tree-view";
 import { Details } from "@/components/ui/accordion";
-import { renderTimeValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
+import { formatMs } from "@/features/page-speed-insights/shared/format";
 import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
 import { isNetworkDependencyTreeRecommendation } from "@/features/page-speed-insights/RecommendationsSection/recommendationHelpers";
 import {
@@ -46,7 +46,7 @@ export function RecommendationNetworkTree({
               <div className="text-sm font-semibold">{label}</div>
               {tree.longestChain ? (
                 <div className="text-xs text-muted-foreground">
-                  Longest Chain Duration: {renderTimeValue(tree.longestChain.duration)}
+                  Longest Chain Duration: {formatMs(tree.longestChain.duration)}
                 </div>
               ) : null}
             </summary>

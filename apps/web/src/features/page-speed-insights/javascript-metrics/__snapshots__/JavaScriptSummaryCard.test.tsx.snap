@@ -294,7 +294,7 @@ exports[`JavaScriptSummaryCard > renders Report column when multiple reports 1`]
                     class="whitespace-nowrap tabular-nums"
                     title="bytes"
                   >
-                    500 bytes
+                    500 B
                   </span>
                 </td>
                 <td
@@ -313,7 +313,7 @@ exports[`JavaScriptSummaryCard > renders Report column when multiple reports 1`]
                     class="whitespace-nowrap tabular-nums"
                     title="bytes"
                   >
-                    600 bytes
+                    600 B
                   </span>
                 </td>
               </tr>
@@ -350,7 +350,7 @@ exports[`JavaScriptSummaryCard > renders Report column when multiple reports 1`]
                     class="whitespace-nowrap tabular-nums"
                     title="bytes"
                   >
-                    700 bytes
+                    700 B
                   </span>
                 </td>
                 <td
@@ -369,7 +369,7 @@ exports[`JavaScriptSummaryCard > renders Report column when multiple reports 1`]
                     class="whitespace-nowrap tabular-nums"
                     title="bytes"
                   >
-                    800 bytes
+                    800 B
                   </span>
                 </td>
               </tr>
@@ -676,7 +676,7 @@ exports[`JavaScriptSummaryCard > renders table with single report (no Report col
                     class="whitespace-nowrap tabular-nums"
                     title="bytes"
                   >
-                    1000 bytes
+                    1000 B
                   </span>
                 </td>
                 <td
@@ -695,7 +695,7 @@ exports[`JavaScriptSummaryCard > renders table with single report (no Report col
                     class="whitespace-nowrap tabular-nums"
                     title="bytes"
                   >
-                    1.95 KB
+                    2.0 KiB
                   </span>
                 </td>
               </tr>

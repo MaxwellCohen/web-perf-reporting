@@ -2,11 +2,8 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { TableCardShell } from "@/features/page-speed-insights/shared/TableCard";
+import { formatMs } from "@/features/page-speed-insights/shared/format";
 import type { FcpScreenshot } from "@/features/page-speed-insights/fcpScreenshot";
-
-function formatMs(value: number): string {
-  return `${Math.round(value)} ms`;
-}
 
 export function FcpScreenshotCard({ screenshots }: { screenshots: FcpScreenshot[] }) {
   if (!screenshots.length) return null;

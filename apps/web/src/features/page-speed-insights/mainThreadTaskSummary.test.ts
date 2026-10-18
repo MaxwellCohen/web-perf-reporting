@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AuditResult } from "@/lib/schema";
 import {
-  formatTaskMs,
   longTaskItemsFromAudit,
   summarizeLongTaskScripts,
   summarizeMainThreadTasks,
@@ -104,13 +103,6 @@ describe("longTaskItemsFromAudit", () => {
     expect(longTaskItemsFromAudit(audit)).toEqual([
       { url: "https://cdn.example/app.js", duration: 90 },
     ]);
-  });
-});
-
-describe("formatTaskMs", () => {
-  it("rounds milliseconds and switches to seconds at 1000", () => {
-    expect(formatTaskMs(49.6)).toBe("50 ms");
-    expect(formatTaskMs(1500)).toBe("1.50 s");
   });
 });
 

@@ -159,9 +159,3 @@ export function summarizeLongTaskScripts(
   );
 }
 
-export function formatTaskMs(ms: number): string {
-  if (!Number.isFinite(ms)) return "—";
-  const rounded = Math.round(ms);
-  if (Math.abs(rounded) < 1000) return `${rounded} ms`;
-  return `${(rounded / 1000).toFixed(2)} s`;
-}

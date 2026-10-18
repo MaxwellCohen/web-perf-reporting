@@ -6,7 +6,7 @@ import type {
   PreconnectCandidate,
   UserTiming,
 } from "./collectTimelineSources";
-import { formatBytes, formatMs, shortUrl } from "./timelineFormat";
+import { formatBytes, formatMs, shortUrl } from "@/features/page-speed-insights/shared/format";
 import type {
   PhaseId,
   TimelineEvent,

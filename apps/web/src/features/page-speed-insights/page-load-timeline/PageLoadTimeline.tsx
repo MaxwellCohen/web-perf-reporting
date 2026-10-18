@@ -22,6 +22,7 @@ import {
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
 import { patchDashboardSearch } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
+import { formatMs } from "@/features/page-speed-insights/shared/format";
 import { getNetworkBarColor } from "@/features/page-speed-insights/shared/networkResourceColors";
 import { ResourceUrlCell } from "@/features/page-speed-insights/shared/ResourceUrlCell";
 import { cn } from "@/lib/cn";
@@ -96,11 +97,6 @@ function textWithUnattributedHint(text: string) {
       {index < parts.length - 1 ? <UnattributedLabel /> : null}
     </Fragment>
   ));
-}
-
-function formatMs(ms: number): string {
-  if (ms >= 1000) return `${(ms / 1000).toFixed(ms >= 10000 ? 1 : 2)} s`;
-  return `${Math.round(ms)} ms`;
 }
 
 function ratingClass(rating?: Rating): string {

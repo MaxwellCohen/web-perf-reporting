@@ -30,11 +30,11 @@ describe("networkTreeToTreeData", () => {
     );
 
     expect(root?.metrics).toEqual([
-      { label: "Transfer", value: "809 bytes" },
+      { label: "Transfer", value: "809 B" },
       { label: "Time", value: "157 ms" },
     ]);
     expect(root?.children?.[0]?.metrics).toEqual([
-      { label: "Transfer", value: "1.52 KB" },
+      { label: "Transfer", value: "1.5 KiB" },
       { label: "Extends", value: "9 ms" },
       { label: "Time", value: "166 ms" },
     ]);

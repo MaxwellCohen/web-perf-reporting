@@ -7,7 +7,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { renderTimeValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
+import { formatMs } from "@/features/page-speed-insights/shared/format";
 import {
   buildKeyedChartConfig,
   formatAxisMs,
@@ -88,7 +88,7 @@ export function LCPBreakdownChart({
               style={{ zIndex: 9999 }}
               formatter={(value, name) => {
                 const label = subpartLabelBySubpart[String(name)] ?? String(name);
-                return `${renderTimeValue(value)} ${label}`;
+                return `${formatMs(Number(value))} ${label}`;
               }}
             />
           }

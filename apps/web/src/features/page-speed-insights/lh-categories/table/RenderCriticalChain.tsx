@@ -2,10 +2,7 @@ import { CriticalRequestChain } from "@/lib/schema";
 import { Details } from "@/components/ui/accordion";
 import { accordionSectionTitleClassName } from "@/components/ui/accordion-section-title-trigger";
 import { TreeDataItem, TreeView } from "@/components/ui/tree-view";
-import {
-  formatBytes,
-  renderTimeValue,
-} from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
+import { formatBytes, formatMs } from "@/features/page-speed-insights/shared/format";
 
 export function RenderCriticalChainData({
   desktopDetails,
@@ -45,7 +42,7 @@ function CriticalRequestChainSection({
       <summary className="flex flex-col gap-2">
         <div className="text-lg font-bold">Critical Request Chains for {device}</div>
         <div className="text-sm">
-          Longest Chain: {renderTimeValue(details.longestChain.duration)} with{" "}
+          Longest Chain: {formatMs(details.longestChain.duration)} with{" "}
           {details.longestChain.length} requests and {details.longestChain.transferSize} bytes
         </div>
       </summary>
@@ -61,10 +58,10 @@ function chainToTree(node: CriticalRequestChain["chains"]): TreeDataItem[] {
       id: key,
       name: value.request.url,
       metrics: [
-        { label: "Start", value: renderTimeValue(value.request.startTime) },
+        { label: "Start", value: formatMs(value.request.startTime) },
         {
           label: "Segment",
-          value: renderTimeValue((value.request.endTime - value.request.startTime) * 1000),
+          value: formatMs((value.request.endTime - value.request.startTime) * 1000),
         },
         { label: "Transfer", value: formatBytes(value.request.transferSize) },
       ],

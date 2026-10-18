@@ -4,8 +4,8 @@ import { useState, type ReactNode } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { RenderBytesValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
-import { renderTimeValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
+import { formatMs } from "@/features/page-speed-insights/shared/format";
 import {
   barEndRadius,
   buildKeyedChartConfig,
@@ -78,7 +78,7 @@ export function RecommendationsSummary({ recommendations }: RecommendationsSumma
           value={
             <>
               {summary.totalMsSavings > 0 ? (
-                <span>{renderTimeValue(summary.totalMsSavings)}</span>
+                <span>{formatMs(summary.totalMsSavings)}</span>
               ) : null}
               {summary.totalMsSavings > 0 && summary.totalByteSavings > 0 ? (
                 <span className="text-muted-foreground"> + </span>

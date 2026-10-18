@@ -13,15 +13,6 @@ vi.mock("@/components/ui/accordion", () => ({
   Details: ({ children }: { children: React.ReactNode }) => <details>{children}</details>,
 }));
 
-vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", () => ({
-  renderTimeValue: (ms: number) => `${ms} ms`,
-  formatBytes: (n: number) => `${n} B`,
-}));
-
-vi.mock("@/features/page-speed-insights/RecommendationsSection/utils", () => ({
-  formatBytes: (n: number) => `${n} B`,
-}));
-
 vi.mock("@/features/page-speed-insights/RecommendationsSection/recommendationHelpers", () => ({
   isNetworkDependencyTreeRecommendation: vi.fn((id: string) => id === "network-dependency-tree"),
 }));

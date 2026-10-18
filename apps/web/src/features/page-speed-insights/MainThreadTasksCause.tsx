@@ -9,8 +9,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { CauseAuditEntry, MetricAuditSource } from "@/features/page-speed-insights/metricCauseAudits";
+import { formatMs } from "@/features/page-speed-insights/shared/format";
 import {
-  formatTaskMs,
   longTaskItemsFromAudit,
   LONG_TASK_THRESHOLD_MS,
   summarizeLongTaskScripts,
@@ -34,10 +34,10 @@ function TaskSummaryStats({ summary }: { summary: MainThreadTaskSummary }) {
   return (
     <dl className="grid grid-cols-2 gap-2 sm:grid-cols-5">
       <Stat label="Tasks" value={String(summary.totalTasks)} />
-      <Stat label="Total time" value={formatTaskMs(summary.totalTimeMs)} />
-      <Stat label="Longest" value={formatTaskMs(summary.longestDurationMs)} />
+      <Stat label="Total time" value={formatMs(summary.totalTimeMs)} />
+      <Stat label="Longest" value={formatMs(summary.longestDurationMs)} />
       <Stat label="Long tasks" value={String(summary.longTaskCount)} />
-      <Stat label="Blocking time" value={formatTaskMs(summary.blockingTimeMs)} />
+      <Stat label="Blocking time" value={formatMs(summary.blockingTimeMs)} />
     </dl>
   );
 }
@@ -74,7 +74,7 @@ function ScriptBlockingTable({ rows }: { rows: ScriptBlockingRow[] }) {
                 <ScriptLabel url={row.url} />
               </TableCell>
               <TableCell className="font-mono tabular-nums">{row.taskCount}</TableCell>
-              <TableCell className="font-mono tabular-nums">{formatTaskMs(row.blockingTimeMs)}</TableCell>
+              <TableCell className="font-mono tabular-nums">{formatMs(row.blockingTimeMs)}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -106,10 +106,10 @@ function LongTaskTable({ summary }: { summary: MainThreadTaskSummary }) {
         <TableBody>
           {summary.longestTasks.map((task, index) => (
             <TableRow key={`${index}-${task.startTime}-${task.duration}`}>
-              <TableCell className="font-mono tabular-nums">{formatTaskMs(task.startTime)}</TableCell>
-              <TableCell className="font-mono tabular-nums">{formatTaskMs(task.duration)}</TableCell>
+              <TableCell className="font-mono tabular-nums">{formatMs(task.startTime)}</TableCell>
+              <TableCell className="font-mono tabular-nums">{formatMs(task.duration)}</TableCell>
               <TableCell className="font-mono tabular-nums">
-                {formatTaskMs(task.blockingTime)}
+                {formatMs(task.blockingTime)}
               </TableCell>
             </TableRow>
           ))}

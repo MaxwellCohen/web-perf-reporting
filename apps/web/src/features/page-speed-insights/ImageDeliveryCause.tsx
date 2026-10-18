@@ -1,7 +1,7 @@
 "use client";
 
 import type { CauseAuditEntry } from "@/features/page-speed-insights/metricCauseAudits";
-import { formatBytes } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
+import { formatBytes } from "@/features/page-speed-insights/shared/format";
 import { ResourceUrlCell } from "@/features/page-speed-insights/shared/ResourceUrlCell";
 import {
   imageSizeLines,

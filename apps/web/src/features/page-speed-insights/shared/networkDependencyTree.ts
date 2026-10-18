@@ -1,9 +1,6 @@
 import type { TreeDataItem, TreeMetric } from "@/components/ui/tree-view";
 import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
-import {
-  formatBytes,
-  renderTimeValue,
-} from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
+import { formatBytes, formatMs } from "@/features/page-speed-insights/shared/format";
 
 type NetworkTreeNode = {
   url: string;
@@ -69,12 +66,12 @@ export function networkTreeToTreeData(
     if (node.navStartToEndTime !== undefined && parentEndTime !== undefined) {
       metrics.push({
         label: "Extends",
-        value: renderTimeValue(node.navStartToEndTime - parentEndTime),
+        value: formatMs(Math.max(0, node.navStartToEndTime - parentEndTime)),
       });
     }
 
     if (node.navStartToEndTime !== undefined) {
-      metrics.push({ label: "Time", value: renderTimeValue(node.navStartToEndTime) });
+      metrics.push({ label: "Time", value: formatMs(node.navStartToEndTime) });
     }
 
     return {

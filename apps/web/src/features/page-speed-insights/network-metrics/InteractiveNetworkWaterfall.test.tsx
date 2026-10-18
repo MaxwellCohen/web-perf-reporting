@@ -3,10 +3,6 @@ import { describe, expect, it, vi } from "vitest";
 import { InteractiveNetworkWaterfall } from "@/features/page-speed-insights/network-metrics/InteractiveNetworkWaterfall";
 import { buildWaterfallRows } from "@/features/page-speed-insights/network-metrics/networkWaterfallData";
 
-vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", () => ({
-  formatBytes: (value: number) => `${value} B`,
-}));
-
 const rows = buildWaterfallRows([
   {
     url: "https://example.com/app.js",

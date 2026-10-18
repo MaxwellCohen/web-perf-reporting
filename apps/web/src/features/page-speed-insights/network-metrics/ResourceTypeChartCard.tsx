@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatBytes } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
+import { formatBytes } from "@/features/page-speed-insights/shared/format";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { useNetworkRequestStats } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
 import type { TableItem } from "@/lib/schema";

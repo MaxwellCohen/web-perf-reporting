@@ -21,8 +21,8 @@ import { debugDataTableFeatures } from "@/features/page-speed-insights/tanstack-
 import {
   RenderBytesValue,
   RenderCountNumber,
-  renderTimeValue,
 } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
+import { formatMs } from "@/features/page-speed-insights/shared/format";
 import {
   LIGHTHOUSE_SUMMARY_METRIC_DEFS,
   type LighthouseSummaryMetricDebugFormat,
@@ -268,7 +268,7 @@ const DEBUG_TITLE_FORMATTERS: Record<
   ((v: unknown) => unknown) | undefined
 > = {
   plain: undefined,
-  time: renderTimeValue,
+  time: (value: unknown) => formatMs(Number(value)),
   bytes: renderBytesValue,
   count: RenderCountNumber,
   ts: renderTSValue,

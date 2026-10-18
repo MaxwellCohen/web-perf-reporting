@@ -15,7 +15,10 @@ vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", (
     <span data-testid="bytes">{String(value)}</span>
   ),
   RenderCountNumber: (v: unknown) => <span data-testid="count">{String(v)}</span>,
-  renderTimeValue: (v: unknown) => <span data-testid="time">{String(v)}</span>,
+}));
+
+vi.mock("@/features/page-speed-insights/shared/format", () => ({
+  formatMs: (v: number) => <span data-testid="time">{String(v)}</span>,
 }));
 
 const mockTableDataItem = (details: Record<string, unknown>) => ({

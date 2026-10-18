@@ -8,9 +8,9 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { renderTimeValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import { useNetworkMetricSeries } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
 import { buildTimelineChartRows } from "@/features/page-speed-insights/network-metrics/timelineMetricsData";
+import { formatMs } from "@/features/page-speed-insights/shared/format";
 import {
   CHART_SERIES_COLORS,
   barEndRadius,
@@ -96,7 +96,7 @@ export function TimelineChartCard() {
               content={
                 <ChartTooltipContent
                   indicator="dot"
-                  formatter={(value) => [`${renderTimeValue(value)}`, "Time"]}
+                  formatter={(value) => [`${formatMs(Number(value))}`, "Time"]}
                 />
               }
             />

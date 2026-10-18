@@ -1,6 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import { Badge } from "@/components/ui/badge";
-import { formatTime } from "@/features/page-speed-insights/RecommendationsSection/utils";
+import { formatMsOptional } from "@/features/page-speed-insights/shared/format";
 import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
 import { recommendationMarkdownComponents } from "@/features/page-speed-insights/RecommendationsSection/recommendationMarkdownComponents";
 
@@ -30,7 +30,7 @@ export function RecommendationHeader({
         </div>
         {recommendation.impact.metric && recommendation.impact.savings ? (
           <div className="text-sm text-muted-foreground">
-            Potential savings: {formatTime(recommendation.impact.savings)} on{" "}
+            Potential savings: {formatMsOptional(recommendation.impact.savings)} on{" "}
             {recommendation.impact.metric}
           </div>
         ) : null}

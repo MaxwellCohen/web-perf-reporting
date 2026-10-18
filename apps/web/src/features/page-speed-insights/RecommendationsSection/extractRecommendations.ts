@@ -1,7 +1,7 @@
 import {
-  formatBytes,
-  formatTime,
-} from "@/features/page-speed-insights/RecommendationsSection/utils";
+  formatBytesOptional,
+  formatMsOptional,
+} from "@/features/page-speed-insights/shared/format";
 import type { ActionableStep } from "@/features/page-speed-insights/RecommendationsSection/types";
 
 function getResourceName(url: string): string {
@@ -109,7 +109,7 @@ export function extractSpecificRecommendations(
 
     if (item.wastedBytes && item.wastedBytes > 0) {
       return {
-        step: `Remove ${formatBytes(item.wastedBytes)} of unused code from ${resourceLink}`,
+        step: `Remove ${formatBytesOptional(item.wastedBytes)} of unused code from ${resourceLink}`,
         reports: reportLabels,
         url,
         host,
@@ -117,7 +117,7 @@ export function extractSpecificRecommendations(
     }
     if (item.wastedMs && item.wastedMs > 0) {
       return {
-        step: `Optimize ${resourceLink} to save ${formatTime(item.wastedMs)}`,
+        step: `Optimize ${resourceLink} to save ${formatMsOptional(item.wastedMs)}`,
         reports: reportLabels,
         url,
         host,
@@ -133,7 +133,7 @@ export function extractSpecificRecommendations(
     }
     if (item.scripting && item.scripting > 100) {
       return {
-        step: `Reduce JavaScript execution time in ${resourceLink} (${formatTime(item.scripting)} spent on scripting)`,
+        step: `Reduce JavaScript execution time in ${resourceLink} (${formatMsOptional(item.scripting)} spent on scripting)`,
         reports: reportLabels,
         url,
         host,
@@ -141,7 +141,7 @@ export function extractSpecificRecommendations(
     }
     if (item.scriptParseCompile && item.scriptParseCompile > 100) {
       return {
-        step: `Optimize script parsing/compilation for ${resourceLink} (${formatTime(item.scriptParseCompile)} spent)`,
+        step: `Optimize script parsing/compilation for ${resourceLink} (${formatMsOptional(item.scriptParseCompile)} spent)`,
         reports: reportLabels,
         url,
         host,
@@ -149,7 +149,7 @@ export function extractSpecificRecommendations(
     }
     if (item.total && item.total > 500) {
       return {
-        step: `Optimize ${resourceLink} (${formatTime(item.total)} total CPU time)`,
+        step: `Optimize ${resourceLink} (${formatMsOptional(item.total)} total CPU time)`,
         reports: reportLabels,
         url,
         host,
@@ -157,7 +157,7 @@ export function extractSpecificRecommendations(
     }
     if (item.totalBytes && item.totalBytes > 0) {
       return {
-        step: `Optimize ${resourceLink} (${formatBytes(item.totalBytes)})`,
+        step: `Optimize ${resourceLink} (${formatBytesOptional(item.totalBytes)})`,
         reports: reportLabels,
         url,
         host,

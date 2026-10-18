@@ -10,8 +10,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { renderTimeValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import { buildGroupedComparison } from "@/features/page-speed-insights/shared/comparisonChartData";
+import { formatMs } from "@/features/page-speed-insights/shared/format";
 import {
   buildKeyedChartConfig,
   formatAxisMs,
@@ -179,7 +179,7 @@ function BootupCompositionChart({ metric }: { metric: BootupTimeData }) {
               content={
                 <ChartTooltipContent
                   indicator="dot"
-                  formatter={(value) => [`${renderTimeValue(value)}`, ""]}
+                  formatter={(value) => [`${formatMs(Number(value))}`, ""]}
                 />
               }
             />
