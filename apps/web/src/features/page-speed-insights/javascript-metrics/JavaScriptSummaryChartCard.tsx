@@ -81,7 +81,7 @@ export function JavaScriptSummaryChartCard({ stats }: { stats: JavaScriptSummary
                   indicator="dot"
                   formatter={(value, name) => {
                     if (name === "totalTransferSize") {
-                      return [formatBytes(value), "Transfer Size"];
+                      return [formatBytes(Number(value)), "Transfer Size"];
                     }
                     return [`${value}`, "Scripts"];
                   }}
