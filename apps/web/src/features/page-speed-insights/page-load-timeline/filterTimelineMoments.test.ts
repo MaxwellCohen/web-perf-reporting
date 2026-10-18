@@ -5,9 +5,9 @@ import {
   filterTimelineMoments,
   type TaskFilterId,
 } from "./filterTimelineMoments";
-import type { TimelineMoment, TimelineWaterfallBar } from "./types";
+import type { TimelineEvent, TimelineWaterfallBar } from "./types";
 
-function moment(partial: Partial<TimelineMoment> & Pick<TimelineMoment, "id" | "phaseId">): TimelineMoment {
+function moment(partial: Partial<TimelineEvent> & Pick<TimelineEvent, "id" | "phaseId">): TimelineEvent {
   return {
     phaseTitle: partial.phaseId,
     timeMs: 0,
@@ -17,9 +17,6 @@ function moment(partial: Partial<TimelineMoment> & Pick<TimelineMoment, "id" | "
     hasTimestamp: true,
     kind: "marker",
     evidence: [],
-    network: [],
-    mainThread: [],
-    findings: [],
     ...partial,
   };
 }

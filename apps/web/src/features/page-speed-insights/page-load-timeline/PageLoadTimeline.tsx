@@ -40,7 +40,7 @@ import type {
   PageLoadTimeline,
   Rating,
   RenderBlockingStatus,
-  TimelineMoment,
+  TimelineEvent,
   TimelineNote,
   TimelineTable,
   TimelineWaterfallBar,
@@ -193,7 +193,7 @@ function MomentScreenshot({ timing, data }: { timing: number; data: string }) {
   );
 }
 
-function LcpBreakdown({ segments }: { segments: NonNullable<TimelineMoment["lcpSegments"]> }) {
+function LcpBreakdown({ segments }: { segments: NonNullable<TimelineEvent["lcpSegments"]> }) {
   if (!segments.length) return null;
   const total = segments.reduce((sum, s) => sum + s.durationMs, 0) || 1;
   return (
@@ -493,7 +493,7 @@ function MomentRow({
   axisEnd,
   showPhaseHeader,
 }: {
-  moment: TimelineMoment;
+  moment: TimelineEvent;
   axisEnd: number;
   showPhaseHeader: boolean;
 }) {
@@ -674,7 +674,7 @@ function VerticalTimeline({ timeline }: { timeline: PageLoadTimeline }) {
         />
 
         <ol className="relative m-0 list-none p-0">
-          {timeline.moments.map((moment) => (
+          {timeline.events.map((moment) => (
             <MomentRow
               key={`${moment.phaseId}-${moment.id}`}
               moment={moment}
@@ -709,9 +709,9 @@ export function PageLoadTimeline() {
   }
 
   const reportName = active.label?.trim() || "Report";
-  const moments = filterTimelineMoments(active.moments, enabledTasks);
-  const timeline = moments === active.moments ? active : { ...active, moments };
-  const taskOptions = availableTaskFilters(active.moments);
+  const events = filterTimelineMoments(active.events, enabledTasks);
+  const timeline = events === active.events ? active : { ...active, events };
+  const taskOptions = availableTaskFilters(active.events);
 
   function toggleTask(id: TaskFilterId) {
     const next = new Set(enabledTasks);
@@ -759,8 +759,8 @@ export function PageLoadTimeline() {
         <TaskFilters
           options={taskOptions}
           enabled={enabledTasks}
-          shown={moments.length}
-          total={active.moments.length}
+          shown={events.length}
+          total={active.events.length}
           onToggle={toggleTask}
         />
       </div>

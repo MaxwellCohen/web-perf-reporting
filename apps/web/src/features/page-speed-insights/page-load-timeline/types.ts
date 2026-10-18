@@ -63,66 +63,9 @@ export type TimelineNote = {
   endMs?: number;
 };
 
-export type TimelineStep = {
-  id: string;
-  title: string;
-  status: StepStatus;
-  kind: MarkerKind;
-  /** ms from navigation start when known */
-  timeMs?: number;
-  /** end of a span, ms from navigation start */
-  endMs?: number;
-  detail: string;
-  rating?: Rating;
-  evidence?: string[];
-  table?: TimelineTable;
-  waterfall?: TimelineWaterfallBar[];
-  notes?: TimelineNote[];
-};
-
-export type TimelinePhase = {
-  id: PhaseId;
-  title: string;
-  startMs: number;
-  endMs: number;
-  steps: TimelineStep[];
-};
-
 export type ScreenshotFrame = {
   timing: number;
   data: string;
-};
-
-export type Milestone = {
-  id: string;
-  label: string;
-  timeMs: number;
-  kind: MarkerKind;
-  rating?: Rating;
-  phaseId: PhaseId;
-};
-
-export type NetworkBar = {
-  id: string;
-  url: string;
-  resourceType: string;
-  startMs: number;
-  endMs: number;
-  transferSize?: number;
-  statusCode?: number;
-  protocol?: string;
-  priority?: string;
-  isLinkPreload?: boolean;
-  isRenderBlocking?: boolean;
-  isCriticalChain?: boolean;
-  entity?: string;
-};
-
-export type MainThreadBlock = {
-  id: string;
-  startMs: number;
-  durationMs: number;
-  url?: string;
 };
 
 export type LcpSegment = {
@@ -133,22 +76,8 @@ export type LcpSegment = {
   endMs: number;
 };
 
-export type FindingSeverity = "critical" | "high" | "medium" | "low";
-
-export type TimelineFinding = {
-  id: string;
-  title: string;
-  severity: FindingSeverity;
-  startMs: number;
-  endMs: number;
-  summary: string;
-  fix: string;
-  stepIds: string[];
-  evidence: string[];
-};
-
-/** One combined row in the vertical scroll timeline (0ms at top → later down). */
-export type TimelineMoment = {
+/** One chronological row in the vertical scroll timeline (0ms at top → later down). */
+export type TimelineEvent = {
   id: string;
   phaseId: PhaseId;
   phaseTitle: string;
@@ -167,25 +96,14 @@ export type TimelineMoment = {
   waterfall?: TimelineWaterfallBar[];
   notes?: TimelineNote[];
   screenshot?: ScreenshotFrame;
-  network: NetworkBar[];
-  mainThread: MainThreadBlock[];
-  findings: TimelineFinding[];
   lcpSegments?: LcpSegment[];
   isPhaseStart?: boolean;
 };
 
 export type PageLoadTimeline = {
   label: string;
-  phases: TimelinePhase[];
   /** Chronological rows for the vertical scroll UI (0ms first). */
-  moments: TimelineMoment[];
-  screenshots: ScreenshotFrame[];
-  milestones: Milestone[];
-  networkBars: NetworkBar[];
-  mainThreadBlocks: MainThreadBlock[];
-  lcpSegments: LcpSegment[];
-  lcpElementLabel?: string;
-  findings: TimelineFinding[];
+  events: TimelineEvent[];
   /** Scale for inline network and main-thread bars, through the end of the trace. */
   axisEndMs: number;
   /** Set when times were moved onto Lighthouse's simulated CPU and network. */

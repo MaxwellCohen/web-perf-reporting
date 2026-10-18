@@ -1,4 +1,4 @@
-import type { TimelineMoment, TimelineWaterfallBar } from "./types";
+import type { TimelineEvent, TimelineWaterfallBar } from "./types";
 
 /** Categories a user can show or hide. Milestones, screenshots, and the document stay visible. */
 export const TASK_FILTERS = ["blocking", "potentially-blocking", "non-blocking", "long-task"] as const;
@@ -19,9 +19,9 @@ export function allTaskFilters(): TaskFilterSelection {
 }
 
 /** Filters that have something to hide on this timeline. */
-export function availableTaskFilters(moments: TimelineMoment[]): TaskFilterId[] {
+export function availableTaskFilters(events: TimelineEvent[]): TaskFilterId[] {
   const present = new Set<TaskFilterId>();
-  for (const moment of moments) {
+  for (const moment of events) {
     if (moment.id.startsWith("long-task-")) present.add("long-task");
     for (const bar of moment.waterfall ?? []) {
       if (bar.resourceType === "Document" || !bar.renderBlocking) continue;
@@ -52,9 +52,9 @@ function hiddenDetail(detail: string, hidden: number): string {
 }
 
 function filterDownloadMoment(
-  moment: TimelineMoment,
+  moment: TimelineEvent,
   enabled: TaskFilterSelection,
-): TimelineMoment | null {
+): TimelineEvent | null {
   const bars = moment.waterfall ?? [];
   const filterable = bars.some((bar) => !isAlwaysVisibleBar(bar));
   if (!filterable) return moment;
@@ -87,16 +87,16 @@ function filterDownloadMoment(
   };
 }
 
-function filterMoment(moment: TimelineMoment, enabled: TaskFilterSelection): TimelineMoment | null {
+function filterMoment(moment: TimelineEvent, enabled: TaskFilterSelection): TimelineEvent | null {
   if (moment.id.startsWith("long-task-")) {
     return enabled.has("long-task") ? moment : null;
   }
   return filterDownloadMoment(moment, enabled);
 }
 
-function withPhaseStarts(moments: TimelineMoment[]): TimelineMoment[] {
+function withPhaseStarts(events: TimelineEvent[]): TimelineEvent[] {
   const seen = new Set<string>();
-  return moments.map((moment) => {
+  return events.map((moment) => {
     const isPhaseStart = !seen.has(moment.phaseId);
     seen.add(moment.phaseId);
     if (moment.isPhaseStart === isPhaseStart) return moment;
@@ -105,13 +105,13 @@ function withPhaseStarts(moments: TimelineMoment[]): TimelineMoment[] {
 }
 
 export function filterTimelineMoments(
-  moments: TimelineMoment[],
+  events: TimelineEvent[],
   enabled: TaskFilterSelection,
-): TimelineMoment[] {
-  if (allEnabled(enabled)) return moments;
+): TimelineEvent[] {
+  if (allEnabled(enabled)) return events;
 
-  const visible: TimelineMoment[] = [];
-  for (const moment of moments) {
+  const visible: TimelineEvent[] = [];
+  for (const moment of events) {
     const next = filterMoment(moment, enabled);
     if (next) visible.push(next);
   }
