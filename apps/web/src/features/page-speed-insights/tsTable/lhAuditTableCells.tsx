@@ -11,7 +11,8 @@ export function LHCategoryTitleCell(props: StockCellContext<TableDataItem, strin
   return <div className="w-full min-w-0 basis-full text-lg font-bold sm:basis-48 sm:text-xl">{category}</div>;
 }
 
-export function LHCategoryScoreCell(props: StockCellContext<TableDataItem, string | string[]>) {
+export function LHCategoryScoreCell(props: StockCellContext<TableDataItem, string>) {
+  // Leaf rows are "score:::label". Grouped rows reuse this cell with the unique aggregation (string[]).
   const raw = props.getValue<string | string[]>();
   if (!raw || props.row.groupingValue === "Core Web Vitals") {
     return null;
