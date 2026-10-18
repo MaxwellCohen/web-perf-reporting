@@ -152,6 +152,24 @@ describe("createTimelineClock", () => {
     ]);
   });
 
+  it("uses the simulated first byte when a text LCP has no resource phases", () => {
+    const clock = createTimelineClock({
+      throttling,
+      simulatedTtfb: 601,
+      simulatedLcp: 6980,
+    });
+    const parts = clock.adjustLcpSubparts(
+      [
+        { subpart: "timeToFirstByte", label: "Time to first byte", duration: 72 },
+        { subpart: "elementRenderDelay", label: "Element render delay", duration: 6900 },
+      ],
+      { simulatedTtfb: 601, simulatedLcp: 6980 },
+    );
+    expect(parts.map((part) => part.subpart)).toEqual(["timeToFirstByte", "elementRenderDelay"]);
+    expect(parts[0]?.duration).toBe(601);
+    expect(parts[1]?.duration).toBeCloseTo(6980 - 601, 5);
+  });
+
   it("does not slow CPU tasks on the desktop preset", () => {
     const desktop = resolveSimulatedThrottling({ formFactor: "desktop" })!;
     const clock = createTimelineClock({

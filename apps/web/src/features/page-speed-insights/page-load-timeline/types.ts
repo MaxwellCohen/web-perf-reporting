@@ -2,6 +2,9 @@ export type Rating = "good" | "needs-improvement" | "poor";
 export type MarkerKind = "blocking" | "cwv" | "marker" | "fact";
 export type StepStatus = "measured" | "inferred" | "not-recorded";
 
+/** How a download affected rendering. Matches the Network panel's render-blocking column. */
+export type RenderBlockingStatus = "blocking" | "potentially-blocking" | "non-blocking";
+
 export type PhaseId =
   | "navigation"
   | "connection"
@@ -32,6 +35,32 @@ export type TimelineWaterfallBar = {
   startMs: number;
   endMs: number;
   resourceType?: string;
+  /** Used share of a stylesheet or script, from Lighthouse coverage. */
+  coverage?: string;
+  /** Transfer size of the script a long task ran, when the download was recorded. */
+  scriptSize?: string;
+  /** How long that script took to download. */
+  downloadDuration?: string;
+  /** When that script download started, ms from navigation start. */
+  downloadStartMs?: number;
+  /** When that script download finished, ms from navigation start. */
+  downloadEndMs?: number;
+  /** Chrome network priority, when recorded (VeryHigh, High, Medium, Low, VeryLow). */
+  priority?: string;
+  /** Set on downloaded resources. */
+  renderBlocking?: RenderBlockingStatus;
+};
+
+/** A measurement that belongs on another row, such as TTFB on the document request. */
+export type TimelineNote = {
+  id: string;
+  title: string;
+  detail: string;
+  status: StepStatus;
+  kind: MarkerKind;
+  rating?: Rating;
+  timeMs?: number;
+  endMs?: number;
 };
 
 export type TimelineStep = {
@@ -48,6 +77,7 @@ export type TimelineStep = {
   evidence?: string[];
   table?: TimelineTable;
   waterfall?: TimelineWaterfallBar[];
+  notes?: TimelineNote[];
 };
 
 export type TimelinePhase = {
@@ -81,6 +111,7 @@ export type NetworkBar = {
   transferSize?: number;
   statusCode?: number;
   protocol?: string;
+  priority?: string;
   isLinkPreload?: boolean;
   isRenderBlocking?: boolean;
   isCriticalChain?: boolean;
@@ -134,6 +165,7 @@ export type TimelineMoment = {
   evidence: string[];
   table?: TimelineTable;
   waterfall?: TimelineWaterfallBar[];
+  notes?: TimelineNote[];
   screenshot?: ScreenshotFrame;
   network: NetworkBar[];
   mainThread: MainThreadBlock[];

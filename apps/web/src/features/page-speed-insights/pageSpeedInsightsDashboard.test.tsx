@@ -5,10 +5,14 @@ const {
   selectPageSpeedIsLoadingToken,
   selectPageSpeedItemsToken,
   selectPageSpeedReportTitleToken,
+  selectPageSpeedUserLabelsToken,
+  selectPageSpeedUserLabelFilterToken,
 } = vi.hoisted(() => ({
   selectPageSpeedIsLoadingToken: Symbol("selectPageSpeedIsLoading"),
   selectPageSpeedItemsToken: Symbol("selectPageSpeedItems"),
   selectPageSpeedReportTitleToken: Symbol("selectPageSpeedReportTitle"),
+  selectPageSpeedUserLabelsToken: Symbol("selectPageSpeedUserLabels"),
+  selectPageSpeedUserLabelFilterToken: Symbol("selectPageSpeedUserLabelFilter"),
 }));
 
 const resetColumnFiltersMock = vi.fn();
@@ -31,14 +35,27 @@ vi.mock("@/features/page-speed-insights/PageSpeedContext", () => ({
   selectPageSpeedReportTitle: selectPageSpeedReportTitleToken,
   usePageSpeedInsightsStore: () => ({
     id: "store",
-    trigger: { resetUserLabelFilter: resetUserLabelFilterMock },
+    trigger: {
+      resetUserLabelFilter: resetUserLabelFilterMock,
+      setUserLabelFilter: vi.fn(),
+    },
   }),
   useRequiredPageSpeedInsightsStore: () => ({
     id: "store",
-    trigger: { resetUserLabelFilter: resetUserLabelFilterMock },
+    trigger: {
+      resetUserLabelFilter: resetUserLabelFilterMock,
+      setUserLabelFilter: vi.fn(),
+    },
   }),
   usePageSpeedItems: () => dashboardState.items,
   usePageSpeedReportTitle: () => dashboardState.reportTitle,
+  usePageSpeedSelector: (selector: unknown) => {
+    if (selector === selectPageSpeedUserLabelsToken) return [];
+    if (selector === selectPageSpeedUserLabelFilterToken) return null;
+    return undefined;
+  },
+  selectPageSpeedUserLabels: selectPageSpeedUserLabelsToken,
+  selectPageSpeedUserLabelFilter: selectPageSpeedUserLabelFilterToken,
 }));
 
 vi.mock("@xstate/store-react", () => ({
@@ -114,7 +131,10 @@ vi.mock("@/features/page-speed-insights/PageSpeedInsightsCopyButtons", () => ({
 
 vi.mock("@/features/page-speed-insights/tsTable/useLHTable", () => ({
   useLHTable: () => ({
-    getColumn: (columnId: string) => ({ columnId }),
+    getColumn: () => ({
+      getFilterValue: () => "",
+      setFilterValue: vi.fn(),
+    }),
     resetColumnFilters: () => resetColumnFiltersMock(),
     getRowModel: () => ({ rows: tableRows }),
   }),
@@ -209,10 +229,34 @@ describe("pageSpeedInsightsDashboard", () => {
     const { unmount } = render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
     selectTab(/classic/i);
     unmount();
+    window.history.replaceState(null, "", "/");
 
     render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
     expect(screen.getByRole("tab", { name: /classic/i })).toHaveAttribute("aria-selected", "true");
     expect(screen.queryByRole("region", { name: "Score overview" })).not.toBeInTheDocument();
+  });
+
+  it("opens the dashboard tab named in the URL ahead of the saved layout", async () => {
+    window.localStorage.setItem("page-speed-insights:view-mode", "classic");
+    window.history.replaceState(null, "", "/page-speed/report?tab=timeline");
+
+    render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
+
+    expect(screen.getByRole("tab", { name: /dashboard/i })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    expect(await screen.findByText("Page load timeline")).toBeInTheDocument();
+  });
+
+  it("writes the selected tab into the URL", async () => {
+    render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
+    selectTab(/dashboard/i);
+    selectTab("Network");
+
+    expect(new URLSearchParams(window.location.search).get("tab")).toBe("network");
+    expect(new URLSearchParams(window.location.search).get("view")).toBe("dashboard");
+    expect(await screen.findByText("Network waterfall section")).toBeInTheDocument();
   });
 
   it("renders report title and mocked sections in the classic view", async () => {

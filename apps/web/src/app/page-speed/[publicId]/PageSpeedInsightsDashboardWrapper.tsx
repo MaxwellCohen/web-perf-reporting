@@ -15,12 +15,24 @@ const PageSpeedInsightsDashboard = dynamic(
   { loading: () => <LoadingMessage /> },
 );
 
-export function PageSpeedInsightsDashboardContent({ publicId }: { publicId: string }) {
+export function PageSpeedInsightsDashboardContent({
+  publicId,
+  initialSearch = "",
+}: {
+  publicId: string;
+  initialSearch?: string;
+}) {
   const result = usePageSpeedInsightsQueryByPublicId(publicId);
 
   if (result.status === "failed") {
     return <ReportErrorCard testUrl={result.url} description={result.error} />;
   }
 
-  return <PageSpeedInsightsDashboard data={result.data} labels={["Mobile", "Desktop"]} />;
+  return (
+    <PageSpeedInsightsDashboard
+      data={result.data}
+      labels={["Mobile", "Desktop"]}
+      initialSearch={initialSearch}
+    />
+  );
 }

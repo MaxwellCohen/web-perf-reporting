@@ -1,7 +1,7 @@
 "use client";
 
-import { Accordion } from "@/components/ui/accordion";
 import { CWVMetricsComponent } from "@/features/page-speed-insights/CWVMetricsComponent";
+import { SectionStack } from "@/features/page-speed-insights/dashboard-view/SectionStack";
 import { JavaScriptPerformanceComponent } from "@/features/page-speed-insights/javascript-metrics/JavaScriptPerformanceComponent";
 import { LighthouseAuditsPanel } from "@/features/page-speed-insights/LighthouseAuditsPanel";
 import { LoadingExperiencesSection } from "@/features/page-speed-insights/loading-experience";
@@ -17,7 +17,7 @@ import { ScriptTreemapSection } from "@/features/page-speed-insights/script-tree
 export function ClassicView() {
   return (
     <>
-      <Accordion type="multiple">
+      <SectionStack defaultOpen={[]}>
         <LoadingExperiencesSection />
         <CWVMetricsComponent />
         <RenderFilmStrip />
@@ -27,7 +27,7 @@ export function ClassicView() {
         <NetworkResourcesSection />
         <JavaScriptPerformanceComponent />
         <RecommendationsSection />
-      </Accordion>
+      </SectionStack>
       <LighthouseAuditsPanel />
     </>
   );

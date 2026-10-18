@@ -152,9 +152,20 @@ describe("PageLoadTimeline", () => {
     expect(screen.getByText("FCP")).toBeInTheDocument();
     expect(screen.getByText("First Contentful Paint at 1.20 s.")).toBeInTheDocument();
 
-    expect(screen.getByRole("heading", { name: "Document" })).toBeInTheDocument();
+    const documentRow = screen.getByRole("heading", { name: "Document" }).closest("li");
+    expect(documentRow).toBeTruthy();
+    expect(within(documentRow!).getByText("Server think time")).toBeInTheDocument();
+    expect(within(documentRow!).getByText("TTFB")).toBeInTheDocument();
+    expect(
+      within(documentRow!).getByText(/Root document server response took 90 ms/),
+    ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Stylesheet" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Image" })).toBeInTheDocument();
+
+    const image = screen.getByRole("heading", { name: "Image" }).closest("li");
+    expect(within(image!).getByText("Non-blocking")).toBeInTheDocument();
+    const stylesheet = screen.getByRole("heading", { name: "Stylesheet" }).closest("li");
+    expect(within(stylesheet!).getByText("Potentially blocking")).toBeInTheDocument();
 
     const longTask = screen.getByRole("heading", { name: "Long task" }).closest("li");
     expect(longTask).toBeTruthy();
@@ -169,6 +180,74 @@ describe("PageLoadTimeline", () => {
 
     expect(screen.queryByText("Network")).not.toBeInTheDocument();
     expect(screen.queryByText("Main thread")).not.toBeInTheDocument();
+  });
+
+  it("shows coverage on a stylesheet row", () => {
+    const item = reportItem("Mobile");
+    const audits = item.item.lighthouseResult.audits as Record<string, unknown>;
+    audits["unused-css-rules"] = {
+      id: "unused-css-rules",
+      details: {
+        type: "opportunity",
+        items: [{ url: "https://example.com/app.css", wastedBytes: 6000, totalBytes: 8000 }],
+      },
+    };
+    mockItems.current = [item];
+    render(<PageLoadTimeline />);
+
+    const stylesheet = screen.getByRole("heading", { name: "Stylesheet" }).closest("li");
+    expect(stylesheet).toBeTruthy();
+    expect(
+      within(stylesheet!).getByText("25% used · 2.0 KiB used of 7.8 KiB · 5.9 KiB unused"),
+    ).toBeInTheDocument();
+  });
+
+  it("shows request priority on a network row", () => {
+    const item = reportItem("Mobile");
+    const audits = item.item.lighthouseResult.audits as {
+      "network-requests": { details: { items: Array<Record<string, unknown>> } };
+    };
+    audits["network-requests"].details.items = audits["network-requests"].details.items.map(
+      (row) => (row.url === "https://example.com/app.css" ? { ...row, priority: "High" } : row),
+    );
+    mockItems.current = [item];
+    render(<PageLoadTimeline />);
+
+    const stylesheet = screen.getByRole("heading", { name: "Stylesheet" }).closest("li");
+    expect(stylesheet).toBeTruthy();
+    expect(within(stylesheet!).getByText("Priority High")).toBeInTheDocument();
+  });
+
+  it("shows script size, download time, and coverage on an attributed long task", () => {
+    const item = reportItem("Mobile");
+    const audits = item.item.lighthouseResult.audits as {
+      "network-requests": { details: { items: Array<Record<string, unknown>> } };
+    } & Record<string, unknown>;
+    audits["network-requests"].details.items.push({
+      url: "https://example.com/a.js",
+      resourceType: "Script",
+      networkRequestTime: 600,
+      networkEndTime: 900,
+      transferSize: 50000,
+      statusCode: 200,
+    });
+    audits["unused-javascript"] = {
+      id: "unused-javascript",
+      details: {
+        type: "opportunity",
+        items: [{ url: "https://example.com/a.js", wastedBytes: 25000, wastedPercent: 50 }],
+      },
+    };
+    mockItems.current = [item];
+    render(<PageLoadTimeline />);
+
+    const longTask = screen.getByRole("heading", { name: "Long task" }).closest("li");
+    expect(longTask).toBeTruthy();
+    const scope = within(longTask!);
+    expect(scope.getByText("48.8 KiB · downloaded 600 ms–900 ms (300 ms)")).toBeInTheDocument();
+    expect(
+      scope.getByText("50% used · 24.4 KiB used of 48.8 KiB · 24.4 KiB unused"),
+    ).toBeInTheDocument();
   });
 
   it("explains unattributed long tasks", () => {
@@ -203,6 +282,37 @@ describe("PageLoadTimeline", () => {
     expect(waterfall).toHaveTextContent(/1\.00 s–1\.08 s · 80 ms/);
   });
 
+  it("hides non-blocking tasks and long tasks from the timeline", () => {
+    mockItems.current = [reportItem("Mobile")];
+    render(<PageLoadTimeline />);
+
+    const filters = screen.getByTestId("timeline-task-filters");
+    expect(within(filters).getByRole("button", { name: "Non-blocking" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("heading", { name: "Image" })).toBeInTheDocument();
+
+    fireEvent.click(within(filters).getByRole("button", { name: "Non-blocking" }));
+
+    expect(within(filters).getByRole("button", { name: "Non-blocking" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+    expect(screen.queryByRole("heading", { name: "Image" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Stylesheet" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Document" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Long task" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "FCP" })).toBeInTheDocument();
+    expect(filters).toHaveTextContent(/\d+ of \d+/);
+
+    fireEvent.click(within(filters).getByRole("button", { name: "Long tasks" }));
+    expect(screen.queryByRole("heading", { name: "Long task" })).not.toBeInTheDocument();
+
+    fireEvent.click(within(filters).getByRole("button", { name: "Non-blocking" }));
+    expect(screen.getByRole("heading", { name: "Image" })).toBeInTheDocument();
+  });
+
   it("switches between report labels", () => {
     mockItems.current = [reportItem("Mobile"), reportItem("Desktop")];
     render(<PageLoadTimeline />);
@@ -211,5 +321,22 @@ describe("PageLoadTimeline", () => {
     expect(screen.getByRole("button", { name: "Mobile" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Desktop" }));
     expect(screen.getByTestId("timeline-report-label")).toHaveTextContent("Desktop");
+    expect(new URLSearchParams(window.location.search).get("report")).toBe("Desktop");
+  });
+
+  it("opens the report named in the URL", () => {
+    mockItems.current = [reportItem("Mobile"), reportItem("Desktop")];
+    window.history.replaceState(null, "", "/?report=Desktop&tasks=non-blocking");
+    render(<PageLoadTimeline />);
+
+    expect(screen.getByTestId("timeline-report-label")).toHaveTextContent("Desktop");
+    expect(screen.getByRole("button", { name: "Non-blocking" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "Long tasks" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
   });
 });

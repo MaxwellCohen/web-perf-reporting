@@ -31,6 +31,7 @@ beforeEach(() => {
   idIndex = 0;
   (React.useId as ReturnType<typeof vi.fn>).mockImplementation(nextId);
   radixUseId.mockImplementation(nextId);
+  window.history.replaceState(null, "", "/");
 
   // Fail on console.log
   console.log = (...args: unknown[]) => {

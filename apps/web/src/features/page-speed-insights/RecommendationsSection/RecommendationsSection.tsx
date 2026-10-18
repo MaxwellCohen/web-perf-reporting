@@ -1,6 +1,7 @@
 "use client";
-import { useState } from "react";
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
+import { patchDashboardSearch } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
+import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
 import { Accordion, AccordionItem, AccordionContent } from "@/components/ui/accordion";
 import { AccordionSectionTitleTrigger } from "@/components/ui/accordion-section-title-trigger";
 import { Badge } from "@/components/ui/badge";
@@ -66,10 +67,11 @@ export function RecommendationsSection() {
   const recommendations = allRecommendations.filter(hasDetails);
 
   const quickWins = getQuickWinRecommendations(recommendations);
-
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedPriorities, setSelectedPriorities] = useState<string[]>([]);
-  const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const {
+    categories: selectedCategories,
+    priorities: selectedPriorities,
+    expanded: expandedItems,
+  } = useDashboardSearchState();
 
   const categories = Array.from(new Set(recommendations.map((r) => r.category))).sort();
 
@@ -92,11 +94,11 @@ export function RecommendationsSection() {
   });
 
   const toggleAll = () => {
-    if (expandedItems.length === filteredRecommendations.length) {
-      setExpandedItems([]);
-    } else {
-      setExpandedItems(filteredRecommendations.map((r) => r.id));
-    }
+    const next =
+      expandedItems.length === filteredRecommendations.length
+        ? []
+        : filteredRecommendations.map((recommendation) => recommendation.id);
+    patchDashboardSearch({ expanded: next.length ? next : null });
   };
 
   if (recommendations.length === 0) {
@@ -121,8 +123,12 @@ export function RecommendationsSection() {
             priorities={priorities}
             selectedCategories={selectedCategories}
             selectedPriorities={selectedPriorities}
-            onCategoriesChange={setSelectedCategories}
-            onPrioritiesChange={setSelectedPriorities}
+            onCategoriesChange={(next) =>
+              patchDashboardSearch({ categories: next.length ? next : null })
+            }
+            onPrioritiesChange={(next) =>
+              patchDashboardSearch({ priorities: next.length ? next : null })
+            }
             filteredCount={filteredRecommendations.length}
             totalCount={recommendations.length}
             onToggleAll={toggleAll}
@@ -138,7 +144,9 @@ export function RecommendationsSection() {
             )}
             items={items}
             expandedItems={expandedItems}
-            onExpandedChange={setExpandedItems}
+            onExpandedChange={(next) =>
+              patchDashboardSearch({ expanded: next.length ? next : null })
+            }
           />
           {Object.entries(grouped).map(([category, recs]) => (
             <RecommendationGroup
@@ -147,7 +155,9 @@ export function RecommendationsSection() {
               recs={recs.filter((rec) => !quickWinIds.has(rec.id))}
               items={items}
               expandedItems={expandedItems}
-              onExpandedChange={setExpandedItems}
+              onExpandedChange={(next) =>
+                patchDashboardSearch({ expanded: next.length ? next : null })
+              }
             />
           ))}
         </div>

@@ -6,8 +6,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CWVMetricsComponent } from "@/features/page-speed-insights/CWVMetricsComponent";
 import { DashboardPanelFallback } from "@/features/page-speed-insights/dashboard-view/DashboardPanelFallback";
 import { LoadingExperiencesSection } from "@/features/page-speed-insights/loading-experience";
+import {
+  isDashboardTab,
+  patchDashboardSearch,
+} from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 import { ReportScoreOverview } from "@/features/page-speed-insights/dashboard-view/ReportScoreOverview";
 import { SectionStack } from "@/features/page-speed-insights/dashboard-view/SectionStack";
+import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
 
 const OVERVIEW_OPEN = ["cwv", "loadingExperience", "originLoadingExperience"];
 
@@ -46,10 +51,18 @@ function TabPanel({ value, children }: { value: string; children: ReactNode }) {
 }
 
 export function PageSpeedDashboardView() {
+  const tab = useDashboardSearchState().tab;
+
   return (
     <div className="flex flex-col gap-6 px-3">
       <ReportScoreOverview />
-      <Tabs defaultValue="overview">
+      <Tabs
+        value={tab}
+        onValueChange={(value) => {
+          if (!isDashboardTab(value)) return;
+          patchDashboardSearch({ tab: value, open: null }, "push");
+        }}
+      >
         <div className="-mx-3 overflow-x-auto px-3">
           <TabsList>
             <TabsTrigger className={tabTriggerClassName} value="overview">

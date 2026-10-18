@@ -13,6 +13,7 @@ import {
   usePageSpeedSelector,
   useRequiredPageSpeedInsightsStore,
 } from "@/features/page-speed-insights/PageSpeedContext";
+import { patchDashboardSearch } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 import { ChevronDown } from "lucide-react";
 
 export function UserLabelFilter() {
@@ -44,17 +45,14 @@ export function UserLabelFilter() {
             key={label}
             checked={activeFilter.includes(label)}
             onCheckedChange={(checked) => {
-
-              if (checked) {
-                store.trigger.setUserLabelFilter({
-                  labels: [...new Set([...activeFilter, label])],
-                });
-              } else {
-                const next = activeFilter.filter((value) => value !== label);
-                store.trigger.setUserLabelFilter({
-                  labels: next.length === 0 ? sortedLabels : next,
-                });
-              }
+              const next = checked
+                ? [...new Set([...activeFilter, label])]
+                : activeFilter.filter((value) => value !== label);
+              const selected = next.length === 0 ? sortedLabels : next;
+              store.trigger.setUserLabelFilter({ labels: selected });
+              patchDashboardSearch({
+                labels: selected.length === sortedLabels.length ? null : [...selected].sort(),
+              });
             }}
           >
             {label}

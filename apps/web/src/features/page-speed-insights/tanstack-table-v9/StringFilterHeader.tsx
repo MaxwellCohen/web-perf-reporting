@@ -11,8 +11,10 @@ const MAX_DATALIST_OPTIONS = 5000;
 export function StringFilterHeader<TData extends RowData>({
   column,
   name,
+  onValueChange,
 }: Partial<Pick<HeaderContext<any, TData, unknown>, "column">> & {
   name: string;
+  onValueChange?: (value: string) => void;
 }) {
   const id = useId();
   const uniqueValues = column?.getFacetedUniqueValues();
@@ -27,6 +29,11 @@ export function StringFilterHeader<TData extends RowData>({
   const uniqueCount = uniqueValues?.size ?? 0;
   const columnFilterValue = column?.getFilterValue();
   const datalistId = `${column.id}-list-${id}`;
+
+  function commit(value: string) {
+    column?.setFilterValue(value);
+    onValueChange?.(value);
+  }
 
   return (
     <div className="my-2 flex w-full min-w-0 flex-col">
@@ -43,7 +50,7 @@ export function StringFilterHeader<TData extends RowData>({
           id={`filter_${id}`}
           type="text"
           value={(columnFilterValue ?? "") as string}
-          onChange={(value) => column.setFilterValue(value)}
+          onChange={(value) => commit(String(value))}
           placeholder={`Search... (${uniqueCount})`}
           className="min-w-0 flex-1 rounded border shadow"
           list={datalistId}
@@ -52,7 +59,7 @@ export function StringFilterHeader<TData extends RowData>({
         <Button
           variant="ghost"
           className="ml-2 shrink-0"
-          onClick={() => column.setFilterValue("")}
+          onClick={() => commit("")}
           aria-label={`Clear filter for ${name}`}
         >
           <span className="sr-only">Clear filter</span>

@@ -1,16 +1,37 @@
-import { frameAtFcp } from "@/features/page-speed-insights/fcpScreenshot";
-import type { PageLoadTimeline, TimelineMoment, TimelinePhase } from "./types";
+import type { PageLoadTimeline, ScreenshotFrame, TimelineMoment, TimelinePhase } from "./types";
 
-const SCREENSHOT_STEP_IDS = new Set([
-  "render-fcp",
-  "sub-lcp",
-  "sub-load",
-  "sub-last-visual",
-]);
+/** Phase already underway at `timeMs` — latest start still at or before that time. */
+function phaseActiveAt(phases: TimelinePhase[], timeMs: number): TimelinePhase | undefined {
+  let active: TimelinePhase | undefined;
+  for (const phase of phases) {
+    if (phase.startMs <= timeMs) active = phase;
+  }
+  return active ?? phases[0];
+}
+
+function filmstripMoment(phases: TimelinePhase[], shot: ScreenshotFrame, index: number): TimelineMoment {
+  const phase = phaseActiveAt(phases, shot.timing);
+  return {
+    id: `screenshot-${index}`,
+    phaseId: phase?.id ?? "firstRender",
+    phaseTitle: phase?.title ?? "First render",
+    timeMs: shot.timing,
+    title: "Screenshot",
+    detail: "",
+    status: "measured",
+    hasTimestamp: true,
+    kind: "marker",
+    evidence: [],
+    screenshot: { timing: shot.timing, data: shot.data },
+    network: [],
+    mainThread: [],
+    findings: [],
+  };
+}
 
 /**
  * Flatten phases into a single chronological list: 0ms first, later events further down.
- * Screenshots attach only to paint milestones (FCP, LCP, load, last visual).
+ * Every filmstrip frame is its own row at the time it was captured.
  */
 export function buildTimelineMoments(
   phases: TimelinePhase[],
@@ -25,13 +46,6 @@ export function buildTimelineMoments(
   const moments: TimelineMoment[] = [];
   for (const { phase, step } of flatSteps) {
     const timeMs = step.timeMs ?? phase.startMs;
-    const shot =
-      screenshots.length &&
-      step.timeMs != null &&
-      SCREENSHOT_STEP_IDS.has(step.id)
-        ? frameAtFcp(screenshots, step.timeMs)
-        : undefined;
-
     const isLcp = step.id === "sub-lcp";
 
     moments.push({
@@ -49,13 +63,17 @@ export function buildTimelineMoments(
       evidence: step.evidence ?? [],
       table: step.table,
       waterfall: step.waterfall,
-      screenshot: shot ? { timing: shot.timing, data: shot.data } : undefined,
+      notes: step.notes,
       network: [],
       mainThread: [],
       findings: [],
       lcpSegments: isLcp ? lcpSegments : undefined,
     });
   }
+
+  screenshots.forEach((shot, index) => {
+    moments.push(filmstripMoment(phases, shot, index));
+  });
 
   moments.sort((a, b) => {
     if (a.timeMs !== b.timeMs) return a.timeMs - b.timeMs;

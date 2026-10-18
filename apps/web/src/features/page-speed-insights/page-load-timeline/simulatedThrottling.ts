@@ -6,9 +6,9 @@
  *
  * Paint milestones use Lighthouse's simulated values. Other times are
  * interpolated between those anchors. Network bars are at least as long as a
- * TCP slow-start estimate, and main-thread tasks are multiplied by the CPU
- * slowdown. A task that already finished before the next one started on the
- * trace stays in front of it, so slowed tasks queue instead of overlapping.
+ * TCP slow-start estimate, and observed main-thread tasks are multiplied by
+ * the CPU slowdown. A task that already finished before the next one started
+ * on the trace stays in front of it, so slowed tasks queue instead of overlapping.
  */
 
 const TCP_SEGMENT_SIZE = 1460;
@@ -44,6 +44,9 @@ export type TimedRequest = {
   networkEndTime?: number;
   transferSize?: number;
   protocol?: string;
+  statusCode?: number;
+  resourceType?: string;
+  mimeType?: string;
 };
 
 export type TimedTask = {
@@ -283,6 +286,17 @@ function isMultiplexed(protocol: string | undefined): boolean {
   return /h2|h3|http\/2|http\/3|quic/i.test(protocol ?? "");
 }
 
+/** Server-side hops. 304 is a cache revalidation, not a navigation redirect. */
+export function isNavigationRedirect(statusCode: number | undefined): boolean {
+  return (
+    statusCode === 301 ||
+    statusCode === 302 ||
+    statusCode === 303 ||
+    statusCode === 307 ||
+    statusCode === 308
+  );
+}
+
 export function createTimelineClock(input: ClockInput): TimelineClock {
   const mapTime = buildMapTime(input);
   const { throttling } = input;
@@ -303,8 +317,13 @@ export function createTimelineClock(input: ClockInput): TimelineClock {
         firstOfOrigin.add(request);
       }
 
+      // The first timed request is often a 3xx. Server latency and the TTFB
+      // floor belong to the document that follows, not the redirect hop.
       const documentRequest = ordered.find(
-        (request) => request.networkRequestTime != null && request.networkEndTime != null,
+        (request) =>
+          request.networkRequestTime != null &&
+          request.networkEndTime != null &&
+          !isNavigationRedirect(request.statusCode),
       );
 
       return requests.map((request) => {
@@ -341,9 +360,7 @@ export function createTimelineClock(input: ClockInput): TimelineClock {
       const cpu = throttling.cpuSlowdownMultiplier;
       const ordered = tasks
         .map((task, index) => ({ task, index }))
-        .sort(
-          (a, b) => a.task.startTime - b.task.startTime || b.task.duration - a.task.duration,
-        );
+        .sort((a, b) => a.task.startTime - b.task.startTime || b.task.duration - a.task.duration);
 
       const placed = tasks.slice();
       let cursor = 0;
@@ -368,33 +385,60 @@ export function createTimelineClock(input: ClockInput): TimelineClock {
     },
     adjustLcpSubparts(subparts, parts) {
       const { simulatedTtfb, simulatedLcp, loadDelay, loadDuration } = parts;
-      if (simulatedLcp != null && loadDelay != null && loadDuration != null) {
-        const ttfb = simulatedTtfb ?? 0;
-        const render = Math.max(0, simulatedLcp - ttfb - loadDelay - loadDuration);
-        const labelFor = (subpart: string, fallback: string) =>
-          subparts.find((part) => part.subpart === subpart)?.label ?? fallback;
-        return [
-          {
-            subpart: "timeToFirstByte",
-            label: labelFor("timeToFirstByte", "Time to first byte"),
-            duration: ttfb,
-          },
-          {
-            subpart: "resourceLoadDelay",
-            label: labelFor("resourceLoadDelay", "Resource load delay"),
-            duration: loadDelay,
-          },
-          {
-            subpart: "resourceLoadDuration",
-            label: labelFor("resourceLoadDuration", "Resource load duration"),
-            duration: loadDuration,
-          },
-          {
-            subpart: "elementRenderDelay",
-            label: labelFor("elementRenderDelay", "Element render delay"),
-            duration: render,
-          },
-        ];
+      const labelFor = (subpart: string, fallback: string) =>
+        subparts.find((part) => part.subpart === subpart)?.label ?? fallback;
+
+      // Resource phases from the metrics audit are already on Lantern's clock.
+      // Text LCP has no resource, so the insight only has an observed first byte.
+      if (simulatedLcp != null && simulatedTtfb != null) {
+        const ttfb = Math.min(Math.max(0, simulatedTtfb), simulatedLcp);
+        if (loadDelay != null && loadDuration != null) {
+          const render = Math.max(0, simulatedLcp - ttfb - loadDelay - loadDuration);
+          return [
+            {
+              subpart: "timeToFirstByte",
+              label: labelFor("timeToFirstByte", "Time to first byte"),
+              duration: ttfb,
+            },
+            {
+              subpart: "resourceLoadDelay",
+              label: labelFor("resourceLoadDelay", "Resource load delay"),
+              duration: loadDelay,
+            },
+            {
+              subpart: "resourceLoadDuration",
+              label: labelFor("resourceLoadDuration", "Resource load duration"),
+              duration: loadDuration,
+            },
+            {
+              subpart: "elementRenderDelay",
+              label: labelFor("elementRenderDelay", "Element render delay"),
+              duration: render,
+            },
+          ];
+        }
+
+        const rest = subparts.filter((part) => part.subpart !== "timeToFirstByte");
+        const restTotal = rest.reduce((sum, part) => sum + part.duration, 0);
+        const budget = simulatedLcp - ttfb;
+        const firstByte = {
+          subpart: "timeToFirstByte",
+          label: labelFor("timeToFirstByte", "Time to first byte"),
+          duration: ttfb,
+        };
+        if (restTotal <= 0) {
+          return [
+            firstByte,
+            {
+              subpart: "elementRenderDelay",
+              label: labelFor("elementRenderDelay", "Element render delay"),
+              duration: budget,
+            },
+          ];
+        }
+        const scale = budget / restTotal;
+        const scaled = rest.map((part) => ({ ...part, duration: part.duration * scale }));
+        return [firstByte, ...scaled];
       }
 
       const observedTotal = subparts.reduce((sum, part) => sum + part.duration, 0);

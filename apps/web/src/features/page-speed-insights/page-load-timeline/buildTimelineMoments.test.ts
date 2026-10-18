@@ -75,7 +75,7 @@ describe("buildTimelineMoments", () => {
     expect(moments.find((m) => m.id === "render-fcp")?.hasTimestamp).toBe(true);
   });
 
-  it("attaches screenshots only to paint milestones", () => {
+  it("places every filmstrip frame on the timeline at its capture time", () => {
     const moments = buildTimelineMoments(
       phases,
       [
@@ -86,13 +86,21 @@ describe("buildTimelineMoments", () => {
       "Hero",
     );
 
-    const fcp = moments.find((m) => m.id === "render-fcp");
-    const lcp = moments.find((m) => m.id === "sub-lcp");
-    const stylesheet = moments.find((m) => m.id === "net-0");
+    const shots = moments.filter((m) => m.id.startsWith("screenshot-"));
+    expect(shots.map((m) => m.screenshot?.data)).toEqual(["fcp-shot", "lcp-shot"]);
+    expect(shots.map((m) => m.timeMs)).toEqual([1100, 2500]);
+    expect(moments.map((m) => m.id)).toEqual([
+      "nav-start",
+      "net-0",
+      "render-fcp",
+      "screenshot-0",
+      "sub-lcp",
+      "screenshot-1",
+    ]);
 
-    expect(fcp?.screenshot?.data).toBe("fcp-shot");
-    expect(lcp?.screenshot?.data).toBe("lcp-shot");
-    expect(stylesheet?.screenshot).toBeUndefined();
+    const lcp = moments.find((m) => m.id === "sub-lcp");
+    expect(moments.find((m) => m.id === "render-fcp")?.screenshot).toBeUndefined();
+    expect(moments.find((m) => m.id === "net-0")?.screenshot).toBeUndefined();
     expect(lcp?.lcpSegments).toHaveLength(1);
     expect(lcp?.evidence[0]).toBe("Element: Hero");
   });

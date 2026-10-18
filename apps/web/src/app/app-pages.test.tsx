@@ -166,4 +166,24 @@ describe("app page coverage smoke tests", () => {
     expect(requestPageSpeedDataMock).toHaveBeenCalledWith("https://example.com");
     expect(redirectMock).toHaveBeenCalledWith("/page-speed/public-123");
   });
+
+  it("keeps dashboard view params when redirecting to a report", async () => {
+    updateUrlMock.mockReturnValue("https://example.com");
+    requestPageSpeedDataMock.mockResolvedValue("public-123");
+
+    render(
+      await PageSpeedPage({
+        searchParams: Promise.resolve({
+          url: "https://example.com",
+          view: "dashboard",
+          tab: "timeline",
+          labels: ["Mobile"],
+        }),
+      }),
+    );
+
+    expect(redirectMock).toHaveBeenCalledWith(
+      "/page-speed/public-123?view=dashboard&tab=timeline&labels=Mobile",
+    );
+  });
 });

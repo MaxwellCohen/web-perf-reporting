@@ -51,7 +51,7 @@ function useHash() {
   return [hash, setLocationHash] as const;
 }
 
-export default function ViewerPage() {
+export default function ViewerPage({ initialSearch = "" }: { initialSearch?: string }) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<PageSpeedInsights[]>([]);
   const [labels, setLabels] = useState<string[]>([]);
@@ -106,7 +106,12 @@ export default function ViewerPage() {
             ← Back to input
           </Button>
         </div>
-        <PageSpeedInsightsDashboard data={data} labels={labels} hideReport />
+        <PageSpeedInsightsDashboard
+          data={data}
+          labels={labels}
+          hideReport
+          initialSearch={initialSearch}
+        />
       </div>
     );
   }

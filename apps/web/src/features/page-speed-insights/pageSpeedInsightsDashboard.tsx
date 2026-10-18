@@ -1,17 +1,30 @@
 "use client";
 import dynamic from "next/dynamic";
+import { useLayoutEffect } from "react";
 import { LayoutDashboard, List } from "lucide-react";
 import {
   PageSpeedInsightsStoreProvider,
+  selectPageSpeedUserLabelFilter,
+  selectPageSpeedUserLabels,
   usePageSpeedInsightsStore,
   usePageSpeedItems,
   usePageSpeedReportTitle,
+  usePageSpeedSelector,
+  useRequiredPageSpeedInsightsStore,
 } from "@/features/page-speed-insights/PageSpeedContext";
 import { NullablePageSpeedInsights } from "@/lib/schema";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserLabelFilter } from "@/features/page-speed-insights/UserLabelFilter";
 import { PageSpeedInsightsCopyButtons } from "@/features/page-speed-insights/PageSpeedInsightsCopyButtons";
 import { DashboardPanelFallback } from "@/features/page-speed-insights/dashboard-view/DashboardPanelFallback";
+import {
+  narrowLabelFilter,
+  sameStringList,
+} from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
+import {
+  DashboardSearchProvider,
+  useDashboardSearchState,
+} from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
 import { PageSpeedDashboardView } from "@/features/page-speed-insights/dashboard-view/PageSpeedDashboardView";
 import {
   isDashboardViewMode,
@@ -46,10 +59,26 @@ function ViewModeToggle() {
   );
 }
 
+function useSyncUserLabelFilterFromUrl() {
+  const store = useRequiredPageSpeedInsightsStore();
+  const available = usePageSpeedSelector(selectPageSpeedUserLabels);
+  const current = usePageSpeedSelector(selectPageSpeedUserLabelFilter);
+  const urlLabels = useDashboardSearchState().labels;
+
+  useLayoutEffect(() => {
+    if (!available.length) return;
+    const next = narrowLabelFilter(urlLabels, available);
+    const applied = narrowLabelFilter(current, available);
+    if (sameStringList(next, applied)) return;
+    store.trigger.setUserLabelFilter({ labels: next ?? available });
+  }, [available, current, urlLabels, store]);
+}
+
 function PageSpeedInsightsDashboardContent() {
   const items = usePageSpeedItems();
   const reportTitle = usePageSpeedReportTitle();
   const [viewMode] = useDashboardViewMode();
+  useSyncUserLabelFilterFromUrl();
 
   return (
     <>
@@ -71,10 +100,12 @@ function PageSpeedInsightsDashboardContent() {
 export function PageSpeedInsightsDashboard({
   data,
   labels,
+  initialSearch = "",
 }: {
   data: NullablePageSpeedInsights[];
   labels: string[];
   hideReport?: boolean;
+  initialSearch?: string;
 }) {
   const dataForStore: NullablePageSpeedInsights[] = Array.isArray(data) ? data : [];
   const store = usePageSpeedInsightsStore({
@@ -84,8 +115,10 @@ export function PageSpeedInsightsDashboard({
   });
 
   return (
-    <PageSpeedInsightsStoreProvider store={store}>
-      <PageSpeedInsightsDashboardContent />
-    </PageSpeedInsightsStoreProvider>
+    <DashboardSearchProvider initialSearch={initialSearch}>
+      <PageSpeedInsightsStoreProvider store={store}>
+        <PageSpeedInsightsDashboardContent />
+      </PageSpeedInsightsStoreProvider>
+    </DashboardSearchProvider>
   );
 }

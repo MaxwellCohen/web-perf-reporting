@@ -20,15 +20,28 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
+import { patchDashboardSearch } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
+import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
 import { getNetworkBarColor } from "@/features/page-speed-insights/shared/networkResourceColors";
 import { ResourceUrlCell } from "@/features/page-speed-insights/shared/ResourceUrlCell";
 import { cn } from "@/lib/cn";
 import { buildPageLoadTimelines } from "./buildPageLoadTimeline";
+import {
+  TASK_FILTERS,
+  allTaskFilters,
+  availableTaskFilters,
+  filterTimelineMoments,
+  TASK_FILTER_LABEL,
+  type TaskFilterId,
+  type TaskFilterSelection,
+} from "./filterTimelineMoments";
 import type {
   MarkerKind,
   PageLoadTimeline,
   Rating,
+  RenderBlockingStatus,
   TimelineMoment,
+  TimelineNote,
   TimelineTable,
   TimelineWaterfallBar,
 } from "./types";
@@ -95,6 +108,43 @@ function ratingClass(rating?: Rating): string {
   if (rating === "needs-improvement") return "bg-amber-500/15 text-amber-800 dark:text-amber-300";
   if (rating === "poor") return "bg-rose-500/15 text-rose-700 dark:text-rose-300";
   return "bg-muted text-muted-foreground";
+}
+
+const RENDER_BLOCKING_ORDER: RenderBlockingStatus[] = [
+  "blocking",
+  "potentially-blocking",
+  "non-blocking",
+];
+
+const RENDER_BLOCKING_LABEL: Record<RenderBlockingStatus, string> = {
+  blocking: "Blocking",
+  "potentially-blocking": "Potentially blocking",
+  "non-blocking": "Non-blocking",
+};
+
+function renderBlockingClass(status: RenderBlockingStatus): string {
+  if (status === "blocking") return "bg-rose-500/15 text-rose-700 dark:text-rose-300";
+  if (status === "potentially-blocking")
+    return "bg-amber-500/15 text-amber-800 dark:text-amber-300";
+  return "bg-muted text-muted-foreground";
+}
+
+function blockingStatuses(bars?: TimelineWaterfallBar[]): RenderBlockingStatus[] {
+  const present = new Set<RenderBlockingStatus>();
+  for (const bar of bars ?? []) {
+    if (bar.renderBlocking) present.add(bar.renderBlocking);
+  }
+  return RENDER_BLOCKING_ORDER.filter((status) => present.has(status));
+}
+
+function RenderBlockingBadge({ status }: { status: RenderBlockingStatus }) {
+  return (
+    <span
+      className={cn("rounded px-1.5 py-0.5 text-[10px] font-medium", renderBlockingClass(status))}
+    >
+      {RENDER_BLOCKING_LABEL[status]}
+    </span>
+  );
 }
 
 function markerDotClass(kind: MarkerKind, rating?: Rating): string {
@@ -189,6 +239,20 @@ function barTimingLabel(bar: TimelineWaterfallBar, row: TimelineTable["rows"][nu
   return extras.length ? `${range} · ${extras.join(" · ")}` : range;
 }
 
+function scriptDownloadLabel(bar: TimelineWaterfallBar): string | null {
+  const window =
+    bar.downloadStartMs != null && bar.downloadEndMs != null
+      ? `${formatMs(bar.downloadStartMs)}–${formatMs(bar.downloadEndMs)}`
+      : null;
+  const download = window
+    ? `downloaded ${window}${bar.downloadDuration ? ` (${bar.downloadDuration})` : ""}`
+    : bar.downloadDuration
+      ? `downloaded in ${bar.downloadDuration}`
+      : null;
+  const parts = [bar.scriptSize, download].filter((part): part is string => Boolean(part));
+  return parts.length > 0 ? parts.join(" · ") : null;
+}
+
 function BarIdentity({ bar }: { bar: TimelineWaterfallBar }) {
   if (bar.href) return <ResourceUrlCell url={bar.href} />;
   if (bar.label === UNATTRIBUTED_LABEL) return <UnattributedLabel />;
@@ -203,10 +267,12 @@ function WaterfallRows({
   bars,
   table,
   axisEnd,
+  showBlockingBadge,
 }: {
   bars: TimelineWaterfallBar[];
   table?: TimelineTable;
   axisEnd: number;
+  showBlockingBadge: boolean;
 }) {
   const scale = axisEnd > 0 ? axisEnd : Math.max(...bars.map((b) => b.endMs), 1);
 
@@ -215,12 +281,27 @@ function WaterfallRows({
       {bars.map((bar, index) => {
         const left = (bar.startMs / scale) * 100;
         const width = Math.max(1.5, ((bar.endMs - bar.startMs) / scale) * 100);
+        const downloadLabel = scriptDownloadLabel(bar);
         return (
           <div key={bar.id} className="space-y-1">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <div className="text-[11px] font-medium">{bar.resourceType ?? "Request"}</div>
+                <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-medium">
+                  <span>{bar.resourceType ?? "Request"}</span>
+                  {showBlockingBadge && bar.renderBlocking ? (
+                    <RenderBlockingBadge status={bar.renderBlocking} />
+                  ) : null}
+                </div>
                 <BarIdentity bar={bar} />
+                {bar.priority ? (
+                  <p className="text-[11px] text-muted-foreground">Priority {bar.priority}</p>
+                ) : null}
+                {downloadLabel ? (
+                  <p className="text-[11px] tabular-nums text-muted-foreground">{downloadLabel}</p>
+                ) : null}
+                {bar.coverage ? (
+                  <p className="text-[11px] tabular-nums text-muted-foreground">{bar.coverage}</p>
+                ) : null}
               </div>
               <span className="shrink-0 pt-0.5 text-right text-[11px] tabular-nums text-muted-foreground">
                 {barTimingLabel(bar, table?.rows[index])}
@@ -228,7 +309,10 @@ function WaterfallRows({
             </div>
             <div className="relative h-2 overflow-hidden rounded-full bg-muted/60">
               <div
-                className={cn("absolute inset-y-0 rounded-full", getNetworkBarColor(bar.resourceType))}
+                className={cn(
+                  "absolute inset-y-0 rounded-full",
+                  getNetworkBarColor(bar.resourceType),
+                )}
                 style={{ left: `${left}%`, width: `${width}%` }}
               />
             </div>
@@ -257,7 +341,10 @@ function CollapsedUrlTable({ table, count }: { table: TimelineTable; count: numb
               {table.headers.map((header) => (
                 <TableHead
                   key={header.text}
-                  className={cn("h-8 px-2 py-1 text-[11px]", header.align === "end" && "text-right")}
+                  className={cn(
+                    "h-8 px-2 py-1 text-[11px]",
+                    header.align === "end" && "text-right",
+                  )}
                 >
                   {header.text}
                 </TableHead>
@@ -298,10 +385,12 @@ function MomentRequests({
   bars,
   table,
   axisEnd,
+  showBlockingBadge,
 }: {
   bars?: TimelineWaterfallBar[];
   table?: TimelineTable;
   axisEnd: number;
+  showBlockingBadge: boolean;
 }) {
   const waterfall = bars ?? [];
   const rowCount = table?.rows.length ?? 0;
@@ -314,11 +403,18 @@ function MomentRequests({
             <span className="text-foreground/80">Requests</span>
             <span className="tabular-nums text-muted-foreground">({waterfall.length})</span>
             <span className="text-[10px] font-normal opacity-70 group-open:hidden">show</span>
-            <span className="hidden text-[10px] font-normal opacity-70 group-open:inline">hide</span>
+            <span className="hidden text-[10px] font-normal opacity-70 group-open:inline">
+              hide
+            </span>
           </span>
         </summary>
         <div className="border-t border-border/60 px-2.5 py-2.5">
-          <WaterfallRows bars={waterfall} table={table} axisEnd={axisEnd} />
+          <WaterfallRows
+            bars={waterfall}
+            table={table}
+            axisEnd={axisEnd}
+            showBlockingBadge={showBlockingBadge}
+          />
         </div>
       </details>
     );
@@ -327,7 +423,12 @@ function MomentRequests({
   if (waterfall.length === 1) {
     return (
       <div className="mt-2">
-        <WaterfallRows bars={waterfall} table={table} axisEnd={axisEnd} />
+        <WaterfallRows
+          bars={waterfall}
+          table={table}
+          axisEnd={axisEnd}
+          showBlockingBadge={showBlockingBadge}
+        />
       </div>
     );
   }
@@ -337,6 +438,54 @@ function MomentRequests({
   }
 
   return null;
+}
+
+function noteTimeLabel(note: TimelineNote): string | null {
+  if (note.timeMs == null) return null;
+  if (note.endMs != null && note.endMs !== note.timeMs) {
+    return `${formatMs(note.timeMs)}–${formatMs(note.endMs)}`;
+  }
+  return formatMs(note.timeMs);
+}
+
+function MomentNotes({ notes }: { notes: TimelineNote[] }) {
+  return (
+    <div className="space-y-3 border-t border-border/70 pt-3">
+      {notes.map((note) => {
+        const statusLabel =
+          note.status === "measured" && note.timeMs == null ? null : note.status.replace("-", " ");
+        const timeLabel = noteTimeLabel(note);
+        return (
+          <div key={note.id} className="space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-sm font-semibold leading-snug">{note.title}</p>
+              {note.rating ? (
+                <span
+                  className={cn(
+                    "rounded px-1.5 py-0.5 text-[10px] font-medium uppercase",
+                    ratingClass(note.rating),
+                  )}
+                >
+                  {note.rating.replace("-", " ")}
+                </span>
+              ) : null}
+              {statusLabel ? (
+                <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                  {statusLabel}
+                </span>
+              ) : null}
+              {timeLabel ? (
+                <span className="ml-auto text-[11px] tabular-nums text-muted-foreground">
+                  {timeLabel}
+                </span>
+              ) : null}
+            </div>
+            <p className="text-sm text-muted-foreground">{note.detail}</p>
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 function MomentRow({
@@ -349,10 +498,9 @@ function MomentRow({
   showPhaseHeader: boolean;
 }) {
   const muted = moment.status === "not-recorded";
+  const downloadBlocking = blockingStatuses(moment.waterfall);
   const statusLabel =
-    moment.status === "measured" && !moment.hasTimestamp
-      ? null
-      : moment.status.replace("-", " ");
+    moment.status === "measured" && !moment.hasTimestamp ? null : moment.status.replace("-", " ");
 
   return (
     <li className="relative">
@@ -408,6 +556,9 @@ function MomentRow({
                     {moment.rating.replace("-", " ")}
                   </span>
                 ) : null}
+                {downloadBlocking.map((status) => (
+                  <RenderBlockingBadge key={status} status={status} />
+                ))}
                 {statusLabel ? (
                   <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
                     {statusLabel}
@@ -415,9 +566,18 @@ function MomentRow({
                 ) : null}
               </div>
 
-              <p className="text-sm text-muted-foreground">{textWithUnattributedHint(moment.detail)}</p>
+              <p className="text-sm text-muted-foreground">
+                {textWithUnattributedHint(moment.detail)}
+              </p>
 
-              <MomentRequests bars={moment.waterfall} table={moment.table} axisEnd={axisEnd} />
+              <MomentRequests
+                bars={moment.waterfall}
+                table={moment.table}
+                axisEnd={axisEnd}
+                showBlockingBadge={downloadBlocking.length > 1}
+              />
+
+              {moment.notes?.length ? <MomentNotes notes={moment.notes} /> : null}
 
               {moment.lcpSegments ? <LcpBreakdown segments={moment.lcpSegments} /> : null}
             </div>
@@ -429,6 +589,60 @@ function MomentRow({
         </div>
       </div>
     </li>
+  );
+}
+
+function TaskFilters({
+  options,
+  enabled,
+  shown,
+  total,
+  onToggle,
+}: {
+  options: TaskFilterId[];
+  enabled: TaskFilterSelection;
+  shown: number;
+  total: number;
+  onToggle: (id: TaskFilterId) => void;
+}) {
+  if (!options.length) return null;
+  const filtering = shown !== total;
+
+  return (
+    <div
+      role="group"
+      aria-label="Filter timeline tasks"
+      data-testid="timeline-task-filters"
+      className="flex flex-wrap items-center gap-1.5"
+    >
+      <span className="mr-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+        Tasks
+      </span>
+      {options.map((id) => {
+        const pressed = enabled.has(id);
+        return (
+          <button
+            key={id}
+            type="button"
+            aria-pressed={pressed}
+            onClick={() => onToggle(id)}
+            className={cn(
+              "rounded-md border px-2 py-0.5 text-[11px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              pressed
+                ? "border-transparent bg-white text-black"
+                : "border-white/20 bg-black text-white",
+            )}
+          >
+            {TASK_FILTER_LABEL[id]}
+          </button>
+        );
+      })}
+      {filtering ? (
+        <span className="text-[11px] tabular-nums text-muted-foreground">
+          {shown} of {total}
+        </span>
+      ) : null}
+    </div>
   );
 }
 
@@ -477,9 +691,14 @@ function VerticalTimeline({ timeline }: { timeline: PageLoadTimeline }) {
 export function PageLoadTimeline() {
   const items = usePageSpeedItems();
   const timelines = useMemo(() => buildPageLoadTimelines(items), [items]);
-  const [label, setLabel] = useState<string | null>(null);
+  const { report, tasks } = useDashboardSearchState();
+  const enabledTasks = useMemo<TaskFilterSelection>(() => {
+    if (tasks == null) return allTaskFilters();
+    const allowed = new Set<string>(TASK_FILTERS);
+    return new Set(tasks.filter((id): id is TaskFilterId => allowed.has(id)));
+  }, [tasks]);
 
-  const active = timelines.find((t) => t.label === label) ?? timelines[0] ?? null;
+  const active = timelines.find((timeline) => timeline.label === report) ?? timelines[0] ?? null;
 
   if (!timelines.length || !active) {
     return (
@@ -490,40 +709,62 @@ export function PageLoadTimeline() {
   }
 
   const reportName = active.label?.trim() || "Report";
+  const moments = filterTimelineMoments(active.moments, enabledTasks);
+  const timeline = moments === active.moments ? active : { ...active, moments };
+  const taskOptions = availableTaskFilters(active.moments);
+
+  function toggleTask(id: TaskFilterId) {
+    const next = new Set(enabledTasks);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    const ordered = TASK_FILTERS.filter((filter) => next.has(filter));
+    patchDashboardSearch({
+      tasks: ordered.length === TASK_FILTERS.length ? null : ordered,
+    });
+  }
 
   return (
     <div className="flex flex-col gap-4" data-testid="page-load-timeline">
-      <div className="sticky top-0 z-30 -mx-1 flex flex-wrap items-center justify-between gap-3 border-b border-border/80 bg-background/95 px-1 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-background/85">
-        <div className="min-w-0">
-          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-            Viewing report
-          </p>
-          <p className="truncate text-base font-semibold" data-testid="timeline-report-label">
-            {reportName}
-          </p>
-        </div>
-        {timelines.length > 1 ? (
-          <div className="flex flex-wrap gap-2" role="tablist" aria-label="Report device">
-            {timelines.map((t) => {
-              const name = t.label?.trim() || "Report";
-              const selected = t.label === active.label;
-              return (
-                <Button
-                  key={t.label}
-                  type="button"
-                  size="sm"
-                  variant={selected ? "default" : "outline"}
-                  aria-pressed={selected}
-                  onClick={() => setLabel(t.label)}
-                >
-                  {name}
-                </Button>
-              );
-            })}
+      <div className="sticky top-0 z-30 -mx-1 flex flex-col gap-2 border-b border-border/80 bg-background/95 px-1 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-background/85">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              Viewing report
+            </p>
+            <p className="truncate text-base font-semibold" data-testid="timeline-report-label">
+              {reportName}
+            </p>
           </div>
-        ) : null}
+          {timelines.length > 1 ? (
+            <div className="flex flex-wrap gap-2" role="tablist" aria-label="Report device">
+              {timelines.map((t) => {
+                const name = t.label?.trim() || "Report";
+                const selected = t.label === active.label;
+                return (
+                  <Button
+                    key={t.label}
+                    type="button"
+                    size="sm"
+                    variant={selected ? "default" : "outline"}
+                    aria-pressed={selected}
+                    onClick={() => patchDashboardSearch({ report: t.label })}
+                  >
+                    {name}
+                  </Button>
+                );
+              })}
+            </div>
+          ) : null}
+        </div>
+        <TaskFilters
+          options={taskOptions}
+          enabled={enabledTasks}
+          shown={moments.length}
+          total={active.moments.length}
+          onToggle={toggleTask}
+        />
       </div>
-      <VerticalTimeline key={active.label} timeline={active} />
+      <VerticalTimeline key={active.label} timeline={timeline} />
     </div>
   );
 }

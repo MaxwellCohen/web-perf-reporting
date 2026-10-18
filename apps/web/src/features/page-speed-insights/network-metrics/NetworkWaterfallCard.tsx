@@ -19,6 +19,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
+import { patchDashboardSearch } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
+import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
 import {
   InteractiveNetworkWaterfall,
   type WaterfallHeightSize,
@@ -125,17 +127,18 @@ function ToolbarField({ children, className }: { children: ReactNode; className?
 
 export function NetworkWaterfallCard() {
   const series = useNetworkMetricSeries();
-  const [selectedReportIndex, setSelectedReportIndex] = useState(0);
-  const [resourceTypes, setResourceTypes] = useState<string[]>([]);
-  const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState<WaterfallSortBy>("start");
+  const {
+    report,
+    types: resourceTypes,
+    sort: sortBy,
+    height: heightSize,
+    query: search,
+  } = useDashboardSearchState();
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
-  const [heightSize, setHeightSize] = useState<WaterfallHeightSize>("default");
 
   const validSeries = series.filter((entry) => entry.networkRequests.length > 0);
 
-  const activeIndex = Math.min(selectedReportIndex, Math.max(validSeries.length - 1, 0));
-  const activeSeries = validSeries[activeIndex];
+  const activeSeries = validSeries.find((entry) => entry.label === report) ?? validSeries[0];
 
   const allRows = activeSeries ? buildWaterfallRows(activeSeries.networkRequests) : [];
 
@@ -168,10 +171,10 @@ export function NetworkWaterfallCard() {
           {validSeries.length > 1 ? (
             <ToolbarField>
               <Select
-                value={String(activeIndex)}
+                value={activeSeries.label || "0"}
                 onValueChange={(value) => {
-                  setSelectedReportIndex(Number(value));
                   setSelectedRowId(null);
+                  patchDashboardSearch({ report: value });
                 }}
               >
                 <SelectTrigger className="w-full md:w-[200px]">
@@ -179,7 +182,10 @@ export function NetworkWaterfallCard() {
                 </SelectTrigger>
                 <SelectContent>
                   {validSeries.map((entry, index) => (
-                    <SelectItem key={entry.label || `report-${index}`} value={String(index)}>
+                    <SelectItem
+                      key={entry.label || `report-${index}`}
+                      value={entry.label || String(index)}
+                    >
                       {entry.label || `Report ${index + 1}`}
                     </SelectItem>
                   ))}
@@ -192,13 +198,18 @@ export function NetworkWaterfallCard() {
             <ResourceTypeFilterDropdown
               options={resourceTypeOptions}
               selected={resourceTypes}
-              onSelectedChange={setResourceTypes}
+              onSelectedChange={(next) =>
+                patchDashboardSearch({ types: next.length ? next : null })
+              }
               className="w-full md:w-auto"
             />
           </ToolbarField>
 
           <ToolbarField>
-            <Select value={sortBy} onValueChange={(value) => setSortBy(value as WaterfallSortBy)}>
+            <Select
+              value={sortBy}
+              onValueChange={(value) => patchDashboardSearch({ sort: value as WaterfallSortBy })}
+            >
               <SelectTrigger className="w-full md:w-[160px]">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
@@ -213,7 +224,9 @@ export function NetworkWaterfallCard() {
           <ToolbarField>
             <Select
               value={heightSize}
-              onValueChange={(value) => setHeightSize(value as WaterfallHeightSize)}
+              onValueChange={(value) =>
+                patchDashboardSearch({ height: value as WaterfallHeightSize })
+              }
             >
               <SelectTrigger className="w-full md:w-[140px]" aria-label="Waterfall height">
                 <SelectValue placeholder="Height" />
@@ -230,7 +243,11 @@ export function NetworkWaterfallCard() {
           <ToolbarField className="md:min-w-[200px] md:flex-1">
             <DebouncedInput
               value={search}
-              onChange={(value) => setSearch(String(value))}
+              onChange={(value) => {
+                const next = String(value);
+                if (next === search) return;
+                patchDashboardSearch({ query: next });
+              }}
               placeholder="Search URL…"
               className="w-full"
             />
