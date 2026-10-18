@@ -1265,7 +1265,7 @@ describe("buildPageLoadTimeline", () => {
     const timeline = buildPageLoadTimeline(makeItem({}));
     expect(timeline!.events.length).toBeGreaterThan(5);
     expect(timeline!.events[0]?.timeMs).toBe(0);
-    expect(timeline!.events[0]?.title).toMatch(/navigationStart/i);
+    expect(timeline!.events[0]?.title).toBe("Navigation start");
 
     for (let i = 1; i < timeline!.events.length; i++) {
       expect(timeline!.events[i]!.timeMs).toBeGreaterThanOrEqual(timeline!.events[i - 1]!.timeMs);
@@ -1852,5 +1852,18 @@ describe("buildPageLoadTimeline", () => {
 
     const script = timeline!.events.find((m) => m.title === "Script");
     expect(script?.detail).toMatch(/critical chain \(800 ms\)/);
+    expect(script?.notes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "critical-chain-js",
+          title: "Avoid chaining critical requests",
+          detail:
+            "Reduce the length of chains, reduce the download size of resources, or defer the download of unnecessary resources to improve page load.",
+        }),
+      ]),
+    );
+
+    const document = timeline!.events.find((m) => m.title === "Document");
+    expect(document?.notes?.some((n) => n.id === "critical-chain-js")).toBeFalsy();
   });
 });

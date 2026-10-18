@@ -658,12 +658,17 @@ function networkTypeNoun(resourceType: string, count: number): string {
   return count === 1 ? pair[0] : pair[1];
 }
 
-/** e.g. "5 images downloaded", "style downloaded" */
+function sentenceCase(value: string): string {
+  if (!value) return value;
+  return value[0]!.toUpperCase() + value.slice(1);
+}
+
+/** e.g. "5 images downloaded", "Style downloaded" */
 function overviewDownloadTitle(event: TimelineEvent): string {
   const bars = event.waterfall ?? [];
   const count = Math.max(bars.length, 1);
   const resourceType = bars[0]?.resourceType ?? "Other";
-  if (count === 1) return `${networkTypeNoun(resourceType, 1)} downloaded`;
+  if (count === 1) return sentenceCase(`${networkTypeNoun(resourceType, 1)} downloaded`);
   return `${count} ${networkTypeNoun(resourceType, count)} downloaded`;
 }
 
@@ -673,14 +678,14 @@ function overviewLaneTitle(event: TimelineEvent): string {
   if (event.id.startsWith("user-timing-")) {
     const isMeasure = event.detail.toLowerCase().includes("measure");
     const name = event.title.toLowerCase().replaceAll("next.js", "next");
-    return `${name} · ${isMeasure ? "measure" : "mark"}`;
+    return `${sentenceCase(name)} · ${isMeasure ? "measure" : "mark"}`;
   }
   if (event.id.startsWith("long-task-")) return "Long task";
   if (event.id.startsWith("short-task-")) return event.title;
   if (event.id === "nav-redirects") {
     const hops = event.waterfall?.length ?? 0;
     if (hops > 1) return `${hops} redirects followed`;
-    return hops === 1 ? "redirect followed" : "Redirects";
+    return hops === 1 ? "Redirect followed" : "Redirects";
   }
   if (event.id.startsWith("net-") || (event.waterfall?.length && event.waterfall[0]?.resourceType)) {
     return overviewDownloadTitle(event);

@@ -148,7 +148,6 @@ describe("PageLoadTimeline", () => {
     expect(screen.getByTestId("timeline-report-label")).toHaveTextContent("Mobile");
     expect(screen.getByText(/Scroll down from 0 ms/i)).toBeInTheDocument();
     expect(screen.getAllByText("Navigation start").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("navigationStart").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("FCP").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("First Contentful Paint at 1.20 s.")).toBeInTheDocument();
 
@@ -179,11 +178,11 @@ describe("PageLoadTimeline", () => {
     const allLanes = within(overview).getByTestId("overview-lanes");
     expect(within(allLanes).getByTestId("overview-time-axis")).toBeInTheDocument();
     expect(within(allLanes).getByTestId("overview-tick-grid")).toBeInTheDocument();
-    expect(allLanes).toHaveTextContent("navigationStart");
+    expect(allLanes).toHaveTextContent("Navigation start");
     expect(allLanes).toHaveTextContent("FCP");
     expect(allLanes).toHaveTextContent("LCP");
     expect(allLanes).toHaveTextContent("CWV");
-    expect(allLanes).toHaveTextContent("document downloaded");
+    expect(allLanes).toHaveTextContent("Document downloaded");
     expect(allLanes).toHaveTextContent("Screenshot");
     expect(within(allLanes).getAllByTitle(/FCP: 1\.20 s/).length).toBeGreaterThan(0);
     expect(within(allLanes).getAllByTitle(/LCP: 2\.50 s/).length).toBeGreaterThan(0);
@@ -192,14 +191,15 @@ describe("PageLoadTimeline", () => {
     expect(within(overview).getByText("Waterfall view")).toBeInTheDocument();
     const blockingLanes = within(overview).getByTestId("overview-lanes");
     expect(blockingLanes.querySelectorAll("li")).toHaveLength(2);
-    expect(blockingLanes).toHaveTextContent("style downloaded");
+    expect(blockingLanes).toHaveTextContent("Style downloaded");
     expect(blockingLanes).toHaveTextContent("Long task");
     expect(blockingLanes).not.toHaveTextContent("a.js");
-    expect(within(blockingLanes).getAllByTitle(/style downloaded:.*320 ms/).length).toBeGreaterThan(
+    expect(within(blockingLanes).getAllByTitle(/Style downloaded:.*320 ms/).length).toBeGreaterThan(
       0,
     );
     expect(within(blockingLanes).getAllByTitle(/Long task:.*200 ms/).length).toBeGreaterThan(0);
     expect(blockingLanes).not.toHaveTextContent("hero.png");
+    expect(blockingLanes).not.toHaveTextContent("Image downloaded");
     expect(blockingLanes).not.toHaveTextContent("image downloaded");
     expect(blockingLanes).not.toHaveTextContent("FCP");
     expect(blockingLanes).not.toHaveTextContent("LCP");

@@ -177,6 +177,23 @@ function criticalChainFlag(longestChainMs: number | undefined): string {
   return "critical chain";
 }
 
+function isScriptRequest(request: CombinedRequest): boolean {
+  if (request.resourceType === "Script") return true;
+  return !!request.mimeType?.includes("javascript");
+}
+
+/** Lighthouse network-dependency-tree advice, shown on critical-chain scripts. */
+function criticalChainScriptNote(): TimelineNote {
+  return {
+    id: "critical-chain-js",
+    title: "Avoid chaining critical requests",
+    detail:
+      "Reduce the length of chains, reduce the download size of resources, or defer the download of unnecessary resources to improve page load.",
+    status: "measured",
+    kind: "marker",
+  };
+}
+
 function ttfbStepDetail(
   timeMs: number,
   observed: boolean,
@@ -412,8 +429,15 @@ function networkEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent[
             .filter(Boolean)
             .join(" · ") + ".";
 
-    const attachedNotes = anyDocument && notes.length > 0 ? notes : undefined;
-    if (attachedNotes) attachedDocumentNotes = true;
+    const groupNotes: TimelineNote[] = [];
+    if (anyDocument && notes.length > 0) {
+      groupNotes.push(...notes);
+      attachedDocumentNotes = true;
+    }
+    if (anyCritical && group.some(isScriptRequest)) {
+      groupNotes.push(criticalChainScriptNote());
+    }
+    const attachedNotes = groupNotes.length > 0 ? groupNotes : undefined;
 
     const showPriority = group.some((r) => r.priority);
     const placement = atIntervalEnd(startMs, endMs);
@@ -658,7 +682,7 @@ function milestoneEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEven
   events.push(
     timedEvent(
       "nav-start",
-      "navigationStart",
+      "Navigation start",
       "Lab navigation begins. performance.timeOrigin is set.",
       0,
       "navigation",
@@ -796,7 +820,7 @@ function milestoneEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEven
     events.push(
       timedEvent(
         "sub-load",
-        "window load",
+        "Window load",
         `Load event at ${formatMs(load.load)}.`,
         load.load,
         "subresources",
