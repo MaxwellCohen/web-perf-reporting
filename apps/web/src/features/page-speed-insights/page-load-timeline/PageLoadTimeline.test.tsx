@@ -171,7 +171,7 @@ describe("PageLoadTimeline", () => {
     expect(longTask).toBeTruthy();
     const markerCol = longTask!.querySelector(".grid > div");
     expect(markerCol?.textContent).toMatch(/1\.00 s/);
-    expect(markerCol?.textContent).toMatch(/→ 1\.20 s/);
+    expect(markerCol?.textContent).toMatch(/1\.20 s/);
     expect(within(longTask!).getByTestId("moment-waterfall")).toBeInTheDocument();
     expect(within(longTask!).getByText(/1\.00 s–1\.20 s/)).toBeInTheDocument();
     expect(within(longTask!).getByRole("link", { name: /a\.js/ })).toBeInTheDocument();

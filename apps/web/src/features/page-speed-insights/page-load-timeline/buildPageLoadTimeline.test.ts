@@ -607,7 +607,8 @@ describe("buildPageLoadTimeline", () => {
     expect(netMoments.map((m) => m.title)).toEqual(["Document", "Stylesheet", "Script"]);
 
     const doc = netMoments[0];
-    expect(doc?.timeMs).toBe(5);
+    expect(doc?.startMs).toBe(5);
+    expect(doc?.timeMs).toBe(250);
     expect(doc?.endMs).toBe(250);
     expect(doc?.detail).toMatch(/document/);
     expect(doc?.table?.rows[0]?.[0]).toMatchObject({
@@ -886,10 +887,11 @@ describe("buildPageLoadTimeline", () => {
     );
 
     const netMoments = timeline!.events.filter((m) => m.id.startsWith("net-"));
+    // Ordered by download end time (stylesheet finishes before a.js).
     expect(netMoments.map((m) => m.title)).toEqual([
       "Document",
-      "Script",
       "Stylesheet",
+      "Script",
       "2 Scripts",
       "6 Images",
       "Script",
@@ -897,13 +899,14 @@ describe("buildPageLoadTimeline", () => {
     ]);
 
     const images = netMoments.find((m) => m.title === "6 Images");
-    expect(images?.timeMs).toBe(2040);
+    expect(images?.startMs).toBe(2040);
+    expect(images?.timeMs).toBe(2390);
     expect(images?.endMs).toBe(2390);
     expect(images?.detail).toMatch(/6 image requests/);
     expect(images?.detail).not.toMatch(/within 10 ms/);
     expect(images?.waterfall?.every((bar) => bar.renderBlocking === "non-blocking")).toBe(true);
 
-    const earlyScript = netMoments.find((m) => m.title === "Script" && m.timeMs === 200);
+    const earlyScript = netMoments.find((m) => m.title === "Script" && m.startMs === 200);
     expect(earlyScript?.waterfall?.[0]?.label).toMatch(/a\.js/);
 
     const styles = netMoments.find((m) => m.title === "Stylesheet");
@@ -1055,7 +1058,8 @@ describe("buildPageLoadTimeline", () => {
   it("includes a redirect span when redirects took time", () => {
     const timeline = buildPageLoadTimeline(makeItem({ redirectsMs: 150 }));
     const redirects = timeline!.events.find((s) => s.id === "nav-redirects");
-    expect(redirects?.timeMs).toBe(0);
+    expect(redirects?.startMs).toBe(0);
+    expect(redirects?.timeMs).toBe(150);
     expect(redirects?.endMs).toBe(150);
     expect(redirects?.kind).toBe("blocking");
   });
@@ -1100,9 +1104,10 @@ describe("buildPageLoadTimeline", () => {
     const redirectBar = networkBars(timeline!).find((bar) => bar.statusCode === 307);
     const documentBar = networkBars(timeline!).find((bar) => bar.statusCode === 200);
 
-    expect(redirects?.timeMs).toBe(redirectBar?.startMs);
+    expect(redirects?.startMs).toBe(redirectBar?.startMs);
+    expect(redirects?.timeMs).toBe(redirectBar?.endMs);
     expect(redirects?.endMs).toBe(redirectBar?.endMs);
-    expect(redirects!.endMs! - redirects!.timeMs!).toBeLessThan(1000);
+    expect(redirects!.endMs! - redirects!.startMs!).toBeLessThan(1000);
     expect(redirects?.detail).not.toMatch(/2\.39 s/);
     expect(redirects?.waterfall?.map((bar) => bar.href)).toEqual(["https://www.nextjs.org/"]);
     expect(redirects?.table?.rows[0]?.map((cell) => cell.text)).toContain("status 307");
@@ -1168,7 +1173,8 @@ describe("buildPageLoadTimeline", () => {
       "http://example.com/",
       "https://example.com/",
     ]);
-    expect(redirects?.timeMs).toBe(1);
+    expect(redirects?.startMs).toBe(1);
+    expect(redirects?.timeMs).toBe(120);
     expect(redirects?.endMs).toBe(120);
     expect(timeline!.events.filter((moment) => moment.id === "nav-redirects")).toHaveLength(1);
     expect(
@@ -1301,7 +1307,8 @@ describe("buildPageLoadTimeline", () => {
     const between = moments.slice(fcpIdx + 1, lcpIdx);
     expect(moments.some((m) => m.id === "lcp-seg-elementRenderDelay")).toBe(false);
     const tasks = moments.filter((moment) => moment.id.startsWith("long-task-"));
-    expect(tasks.map((moment) => moment.timeMs)).toEqual([2600, 9000]);
+    expect(tasks.map((moment) => moment.startMs)).toEqual([2600, 9000]);
+    expect(tasks.map((moment) => moment.timeMs)).toEqual([2800, 9100]);
     expect(between.some((moment) => moment.id.startsWith("long-task-"))).toBe(true);
     expect(moments.some((moment) => moment.id.startsWith("long-task-") && moment.timeMs > 6980)).toBe(
       true,
@@ -1540,10 +1547,11 @@ describe("buildPageLoadTimeline", () => {
       [5733, 170],
     ]);
 
-    const card = timeline!.events.find((moment) => moment.timeMs === 3645);
+    const card = timeline!.events.find((moment) => moment.startMs === 3645);
     expect(card?.detail).toBe(
       "nextjs.org/_next/static/immutable/chunks/1k7fgn… blocked the main thread for 61 ms.",
     );
+    expect(card?.timeMs).toBe(3706);
     expect(card?.endMs).toBe(3706);
 
     const observed = mainThreadBlocks(timeline!).filter((block) => !block.url);
@@ -1571,7 +1579,7 @@ describe("buildPageLoadTimeline", () => {
     });
   });
 
-  it("places each long task on the timeline at the moment it starts", () => {
+  it("places each long task on the timeline at the moment it ends", () => {
     const timeline = buildPageLoadTimeline(
       makeItem({
         longTasks: [
@@ -1587,7 +1595,8 @@ describe("buildPageLoadTimeline", () => {
     );
 
     const moments = timeline!.events.filter((item) => item.id.startsWith("long-task-"));
-    expect(moments.map((moment) => moment.timeMs)).toEqual([4200, 9880, 17100]);
+    expect(moments.map((moment) => moment.startMs)).toEqual([4200, 9880, 17100]);
+    expect(moments.map((moment) => moment.timeMs)).toEqual([4290, 10460, 17948]);
     expect(moments.map((moment) => moment.endMs)).toEqual([4290, 10460, 17948]);
     expect(moments.map((moment) => moment.title)).toEqual(["Long task", "Long task", "Long task"]);
     expect(timeline!.events.some((item) => item.id === "after-long-tasks")).toBe(false);
@@ -1654,13 +1663,21 @@ describe("buildPageLoadTimeline", () => {
     const userSteps = steps.filter((s) => s.id.startsWith("user-timing-"));
     expect(userSteps.map((s) => s.title)).toEqual([
       "Next.js-before-hydration",
-      "Next.js-hydration",
       "beforeRender",
+      "Next.js-hydration",
       "sentry-tracing-init",
     ]);
 
+    const beforeHydration = userSteps.find((s) => s.title === "Next.js-before-hydration");
+    // Measures sit at their end time so a 0→1.14s span isn't pinned at navigation start.
+    expect(beforeHydration?.startMs).toBe(0);
+    expect(beforeHydration?.timeMs).toBe(1144);
+    expect(beforeHydration?.endMs).toBe(1144);
+    expect(beforeHydration?.detail).toMatch(/1\.14 s/);
+
     const hydration = userSteps.find((s) => s.title === "Next.js-hydration");
-    expect(hydration?.timeMs).toBe(1144);
+    expect(hydration?.startMs).toBe(1144);
+    expect(hydration?.timeMs).toBe(1384);
     expect(hydration?.endMs).toBe(1384);
     expect(hydration?.detail).toMatch(/240 ms/);
 

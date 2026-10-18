@@ -254,6 +254,14 @@ function timedEvent(
   );
 }
 
+/** Place an interval at its end; start shows as smaller text above the node. */
+function atIntervalEnd(
+  startMs: number,
+  endMs: number,
+): Pick<TimelineEvent, "timeMs" | "startMs" | "endMs"> {
+  return { startMs, timeMs: endMs, endMs };
+}
+
 function redirectWaterfall(hops: CombinedRequest[]): {
   waterfall: TimelineWaterfallBar[];
   table: TimelineTable;
@@ -379,7 +387,8 @@ function networkEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent[
     if (attachedNotes) attachedDocumentNotes = true;
 
     const showPriority = group.some((r) => r.priority);
-    const phase = phaseActiveAt(bounds, startMs);
+    const placement = atIntervalEnd(startMs, endMs);
+    const phase = phaseActiveAt(bounds, placement.timeMs);
 
     events.push(
       event(
@@ -387,8 +396,7 @@ function networkEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent[
           id: `net-${index}`,
           title: pluralResourceTitle(resourceType, group.length),
           detail,
-          timeMs: startMs,
-          endMs,
+          ...placement,
           phaseId: phase.id,
           kind: anyBlocking ? "blocking" : "marker",
           notes: attachedNotes,
@@ -429,9 +437,13 @@ function networkEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent[
   if (!attachedDocumentNotes) {
     for (const note of notes) {
       if (note.timeMs == null) continue;
+      const placement =
+        note.endMs != null && note.endMs !== note.timeMs
+          ? atIntervalEnd(note.timeMs, note.endMs)
+          : { timeMs: note.timeMs };
       events.push(
-        timedEvent(note.id, note.title, note.detail, note.timeMs, "requestResponse", bounds, {
-          endMs: note.endMs,
+        timedEvent(note.id, note.title, note.detail, placement.timeMs, "requestResponse", bounds, {
+          ...placement,
           kind: note.kind,
           rating: note.rating,
         }),
@@ -485,15 +497,15 @@ function longTaskEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent
           ? `${shortUrl(group[0]!.url)} blocked the main thread for ${formatMs(group[0]!.duration)}.`
           : `Unattributed script blocked the main thread for ${formatMs(group[0]!.duration)}.`
         : `${group.length} long tasks started within ${START_GROUP_WINDOW_MS} ms (${formatMs(totalDuration)} total).`;
-    const phase = phaseActiveAt(bounds, startMs);
+    const placement = atIntervalEnd(startMs, endMs);
+    const phase = phaseActiveAt(bounds, placement.timeMs);
 
     return event(
       {
         id: `long-task-${index}`,
         title: group.length === 1 ? "Long task" : `${group.length} Long tasks`,
         detail,
-        timeMs: startMs,
-        endMs,
+        ...placement,
         phaseId: phase.id,
         kind: "blocking",
         waterfall: group.map((task, i) => longTaskBar(task, `long-task-${index}-${i}`)),
@@ -521,18 +533,19 @@ function longTaskEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent
 function userTimingEvents(timings: UserTiming[], bounds: PhaseBound[]): TimelineEvent[] {
   return timings.map((timing, index) => {
     const isMeasure = timing.timingType.toLowerCase() === "measure" && timing.duration != null;
-    const endMs = isMeasure ? timing.startTime + timing.duration! : undefined;
+    const placement = isMeasure
+      ? atIntervalEnd(timing.startTime, timing.startTime + timing.duration!)
+      : { timeMs: timing.startTime };
     const detail = isMeasure
       ? `User timing measure lasting ${formatMs(timing.duration!)}.`
       : "User timing mark.";
-    const phase = phaseActiveAt(bounds, timing.startTime);
+    const phase = phaseActiveAt(bounds, placement.timeMs);
     return event(
       {
         id: `user-timing-${index}`,
         title: timing.name,
         detail,
-        timeMs: timing.startTime,
-        endMs,
+        ...placement,
         phaseId: phase.id,
         kind: "marker",
       },
@@ -627,16 +640,17 @@ function milestoneEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEven
 
   if (redirectStart != null && redirectEnd != null && redirectEnd > redirectStart) {
     const redirectMs = redirectEnd - redirectStart;
+    const placement = atIntervalEnd(redirectStart, redirectEnd);
     events.push(
       timedEvent(
         "nav-redirects",
         "Redirects",
         `${formatMs(redirectMs)} spent on redirects before the document.`,
-        redirectStart,
+        placement.timeMs,
         "navigation",
         bounds,
         {
-          endMs: redirectEnd,
+          ...placement,
           kind: "blocking",
           rating: redirectMs > 100 ? "needs-improvement" : "good",
           evidence: hops.length ? hops.map((hop) => hop.url) : load.redirectAuditUrls,
@@ -675,15 +689,16 @@ function milestoneEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEven
       if (load.fcp != null && seg.endMs <= load.fcp) continue;
       const startMs = load.fcp != null ? Math.max(load.fcp, seg.startMs) : seg.startMs;
       if (startMs >= load.lcp) continue;
+      const placement = atIntervalEnd(startMs, Math.min(load.lcp, seg.endMs));
       events.push(
         timedEvent(
           `lcp-seg-${seg.subpart}`,
           seg.label,
           `${formatMs(seg.durationMs)} of LCP is ${seg.label.toLowerCase()}.`,
-          startMs,
+          placement.timeMs,
           "firstRender",
           bounds,
-          { endMs: Math.min(load.lcp, seg.endMs) },
+          placement,
         ),
       );
     }

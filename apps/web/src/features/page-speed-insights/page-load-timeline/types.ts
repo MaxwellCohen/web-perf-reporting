@@ -81,8 +81,10 @@ export type TimelineEvent = {
   id: string;
   phaseId: PhaseId;
   phaseTitle: string;
-  /** Sort / display time; not-recorded facts without a time use phase start */
+  /** Sort / display time; intervals use the end. Not-recorded facts without a time use phase start. */
   timeMs: number;
+  /** Interval start when the row is placed at its end (`timeMs` / `endMs`). */
+  startMs?: number;
   endMs?: number;
   title: string;
   detail: string;

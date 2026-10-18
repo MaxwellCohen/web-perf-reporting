@@ -508,6 +508,11 @@ function MomentRow({
 
       <div className="grid grid-cols-[4.75rem_minmax(0,1fr)] gap-3 sm:grid-cols-[5.75rem_minmax(0,1fr)]">
         <div className="relative z-10 flex flex-col items-center pt-0.5">
+          {moment.startMs != null && moment.startMs !== moment.timeMs ? (
+            <span className="max-w-full truncate px-0.5 text-center text-[9px] tabular-nums text-muted-foreground">
+              {formatMs(moment.startMs)} → 
+            </span>
+          ) : null}
           <span
             className={cn(
               "max-w-full px-0.5 text-center text-[11px] font-semibold leading-tight tabular-nums sm:text-xs",
