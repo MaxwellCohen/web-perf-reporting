@@ -162,10 +162,33 @@ describe("PageLoadTimeline", () => {
     expect(screen.getByRole("heading", { name: "Stylesheet" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Image" })).toBeInTheDocument();
 
-    const image = screen.getByRole("heading", { name: "Image" }).closest("li");
-    expect(within(image!).getByText("Non-blocking")).toBeInTheDocument();
-    const stylesheet = screen.getByRole("heading", { name: "Stylesheet" }).closest("li");
-    expect(within(stylesheet!).getByText("Potentially blocking")).toBeInTheDocument();
+    const imageHeading = screen.getByRole("heading", { name: "Image" });
+    const imageCard = imageHeading.closest("div.rounded-lg") as HTMLElement | null;
+    expect(imageCard).toBeTruthy();
+    expect(within(imageCard!).getByText("Non-blocking")).toBeInTheDocument();
+    const stylesheetCard = screen
+      .getByRole("heading", { name: "Stylesheet" })
+      .closest("div.rounded-lg") as HTMLElement | null;
+    expect(stylesheetCard).toBeTruthy();
+    expect(within(stylesheetCard!).getByText("Potentially blocking")).toBeInTheDocument();
+
+    const overview = screen.getByTestId("timeline-overview");
+    expect(within(overview).getByText("All overlapping work")).toBeInTheDocument();
+    expect(within(overview).getByTestId("overview-lanes")).toBeInTheDocument();
+    const focus = within(overview).getByTestId("overview-focus");
+    fireEvent.click(within(focus).getByRole("button", { name: /Blocking/ }));
+    expect(within(overview).getByText("Blocking work")).toBeInTheDocument();
+    const blockingLanes = within(overview).getByTestId("overview-lanes");
+    expect(blockingLanes.querySelectorAll("li")).toHaveLength(2);
+    expect(blockingLanes).toHaveTextContent("Stylesheet");
+    expect(blockingLanes).toHaveTextContent("Long task");
+    expect(blockingLanes).not.toHaveTextContent("Image");
+
+    expect(screen.queryByTestId("parallel-cluster")).not.toBeInTheDocument();
+    expect(screen.queryByText("Parallel")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Document" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Stylesheet" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Image" })).toBeInTheDocument();
 
     const longTask = screen.getByRole("heading", { name: "Long task" }).closest("li");
     expect(longTask).toBeTruthy();
@@ -179,7 +202,6 @@ describe("PageLoadTimeline", () => {
     expect(within(longTask!).queryByText("Requests")).not.toBeInTheDocument();
 
     expect(screen.queryByText("Network")).not.toBeInTheDocument();
-    expect(screen.queryByText("Main thread")).not.toBeInTheDocument();
   });
 
   it("shows coverage on a stylesheet row", () => {

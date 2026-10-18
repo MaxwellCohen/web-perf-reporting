@@ -27,6 +27,7 @@ import { getNetworkBarColor } from "@/features/page-speed-insights/shared/networ
 import { ResourceUrlCell } from "@/features/page-speed-insights/shared/ResourceUrlCell";
 import { cn } from "@/lib/cn";
 import { buildPageLoadTimelines } from "./buildPageLoadTimeline";
+import { isIntervalMoment, momentInterval } from "./clusterOverlappingMoments";
 import {
   TASK_FILTERS,
   allTaskFilters,
@@ -152,6 +153,12 @@ function markerDotClass(kind: MarkerKind, rating?: Rating): string {
   }
   if (kind === "fact") return "bg-muted-foreground/50";
   return "bg-sky-500";
+}
+
+function parallelLaneColor(moment: TimelineEvent): string {
+  const resourceType = moment.waterfall?.[0]?.resourceType;
+  if (resourceType) return getNetworkBarColor(resourceType);
+  return markerDotClass(moment.kind, moment.rating);
 }
 
 function MomentScreenshot({ timing, data }: { timing: number; data: string }) {
@@ -484,6 +491,318 @@ function MomentNotes({ notes }: { notes: TimelineNote[] }) {
   );
 }
 
+function PhaseHeader({ title }: { title: string }) {
+  return (
+    <div className="sticky top-0 z-20 mb-3 border-b border-border/80 bg-background/95 px-1 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
+    </div>
+  );
+}
+
+function MomentCard({ moment, axisEnd }: { moment: TimelineEvent; axisEnd: number }) {
+  const muted = moment.status === "not-recorded";
+  const downloadBlocking = blockingStatuses(moment.waterfall);
+  const statusLabel =
+    moment.status === "measured" && !moment.hasTimestamp ? null : moment.status.replace("-", " ");
+
+  return (
+    <div
+      className={cn(
+        "min-w-0 rounded-lg border px-3 py-3 sm:px-4",
+        muted && "border-dashed opacity-80",
+        moment.kind === "blocking" && !muted && "border-rose-500/30",
+        moment.kind === "cwv" && !muted && "border-amber-500/30",
+      )}
+    >
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <h4 className="text-sm font-semibold leading-snug sm:text-base">{moment.title}</h4>
+            {moment.rating ? (
+              <span
+                className={cn(
+                  "rounded px-1.5 py-0.5 text-[10px] font-medium uppercase",
+                  ratingClass(moment.rating),
+                )}
+              >
+                {moment.rating.replace("-", " ")}
+              </span>
+            ) : null}
+            {downloadBlocking.map((status) => (
+              <RenderBlockingBadge key={status} status={status} />
+            ))}
+            {statusLabel ? (
+              <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                {statusLabel}
+              </span>
+            ) : null}
+          </div>
+
+          <p className="text-sm text-muted-foreground">{textWithUnattributedHint(moment.detail)}</p>
+
+          <MomentRequests
+            bars={moment.waterfall}
+            table={moment.table}
+            axisEnd={axisEnd}
+            showBlockingBadge={downloadBlocking.length > 1}
+          />
+
+          {moment.notes?.length ? <MomentNotes notes={moment.notes} /> : null}
+
+          {moment.lcpSegments ? <LcpBreakdown segments={moment.lcpSegments} /> : null}
+        </div>
+
+        {moment.screenshot ? (
+          <MomentScreenshot timing={moment.screenshot.timing} data={moment.screenshot.data} />
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function MomentRail({ moment }: { moment: TimelineEvent }) {
+  const muted = moment.status === "not-recorded";
+  return (
+    <div className="relative z-10 flex flex-col items-center pt-0.5">
+      {moment.startMs != null && moment.startMs !== moment.timeMs ? (
+        <span className="max-w-full truncate px-0.5 text-center text-xs tabular-nums text-muted-foreground">
+          {formatMs(moment.startMs)} →
+        </span>
+      ) : null}
+      <span
+        className={cn(
+          "max-w-full px-0.5 text-center text-xs font-semibold leading-tight tabular-nums sm:text-sm",
+          muted ? "text-muted-foreground/70" : "text-foreground",
+        )}
+      >
+        {formatMs(moment.timeMs)}
+      </span>
+      {moment.endMs != null && moment.endMs !== moment.timeMs ? (
+        <span className="max-w-full truncate px-0.5 text-center text-xs tabular-nums text-muted-foreground">
+          → {formatMs(moment.endMs)}
+        </span>
+      ) : null}
+      <span
+        className={cn(
+          "mt-1 size-2.5 shrink-0 rounded-full ring-2 ring-background",
+          markerDotClass(moment.kind, moment.rating),
+        )}
+        aria-hidden
+      />
+    </div>
+  );
+}
+
+function momentAnchorId(id: string): string {
+  return `timeline-moment-${id}`;
+}
+
+function scrollToMoment(id: string) {
+  document.getElementById(momentAnchorId(id))?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+/** Downloads, long tasks, and other work that blocked or could block rendering. */
+function isBlockingWork(event: TimelineEvent): boolean {
+  if (event.kind === "blocking") return true;
+  if (event.id.startsWith("long-task-")) return true;
+  return (event.waterfall ?? []).some(
+    (bar) => bar.renderBlocking === "blocking" || bar.renderBlocking === "potentially-blocking",
+  );
+}
+
+function blockingLabel(event: TimelineEvent): string | null {
+  if (event.id.startsWith("long-task-") || event.kind === "blocking") {
+    const statuses = blockingStatuses(event.waterfall);
+    if (statuses.includes("blocking")) return "Blocking";
+    if (statuses.includes("potentially-blocking")) return "Potentially blocking";
+    return "Main thread";
+  }
+  const statuses = blockingStatuses(event.waterfall);
+  if (statuses.includes("blocking")) return "Blocking";
+  if (statuses.includes("potentially-blocking")) return "Potentially blocking";
+  return null;
+}
+
+function LaneChart({
+  events,
+  startMs,
+  endMs,
+  heading,
+  testId,
+  onSelect,
+}: {
+  events: TimelineEvent[];
+  startMs: number;
+  endMs: number;
+  heading?: string;
+  testId?: string;
+  onSelect?: (eventId: string) => void;
+}) {
+  const windowMs = Math.max(endMs - startMs, 1);
+  const lanes = [...events].sort((a, b) => {
+    const aRange = momentInterval(a);
+    const bRange = momentInterval(b);
+    return (
+      aRange.endMs - bRange.endMs || aRange.startMs - bRange.startMs || a.timeMs - b.timeMs
+    );
+  });
+
+  if (!lanes.length) return null;
+
+  return (
+    <div
+      className="space-y-3 rounded-lg border border-border/70 bg-muted/15 px-3 py-3 sm:px-4"
+      data-testid={testId}
+    >
+      {heading ? (
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+          <h3 className="text-sm font-semibold tracking-tight sm:text-base">{heading}</h3>
+          <span className="text-xs tabular-nums text-muted-foreground sm:text-sm">
+            {formatMs(startMs)}–{formatMs(endMs)}
+          </span>
+        </div>
+      ) : null}
+      <ul className="m-0 list-none space-y-2.5 p-0">
+        {lanes.map((event) => {
+          const range = momentInterval(event);
+          const left = ((range.startMs - startMs) / windowMs) * 100;
+          const width = Math.max(2, ((range.endMs - range.startMs) / windowMs) * 100);
+          const rangeLabel = `${formatMs(range.startMs)}–${formatMs(range.endMs)}`;
+          const blockLabel = blockingLabel(event);
+          const row = (
+            <>
+              <span className="flex min-w-0 flex-col gap-0.5">
+                <span className="truncate text-sm font-medium text-foreground" title={event.title}>
+                  {event.title}
+                </span>
+                {blockLabel ? (
+                  <span
+                    className={cn(
+                      "w-fit rounded px-1.5 py-0.5 text-[10px] font-medium",
+                      blockLabel === "Potentially blocking"
+                        ? renderBlockingClass("potentially-blocking")
+                        : renderBlockingClass("blocking"),
+                    )}
+                  >
+                    {blockLabel}
+                  </span>
+                ) : null}
+              </span>
+              <div className="relative h-3 min-w-0 overflow-hidden rounded-md bg-muted/70">
+                <div
+                  className={cn("absolute inset-y-0 rounded-md", parallelLaneColor(event))}
+                  style={{ left: `${left}%`, width: `${width}%` }}
+                  title={`${event.title}: ${rangeLabel}`}
+                />
+              </div>
+              <span className="text-xs tabular-nums text-muted-foreground sm:text-right sm:text-sm">
+                {rangeLabel}
+                <span className="text-muted-foreground/70">
+                  {" "}
+                  · {formatMs(range.endMs - range.startMs)}
+                </span>
+              </span>
+            </>
+          );
+          return (
+            <li key={event.id}>
+              {onSelect ? (
+                <button
+                  type="button"
+                  onClick={() => onSelect(event.id)}
+                  className="grid w-full grid-cols-1 items-center gap-1.5 rounded-md text-left transition hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:grid-cols-[minmax(8rem,12rem)_minmax(0,1fr)_auto] sm:gap-3 sm:px-1 sm:py-1"
+                >
+                  {row}
+                </button>
+              ) : (
+                <div className="grid grid-cols-1 items-center gap-1.5 sm:grid-cols-[minmax(8rem,12rem)_minmax(0,1fr)_auto] sm:gap-3">
+                  {row}
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+type OverviewFocus = "all" | "blocking";
+
+function TimelineOverview({ events, axisEndMs }: { events: TimelineEvent[]; axisEndMs: number }) {
+  const [focus, setFocus] = useState<OverviewFocus>("all");
+  const intervals = events.filter(isIntervalMoment);
+  const blocking = intervals.filter(isBlockingWork);
+
+  if (intervals.length < 2) return null;
+
+  const shown = focus === "blocking" ? blocking : intervals;
+  const heading = focus === "blocking" ? "Blocking work" : "All overlapping work";
+
+  return (
+    <div className="space-y-3" data-testid="timeline-overview">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold tracking-tight sm:text-base">{heading}</p>
+          <p className="text-xs text-muted-foreground sm:text-sm">
+            {intervals.length} overlapping events
+            {blocking.length > 0 ? ` · ${blocking.length} blocking` : ""}
+            {" · "}
+            {formatMs(0)}–{formatMs(axisEndMs)}
+          </p>
+        </div>
+        <div
+          role="group"
+          aria-label="Overview focus"
+          data-testid="overview-focus"
+          className="flex flex-wrap items-center gap-1.5"
+        >
+          <button
+            type="button"
+            aria-pressed={focus === "all"}
+            onClick={() => setFocus("all")}
+            className={cn(
+              "rounded-md border px-2.5 py-1 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-sm",
+              focus === "all"
+                ? "border-transparent bg-foreground text-background"
+                : "border-border bg-background text-foreground",
+            )}
+          >
+            All ({intervals.length})
+          </button>
+          <button
+            type="button"
+            aria-pressed={focus === "blocking"}
+            disabled={blocking.length === 0}
+            onClick={() => setFocus("blocking")}
+            className={cn(
+              "rounded-md border px-2.5 py-1 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-sm",
+              focus === "blocking"
+                ? "border-transparent bg-rose-600 text-white"
+                : "border-border bg-background text-foreground",
+              blocking.length === 0 && "opacity-50",
+            )}
+          >
+            Blocking ({blocking.length})
+          </button>
+        </div>
+      </div>
+
+      {shown.length > 0 ? (
+        <LaneChart
+          events={shown}
+          startMs={0}
+          endMs={axisEndMs}
+          testId="overview-lanes"
+          onSelect={scrollToMoment}
+        />
+      ) : (
+        <p className="text-sm text-muted-foreground">No blocking work in this view.</p>
+      )}
+    </div>
+  );
+}
+
 function MomentRow({
   moment,
   axisEnd,
@@ -493,100 +812,14 @@ function MomentRow({
   axisEnd: number;
   showPhaseHeader: boolean;
 }) {
-  const muted = moment.status === "not-recorded";
-  const downloadBlocking = blockingStatuses(moment.waterfall);
-  const statusLabel =
-    moment.status === "measured" && !moment.hasTimestamp ? null : moment.status.replace("-", " ");
-
   return (
-    <li className="relative">
-      {showPhaseHeader ? (
-        <div className="sticky top-0 z-20 mb-3 border-b border-border/80 bg-background/95 px-1 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-          <h3 className="text-sm font-semibold tracking-tight">{moment.phaseTitle}</h3>
-        </div>
-      ) : null}
+    <li className="relative scroll-mt-28" id={momentAnchorId(moment.id)}>
+      {showPhaseHeader ? <PhaseHeader title={moment.phaseTitle} /> : null}
 
       <div className="grid grid-cols-[4.75rem_minmax(0,1fr)] gap-3 sm:grid-cols-[5.75rem_minmax(0,1fr)]">
-        <div className="relative z-10 flex flex-col items-center pt-0.5">
-          {moment.startMs != null && moment.startMs !== moment.timeMs ? (
-            <span className="max-w-full truncate px-0.5 text-center text-[9px] tabular-nums text-muted-foreground">
-              {formatMs(moment.startMs)} → 
-            </span>
-          ) : null}
-          <span
-            className={cn(
-              "max-w-full px-0.5 text-center text-[11px] font-semibold leading-tight tabular-nums sm:text-xs",
-              muted ? "text-muted-foreground/70" : "text-foreground",
-            )}
-          >
-            {formatMs(moment.timeMs)}
-          </span>
-          {moment.endMs != null && moment.endMs !== moment.timeMs ? (
-            <span className="max-w-full truncate px-0.5 text-center text-[9px] tabular-nums text-muted-foreground">
-              → {formatMs(moment.endMs)}
-            </span>
-          ) : null}
-          <span
-            className={cn(
-              "mt-1 size-2.5 shrink-0 rounded-full ring-2 ring-background",
-              markerDotClass(moment.kind, moment.rating),
-            )}
-            aria-hidden
-          />
-        </div>
-
-        <div
-          className={cn(
-            "mb-4 min-w-0 rounded-lg border px-3 py-3 sm:px-4",
-            muted && "border-dashed opacity-80",
-            moment.kind === "blocking" && !muted && "border-rose-500/30",
-            moment.kind === "cwv" && !muted && "border-amber-500/30",
-          )}
-        >
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-            <div className="min-w-0 flex-1 space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <h4 className="text-sm font-semibold leading-snug sm:text-base">{moment.title}</h4>
-                {moment.rating ? (
-                  <span
-                    className={cn(
-                      "rounded px-1.5 py-0.5 text-[10px] font-medium uppercase",
-                      ratingClass(moment.rating),
-                    )}
-                  >
-                    {moment.rating.replace("-", " ")}
-                  </span>
-                ) : null}
-                {downloadBlocking.map((status) => (
-                  <RenderBlockingBadge key={status} status={status} />
-                ))}
-                {statusLabel ? (
-                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                    {statusLabel}
-                  </span>
-                ) : null}
-              </div>
-
-              <p className="text-sm text-muted-foreground">
-                {textWithUnattributedHint(moment.detail)}
-              </p>
-
-              <MomentRequests
-                bars={moment.waterfall}
-                table={moment.table}
-                axisEnd={axisEnd}
-                showBlockingBadge={downloadBlocking.length > 1}
-              />
-
-              {moment.notes?.length ? <MomentNotes notes={moment.notes} /> : null}
-
-              {moment.lcpSegments ? <LcpBreakdown segments={moment.lcpSegments} /> : null}
-            </div>
-
-            {moment.screenshot ? (
-              <MomentScreenshot timing={moment.screenshot.timing} data={moment.screenshot.data} />
-            ) : null}
-          </div>
+        <MomentRail moment={moment} />
+        <div className="mb-4 min-w-0">
+          <MomentCard moment={moment} axisEnd={axisEnd} />
         </div>
       </div>
     </li>
@@ -650,7 +883,7 @@ function TaskFilters({
 function VerticalTimeline({ timeline }: { timeline: PageLoadTimeline }) {
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground sm:text-sm">
         <span className="inline-flex items-center gap-1">
           <span className="size-2 rounded-full bg-rose-500" /> Blocking
         </span>
@@ -667,6 +900,8 @@ function VerticalTimeline({ timeline }: { timeline: PageLoadTimeline }) {
           </span>
         ) : null}
       </div>
+
+      <TimelineOverview events={timeline.events} axisEndMs={timeline.axisEndMs} />
 
       <div className="relative">
         <div
