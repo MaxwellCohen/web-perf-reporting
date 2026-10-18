@@ -147,9 +147,9 @@ describe("PageLoadTimeline", () => {
     expect(screen.getByTestId("page-load-timeline")).toBeInTheDocument();
     expect(screen.getByTestId("timeline-report-label")).toHaveTextContent("Mobile");
     expect(screen.getByText(/Scroll down from 0 ms/i)).toBeInTheDocument();
-    expect(screen.getByText("Navigation start")).toBeInTheDocument();
-    expect(screen.getByText("navigationStart")).toBeInTheDocument();
-    expect(screen.getByText("FCP")).toBeInTheDocument();
+    expect(screen.getAllByText("Navigation start").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("navigationStart").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("FCP").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("First Contentful Paint at 1.20 s.")).toBeInTheDocument();
 
     const documentRow = screen.getByRole("heading", { name: "Document" }).closest("li");
@@ -173,16 +173,44 @@ describe("PageLoadTimeline", () => {
     expect(within(stylesheetCard!).getByText("Potentially blocking")).toBeInTheDocument();
 
     const overview = screen.getByTestId("timeline-overview");
-    expect(within(overview).getByText("All overlapping work")).toBeInTheDocument();
-    expect(within(overview).getByTestId("overview-lanes")).toBeInTheDocument();
+    const overviewToggle = within(overview).getByRole("button", { name: /Waterfall view/ });
+    expect(overviewToggle).toHaveAttribute("aria-expanded", "true");
+    expect(within(overview).getByText("Waterfall view")).toBeInTheDocument();
+    const allLanes = within(overview).getByTestId("overview-lanes");
+    expect(within(allLanes).getByTestId("overview-time-axis")).toBeInTheDocument();
+    expect(within(allLanes).getByTestId("overview-tick-grid")).toBeInTheDocument();
+    expect(allLanes).toHaveTextContent("navigationStart");
+    expect(allLanes).toHaveTextContent("FCP");
+    expect(allLanes).toHaveTextContent("LCP");
+    expect(allLanes).toHaveTextContent("CWV");
+    expect(allLanes).toHaveTextContent("document downloaded");
+    expect(allLanes).toHaveTextContent("Screenshot");
+    expect(within(allLanes).getAllByTitle(/FCP: 1\.20 s/).length).toBeGreaterThan(0);
+    expect(within(allLanes).getAllByTitle(/LCP: 2\.50 s/).length).toBeGreaterThan(0);
     const focus = within(overview).getByTestId("overview-focus");
     fireEvent.click(within(focus).getByRole("button", { name: /Blocking/ }));
-    expect(within(overview).getByText("Blocking work")).toBeInTheDocument();
+    expect(within(overview).getByText("Waterfall view")).toBeInTheDocument();
     const blockingLanes = within(overview).getByTestId("overview-lanes");
     expect(blockingLanes.querySelectorAll("li")).toHaveLength(2);
-    expect(blockingLanes).toHaveTextContent("Stylesheet");
+    expect(blockingLanes).toHaveTextContent("style downloaded");
     expect(blockingLanes).toHaveTextContent("Long task");
-    expect(blockingLanes).not.toHaveTextContent("Image");
+    expect(blockingLanes).not.toHaveTextContent("a.js");
+    expect(within(blockingLanes).getAllByTitle(/style downloaded:.*320 ms/).length).toBeGreaterThan(
+      0,
+    );
+    expect(within(blockingLanes).getAllByTitle(/Long task:.*200 ms/).length).toBeGreaterThan(0);
+    expect(blockingLanes).not.toHaveTextContent("hero.png");
+    expect(blockingLanes).not.toHaveTextContent("image downloaded");
+    expect(blockingLanes).not.toHaveTextContent("FCP");
+    expect(blockingLanes).not.toHaveTextContent("LCP");
+
+    fireEvent.click(within(overview).getByRole("button", { name: /Waterfall view/ }));
+    expect(overviewToggle).toHaveAttribute("aria-expanded", "false");
+    expect(within(overview).queryByTestId("overview-lanes")).not.toBeInTheDocument();
+    expect(within(overview).queryByTestId("overview-focus")).not.toBeInTheDocument();
+    fireEvent.click(within(overview).getByRole("button", { name: /Waterfall view/ }));
+    expect(overviewToggle).toHaveAttribute("aria-expanded", "true");
+    expect(within(overview).getByTestId("overview-lanes")).toBeInTheDocument();
 
     expect(screen.queryByTestId("parallel-cluster")).not.toBeInTheDocument();
     expect(screen.queryByText("Parallel")).not.toBeInTheDocument();
@@ -198,7 +226,8 @@ describe("PageLoadTimeline", () => {
     expect(within(longTask!).getByTestId("moment-waterfall")).toBeInTheDocument();
     expect(within(longTask!).getByText(/1\.00 s–1\.20 s/)).toBeInTheDocument();
     expect(within(longTask!).getByRole("link", { name: /a\.js/ })).toBeInTheDocument();
-    // A single request stays open. Groups fold the bars and URL rows into one disclosure.
+    // A single task stays open. Groups fold the bars into a Tasks disclosure.
+    expect(within(longTask!).queryByText("Tasks")).not.toBeInTheDocument();
     expect(within(longTask!).queryByText("Requests")).not.toBeInTheDocument();
 
     expect(screen.queryByText("Network")).not.toBeInTheDocument();
@@ -284,24 +313,53 @@ describe("PageLoadTimeline", () => {
     mockItems.current = [item];
     render(<PageLoadTimeline />);
 
-    const longTask = screen.getByRole("heading", { name: "2 Long tasks" }).closest("li");
-    expect(longTask).toBeTruthy();
-    const scope = within(longTask!);
-    const disclosure = scope.getByText("Requests").closest("details");
+    const headings = screen.getAllByRole("heading", { name: "Long task" });
+    expect(headings).toHaveLength(2);
+
+    const rows = headings.map((heading) => heading.closest("li")).filter(Boolean) as HTMLElement[];
+    const unattributed = rows.find((li) => li.textContent?.includes("1.00 s–1.58 s"));
+    expect(unattributed).toBeTruthy();
+    const scope = within(unattributed!);
+    expect(scope.queryByText("Tasks")).not.toBeInTheDocument();
+    const waterfall = scope.getByTestId("moment-waterfall");
+    const label = within(waterfall).getByRole("button", { name: "Unattributed" });
+    expect(label).toHaveAccessibleDescription(/did not attribute it to a script URL/i);
+    expect(waterfall).toHaveTextContent(/1\.00 s–1\.58 s · 580 ms/);
+
+    const attributed = rows.find((li) => within(li).queryAllByRole("link", { name: /a\.js/ }).length);
+    expect(attributed).toBeTruthy();
+    expect(within(attributed!).getByTestId("moment-waterfall")).toHaveTextContent(
+      /1\.00 s–1\.08 s · 80 ms/,
+    );
+  });
+
+  it("labels grouped short tasks as Tasks in the disclosure", () => {
+    const item = reportItem("Mobile");
+    const audits = item.item.lighthouseResult.audits as Record<string, unknown>;
+    audits["main-thread-tasks"] = {
+      id: "main-thread-tasks",
+      details: {
+        type: "table",
+        items: [
+          { startTime: 2000, duration: 20 },
+          { startTime: 2020, duration: 15 },
+          { startTime: 2035, duration: 10 },
+        ],
+        headings: [],
+      },
+    };
+    mockItems.current = [item];
+    render(<PageLoadTimeline />);
+
+    const shortTasks = screen.getByRole("heading", { name: "3 Short tasks" }).closest("li");
+    expect(shortTasks).toBeTruthy();
+    const scope = within(shortTasks!);
+    const disclosure = scope.getByText("Tasks").closest("details");
     expect(disclosure).toBeTruthy();
     expect(disclosure).not.toHaveAttribute("open");
-    expect(scope.queryByRole("table")).not.toBeInTheDocument();
-
     fireEvent.click(scope.getByText("show"));
     expect(disclosure).toHaveAttribute("open");
-
-    const label = scope.getByRole("button", { name: "Unattributed" });
-    expect(label).toHaveAccessibleDescription(/did not attribute it to a script URL/i);
-    const waterfall = scope.getByTestId("moment-waterfall");
-    expect(waterfall).toContainElement(label);
-    expect(waterfall).toContainElement(scope.getByRole("link", { name: /a\.js/ }));
-    expect(waterfall).toHaveTextContent(/1\.00 s–1\.58 s · 580 ms/);
-    expect(waterfall).toHaveTextContent(/1\.00 s–1\.08 s · 80 ms/);
+    expect(scope.getByTestId("moment-waterfall")).toBeInTheDocument();
   });
 
   it("hides non-blocking tasks and long tasks from the timeline", () => {

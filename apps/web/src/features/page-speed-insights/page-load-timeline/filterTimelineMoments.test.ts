@@ -129,6 +129,28 @@ describe("filterTimelineMoments", () => {
     expect(visible.map((item) => item.id)).toEqual(["net-3"]);
   });
 
+  it("hides short tasks with the potentially-blocking filter", () => {
+    const shortTask = moment({
+      id: "short-task-0",
+      phaseId: "subresources",
+      title: "Short task",
+      kind: "potentially-blocking",
+    });
+    const longTask = moment({ id: "long-task-0", phaseId: "subresources", title: "Long task" });
+    const script = moment({
+      id: "net-3",
+      phaseId: "subresources",
+      waterfall: [bar("app.js", "blocking", "Script")],
+    });
+
+    const visible = filterTimelineMoments(
+      [script, shortTask, longTask],
+      without("potentially-blocking"),
+    );
+
+    expect(visible.map((item) => item.id)).toEqual(["net-3", "long-task-0"]);
+  });
+
   it("lists only filters that appear on subresource tasks", () => {
     const moments = [
       moment({
@@ -142,8 +164,13 @@ describe("filterTimelineMoments", () => {
         waterfall: [bar("hero", "non-blocking")],
       }),
       moment({ id: "long-task-0", phaseId: "subresources" }),
+      moment({ id: "short-task-0", phaseId: "subresources", kind: "potentially-blocking" }),
     ];
 
-    expect(availableTaskFilters(moments)).toEqual(["non-blocking", "long-task"]);
+    expect(availableTaskFilters(moments)).toEqual([
+      "potentially-blocking",
+      "non-blocking",
+      "long-task",
+    ]);
   });
 });

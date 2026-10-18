@@ -23,6 +23,7 @@ export function availableTaskFilters(events: TimelineEvent[]): TaskFilterId[] {
   const present = new Set<TaskFilterId>();
   for (const moment of events) {
     if (moment.id.startsWith("long-task-")) present.add("long-task");
+    if (moment.id.startsWith("short-task-")) present.add("potentially-blocking");
     for (const bar of moment.waterfall ?? []) {
       if (bar.resourceType === "Document" || !bar.renderBlocking) continue;
       present.add(bar.renderBlocking);
@@ -90,6 +91,9 @@ function filterDownloadMoment(
 function filterMoment(moment: TimelineEvent, enabled: TaskFilterSelection): TimelineEvent | null {
   if (moment.id.startsWith("long-task-")) {
     return enabled.has("long-task") ? moment : null;
+  }
+  if (moment.id.startsWith("short-task-")) {
+    return enabled.has("potentially-blocking") ? moment : null;
   }
   return filterDownloadMoment(moment, enabled);
 }

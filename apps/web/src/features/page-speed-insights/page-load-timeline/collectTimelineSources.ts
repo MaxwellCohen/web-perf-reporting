@@ -412,7 +412,7 @@ function taskRows(
       startTime: getNumber(item.startTime) ?? 0,
       duration: getNumber(item.duration) ?? 0,
     }))
-    .filter((task) => task.duration >= 50);
+    .filter((task) => task.duration > 0);
 }
 
 function mergeTasks(primary: RawLongTask[], extra: RawLongTask[]): RawLongTask[] {

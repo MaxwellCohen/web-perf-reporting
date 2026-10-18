@@ -1,7 +1,8 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 
-import { Fragment, useId, useMemo, useState } from "react";
+import { Fragment, useEffect, useId, useMemo, useRef, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,6 +23,7 @@ import {
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
 import { patchDashboardSearch } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
+import { buildTimeAxisTicks } from "@/features/page-speed-insights/network-metrics/networkWaterfallData";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
 import { getNetworkBarColor } from "@/features/page-speed-insights/shared/networkResourceColors";
 import { ResourceUrlCell } from "@/features/page-speed-insights/shared/ResourceUrlCell";
@@ -146,6 +148,7 @@ function RenderBlockingBadge({ status }: { status: RenderBlockingStatus }) {
 
 function markerDotClass(kind: MarkerKind, rating?: Rating): string {
   if (kind === "blocking") return "bg-rose-500";
+  if (kind === "potentially-blocking") return "bg-amber-500";
   if (kind === "cwv") {
     if (rating === "good") return "bg-emerald-500";
     if (rating === "poor") return "bg-rose-500";
@@ -389,11 +392,13 @@ function MomentRequests({
   table,
   axisEnd,
   showBlockingBadge,
+  summaryLabel = "Requests",
 }: {
   bars?: TimelineWaterfallBar[];
   table?: TimelineTable;
   axisEnd: number;
   showBlockingBadge: boolean;
+  summaryLabel?: string;
 }) {
   const waterfall = bars ?? [];
   const rowCount = table?.rows.length ?? 0;
@@ -403,7 +408,7 @@ function MomentRequests({
       <details className="group mt-2 rounded-md border border-border/70 bg-muted/20">
         <summary className="cursor-pointer list-none px-2.5 py-1.5 text-xs font-medium text-muted-foreground marker:content-none [&::-webkit-details-marker]:hidden">
           <span className="inline-flex items-center gap-1.5">
-            <span className="text-foreground/80">Requests</span>
+            <span className="text-foreground/80">{summaryLabel}</span>
             <span className="tabular-nums text-muted-foreground">({waterfall.length})</span>
             <span className="text-[10px] font-normal opacity-70 group-open:hidden">show</span>
             <span className="hidden text-[10px] font-normal opacity-70 group-open:inline">
@@ -511,6 +516,7 @@ function MomentCard({ moment, axisEnd }: { moment: TimelineEvent; axisEnd: numbe
         "min-w-0 rounded-lg border px-3 py-3 sm:px-4",
         muted && "border-dashed opacity-80",
         moment.kind === "blocking" && !muted && "border-rose-500/30",
+        moment.kind === "potentially-blocking" && !muted && "border-amber-500/30",
         moment.kind === "cwv" && !muted && "border-amber-500/30",
       )}
     >
@@ -545,6 +551,11 @@ function MomentCard({ moment, axisEnd }: { moment: TimelineEvent; axisEnd: numbe
             table={moment.table}
             axisEnd={axisEnd}
             showBlockingBadge={downloadBlocking.length > 1}
+            summaryLabel={
+              moment.id.startsWith("long-task-") || moment.id.startsWith("short-task-")
+                ? "Tasks"
+                : "Requests"
+            }
           />
 
           {moment.notes?.length ? <MomentNotes notes={moment.notes} /> : null}
@@ -601,16 +612,19 @@ function scrollToMoment(id: string) {
   document.getElementById(momentAnchorId(id))?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-/** Downloads, long tasks, and other work that blocked or could block rendering. */
+/** Downloads, main-thread tasks, and other work that blocked or could block rendering. */
 function isBlockingWork(event: TimelineEvent): boolean {
-  if (event.kind === "blocking") return true;
-  if (event.id.startsWith("long-task-")) return true;
+  if (event.kind === "blocking" || event.kind === "potentially-blocking") return true;
+  if (event.id.startsWith("long-task-") || event.id.startsWith("short-task-")) return true;
   return (event.waterfall ?? []).some(
     (bar) => bar.renderBlocking === "blocking" || bar.renderBlocking === "potentially-blocking",
   );
 }
 
 function blockingLabel(event: TimelineEvent): string | null {
+  if (event.id.startsWith("short-task-") || event.kind === "potentially-blocking") {
+    return "Potentially blocking";
+  }
   if (event.id.startsWith("long-task-") || event.kind === "blocking") {
     const statuses = blockingStatuses(event.waterfall);
     if (statuses.includes("blocking")) return "Blocking";
@@ -623,6 +637,79 @@ function blockingLabel(event: TimelineEvent): string | null {
   return null;
 }
 
+const NETWORK_TYPE_NOUNS: Record<string, [one: string, many: string]> = {
+  Image: ["image", "images"],
+  Script: ["script", "scripts"],
+  Stylesheet: ["style", "styles"],
+  Font: ["font", "fonts"],
+  Document: ["document", "documents"],
+  Fetch: ["fetch", "fetches"],
+  XHR: ["XHR", "XHRs"],
+  Media: ["media file", "media files"],
+  Redirect: ["redirect", "redirects"],
+  Other: ["resource", "resources"],
+};
+
+function networkTypeNoun(resourceType: string, count: number): string {
+  const pair = NETWORK_TYPE_NOUNS[resourceType] ?? [
+    resourceType.toLowerCase(),
+    `${resourceType.toLowerCase()}s`,
+  ];
+  return count === 1 ? pair[0] : pair[1];
+}
+
+/** e.g. "5 images downloaded", "style downloaded" */
+function overviewDownloadTitle(event: TimelineEvent): string {
+  const bars = event.waterfall ?? [];
+  const count = Math.max(bars.length, 1);
+  const resourceType = bars[0]?.resourceType ?? "Other";
+  if (count === 1) return `${networkTypeNoun(resourceType, 1)} downloaded`;
+  return `${count} ${networkTypeNoun(resourceType, count)} downloaded`;
+}
+
+/** Clearer lane title: downloads, tasks, or Measure/Mark for user timings. */
+function overviewLaneTitle(event: TimelineEvent): string {
+  if (event.kind === "cwv") return event.title;
+  if (event.id.startsWith("user-timing-")) {
+    const isMeasure = event.detail.toLowerCase().includes("measure");
+    const name = event.title.toLowerCase().replaceAll("next.js", "next");
+    return `${name} · ${isMeasure ? "measure" : "mark"}`;
+  }
+  if (event.id.startsWith("long-task-")) return "Long task";
+  if (event.id.startsWith("short-task-")) return event.title;
+  if (event.id === "nav-redirects") {
+    const hops = event.waterfall?.length ?? 0;
+    if (hops > 1) return `${hops} redirects followed`;
+    return hops === 1 ? "redirect followed" : "Redirects";
+  }
+  if (event.id.startsWith("net-") || (event.waterfall?.length && event.waterfall[0]?.resourceType)) {
+    return overviewDownloadTitle(event);
+  }
+  return event.title;
+}
+
+function overviewStatusChip(event: TimelineEvent): { label: string; className: string } | null {
+  if (event.kind === "cwv") {
+    return {
+      label: "CWV",
+      className: "bg-amber-500/15 text-amber-800 dark:text-amber-200",
+    };
+  }
+  const block = blockingLabel(event);
+  if (!block) return null;
+  if (block === "Potentially blocking") {
+    return { label: "Maybe", className: renderBlockingClass("potentially-blocking") };
+  }
+  if (block === "Main thread") {
+    return { label: "Main", className: renderBlockingClass("blocking") };
+  }
+  return { label: "Block", className: renderBlockingClass("blocking") };
+}
+
+const OVERVIEW_LANE_COLS =
+  "grid w-full grid-cols-[minmax(0,9.5rem)_minmax(0,1fr)] gap-1.5 sm:grid-cols-[11rem_minmax(0,1fr)]";
+const OVERVIEW_LANE_GRID = cn(OVERVIEW_LANE_COLS, "items-center");
+
 function LaneChart({
   events,
   startMs,
@@ -630,6 +717,7 @@ function LaneChart({
   heading,
   testId,
   onSelect,
+  stickyTopPx = 0,
 }: {
   events: TimelineEvent[];
   startMs: number;
@@ -637,168 +725,287 @@ function LaneChart({
   heading?: string;
   testId?: string;
   onSelect?: (eventId: string) => void;
+  /** Offset below the page sticky header so the time axis stacks, not nests a scrollbar. */
+  stickyTopPx?: number;
 }) {
   const windowMs = Math.max(endMs - startMs, 1);
-  const lanes = [...events].sort((a, b) => {
-    const aRange = momentInterval(a);
-    const bRange = momentInterval(b);
-    return (
-      aRange.endMs - bRange.endMs || aRange.startMs - bRange.startMs || a.timeMs - b.timeMs
-    );
-  });
+  const ticks = buildTimeAxisTicks(startMs, endMs, 5).filter(
+    (tick) => tick >= startMs - 1 && tick <= endMs + 1,
+  );
 
-  if (!lanes.length) return null;
+  // Keep caller order (same list as the vertical timeline).
+  if (!events.length) return null;
 
   return (
-    <div
-      className="space-y-3 rounded-lg border border-border/70 bg-muted/15 px-3 py-3 sm:px-4"
-      data-testid={testId}
-    >
+    <div className="rounded-md border border-border/60 bg-muted/10" data-testid={testId}>
       {heading ? (
-        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-          <h3 className="text-sm font-semibold tracking-tight sm:text-base">{heading}</h3>
-          <span className="text-xs tabular-nums text-muted-foreground sm:text-sm">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-2 border-b border-border/40 px-2 py-1">
+          <h3 className="text-xs font-semibold tracking-tight">{heading}</h3>
+          <span className="text-[10px] tabular-nums text-muted-foreground">
             {formatMs(startMs)}–{formatMs(endMs)}
           </span>
         </div>
       ) : null}
-      <ul className="m-0 list-none space-y-2.5 p-0">
-        {lanes.map((event) => {
-          const range = momentInterval(event);
-          const left = ((range.startMs - startMs) / windowMs) * 100;
-          const width = Math.max(2, ((range.endMs - range.startMs) / windowMs) * 100);
-          const rangeLabel = `${formatMs(range.startMs)}–${formatMs(range.endMs)}`;
-          const blockLabel = blockingLabel(event);
-          const row = (
-            <>
-              <span className="flex min-w-0 flex-col gap-0.5">
-                <span className="truncate text-sm font-medium text-foreground" title={event.title}>
-                  {event.title}
+
+      {/* Sticky on the page scroll — sits under the report header. */}
+      <div
+        className="sticky z-20 border-b border-border/50 bg-background/95 px-1.5 py-1 backdrop-blur supports-[backdrop-filter]:bg-background/90"
+        style={{ top: stickyTopPx }}
+      >
+        <div className={cn(OVERVIEW_LANE_GRID, "px-1")}>
+          <div
+            aria-hidden
+            className="text-[9px] font-medium uppercase tracking-wide text-muted-foreground/80"
+          >
+            Time
+          </div>
+          <div className="relative h-4" data-testid="overview-time-axis">
+            {ticks.map((tick, index) => {
+              const left = ((tick - startMs) / windowMs) * 100;
+              return (
+                <span
+                  key={tick}
+                  className={cn(
+                    "absolute top-0 text-[9px] leading-none tabular-nums text-muted-foreground",
+                    index === 0 && "left-0",
+                    index === ticks.length - 1 && "right-0 left-auto",
+                    index > 0 && index < ticks.length - 1 && "-translate-x-1/2",
+                  )}
+                  style={
+                    index === 0 || index === ticks.length - 1 ? undefined : { left: `${left}%` }
+                  }
+                >
+                  {formatMs(tick)}
                 </span>
-                {blockLabel ? (
-                  <span
+              );
+            })}
+            {ticks.map((tick) => (
+              <div
+                key={`stub-${tick}`}
+                aria-hidden
+                className="absolute bottom-0 h-1.5 w-px bg-border/70"
+                style={{ left: `${((tick - startMs) / windowMs) * 100}%` }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="relative px-1.5 py-1">
+        <div
+          className={cn(
+            "pointer-events-none absolute inset-y-1 left-1.5 right-1.5 z-0 px-1",
+            OVERVIEW_LANE_COLS,
+          )}
+          data-testid="overview-tick-grid"
+          aria-hidden
+        >
+          <div />
+          <div className="relative min-h-full">
+            {ticks.map((tick) => (
+              <div
+                key={tick}
+                className="absolute top-0 bottom-0 w-px bg-border/45"
+                style={{ left: `${((tick - startMs) / windowMs) * 100}%` }}
+              />
+            ))}
+          </div>
+        </div>
+
+        <ul className="relative z-[1] m-0 list-none p-0">
+          {events.map((event) => {
+            const range = momentInterval(event);
+            const isPoint = !isIntervalMoment(event);
+            const durationMs = range.endMs - range.startMs;
+            const left = isPoint
+              ? ((event.timeMs - startMs) / windowMs) * 100
+              : ((range.startMs - startMs) / windowMs) * 100;
+            const width = Math.max(1.5, (durationMs / windowMs) * 100);
+            const timeLabel = isPoint
+              ? formatMs(event.timeMs)
+              : `${formatMs(range.startMs)}–${formatMs(range.endMs)}`;
+            const durationLabel = formatMs(durationMs);
+            const laneTitle = overviewLaneTitle(event);
+            const status = overviewStatusChip(event);
+            const barTitle = isPoint
+              ? `${laneTitle}: ${timeLabel}`
+              : `${laneTitle}: ${timeLabel} · ${durationLabel}`;
+            const row = (
+              <>
+                <span className="flex min-w-0 items-center gap-1" title={barTitle}>
+                  <span className="truncate text-[11px] font-medium leading-none text-foreground">
+                    {laneTitle}
+                  </span>
+                  {status ? (
+                    <span
+                      className={cn(
+                        "shrink-0 rounded px-1 py-px text-[9px] font-medium leading-none",
+                        status.className,
+                      )}
+                    >
+                      {status.label}
+                    </span>
+                  ) : null}
+                </span>
+                <div className="relative h-3 min-w-0 overflow-hidden rounded-sm bg-muted/60">
+                  {isPoint ? (
+                    <div
+                      className={cn(
+                        "absolute top-0 bottom-0 w-1 -translate-x-1/2 rounded-full",
+                        parallelLaneColor(event),
+                      )}
+                      style={{ left: `${left}%` }}
+                      title={barTitle}
+                    />
+                  ) : (
+                    <div
+                      className={cn(
+                        "absolute inset-y-0 flex min-w-0 items-center overflow-hidden rounded-sm px-1",
+                        parallelLaneColor(event),
+                      )}
+                      style={{ left: `${left}%`, width: `${width}%` }}
+                      title={barTitle}
+                    >
+                      {width >= 8 ? (
+                        <span className="truncate text-[9px] font-medium leading-none tabular-nums text-white drop-shadow-sm">
+                          {durationLabel}
+                        </span>
+                      ) : null}
+                    </div>
+                  )}
+                </div>
+              </>
+            );
+            return (
+              <li key={event.id}>
+                {onSelect ? (
+                  <button
+                    type="button"
+                    onClick={() => onSelect(event.id)}
                     className={cn(
-                      "w-fit rounded px-1.5 py-0.5 text-[10px] font-medium",
-                      blockLabel === "Potentially blocking"
-                        ? renderBlockingClass("potentially-blocking")
-                        : renderBlockingClass("blocking"),
+                      OVERVIEW_LANE_GRID,
+                      "rounded-sm px-1 py-0.5 text-left transition hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                     )}
                   >
-                    {blockLabel}
-                  </span>
-                ) : null}
-              </span>
-              <div className="relative h-3 min-w-0 overflow-hidden rounded-md bg-muted/70">
-                <div
-                  className={cn("absolute inset-y-0 rounded-md", parallelLaneColor(event))}
-                  style={{ left: `${left}%`, width: `${width}%` }}
-                  title={`${event.title}: ${rangeLabel}`}
-                />
-              </div>
-              <span className="text-xs tabular-nums text-muted-foreground sm:text-right sm:text-sm">
-                {rangeLabel}
-                <span className="text-muted-foreground/70">
-                  {" "}
-                  · {formatMs(range.endMs - range.startMs)}
-                </span>
-              </span>
-            </>
-          );
-          return (
-            <li key={event.id}>
-              {onSelect ? (
-                <button
-                  type="button"
-                  onClick={() => onSelect(event.id)}
-                  className="grid w-full grid-cols-1 items-center gap-1.5 rounded-md text-left transition hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:grid-cols-[minmax(8rem,12rem)_minmax(0,1fr)_auto] sm:gap-3 sm:px-1 sm:py-1"
-                >
-                  {row}
-                </button>
-              ) : (
-                <div className="grid grid-cols-1 items-center gap-1.5 sm:grid-cols-[minmax(8rem,12rem)_minmax(0,1fr)_auto] sm:gap-3">
-                  {row}
-                </div>
-              )}
-            </li>
-          );
-        })}
-      </ul>
+                    {row}
+                  </button>
+                ) : (
+                  <div className={cn(OVERVIEW_LANE_GRID, "px-1 py-0.5")}>{row}</div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </div>
   );
 }
 
 type OverviewFocus = "all" | "blocking";
 
-function TimelineOverview({ events, axisEndMs }: { events: TimelineEvent[]; axisEndMs: number }) {
+function TimelineOverview({
+  events,
+  axisEndMs,
+  stickyTopPx = 0,
+}: {
+  events: TimelineEvent[];
+  axisEndMs: number;
+  stickyTopPx?: number;
+}) {
+  const [open, setOpen] = useState(true);
   const [focus, setFocus] = useState<OverviewFocus>("all");
-  const intervals = events.filter(isIntervalMoment);
-  const blocking = intervals.filter(isBlockingWork);
+  const overviewEvents = events;
+  const cwvs = overviewEvents.filter((event) => event.kind === "cwv");
+  const blocking = overviewEvents.filter(isBlockingWork);
 
-  if (intervals.length < 2) return null;
+  if (overviewEvents.length < 1) return null;
 
-  const shown = focus === "blocking" ? blocking : intervals;
-  const heading = focus === "blocking" ? "Blocking work" : "All overlapping work";
+  const shown = focus === "blocking" ? blocking : overviewEvents;
+  const summaryId = "timeline-overview-summary";
 
   return (
-    <div className="space-y-3" data-testid="timeline-overview">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="min-w-0">
-          <p className="text-sm font-semibold tracking-tight sm:text-base">{heading}</p>
-          <p className="text-xs text-muted-foreground sm:text-sm">
-            {intervals.length} overlapping events
+    <div className="space-y-1.5" data-testid="timeline-overview">
+      <div className="flex flex-wrap items-center justify-between gap-1.5">
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls="timeline-overview-panel"
+          onClick={() => setOpen((value) => !value)}
+          className="flex min-w-0 flex-1 items-center gap-1.5 rounded-sm text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        >
+          <ChevronDown
+            aria-hidden
+            className={cn(
+              "size-3.5 shrink-0 text-muted-foreground transition-transform duration-200",
+              !open && "-rotate-90",
+            )}
+          />
+          <p id={summaryId} className="truncate text-xs font-semibold tracking-tight">
+            Waterfall view
+          </p>
+          <p className="truncate text-[10px] text-muted-foreground">
+            {overviewEvents.length} events
+            {cwvs.length > 0 ? ` · ${cwvs.length} CWV` : ""}
             {blocking.length > 0 ? ` · ${blocking.length} blocking` : ""}
             {" · "}
             {formatMs(0)}–{formatMs(axisEndMs)}
           </p>
-        </div>
-        <div
-          role="group"
-          aria-label="Overview focus"
-          data-testid="overview-focus"
-          className="flex flex-wrap items-center gap-1.5"
-        >
-          <button
-            type="button"
-            aria-pressed={focus === "all"}
-            onClick={() => setFocus("all")}
-            className={cn(
-              "rounded-md border px-2.5 py-1 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-sm",
-              focus === "all"
-                ? "border-transparent bg-foreground text-background"
-                : "border-border bg-background text-foreground",
-            )}
+        </button>
+        {open ? (
+          <div
+            role="group"
+            aria-label="Overview focus"
+            data-testid="overview-focus"
+            className="flex flex-wrap items-center gap-1"
           >
-            All ({intervals.length})
-          </button>
-          <button
-            type="button"
-            aria-pressed={focus === "blocking"}
-            disabled={blocking.length === 0}
-            onClick={() => setFocus("blocking")}
-            className={cn(
-              "rounded-md border px-2.5 py-1 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-sm",
-              focus === "blocking"
-                ? "border-transparent bg-rose-600 text-white"
-                : "border-border bg-background text-foreground",
-              blocking.length === 0 && "opacity-50",
-            )}
-          >
-            Blocking ({blocking.length})
-          </button>
-        </div>
+            <button
+              type="button"
+              aria-pressed={focus === "all"}
+              onClick={() => setFocus("all")}
+              className={cn(
+                "rounded border px-1.5 py-0.5 text-[10px] font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                focus === "all"
+                  ? "border-transparent bg-foreground text-background"
+                  : "border-border bg-background text-foreground",
+              )}
+            >
+              All ({overviewEvents.length})
+            </button>
+            <button
+              type="button"
+              aria-pressed={focus === "blocking"}
+              disabled={blocking.length === 0}
+              onClick={() => setFocus("blocking")}
+              className={cn(
+                "rounded border px-1.5 py-0.5 text-[10px] font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                focus === "blocking"
+                  ? "border-transparent bg-rose-600 text-white"
+                  : "border-border bg-background text-foreground",
+                blocking.length === 0 && "opacity-50",
+              )}
+            >
+              Blocking ({blocking.length})
+            </button>
+          </div>
+        ) : null}
       </div>
 
-      {shown.length > 0 ? (
-        <LaneChart
-          events={shown}
-          startMs={0}
-          endMs={axisEndMs}
-          testId="overview-lanes"
-          onSelect={scrollToMoment}
-        />
-      ) : (
-        <p className="text-sm text-muted-foreground">No blocking work in this view.</p>
-      )}
+      {open ? (
+        <div id="timeline-overview-panel" role="region" aria-labelledby={summaryId}>
+          {shown.length > 0 ? (
+            <LaneChart
+              events={shown}
+              startMs={0}
+              endMs={axisEndMs}
+              testId="overview-lanes"
+              onSelect={scrollToMoment}
+              stickyTopPx={stickyTopPx}
+            />
+          ) : (
+            <p className="text-xs text-muted-foreground">No blocking work in this view.</p>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -880,7 +1087,16 @@ function TaskFilters({
   );
 }
 
-function VerticalTimeline({ timeline }: { timeline: PageLoadTimeline }) {
+function VerticalTimeline({
+  timeline,
+  stickyTopPx = 0,
+}: {
+  timeline: PageLoadTimeline;
+  stickyTopPx?: number;
+}) {
+  // One ordered list drives both the waterfall overview and the scroll timeline.
+  const { events, axisEndMs } = timeline;
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground sm:text-sm">
@@ -901,7 +1117,7 @@ function VerticalTimeline({ timeline }: { timeline: PageLoadTimeline }) {
         ) : null}
       </div>
 
-      <TimelineOverview events={timeline.events} axisEndMs={timeline.axisEndMs} />
+      <TimelineOverview events={events} axisEndMs={axisEndMs} stickyTopPx={stickyTopPx} />
 
       <div className="relative">
         <div
@@ -910,11 +1126,11 @@ function VerticalTimeline({ timeline }: { timeline: PageLoadTimeline }) {
         />
 
         <ol className="relative m-0 list-none p-0">
-          {timeline.events.map((moment) => (
+          {events.map((moment) => (
             <MomentRow
               key={`${moment.phaseId}-${moment.id}`}
               moment={moment}
-              axisEnd={timeline.axisEndMs}
+              axisEnd={axisEndMs}
               showPhaseHeader={!!moment.isPhaseStart}
             />
           ))}
@@ -928,6 +1144,8 @@ export function PageLoadTimeline() {
   const items = usePageSpeedItems();
   const timelines = useMemo(() => buildPageLoadTimelines(items), [items]);
   const { report, tasks } = useDashboardSearchState();
+  const stickyHeaderRef = useRef<HTMLDivElement>(null);
+  const [stickyTopPx, setStickyTopPx] = useState(0);
   const enabledTasks = useMemo<TaskFilterSelection>(() => {
     if (tasks == null) return allTaskFilters();
     const allowed = new Set<string>(TASK_FILTERS);
@@ -935,6 +1153,17 @@ export function PageLoadTimeline() {
   }, [tasks]);
 
   const active = timelines.find((timeline) => timeline.label === report) ?? timelines[0] ?? null;
+  const taskOptions = active ? availableTaskFilters(active.events) : [];
+
+  useEffect(() => {
+    const el = stickyHeaderRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const update = () => setStickyTopPx(el.getBoundingClientRect().height);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [active?.label, taskOptions.length, timelines.length]);
 
   if (!timelines.length || !active) {
     return (
@@ -947,7 +1176,6 @@ export function PageLoadTimeline() {
   const reportName = active.label?.trim() || "Report";
   const events = filterTimelineMoments(active.events, enabledTasks);
   const timeline = events === active.events ? active : { ...active, events };
-  const taskOptions = availableTaskFilters(active.events);
 
   function toggleTask(id: TaskFilterId) {
     const next = new Set(enabledTasks);
@@ -961,7 +1189,10 @@ export function PageLoadTimeline() {
 
   return (
     <div className="flex flex-col gap-4" data-testid="page-load-timeline">
-      <div className="sticky top-0 z-30 -mx-1 flex flex-col gap-2 border-b border-border/80 bg-background/95 px-1 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-background/85">
+      <div
+        ref={stickyHeaderRef}
+        className="sticky top-0 z-30 -mx-1 flex flex-col gap-2 border-b border-border/80 bg-background/95 px-1 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-background/85"
+      >
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -1000,7 +1231,7 @@ export function PageLoadTimeline() {
           onToggle={toggleTask}
         />
       </div>
-      <VerticalTimeline key={active.label} timeline={timeline} />
+      <VerticalTimeline key={active.label} timeline={timeline} stickyTopPx={stickyTopPx} />
     </div>
   );
 }

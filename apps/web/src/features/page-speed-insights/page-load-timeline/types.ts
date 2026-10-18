@@ -1,5 +1,5 @@
 export type Rating = "good" | "needs-improvement" | "poor";
-export type MarkerKind = "blocking" | "cwv" | "marker" | "fact";
+export type MarkerKind = "blocking" | "potentially-blocking" | "cwv" | "marker" | "fact";
 export type StepStatus = "measured" | "inferred" | "not-recorded";
 
 /** How a download affected rendering. Matches the Network panel's render-blocking column. */

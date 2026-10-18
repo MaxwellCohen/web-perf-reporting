@@ -37,8 +37,12 @@ const PHASE_TITLES: Record<PhaseId, string> = {
   afterLoad: "After load",
 };
 
-/** Same-type events whose starts are within this window collapse into one row. */
-const START_GROUP_WINDOW_MS = 10;
+/** Short tasks that start within this window of the previous short task join one row. */
+const SHORT_TASK_START_WINDOW_MS = 10;
+/** Short tasks that begin this soon after the previous short task ends are contiguous. */
+const SHORT_TASK_CONTIGUOUS_GAP_MS = 1;
+/** Chrome / Lighthouse long-task threshold. */
+const LONG_TASK_MS = 50;
 
 type PhaseBound = {
   id: PhaseId;
@@ -59,25 +63,50 @@ function coverageLabel(request: CombinedRequest): string | undefined {
   return request.coverage ? formatCoverage(request.coverage) : undefined;
 }
 
-function clusterByStartWindow<T>(
-  items: T[],
-  startMs: (item: T) => number,
-  key: (item: T) => string,
-  windowMs: number = START_GROUP_WINDOW_MS,
-): T[][] {
-  const groups: T[][] = [];
-  for (const item of items) {
-    const prev = groups[groups.length - 1];
-    if (
-      prev &&
-      key(prev[0]!) === key(item) &&
-      startMs(item) - startMs(prev[prev.length - 1]!) <= windowMs
-    ) {
-      prev.push(item);
-    } else {
-      groups.push([item]);
+function isLongTask(task: CombinedLongTask): boolean {
+  return task.duration >= LONG_TASK_MS;
+}
+
+/** Short tasks join when contiguous (end→start) or starts within the start window. */
+function shortTasksAdjacent(prev: CombinedLongTask, next: CombinedLongTask): boolean {
+  const startDelta = next.startTime - prev.startTime;
+  const gap = next.startTime - (prev.startTime + prev.duration);
+  return startDelta <= SHORT_TASK_START_WINDOW_MS || gap <= SHORT_TASK_CONTIGUOUS_GAP_MS;
+}
+
+/**
+ * Long tasks always stand alone. Short tasks (&lt;50ms) collapse when adjacent.
+ * A long task flushes any pending short group.
+ */
+function groupMainThreadTasks(tasks: CombinedLongTask[]): CombinedLongTask[][] {
+  const ordered = [...tasks].sort(
+    (a, b) => a.startTime - b.startTime || b.duration - a.duration,
+  );
+  const groups: CombinedLongTask[][] = [];
+  let shortGroup: CombinedLongTask[] = [];
+
+  function flushShorts() {
+    if (shortGroup.length) {
+      groups.push(shortGroup);
+      shortGroup = [];
     }
   }
+
+  for (const task of ordered) {
+    if (isLongTask(task)) {
+      flushShorts();
+      groups.push([task]);
+      continue;
+    }
+    const prev = shortGroup[shortGroup.length - 1];
+    if (prev && shortTasksAdjacent(prev, task)) {
+      shortGroup.push(task);
+    } else {
+      flushShorts();
+      shortGroup = [task];
+    }
+  }
+  flushShorts();
   return groups;
 }
 
@@ -475,40 +504,51 @@ function longTaskBar(task: CombinedLongTask, id: string): TimelineWaterfallBar {
   return bar;
 }
 
+function taskGroupDetail(group: CombinedLongTask[], long: boolean): string {
+  if (group.length === 1) {
+    const task = group[0]!;
+    if (long) {
+      return task.url
+        ? `${shortUrl(task.url)} blocked the main thread for ${formatMs(task.duration)}.`
+        : `Unattributed script blocked the main thread for ${formatMs(task.duration)}.`;
+    }
+    return task.url
+      ? `${shortUrl(task.url)} ran on the main thread for ${formatMs(task.duration)}.`
+      : `Main thread task lasting ${formatMs(task.duration)}.`;
+  }
+  const totalDuration = group.reduce((sum, t) => sum + t.duration, 0);
+  return `${group.length} short tasks (${formatMs(totalDuration)} total).`;
+}
+
 function longTaskEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent[] {
   if (!load.longTasks.length) return [];
 
-  const ordered = [...load.longTasks].sort(
-    (a, b) => a.startTime - b.startTime || b.duration - a.duration,
-  );
-  const groups = clusterByStartWindow(
-    ordered,
-    (t) => t.startTime,
-    () => "long-task",
-  );
+  const groups = groupMainThreadTasks(load.longTasks);
+  let longIndex = 0;
+  let shortIndex = 0;
 
-  return groups.map((group, index) => {
+  return groups.map((group) => {
+    const long = group.some(isLongTask);
+    const index = long ? longIndex++ : shortIndex++;
+    const idPrefix = long ? "long-task" : "short-task";
     const startMs = Math.min(...group.map((t) => t.startTime));
     const endMs = Math.max(...group.map((t) => t.startTime + t.duration));
-    const totalDuration = group.reduce((sum, t) => sum + t.duration, 0);
-    const detail =
-      group.length === 1
-        ? group[0]!.url
-          ? `${shortUrl(group[0]!.url)} blocked the main thread for ${formatMs(group[0]!.duration)}.`
-          : `Unattributed script blocked the main thread for ${formatMs(group[0]!.duration)}.`
-        : `${group.length} long tasks started within ${START_GROUP_WINDOW_MS} ms (${formatMs(totalDuration)} total).`;
     const placement = atIntervalEnd(startMs, endMs);
     const phase = phaseActiveAt(bounds, placement.timeMs);
 
     return event(
       {
-        id: `long-task-${index}`,
-        title: group.length === 1 ? "Long task" : `${group.length} Long tasks`,
-        detail,
+        id: `${idPrefix}-${index}`,
+        title: long
+          ? "Long task"
+          : group.length === 1
+            ? "Short task"
+            : `${group.length} Short tasks`,
+        detail: taskGroupDetail(group, long),
         ...placement,
         phaseId: phase.id,
-        kind: "blocking",
-        waterfall: group.map((task, i) => longTaskBar(task, `long-task-${index}-${i}`)),
+        kind: long ? "blocking" : "potentially-blocking",
+        waterfall: group.map((task, i) => longTaskBar(task, `${idPrefix}-${index}-${i}`)),
         table: {
           headers: [
             { text: "Script" },

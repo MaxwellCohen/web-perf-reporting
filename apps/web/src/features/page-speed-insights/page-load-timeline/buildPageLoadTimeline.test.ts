@@ -1032,7 +1032,7 @@ describe("buildPageLoadTimeline", () => {
     expect(documentTask?.waterfall?.[0]?.coverage).toBeUndefined();
   });
 
-  it("groups long tasks that start within 10 ms", () => {
+  it("keeps each long task on its own row even when starts are within 10 ms", () => {
     const timeline = buildPageLoadTimeline(
       makeItem({
         longTasks: [
@@ -1044,9 +1044,42 @@ describe("buildPageLoadTimeline", () => {
     );
 
     const longTasks = timeline!.events.filter((m) => m.id.startsWith("long-task-"));
-    expect(longTasks.map((m) => m.title)).toEqual(["2 Long tasks", "Long task"]);
-    expect(longTasks[0]?.table?.rows).toHaveLength(2);
-    expect(longTasks[0]?.detail).toMatch(/within 10 ms/);
+    expect(longTasks.map((m) => m.title)).toEqual(["Long task", "Long task", "Long task"]);
+    expect(longTasks.map((m) => m.kind)).toEqual(["blocking", "blocking", "blocking"]);
+    expect(longTasks[0]?.table?.rows).toHaveLength(1);
+  });
+
+  it("groups adjacent short tasks and leaves long tasks alone", () => {
+    const timeline = buildPageLoadTimeline(
+      makeItem({
+        longTasks: [{ url: "https://example.com/long.js", startTime: 1200, duration: 90 }],
+        mainThreadTasks: [
+          { startTime: 1000, duration: 20 },
+          { startTime: 1020, duration: 15 },
+          { startTime: 1035, duration: 10 },
+          { startTime: 1500, duration: 25 },
+          { startTime: 1800, duration: 12 },
+          { startTime: 1808, duration: 8 },
+        ],
+      }),
+    );
+
+    const shorts = timeline!.events.filter((m) => m.id.startsWith("short-task-"));
+    const longs = timeline!.events.filter((m) => m.id.startsWith("long-task-"));
+
+    expect(longs).toHaveLength(1);
+    expect(longs[0]?.title).toBe("Long task");
+    expect(longs[0]?.kind).toBe("blocking");
+
+    expect(shorts.map((m) => m.title)).toEqual(["3 Short tasks", "Short task", "2 Short tasks"]);
+    expect(shorts.map((m) => m.kind)).toEqual([
+      "potentially-blocking",
+      "potentially-blocking",
+      "potentially-blocking",
+    ]);
+    expect(shorts[0]?.detail).toMatch(/3 short tasks/);
+    expect(shorts[0]?.waterfall).toHaveLength(3);
+    expect(shorts[2]?.waterfall).toHaveLength(2);
   });
 
   it("omits redirect rows when there are no redirects", () => {
