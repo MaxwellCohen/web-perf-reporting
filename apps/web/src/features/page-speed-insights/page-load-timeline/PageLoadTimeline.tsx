@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 
-import { Fragment, useEffect, useId, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useId, useMemo, useRef, useState, type PointerEvent } from "react";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
@@ -1061,34 +1061,25 @@ function LaneChart({
 
 type OverviewFocus = "all" | "blocking";
 
-/** About 200 drag stops, snapped to a readable millisecond size. */
+/** About 200 drag stops, and a divisor of the axis so the end thumb can sit on the trace end. */
 function timeRangeStep(axisEndMs: number): number {
-  const rough = axisEndMs / 200;
-  const buckets = [1, 5, 10, 25, 50, 100, 250, 500, 1000];
-  for (const bucket of buckets) {
-    if (rough <= bucket) return bucket;
+  const target = Math.max(1, Math.round(axisEndMs / 200));
+  for (let step = target; step > 1; step--) {
+    if (axisEndMs % step === 0) return step;
   }
-  return 1000;
+  return 1;
+}
+
+function snapTime(value: number, step: number, axisEndMs: number): number {
+  if (value >= axisEndMs - step / 2) return axisEndMs;
+  const snapped = Math.round(value / step) * step;
+  return Math.min(axisEndMs, Math.max(0, snapped));
 }
 
 function eventOverlapsTimeRange(event: TimelineEvent, startMs: number, endMs: number): boolean {
   const interval = momentInterval(event);
   return interval.endMs >= startMs && interval.startMs <= endMs;
 }
-
-const RANGE_INPUT_CLASS = cn(
-  "pointer-events-none absolute inset-0 m-0 h-4 w-full cursor-ew-resize appearance-none bg-transparent",
-  "focus-visible:z-30 focus-visible:outline-none",
-  "[&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:bg-transparent",
-  "[&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5",
-  "[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full",
-  "[&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-background",
-  "[&::-webkit-slider-thumb]:bg-foreground [&::-webkit-slider-thumb]:shadow-sm",
-  "[&::-moz-range-track]:h-1 [&::-moz-range-track]:border-0 [&::-moz-range-track]:bg-transparent",
-  "[&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-3.5 [&::-moz-range-thumb]:w-3.5",
-  "[&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-background",
-  "[&::-moz-range-thumb]:bg-foreground",
-);
 
 function TimeRangeFilter({
   axisEndMs,
@@ -1102,11 +1093,42 @@ function TimeRangeFilter({
   onChange: (startMs: number, endMs: number) => void;
 }) {
   const step = timeRangeStep(axisEndMs);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<"start" | "end" | null>(null);
+  const [focused, setFocused] = useState<"start" | "end" | null>(null);
   const filtering = startMs > 0 || endMs < axisEndMs;
   const startPct = axisEndMs > 0 ? (startMs / axisEndMs) * 100 : 0;
   const endPct = axisEndMs > 0 ? (endMs / axisEndMs) * 100 : 100;
-  // Keep the thumb nearer the crowded end above the other so it stays draggable.
-  const startOnTop = startMs > axisEndMs - endMs;
+
+  function move(which: "start" | "end", value: number) {
+    if (which === "start") onChange(Math.max(0, Math.min(value, endMs - step)), endMs);
+    else onChange(startMs, Math.min(axisEndMs, Math.max(value, startMs + step)));
+  }
+
+  function valueFromPointer(clientX: number): number {
+    const rect = trackRef.current?.getBoundingClientRect();
+    if (!rect || rect.width <= 0) return startMs;
+    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    return snapTime(ratio * axisEndMs, step, axisEndMs);
+  }
+
+  function onPointerDown(event: PointerEvent<HTMLDivElement>) {
+    if (event.button !== 0) return;
+    const value = valueFromPointer(event.clientX);
+    const which = Math.abs(value - startMs) <= Math.abs(value - endMs) ? "start" : "end";
+    dragRef.current = which;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    move(which, value);
+  }
+
+  function onPointerMove(event: PointerEvent<HTMLDivElement>) {
+    if (!dragRef.current) return;
+    move(dragRef.current, valueFromPointer(event.clientX));
+  }
+
+  function onPointerUp() {
+    dragRef.current = null;
+  }
 
   return (
     <div
@@ -1118,15 +1140,38 @@ function TimeRangeFilter({
       <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
         Range
       </span>
-      <div className="relative h-4 min-w-[8rem] flex-1">
+      <div
+        ref={trackRef}
+        className="relative h-4 min-w-[8rem] flex-1 cursor-ew-resize touch-none"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+      >
         <div
           aria-hidden
-          className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-border"
+          className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-muted-foreground/30"
         />
         <div
           aria-hidden
-          className="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-foreground/80"
+          className="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-foreground"
           style={{ left: `${startPct}%`, width: `${Math.max(0, endPct - startPct)}%` }}
+        />
+        <div
+          aria-hidden
+          className={cn(
+            "absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-background bg-foreground shadow-sm",
+            focused === "start" && "ring-2 ring-ring",
+          )}
+          style={{ left: `${startPct}%` }}
+        />
+        <div
+          aria-hidden
+          className={cn(
+            "absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-background bg-foreground shadow-sm",
+            focused === "end" && "ring-2 ring-ring",
+          )}
+          style={{ left: `${endPct}%` }}
         />
         <input
           type="range"
@@ -1136,11 +1181,10 @@ function TimeRangeFilter({
           max={axisEndMs}
           step={step}
           value={startMs}
-          onChange={(event) => {
-            const next = Number(event.target.value);
-            onChange(Math.max(0, Math.min(next, endMs - step)), endMs);
-          }}
-          className={cn(RANGE_INPUT_CLASS, startOnTop ? "z-20" : "z-10")}
+          onChange={(event) => move("start", Number(event.target.value))}
+          onFocus={() => setFocused("start")}
+          onBlur={() => setFocused(null)}
+          className="sr-only"
         />
         <input
           type="range"
@@ -1150,11 +1194,10 @@ function TimeRangeFilter({
           max={axisEndMs}
           step={step}
           value={endMs}
-          onChange={(event) => {
-            const next = Number(event.target.value);
-            onChange(startMs, Math.min(axisEndMs, Math.max(next, startMs + step)));
-          }}
-          className={cn(RANGE_INPUT_CLASS, startOnTop ? "z-10" : "z-20")}
+          onChange={(event) => move("end", Number(event.target.value))}
+          onFocus={() => setFocused("end")}
+          onBlur={() => setFocused(null)}
+          className="sr-only"
         />
       </div>
       <span className="shrink-0 text-[10px] tabular-nums text-muted-foreground">
