@@ -307,6 +307,29 @@ describe("PageLoadTimeline", () => {
     fireEvent.click(within(overview).getByRole("button", { name: /Blocking/ }));
     fireEvent.change(start, { target: { value: String(rangeStart) } });
     expect(within(overview).getByText("No blocking work in this view.")).toBeInTheDocument();
+
+    fireEvent.click(within(range).getByRole("button", { name: "Reset" }));
+    fireEvent.click(within(overview).getByRole("button", { name: /^All/ }));
+    const track = within(range).getByTestId("overview-time-range-track");
+    track.getBoundingClientRect = () =>
+      ({
+        x: 0,
+        y: 0,
+        left: 0,
+        top: 0,
+        right: 200,
+        bottom: 16,
+        width: 200,
+        height: 16,
+        toJSON() {
+          return {};
+        },
+      }) as DOMRect;
+    fireEvent.pointerDown(track, { button: 0, clientX: 100, pointerId: 1 });
+    expect(Number((start as HTMLInputElement).value)).toBeGreaterThan(0);
+    const dragged = within(overview).getByTestId("overview-lanes");
+    expect(dragged).not.toHaveTextContent("Navigation start");
+    expect(dragged).toHaveTextContent("TTI");
   });
 
   it("shows coverage on a stylesheet row", () => {

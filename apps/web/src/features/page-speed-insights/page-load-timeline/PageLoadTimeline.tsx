@@ -1117,7 +1117,11 @@ function TimeRangeFilter({
     const value = valueFromPointer(event.clientX);
     const which = Math.abs(value - startMs) <= Math.abs(value - endMs) ? "start" : "end";
     dragRef.current = which;
-    event.currentTarget.setPointerCapture(event.pointerId);
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // jsdom and untrusted events have no active pointer to capture.
+    }
     move(which, value);
   }
 
@@ -1142,6 +1146,7 @@ function TimeRangeFilter({
       </span>
       <div
         ref={trackRef}
+        data-testid="overview-time-range-track"
         className="relative h-4 min-w-[8rem] flex-1 cursor-ew-resize touch-none"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
