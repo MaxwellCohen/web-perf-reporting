@@ -4,6 +4,7 @@
 import { Fragment, useEffect, useId, useMemo, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CopyButton } from "@/components/ui/copy-button";
 import {
   Dialog,
   DialogClose,
@@ -39,6 +40,7 @@ import {
   type TaskFilterId,
   type TaskFilterSelection,
 } from "./filterTimelineMoments";
+import { timelineToMarkdown } from "./timelineToMarkdown";
 import type {
   MarkerKind,
   PageLoadTimeline,
@@ -609,7 +611,9 @@ function momentAnchorId(id: string): string {
 }
 
 function scrollToMoment(id: string) {
-  document.getElementById(momentAnchorId(id))?.scrollIntoView({ behavior: "smooth", block: "start" });
+  document
+    .getElementById(momentAnchorId(id))
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 /** Downloads, main-thread tasks, and other work that blocked or could block rendering. */
@@ -687,7 +691,10 @@ function overviewLaneTitle(event: TimelineEvent): string {
     if (hops > 1) return `${hops} redirects followed`;
     return hops === 1 ? "Redirect followed" : "Redirects";
   }
-  if (event.id.startsWith("net-") || (event.waterfall?.length && event.waterfall[0]?.resourceType)) {
+  if (
+    event.id.startsWith("net-") ||
+    (event.waterfall?.length && event.waterfall[0]?.resourceType)
+  ) {
     return overviewDownloadTitle(event);
   }
   return event.title;
@@ -715,6 +722,80 @@ const OVERVIEW_LANE_COLS =
   "grid w-full grid-cols-[minmax(0,9.5rem)_minmax(0,1fr)] gap-1.5 sm:grid-cols-[11rem_minmax(0,1fr)]";
 const OVERVIEW_LANE_GRID = cn(OVERVIEW_LANE_COLS, "items-center");
 
+/** Lifecycle / CWV points that get full-height vertical guides in the waterfall. */
+const OVERVIEW_GUIDE_IDS = new Set([
+  "nav-start",
+  "req-ttfb",
+  "render-fp",
+  "render-fcp",
+  "parse-dcl",
+  "sub-lcp",
+  "sub-load",
+  "sub-last-visual",
+  "after-tti",
+]);
+
+/** Short axis labels for guide markers (Chrome-style). */
+const OVERVIEW_GUIDE_LABEL: Record<string, string> = {
+  "nav-start": "Nav",
+  "req-ttfb": "TTFB",
+  "render-fp": "FP",
+  "render-fcp": "FCP",
+  "parse-dcl": "DCL",
+  "sub-lcp": "LCP",
+  "sub-load": "Load",
+  "sub-last-visual": "LVC",
+  "after-tti": "TTI",
+};
+
+function isOverviewGuideMarker(event: TimelineEvent): boolean {
+  if (isIntervalMoment(event)) return false;
+  return event.kind === "cwv" || OVERVIEW_GUIDE_IDS.has(event.id);
+}
+
+function overviewGuideLabel(event: TimelineEvent): string {
+  return OVERVIEW_GUIDE_LABEL[event.id] ?? event.title;
+}
+
+function overviewGuideLineClass(event: TimelineEvent): string {
+  if (event.kind === "cwv") {
+    if (event.rating === "good") return "bg-emerald-500/65";
+    if (event.rating === "poor") return "bg-rose-500/65";
+    return "bg-amber-500/65";
+  }
+  return "bg-sky-500/50";
+}
+
+function overviewGuideLabelClass(event: TimelineEvent): string {
+  if (event.kind === "cwv") {
+    if (event.rating === "good") return "text-emerald-700 dark:text-emerald-300";
+    if (event.rating === "poor") return "text-rose-700 dark:text-rose-300";
+    return "text-amber-800 dark:text-amber-300";
+  }
+  return "text-sky-700 dark:text-sky-300";
+}
+
+/** Stagger labels that sit within ~6% of each other so they don't collide. */
+function overviewGuideLabelLanes(
+  markers: TimelineEvent[],
+  startMs: number,
+  windowMs: number,
+): number[] {
+  const lanes: number[] = [];
+  const occupied: { left: number; lane: number }[] = [];
+  const minGapPct = 6;
+  for (const event of markers) {
+    const left = ((event.timeMs - startMs) / windowMs) * 100;
+    let lane = 0;
+    while (occupied.some((o) => o.lane === lane && Math.abs(o.left - left) < minGapPct)) {
+      lane += 1;
+    }
+    occupied.push({ left, lane });
+    lanes.push(lane);
+  }
+  return lanes;
+}
+
 function LaneChart({
   events,
   startMs,
@@ -737,6 +818,11 @@ function LaneChart({
   const ticks = buildTimeAxisTicks(startMs, endMs, 5).filter(
     (tick) => tick >= startMs - 1 && tick <= endMs + 1,
   );
+  const guideMarkers = events.filter(isOverviewGuideMarker);
+  const guideLabelLanes = overviewGuideLabelLanes(guideMarkers, startMs, windowMs);
+  const guideLabelRows = guideMarkers.length
+    ? Math.max(1, ...guideLabelLanes.map((lane) => lane + 1))
+    : 0;
 
   // Keep caller order (same list as the vertical timeline).
   if (!events.length) return null;
@@ -794,6 +880,44 @@ function LaneChart({
             ))}
           </div>
         </div>
+        {guideMarkers.length > 0 ? (
+          <div className={cn(OVERVIEW_LANE_GRID, "mt-0.5 px-1")}>
+            <div
+              aria-hidden
+              className="text-[9px] font-medium uppercase tracking-wide text-muted-foreground/80"
+            >
+              Marks
+            </div>
+            <div
+              className="relative"
+              style={{ height: `${guideLabelRows * 0.75}rem` }}
+              data-testid="overview-guide-labels"
+            >
+              {guideMarkers.map((event, index) => {
+                const left = ((event.timeMs - startMs) / windowMs) * 100;
+                const lane = guideLabelLanes[index] ?? 0;
+                const short = overviewGuideLabel(event);
+                const full = `${overviewLaneTitle(event)} · ${formatMs(event.timeMs)}`;
+                return (
+                  <span
+                    key={`label-${event.id}`}
+                    title={full}
+                    className={cn(
+                      "absolute left-0 text-[9px] font-semibold leading-none -translate-x-1/2",
+                      overviewGuideLabelClass(event),
+                      left < 4 && "translate-x-0",
+                      left > 96 && "-translate-x-full",
+                    )}
+                    style={{ left: `${left}%`, top: `${lane * 0.75}rem` }}
+                    data-guide-label={event.id}
+                  >
+                    {short}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <div className="relative px-1.5 py-1">
@@ -816,6 +940,35 @@ function LaneChart({
             ))}
           </div>
         </div>
+
+        {guideMarkers.length > 0 ? (
+          <div
+            className={cn(
+              "pointer-events-none absolute inset-y-1 left-1.5 right-1.5 z-0 px-1",
+              OVERVIEW_LANE_COLS,
+            )}
+            data-testid="overview-guide-lines"
+            aria-hidden
+          >
+            <div />
+            <div className="relative min-h-full">
+              {guideMarkers.map((event) => {
+                const left = ((event.timeMs - startMs) / windowMs) * 100;
+                return (
+                  <div
+                    key={`guide-${event.id}`}
+                    className={cn(
+                      "absolute top-0 bottom-0 w-px -translate-x-1/2",
+                      overviewGuideLineClass(event),
+                    )}
+                    style={{ left: `${left}%` }}
+                    data-guide={event.id}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
 
         <ul className="relative z-[1] m-0 list-none p-0">
           {events.map((event) => {
@@ -908,6 +1061,118 @@ function LaneChart({
 
 type OverviewFocus = "all" | "blocking";
 
+/** About 200 drag stops, snapped to a readable millisecond size. */
+function timeRangeStep(axisEndMs: number): number {
+  const rough = axisEndMs / 200;
+  const buckets = [1, 5, 10, 25, 50, 100, 250, 500, 1000];
+  for (const bucket of buckets) {
+    if (rough <= bucket) return bucket;
+  }
+  return 1000;
+}
+
+function eventOverlapsTimeRange(event: TimelineEvent, startMs: number, endMs: number): boolean {
+  const interval = momentInterval(event);
+  return interval.endMs >= startMs && interval.startMs <= endMs;
+}
+
+const RANGE_INPUT_CLASS = cn(
+  "pointer-events-none absolute inset-0 m-0 h-4 w-full cursor-ew-resize appearance-none bg-transparent",
+  "focus-visible:z-30 focus-visible:outline-none",
+  "[&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:bg-transparent",
+  "[&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5",
+  "[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full",
+  "[&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-background",
+  "[&::-webkit-slider-thumb]:bg-foreground [&::-webkit-slider-thumb]:shadow-sm",
+  "[&::-moz-range-track]:h-1 [&::-moz-range-track]:border-0 [&::-moz-range-track]:bg-transparent",
+  "[&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-3.5 [&::-moz-range-thumb]:w-3.5",
+  "[&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-background",
+  "[&::-moz-range-thumb]:bg-foreground",
+);
+
+function TimeRangeFilter({
+  axisEndMs,
+  startMs,
+  endMs,
+  onChange,
+}: {
+  axisEndMs: number;
+  startMs: number;
+  endMs: number;
+  onChange: (startMs: number, endMs: number) => void;
+}) {
+  const step = timeRangeStep(axisEndMs);
+  const filtering = startMs > 0 || endMs < axisEndMs;
+  const startPct = axisEndMs > 0 ? (startMs / axisEndMs) * 100 : 0;
+  const endPct = axisEndMs > 0 ? (endMs / axisEndMs) * 100 : 100;
+  // Keep the thumb nearer the crowded end above the other so it stays draggable.
+  const startOnTop = startMs > axisEndMs - endMs;
+
+  return (
+    <div
+      role="group"
+      aria-label="Time range"
+      data-testid="overview-time-range"
+      className="flex min-w-[16rem] flex-1 items-center gap-2"
+    >
+      <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+        Range
+      </span>
+      <div className="relative h-4 min-w-[8rem] flex-1">
+        <div
+          aria-hidden
+          className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-border"
+        />
+        <div
+          aria-hidden
+          className="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-foreground/80"
+          style={{ left: `${startPct}%`, width: `${Math.max(0, endPct - startPct)}%` }}
+        />
+        <input
+          type="range"
+          aria-label="Range start"
+          aria-valuetext={formatMs(startMs)}
+          min={0}
+          max={axisEndMs}
+          step={step}
+          value={startMs}
+          onChange={(event) => {
+            const next = Number(event.target.value);
+            onChange(Math.max(0, Math.min(next, endMs - step)), endMs);
+          }}
+          className={cn(RANGE_INPUT_CLASS, startOnTop ? "z-20" : "z-10")}
+        />
+        <input
+          type="range"
+          aria-label="Range end"
+          aria-valuetext={formatMs(endMs)}
+          min={0}
+          max={axisEndMs}
+          step={step}
+          value={endMs}
+          onChange={(event) => {
+            const next = Number(event.target.value);
+            onChange(startMs, Math.min(axisEndMs, Math.max(next, startMs + step)));
+          }}
+          className={cn(RANGE_INPUT_CLASS, startOnTop ? "z-10" : "z-20")}
+        />
+      </div>
+      <span className="shrink-0 text-[10px] tabular-nums text-muted-foreground">
+        {formatMs(startMs)}–{formatMs(endMs)}
+      </span>
+      {filtering ? (
+        <button
+          type="button"
+          onClick={() => onChange(0, axisEndMs)}
+          className="shrink-0 rounded border border-border bg-background px-1.5 py-0.5 text-[10px] font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        >
+          Reset
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
 function TimelineOverview({
   events,
   axisEndMs,
@@ -919,24 +1184,33 @@ function TimelineOverview({
 }) {
   const [open, setOpen] = useState(true);
   const [focus, setFocus] = useState<OverviewFocus>("all");
-  const overviewEvents = events;
-  const cwvs = overviewEvents.filter((event) => event.kind === "cwv");
-  const blocking = overviewEvents.filter(isBlockingWork);
+  const [rangeStartMs, setRangeStartMs] = useState(0);
+  const [rangeEndMs, setRangeEndMs] = useState(axisEndMs);
+  const rangeActive = rangeStartMs > 0 || rangeEndMs < axisEndMs;
+  const rangedEvents = rangeActive
+    ? events.filter((event) => eventOverlapsTimeRange(event, rangeStartMs, rangeEndMs))
+    : events;
+  const cwvs = rangedEvents.filter((event) => event.kind === "cwv");
+  const blocking = rangedEvents.filter(isBlockingWork);
 
-  if (overviewEvents.length < 1) return null;
+  if (events.length < 1) return null;
 
-  const shown = focus === "blocking" ? blocking : overviewEvents;
+  const shown = focus === "blocking" ? blocking : rangedEvents;
   const summaryId = "timeline-overview-summary";
+  const eventCount =
+    rangedEvents.length === events.length
+      ? `${events.length} events`
+      : `${rangedEvents.length} of ${events.length} events`;
 
   return (
     <div className="space-y-1.5" data-testid="timeline-overview">
-      <div className="flex flex-wrap items-center justify-between gap-1.5">
+      <div className="flex flex-col gap-1.5">
         <button
           type="button"
           aria-expanded={open}
           aria-controls="timeline-overview-panel"
           onClick={() => setOpen((value) => !value)}
-          className="flex min-w-0 flex-1 items-center gap-1.5 rounded-sm text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          className="flex min-w-0 items-center gap-1.5 rounded-sm text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
           <ChevronDown
             aria-hidden
@@ -949,48 +1223,61 @@ function TimelineOverview({
             Waterfall view
           </p>
           <p className="truncate text-[10px] text-muted-foreground">
-            {overviewEvents.length} events
+            {eventCount}
             {cwvs.length > 0 ? ` · ${cwvs.length} CWV` : ""}
             {blocking.length > 0 ? ` · ${blocking.length} blocking` : ""}
             {" · "}
-            {formatMs(0)}–{formatMs(axisEndMs)}
+            {formatMs(rangeStartMs)}–{formatMs(rangeEndMs)}
           </p>
         </button>
         {open ? (
-          <div
-            role="group"
-            aria-label="Overview focus"
-            data-testid="overview-focus"
-            className="flex flex-wrap items-center gap-1"
-          >
-            <button
-              type="button"
-              aria-pressed={focus === "all"}
-              onClick={() => setFocus("all")}
-              className={cn(
-                "rounded border px-1.5 py-0.5 text-[10px] font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                focus === "all"
-                  ? "border-transparent bg-foreground text-background"
-                  : "border-border bg-background text-foreground",
-              )}
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 pl-5">
+            <div
+              role="group"
+              aria-label="Overview focus"
+              data-testid="overview-focus"
+              className="flex flex-wrap items-center gap-1"
             >
-              All ({overviewEvents.length})
-            </button>
-            <button
-              type="button"
-              aria-pressed={focus === "blocking"}
-              disabled={blocking.length === 0}
-              onClick={() => setFocus("blocking")}
-              className={cn(
-                "rounded border px-1.5 py-0.5 text-[10px] font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                focus === "blocking"
-                  ? "border-transparent bg-rose-600 text-white"
-                  : "border-border bg-background text-foreground",
-                blocking.length === 0 && "opacity-50",
-              )}
-            >
-              Blocking ({blocking.length})
-            </button>
+              <button
+                type="button"
+                aria-pressed={focus === "all"}
+                onClick={() => setFocus("all")}
+                className={cn(
+                  "rounded border px-1.5 py-0.5 text-[10px] font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                  focus === "all"
+                    ? "border-transparent bg-foreground text-background"
+                    : "border-border bg-background text-foreground",
+                )}
+              >
+                All ({rangedEvents.length})
+              </button>
+              <button
+                type="button"
+                aria-pressed={focus === "blocking"}
+                disabled={blocking.length === 0}
+                onClick={() => setFocus("blocking")}
+                className={cn(
+                  "rounded border px-1.5 py-0.5 text-[10px] font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                  focus === "blocking"
+                    ? "border-transparent bg-rose-600 text-white"
+                    : "border-border bg-background text-foreground",
+                  blocking.length === 0 && "opacity-50",
+                )}
+              >
+                Blocking ({blocking.length})
+              </button>
+            </div>
+            {axisEndMs > 0 ? (
+              <TimeRangeFilter
+                axisEndMs={axisEndMs}
+                startMs={rangeStartMs}
+                endMs={rangeEndMs}
+                onChange={(startMs, endMs) => {
+                  setRangeStartMs(startMs);
+                  setRangeEndMs(endMs);
+                }}
+              />
+            ) : null}
           </div>
         ) : null}
       </div>
@@ -1000,14 +1287,18 @@ function TimelineOverview({
           {shown.length > 0 ? (
             <LaneChart
               events={shown}
-              startMs={0}
-              endMs={axisEndMs}
+              startMs={rangeStartMs}
+              endMs={rangeEndMs}
               testId="overview-lanes"
               onSelect={scrollToMoment}
               stickyTopPx={stickyTopPx}
             />
           ) : (
-            <p className="text-xs text-muted-foreground">No blocking work in this view.</p>
+            <p className="text-xs text-muted-foreground">
+              {focus === "blocking"
+                ? "No blocking work in this view."
+                : "No events in this time range."}
+            </p>
           )}
         </div>
       ) : null}
@@ -1207,26 +1498,37 @@ export function PageLoadTimeline() {
               {reportName}
             </p>
           </div>
-          {timelines.length > 1 ? (
-            <div className="flex flex-wrap gap-2" role="tablist" aria-label="Report device">
-              {timelines.map((t) => {
-                const name = t.label?.trim() || "Report";
-                const selected = t.label === active.label;
-                return (
-                  <Button
-                    key={t.label}
-                    type="button"
-                    size="sm"
-                    variant={selected ? "default" : "outline"}
-                    aria-pressed={selected}
-                    onClick={() => patchDashboardSearch({ report: t.label })}
-                  >
-                    {name}
-                  </Button>
-                );
-              })}
-            </div>
-          ) : null}
+          <div className="flex flex-wrap items-center gap-2">
+            {timelines.length > 1 ? (
+              <div className="flex flex-wrap gap-2" role="tablist" aria-label="Report device">
+                {timelines.map((t) => {
+                  const name = t.label?.trim() || "Report";
+                  const selected = t.label === active.label;
+                  return (
+                    <Button
+                      key={t.label}
+                      type="button"
+                      size="sm"
+                      variant={selected ? "default" : "outline"}
+                      aria-pressed={selected}
+                      onClick={() => patchDashboardSearch({ report: t.label })}
+                    >
+                      {name}
+                    </Button>
+                  );
+                })}
+              </div>
+            ) : null}
+            <CopyButton
+              text={timelineToMarkdown(timeline)}
+              size="sm"
+              title="Copy timeline as Markdown"
+              aria-label="Copy timeline as Markdown"
+              data-testid="copy-timeline-markdown"
+            >
+              <span className="ml-1.5 hidden sm:inline">Copy Markdown</span>
+            </CopyButton>
+          </div>
         </div>
         <TaskFilters
           options={taskOptions}

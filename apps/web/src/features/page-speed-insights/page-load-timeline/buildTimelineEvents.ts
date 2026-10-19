@@ -3,6 +3,7 @@ import type {
   CombinedLoad,
   CombinedLongTask,
   CombinedRequest,
+  LayoutShiftEvent,
   PreconnectCandidate,
   UserTiming,
 } from "./collectTimelineSources";
@@ -351,41 +352,33 @@ function redirectWaterfall(hops: CombinedRequest[]): {
   };
 }
 
-function documentNotes(load: CombinedLoad): TimelineNote[] {
-  const notes: TimelineNote[] = [];
-  if (load.serverThinkMs != null && load.serverStartMs != null && load.serverEndMs != null) {
-    notes.push({
-      id: "req-server",
-      title: "Server think time",
-      detail: `Root document server response took ${formatMs(load.serverThinkMs)}.`,
-      status: "measured",
-      kind: "marker",
-      timeMs: load.serverStartMs,
-      endMs: load.serverEndMs,
-    });
+function serverThinkEvent(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent | null {
+  if (load.serverThinkMs == null || load.serverStartMs == null || load.serverEndMs == null) {
+    return null;
   }
-  if (load.ttfb != null) {
-    notes.push({
-      id: "req-ttfb",
-      title: "TTFB",
-      detail: ttfbStepDetail(
-        load.ttfb,
-        load.ttfbObserved,
-        load.simulatedTtfb,
-        load.simulationLabel,
-      ),
-      status: "measured",
-      kind: "marker",
-      timeMs: load.ttfb,
-      rating: load.ttfbRating,
-    });
-  }
-  return notes;
+  const placement =
+    load.serverEndMs !== load.serverStartMs
+      ? atIntervalEnd(load.serverStartMs, load.serverEndMs)
+      : { timeMs: load.serverStartMs };
+  return timedEvent(
+    "req-server",
+    "Server think time",
+    `Root document server response took ${formatMs(load.serverThinkMs)}.`,
+    placement.timeMs,
+    "requestResponse",
+    bounds,
+    { ...placement, kind: "marker" },
+  );
+}
+
+function formatClsScore(score: number): string {
+  if (!Number.isFinite(score)) return "—";
+  if (score === 0) return "0";
+  if (Math.abs(score) < 0.001) return score.toPrecision(2);
+  return score.toFixed(3);
 }
 
 function networkEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent[] {
-  const notes = documentNotes(load);
-  let attachedDocumentNotes = false;
   const groups = groupDownloads(load.requests);
   const events: TimelineEvent[] = [];
 
@@ -430,10 +423,6 @@ function networkEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent[
             .join(" · ") + ".";
 
     const groupNotes: TimelineNote[] = [];
-    if (anyDocument && notes.length > 0) {
-      groupNotes.push(...notes);
-      attachedDocumentNotes = true;
-    }
     if (anyCritical && group.some(isScriptRequest)) {
       groupNotes.push(criticalChainScriptNote());
     }
@@ -486,23 +475,6 @@ function networkEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent[
       ),
     );
   });
-
-  if (!attachedDocumentNotes) {
-    for (const note of notes) {
-      if (note.timeMs == null) continue;
-      const placement =
-        note.endMs != null && note.endMs !== note.timeMs
-          ? atIntervalEnd(note.timeMs, note.endMs)
-          : { timeMs: note.timeMs };
-      events.push(
-        timedEvent(note.id, note.title, note.detail, placement.timeMs, "requestResponse", bounds, {
-          ...placement,
-          kind: note.kind,
-          rating: note.rating,
-        }),
-      );
-    }
-  }
 
   return events;
 }
@@ -676,6 +648,31 @@ function screenshotEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEve
   });
 }
 
+function layoutShiftEvents(shifts: LayoutShiftEvent[], bounds: PhaseBound[]): TimelineEvent[] {
+  return shifts.map((shift, index) => {
+    const phase = phaseActiveAt(bounds, shift.startTime);
+    const scoreText = formatClsScore(shift.score);
+    return event(
+      {
+        id: `layout-shift-${index}`,
+        title: "Layout shift",
+        detail: [
+          `Layout shift score ${scoreText} at ${formatMs(shift.startTime)}.`,
+          shift.nodeLabel ? `Largest impacted element: ${shift.nodeLabel}.` : null,
+        ]
+          .filter(Boolean)
+          .join(" "),
+        timeMs: shift.startTime,
+        phaseId: phase.id,
+        kind: "marker",
+        rating: shift.score <= 0.1 ? "good" : shift.score <= 0.25 ? "needs-improvement" : "poor",
+        evidence: shift.nodeLabel ? [`Element: ${shift.nodeLabel}`] : [],
+      },
+      bounds,
+    );
+  });
+}
+
 function milestoneEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent[] {
   const events: TimelineEvent[] = [];
 
@@ -724,20 +721,60 @@ function milestoneEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEven
     );
   }
 
+  const serverThink = serverThinkEvent(load, bounds);
+  if (serverThink) events.push(serverThink);
+
+  if (load.ttfb != null) {
+    events.push(
+      timedEvent(
+        "req-ttfb",
+        "TTFB",
+        ttfbStepDetail(
+          load.ttfb,
+          load.ttfbObserved,
+          load.simulatedTtfb,
+          load.simulationLabel,
+        ),
+        load.ttfb,
+        "requestResponse",
+        bounds,
+        { kind: "marker", rating: load.ttfbRating },
+      ),
+    );
+  }
+
+  if (load.firstVisual != null) {
+    events.push(
+      timedEvent(
+        "render-first-visual",
+        "First visual change",
+        `First visual change at ${formatMs(load.firstVisual)}.`,
+        load.firstVisual,
+        "firstRender",
+        bounds,
+      ),
+    );
+  }
+
+  if (load.firstPaint != null) {
+    events.push(
+      timedEvent(
+        "render-fp",
+        "First Paint",
+        `First Paint at ${formatMs(load.firstPaint)}.`,
+        load.firstPaint,
+        "firstRender",
+        bounds,
+      ),
+    );
+  }
+
   if (load.fcp != null) {
-    const paintNotes = [
-      load.firstPaint != null && Math.abs(load.firstPaint - load.fcp) > 100
-        ? `First Paint was ${formatMs(load.firstPaint)}.`
-        : null,
-      load.firstVisual != null && Math.abs(load.firstVisual - load.fcp) > 100
-        ? `First visual change was ${formatMs(load.firstVisual)}.`
-        : null,
-    ].filter(Boolean);
     events.push(
       timedEvent(
         "render-fcp",
         "FCP",
-        [`First Contentful Paint at ${formatMs(load.fcp)}.`, ...paintNotes].join(" "),
+        `First Contentful Paint at ${formatMs(load.fcp)}.`,
         load.fcp,
         "firstRender",
         bounds,
@@ -895,6 +932,7 @@ export function buildTimelineEvents(load: CombinedLoad): TimelineEvent[] {
     ...networkEvents(load, bounds),
     ...longTaskEvents(load, bounds),
     ...userTimingEvents(load.userTimings, bounds),
+    ...layoutShiftEvents(load.layoutShifts, bounds),
     ...screenshotEvents(load, bounds),
   ];
 
@@ -922,6 +960,7 @@ export function axisEndMs(load: CombinedLoad, events: TimelineEvent[]): number {
     ...load.longTasks.map((t) => t.startTime + t.duration),
     ...load.screenshots.map((shot) => shot.timing),
     ...load.userTimings.map((t) => t.startTime + (t.duration ?? 0)),
+    ...load.layoutShifts.map((shift) => shift.startTime),
     ...events.map((e) => e.endMs ?? e.timeMs),
     1,
   );

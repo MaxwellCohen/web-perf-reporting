@@ -140,6 +140,27 @@ describe("PageLoadTimeline", () => {
     expect(screen.getByRole("status")).toHaveTextContent(/No lab metrics/i);
   });
 
+  it("copies the filtered timeline as markdown", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText },
+      writable: true,
+      configurable: true,
+    });
+
+    mockItems.current = [reportItem("Mobile")];
+    render(<PageLoadTimeline />);
+
+    fireEvent.click(screen.getByTestId("copy-timeline-markdown"));
+    await vi.waitFor(() => {
+      expect(writeText).toHaveBeenCalledOnce();
+    });
+    const markdown = writeText.mock.calls[0]?.[0] as string;
+    expect(markdown).toContain("# Page load timeline — Mobile");
+    expect(markdown).toContain("### LCP");
+    expect(markdown).not.toContain("data:image");
+  });
+
   it("renders timed milestones, network rows, and long tasks", () => {
     mockItems.current = [reportItem("Mobile")];
     render(<PageLoadTimeline />);
@@ -153,11 +174,18 @@ describe("PageLoadTimeline", () => {
 
     const documentRow = screen.getByRole("heading", { name: "Document" }).closest("li");
     expect(documentRow).toBeTruthy();
-    expect(within(documentRow!).getByText("Server think time")).toBeInTheDocument();
-    expect(within(documentRow!).getByText("TTFB")).toBeInTheDocument();
+    expect(within(documentRow!).queryByText("Server think time")).not.toBeInTheDocument();
+    expect(within(documentRow!).queryByText("TTFB")).not.toBeInTheDocument();
+
+    const serverRow = screen.getByRole("heading", { name: "Server think time" }).closest("li");
+    expect(serverRow).toBeTruthy();
+    expect(serverRow).not.toBe(documentRow);
+    expect(serverRow).toHaveAttribute("id", "timeline-moment-req-server");
     expect(
-      within(documentRow!).getByText(/Root document server response took 90 ms/),
+      within(serverRow!).getByText(/Root document server response took 90 ms/),
     ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "TTFB" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "First Paint" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Stylesheet" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Image" })).toBeInTheDocument();
 
@@ -178,6 +206,10 @@ describe("PageLoadTimeline", () => {
     const allLanes = within(overview).getByTestId("overview-lanes");
     expect(within(allLanes).getByTestId("overview-time-axis")).toBeInTheDocument();
     expect(within(allLanes).getByTestId("overview-tick-grid")).toBeInTheDocument();
+    const guideLines = within(allLanes).getByTestId("overview-guide-lines");
+    expect(guideLines.querySelector('[data-guide="render-fcp"]')).toBeInTheDocument();
+    expect(guideLines.querySelector('[data-guide="sub-lcp"]')).toBeInTheDocument();
+    expect(guideLines.querySelector('[data-guide="nav-start"]')).toBeInTheDocument();
     expect(allLanes).toHaveTextContent("Navigation start");
     expect(allLanes).toHaveTextContent("FCP");
     expect(allLanes).toHaveTextContent("LCP");
@@ -204,13 +236,16 @@ describe("PageLoadTimeline", () => {
     expect(blockingLanes).not.toHaveTextContent("FCP");
     expect(blockingLanes).not.toHaveTextContent("LCP");
 
+    expect(within(overview).getByTestId("overview-time-range")).toBeInTheDocument();
     fireEvent.click(within(overview).getByRole("button", { name: /Waterfall view/ }));
     expect(overviewToggle).toHaveAttribute("aria-expanded", "false");
     expect(within(overview).queryByTestId("overview-lanes")).not.toBeInTheDocument();
     expect(within(overview).queryByTestId("overview-focus")).not.toBeInTheDocument();
+    expect(within(overview).queryByTestId("overview-time-range")).not.toBeInTheDocument();
     fireEvent.click(within(overview).getByRole("button", { name: /Waterfall view/ }));
     expect(overviewToggle).toHaveAttribute("aria-expanded", "true");
     expect(within(overview).getByTestId("overview-lanes")).toBeInTheDocument();
+    expect(within(overview).getByTestId("overview-time-range")).toBeInTheDocument();
 
     expect(screen.queryByTestId("parallel-cluster")).not.toBeInTheDocument();
     expect(screen.queryByText("Parallel")).not.toBeInTheDocument();
@@ -231,6 +266,47 @@ describe("PageLoadTimeline", () => {
     expect(within(longTask!).queryByText("Requests")).not.toBeInTheDocument();
 
     expect(screen.queryByText("Network")).not.toBeInTheDocument();
+  });
+
+  it("filters the waterfall to a time range and zooms the axis", () => {
+    mockItems.current = [reportItem("Mobile")];
+    render(<PageLoadTimeline />);
+
+    const overview = screen.getByTestId("timeline-overview");
+    const range = within(overview).getByTestId("overview-time-range");
+    const start = within(range).getByRole("slider", { name: "Range start" });
+    const end = within(range).getByRole("slider", { name: "Range end" });
+    const step = Number(start.getAttribute("step"));
+    const rangeStart = Math.ceil(2500 / step) * step;
+
+    expect(within(range).queryByRole("button", { name: "Reset" })).not.toBeInTheDocument();
+    expect(within(overview).getByTestId("overview-lanes")).toHaveTextContent("FCP");
+
+    fireEvent.change(start, { target: { value: String(rangeStart) } });
+
+    const lanes = within(overview).getByTestId("overview-lanes");
+    expect(lanes).toHaveTextContent("LCP");
+    expect(lanes).toHaveTextContent("TTI");
+    expect(lanes).not.toHaveTextContent("FCP");
+    expect(lanes).not.toHaveTextContent("Image downloaded");
+    expect(lanes).not.toHaveTextContent("Long task");
+    expect(within(overview).getByRole("button", { name: /Waterfall view/ })).toHaveTextContent(
+      /of \d+ events/,
+    );
+    expect(within(lanes).getByTestId("overview-time-axis")).not.toHaveTextContent("0 ms");
+    expect(within(range).getByRole("button", { name: "Reset" })).toBeInTheDocument();
+
+    fireEvent.change(end, { target: { value: "0" } });
+    expect(Number((end as HTMLInputElement).value)).toBeGreaterThan(rangeStart);
+    expect(within(overview).getByRole("button", { name: /Blocking/ })).toBeDisabled();
+
+    fireEvent.click(within(range).getByRole("button", { name: "Reset" }));
+    expect(within(overview).getByTestId("overview-lanes")).toHaveTextContent("FCP");
+    expect(within(range).queryByRole("button", { name: "Reset" })).not.toBeInTheDocument();
+
+    fireEvent.click(within(overview).getByRole("button", { name: /Blocking/ }));
+    fireEvent.change(start, { target: { value: String(rangeStart) } });
+    expect(within(overview).getByText("No blocking work in this view.")).toBeInTheDocument();
   });
 
   it("shows coverage on a stylesheet row", () => {
@@ -326,7 +402,9 @@ describe("PageLoadTimeline", () => {
     expect(label).toHaveAccessibleDescription(/did not attribute it to a script URL/i);
     expect(waterfall).toHaveTextContent(/1\.00 s–1\.58 s · 580 ms/);
 
-    const attributed = rows.find((li) => within(li).queryAllByRole("link", { name: /a\.js/ }).length);
+    const attributed = rows.find(
+      (li) => within(li).queryAllByRole("link", { name: /a\.js/ }).length,
+    );
     expect(attributed).toBeTruthy();
     expect(within(attributed!).getByTestId("moment-waterfall")).toHaveTextContent(
       /1\.00 s–1\.08 s · 80 ms/,

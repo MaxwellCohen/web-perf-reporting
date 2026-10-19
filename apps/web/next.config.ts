@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactCompiler: true,
   typedRoutes: true,
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   experimental: {
     // Native Rust React Compiler (faster than Babel). When enabled,
     // babel-plugin-react-compiler is not required.

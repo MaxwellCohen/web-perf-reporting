@@ -113,6 +113,11 @@ function makeItem(overrides: {
     startTime: number;
     duration?: number;
   }>;
+  layoutShifts?: Array<{
+    startTime?: number;
+    score: number;
+    node?: { type?: string; nodeLabel?: string; value?: string };
+  }>;
   formFactor?: "mobile" | "desktop";
   throttlingMethod?: string;
   throttling?: {
@@ -368,7 +373,7 @@ function makeItem(overrides: {
     },
     "layout-shifts": {
       id: "layout-shifts",
-      details: { type: "table", items: [], headings: [] },
+      details: { type: "table", items: overrides.layoutShifts ?? [], headings: [] },
     },
     "cls-culprits-insight": {
       id: "cls-culprits-insight",
@@ -619,9 +624,20 @@ describe("buildPageLoadTimeline", () => {
     const css = netMoments.find((m) => m.title === "Stylesheet");
     expect(css?.kind).toBe("blocking");
 
-    const docNotes = doc?.notes?.map((note) => note.title);
-    expect(docNotes).toEqual(["Server think time", "TTFB"]);
-    expect(timeline!.events.some((moment) => moment.id === "req-ttfb")).toBe(false);
+    expect(doc?.notes?.some((note) => note.title === "Server think time")).toBeFalsy();
+    const server = timeline!.events.find((moment) => moment.id === "req-server");
+    expect(server).toMatchObject({
+      title: "Server think time",
+      kind: "marker",
+      phaseId: "requestResponse",
+      startMs: 5,
+      timeMs: 85,
+      endMs: 85,
+      detail: "Root document server response took 80 ms.",
+    });
+    const ttfb = timeline!.events.find((moment) => moment.id === "req-ttfb");
+    expect(ttfb?.timeMs).toBe(85);
+    expect(ttfb?.title).toBe("TTFB");
     expect(css?.waterfall?.[0]?.renderBlocking).toBe("blocking");
     expect(netMoments.find((m) => m.title === "Script")?.waterfall?.[0]?.renderBlocking).toBe(
       "non-blocking",
@@ -1231,7 +1247,8 @@ describe("buildPageLoadTimeline", () => {
     );
 
     const fcpStep = timeline!.events.find((s) => s.id === "render-fcp");
-    expect(fcpStep?.detail).toMatch(/First Paint was/i);
+    expect(fcpStep?.detail).toBe("First Contentful Paint at 1.60 s.");
+    expect(timeline!.events.find((s) => s.id === "render-fp")?.timeMs).toBe(200);
 
     const shots = timeline!.events.filter((m) => m.id.startsWith("screenshot-"));
     expect(shots.map((m) => ({ timeMs: m.timeMs, data: m.screenshot?.data }))).toEqual([
@@ -1401,6 +1418,7 @@ describe("buildPageLoadTimeline", () => {
     const step = findMarked(timeline!, "req-ttfb");
     expect(step?.timeMs).toBe(180);
     expect(step?.detail).toBe("First byte at 180 ms.");
+    expect(timeline!.events.some((moment) => moment.id === "req-server")).toBe(false);
   });
 
   it("drops a simulated TTFB that lands after the HTML response", () => {
@@ -1429,6 +1447,100 @@ describe("buildPageLoadTimeline", () => {
     const steps = timeline!.events;
     expect(steps.every((s) => s.id !== "after-field-inp")).toBe(true);
     expect(timeline!.events.every((m) => m.title !== "Field INP")).toBe(true);
+  });
+
+  it("adds First Paint, first visual change, and TTFB as top-level moments", () => {
+    const timeline = buildPageLoadTimeline(
+      makeItem({
+        metrics: {
+          observedFirstPaint: 1100,
+          observedFirstVisualChange: 1050,
+          observedFirstContentfulPaint: 1200,
+          timeToFirstByte: 200,
+        },
+        serverResponseMs: 90,
+      }),
+    );
+
+    const firstVisual = timeline!.events.find((m) => m.id === "render-first-visual");
+    expect(firstVisual).toMatchObject({
+      title: "First visual change",
+      timeMs: 1050,
+      detail: "First visual change at 1.05 s.",
+    });
+
+    const firstPaint = timeline!.events.find((m) => m.id === "render-fp");
+    expect(firstPaint).toMatchObject({
+      title: "First Paint",
+      timeMs: 1100,
+      detail: "First Paint at 1.10 s.",
+    });
+
+    const fcp = timeline!.events.find((m) => m.id === "render-fcp");
+    expect(fcp?.detail).toBe("First Contentful Paint at 1.20 s.");
+    expect(fcp?.detail).not.toMatch(/First Paint was/i);
+
+    const ttfb = timeline!.events.find((m) => m.id === "req-ttfb");
+    expect(ttfb).toMatchObject({
+      title: "TTFB",
+      timeMs: 95,
+      kind: "marker",
+    });
+    expect(ttfb?.detail).toMatch(/Observed first byte at 95 ms/);
+    expect(
+      timeline!.events
+        .find((m) => m.title === "Document")
+        ?.notes?.some((note) => note.id === "req-ttfb"),
+    ).toBeFalsy();
+  });
+
+  it("plots layout shifts that include a startTime", () => {
+    const timeline = buildPageLoadTimeline(
+      makeItem({
+        layoutShifts: [
+          {
+            startTime: 1800,
+            score: 0.12,
+            node: { type: "node", nodeLabel: "Hero banner" },
+          },
+          {
+            score: 0.05,
+            node: { type: "node", nodeLabel: "Missing time" },
+          },
+          {
+            startTime: 900,
+            score: 0.00002,
+            node: { type: "node", nodeLabel: "Cookie banner" },
+          },
+        ],
+      }),
+    );
+
+    const shifts = timeline!.events.filter((m) => m.id.startsWith("layout-shift-"));
+    expect(shifts.map((m) => ({ id: m.id, timeMs: m.timeMs, title: m.title }))).toEqual([
+      { id: "layout-shift-0", timeMs: 900, title: "Layout shift" },
+      { id: "layout-shift-1", timeMs: 1800, title: "Layout shift" },
+    ]);
+    expect(shifts[0]?.detail).toMatch(/Cookie banner/);
+    expect(shifts[0]?.detail).toMatch(/0\.000020|2\.0e-5|0\.00002/i);
+    expect(shifts[1]?.detail).toMatch(/0\.120/);
+    expect(shifts[1]?.evidence).toEqual(["Element: Hero banner"]);
+    expect(shifts.every((m) => m.kind === "marker")).toBe(true);
+  });
+
+  it("skips layout-shift rows without a startTime", () => {
+    const timeline = buildPageLoadTimeline(
+      makeItem({
+        layoutShifts: [
+          {
+            score: 0.08,
+            node: { type: "node", nodeLabel: "No timestamp in PSI" },
+          },
+        ],
+      }),
+    );
+
+    expect(timeline!.events.some((m) => m.id.startsWith("layout-shift-"))).toBe(false);
   });
 
   it("builds timelines for multiple reports and skips empty ones", () => {

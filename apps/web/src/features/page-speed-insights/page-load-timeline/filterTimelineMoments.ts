@@ -36,7 +36,7 @@ function allEnabled(enabled: TaskFilterSelection): boolean {
   return TASK_FILTERS.every((id) => enabled.has(id));
 }
 
-/** The document row carries TTFB and server think time, so it stays with the navigation. */
+/** The root document stays visible with the navigation. */
 function isAlwaysVisibleBar(bar: TimelineWaterfallBar): boolean {
   return bar.resourceType === "Document" || !bar.renderBlocking;
 }
