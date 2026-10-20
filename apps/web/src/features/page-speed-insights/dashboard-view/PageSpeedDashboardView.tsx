@@ -56,7 +56,6 @@ export function PageSpeedDashboardView() {
 
   return (
     <div className="flex flex-col gap-6 px-3">
-      {tab === "overview" ? <PlatformNotesOverview /> : null}
       <ReportScoreOverview />
       <Tabs
         value={tab}
@@ -91,10 +90,13 @@ export function PageSpeedDashboardView() {
           </TabsList>
         </div>
         <TabPanel value="overview">
-          <SectionStack defaultOpen={OVERVIEW_OPEN}>
-            <CWVMetricsComponent />
-            <LoadingExperiencesSection />
-          </SectionStack>
+          <div className="flex flex-col gap-6">
+            <SectionStack defaultOpen={OVERVIEW_OPEN}>
+              <CWVMetricsComponent />
+              <LoadingExperiencesSection />
+            </SectionStack>
+            <PlatformNotesOverview />
+          </div>
         </TabPanel>
         <TabPanel value="timeline">
           <TimelineTabPanel />
