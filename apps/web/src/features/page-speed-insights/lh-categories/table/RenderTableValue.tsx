@@ -2,6 +2,7 @@
 import { cn } from "@/lib/utils";
 import { NodeComponent } from "@/features/page-speed-insights/lh-categories/table/RenderNode";
 import {
+  BaselineStatusValue,
   CodeValue,
   ItemValue,
   LinkValue,
@@ -56,6 +57,8 @@ export function RenderTableValue({
         return <RenderUrlValue value={value as UrlValue} {...props} />;
       case "text":
         return <RenderTextValue value={value as TextValue} {...props} />;
+      case "baseline-status":
+        return <RenderBaselineStatus value={value as BaselineStatusValue} {...props} />;
       default:
         return <RenderDefault value={value} {...props} />;
     }
@@ -287,6 +290,37 @@ function RenderUrlValue({
     return renderHttpUrl(v, props);
   }
   return <RenderAnchoredOverflowLink href={v} title={v} label={v} {...props} />;
+}
+
+const BASELINE_STATUS_COLOR: Record<string, string> = {
+  limited: "hsl(var(--chart-3))",
+  low: "hsl(var(--chart-2))",
+  high: "hsl(var(--chart-1))",
+};
+
+function baselineStatusLabel(value: BaselineStatusValue): string {
+  if (typeof value.displayString === "string") return value.displayString;
+  return value.displayString.formattedDefault;
+}
+
+function RenderBaselineStatus({
+  value,
+  ...props
+}: { value: BaselineStatusValue } & React.HTMLAttributes<HTMLElement>) {
+  return (
+    <span
+      title="baseline-status"
+      {...props}
+      className={cn("inline-flex items-center gap-1.5 whitespace-nowrap", props.className)}
+    >
+      <span
+        className="size-2 shrink-0 rounded-full"
+        style={{ backgroundColor: BASELINE_STATUS_COLOR[value.status] ?? "hsl(var(--muted-foreground))" }}
+        aria-hidden
+      />
+      {baselineStatusLabel(value)}
+    </span>
+  );
 }
 
 function RenderTextValue({

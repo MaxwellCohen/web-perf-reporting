@@ -92,6 +92,10 @@ function ResourceTypeLegend({ types }: { types: string[] }) {
         <span className="h-1.5 w-2.5 shrink-0 rounded-sm bg-slate-400/60 bg-[repeating-linear-gradient(45deg,transparent,transparent_2px,rgba(0,0,0,0.06)_2px,rgba(0,0,0,0.06)_4px)] dark:bg-slate-500/50" />
         Queue
       </span>
+      <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
+        <span className="h-1.5 w-2.5 shrink-0 rounded-sm bg-sky-600/80 shadow-[inset_0_-2px_0_0] shadow-sky-950 ring-1 ring-sky-700 dark:bg-sky-300/70 dark:shadow-sky-100 dark:ring-sky-200" />
+        Critical chain
+      </span>
     </div>
   );
 }

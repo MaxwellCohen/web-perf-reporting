@@ -255,6 +255,42 @@ describe("networkWaterfallData", () => {
     expect(loneTask?.renderBlocking).toBe("blocking");
   });
 
+  it("copies bootup cpu and chain timing onto request and task bars", () => {
+    const scriptCpu = { totalMs: 420, scriptingMs: 300, parseMs: 80 };
+    const chain = { endMs: 900, extendsMs: 400, isLongest: true };
+    const rows = buildWaterfallRowsFromSources(
+      makeLoad({
+        requests: [
+          {
+            url: "https://example.com/app.js",
+            resourceType: "Script",
+            networkRequestTime: 10,
+            networkEndTime: 40,
+            renderBlocking: "non-blocking",
+            isCriticalChain: true,
+            scriptCpu,
+            chain,
+          },
+        ],
+        longTasks: [
+          {
+            startTime: 50,
+            duration: 80,
+            url: "https://example.com/app.js",
+            scriptCpu,
+            chain,
+          },
+        ],
+      }),
+      { density: "expanded" },
+    );
+
+    const request = rows.find((row) => row.kind === "request");
+    expect(request?.segments?.[0]).toMatchObject({ scriptCpu, chain });
+    const task = rows.find((row) => row.kind === "task");
+    expect(task?.segments?.[0]).toMatchObject({ scriptCpu, chain });
+  });
+
   it("keeps tasks on one row when the gap is under 50ms, else splits", () => {
     const rows = buildWaterfallRowsFromSources(
       makeLoad({

@@ -141,6 +141,38 @@ describe("timelineToMarkdown", () => {
     );
   });
 
+  it("includes script cpu and chain facts on a waterfall line", () => {
+    const markdown = timelineToMarkdown({
+      label: "Mobile",
+      axisEndMs: 1000,
+      events: [
+        event({
+          id: "long-task-0",
+          title: "Long task",
+          timeMs: 980,
+          startMs: 800,
+          waterfall: [
+            {
+              id: "task",
+              label: "tag.js",
+              href: "https://cdn.example.com/tag.js",
+              startMs: 800,
+              endMs: 980,
+              resourceType: "Task",
+              scriptCpu: { totalMs: 420, scriptingMs: 300, parseMs: 80 },
+              chain: { endMs: 900, extendsMs: 400, isLongest: true },
+            },
+          ],
+        }),
+      ],
+    });
+
+    expect(markdown).toContain(
+      "Total CPU Time 420 ms · Script Evaluation 300 ms · Script Parse 80 ms",
+    );
+    expect(markdown).toContain("Longest chain · Chain time 900 ms · Extends chain 400 ms");
+  });
+
   it("returns a short empty message when there are no events", () => {
     expect(
       timelineToMarkdown({

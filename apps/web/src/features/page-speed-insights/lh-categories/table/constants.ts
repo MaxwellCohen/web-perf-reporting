@@ -22,6 +22,7 @@ export const UNIQUE_AGG_VALUE_TYPES: ItemValueType[] = [
   "link",
   "thumbnail",
   "node",
+  "baseline-status",
 ];
 
 /**

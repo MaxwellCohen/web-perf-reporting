@@ -11,7 +11,7 @@ import {
   processFailedAudit,
 } from "@/features/page-speed-insights/RecommendationsSection/recommendationProcessing";
 
-const hideAuditId = ["main-thread-tasks", "screenshot-thumbnails"];
+const hideAuditId = ["main-thread-tasks", "screenshot-thumbnails", "baseline"];
 
 function hasActionableDetails(
   allTableDataItems: TableItem[],

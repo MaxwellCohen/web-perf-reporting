@@ -2,9 +2,11 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockItems = vi.hoisted(() => ({ current: [] as unknown[] }));
+const mockScreenshots = vi.hoisted(() => ({ current: {} as Record<string, unknown> }));
 
 vi.mock("@/features/page-speed-insights/PageSpeedContext", () => ({
   usePageSpeedItems: () => mockItems.current,
+  useFullPageScreenshots: () => mockScreenshots.current,
 }));
 
 vi.mock("@/components/ui/dialog", () => ({
@@ -133,11 +135,41 @@ function reportItem(label: string) {
 describe("PageLoadTimeline", () => {
   beforeEach(() => {
     mockItems.current = [];
+    mockScreenshots.current = {};
   });
 
   it("shows empty state when there are no metrics", () => {
     render(<PageLoadTimeline />);
     expect(screen.getByRole("status")).toHaveTextContent(/No lab metrics/i);
+  });
+
+  it("shows the LCP element screenshot on the LCP card", () => {
+    const shot = "data:image/jpeg;base64,abc";
+    mockScreenshots.current = {
+      Mobile: {
+        screenshot: { data: shot, width: 400, height: 800 },
+        nodes: {
+          "lcp-node": { left: 10, top: 20, width: 120, height: 40, right: 130, bottom: 60 },
+        },
+      },
+    };
+    const item = reportItem("Mobile");
+    const breakdown = item.item.lighthouseResult.audits["lcp-breakdown-insight"].details.items;
+    breakdown.push({
+      type: "node",
+      lhId: "lcp-node",
+      nodeLabel: "Hero headline",
+      snippet: "<h1>",
+    });
+    mockItems.current = [item];
+
+    render(<PageLoadTimeline />);
+
+    const card = document.getElementById("timeline-moment-sub-lcp");
+    expect(card).toBeTruthy();
+    const shotEl = within(card!).getByTestId("lcp-element-screenshot");
+    expect(shotEl.querySelector(".lh-element-screenshot")).toBeTruthy();
+    expect(shotEl.querySelector("img")).toHaveAttribute("src", shot);
   });
 
   it("copies the filtered timeline as markdown", async () => {
@@ -391,6 +423,86 @@ describe("PageLoadTimeline", () => {
     expect(scope.getByText("48.8 KiB · downloaded 600 ms–900 ms (300 ms)")).toBeInTheDocument();
     expect(
       scope.getByText("50% used · 24.4 KiB used of 48.8 KiB · 24.4 KiB unused"),
+    ).toBeInTheDocument();
+  });
+
+  it("shows bootup cpu and critical-chain timing with the script info", () => {
+    const item = reportItem("Mobile");
+    const audits = item.item.lighthouseResult.audits as {
+      "network-requests": { details: { items: Array<Record<string, unknown>> } };
+    } & Record<string, unknown>;
+    audits["network-requests"].details.items.push({
+      url: "https://example.com/a.js",
+      resourceType: "Script",
+      networkRequestTime: 600,
+      networkEndTime: 900,
+      transferSize: 50000,
+      statusCode: 200,
+    });
+    audits["bootup-time"] = {
+      id: "bootup-time",
+      details: {
+        type: "table",
+        items: [
+          {
+            url: "https://example.com/a.js",
+            total: 420,
+            scripting: 300,
+            scriptParseCompile: 80,
+          },
+        ],
+        headings: [],
+      },
+    };
+    audits["network-dependency-tree-insight"] = {
+      id: "network-dependency-tree-insight",
+      details: {
+        type: "list",
+        items: [
+          {
+            type: "list-section",
+            value: {
+              type: "network-tree",
+              longestChain: { duration: 900 },
+              chains: {
+                root: {
+                  url: "https://example.com/",
+                  navStartToEndTime: 220,
+                  children: {
+                    script: {
+                      url: "https://example.com/a.js",
+                      navStartToEndTime: 900,
+                      isLongest: true,
+                      transferSize: 50000,
+                      children: {},
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+    };
+    mockItems.current = [item];
+    render(<PageLoadTimeline />);
+
+    const longTask = screen.getByRole("heading", { name: "Long task" }).closest("li");
+    expect(longTask).toBeTruthy();
+    const scope = within(longTask!);
+    expect(
+      scope.getByText("Total CPU Time 420 ms · Script Evaluation 300 ms · Script Parse 80 ms"),
+    ).toBeInTheDocument();
+    expect(
+      scope.getByText("Longest chain · Chain time 900 ms · Extends chain 680 ms"),
+    ).toBeInTheDocument();
+
+    const script = screen.getByRole("heading", { name: "Script downloaded" }).closest("li");
+    expect(script).toBeTruthy();
+    expect(
+      within(script!).getByText(
+        "Total CPU Time 420 ms · Script Evaluation 300 ms · Script Parse 80 ms",
+      ),
     ).toBeInTheDocument();
   });
 

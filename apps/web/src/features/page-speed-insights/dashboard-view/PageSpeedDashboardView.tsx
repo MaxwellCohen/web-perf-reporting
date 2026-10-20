@@ -10,6 +10,7 @@ import {
   isDashboardTab,
   patchDashboardSearch,
 } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
+import { PlatformNotesOverview } from "@/features/page-speed-insights/dashboard-view/PlatformNotes";
 import { ReportScoreOverview } from "@/features/page-speed-insights/dashboard-view/ReportScoreOverview";
 import { SectionStack } from "@/features/page-speed-insights/dashboard-view/SectionStack";
 import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
@@ -55,6 +56,7 @@ export function PageSpeedDashboardView() {
 
   return (
     <div className="flex flex-col gap-6 px-3">
+      {tab === "overview" ? <PlatformNotesOverview /> : null}
       <ReportScoreOverview />
       <Tabs
         value={tab}

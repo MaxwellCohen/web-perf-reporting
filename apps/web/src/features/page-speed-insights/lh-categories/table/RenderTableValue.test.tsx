@@ -131,6 +131,21 @@ describe("RenderTableValue", () => {
     expect(container.querySelector('[data-testid="node-component"]')).toBeTruthy();
   });
 
+  it("renders baseline status without dumping JSON", () => {
+    const { container } = render(
+      <RenderTableValue
+        value={{
+          type: "baseline-status",
+          status: "limited",
+          displayString: "Limited Availability",
+        }}
+        device=""
+      />,
+    );
+    expect(container.querySelector("pre")).toBeNull();
+    expect(container.textContent).toContain("Limited Availability");
+  });
+
   it("renders default for unknown value", () => {
     const { container } = render(
       <RenderTableValue value={{ foo: "bar" } as unknown as ItemValue} device="" />,

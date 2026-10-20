@@ -77,6 +77,8 @@ function requestWaterfallBar(
     startMs: request.networkRequestTime,
     endMs: request.networkEndTime,
     resourceType: request.resourceType,
+    scriptCpu: request.scriptCpu,
+    chain: request.chain,
     ...queueWindow(request.rendererStartTime, request.networkRequestTime),
     ...extras,
   };
@@ -429,6 +431,8 @@ function longTaskBar(task: CombinedLongTask, id: string): TimelineWaterfallBar {
     bar.downloadDuration = formatMs(Math.max(0, task.downloadEndMs - task.downloadStartMs));
   }
   if (task.coverage) bar.coverage = formatCoverage(task.coverage);
+  if (task.scriptCpu) bar.scriptCpu = task.scriptCpu;
+  if (task.chain) bar.chain = task.chain;
   return bar;
 }
 
@@ -780,6 +784,7 @@ function milestoneEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEven
           evidence,
           notes: discoveryNotes.length ? discoveryNotes : undefined,
           lcpSegments: load.lcpSegments,
+          lcpElement: load.lcpElement,
         },
       ),
     );

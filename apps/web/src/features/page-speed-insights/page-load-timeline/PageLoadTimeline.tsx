@@ -21,9 +21,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
+import { RenderNodeImage } from "@/features/page-speed-insights/lh-categories/table/RenderNode";
 import { patchDashboardSearch } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
 import { formatMs, formatNetworkPriority } from "@/features/page-speed-insights/shared/format";
+import {
+  chainLabel,
+  scriptCpuLabel,
+} from "@/features/page-speed-insights/shared/scriptResourceFacts";
 import { ResourceUrlCell } from "@/features/page-speed-insights/shared/ResourceUrlCell";
 import {
   RenderBlockingBadge,
@@ -258,6 +263,8 @@ function WaterfallRows({
     <div className="space-y-2" data-testid="moment-waterfall">
       {bars.map((bar, index) => {
         const downloadLabel = scriptDownloadLabel(bar);
+        const cpuLabel = scriptCpuLabel(bar.scriptCpu);
+        const chainText = chainLabel(bar.chain);
         const kind: WaterfallRowKind =
           rowKind === "task" || bar.taskKind != null || bar.resourceType === "Task"
             ? "task"
@@ -281,6 +288,12 @@ function WaterfallRows({
                 ) : null}
                 {downloadLabel ? (
                   <p className="text-[11px] tabular-nums text-muted-foreground">{downloadLabel}</p>
+                ) : null}
+                {cpuLabel ? (
+                  <p className="text-[11px] tabular-nums text-muted-foreground">{cpuLabel}</p>
+                ) : null}
+                {chainText ? (
+                  <p className="text-[11px] tabular-nums text-muted-foreground">{chainText}</p>
                 ) : null}
                 {bar.coverage ? (
                   <p className="text-[11px] tabular-nums text-muted-foreground">{bar.coverage}</p>
@@ -477,7 +490,15 @@ function PhaseHeader({ title }: { title: string }) {
   );
 }
 
-function MomentCard({ moment, axisEnd }: { moment: TimelineEvent; axisEnd: number }) {
+function MomentCard({
+  moment,
+  axisEnd,
+  deviceLabel,
+}: {
+  moment: TimelineEvent;
+  axisEnd: number;
+  deviceLabel: string;
+}) {
   const muted = moment.status === "not-recorded";
   const downloadBlocking = blockingStatuses(moment.waterfall);
   const statusLabel =
@@ -543,6 +564,12 @@ function MomentCard({ moment, axisEnd }: { moment: TimelineEvent; axisEnd: numbe
           ) : null}
         </div>
 
+        {moment.lcpElement ? (
+          <div className="shrink-0" data-testid="lcp-element-screenshot">
+            <RenderNodeImage item={moment.lcpElement} device={deviceLabel} imageSize={140} />
+          </div>
+        ) : null}
+
         {moment.screenshot ? (
           <MomentScreenshot timing={moment.screenshot.timing} data={moment.screenshot.data} />
         ) : null}
@@ -592,10 +619,12 @@ function momentAnchorId(id: string): string {
 function MomentRow({
   moment,
   axisEnd,
+  deviceLabel,
   showPhaseHeader,
 }: {
   moment: TimelineEvent;
   axisEnd: number;
+  deviceLabel: string;
   showPhaseHeader: boolean;
 }) {
   return (
@@ -605,7 +634,7 @@ function MomentRow({
       <div className="grid grid-cols-[4.75rem_minmax(0,1fr)] gap-3 sm:grid-cols-[5.75rem_minmax(0,1fr)]">
         <MomentRail moment={moment} />
         <div className="mb-4 min-w-0">
-          <MomentCard moment={moment} axisEnd={axisEnd} />
+          <MomentCard moment={moment} axisEnd={axisEnd} deviceLabel={deviceLabel} />
         </div>
       </div>
     </li>
@@ -716,6 +745,7 @@ function VerticalTimeline({
               key={`${moment.phaseId}-${moment.id}`}
               moment={moment}
               axisEnd={axisEndMs}
+              deviceLabel={load.label}
               showPhaseHeader={!!moment.isPhaseStart}
             />
           ))}

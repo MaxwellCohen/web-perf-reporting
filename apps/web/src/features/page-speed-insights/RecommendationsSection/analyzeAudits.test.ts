@@ -54,6 +54,27 @@ describe("analyzeAudits", () => {
     expect(result[0].actionableSteps.length).toBeGreaterThanOrEqual(0);
   });
 
+  it("skips the baseline inventory", () => {
+    const items = [
+      createItem({
+        baseline: {
+          id: "baseline",
+          title: "Baseline Features",
+          score: 1,
+          scoreDisplayMode: "informative",
+          description: "Lists web features used on the page.",
+          details: {
+            type: "table",
+            headings: [{ key: "featureId", label: "Feature" }],
+            items: [{ featureId: "grid" }],
+          },
+        },
+      }),
+    ];
+    const result = analyzeAudits(items as any);
+    expect(result.filter((r) => r.id.includes("baseline"))).toHaveLength(0);
+  });
+
   it("skips audits in hideAuditId list", () => {
     const items = [
       createItem({

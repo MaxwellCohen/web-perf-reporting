@@ -180,6 +180,33 @@ describe("InteractiveNetworkWaterfall", () => {
     expect(screen.getAllByTestId("waterfall-bar-track").length).toBeGreaterThan(0);
   });
 
+  it("marks critical-chain requests on the row and the bar", () => {
+    const chainRow: NetworkWaterfallRow = {
+      ...rows[1]!,
+      id: "chain-css",
+      isCriticalChain: true,
+      chain: { endMs: 400, isLongest: true },
+      segments: rows[1]!.segments?.map((segment) => ({
+        ...segment,
+        isCriticalChain: true,
+        chain: { endMs: 400, isLongest: true },
+      })),
+    };
+
+    render(
+      <InteractiveNetworkWaterfall
+        rows={[chainRow, rows[0]!]}
+        timeRange={timeRange}
+      />,
+    );
+
+    const badges = screen.getAllByTestId("waterfall-chain-badge");
+    expect(badges.length).toBeGreaterThan(0);
+    expect(badges.every((badge) => badge.textContent === "Critical path")).toBe(true);
+    expect(badges[0]).toHaveAttribute("data-critical-chain", "longest");
+    expect(document.querySelector('[data-critical-chain="longest"]')).toBeTruthy();
+  });
+
   it("shows bar info in a portaled popover on hover", async () => {
     render(
       <InteractiveNetworkWaterfall

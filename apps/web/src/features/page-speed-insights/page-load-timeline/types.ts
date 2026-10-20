@@ -1,3 +1,9 @@
+import type {
+  CriticalChainNode,
+  ScriptCpu,
+} from "@/features/page-speed-insights/shared/scriptResourceFacts";
+import type { NodeValue } from "@/lib/schema";
+
 export type Rating = "good" | "needs-improvement" | "poor";
 export type MarkerKind = "blocking" | "potentially-blocking" | "cwv" | "marker" | "fact";
 export type StepStatus = "measured" | "inferred" | "not-recorded";
@@ -54,6 +60,10 @@ export type TimelineWaterfallBar = {
   renderBlocking?: RenderBlockingStatus;
   /** Main-thread task bars: short vs long coloring in WaterfallBarTrack. */
   taskKind?: "short" | "long";
+  /** bootup-time CPU for this script URL. */
+  scriptCpu?: ScriptCpu;
+  /** Critical-chain timing from network-dependency-tree-insight. */
+  chain?: CriticalChainNode;
 };
 
 /** A measurement that belongs on another row, such as TTFB on the document request. */
@@ -103,6 +113,8 @@ export type TimelineEvent = {
   waterfall?: TimelineWaterfallBar[];
   notes?: TimelineNote[];
   screenshot?: ScreenshotFrame;
+  /** Lighthouse node for the LCP element, used to crop the full-page screenshot. */
+  lcpElement?: NodeValue;
   lcpSegments?: LcpSegment[];
   isPhaseStart?: boolean;
 };

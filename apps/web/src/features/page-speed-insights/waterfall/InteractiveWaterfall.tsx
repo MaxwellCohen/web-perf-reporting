@@ -17,7 +17,10 @@ import {
   guidesFromMilestones,
 } from "@/features/page-speed-insights/waterfall/guides";
 import { TickGridOverlay, TimeAxis } from "@/features/page-speed-insights/waterfall/timeAxis";
-import { WaterfallBarTrack } from "@/features/page-speed-insights/waterfall/WaterfallBarTrack";
+import {
+  rowCriticalChainMark,
+  WaterfallBarTrack,
+} from "@/features/page-speed-insights/waterfall/WaterfallBarTrack";
 import { RenderBlockingBadge } from "@/features/page-speed-insights/waterfall/renderBlockingBadge";
 import { cn } from "@/lib/utils";
 
@@ -126,6 +129,25 @@ function RowTrailingMeta({ row }: { row: WaterfallRow }) {
   );
 }
 
+function ChainChip({ row }: { row: WaterfallRow }) {
+  const mark = rowCriticalChainMark(row);
+  if (!mark) return null;
+  return (
+    <span
+      className={cn(
+        "shrink-0 rounded px-1 py-0.5 text-[10px] font-medium leading-none",
+        mark === "longest"
+          ? "bg-sky-500/20 text-sky-800 dark:text-sky-200"
+          : "bg-sky-500/10 text-sky-700 dark:text-sky-300",
+      )}
+      data-testid="waterfall-chain-badge"
+      data-critical-chain={mark}
+    >
+      {mark === "longest" ? "Critical path" : "Chain"}
+    </span>
+  );
+}
+
 function BlockingChip({ row }: { row: WaterfallRow }) {
   if (
     (row.kind !== "request" && row.kind !== "request-group" && row.kind !== "task") ||
@@ -162,6 +184,7 @@ function RowMeta({ row, layout = "desktop" }: { row: WaterfallRow; layout?: "des
           {label}
         </p>
         <BlockingChip row={row} />
+        <ChainChip row={row} />
         {meta ? (
           <span className="shrink-0 tabular-nums text-[10px] leading-none text-muted-foreground">
             {meta}
@@ -179,6 +202,7 @@ function RowMeta({ row, layout = "desktop" }: { row: WaterfallRow; layout?: "des
           {label}
         </span>
         <BlockingChip row={row} />
+        <ChainChip row={row} />
       </div>
       <RowTrailingMeta row={row} />
     </div>
@@ -419,17 +443,13 @@ export function InteractiveWaterfall({
           </div>
 
           <div className="relative">
+            {/* Milestone guides stay desktop-only — on stacked mobile they cut through
+                row labels. TimeAxis chip legend still lists the same milestones. */}
             <TickGridOverlay
               minStart={minStart}
               maxEnd={maxEnd}
               overview={overview}
               tickCount={3}
-            />
-            <GuideOverlay
-              minStart={minStart}
-              maxEnd={maxEnd}
-              guides={guides}
-              testId={overview ? "overview-guide-lines" : "waterfall-milestone-overlay"}
             />
 
             {rows.map((row) => {
@@ -445,8 +465,16 @@ export function InteractiveWaterfall({
                   aria-selected={isSelected}
                   onClick={() => handleRowActivate(row)}
                 >
-                  <RowMeta row={row} layout="mobile" />
-                  <div className="mt-1.5">
+                  {/* Opaque label strip so faint tick lines don't slice through text. */}
+                  <div
+                    className={cn(
+                      "relative z-2 -mx-2 -mt-1.5 px-2 pt-1.5",
+                      isSelected ? "bg-muted/60" : "bg-card group-hover:bg-muted/30",
+                    )}
+                  >
+                    <RowMeta row={row} layout="mobile" />
+                  </div>
+                  <div className="relative mt-1.5">
                     <WaterfallBarTrack row={row} minStart={minStart} maxEnd={maxEnd} height={10} />
                   </div>
                 </button>

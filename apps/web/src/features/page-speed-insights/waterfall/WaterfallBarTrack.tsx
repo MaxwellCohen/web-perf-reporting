@@ -15,6 +15,10 @@ import {
   formatMs,
   formatNetworkPriority,
 } from "@/features/page-speed-insights/shared/format";
+import {
+  scriptCpuLabel,
+  type CriticalChainNode,
+} from "@/features/page-speed-insights/shared/scriptResourceFacts";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -41,6 +45,38 @@ function isEmphasizedBlocking(segment: WaterfallSegment): boolean {
   );
 }
 
+export type CriticalChainMark = "chain" | "longest";
+
+/** Network requests on the critical chain. Longest-path nodes are called out separately. */
+export function criticalChainMark(
+  row: Pick<WaterfallRow, "kind" | "isCriticalChain" | "chain">,
+  segment?: Pick<WaterfallSegment, "isCriticalChain" | "chain">,
+): CriticalChainMark | null {
+  if (row.kind === "task" || row.kind === "user-mark" || row.kind === "user-measure") return null;
+  const onChain = Boolean(segment?.isCriticalChain || row.isCriticalChain);
+  if (!onChain) return null;
+  if (segment?.chain?.isLongest || row.chain?.isLongest) return "longest";
+  return "chain";
+}
+
+export function rowCriticalChainMark(row: WaterfallRow): CriticalChainMark | null {
+  const segments = row.segments ?? [];
+  if (!segments.length) return criticalChainMark(row);
+  if (segments.some((segment) => criticalChainMark(row, segment) === "longest")) return "longest";
+  if (segments.some((segment) => criticalChainMark(row, segment) === "chain")) return "chain";
+  return null;
+}
+
+function chainBarClass(mark: CriticalChainMark | null): string | undefined {
+  if (mark === "longest") {
+    return "ring-1 ring-sky-600 shadow-[inset_0_-2px_0_0] shadow-sky-600 dark:ring-sky-300 dark:shadow-sky-300";
+  }
+  if (mark === "chain") {
+    return "shadow-[inset_0_-2px_0_0] shadow-sky-600/80 dark:shadow-sky-300/80";
+  }
+  return undefined;
+}
+
 function blockingLabel(status: WaterfallSegment["renderBlocking"]): string | null {
   if (status === "blocking") return "Blocking";
   if (status === "potentially-blocking") return "Potentially blocking";
@@ -56,51 +92,77 @@ function segmentKindLabel(row: WaterfallRow, segment: WaterfallSegment): string 
   return toTitleCase(row.resourceType);
 }
 
+function joinParts(parts: Array<string | null | undefined | false>): string | null {
+  const line = parts.filter((part): part is string => Boolean(part)).join(" · ");
+  return line.length > 0 ? line : null;
+}
+
+function chainTooltipLine(
+  row: Pick<WaterfallRow, "isCriticalChain" | "chain">,
+  segment: Pick<WaterfallSegment, "isCriticalChain" | "chain">,
+): string | null {
+  const node: CriticalChainNode | undefined = segment.chain ?? row.chain;
+  const onChain = Boolean(segment.isCriticalChain || row.isCriticalChain || node);
+  if (!onChain) return null;
+  const head = node?.isLongest ? "Critical path" : "Critical chain";
+  if (node?.extendsMs != null && Math.round(node.extendsMs) > 0) {
+    return `${head} · ${formatMs(node.extendsMs)} past its parent`;
+  }
+  return head;
+}
+
 /** Lines shown in the hover tooltip for a bar segment. */
 export function segmentTooltipLines(row: WaterfallRow, segment: WaterfallSegment): string[] {
   const name = segment.label ?? row.label;
   const duration = Math.max(0, segment.end - segment.start);
-  const lines = [name, segmentKindLabel(row, segment)];
-
-  if (duration > 0 || row.kind !== "user-mark") {
-    lines.push(`${formatMs(segment.start)}–${formatMs(segment.end)} · ${formatMs(duration)}`);
-  } else {
-    lines.push(`At ${formatMs(segment.start)}`);
-  }
-
-  if (segment.queueStart != null && segment.queueEnd != null) {
-    lines.push(`Queue ${formatMs(segment.queueEnd - segment.queueStart)}`);
-  }
-
-  const blocking = blockingLabel(segment.renderBlocking ?? row.renderBlocking);
-  if (blocking) lines.push(blocking);
+  const timing =
+    duration > 0 || row.kind !== "user-mark"
+      ? `${formatMs(segment.start)}–${formatMs(segment.end)} · ${formatMs(duration)}`
+      : `At ${formatMs(segment.start)}`;
+  const lines = [name, `${segmentKindLabel(row, segment)} · ${timing}`];
 
   const priority = segment.priority ?? row.priority;
-  if (priority) lines.push(`Priority ${formatNetworkPriority(priority)}`);
+  const queue =
+    segment.queueStart != null && segment.queueEnd != null
+      ? `Queued ${formatMs(segment.queueEnd - segment.queueStart)}`
+      : null;
+  const meta = joinParts([
+    queue,
+    priority ? `${formatNetworkPriority(priority)} priority` : null,
+    blockingLabel(segment.renderBlocking ?? row.renderBlocking),
+    segment.protocol ?? row.protocol,
+    segment.isLinkPreload || row.isLinkPreload ? "Preload" : null,
+  ]);
+  if (meta) lines.push(meta);
 
+  const transfer =
+    segment.transferSize != null && segment.transferSize > 0
+      ? segment.transferSize
+      : row.transferSize != null && row.transferSize > 0 && !row.segments?.length
+        ? row.transferSize
+        : null;
   const coverage = segment.coverage ?? row.coverage;
-  if (coverage) lines.push(coverage);
+  const size = joinParts([
+    transfer != null ? `Transfer ${formatBytes(transfer)}` : null,
+    coverage ? `Coverage ${coverage}` : null,
+  ]);
+  if (size) lines.push(size);
 
-  const protocol = segment.protocol ?? row.protocol;
-  if (protocol) lines.push(protocol);
+  const download = joinParts([
+    segment.downloadStartMs != null && segment.downloadEndMs != null
+      ? `Downloaded ${formatMs(segment.downloadStartMs)}–${formatMs(segment.downloadEndMs)}`
+      : null,
+    segment.scriptTransferBytes != null && segment.scriptTransferBytes > 0
+      ? formatBytes(segment.scriptTransferBytes)
+      : null,
+  ]);
+  if (download) lines.push(download);
 
-  if (segment.transferSize != null && segment.transferSize > 0) {
-    lines.push(formatBytes(segment.transferSize));
-  } else if (row.transferSize != null && row.transferSize > 0 && !row.segments?.length) {
-    lines.push(formatBytes(row.transferSize));
-  }
+  const cpu = scriptCpuLabel(segment.scriptCpu ?? row.scriptCpu);
+  if (cpu) lines.push(cpu);
 
-  if (segment.downloadStartMs != null && segment.downloadEndMs != null) {
-    lines.push(
-      `Script download ${formatMs(segment.downloadStartMs)}–${formatMs(segment.downloadEndMs)}`,
-    );
-  }
-  if (segment.scriptTransferBytes != null && segment.scriptTransferBytes > 0) {
-    lines.push(`Script ${formatBytes(segment.scriptTransferBytes)}`);
-  }
-
-  if (segment.isCriticalChain || row.isCriticalChain) lines.push("Critical chain");
-  if (segment.isLinkPreload || row.isLinkPreload) lines.push("Preload");
+  const chain = chainTooltipLine(row, segment);
+  if (chain) lines.push(chain);
 
   return lines;
 }
@@ -110,12 +172,14 @@ function BarInfoPopover({
   className,
   style,
   "data-task-kind": taskKind,
+  "data-critical-chain": criticalChain,
   "data-testid": testId,
 }: {
   lines: string[];
   className?: string;
   style?: React.CSSProperties;
   "data-task-kind"?: string;
+  "data-critical-chain"?: CriticalChainMark;
   "data-testid"?: string;
 }) {
   const descriptionId = useId();
@@ -130,6 +194,7 @@ function BarInfoPopover({
           aria-label={lines.join(", ")}
           aria-describedby={descriptionId}
           data-task-kind={taskKind}
+          data-critical-chain={criticalChain}
           data-testid={testId}
           onMouseEnter={() => setOpen(true)}
           onMouseLeave={() => setOpen(false)}
@@ -234,6 +299,9 @@ export function WaterfallBarTrack({
             label: row.label,
             priority: row.priority,
             coverage: row.coverage,
+            scriptCpu: row.scriptCpu,
+            chain: row.chain,
+            isCriticalChain: row.isCriticalChain,
           } satisfies WaterfallSegment,
         ];
 
@@ -251,13 +319,15 @@ export function WaterfallBarTrack({
         const networkStyle = getSegmentStyle(segment.start, segment.end, minStart, maxEnd);
         const color = segmentBarColor(row, segment);
         const emphasized = isEmphasizedBlocking(segment);
+        const chainMark = criticalChainMark(row, segment);
         const lines = segmentTooltipLines(row, segment);
 
         const barClass = cn(
           "absolute top-0 bottom-0 rounded-xs opacity-90",
           interactive && "hover:opacity-100",
           color,
-          emphasized && "ring-1 ring-rose-500/50",
+          emphasized && chainMark !== "longest" && "ring-1 ring-rose-500/50",
+          chainBarClass(chainMark),
         );
         return (
           <div key={segment.id}>
@@ -276,12 +346,14 @@ export function WaterfallBarTrack({
               <BarInfoPopover
                 lines={lines}
                 data-task-kind={segment.taskKind}
+                data-critical-chain={chainMark ?? undefined}
                 className={barClass}
                 style={networkStyle}
               />
             ) : (
               <div
                 data-task-kind={segment.taskKind}
+                data-critical-chain={chainMark ?? undefined}
                 className={barClass}
                 style={networkStyle}
               />

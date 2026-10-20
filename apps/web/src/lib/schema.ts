@@ -464,6 +464,7 @@ const ItemValueTypeSchema = z.union([
   z.literal("thumbnail"),
   z.literal("timespanMs"),
   z.literal("multi"), // not sure what this is
+  z.literal("baseline-status"),
 ]);
 
 /** String enum of possible types of values found within table items. */
@@ -530,6 +531,14 @@ const TextValueSchema = z.object({
 
 export type TextValue = z.infer<typeof TextValueSchema>;
 
+const BaselineStatusValueSchema = z.object({
+  type: z.literal("baseline-status"),
+  status: z.string(),
+  displayString: z.union([IcuMessageSchema, z.string()]),
+});
+
+export type BaselineStatusValue = z.infer<typeof BaselineStatusValueSchema>;
+
 /** Possible types of values found within table items. */
 const ItemValueSchema = z.union([
   z.string(),
@@ -544,6 +553,7 @@ const ItemValueSchema = z.union([
   NumericValueSchema,
   IcuMessageSchema,
   TextValueSchema,
+  BaselineStatusValueSchema,
 ]);
 
 export type ItemValue = z.infer<typeof ItemValueSchema> | TableSubItems;

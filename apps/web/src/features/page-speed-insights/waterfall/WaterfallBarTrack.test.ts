@@ -28,10 +28,8 @@ describe("segmentTooltipLines", () => {
       }),
     ).toEqual([
       "example.com/app.css",
-      "Stylesheet",
-      "100 ms–200 ms · 100 ms",
-      "Queue 20 ms",
-      "Blocking",
+      "Stylesheet · 100 ms–200 ms · 100 ms",
+      "Queued 20 ms · Blocking",
     ]);
   });
 
@@ -56,7 +54,7 @@ describe("segmentTooltipLines", () => {
         taskKind: "long",
         renderBlocking: "blocking",
       }),
-    ).toEqual(["app.js", "Long task", "50 ms–120 ms · 70 ms", "Blocking"]);
+    ).toEqual(["app.js", "Long task · 50 ms–120 ms · 70 ms", "Blocking"]);
   });
 
   it("includes priority and coverage when present", () => {
@@ -81,7 +79,7 @@ describe("segmentTooltipLines", () => {
         coverage: "50% used",
       }),
     ).toEqual(
-      expect.arrayContaining(["Priority High", "50% used"]),
+      expect.arrayContaining(["High priority", "Coverage 50% used"]),
     );
   });
 
@@ -104,6 +102,39 @@ describe("segmentTooltipLines", () => {
         label: "Document",
         priority: "VeryHigh",
       }),
-    ).toEqual(expect.arrayContaining(["Priority Very High"]));
+    ).toEqual(expect.arrayContaining(["Very High priority"]));
+  });
+
+  it("includes bootup cpu and critical-chain timing", () => {
+    const row: WaterfallRow = {
+      id: "tasks-0",
+      kind: "task",
+      label: "Task",
+      resourceType: "Task",
+      networkStart: 800,
+      networkEnd: 980,
+      duration: 180,
+      isCriticalChain: true,
+      scriptCpu: { totalMs: 1177.7, scriptingMs: 258, parseMs: 892 },
+      chain: { endMs: 595, extendsMs: 345, isLongest: true },
+    };
+
+    expect(
+      segmentTooltipLines(row, {
+        id: "t0",
+        start: 800,
+        end: 980,
+        label: "cdn.example.com/tag.js",
+        taskKind: "long",
+        isCriticalChain: true,
+        scriptCpu: row.scriptCpu,
+        chain: row.chain,
+      }),
+    ).toEqual([
+      "cdn.example.com/tag.js",
+      "Long task · 800 ms–980 ms · 180 ms",
+      "Total CPU Time 1.18 s · Script Evaluation 258 ms · Script Parse 892 ms",
+      "Critical path · 345 ms past its parent",
+    ]);
   });
 });

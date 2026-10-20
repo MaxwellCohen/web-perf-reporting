@@ -13,6 +13,10 @@ import type {
 import { groupDownloads } from "@/features/page-speed-insights/page-load-timeline/groupDownloads";
 import { isLongTask } from "@/features/page-speed-insights/page-load-timeline/groupMainThreadTasks";
 import type { RenderBlockingStatus } from "@/features/page-speed-insights/page-load-timeline/types";
+import type {
+  CriticalChainNode,
+  ScriptCpu,
+} from "@/features/page-speed-insights/shared/scriptResourceFacts";
 import type { TableItem } from "@/lib/schema";
 import { getNumber, getUrlString } from "@/lib/utils";
 
@@ -52,6 +56,8 @@ export type WaterfallSegment = {
   downloadStartMs?: number;
   downloadEndMs?: number;
   scriptTransferBytes?: number;
+  scriptCpu?: ScriptCpu;
+  chain?: CriticalChainNode;
 };
 
 /** Alias kept for call sites that still say NetworkWaterfallRow. */
@@ -69,6 +75,8 @@ export type WaterfallRow = {
   mimeType?: string;
   priority?: string;
   coverage?: string;
+  scriptCpu?: ScriptCpu;
+  chain?: CriticalChainNode;
   isCriticalChain?: boolean;
   isLinkPreload?: boolean;
   renderBlocking?: RenderBlockingStatus;
@@ -139,6 +147,8 @@ function requestExtras(request: CombinedRequest) {
     isCriticalChain: request.isCriticalChain || undefined,
     isLinkPreload: request.isLinkPreload || undefined,
     resourceSize: request.resourceSize,
+    scriptCpu: request.scriptCpu,
+    chain: request.chain,
   };
 }
 
@@ -291,6 +301,8 @@ function taskRow(group: CombinedLongTask[], index: number): WaterfallRow {
     momentId,
     url: group.length === 1 ? group[0]?.url : undefined,
     coverage: group.length === 1 && group[0]?.coverage ? formatCoverage(group[0].coverage) : undefined,
+    scriptCpu: group.length === 1 ? group[0]?.scriptCpu : undefined,
+    chain: group.length === 1 ? group[0]?.chain : undefined,
     segments: group.map((task, segIndex) => {
       const long = isLongTask(task);
       return {
@@ -306,6 +318,8 @@ function taskRow(group: CombinedLongTask[], index: number): WaterfallRow {
         downloadEndMs: task.downloadEndMs,
         scriptTransferBytes: task.scriptTransferBytes,
         coverage: task.coverage ? formatCoverage(task.coverage) : undefined,
+        scriptCpu: task.scriptCpu,
+        chain: task.chain,
       };
     }),
   };
@@ -618,6 +632,8 @@ export function waterfallRowFromTimelineBar(
     downloadStartMs?: number;
     downloadEndMs?: number;
     scriptSize?: string;
+    scriptCpu?: ScriptCpu;
+    chain?: CriticalChainNode;
     queueStartMs?: number;
     queueEndMs?: number;
     taskKind?: WaterfallTaskKind;
@@ -642,6 +658,9 @@ export function waterfallRowFromTimelineBar(
     duration: Math.max(0, bar.endMs - (queueStart ?? bar.startMs)),
     coverage: bar.coverage,
     priority: bar.priority,
+    scriptCpu: bar.scriptCpu,
+    chain: bar.chain,
+    isCriticalChain: bar.chain ? true : undefined,
     segments: [
       {
         id: `${bar.id}-seg`,
@@ -656,6 +675,9 @@ export function waterfallRowFromTimelineBar(
         priority: bar.priority,
         downloadStartMs: bar.downloadStartMs,
         downloadEndMs: bar.downloadEndMs,
+        scriptCpu: bar.scriptCpu,
+        chain: bar.chain,
+        isCriticalChain: bar.chain ? true : undefined,
         colorClass: bar.colorClass,
       },
     ],

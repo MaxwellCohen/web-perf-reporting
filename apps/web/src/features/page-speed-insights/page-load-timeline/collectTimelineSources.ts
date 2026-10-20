@@ -1,5 +1,5 @@
 import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
-import type { AuditResultsRecord, TableItem } from "@/lib/schema";
+import type { AuditResultsRecord, NodeValue, TableItem } from "@/lib/schema";
 import { getNumber } from "@/lib/utils";
 import {
   createTimelineClock,
@@ -7,6 +7,7 @@ import {
   resolveSimulatedThrottling,
   type TimelineClock,
 } from "./simulatedThrottling";
+import type { CriticalChainNode, ScriptCpu } from "@/features/page-speed-insights/shared/scriptResourceFacts";
 import type { LcpSegment, Rating, RenderBlockingStatus, ScreenshotFrame } from "./types";
 
 type MetricsItem = Record<string, unknown>;
@@ -94,6 +95,10 @@ export type CombinedRequest = {
   renderBlocking: RenderBlockingStatus;
   isCriticalChain: boolean;
   coverage?: CodeCoverage;
+  /** bootup-time CPU for this URL, when Lighthouse attributed any. */
+  scriptCpu?: ScriptCpu;
+  /** Critical-chain timing from network-dependency-tree-insight. */
+  chain?: CriticalChainNode;
 };
 
 export type CombinedLongTask = {
@@ -104,6 +109,8 @@ export type CombinedLongTask = {
   downloadStartMs?: number;
   downloadEndMs?: number;
   coverage?: CodeCoverage;
+  scriptCpu?: ScriptCpu;
+  chain?: CriticalChainNode;
 };
 
 export type CombinedLoad = {
@@ -138,6 +145,8 @@ export type CombinedLoad = {
   userTimings: UserTiming[];
   screenshots: ScreenshotFrame[];
   lcpElementLabel?: string;
+  /** Lighthouse node for the painted LCP element, including `lhId` for the screenshot crop. */
+  lcpElement?: NodeValue;
   lcpSegments: LcpSegment[];
   lcpDiscoveryFailures: LcpDiscoveryCheck[];
   layoutShifts: LayoutShiftEvent[];
@@ -339,8 +348,88 @@ function collectChainUrls(chains: Record<string, unknown>, out: string[] = []): 
   return out;
 }
 
+function lookupKeyed<T>(map: Map<string, T>, url: string): T | undefined {
+  for (const key of coverageKeys(url)) {
+    const value = map.get(key);
+    if (value) return value;
+  }
+  return undefined;
+}
+
+function rememberBest<T>(
+  map: Map<string, T>,
+  url: string,
+  value: T,
+  prefer: (current: T, next: T) => T,
+): void {
+  for (const key of coverageKeys(url)) {
+    const existing = map.get(key);
+    map.set(key, existing ? prefer(existing, value) : value);
+  }
+}
+
+function bootupCpuByUrl(audits: AuditResultsRecord | undefined): Map<string, ScriptCpu> {
+  const map = new Map<string, ScriptCpu>();
+  for (const item of auditItems(audits, "bootup-time")) {
+    if (!item || typeof item !== "object") continue;
+    const row = item as TableItem;
+    const url = typeof row.url === "string" ? row.url : "";
+    if (!url.startsWith("http")) continue;
+    const totalMs = getNumber(row.total) ?? 0;
+    const scriptingMs = getNumber(row.scripting) ?? 0;
+    const parseMs = getNumber(row.scriptParseCompile) ?? 0;
+    if (totalMs <= 0 && scriptingMs <= 0 && parseMs <= 0) continue;
+    rememberBest(
+      map,
+      url,
+      { totalMs, scriptingMs, parseMs },
+      (current, next) => (next.totalMs > current.totalMs ? next : current),
+    );
+  }
+  return map;
+}
+
+type ChainWalkNode = {
+  url?: string;
+  navStartToEndTime?: number;
+  isLongest?: boolean;
+  children?: Record<string, ChainWalkNode>;
+};
+
+function preferChain(current: CriticalChainNode, next: CriticalChainNode): CriticalChainNode {
+  if (next.isLongest && !current.isLongest) return next;
+  if (current.isLongest && !next.isLongest) return current;
+  return (next.endMs ?? 0) > (current.endMs ?? 0) ? next : current;
+}
+
+function rememberChainNodes(
+  map: Map<string, CriticalChainNode>,
+  chains: Record<string, ChainWalkNode> | undefined,
+  parentEndMs: number | undefined,
+): void {
+  if (!chains) return;
+  for (const node of Object.values(chains)) {
+    if (!node || typeof node !== "object") continue;
+    const endMs = getNumber(node.navStartToEndTime);
+    if (typeof node.url === "string" && node.url.startsWith("http")) {
+      const info: CriticalChainNode = {};
+      if (endMs != null) info.endMs = endMs;
+      if (parentEndMs != null && endMs != null) {
+        const extendsMs = Math.max(0, endMs - parentEndMs);
+        if (extendsMs > 0) info.extendsMs = extendsMs;
+      }
+      if (node.isLongest) info.isLongest = true;
+      if (info.endMs != null || info.extendsMs != null || info.isLongest) {
+        rememberBest(map, node.url, info, preferChain);
+      }
+    }
+    rememberChainNodes(map, node.children, endMs ?? parentEndMs);
+  }
+}
+
 function parseDependencyTree(audits: AuditResultsRecord | undefined): {
   chainUrls: string[];
+  chainByUrl: Map<string, CriticalChainNode>;
   longestChainMs?: number;
   preconnectedText?: string;
   preconnectCandidates: PreconnectCandidate[];
@@ -350,6 +439,7 @@ function parseDependencyTree(audits: AuditResultsRecord | undefined): {
     | undefined;
   const result = {
     chainUrls: [] as string[],
+    chainByUrl: new Map<string, CriticalChainNode>(),
     longestChainMs: undefined as number | undefined,
     preconnectedText: undefined as string | undefined,
     preconnectCandidates: [] as PreconnectCandidate[],
@@ -376,6 +466,11 @@ function parseDependencyTree(audits: AuditResultsRecord | undefined): {
       if (value.type === "network-tree") {
         result.longestChainMs = getNumber(value.longestChain?.duration);
         result.chainUrls = collectChainUrls(value.chains ?? {});
+        rememberChainNodes(
+          result.chainByUrl,
+          value.chains as Record<string, ChainWalkNode> | undefined,
+          undefined,
+        );
       } else if (value.type === "text" && typeof value.value === "string") {
         if (s.title?.toLowerCase().includes("preconnected")) {
           result.preconnectedText = value.value;
@@ -490,16 +585,14 @@ function lcpSubparts(audits: AuditResultsRecord | undefined): LcpSubpart[] {
   return [];
 }
 
-function lcpElementLabel(audits: AuditResultsRecord | undefined): string | undefined {
+function lcpElementNode(audits: AuditResultsRecord | undefined): NodeValue | undefined {
   const details = audits?.["lcp-breakdown-insight"]?.details as { items?: unknown[] } | undefined;
   if (!details?.items) return undefined;
 
   for (const entry of details.items) {
     if (!entry || typeof entry !== "object") continue;
-    const node = entry as { type?: string; nodeLabel?: string; snippet?: string };
-    if (node.type === "node") {
-      return node.nodeLabel ?? node.snippet;
-    }
+    const node = entry as NodeValue;
+    if (node.type === "node") return node;
   }
 
   return undefined;
@@ -675,8 +768,12 @@ function toCombinedRequest(
   textBlockingUrlSet: Set<string>,
   chainUrlSet: Set<string>,
   coverageByUrl: Map<string, CodeCoverage>,
+  cpuByUrl: Map<string, ScriptCpu>,
+  chainByUrl: Map<string, CriticalChainNode>,
 ): CombinedRequest | null {
   if (request.networkRequestTime == null || request.networkEndTime == null) return null;
+  const chain = lookupKeyed(chainByUrl, request.url);
+  const scriptCpu = lookupKeyed(cpuByUrl, request.url);
   return {
     url: request.url,
     resourceType: request.resourceType,
@@ -692,10 +789,12 @@ function toCombinedRequest(
     entity: request.entity,
     priority: request.priority,
     renderBlocking: downloadBlockingStatus(request, blockingUrlSet, textBlockingUrlSet),
-    isCriticalChain: chainUrlSet.has(request.url),
+    isCriticalChain: chainUrlSet.has(request.url) || chain != null,
     coverage: isCodeResource(request.resourceType)
       ? coverageFor(coverageByUrl, request.url)
       : undefined,
+    ...(scriptCpu ? { scriptCpu } : {}),
+    ...(chain ? { chain } : {}),
   };
 }
 
@@ -703,11 +802,17 @@ function enrichLongTask(
   task: RawLongTask,
   requests: RawNetworkRequest[],
   coverageByUrl: Map<string, CodeCoverage>,
+  cpuByUrl: Map<string, ScriptCpu>,
+  chainByUrl: Map<string, CriticalChainNode>,
 ): CombinedLongTask {
+  const scriptCpu = task.url ? lookupKeyed(cpuByUrl, task.url) : undefined;
+  const chain = task.url ? lookupKeyed(chainByUrl, task.url) : undefined;
   const base: CombinedLongTask = {
     url: task.url,
     startTime: task.startTime,
     duration: task.duration,
+    ...(scriptCpu ? { scriptCpu } : {}),
+    ...(chain ? { chain } : {}),
   };
   if (!task.url) return base;
 
@@ -802,7 +907,8 @@ export function collectTimelineSources(source: InsightsContextItem): CombinedLoa
       })
     : lcpSubparts(audits);
   const lcpSegs = buildLcpSegments(subparts, lcp);
-  const elementLabel = lcpElementLabel(audits);
+  const element = lcpElementNode(audits);
+  const elementLabel = element?.nodeLabel ?? element?.snippet;
   const discoveryFailures = lcpDiscoveryFailures(audits);
   const shifts = layoutShifts(audits).map((shift) => ({
     ...shift,
@@ -821,12 +927,22 @@ export function collectTimelineSources(source: InsightsContextItem): CombinedLoa
   const blockingUrlSet = new Set(blocking.map((b) => b.url));
   const textBlockingUrlSet = textBlockingUrls(audits);
   const coverageByUrl = codeCoverageByUrl(audits);
+  const cpuByUrl = bootupCpuByUrl(audits);
+  const chainByUrl = depTree.chainByUrl;
 
   const hops = redirectHops(requests, document, redirectAuditUrls);
   const hopSet = new Set(hops);
 
   const toCombined = (request: RawNetworkRequest) =>
-    toCombinedRequest(request, blockingUrlSet, textBlockingUrlSet, chainUrlSet, coverageByUrl);
+    toCombinedRequest(
+      request,
+      blockingUrlSet,
+      textBlockingUrlSet,
+      chainUrlSet,
+      coverageByUrl,
+      cpuByUrl,
+      chainByUrl,
+    );
 
   const combinedHops = hops
     .map(toCombined)
@@ -872,10 +988,13 @@ export function collectTimelineSources(source: InsightsContextItem): CombinedLoa
     redirectAuditMs,
     redirectAuditUrls,
     longestChainMs: depTree.longestChainMs,
-    longTasks: tasks.map((task) => enrichLongTask(task, requests, coverageByUrl)),
+    longTasks: tasks.map((task) =>
+      enrichLongTask(task, requests, coverageByUrl, cpuByUrl, chainByUrl),
+    ),
     userTimings: timings,
     screenshots,
     lcpElementLabel: elementLabel,
+    lcpElement: element,
     lcpSegments: lcpSegs,
     lcpDiscoveryFailures: discoveryFailures,
     layoutShifts: shifts,

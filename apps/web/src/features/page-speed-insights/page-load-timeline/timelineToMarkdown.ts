@@ -1,4 +1,8 @@
 import { formatMs, formatNetworkPriority } from "@/features/page-speed-insights/shared/format";
+import {
+  chainLabel,
+  scriptCpuLabel,
+} from "@/features/page-speed-insights/shared/scriptResourceFacts";
 import { rowsToMarkdown } from "@/features/page-speed-insights/tanstack-table-v9/rowsToMarkdown";
 import { momentInterval } from "./clusterOverlappingMoments";
 import type {
@@ -44,6 +48,8 @@ function waterfallLine(bar: TimelineWaterfallBar): string {
     bar.coverage ? `coverage ${bar.coverage}` : undefined,
     bar.scriptSize,
     bar.downloadDuration ? `download ${bar.downloadDuration}` : undefined,
+    scriptCpuLabel(bar.scriptCpu) ?? undefined,
+    chainLabel(bar.chain) ?? undefined,
   ].filter((part): part is string => Boolean(part));
   return `  - ${parts.join(" · ")}`;
 }

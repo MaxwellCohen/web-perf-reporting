@@ -92,6 +92,14 @@ function makeItem(overrides: {
   rtt?: number;
   preconnectCandidates?: Array<{ origin: string; wastedMs: number }>;
   chainUrls?: string[];
+  /** navStartToEndTime for each chainUrls entry, in order. */
+  chainEndTimes?: number[];
+  bootupTime?: Array<{
+    url: string;
+    total?: number;
+    scripting?: number;
+    scriptParseCompile?: number;
+  }>;
   fontDisplayItems?: unknown[];
   unsizedImages?: unknown[];
   cls?: number;
@@ -201,6 +209,7 @@ function makeItem(overrides: {
   if (overrides.lcpNodeLabel) {
     lcpItems.push({
       type: "node",
+      lhId: "lcp-node",
       nodeLabel: overrides.lcpNodeLabel,
       snippet: "<div>",
     });
@@ -236,7 +245,8 @@ function makeItem(overrides: {
         const node: Record<string, unknown> = {
           url: overrides.chainUrls[i],
           transferSize: 1000,
-          navStartToEndTime: 100 * (i + 1),
+          navStartToEndTime: overrides.chainEndTimes?.[i] ?? 100 * (i + 1),
+          isLongest: i === overrides.chainUrls.length - 1,
           children: {},
         };
         if (i === 0) {
@@ -412,6 +422,13 @@ function makeItem(overrides: {
     audits["network-dependency-tree-insight"] = {
       id: "network-dependency-tree-insight",
       details: { type: "list", items: depItems },
+    };
+  }
+
+  if (overrides.bootupTime) {
+    audits["bootup-time"] = {
+      id: "bootup-time",
+      details: { type: "table", items: overrides.bootupTime, headings: [] },
     };
   }
 
@@ -1050,6 +1067,58 @@ describe("buildPageLoadTimeline", () => {
     );
     expect(documentTask?.waterfall?.[0]?.scriptSize).toBeUndefined();
     expect(documentTask?.waterfall?.[0]?.coverage).toBeUndefined();
+  });
+
+  it("adds bootup cpu and critical-chain timing beside script info", () => {
+    const timeline = buildPageLoadTimeline(
+      makeItem({
+        bootupTime: [
+          {
+            url: "https://cdn.example.com/tag.js?v=2",
+            total: 1177.7,
+            scripting: 258.07,
+            scriptParseCompile: 892,
+          },
+          { url: "Unattributable", total: 480, scripting: 65, scriptParseCompile: 0 },
+        ],
+        chainUrls: ["https://cdn.example.com/tag.js"],
+        chainEndTimes: [595],
+        longTasks: [
+          { url: "https://cdn.example.com/tag.js", startTime: 800, duration: 180 },
+          { startTime: 2000, duration: 90 },
+        ],
+      }),
+    );
+
+    const script = timeline!.events.find((moment) => moment.title === "Script downloaded");
+    expect(script?.waterfall?.[0]).toMatchObject({
+      scriptCpu: { totalMs: 1177.7, scriptingMs: 258.07, parseMs: 892 },
+      chain: { endMs: 595, extendsMs: 345, isLongest: true },
+    });
+
+    const document = timeline!.events.find((moment) => moment.title === "Document");
+    expect(document?.waterfall?.[0]?.chain).toEqual({ endMs: 250 });
+    expect(document?.waterfall?.[0]?.scriptCpu).toBeUndefined();
+
+    const attributed = timeline!.events.find(
+      (moment) => moment.detail.includes("tag.js") && moment.id.startsWith("long-task-"),
+    );
+    expect(attributed?.waterfall?.[0]?.scriptCpu).toEqual({
+      totalMs: 1177.7,
+      scriptingMs: 258.07,
+      parseMs: 892,
+    });
+    expect(attributed?.waterfall?.[0]?.chain).toEqual({
+      endMs: 595,
+      extendsMs: 345,
+      isLongest: true,
+    });
+
+    const unattributed = timeline!.events.find((moment) =>
+      moment.detail.startsWith("Unattributed"),
+    );
+    expect(unattributed?.waterfall?.[0]?.scriptCpu).toBeUndefined();
+    expect(unattributed?.waterfall?.[0]?.chain).toBeUndefined();
   });
 
   it("keeps each long task on its own row even when starts are within 10 ms", () => {
@@ -1892,6 +1961,11 @@ describe("buildPageLoadTimeline", () => {
       title: "LCP discovery",
       detail: "fetchpriority=high should be applied",
       kind: "blocking",
+    });
+    expect(lcp?.lcpElement).toMatchObject({
+      type: "node",
+      lhId: "lcp-node",
+      nodeLabel: "Hero banner",
     });
   });
 
