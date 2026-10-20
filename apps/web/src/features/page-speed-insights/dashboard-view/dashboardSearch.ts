@@ -6,7 +6,9 @@
  * labels, category, priority, expand, type, groups — repeatable; omitted means "all" or "none"
  * report — timeline and waterfall report label
  * tasks — timeline task filters; omitted means all on; `tasks=` means all off
- * sort=start|duration|size  height=default|large|xl|full  q=  audit=
+ * sort=start|duration|size  height=default|large|xl|full  rows=expanded|collapsed
+ * blocking=1 — waterfall shows blocking items only
+ * q=  audit=
  * open — accordion sections; omitted means the tab default; `open=` means all collapsed
  */
 
@@ -28,6 +30,9 @@ export type DashboardSort = (typeof DASHBOARD_SORTS)[number];
 export const DASHBOARD_HEIGHTS = ["default", "large", "xl", "full"] as const;
 export type DashboardHeight = (typeof DASHBOARD_HEIGHTS)[number];
 
+export const DASHBOARD_ROW_DENSITIES = ["expanded", "collapsed"] as const;
+export type DashboardRowDensity = (typeof DASHBOARD_ROW_DENSITIES)[number];
+
 export const DASHBOARD_SEARCH_KEYS = [
   "view",
   "tab",
@@ -39,6 +44,8 @@ export const DASHBOARD_SEARCH_KEYS = [
   "type",
   "sort",
   "height",
+  "rows",
+  "blocking",
   "q",
   "audit",
   "open",
@@ -61,6 +68,9 @@ export type DashboardSearchState = {
   types: string[];
   sort: DashboardSort;
   height: DashboardHeight;
+  rows: DashboardRowDensity;
+  /** Waterfall: only render-blocking / main-thread task rows. */
+  blockingOnly: boolean;
   query: string;
   audit: string;
   open: string[] | null;
@@ -79,6 +89,8 @@ export type DashboardSearchPatch = {
   types?: string[] | null;
   sort?: DashboardSort | null;
   height?: DashboardHeight | null;
+  rows?: DashboardRowDensity | null;
+  blockingOnly?: boolean | null;
   query?: string | null;
   audit?: string | null;
   /** null uses the section default; [] collapses every section. */
@@ -106,6 +118,10 @@ function isHeight(value: string | null): value is DashboardHeight {
   return value != null && (DASHBOARD_HEIGHTS as readonly string[]).includes(value);
 }
 
+function isRowDensity(value: string | null): value is DashboardRowDensity {
+  return value != null && (DASHBOARD_ROW_DENSITIES as readonly string[]).includes(value);
+}
+
 function readList(params: URLSearchParams, key: string): string[] {
   return params.getAll(key).filter((value) => value.length > 0);
 }
@@ -121,6 +137,7 @@ export function parseDashboardSearch(search: string): DashboardSearchState {
   const tab = params.get("tab");
   const sort = params.get("sort");
   const height = params.get("height");
+  const rows = params.get("rows");
 
   return {
     view: isDashboardViewMode(view) ? view : null,
@@ -133,6 +150,8 @@ export function parseDashboardSearch(search: string): DashboardSearchState {
     types: readList(params, "type"),
     sort: isSort(sort) ? sort : "start",
     height: isHeight(height) ? height : "default",
+    rows: isRowDensity(rows) ? rows : "expanded",
+    blockingOnly: params.get("blocking") === "1",
     query: params.get("q") ?? "",
     audit: params.get("audit") ?? "",
     open: readNullableList(params, "open"),
@@ -181,6 +200,12 @@ export function applyDashboardSearchPatch(
     writeText(next, "sort", patch.sort && patch.sort !== "start" ? patch.sort : null);
   if (patch.height !== undefined) {
     writeText(next, "height", patch.height && patch.height !== "default" ? patch.height : null);
+  }
+  if (patch.rows !== undefined) {
+    writeText(next, "rows", patch.rows && patch.rows !== "expanded" ? patch.rows : null);
+  }
+  if (patch.blockingOnly !== undefined) {
+    writeText(next, "blocking", patch.blockingOnly ? "1" : null);
   }
   if (patch.query !== undefined) writeText(next, "q", patch.query);
   if (patch.audit !== undefined) writeText(next, "audit", patch.audit);

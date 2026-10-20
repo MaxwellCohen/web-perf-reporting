@@ -42,6 +42,7 @@ export type TimedRequest = {
   url: string;
   networkRequestTime?: number;
   networkEndTime?: number;
+  rendererStartTime?: number;
   transferSize?: number;
   protocol?: string;
   statusCode?: number;
@@ -353,7 +354,14 @@ export function createTimelineClock(input: ClockInput): TimelineClock {
         ) {
           end = input.simulatedTtfb;
         }
-        return { ...request, networkRequestTime: start, networkEndTime: end };
+        return {
+          ...request,
+          networkRequestTime: start,
+          networkEndTime: end,
+          ...(request.rendererStartTime != null
+            ? { rendererStartTime: mapTime(request.rendererStartTime) }
+            : {}),
+        };
       });
     },
     adjustTasks(tasks) {

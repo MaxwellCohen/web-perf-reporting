@@ -7,6 +7,8 @@ import type {
   PreconnectCandidate,
   UserTiming,
 } from "./collectTimelineSources";
+import { groupDownloads } from "./groupDownloads";
+import { groupMainThreadTasks, isLongTask } from "./groupMainThreadTasks";
 import { formatBytes, formatMs, shortUrl } from "@/features/page-speed-insights/shared/format";
 import type {
   PhaseId,
@@ -38,18 +40,42 @@ const PHASE_TITLES: Record<PhaseId, string> = {
   afterLoad: "After load",
 };
 
-/** Short tasks that start within this window of the previous short task join one row. */
-const SHORT_TASK_START_WINDOW_MS = 10;
-/** Short tasks that begin this soon after the previous short task ends are contiguous. */
-const SHORT_TASK_CONTIGUOUS_GAP_MS = 1;
-/** Chrome / Lighthouse long-task threshold. */
-const LONG_TASK_MS = 50;
-
 type PhaseBound = {
   id: PhaseId;
   title: string;
   startMs: number;
 };
+
+function queueWindow(
+  rendererStart: number | undefined,
+  networkStart: number,
+): { queueStartMs?: number; queueEndMs?: number } {
+  if (
+    rendererStart != null &&
+    Number.isFinite(rendererStart) &&
+    rendererStart < networkStart
+  ) {
+    return { queueStartMs: rendererStart, queueEndMs: networkStart };
+  }
+  return {};
+}
+
+function requestWaterfallBar(
+  request: CombinedRequest,
+  id: string,
+  extras: Partial<TimelineWaterfallBar> = {},
+): TimelineWaterfallBar {
+  return {
+    id,
+    label: shortUrl(request.url),
+    href: request.url,
+    startMs: request.networkRequestTime,
+    endMs: request.networkEndTime,
+    resourceType: request.resourceType,
+    ...queueWindow(request.rendererStartTime, request.networkRequestTime),
+    ...extras,
+  };
+}
 
 function formatCoverage(coverage: CodeCoverage): string {
   const wastedBytes = Math.max(0, coverage.wastedBytes);
@@ -64,111 +90,18 @@ function coverageLabel(request: CombinedRequest): string | undefined {
   return request.coverage ? formatCoverage(request.coverage) : undefined;
 }
 
-function isLongTask(task: CombinedLongTask): boolean {
-  return task.duration >= LONG_TASK_MS;
-}
-
-/** Short tasks join when contiguous (end→start) or starts within the start window. */
-function shortTasksAdjacent(prev: CombinedLongTask, next: CombinedLongTask): boolean {
-  const startDelta = next.startTime - prev.startTime;
-  const gap = next.startTime - (prev.startTime + prev.duration);
-  return startDelta <= SHORT_TASK_START_WINDOW_MS || gap <= SHORT_TASK_CONTIGUOUS_GAP_MS;
-}
-
-/**
- * Long tasks always stand alone. Short tasks (&lt;50ms) collapse when adjacent.
- * A long task flushes any pending short group.
- */
-function groupMainThreadTasks(tasks: CombinedLongTask[]): CombinedLongTask[][] {
-  const ordered = [...tasks].sort(
-    (a, b) => a.startTime - b.startTime || b.duration - a.duration,
-  );
-  const groups: CombinedLongTask[][] = [];
-  let shortGroup: CombinedLongTask[] = [];
-
-  function flushShorts() {
-    if (shortGroup.length) {
-      groups.push(shortGroup);
-      shortGroup = [];
-    }
-  }
-
-  for (const task of ordered) {
-    if (isLongTask(task)) {
-      flushShorts();
-      groups.push([task]);
-      continue;
-    }
-    const prev = shortGroup[shortGroup.length - 1];
-    if (prev && shortTasksAdjacent(prev, task)) {
-      shortGroup.push(task);
-    } else {
-      flushShorts();
-      shortGroup = [task];
-    }
-  }
-  flushShorts();
-  return groups;
-}
-
 function pluralResourceTitle(resourceType: string, count: number): string {
-  if (count === 1) return resourceType;
-  if (resourceType === "Script") return `${count} Scripts`;
-  if (resourceType === "Stylesheet") return `${count} Stylesheets`;
+  const downloaded =
+    resourceType === "Script" || resourceType === "Stylesheet" ? " downloaded" : "";
+  if (count === 1) return `${resourceType}${downloaded}`;
+  if (resourceType === "Script") return `${count} Scripts${downloaded}`;
+  if (resourceType === "Stylesheet") return `${count} Stylesheets${downloaded}`;
   if (resourceType === "Font") return `${count} Fonts`;
   if (resourceType === "Image") return `${count} Images`;
   if (resourceType === "Document") return `${count} Documents`;
   if (resourceType === "Fetch") return `${count} Fetches`;
   if (resourceType === "XHR") return `${count} XHRs`;
   return `${count} ${resourceType}s`;
-}
-
-function requestType(request: CombinedRequest): string {
-  return request.resourceType ?? "Request";
-}
-
-function requestStart(request: CombinedRequest): number {
-  return request.networkRequestTime;
-}
-
-function differentTypeStartsBetween(
-  requests: CombinedRequest[],
-  group: CombinedRequest[],
-  start: number,
-  type: string,
-): boolean {
-  const previousStart = requestStart(group[group.length - 1]!);
-  if (start <= previousStart) return false;
-  return requests.some(
-    (other) =>
-      requestType(other) !== type &&
-      requestStart(other) > previousStart &&
-      requestStart(other) < start,
-  );
-}
-
-function groupDownloads(requests: CombinedRequest[]): CombinedRequest[][] {
-  const sorted = [...requests].sort(
-    (a, b) => requestStart(a) - requestStart(b) || a.url.localeCompare(b.url),
-  );
-  const groups: CombinedRequest[][] = [];
-  const latestByType = new Map<string, CombinedRequest[]>();
-
-  for (const request of sorted) {
-    const type = requestType(request);
-    const start = requestStart(request);
-    const group = latestByType.get(type);
-
-    if (group && !differentTypeStartsBetween(sorted, group, start, type)) {
-      group.push(request);
-    } else {
-      const next = [request];
-      groups.push(next);
-      latestByType.set(type, next);
-    }
-  }
-
-  return groups.sort((a, b) => requestStart(a[0]!) - requestStart(b[0]!));
 }
 
 function criticalChainFlag(longestChainMs: number | undefined): string {
@@ -314,14 +247,9 @@ function redirectWaterfall(hops: CombinedRequest[]): {
   table: TimelineTable;
 } {
   return {
-    waterfall: hops.map((hop, index) => ({
-      id: `nav-redirects-${index}`,
-      label: shortUrl(hop.url),
-      href: hop.url,
-      startMs: hop.networkRequestTime,
-      endMs: hop.networkEndTime,
-      resourceType: "Redirect",
-    })),
+    waterfall: hops.map((hop, index) =>
+      requestWaterfallBar(hop, `nav-redirects-${index}`, { resourceType: "Redirect" }),
+    ),
     table: {
       headers: [
         { text: "URL" },
@@ -442,17 +370,13 @@ function networkEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent[
           phaseId: phase.id,
           kind: anyBlocking ? "blocking" : "marker",
           notes: attachedNotes,
-          waterfall: group.map((r, i) => ({
-            id: `net-${index}-${i}`,
-            label: shortUrl(r.url),
-            href: r.url,
-            startMs: r.networkRequestTime,
-            endMs: r.networkEndTime,
-            resourceType: r.resourceType,
-            coverage: coverageLabel(r),
-            priority: r.priority,
-            renderBlocking: r.renderBlocking,
-          })),
+          waterfall: group.map((r, i) =>
+            requestWaterfallBar(r, `net-${index}-${i}`, {
+              coverage: coverageLabel(r),
+              priority: r.priority,
+              renderBlocking: r.renderBlocking,
+            }),
+          ),
           table: {
             headers: [
               { text: "URL" },
@@ -486,7 +410,8 @@ function longTaskBar(task: CombinedLongTask, id: string): TimelineWaterfallBar {
     href: task.url,
     startMs: task.startTime,
     endMs: task.startTime + task.duration,
-    resourceType: "Script",
+    resourceType: "Task",
+    taskKind: isLongTask(task) ? "long" : "short",
   };
   if (!task.url) return bar;
 

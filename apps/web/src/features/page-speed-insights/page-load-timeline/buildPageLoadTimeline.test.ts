@@ -609,7 +609,11 @@ describe("buildPageLoadTimeline", () => {
 
     const netMoments = timeline!.events.filter((m) => m.id.startsWith("net-"));
     expect(netMoments).toHaveLength(3);
-    expect(netMoments.map((m) => m.title)).toEqual(["Document", "Stylesheet", "Script"]);
+    expect(netMoments.map((m) => m.title)).toEqual([
+      "Document",
+      "Stylesheet downloaded",
+      "Script downloaded",
+    ]);
 
     const doc = netMoments[0];
     expect(doc?.startMs).toBe(5);
@@ -621,7 +625,7 @@ describe("buildPageLoadTimeline", () => {
       href: "https://example.com/",
     });
 
-    const css = netMoments.find((m) => m.title === "Stylesheet");
+    const css = netMoments.find((m) => m.title === "Stylesheet downloaded");
     expect(css?.kind).toBe("blocking");
 
     expect(doc?.notes?.some((note) => note.title === "Server think time")).toBeFalsy();
@@ -639,7 +643,7 @@ describe("buildPageLoadTimeline", () => {
     expect(ttfb?.timeMs).toBe(85);
     expect(ttfb?.title).toBe("TTFB");
     expect(css?.waterfall?.[0]?.renderBlocking).toBe("blocking");
-    expect(netMoments.find((m) => m.title === "Script")?.waterfall?.[0]?.renderBlocking).toBe(
+    expect(netMoments.find((m) => m.title === "Script downloaded")?.waterfall?.[0]?.renderBlocking).toBe(
       "non-blocking",
     );
   });
@@ -720,14 +724,14 @@ describe("buildPageLoadTimeline", () => {
       }),
     );
 
-    const css = timeline!.events.find((m) => m.title === "Stylesheet");
+    const css = timeline!.events.find((m) => m.title === "Stylesheet downloaded");
     expect(css?.detail).toMatch(/25% used · 2\.0 KiB used of 7\.8 KiB · 5\.9 KiB unused/);
     expect(css?.waterfall?.[0]?.coverage).toBe(
       "25% used · 2.0 KiB used of 7.8 KiB · 5.9 KiB unused",
     );
 
     const partial = timeline!.events.find(
-      (m) => m.title === "Script" && m.detail.includes("tag.js"),
+      (m) => m.title === "Script downloaded" && m.detail.includes("tag.js"),
     );
     expect(partial?.detail).toMatch(/50% used · 24\.4 KiB used of 48\.8 KiB · 24\.4 KiB unused/);
     expect(partial?.waterfall?.[0]?.coverage).toBe(
@@ -735,7 +739,7 @@ describe("buildPageLoadTimeline", () => {
     );
 
     const used = timeline!.events.find(
-      (m) => m.title === "Script" && m.detail.includes("used.js"),
+      (m) => m.title === "Script downloaded" && m.detail.includes("used.js"),
     );
     expect(used?.waterfall?.[0]?.coverage).toBe("100% used · 4.0 KiB");
 
@@ -781,7 +785,7 @@ describe("buildPageLoadTimeline", () => {
       }),
     );
 
-    const burst = timeline!.events.find((m) => m.title === "2 Scripts");
+    const burst = timeline!.events.find((m) => m.title === "2 Scripts downloaded");
     expect(burst?.waterfall?.map((bar) => bar.coverage)).toEqual([
       "50% used · 500 B used of 1000 B · 500 B unused",
       "100% used · 2.0 KiB",
@@ -906,11 +910,11 @@ describe("buildPageLoadTimeline", () => {
     // Ordered by download end time (stylesheet finishes before a.js).
     expect(netMoments.map((m) => m.title)).toEqual([
       "Document",
-      "Stylesheet",
-      "Script",
-      "2 Scripts",
+      "Stylesheet downloaded",
+      "Script downloaded",
+      "2 Scripts downloaded",
       "6 Images",
-      "Script",
+      "Script downloaded",
       "Image",
     ]);
 
@@ -922,10 +926,10 @@ describe("buildPageLoadTimeline", () => {
     expect(images?.detail).not.toMatch(/within 10 ms/);
     expect(images?.waterfall?.every((bar) => bar.renderBlocking === "non-blocking")).toBe(true);
 
-    const earlyScript = netMoments.find((m) => m.title === "Script" && m.startMs === 200);
+    const earlyScript = netMoments.find((m) => m.title === "Script downloaded" && m.startMs === 200);
     expect(earlyScript?.waterfall?.[0]?.label).toMatch(/a\.js/);
 
-    const styles = netMoments.find((m) => m.title === "Stylesheet");
+    const styles = netMoments.find((m) => m.title === "Stylesheet downloaded");
     expect(styles?.waterfall?.[0]?.renderBlocking).toBe("potentially-blocking");
     expect(styles?.kind).toBe("marker");
   });
@@ -982,7 +986,7 @@ describe("buildPageLoadTimeline", () => {
       }),
     );
 
-    const styles = timeline!.events.find((m) => m.title === "2 Stylesheets");
+    const styles = timeline!.events.find((m) => m.title === "2 Stylesheets downloaded");
     expect(styles?.waterfall?.map((bar) => bar.renderBlocking)).toEqual([
       "blocking",
       "potentially-blocking",
@@ -995,7 +999,7 @@ describe("buildPageLoadTimeline", () => {
       timeline!.events.find((m) => m.title === "Image")?.waterfall?.[0]?.renderBlocking,
     ).toBe("non-blocking");
     expect(
-      timeline!.events.find((m) => m.title === "Script")?.waterfall?.[0]?.renderBlocking,
+      timeline!.events.find((m) => m.title === "Script downloaded")?.waterfall?.[0]?.renderBlocking,
     ).toBe("potentially-blocking");
     expect(networkBars(timeline!).find((bar) => bar.url.endsWith("app.css"))?.isRenderBlocking).toBe(
       true,
@@ -1962,7 +1966,7 @@ describe("buildPageLoadTimeline", () => {
       }),
     );
 
-    const script = timeline!.events.find((m) => m.title === "Script");
+    const script = timeline!.events.find((m) => m.title === "Script downloaded");
     expect(script?.detail).toMatch(/critical chain \(800 ms\)/);
     expect(script?.notes).toEqual(
       expect.arrayContaining([

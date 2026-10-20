@@ -16,6 +16,7 @@ type RawNetworkRequest = {
   resourceType?: string;
   networkRequestTime?: number;
   networkEndTime?: number;
+  rendererStartTime?: number;
   transferSize?: number;
   resourceSize?: number;
   statusCode?: number;
@@ -80,6 +81,8 @@ export type CombinedRequest = {
   resourceType?: string;
   networkRequestTime: number;
   networkEndTime: number;
+  /** When before networkRequestTime, the waterfall shows a queue segment. */
+  rendererStartTime?: number;
   transferSize?: number;
   resourceSize?: number;
   statusCode?: number;
@@ -184,6 +187,7 @@ function networkRequests(audits: AuditResultsRecord | undefined): RawNetworkRequ
       resourceType: typeof item.resourceType === "string" ? item.resourceType : undefined,
       networkRequestTime: getNumber(item.networkRequestTime),
       networkEndTime: getNumber(item.networkEndTime),
+      rendererStartTime: getNumber(item.rendererStartTime),
       transferSize: getNumber(item.transferSize),
       resourceSize: getNumber(item.resourceSize),
       statusCode: getNumber(item.statusCode),
@@ -678,6 +682,7 @@ function toCombinedRequest(
     resourceType: request.resourceType,
     networkRequestTime: request.networkRequestTime,
     networkEndTime: request.networkEndTime,
+    rendererStartTime: request.rendererStartTime,
     transferSize: request.transferSize,
     resourceSize: request.resourceSize,
     statusCode: request.statusCode,

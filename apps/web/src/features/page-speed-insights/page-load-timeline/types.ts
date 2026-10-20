@@ -34,6 +34,9 @@ export type TimelineWaterfallBar = {
   href?: string;
   startMs: number;
   endMs: number;
+  /** Queue window before network start (`rendererStartTime` → request time). */
+  queueStartMs?: number;
+  queueEndMs?: number;
   resourceType?: string;
   /** Used share of a stylesheet or script, from Lighthouse coverage. */
   coverage?: string;
@@ -49,6 +52,8 @@ export type TimelineWaterfallBar = {
   priority?: string;
   /** Set on downloaded resources. */
   renderBlocking?: RenderBlockingStatus;
+  /** Main-thread task bars: short vs long coloring in WaterfallBarTrack. */
+  taskKind?: "short" | "long";
 };
 
 /** A measurement that belongs on another row, such as TTFB on the document request. */

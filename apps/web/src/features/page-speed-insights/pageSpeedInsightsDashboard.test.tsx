@@ -105,8 +105,11 @@ vi.mock("@/features/page-speed-insights/script-treemap", () => ({
 
 vi.mock("@/features/page-speed-insights/network-metrics", () => ({
   LoadTimelineSection: () => <div>Load timeline section</div>,
-  NetworkWaterfallSection: () => <div>Network waterfall section</div>,
   NetworkResourcesSection: () => <div>Network resources section</div>,
+}));
+
+vi.mock("@/features/page-speed-insights/waterfall/UnifiedWaterfallSection", () => ({
+  UnifiedWaterfallSection: () => <div>Unified waterfall section</div>,
 }));
 
 vi.mock("@/features/page-speed-insights/javascript-metrics/JavaScriptPerformanceComponent", () => ({
@@ -184,7 +187,7 @@ describe("pageSpeedInsightsDashboard", () => {
     expect(screen.getByText("Load timeline section")).toBeInTheDocument();
 
     selectTab("Network");
-    expect(await screen.findByText("Network waterfall section")).toBeInTheDocument();
+    expect(await screen.findByText("Unified waterfall section")).toBeInTheDocument();
     expect(screen.getByText("Network resources section")).toBeInTheDocument();
 
     selectTab("JavaScript");
@@ -256,7 +259,8 @@ describe("pageSpeedInsightsDashboard", () => {
 
     expect(new URLSearchParams(window.location.search).get("tab")).toBe("network");
     expect(new URLSearchParams(window.location.search).get("view")).toBe("dashboard");
-    expect(await screen.findByText("Network waterfall section")).toBeInTheDocument();
+    expect(await screen.findByText("Unified waterfall section")).toBeInTheDocument();
+    expect(screen.getByText("Network resources section")).toBeInTheDocument();
   });
 
   it("renders report title and mocked sections in the classic view", async () => {
@@ -268,7 +272,7 @@ describe("pageSpeedInsightsDashboard", () => {
     expect(await screen.findByText("Film strip")).toBeInTheDocument();
     expect(screen.getByText("Script treemap section")).toBeInTheDocument();
     expect(screen.getByText("Load timeline section")).toBeInTheDocument();
-    expect(screen.getByText("Network waterfall section")).toBeInTheDocument();
+    expect(screen.getByText("Unified waterfall section")).toBeInTheDocument();
     expect(screen.getByText("Network resources section")).toBeInTheDocument();
     expect(screen.getByText("CWV metrics")).toBeInTheDocument();
     expect(screen.getByText("Category row: row-1")).toBeInTheDocument();

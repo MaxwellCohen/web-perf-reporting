@@ -25,6 +25,8 @@ describe("dashboardSearch", () => {
       types: [],
       sort: "start",
       height: "default",
+      rows: "expanded",
+      blockingOnly: false,
       query: "",
       audit: "",
       open: null,
@@ -35,7 +37,7 @@ describe("dashboardSearch", () => {
 
   it("reads layout, tab, filters, and explicit empty lists", () => {
     const state = parseDashboardSearch(
-      "?view=classic&tab=timeline&labels=Mobile&report=Desktop&category=Performance&priority=high&expand=rec-1&type=script&type=image&sort=duration&height=large&q=hero&audit=lcp&open=&groups=performance&tasks=",
+      "?view=classic&tab=timeline&labels=Mobile&report=Desktop&category=Performance&priority=high&expand=rec-1&type=script&type=image&sort=duration&height=large&rows=collapsed&blocking=1&q=hero&audit=lcp&open=&groups=performance&tasks=",
     );
 
     expect(state).toMatchObject({
@@ -49,6 +51,8 @@ describe("dashboardSearch", () => {
       types: ["script", "image"],
       sort: "duration",
       height: "large",
+      rows: "collapsed",
+      blockingOnly: true,
       query: "hero",
       audit: "lcp",
       open: [],

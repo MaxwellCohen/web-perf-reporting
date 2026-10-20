@@ -8,8 +8,8 @@ import { LoadingExperiencesSection } from "@/features/page-speed-insights/loadin
 import {
   LoadTimelineSection,
   NetworkResourcesSection,
-  NetworkWaterfallSection,
 } from "@/features/page-speed-insights/network-metrics";
+import { UnifiedWaterfallSection } from "@/features/page-speed-insights/waterfall/UnifiedWaterfallSection";
 import { RecommendationsSection } from "@/features/page-speed-insights/RecommendationsSection";
 import { RenderFilmStrip } from "@/features/page-speed-insights/RenderFilmStrip";
 import { ScriptTreemapSection } from "@/features/page-speed-insights/script-treemap";
@@ -23,7 +23,7 @@ export function ClassicView() {
         <RenderFilmStrip />
         <ScriptTreemapSection />
         <LoadTimelineSection />
-        <NetworkWaterfallSection />
+        <UnifiedWaterfallSection />
         <NetworkResourcesSection />
         <JavaScriptPerformanceComponent />
         <RecommendationsSection />

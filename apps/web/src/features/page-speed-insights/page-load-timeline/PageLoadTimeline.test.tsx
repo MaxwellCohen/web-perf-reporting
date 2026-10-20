@@ -186,7 +186,7 @@ describe("PageLoadTimeline", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "TTFB" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "First Paint" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Stylesheet" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Stylesheet downloaded" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Image" })).toBeInTheDocument();
 
     const imageHeading = screen.getByRole("heading", { name: "Image" });
@@ -194,7 +194,7 @@ describe("PageLoadTimeline", () => {
     expect(imageCard).toBeTruthy();
     expect(within(imageCard!).getByText("Non-blocking")).toBeInTheDocument();
     const stylesheetCard = screen
-      .getByRole("heading", { name: "Stylesheet" })
+      .getByRole("heading", { name: "Stylesheet downloaded" })
       .closest("div.rounded-lg") as HTMLElement | null;
     expect(stylesheetCard).toBeTruthy();
     expect(within(stylesheetCard!).getByText("Potentially blocking")).toBeInTheDocument();
@@ -204,37 +204,29 @@ describe("PageLoadTimeline", () => {
     expect(overviewToggle).toHaveAttribute("aria-expanded", "true");
     expect(within(overview).getByText("Waterfall view")).toBeInTheDocument();
     const allLanes = within(overview).getByTestId("overview-lanes");
-    expect(within(allLanes).getByTestId("overview-time-axis")).toBeInTheDocument();
-    expect(within(allLanes).getByTestId("overview-tick-grid")).toBeInTheDocument();
-    const guideLines = within(allLanes).getByTestId("overview-guide-lines");
+    expect(within(allLanes).getAllByTestId("overview-time-axis").length).toBeGreaterThan(0);
+    expect(within(allLanes).getAllByTestId("overview-tick-grid").length).toBeGreaterThan(0);
+    const guideLines = within(allLanes).getAllByTestId("overview-guide-lines")[0]!;
     expect(guideLines.querySelector('[data-guide="render-fcp"]')).toBeInTheDocument();
     expect(guideLines.querySelector('[data-guide="sub-lcp"]')).toBeInTheDocument();
     expect(guideLines.querySelector('[data-guide="nav-start"]')).toBeInTheDocument();
-    expect(allLanes).toHaveTextContent("Navigation start");
     expect(allLanes).toHaveTextContent("FCP");
     expect(allLanes).toHaveTextContent("LCP");
-    expect(allLanes).toHaveTextContent("CWV");
-    expect(allLanes).toHaveTextContent("Document downloaded");
-    expect(allLanes).toHaveTextContent("Screenshot");
+    expect(allLanes).toHaveTextContent("Nav");
+    expect(allLanes).toHaveTextContent("app.css");
+    expect(allLanes).toHaveTextContent("hero.png");
     expect(within(allLanes).getAllByTitle(/FCP: 1\.20 s/).length).toBeGreaterThan(0);
     expect(within(allLanes).getAllByTitle(/LCP: 2\.50 s/).length).toBeGreaterThan(0);
     const focus = within(overview).getByTestId("overview-focus");
-    fireEvent.click(within(focus).getByRole("button", { name: /Blocking/ }));
+    fireEvent.click(within(focus).getByRole("button", { name: /^Blocking \(/ }));
     expect(within(overview).getByText("Waterfall view")).toBeInTheDocument();
     const blockingLanes = within(overview).getByTestId("overview-lanes");
-    expect(blockingLanes.querySelectorAll("li")).toHaveLength(2);
-    expect(blockingLanes).toHaveTextContent("Style downloaded");
-    expect(blockingLanes).toHaveTextContent("Long task");
-    expect(blockingLanes).not.toHaveTextContent("a.js");
-    expect(within(blockingLanes).getAllByTitle(/Style downloaded:.*320 ms/).length).toBeGreaterThan(
-      0,
-    );
-    expect(within(blockingLanes).getAllByTitle(/Long task:.*200 ms/).length).toBeGreaterThan(0);
+    expect(blockingLanes).toHaveTextContent("app.css");
+    expect(blockingLanes).toHaveTextContent("Task");
     expect(blockingLanes).not.toHaveTextContent("hero.png");
-    expect(blockingLanes).not.toHaveTextContent("Image downloaded");
-    expect(blockingLanes).not.toHaveTextContent("image downloaded");
-    expect(blockingLanes).not.toHaveTextContent("FCP");
-    expect(blockingLanes).not.toHaveTextContent("LCP");
+    // Guide markers stay visible in blocking focus.
+    expect(blockingLanes).toHaveTextContent("FCP");
+    expect(blockingLanes).toHaveTextContent("LCP");
 
     expect(within(overview).getByTestId("overview-time-range")).toBeInTheDocument();
     fireEvent.click(within(overview).getByRole("button", { name: /Waterfall view/ }));
@@ -250,7 +242,7 @@ describe("PageLoadTimeline", () => {
     expect(screen.queryByTestId("parallel-cluster")).not.toBeInTheDocument();
     expect(screen.queryByText("Parallel")).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Document" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Stylesheet" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Stylesheet downloaded" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Image" })).toBeInTheDocument();
 
     const longTask = screen.getByRole("heading", { name: "Long task" }).closest("li");
@@ -259,7 +251,9 @@ describe("PageLoadTimeline", () => {
     expect(markerCol?.textContent).toMatch(/1\.00 s/);
     expect(markerCol?.textContent).toMatch(/1\.20 s/);
     expect(within(longTask!).getByTestId("moment-waterfall")).toBeInTheDocument();
-    expect(within(longTask!).getByText(/1\.00 s–1\.20 s/)).toBeInTheDocument();
+    expect(
+      within(longTask!).getByTestId("moment-waterfall").textContent,
+    ).toMatch(/1\.00 s–1\.20 s/);
     expect(within(longTask!).getByRole("link", { name: /a\.js/ })).toBeInTheDocument();
     // A single task stays open. Groups fold the bars into a Tasks disclosure.
     expect(within(longTask!).queryByText("Tasks")).not.toBeInTheDocument();
@@ -288,12 +282,12 @@ describe("PageLoadTimeline", () => {
     expect(lanes).toHaveTextContent("LCP");
     expect(lanes).toHaveTextContent("TTI");
     expect(lanes).not.toHaveTextContent("FCP");
-    expect(lanes).not.toHaveTextContent("Image downloaded");
-    expect(lanes).not.toHaveTextContent("Long task");
+    expect(lanes).not.toHaveTextContent("hero.png");
+    expect(lanes).not.toHaveTextContent("Task");
     expect(within(overview).getByRole("button", { name: /Waterfall view/ })).toHaveTextContent(
-      /of \d+ events/,
+      /of \d+ rows/,
     );
-    expect(within(lanes).getByTestId("overview-time-axis")).not.toHaveTextContent("0 ms");
+    expect(within(lanes).getAllByTestId("overview-time-axis")[0]).not.toHaveTextContent("0 ms");
     expect(within(range).getByRole("button", { name: "Reset" })).toBeInTheDocument();
 
     fireEvent.change(end, { target: { value: "0" } });
@@ -304,12 +298,12 @@ describe("PageLoadTimeline", () => {
     expect(within(overview).getByTestId("overview-lanes")).toHaveTextContent("FCP");
     expect(within(range).queryByRole("button", { name: "Reset" })).not.toBeInTheDocument();
 
-    fireEvent.click(within(overview).getByRole("button", { name: /Blocking/ }));
+    fireEvent.click(within(overview).getByRole("button", { name: /^Blocking \(/ }));
     fireEvent.change(start, { target: { value: String(rangeStart) } });
     expect(within(overview).getByText("No blocking work in this view.")).toBeInTheDocument();
 
     fireEvent.click(within(range).getByRole("button", { name: "Reset" }));
-    fireEvent.click(within(overview).getByRole("button", { name: /^All/ }));
+    fireEvent.click(within(overview).getByRole("button", { name: /^All \(/ }));
     const track = within(range).getByTestId("overview-time-range-track");
     track.getBoundingClientRect = () =>
       ({
@@ -328,7 +322,7 @@ describe("PageLoadTimeline", () => {
     fireEvent.pointerDown(track, { button: 0, clientX: 100, pointerId: 1 });
     expect(Number((start as HTMLInputElement).value)).toBeGreaterThan(0);
     const dragged = within(overview).getByTestId("overview-lanes");
-    expect(dragged).not.toHaveTextContent("Navigation start");
+    expect(dragged).not.toHaveTextContent("Nav");
     expect(dragged).toHaveTextContent("TTI");
   });
 
@@ -345,7 +339,7 @@ describe("PageLoadTimeline", () => {
     mockItems.current = [item];
     render(<PageLoadTimeline />);
 
-    const stylesheet = screen.getByRole("heading", { name: "Stylesheet" }).closest("li");
+    const stylesheet = screen.getByRole("heading", { name: "Stylesheet downloaded" }).closest("li");
     expect(stylesheet).toBeTruthy();
     expect(
       within(stylesheet!).getByText("25% used · 2.0 KiB used of 7.8 KiB · 5.9 KiB unused"),
@@ -363,7 +357,7 @@ describe("PageLoadTimeline", () => {
     mockItems.current = [item];
     render(<PageLoadTimeline />);
 
-    const stylesheet = screen.getByRole("heading", { name: "Stylesheet" }).closest("li");
+    const stylesheet = screen.getByRole("heading", { name: "Stylesheet downloaded" }).closest("li");
     expect(stylesheet).toBeTruthy();
     expect(within(stylesheet!).getByText("Priority High")).toBeInTheDocument();
   });
@@ -422,7 +416,10 @@ describe("PageLoadTimeline", () => {
     expect(scope.queryByText("Tasks")).not.toBeInTheDocument();
     const waterfall = scope.getByTestId("moment-waterfall");
     const label = within(waterfall).getByRole("button", { name: "Unattributed" });
-    expect(label).toHaveAccessibleDescription(/did not attribute it to a script URL/i);
+    expect(label).toHaveAttribute("aria-describedby");
+    expect(
+      document.getElementById(label.getAttribute("aria-describedby")!),
+    ).toHaveTextContent(/did not attribute it to a script URL/i);
     expect(waterfall).toHaveTextContent(/1\.00 s–1\.58 s · 580 ms/);
 
     const attributed = rows.find(
@@ -481,17 +478,23 @@ describe("PageLoadTimeline", () => {
       "false",
     );
     expect(screen.queryByRole("heading", { name: "Image" })).not.toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Stylesheet" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Stylesheet downloaded" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Document" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Long task" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "FCP" })).toBeInTheDocument();
     expect(filters).toHaveTextContent(/\d+ of \d+/);
 
+    const overview = screen.getByTestId("overview-lanes");
+    expect(overview).not.toHaveTextContent("hero.png");
+    expect(overview).toHaveTextContent("app.css");
+
     fireEvent.click(within(filters).getByRole("button", { name: "Long tasks" }));
     expect(screen.queryByRole("heading", { name: "Long task" })).not.toBeInTheDocument();
+    expect(screen.getByTestId("overview-lanes")).not.toHaveTextContent("Task");
 
     fireEvent.click(within(filters).getByRole("button", { name: "Non-blocking" }));
     expect(screen.getByRole("heading", { name: "Image" })).toBeInTheDocument();
+    expect(screen.getByTestId("overview-lanes")).toHaveTextContent("hero.png");
   });
 
   it("switches between report labels", () => {
