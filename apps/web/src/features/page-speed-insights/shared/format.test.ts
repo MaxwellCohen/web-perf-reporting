@@ -4,6 +4,7 @@ import {
   formatBytesOptional,
   formatMs,
   formatMsOptional,
+  formatNetworkPriority,
   shortUrl,
 } from "@/features/page-speed-insights/shared/format";
 
@@ -60,6 +61,19 @@ describe("optional formatters", () => {
     expect(formatBytesOptional(null)).toBe("");
     expect(formatBytesOptional(0)).toBe("");
     expect(formatBytesOptional(2048)).toBe("2.0 KiB");
+  });
+});
+
+describe("formatNetworkPriority", () => {
+  it("inserts a space in VeryHigh and VeryLow", () => {
+    expect(formatNetworkPriority("VeryHigh")).toBe("Very High");
+    expect(formatNetworkPriority("VeryLow")).toBe("Very Low");
+  });
+
+  it("leaves other priorities unchanged", () => {
+    expect(formatNetworkPriority("High")).toBe("High");
+    expect(formatNetworkPriority("Medium")).toBe("Medium");
+    expect(formatNetworkPriority("Low")).toBe("Low");
   });
 });
 

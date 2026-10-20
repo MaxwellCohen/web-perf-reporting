@@ -10,7 +10,11 @@ import {
   getNetworkBarColor,
   QUEUE_SEGMENT_COLOR,
 } from "@/features/page-speed-insights/shared/networkResourceColors";
-import { formatBytes, formatMs } from "@/features/page-speed-insights/shared/format";
+import {
+  formatBytes,
+  formatMs,
+  formatNetworkPriority,
+} from "@/features/page-speed-insights/shared/format";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -72,7 +76,7 @@ export function segmentTooltipLines(row: WaterfallRow, segment: WaterfallSegment
   if (blocking) lines.push(blocking);
 
   const priority = segment.priority ?? row.priority;
-  if (priority) lines.push(`Priority ${priority}`);
+  if (priority) lines.push(`Priority ${formatNetworkPriority(priority)}`);
 
   const coverage = segment.coverage ?? row.coverage;
   if (coverage) lines.push(coverage);

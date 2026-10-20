@@ -23,6 +23,13 @@ export function formatBytesOptional(bytes?: number | null): string {
   return formatBytes(bytes);
 }
 
+/** Chrome DevTools network priority labels (VeryHigh, VeryLow, …). */
+export function formatNetworkPriority(priority: string): string {
+  if (priority === "VeryHigh") return "Very High";
+  if (priority === "VeryLow") return "Very Low";
+  return priority;
+}
+
 export function shortUrl(url: string): string {
   try {
     const u = new URL(url);

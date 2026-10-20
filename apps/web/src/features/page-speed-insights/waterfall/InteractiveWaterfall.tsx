@@ -4,7 +4,11 @@ import { Fragment } from "react";
 import type { WaterfallRow } from "@/features/page-speed-insights/waterfall/waterfallData";
 import type { NetworkRequestTimeRange } from "@/features/page-speed-insights/shared/networkRequestsTable";
 import { getNetworkBarColor } from "@/features/page-speed-insights/shared/networkResourceColors";
-import { formatBytes, formatMs } from "@/features/page-speed-insights/shared/format";
+import {
+  formatBytes,
+  formatMs,
+  formatNetworkPriority,
+} from "@/features/page-speed-insights/shared/format";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import {
   GuideOverlay,
@@ -223,7 +227,9 @@ function RowDetail({ row }: { row: WaterfallRow }) {
         {row.statusCode != null ? (
           <DetailChip label="Status" value={String(row.statusCode)} />
         ) : null}
-        {row.priority ? <DetailChip label="Priority" value={row.priority} /> : null}
+        {row.priority ? (
+          <DetailChip label="Priority" value={formatNetworkPriority(row.priority)} />
+        ) : null}
         {row.protocol ? <DetailChip label="Protocol" value={row.protocol} /> : null}
         {row.coverage ? <DetailChip label="Coverage" value={row.coverage} /> : null}
         {row.isCriticalChain ? <DetailChip label="Chain" value="Critical" /> : null}

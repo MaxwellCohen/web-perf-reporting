@@ -1,4 +1,4 @@
-import { formatMs } from "@/features/page-speed-insights/shared/format";
+import { formatMs, formatNetworkPriority } from "@/features/page-speed-insights/shared/format";
 import { rowsToMarkdown } from "@/features/page-speed-insights/tanstack-table-v9/rowsToMarkdown";
 import { momentInterval } from "./clusterOverlappingMoments";
 import type {
@@ -40,7 +40,7 @@ function waterfallLine(bar: TimelineWaterfallBar): string {
     bar.resourceType,
     formatRange(bar.startMs, bar.endMs),
     bar.renderBlocking?.replace(/-/g, " "),
-    bar.priority ? `priority ${bar.priority}` : undefined,
+    bar.priority ? `priority ${formatNetworkPriority(bar.priority)}` : undefined,
     bar.coverage ? `coverage ${bar.coverage}` : undefined,
     bar.scriptSize,
     bar.downloadDuration ? `download ${bar.downloadDuration}` : undefined,

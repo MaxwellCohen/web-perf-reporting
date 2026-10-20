@@ -84,4 +84,26 @@ describe("segmentTooltipLines", () => {
       expect.arrayContaining(["Priority High", "50% used"]),
     );
   });
+
+  it("formats VeryHigh priority with a space", () => {
+    const row: WaterfallRow = {
+      id: "r1",
+      kind: "request",
+      label: "https://example.com/",
+      resourceType: "Document",
+      networkStart: 0,
+      networkEnd: 10,
+      duration: 10,
+      priority: "VeryHigh",
+    };
+    expect(
+      segmentTooltipLines(row, {
+        id: "s",
+        start: 0,
+        end: 10,
+        label: "Document",
+        priority: "VeryHigh",
+      }),
+    ).toEqual(expect.arrayContaining(["Priority Very High"]));
+  });
 });

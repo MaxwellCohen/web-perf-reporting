@@ -9,7 +9,12 @@ import type {
 } from "./collectTimelineSources";
 import { groupDownloads } from "./groupDownloads";
 import { groupMainThreadTasks, isLongTask } from "./groupMainThreadTasks";
-import { formatBytes, formatMs, shortUrl } from "@/features/page-speed-insights/shared/format";
+import {
+  formatBytes,
+  formatMs,
+  formatNetworkPriority,
+  shortUrl,
+} from "@/features/page-speed-insights/shared/format";
 import type {
   PhaseId,
   TimelineEvent,
@@ -336,7 +341,7 @@ function networkEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent[
             group[0]!.statusCode != null ? `status ${group[0]!.statusCode}` : null,
             group[0]!.transferSize != null ? formatBytes(group[0]!.transferSize) : null,
             group[0]!.protocol ?? null,
-            singlePriority ? `priority ${singlePriority}` : null,
+            singlePriority ? `priority ${formatNetworkPriority(singlePriority)}` : null,
             flags.length ? flags.join(" · ") : null,
             singleCoverage ?? null,
           ]
@@ -391,7 +396,9 @@ function networkEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent[
                 text: formatMs(r.networkEndTime - r.networkRequestTime),
                 align: "end" as const,
               },
-              ...(showPriority ? [{ text: r.priority ?? "", align: "end" as const }] : []),
+              ...(showPriority
+                ? [{ text: r.priority ? formatNetworkPriority(r.priority) : "", align: "end" as const }]
+                : []),
             ]),
           },
         },

@@ -118,7 +118,7 @@ describe("timelineToMarkdown", () => {
         "HTML document downloaded.",
         "",
         "- Requests:",
-        "  - `https://example.com/` · Document · 5 ms–220 ms · blocking · priority VeryHigh",
+        "  - `https://example.com/` · Document · 5 ms–220 ms · blocking · priority Very High",
         "",
         "- Notes:",
         "  - TTFB · 200 ms · good — 200 ms",

@@ -23,7 +23,7 @@ import {
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
 import { patchDashboardSearch } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
-import { formatMs } from "@/features/page-speed-insights/shared/format";
+import { formatMs, formatNetworkPriority } from "@/features/page-speed-insights/shared/format";
 import { ResourceUrlCell } from "@/features/page-speed-insights/shared/ResourceUrlCell";
 import {
   RenderBlockingBadge,
@@ -275,7 +275,9 @@ function WaterfallRows({
                 </div>
                 <BarIdentity bar={bar} />
                 {bar.priority ? (
-                  <p className="text-[11px] text-muted-foreground">Priority {bar.priority}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Priority {formatNetworkPriority(bar.priority)}
+                  </p>
                 ) : null}
                 {downloadLabel ? (
                   <p className="text-[11px] tabular-nums text-muted-foreground">{downloadLabel}</p>
