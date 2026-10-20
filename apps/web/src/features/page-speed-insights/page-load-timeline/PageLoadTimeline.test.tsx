@@ -157,6 +157,7 @@ describe("PageLoadTimeline", () => {
     const breakdown = item.item.lighthouseResult.audits["lcp-breakdown-insight"].details.items;
     breakdown.push({
       type: "node",
+      // @ts-expect-error - lhId is not in the type
       lhId: "lcp-node",
       nodeLabel: "Hero headline",
       snippet: "<h1>",
@@ -511,7 +512,9 @@ describe("PageLoadTimeline", () => {
     expect(longTask).toBeTruthy();
     const scope = within(longTask!);
     expect(
-      scope.getByText("Total CPU Time 420 ms · Script Parse 80 ms · Script Evaluation 300 ms"),
+      scope.getByText(
+        "Total CPU Time 420 ms · Script Parse 80 ms · Script Evaluation 300 ms · Other 40 ms",
+      ),
     ).toBeInTheDocument();
     expect(
       scope.getByText("Longest chain · Chain time 900 ms · Extends chain 680 ms"),
@@ -521,7 +524,7 @@ describe("PageLoadTimeline", () => {
     expect(script).toBeTruthy();
     expect(
       within(script!).getByText(
-        "Total CPU Time 420 ms · Script Parse 80 ms · Script Evaluation 300 ms",
+        "Total CPU Time 420 ms · Script Parse 80 ms · Script Evaluation 300 ms · Other 40 ms",
       ),
     ).toBeInTheDocument();
   });

@@ -133,7 +133,7 @@ describe("segmentTooltipLines", () => {
     ).toEqual([
       "cdn.example.com/tag.js",
       "Long task · 800 ms–980 ms · 180 ms",
-      "Total CPU Time 1.18 s · Script Parse 892 ms · Script Evaluation 258 ms",
+      "Total CPU Time 1.18 s · Script Parse 892 ms · Script Evaluation 258 ms · Other 28 ms",
       "Critical path · 345 ms past its parent",
     ]);
   });

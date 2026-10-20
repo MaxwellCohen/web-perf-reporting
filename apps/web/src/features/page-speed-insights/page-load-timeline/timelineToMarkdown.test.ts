@@ -168,7 +168,7 @@ describe("timelineToMarkdown", () => {
     });
 
     expect(markdown).toContain(
-      "Total CPU Time 420 ms · Script Parse 80 ms · Script Evaluation 300 ms",
+      "Total CPU Time 420 ms · Script Parse 80 ms · Script Evaluation 300 ms · Other 40 ms",
     );
     expect(markdown).toContain("Longest chain · Chain time 900 ms · Extends chain 400 ms");
   });
