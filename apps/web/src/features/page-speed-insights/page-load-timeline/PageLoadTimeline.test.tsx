@@ -294,6 +294,26 @@ describe("PageLoadTimeline", () => {
     expect(screen.queryByText("Network")).not.toBeInTheDocument();
   });
 
+  it("filters the waterfall to long tasks from the legend", () => {
+    window.history.replaceState(null, "", "/");
+    mockItems.current = [reportItem("Mobile")];
+    render(<PageLoadTimeline />);
+
+    const overview = screen.getByTestId("timeline-overview");
+    expect(within(overview).getByTestId("overview-lanes")).toHaveTextContent("hero.png");
+    fireEvent.click(within(overview).getByTestId("legend-signal-long-task"));
+
+    const lanes = within(overview).getByTestId("overview-lanes");
+    expect(lanes).toHaveTextContent("Task");
+    expect(lanes).not.toHaveTextContent("hero.png");
+    expect(lanes).toHaveTextContent("FCP");
+    expect(within(overview).getByTestId("waterfall-signal-filter")).toHaveTextContent("Long task");
+
+    fireEvent.click(within(overview).getByTestId("legend-signal-long-task"));
+    expect(within(overview).getByTestId("overview-lanes")).toHaveTextContent("hero.png");
+    window.history.replaceState(null, "", "/");
+  });
+
   it("filters the waterfall to a time range and zooms the axis", () => {
     mockItems.current = [reportItem("Mobile")];
     render(<PageLoadTimeline />);
@@ -491,7 +511,7 @@ describe("PageLoadTimeline", () => {
     expect(longTask).toBeTruthy();
     const scope = within(longTask!);
     expect(
-      scope.getByText("Total CPU Time 420 ms · Script Evaluation 300 ms · Script Parse 80 ms"),
+      scope.getByText("Total CPU Time 420 ms · Script Parse 80 ms · Script Evaluation 300 ms"),
     ).toBeInTheDocument();
     expect(
       scope.getByText("Longest chain · Chain time 900 ms · Extends chain 680 ms"),
@@ -501,7 +521,7 @@ describe("PageLoadTimeline", () => {
     expect(script).toBeTruthy();
     expect(
       within(script!).getByText(
-        "Total CPU Time 420 ms · Script Evaluation 300 ms · Script Parse 80 ms",
+        "Total CPU Time 420 ms · Script Parse 80 ms · Script Evaluation 300 ms",
       ),
     ).toBeInTheDocument();
   });

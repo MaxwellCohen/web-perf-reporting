@@ -25,8 +25,8 @@ export function scriptCpuLines(cpu: ScriptCpu | undefined): string[] {
   if (!cpu) return [];
   return [
     labeledMs("Total CPU Time", cpu.totalMs),
-    labeledMs("Script Evaluation", cpu.scriptingMs),
     labeledMs("Script Parse", cpu.parseMs),
+    labeledMs("Script Evaluation", cpu.scriptingMs),
   ].filter((line): line is string => line != null);
 }
 

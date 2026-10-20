@@ -191,6 +191,10 @@ describe("networkWaterfallData", () => {
       "https://b.test/",
       "https://a.test/",
     ]);
+    expect(sortWaterfallRows(rows, "end").map((row) => row.url)).toEqual([
+      "https://a.test/",
+      "https://b.test/",
+    ]);
     expect(sortWaterfallRows(rows, "duration")[0]?.url).toBe("https://b.test/");
     expect(sortWaterfallRows(rows, "size")[0]?.url).toBe("https://b.test/");
   });

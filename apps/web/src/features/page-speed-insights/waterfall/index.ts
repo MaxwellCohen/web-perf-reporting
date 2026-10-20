@@ -27,6 +27,14 @@ export {
   availableWaterfallTaskFilters,
 } from "./filterWaterfallByTasks";
 export {
+  availableWaterfallSignals,
+  filterWaterfallRowsBySignals,
+  normalizeWaterfallSignals,
+  WATERFALL_SIGNALS,
+  WATERFALL_SIGNAL_LABEL,
+  type WaterfallSignalId,
+} from "./waterfallSignals";
+export {
   buildWaterfallRowsFromSources,
   buildWaterfallRows,
   normalizeNetworkRequest,

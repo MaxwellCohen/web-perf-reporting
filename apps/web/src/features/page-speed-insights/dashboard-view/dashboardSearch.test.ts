@@ -27,6 +27,7 @@ describe("dashboardSearch", () => {
       height: "default",
       rows: "expanded",
       blockingOnly: false,
+      signals: [],
       query: "",
       audit: "",
       open: null,
@@ -95,6 +96,18 @@ describe("dashboardSearch", () => {
     expect(next.getAll("open")).toEqual([""]);
     expect(next.getAll("tasks")).toEqual([""]);
     expect(parseDashboardSearch(`?${next.toString()}`)).toMatchObject({ open: [], tasks: [] });
+  });
+
+  it("writes waterfall signals and clears them", () => {
+    const next = applyDashboardSearchPatch(new URLSearchParams("tab=timeline"), {
+      signals: ["chain", "long-task"],
+    });
+    expect(next.getAll("signal")).toEqual(["chain", "long-task"]);
+    expect(parseDashboardSearch(`?${next.toString()}`).signals).toEqual(["chain", "long-task"]);
+
+    const cleared = applyDashboardSearchPatch(next, { signals: [] });
+    expect(cleared.has("signal")).toBe(false);
+    expect(parseDashboardSearch(`?${cleared.toString()}`).signals).toEqual([]);
   });
 
   it("treats a full label set as no filter", () => {

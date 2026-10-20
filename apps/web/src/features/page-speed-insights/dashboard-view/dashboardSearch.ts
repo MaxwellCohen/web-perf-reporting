@@ -6,8 +6,9 @@
  * labels, category, priority, expand, type, groups — repeatable; omitted means "all" or "none"
  * report — timeline and waterfall report label
  * tasks — timeline task filters; omitted means all on; `tasks=` means all off
- * sort=start|duration|size  height=default|large|xl|full  rows=expanded|collapsed
+ * sort=start|end|duration|size  height=default|large|xl|full  rows=expanded|collapsed
  * blocking=1 — waterfall shows blocking items only
+ * signal — waterfall row signals (critical chain, queue, long tasks, …); omitted means no signal filter
  * q=  audit=
  * open — accordion sections; omitted means the tab default; `open=` means all collapsed
  */
@@ -24,7 +25,7 @@ export const DASHBOARD_TABS = [
 
 export type DashboardTab = (typeof DASHBOARD_TABS)[number];
 
-export const DASHBOARD_SORTS = ["start", "duration", "size"] as const;
+export const DASHBOARD_SORTS = ["start", "end", "duration", "size"] as const;
 export type DashboardSort = (typeof DASHBOARD_SORTS)[number];
 
 export const DASHBOARD_HEIGHTS = ["default", "large", "xl", "full"] as const;
@@ -46,6 +47,7 @@ export const DASHBOARD_SEARCH_KEYS = [
   "height",
   "rows",
   "blocking",
+  "signal",
   "q",
   "audit",
   "open",
@@ -71,6 +73,8 @@ export type DashboardSearchState = {
   rows: DashboardRowDensity;
   /** Waterfall: only render-blocking / main-thread task rows. */
   blockingOnly: boolean;
+  /** Waterfall signals. Empty means every row. */
+  signals: string[];
   query: string;
   audit: string;
   open: string[] | null;
@@ -91,6 +95,8 @@ export type DashboardSearchPatch = {
   height?: DashboardHeight | null;
   rows?: DashboardRowDensity | null;
   blockingOnly?: boolean | null;
+  /** null or [] clears the waterfall signal filter. */
+  signals?: string[] | null;
   query?: string | null;
   audit?: string | null;
   /** null uses the section default; [] collapses every section. */
@@ -152,6 +158,7 @@ export function parseDashboardSearch(search: string): DashboardSearchState {
     height: isHeight(height) ? height : "default",
     rows: isRowDensity(rows) ? rows : "expanded",
     blockingOnly: params.get("blocking") === "1",
+    signals: readList(params, "signal"),
     query: params.get("q") ?? "",
     audit: params.get("audit") ?? "",
     open: readNullableList(params, "open"),
@@ -207,6 +214,7 @@ export function applyDashboardSearchPatch(
   if (patch.blockingOnly !== undefined) {
     writeText(next, "blocking", patch.blockingOnly ? "1" : null);
   }
+  if (patch.signals !== undefined) writeList(next, "signal", patch.signals, "delete");
   if (patch.query !== undefined) writeText(next, "q", patch.query);
   if (patch.audit !== undefined) writeText(next, "audit", patch.audit);
   if (patch.open !== undefined) writeList(next, "open", patch.open, "blank");

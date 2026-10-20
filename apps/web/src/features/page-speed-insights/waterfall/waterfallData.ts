@@ -91,7 +91,7 @@ export type WaterfallRow = {
   segments?: WaterfallSegment[];
 };
 
-export type WaterfallSortBy = "start" | "duration" | "size";
+export type WaterfallSortBy = "start" | "end" | "duration" | "size";
 
 export type WaterfallFilterOptions = {
   resourceTypes?: string[];
@@ -541,6 +541,11 @@ export function sortWaterfallRows(rows: WaterfallRow[], sortBy: WaterfallSortBy)
       sorted.sort(
         (a, b) =>
           (b.transferSize ?? 0) - (a.transferSize ?? 0) || a.networkStart - b.networkStart,
+      );
+      break;
+    case "end":
+      sorted.sort(
+        (a, b) => a.networkEnd - b.networkEnd || a.networkStart - b.networkStart || a.label.localeCompare(b.label),
       );
       break;
     case "start":
