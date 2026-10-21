@@ -146,10 +146,30 @@ describe("createTimelineClock", () => {
     );
     expect(parts.map((part) => part.duration)).toEqual([
       601,
-      2825,
-      2915,
-      19463 - 601 - 2825 - 2915,
+      2825 - 601,
+      2915 - 2825,
+      19463 - 2915,
     ]);
+    expect(parts.reduce((sum, part) => sum + part.duration, 0)).toBe(19463);
+  });
+
+  it("turns load start and finish times that pass LCP into phases that sum to LCP", () => {
+    const clock = createTimelineClock({
+      throttling,
+      simulatedTtfb: 601,
+      simulatedLcp: 9901,
+    });
+    const parts = clock.adjustLcpSubparts(
+      [
+        { subpart: "timeToFirstByte", label: "Time to first byte", duration: 72 },
+        { subpart: "resourceLoadDelay", label: "Resource load delay", duration: 877 },
+        { subpart: "resourceLoadDuration", label: "Resource load duration", duration: 23 },
+        { subpart: "elementRenderDelay", label: "Element render delay", duration: 124 },
+      ],
+      { simulatedTtfb: 601, simulatedLcp: 9901, loadDelay: 8588, loadDuration: 8784 },
+    );
+    expect(parts.map((part) => part.duration)).toEqual([601, 8588 - 601, 8784 - 8588, 9901 - 8784]);
+    expect(parts.reduce((sum, part) => sum + part.duration, 0)).toBe(9901);
   });
 
   it("uses the simulated first byte when a text LCP has no resource phases", () => {

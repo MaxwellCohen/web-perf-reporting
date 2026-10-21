@@ -586,8 +586,10 @@ export function getSegmentStyle(
     return { left: "0%", width: "0%" };
   }
 
-  const leftPct = ((start - minStart) / range) * 100;
-  const widthPct = Math.max(((end - start) / range) * 100, (2 / range) * 100);
+  const rawLeft = ((start - minStart) / range) * 100;
+  const rawWidth = Math.max(((end - start) / range) * 100, (2 / range) * 100);
+  const leftPct = Math.min(100, Math.max(0, rawLeft));
+  const widthPct = Math.min(Math.max(0, 100 - leftPct), Math.max(0, rawWidth));
 
   return {
     left: `${leftPct}%`,

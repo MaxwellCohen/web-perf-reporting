@@ -515,7 +515,7 @@ function MomentCard({
       )}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-        <div className="min-w-0 flex-1 space-y-2">
+        <div className="min-w-0 flex-1 space-y-2 overflow-x-clip">
           <div className="flex flex-wrap items-center gap-2">
             <h4 className="text-sm font-semibold leading-snug sm:text-base">{moment.title}</h4>
             {moment.rating ? (

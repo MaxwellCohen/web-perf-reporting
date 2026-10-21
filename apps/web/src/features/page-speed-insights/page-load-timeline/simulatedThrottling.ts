@@ -396,12 +396,14 @@ export function createTimelineClock(input: ClockInput): TimelineClock {
       const labelFor = (subpart: string, fallback: string) =>
         subparts.find((part) => part.subpart === subpart)?.label ?? fallback;
 
-      // Resource phases from the metrics audit are already on Lantern's clock.
       // Text LCP has no resource, so the insight only has an observed first byte.
+      // When a resource exists, simulated lcpLoadDelay / lcpLoadDuration are
+      // absolute times (resource start and finish), not phase lengths.
       if (simulatedLcp != null && simulatedTtfb != null) {
         const ttfb = Math.min(Math.max(0, simulatedTtfb), simulatedLcp);
         if (loadDelay != null && loadDuration != null) {
-          const render = Math.max(0, simulatedLcp - ttfb - loadDelay - loadDuration);
+          const loadStart = Math.min(simulatedLcp, Math.max(ttfb, loadDelay));
+          const loadEnd = Math.min(simulatedLcp, Math.max(loadStart, loadDuration));
           return [
             {
               subpart: "timeToFirstByte",
@@ -411,17 +413,17 @@ export function createTimelineClock(input: ClockInput): TimelineClock {
             {
               subpart: "resourceLoadDelay",
               label: labelFor("resourceLoadDelay", "Resource load delay"),
-              duration: loadDelay,
+              duration: loadStart - ttfb,
             },
             {
               subpart: "resourceLoadDuration",
               label: labelFor("resourceLoadDuration", "Resource load duration"),
-              duration: loadDuration,
+              duration: loadEnd - loadStart,
             },
             {
               subpart: "elementRenderDelay",
               label: labelFor("elementRenderDelay", "Element render delay"),
-              duration: render,
+              duration: simulatedLcp - loadEnd,
             },
           ];
         }

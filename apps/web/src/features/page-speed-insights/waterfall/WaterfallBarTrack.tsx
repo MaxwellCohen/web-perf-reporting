@@ -263,7 +263,7 @@ export function WaterfallBarTrack({
     );
     return (
       <div
-        className="relative w-full min-w-0 overflow-visible rounded-sm bg-muted/40 group-hover:bg-muted/55"
+        className="relative w-full min-w-0 overflow-x-clip rounded-sm bg-muted/40 group-hover:bg-muted/55"
         style={{ height }}
         data-testid="waterfall-mark-track"
       >
@@ -307,7 +307,7 @@ export function WaterfallBarTrack({
 
   return (
     <div
-      className="relative w-full min-w-0 overflow-visible rounded-sm bg-muted/40 group-hover:bg-muted/55"
+      className="relative w-full min-w-0 overflow-x-clip rounded-sm bg-muted/40 group-hover:bg-muted/55"
       style={{ height }}
       data-testid="waterfall-bar-track"
     >

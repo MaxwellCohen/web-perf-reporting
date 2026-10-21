@@ -213,6 +213,11 @@ describe("networkWaterfallData", () => {
     expect(getSegmentStyle(100, 200, 0, 400)).toEqual({ left: "25%", width: "25%" });
   });
 
+  it("keeps a segment that runs past the range inside the track", () => {
+    expect(getSegmentStyle(300, 800, 0, 400)).toEqual({ left: "75%", width: "25%" });
+    expect(getSegmentStyle(500, 900, 0, 400)).toEqual({ left: "100%", width: "0%" });
+  });
+
   it("builds evenly spaced axis ticks", () => {
     expect(buildTimeAxisTicks(0, 400, 5)).toEqual([0, 100, 200, 300, 400]);
   });

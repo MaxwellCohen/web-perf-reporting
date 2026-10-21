@@ -1700,8 +1700,14 @@ describe("buildPageLoadTimeline", () => {
     expect(observed!.startMs).toBeGreaterThan(2819);
     expect(observed!.startMs).toBeLessThan(19463);
 
-    const renderDelay = lcpSegments(timeline!).find((seg) => seg.subpart === "elementRenderDelay");
-    expect(renderDelay?.durationMs).toBeCloseTo(19463 - 601 - 2825 - 2915, 3);
+    const segments = lcpSegments(timeline!);
+    expect(segments.map((seg) => seg.durationMs)).toEqual([
+      601,
+      2825 - 601,
+      2915 - 2825,
+      19463 - 2915,
+    ]);
+    expect(segments.reduce((sum, seg) => sum + seg.durationMs, 0)).toBe(19463);
 
     expect(milestone(timeline!, "m-load")?.timeMs).toBeGreaterThan(1073);
     const tti = timeline!.events.find((s) => s.id === "after-tti");
