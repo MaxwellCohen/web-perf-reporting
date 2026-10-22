@@ -16,7 +16,7 @@ export function HistoricalChartsSection({ url }: { url: string }) {
   const pending = snapshot?.slots.filter((slot) => slot.status === "pending") ?? [];
   const hasReadySlot = snapshot?.slots.some((slot) => slot.status === "ready") ?? false;
   if (!snapshot || !hasReadySlot) {
-    return <LoadingMessage />;
+    return <LoadingMessage variant="crux" />;
   }
 
   const reportMap = {} as Record<`${Scope}${DeviceType}`, CruxReport[] | null>;

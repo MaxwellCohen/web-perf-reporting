@@ -26,7 +26,7 @@ export function CurrentPerformanceSection({ url }: { url: string }) {
   const pending = snapshot?.slots.filter((slot) => slot.status === "pending") ?? [];
   const hasReadySlot = snapshot?.slots.some((slot) => slot.status === "ready") ?? false;
   if (!snapshot || !hasReadySlot) {
-    return <LoadingMessage />;
+    return <LoadingMessage variant="crux" />;
   }
 
   return (

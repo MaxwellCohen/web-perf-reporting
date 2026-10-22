@@ -60,7 +60,7 @@ export function CurrentPerformanceDashboard({
         ) : null}
       </PerformanceOptions>
       {slotPending ? (
-        <LoadingMessage />
+        <LoadingMessage variant="crux" />
       ) : (
       <div className="mt-2 grid gap-1 grid-cols-2 md:grid-cols-3 lg:grid-cols-6 print:grid-cols-3">
         <CurrentPerformanceCard

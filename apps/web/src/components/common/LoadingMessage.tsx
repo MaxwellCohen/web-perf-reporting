@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const ANALYSIS_STAGES = [
+const LAB_STAGES = [
   "Launching lab tests",
   "Measuring Core Web Vitals",
   "Auditing resources & network",
@@ -11,7 +11,31 @@ const ANALYSIS_STAGES = [
   "Assembling insights",
 ] as const;
 
-const STAGE_INTERVAL_MS = 5000;
+const CRUX_STAGES = [
+  "Querying Chrome UX Report",
+  "Retrieving Core Web Vitals",
+  "Loading device & form factors",
+  "Preparing charts",
+] as const;
+
+const LOADING_VARIANTS = {
+  lab: {
+    stages: LAB_STAGES,
+    title: "Generating report",
+    description: "Lab runs usually finish within about a minute. Keep this tab open.",
+    ariaLabel: "Generating PageSpeed Insights report",
+    stageIntervalMs: 5000,
+  },
+  crux: {
+    stages: CRUX_STAGES,
+    title: "Looking up CrUX data",
+    description: "Fetching real-user experience metrics. This usually takes a few seconds.",
+    ariaLabel: "Looking up Chrome UX Report data",
+    stageIntervalMs: 2500,
+  },
+} as const;
+
+export type LoadingMessageVariant = keyof typeof LOADING_VARIANTS;
 
 function formatTime(seconds: number): string {
   const minutes = Math.floor(seconds / 60);
@@ -25,7 +49,8 @@ function stageStatus(index: number, activeIndex: number): "done" | "active" | "p
   return "pending";
 }
 
-export function LoadingMessage() {
+export function LoadingMessage({ variant = "lab" }: { variant?: LoadingMessageVariant } = {}) {
+  const config = LOADING_VARIANTS[variant];
   const [elapsedTime, setElapsedTime] = useState(0);
   const [stageIndex, setStageIndex] = useState(0);
 
@@ -35,16 +60,16 @@ export function LoadingMessage() {
     }, 1000);
 
     const stageInterval = setInterval(() => {
-      setStageIndex((prev) => Math.min(prev + 1, ANALYSIS_STAGES.length - 1));
-    }, STAGE_INTERVAL_MS);
+      setStageIndex((prev) => Math.min(prev + 1, config.stages.length - 1));
+    }, config.stageIntervalMs);
 
     return () => {
       clearInterval(timerInterval);
       clearInterval(stageInterval);
     };
-  }, []);
+  }, [config.stageIntervalMs, config.stages.length]);
 
-  const activeStage = ANALYSIS_STAGES[stageIndex];
+  const activeStage = config.stages[stageIndex];
   const circumference = 2 * Math.PI * 54;
 
   return (
@@ -53,7 +78,7 @@ export function LoadingMessage() {
       role="status"
       aria-live="polite"
       aria-busy="true"
-      aria-label="Generating PageSpeed Insights report"
+      aria-label={config.ariaLabel}
     >
       <div
         aria-hidden
@@ -98,20 +123,18 @@ export function LoadingMessage() {
         </div>
 
         <div className="space-y-2 text-center">
-          <h2 className="text-2xl font-extrabold tracking-tight">Generating report</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight">{config.title}</h2>
           <p
             key={activeStage}
             className="text-foreground/85 min-h-6 text-base font-medium motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500"
           >
             {activeStage}…
           </p>
-          <p className="text-muted-foreground text-sm">
-            Lab runs usually finish within about a minute. Keep this tab open.
-          </p>
+          <p className="text-muted-foreground text-sm">{config.description}</p>
         </div>
 
         <ol className="border-border/60 bg-card/40 w-full space-y-0 overflow-hidden rounded-xl border">
-          {ANALYSIS_STAGES.map((stage, index) => {
+          {config.stages.map((stage, index) => {
             const status = stageStatus(index, stageIndex);
             return (
               <li
@@ -143,7 +166,7 @@ export function LoadingMessage() {
                 <span className={cn(status === "active" && "font-medium")}>{stage}</span>
                 {status === "active" ? (
                   <span className="text-muted-foreground ml-auto font-mono text-[10px] tracking-wider uppercase">
-                    running
+                    {variant === "crux" ? "looking up" : "running"}
                   </span>
                 ) : null}
               </li>

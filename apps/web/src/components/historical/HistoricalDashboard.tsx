@@ -137,7 +137,7 @@ export function HistoricalDashboard({
           ) : null}
         </PerformanceOptions>
         {slotPending ? (
-          <LoadingMessage />
+          <LoadingMessage variant="crux" />
         ) : (
         <div className="mt-2 grid grid-cols-[repeat(auto-fill,minmax(14.5rem,1fr))] flex-wrap gap-1">
           <HistoricalPerformanceCard

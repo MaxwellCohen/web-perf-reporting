@@ -35,4 +35,13 @@ describe("LoadingMessage", () => {
     });
     expect(container.firstChild).toMatchSnapshot();
   });
+
+  it("renders the CrUX lookup variant", () => {
+    const { container } = render(<LoadingMessage variant="crux" />);
+
+    expect(container.firstChild).toMatchSnapshot();
+    expect(container.textContent).toContain("Looking up CrUX data");
+    expect(container.textContent).toContain("Querying Chrome UX Report");
+    expect(container.textContent).not.toContain("Launching lab tests");
+  });
 });
