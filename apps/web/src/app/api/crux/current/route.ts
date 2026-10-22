@@ -1,12 +1,9 @@
-import { runCruxLookup } from "@/lib/crux/runCruxLookup";
+import { proxyCruxGet, proxyCruxPost } from "@/lib/crux/proxyCruxJob";
 
-export async function POST(request: Request) {
-  const body = (await request.json().catch(() => null)) as { url?: string } | null;
-  const pageUrl = body?.url?.trim();
-  if (!pageUrl) {
-    return Response.json({ error: "Missing url" }, { status: 400 });
-  }
+export function POST(request: Request) {
+  return proxyCruxPost("current", request);
+}
 
-  const job = await runCruxLookup("current", pageUrl);
-  return Response.json(job);
+export function GET(request: Request) {
+  return proxyCruxGet("current", request);
 }
