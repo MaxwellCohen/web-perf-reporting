@@ -325,7 +325,6 @@ vi.mock("@/features/page-speed-insights/javascript-metrics/extractJSMetrics", ()
 
 vi.mock("@/features/page-speed-insights/JSUsage/JSUsageSection", () => ({
   JSUsageSection: () => <div>JS usage section</div>,
-  JSUsageCardSection: () => <div>JS usage card section</div>,
 }));
 
 vi.mock("@/features/page-speed-insights/RecommendationsSection/RecommendationsSummary", () => ({
@@ -370,11 +369,9 @@ vi.mock("@/features/page-speed-insights/RecommendationsSection/RecommendationIte
 
 import { CWVMetricsComponent } from "@/features/page-speed-insights/CWVMetricsComponent";
 import { JavaScriptPerformanceComponent } from "@/features/page-speed-insights/javascript-metrics/JavaScriptPerformanceComponent";
-import { LoadingExperience } from "@/features/page-speed-insights/loading-experience";
-import {
-  LoadTimelineSection,
-  NetworkResourcesSection,
-} from "@/features/page-speed-insights/network-metrics";
+import { LoadingExperience } from "@/features/page-speed-insights/loading-experience/LoadingExperience";
+import { LoadTimelineSection } from "@/features/page-speed-insights/network-metrics/LoadTimelineSection";
+import { NetworkResourcesSection } from "@/features/page-speed-insights/network-metrics/NetworkResourcesSection";
 import { RecommendationsSection } from "@/features/page-speed-insights/RecommendationsSection/RecommendationsSection";
 import {
   ScoreDisplay,

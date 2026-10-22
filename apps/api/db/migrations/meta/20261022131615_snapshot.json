@@ -1,0 +1,104 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "258d95ae-8ced-419a-aa35-d284e365f167",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "Historical_Metrics": {
+      "name": "Historical_Metrics",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "url": {
+          "name": "url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "origin": {
+          "name": "origin",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "formFactor": {
+          "name": "formFactor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "date": {
+          "name": "date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "date2": {
+          "name": "date2",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "data": {
+          "name": "data",
+          "type": "blob",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "historicalMetrics_record_unique": {
+          "name": "historicalMetrics_record_unique",
+          "columns": [
+            "url",
+            "formFactor",
+            "origin",
+            "date"
+          ],
+          "isUnique": true
+        },
+        "historical_Metrics_url_index": {
+          "name": "historical_Metrics_url_index",
+          "columns": [
+            "url"
+          ],
+          "isUnique": false
+        },
+        "historicalMetrics_scope_index": {
+          "name": "historicalMetrics_scope_index",
+          "columns": [
+            "url",
+            "formFactor",
+            "origin"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

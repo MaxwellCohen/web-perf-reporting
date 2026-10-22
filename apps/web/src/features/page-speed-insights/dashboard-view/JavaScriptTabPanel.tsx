@@ -1,7 +1,7 @@
 "use client";
 
 import { JavaScriptPerformanceComponent } from "@/features/page-speed-insights/javascript-metrics/JavaScriptPerformanceComponent";
-import { ScriptTreemapSection } from "@/features/page-speed-insights/script-treemap";
+import { ScriptTreemapSection } from "@/features/page-speed-insights/script-treemap/ScriptTreemapSection";
 import { SectionStack } from "@/features/page-speed-insights/dashboard-view/SectionStack";
 
 const JAVASCRIPT_OPEN = ["scriptTreemap", "javascriptPerformance"];

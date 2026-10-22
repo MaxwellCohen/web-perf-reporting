@@ -10,6 +10,8 @@ node_modules/
 
 # Build artifacts at repo root (legacy paths before monorepo)
 .next/
+.void/
+apps/api/.data/
 .vercel/
 coverage/
 *.tsbuildinfo

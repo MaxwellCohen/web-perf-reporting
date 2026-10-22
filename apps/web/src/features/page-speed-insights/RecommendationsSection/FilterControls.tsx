@@ -1,67 +1,5 @@
-import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
-
-function MultiSelectFilterDropdown({
-  triggerLabel,
-  options,
-  selected,
-  onSelectedChange,
-  renderOption,
-}: {
-  triggerLabel: string;
-  options: string[];
-  selected: string[];
-  onSelectedChange: (next: string[]) => void;
-  renderOption?: (value: string) => ReactNode;
-}) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="h-9">
-          {triggerLabel} <ChevronDown className="ml-2 h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-56">
-        {options.map((option) => (
-          <DropdownMenuCheckboxItem
-            key={option}
-            checked={selected.length === 0 || selected.includes(option)}
-            onCheckedChange={(checked) => {
-              if (checked) {
-                // If adding back the last unchecked item, reset to [] ("all selected")
-                const next = selected.includes(option) ? selected : [...selected, option];
-                onSelectedChange(next.length === options.length ? [] : next);
-              } else {
-                // If currently "all selected" (empty), explicitly select all except this one
-                const base = selected.length === 0 ? options : selected;
-                onSelectedChange(base.filter((item) => item !== option));
-              }
-            }}
-          >
-            {renderOption ? renderOption(option) : option}
-          </DropdownMenuCheckboxItem>
-        ))}
-        <div className="mt-1 border-t pt-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full justify-start"
-            onClick={() => onSelectedChange([])}
-          >
-            Clear
-          </Button>
-        </div>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
+import { MultiSelectFilterDropdown } from "@/features/page-speed-insights/shared/MultiSelectFilterDropdown";
 
 interface FilterControlsProps {
   categories: string[];
@@ -98,13 +36,15 @@ export function FilterControls({
         </Button>
       </div>
       <MultiSelectFilterDropdown
-        triggerLabel="Filter by Category"
+        trigger="Filter by Category"
+        buttonClassName="h-9"
         options={categories}
         selected={selectedCategories}
         onSelectedChange={onCategoriesChange}
       />
       <MultiSelectFilterDropdown
-        triggerLabel="Filter by Priority"
+        trigger="Filter by Priority"
+        buttonClassName="h-9"
         options={priorities}
         selected={selectedPriorities}
         onSelectedChange={onPrioritiesChange}

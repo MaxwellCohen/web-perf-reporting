@@ -39,3 +39,20 @@ export function shortUrl(url: string): string {
     return url.length > 60 ? `${url.slice(0, 57)}…` : url;
   }
 }
+
+type CoverageAmounts = { totalBytes: number; wastedBytes: number };
+
+export function formatCoverage(coverage: CoverageAmounts): string {
+  const wastedBytes = Math.max(0, coverage.wastedBytes);
+  const totalBytes = Math.max(coverage.totalBytes, wastedBytes);
+  const usedBytes = totalBytes - wastedBytes;
+  const usedPercent = totalBytes > 0 ? Math.round((usedBytes / totalBytes) * 100) : 0;
+  if (wastedBytes <= 0) return `${usedPercent}% used · ${formatBytes(totalBytes)}`;
+  return `${usedPercent}% used · ${formatBytes(usedBytes)} used of ${formatBytes(totalBytes)} · ${formatBytes(wastedBytes)} unused`;
+}
+
+export function coverageLabel<T extends { coverage?: CoverageAmounts }>(
+  item: T,
+): string | undefined {
+  return item.coverage ? formatCoverage(item.coverage) : undefined;
+}

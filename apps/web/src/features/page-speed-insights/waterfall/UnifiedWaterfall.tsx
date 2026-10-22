@@ -33,9 +33,7 @@ import {
 import { TimeRangeFilter } from "@/features/page-speed-insights/waterfall/TimeRangeFilter";
 import { WATERFALL_SPECIAL_LEGEND } from "@/features/page-speed-insights/waterfall/WaterfallBarTrack";
 import {
-  TASK_FILTERS,
-  allTaskFilters,
-  type TaskFilterId,
+  resolveTaskFilterSelection,
   type TaskFilterSelection,
 } from "@/features/page-speed-insights/page-load-timeline/filterTimelineMoments";
 import { filterWaterfallRowsByTasks } from "@/features/page-speed-insights/waterfall/filterWaterfallByTasks";
@@ -58,6 +56,7 @@ import {
   type WaterfallSortBy,
 } from "@/features/page-speed-insights/waterfall/waterfallData";
 import { getNetworkBarColor } from "@/features/page-speed-insights/shared/networkResourceColors";
+import { MultiSelectFilterDropdown } from "@/features/page-speed-insights/shared/MultiSelectFilterDropdown";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { cn } from "@/lib/utils";
@@ -196,47 +195,16 @@ function ResourceTypeFilterDropdown({
         : `${selected.length} types`;
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className={cn("h-8", className)}
-          aria-label="Resource type"
-        >
-          {label} <ChevronDown className="ml-1.5 h-3.5 w-3.5" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-56">
-        {options.map((option) => (
-          <DropdownMenuCheckboxItem
-            key={option}
-            checked={selected.length === 0 || selected.includes(option)}
-            onCheckedChange={(checked) => {
-              if (checked) {
-                const next = selected.includes(option) ? selected : [...selected, option];
-                onSelectedChange(next.length === options.length ? [] : next);
-              } else {
-                const base = selected.length === 0 ? options : selected;
-                onSelectedChange(base.filter((item) => item !== option));
-              }
-            }}
-          >
-            {toTitleCase(option)}
-          </DropdownMenuCheckboxItem>
-        ))}
-        <div className="mt-1 border-t pt-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full justify-start"
-            onClick={() => onSelectedChange([])}
-          >
-            Clear
-          </Button>
-        </div>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <MultiSelectFilterDropdown
+      trigger={label}
+      options={options}
+      selected={selected}
+      onSelectedChange={onSelectedChange}
+      renderOption={toTitleCase}
+      buttonClassName={cn("h-8", className)}
+      chevronClassName="ml-1.5 h-3.5 w-3.5"
+      ariaLabel="Resource type"
+    />
   );
 }
 
@@ -372,11 +340,10 @@ export function UnifiedWaterfall({
 
   const signals = useMemo(() => normalizeWaterfallSignals(signalParams), [signalParams]);
 
-  const enabledTasks = useMemo<TaskFilterSelection>(() => {
-    if (tasks == null) return allTaskFilters();
-    const allowed = new Set<string>(TASK_FILTERS);
-    return new Set(tasks.filter((id): id is TaskFilterId => allowed.has(id)));
-  }, [tasks]);
+  const enabledTasks = useMemo<TaskFilterSelection>(
+    () => resolveTaskFilterSelection(tasks),
+    [tasks],
+  );
 
   const builtRows = useMemo(
     () =>

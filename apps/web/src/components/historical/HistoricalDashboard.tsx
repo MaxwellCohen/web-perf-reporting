@@ -3,6 +3,7 @@ import { CruxReport } from "@/lib/schema";
 import { formatCruxReport, formatDate, groupBy } from "@/lib/utils";
 import { CurrentPerformanceChartContext } from "@/components/latest-crux/PerformanceCard";
 import { useState, useMemo } from "react";
+import { LoadingMessage } from "@/components/common/LoadingMessage";
 
 import {
   DeviceType,
@@ -47,18 +48,21 @@ function filterCruxReportsByDateRange(
 
 export function HistoricalDashboard({
   reportMap,
+  pendingKeys = [],
 }: {
   reportMap: Record<`${Scope}${DeviceType}`, CruxReport[] | null>;
+  pendingKeys?: readonly string[];
 }) {
   const [ChartType, setChartType] = useState("bar");
   const [reportScope, setReportScope] = useState<Scope>("origin");
   const [deviceType, setDeviceType] = useState<DeviceType>("All");
   const [selectedDateRange, setSelectedDateRange] = useState<DateRange | null>(null);
 
-  // Get all reports for the current scope and device type
+  const slotKey = `${reportScope}${deviceType}` as `${Scope}${DeviceType}`;
+  const slotPending = pendingKeys.includes(slotKey);
   const allReports = useMemo(() => {
-    return reportMap[`${reportScope}${deviceType}`] || [];
-  }, [reportMap, reportScope, deviceType]);
+    return reportMap[slotKey] || [];
+  }, [reportMap, slotKey]);
 
   // Calculate available date range from reports
   const dateRange = useMemo(() => {
@@ -132,6 +136,9 @@ export function HistoricalDashboard({
             />
           ) : null}
         </PerformanceOptions>
+        {slotPending ? (
+          <LoadingMessage />
+        ) : (
         <div className="mt-2 grid grid-cols-[repeat(auto-fill,minmax(14.5rem,1fr))] flex-wrap gap-1">
           <HistoricalPerformanceCard
             title="Largest Contentful Paint (LCP)"
@@ -158,6 +165,7 @@ export function HistoricalDashboard({
             histogramData={groupedMetics?.round_trip_time}
           />
         </div>
+        )}
       </Details>
     </CurrentPerformanceChartContext.Provider>
   );

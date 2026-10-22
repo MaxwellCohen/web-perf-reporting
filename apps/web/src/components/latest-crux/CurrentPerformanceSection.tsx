@@ -1,27 +1,40 @@
-import { unstable_cache } from "next/cache";
+"use client";
+
+import { LoadingMessage } from "@/components/common/LoadingMessage";
 import { CurrentPerformanceDashboard } from "@/components/latest-crux/PerformanceDashboard";
-import { buildCruxReportMap } from "@/lib/crux/latest-crux-display/buildCruxReportMap";
-import { fetchCruxOriginUrlFormFactorGrid } from "@/lib/cruxOriginUrlFormFactorGrid";
-import { getCurrentCruxData } from "@/lib/services";
+import type { CruxReportMap } from "@/components/latest-crux/types";
+import { useCruxJob } from "@/lib/crux/useCruxJob";
+import type { CruxReport } from "@/lib/schema";
 
-const CRUX_DASHBOARD_CACHE_SECONDS = 86_400;
-
-async function fetchLatestCruxDashboardBundle(url: string) {
-  return fetchCruxOriginUrlFormFactorGrid(url, getCurrentCruxData);
+function reportFromSlots(
+  slots: { key: string; report?: unknown }[],
+): CruxReportMap {
+  const map = {} as CruxReportMap;
+  for (const slot of slots) {
+    map[slot.key as keyof CruxReportMap] = (slot.report ?? null) as CruxReport | null;
+  }
+  return map;
 }
 
-export async function CurrentPerformanceSection({ url }: { url: string }) {
-  const cruxData = await unstable_cache(
-    () => fetchLatestCruxDashboardBundle(url),
-    ["latest-crux-dashboard", url],
-    { revalidate: CRUX_DASHBOARD_CACHE_SECONDS },
-  )();
+export function CurrentPerformanceSection({ url }: { url: string }) {
+  const { snapshot, error } = useCruxJob("current", url);
 
-  const cruxReport = buildCruxReportMap(cruxData);
+  if (error) {
+    return <p className="text-destructive mt-4 text-center">{error}</p>;
+  }
+
+  const pending = snapshot?.slots.filter((slot) => slot.status === "pending") ?? [];
+  const hasReadySlot = snapshot?.slots.some((slot) => slot.status === "ready") ?? false;
+  if (!snapshot || !hasReadySlot) {
+    return <LoadingMessage />;
+  }
 
   return (
-    <div className="flex flex-col mt-4">
-      <CurrentPerformanceDashboard reportMap={cruxReport} />
+    <div className="mt-4 flex flex-col">
+      <CurrentPerformanceDashboard
+        reportMap={reportFromSlots(snapshot.slots)}
+        pendingKeys={pending.map((slot) => slot.key)}
+      />
     </div>
   );
 }

@@ -167,8 +167,8 @@ describe("historical components", () => {
     expect(container.textContent).toContain("Round Trip Time (RTT)");
   });
 
-  it("fetches all historical crux variants before rendering the charts section", async () => {
-    getHistoricalCruxDataMock.mockResolvedValue([report]);
+  it("loads historical crux slots from the queued job", async () => {
+    vi.useRealTimers();
     formatCruxReportMock.mockReturnValue([historyItem]);
     groupByMock.mockReturnValue({
       largest_contentful_paint: [historyItem],
@@ -178,10 +178,33 @@ describe("historical components", () => {
       experimental_time_to_first_byte: [historyItem],
       round_trip_time: [historyItem],
     });
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        jobId: "job-1",
+        pageUrl: "https://example.com",
+        kind: "history",
+        slots: [
+          "originAll",
+          "urlAll",
+          "originDESKTOP",
+          "urlDESKTOP",
+          "originTABLET",
+          "urlTABLET",
+          "originPHONE",
+          "urlPHONE",
+        ].map((key) => ({ key, status: "ready", reports: [report] })),
+      }),
+    } as Response);
 
-    const { container } = render(await HistoricalChartsSection({ url: "https://example.com" }));
+    const { container } = render(<HistoricalChartsSection url="https://example.com" />);
 
-    expect(getHistoricalCruxDataMock).toHaveBeenCalledTimes(8);
-    expect(container.textContent).toContain("Largest Contentful Paint (LCP)");
+    await vi.waitFor(() => {
+      expect(container.textContent).toContain("Largest Contentful Paint (LCP)");
+    });
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/crux/history",
+      expect.objectContaining({ method: "POST" }),
+    );
   });
 });

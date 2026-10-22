@@ -20,18 +20,6 @@ export function JSUsageSection() {
   );
 }
 
-export function JSUsageCardSection() {
-  const treeDataArr = useScriptTreemapItems();
-  if (treeDataArr.length === 0) return null;
-  return (
-    <>
-      {treeDataArr.map(({ treeData, label }, idx) => (
-        <JSUsageCard key={`${idx}_label`} treeData={treeData} label={label} />
-      ))}
-    </>
-  );
-}
-
 export function JSUsageCard({ treeData, label }: { treeData: TreeMapData; label?: string }) {
   const nodes = treeData.nodes.map(flattenTreeMapNode);
 

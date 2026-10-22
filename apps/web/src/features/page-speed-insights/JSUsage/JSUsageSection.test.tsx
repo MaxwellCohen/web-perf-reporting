@@ -2,7 +2,6 @@ import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
   JSUsageSection,
-  JSUsageCardSection,
   JSUsageCard,
   JSUsageAccordion,
 } from "@/features/page-speed-insights/JSUsage/JSUsageSection";
@@ -43,22 +42,6 @@ describe("JSUsageSection", () => {
       { label: "Mobile", treeData: mockTreeData },
     ]);
     const { container } = render(<JSUsageSection />);
-    expect(container.firstChild).toMatchSnapshot();
-  });
-});
-
-describe("JSUsageCardSection", () => {
-  it("returns null when no treemap data", () => {
-    vi.mocked(useScriptTreemapItems).mockReturnValue([]);
-    const { container } = render(<JSUsageCardSection />);
-    expect(container.firstChild).toBeNull();
-  });
-
-  it("renders cards when treemap data exists", () => {
-    vi.mocked(useScriptTreemapItems).mockReturnValue([
-      { label: "Desktop", treeData: mockTreeData },
-    ]);
-    const { container } = render(<JSUsageCardSection />);
     expect(container.firstChild).toMatchSnapshot();
   });
 });

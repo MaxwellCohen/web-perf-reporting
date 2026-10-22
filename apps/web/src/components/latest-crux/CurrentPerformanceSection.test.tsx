@@ -1,58 +1,77 @@
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("next/cache", () => ({
-  unstable_cache: (fn: () => Promise<unknown>) => () => fn(),
-}));
-
-const getCurrentCruxDataMock = vi.fn();
-
-vi.mock("@/lib/services", () => ({
-  getCurrentCruxData: (...args: unknown[]) => getCurrentCruxDataMock(...args),
-}));
-
 vi.mock("@/components/latest-crux/PerformanceDashboard", () => ({
-  CurrentPerformanceDashboard: ({ reportMap }: { reportMap: Record<string, unknown> }) => (
-    <div data-testid="dashboard">Dashboard with {Object.keys(reportMap).length} reports</div>
+  CurrentPerformanceDashboard: ({
+    reportMap,
+    pendingKeys = [],
+  }: {
+    reportMap: Record<string, unknown>;
+    pendingKeys?: string[];
+  }) => (
+    <div data-testid="dashboard">
+      Dashboard with {Object.keys(reportMap).length} reports and {pendingKeys.length} pending
+    </div>
   ),
+}));
+
+vi.mock("@/components/common/LoadingMessage", () => ({
+  LoadingMessage: () => <div data-testid="loading-message">Loading</div>,
 }));
 
 import { CurrentPerformanceSection } from "@/components/latest-crux/CurrentPerformanceSection";
 
+const readyJob = {
+  jobId: "job-1",
+  pageUrl: "https://example.com",
+  kind: "current",
+  slots: [
+    "originAll",
+    "urlAll",
+    "originDESKTOP",
+    "urlDESKTOP",
+    "originTABLET",
+    "urlTABLET",
+    "originPHONE",
+    "urlPHONE",
+  ].map((key) => ({ key, status: "ready", report: { record: {} } })),
+};
+
 describe("CurrentPerformanceSection", () => {
-  it("fetches crux data for origin and url with all form factors", async () => {
-    getCurrentCruxDataMock.mockResolvedValue({ record: {} });
+  it("starts one CrUX job and renders each ready slot", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => readyJob,
+    } as Response);
 
-    const component = await CurrentPerformanceSection({
-      url: "https://example.com",
-    });
-    const { container } = render(component);
+    const { container } = render(<CurrentPerformanceSection url="https://example.com" />);
 
-    expect(getCurrentCruxDataMock).toHaveBeenCalledTimes(8);
-    expect(getCurrentCruxDataMock).toHaveBeenCalledWith({
-      origin: "https://example.com",
-      formFactor: undefined,
+    await waitFor(() => {
+      expect(container.querySelector('[data-testid="dashboard"]')).toBeTruthy();
     });
-    expect(getCurrentCruxDataMock).toHaveBeenCalledWith({
-      origin: "https://example.com",
-      formFactor: "DESKTOP",
-    });
-    expect(getCurrentCruxDataMock).toHaveBeenCalledWith({
-      url: "https://example.com",
-      formFactor: "PHONE",
-    });
-    expect(container.querySelector('[data-testid="dashboard"]')).toBeTruthy();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/crux/current",
+      expect.objectContaining({ method: "POST" }),
+    );
+    expect(container.textContent).toContain("8 reports");
+    expect(container.textContent).toContain("0 pending");
   });
 
-  it("passes report map to dashboard with correct structure", async () => {
-    const report = { record: { collectionPeriod: {} } };
-    getCurrentCruxDataMock.mockResolvedValue(report);
+  it("shows loading until a slot is ready, then keeps pending slots marked", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        ...readyJob,
+        slots: readyJob.slots.map((slot) =>
+          slot.key === "originPHONE" ? { ...slot, status: "pending", report: null } : slot,
+        ),
+      }),
+    } as Response);
 
-    const component = await CurrentPerformanceSection({
-      url: "https://test.com",
+    const { container } = render(<CurrentPerformanceSection url="https://test.com" />);
+
+    await waitFor(() => {
+      expect(container.textContent).toContain("1 pending");
     });
-    const { container } = render(component);
-
-    expect(container.textContent).toContain("8 reports");
   });
 });

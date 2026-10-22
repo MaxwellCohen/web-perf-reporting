@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CWVMetricsComponent } from "@/features/page-speed-insights/CWVMetricsComponent";
 import { DashboardPanelFallback } from "@/features/page-speed-insights/dashboard-view/DashboardPanelFallback";
-import { LoadingExperiencesSection } from "@/features/page-speed-insights/loading-experience";
+import { LoadingExperiencesSection } from "@/features/page-speed-insights/loading-experience/LoadingExperiencesSection";
 import {
   isDashboardTab,
   patchDashboardSearch,

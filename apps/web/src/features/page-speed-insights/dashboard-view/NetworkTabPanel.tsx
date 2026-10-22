@@ -1,6 +1,6 @@
 "use client";
 
-import { NetworkResourcesSection } from "@/features/page-speed-insights/network-metrics";
+import { NetworkResourcesSection } from "@/features/page-speed-insights/network-metrics/NetworkResourcesSection";
 import { ResourceSummaryTiles } from "@/features/page-speed-insights/network-metrics/ResourceSummaryTiles";
 import { UnifiedWaterfallSection } from "@/features/page-speed-insights/waterfall/UnifiedWaterfallSection";
 import { SectionStack } from "@/features/page-speed-insights/dashboard-view/SectionStack";

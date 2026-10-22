@@ -1,0 +1,27 @@
+{
+  "name": "api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "void dev",
+    "build": "void build",
+    "deploy": "void deploy --platform cloudflare",
+    "check": "tsc --noEmit",
+    "test": "vitest run",
+    "db:generate": "void db generate",
+    "import:history": "tsx scripts/import-historical-metrics.ts"
+  },
+  "dependencies": {
+    "void": "^1.2.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@libsql/client": "^0.18.0",
+    "dotenv": "^16.6.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.0",
+    "vitest": "^4.1.11",
+    "@cloudflare/workers-types": "^5.20261019.1"
+  }
+}

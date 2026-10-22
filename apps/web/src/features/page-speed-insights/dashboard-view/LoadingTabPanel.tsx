@@ -1,7 +1,7 @@
 "use client";
 
 import { RenderFilmStrip } from "@/features/page-speed-insights/RenderFilmStrip";
-import { LoadTimelineSection } from "@/features/page-speed-insights/network-metrics";
+import { LoadTimelineSection } from "@/features/page-speed-insights/network-metrics/LoadTimelineSection";
 import { SectionStack } from "@/features/page-speed-insights/dashboard-view/SectionStack";
 
 const LOADING_OPEN = ["Screenshots", "loadTimeline"];

@@ -95,16 +95,19 @@ vi.mock("@/features/page-speed-insights/RenderFilmStrip", () => ({
   RenderFilmStrip: () => <div>Film strip</div>,
 }));
 
-vi.mock("@/features/page-speed-insights/page-load-timeline", () => ({
+vi.mock("@/features/page-speed-insights/page-load-timeline/PageLoadTimeline", () => ({
   PageLoadTimeline: () => <div>Page load timeline</div>,
 }));
 
-vi.mock("@/features/page-speed-insights/script-treemap", () => ({
+vi.mock("@/features/page-speed-insights/script-treemap/ScriptTreemapSection", () => ({
   ScriptTreemapSection: () => <div>Script treemap section</div>,
 }));
 
-vi.mock("@/features/page-speed-insights/network-metrics", () => ({
+vi.mock("@/features/page-speed-insights/network-metrics/LoadTimelineSection", () => ({
   LoadTimelineSection: () => <div>Load timeline section</div>,
+}));
+
+vi.mock("@/features/page-speed-insights/network-metrics/NetworkResourcesSection", () => ({
   NetworkResourcesSection: () => <div>Network resources section</div>,
 }));
 
@@ -116,7 +119,7 @@ vi.mock("@/features/page-speed-insights/javascript-metrics/JavaScriptPerformance
   JavaScriptPerformanceComponent: () => <div>JavaScript metrics</div>,
 }));
 
-vi.mock("@/features/page-speed-insights/RecommendationsSection", () => ({
+vi.mock("@/features/page-speed-insights/RecommendationsSection/RecommendationsSection", () => ({
   RecommendationsSection: () => <div>Recommendations section</div>,
 }));
 

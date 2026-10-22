@@ -25,8 +25,9 @@ Other root scripts: `pnpm test`, `pnpm typecheck`, `pnpm build:web`, `pnpm check
 
 | App | Env file | Required variables |
 |-----|----------|-------------------|
-| `apps/web` | `.env` (see [`.env.example`](apps/web/.env.example)) | `PAGESPEED_INSIGHTS_API`, `TURSO_*`, `NEXT_PUBLIC_POSTHOG_*`, `WORKER_URL` |
+| `apps/web` | `.env` (see [`.env.example`](apps/web/.env.example)) | `WORKER_URL`, `WORKER_API_KEY`, `NEXT_PUBLIC_POSTHOG_*` |
 | `apps/worker` | `.dev.vars` (see [`.dev.vars.example`](apps/worker/.dev.vars.example)) | `PAGESPEED_INSIGHTS_API` |
+| `apps/api` | `.env` (see [`.env.example`](apps/api/.env.example)) | `PAGESPEED_INSIGHTS_API`, `WORKER_API_KEY` |
 
 If you still have `.env` at the repo root from before the monorepo move, copy it to `apps/web/.env`.
 
@@ -42,7 +43,7 @@ In the Vercel project for **web-perf-reporting**:
    ```
 
 3. **Build Command** — `pnpm build` (runs in `apps/web`)
-4. **Environment variables** — include existing vars plus **`WORKER_URL`** (production worker URL, e.g. `https://web-perf-report-cf.<account>.workers.dev`)
+4. **Environment variables** — `WORKER_URL` (Void API, for example `https://web-perf-report-api.<account>.workers.dev`) and `WORKER_API_KEY` (same value as the API worker secret). The Google API key and Turso credentials stay on the API worker.
 5. **Ignored Build Step** (optional):
 
    ```bash
@@ -60,6 +61,22 @@ In Workers & Pages → **web-perf-report-cf** (or reconnect Git):
 5. KV/R2 bindings in `wrangler.toml` must match your account
 
 After migration, archive the standalone [`web-perf-report-cf`](https://github.com/MaxwellCohen/web-perf-report-cf) repo.
+
+## Void API (`apps/api`)
+
+The API worker is a separate Cloudflare worker, `web-perf-report-api`. It reuses the existing KV namespace and `api-results` R2 bucket, stores CrUX history in a new D1 database, and queues Google PageSpeed and CrUX calls.
+
+From `apps/api`, with the [Void CLI](https://void.cloud/) logged into the same Cloudflare account:
+
+```bash
+pnpm --filter api dev
+void secret put PAGESPEED_INSIGHTS_API
+void secret put WORKER_API_KEY
+pnpm --filter api import:history
+void deploy --platform cloudflare
+```
+
+`import:history` copies `Historical_Metrics` from Turso into a local SQLite file and prints row counts. After the first deploy creates D1, load that file into the remote database with `void db` (or `wrangler d1 execute`) before pointing `WORKER_URL` at the new worker. Leave `web-perf-report-cf` deployed until a PageSpeed report shows its loading state and then the result.
 
 ## App docs
 

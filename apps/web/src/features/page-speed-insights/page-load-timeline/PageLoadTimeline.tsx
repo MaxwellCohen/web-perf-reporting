@@ -30,21 +30,21 @@ import {
   scriptCpuLabel,
 } from "@/features/page-speed-insights/shared/scriptResourceFacts";
 import { ResourceUrlCell } from "@/features/page-speed-insights/shared/ResourceUrlCell";
+import { RenderBlockingBadge } from "@/features/page-speed-insights/waterfall/renderBlockingBadge";
+import { UnifiedWaterfall } from "@/features/page-speed-insights/waterfall/UnifiedWaterfall";
+import { WaterfallBarTrack } from "@/features/page-speed-insights/waterfall/WaterfallBarTrack";
 import {
-  RenderBlockingBadge,
-  UnifiedWaterfall,
   waterfallRowFromLcpSegments,
   waterfallRowFromTimelineBar,
-  WaterfallBarTrack,
   type WaterfallRowKind,
-} from "@/features/page-speed-insights/waterfall";
+} from "@/features/page-speed-insights/waterfall/waterfallData";
 import { cn } from "@/lib/cn";
 import { buildPageLoadTimelineBundles } from "./buildPageLoadTimeline";
 import {
   TASK_FILTERS,
-  allTaskFilters,
   availableTaskFilters,
   filterTimelineMoments,
+  resolveTaskFilterSelection,
   TASK_FILTER_LABEL,
   type TaskFilterId,
   type TaskFilterSelection,
@@ -761,11 +761,10 @@ export function PageLoadTimeline() {
   const { report, tasks } = useDashboardSearchState();
   const stickyHeaderRef = useRef<HTMLDivElement>(null);
   const [stickyTopPx, setStickyTopPx] = useState(0);
-  const enabledTasks = useMemo<TaskFilterSelection>(() => {
-    if (tasks == null) return allTaskFilters();
-    const allowed = new Set<string>(TASK_FILTERS);
-    return new Set(tasks.filter((id): id is TaskFilterId => allowed.has(id)));
-  }, [tasks]);
+  const enabledTasks = useMemo<TaskFilterSelection>(
+    () => resolveTaskFilterSelection(tasks),
+    [tasks],
+  );
 
   const activeBundle =
     bundles.find((bundle) => bundle.timeline.label === report) ?? bundles[0] ?? null;

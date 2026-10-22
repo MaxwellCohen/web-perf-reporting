@@ -1,0 +1,10 @@
+node_modules
+.void
+dist
+.data
+.env
+.env.*
+!.env.example
+.dev.vars
+*.tsbuildinfo
+.vercel

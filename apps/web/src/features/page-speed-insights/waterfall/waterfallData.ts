@@ -2,9 +2,8 @@ import {
   getNetworkRequestsTimeRange,
   type NetworkRequestTimeRange,
 } from "@/features/page-speed-insights/shared/networkRequestsTable";
-import { formatBytes, shortUrl } from "@/features/page-speed-insights/shared/format";
+import { formatBytes, formatCoverage, coverageLabel, shortUrl } from "@/features/page-speed-insights/shared/format";
 import type {
-  CodeCoverage,
   CombinedLoad,
   CombinedLongTask,
   CombinedRequest,
@@ -99,19 +98,6 @@ export type WaterfallFilterOptions = {
   /** Keep render-blocking / potentially-blocking requests and main-thread tasks. */
   blockingOnly?: boolean;
 };
-
-function formatCoverage(coverage: CodeCoverage): string {
-  const wastedBytes = Math.max(0, coverage.wastedBytes);
-  const totalBytes = Math.max(coverage.totalBytes, wastedBytes);
-  const usedBytes = totalBytes - wastedBytes;
-  const usedPercent = totalBytes > 0 ? Math.round((usedBytes / totalBytes) * 100) : 0;
-  if (wastedBytes <= 0) return `${usedPercent}% used · ${formatBytes(totalBytes)}`;
-  return `${usedPercent}% used · ${formatBytes(usedBytes)} used of ${formatBytes(totalBytes)} · ${formatBytes(wastedBytes)} unused`;
-}
-
-function coverageLabel(request: CombinedRequest): string | undefined {
-  return request.coverage ? formatCoverage(request.coverage) : undefined;
-}
 
 function queueWindow(
   rendererStart: number | undefined,

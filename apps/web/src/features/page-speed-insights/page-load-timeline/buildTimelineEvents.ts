@@ -1,5 +1,4 @@
 import type {
-  CodeCoverage,
   CombinedLoad,
   CombinedLongTask,
   CombinedRequest,
@@ -13,6 +12,8 @@ import {
   formatBytes,
   formatMs,
   formatNetworkPriority,
+  formatCoverage,
+  coverageLabel,
   shortUrl,
 } from "@/features/page-speed-insights/shared/format";
 import type {
@@ -82,19 +83,6 @@ function requestWaterfallBar(
     ...queueWindow(request.rendererStartTime, request.networkRequestTime),
     ...extras,
   };
-}
-
-function formatCoverage(coverage: CodeCoverage): string {
-  const wastedBytes = Math.max(0, coverage.wastedBytes);
-  const totalBytes = Math.max(coverage.totalBytes, wastedBytes);
-  const usedBytes = totalBytes - wastedBytes;
-  const usedPercent = totalBytes > 0 ? Math.round((usedBytes / totalBytes) * 100) : 0;
-  if (wastedBytes <= 0) return `${usedPercent}% used · ${formatBytes(totalBytes)}`;
-  return `${usedPercent}% used · ${formatBytes(usedBytes)} used of ${formatBytes(totalBytes)} · ${formatBytes(wastedBytes)} unused`;
-}
-
-function coverageLabel(request: CombinedRequest): string | undefined {
-  return request.coverage ? formatCoverage(request.coverage) : undefined;
 }
 
 function pluralResourceTitle(resourceType: string, count: number): string {

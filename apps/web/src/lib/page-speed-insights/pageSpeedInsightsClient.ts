@@ -22,11 +22,48 @@ function parsePageSpeedInsightsArrayFromText(text: string): PageSpeedInsightsArr
   return null;
 }
 
+const PAGE_SPEED_POLL_INTERVAL_MS = 2000;
+const PAGE_SPEED_POLL_TIMEOUT_MS = 180_000;
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function getPageSpeedInsightsByPublicId(publicId: string): Promise<PageSpeedLoadResult> {
+  const deadline = Date.now() + PAGE_SPEED_POLL_TIMEOUT_MS;
+
+  while (Date.now() <= deadline) {
+    const result = await requestPageSpeedInsights(publicId);
+    if (result.status !== "pending") return result;
+    await sleep(PAGE_SPEED_POLL_INTERVAL_MS);
+  }
+
+  return {
+    status: "failed",
+    error: "The PageSpeed Insights report is still running. Refresh to check again.",
+  };
+}
+
+async function requestPageSpeedInsights(
+  publicId: string,
+): Promise<PageSpeedLoadResult | { status: "pending" }> {
   const res = await fetch(PAGE_SPEED_GET_BY_PUBLIC_ID(publicId), {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   });
+
+  if (res.status === 404) {
+    const text = await res.text();
+    try {
+      const body = JSON.parse(text) as { status?: string };
+      if (body.status === "pending" || body.status === "processing") {
+        return { status: "pending" };
+      }
+    } catch {
+      // A non-JSON 404 is a missing report.
+    }
+    return { status: "failed", error: "The PageSpeed Insights report could not be found." };
+  }
 
   if (res.status === 500) {
     const text = await res.text();

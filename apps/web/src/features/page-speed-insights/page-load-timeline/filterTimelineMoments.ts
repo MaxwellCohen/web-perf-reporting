@@ -18,6 +18,18 @@ export function allTaskFilters(): TaskFilterSelection {
   return new Set(TASK_FILTERS);
 }
 
+/**
+ * Enables every task filter when the query param is absent, and drops unknown
+ * filter ids otherwise.
+ */
+export function resolveTaskFilterSelection(
+  tasks: readonly string[] | null | undefined,
+): TaskFilterSelection {
+  if (tasks == null) return allTaskFilters();
+  const allowed = new Set<string>(TASK_FILTERS);
+  return new Set(tasks.filter((id): id is TaskFilterId => allowed.has(id)));
+}
+
 /** Filters that have something to hide on this timeline. */
 export function availableTaskFilters(events: TimelineEvent[]): TaskFilterId[] {
   const present = new Set<TaskFilterId>();

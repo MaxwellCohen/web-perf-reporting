@@ -11,10 +11,15 @@ export async function fetchWorkerJobEnvelopeByPublicId(publicId: string): Promis
   return fetch(requestUrl);
 }
 
-/** Starts a worker-side measurement (server actions); includes API key. */
+/** Starts a worker-side measurement. The Void worker checks x-api-key. The current worker still checks ?key=. */
 export async function fetchWorkerStartMeasurement(url: string, apiKey: string): Promise<Response> {
-  const requestUrl = new URL(getWorkerPageSpeedOrigin());
+  const origin = getWorkerPageSpeedOrigin();
+  const requestUrl = new URL(origin);
   requestUrl.searchParams.append("url", url);
-  requestUrl.searchParams.append("key", apiKey);
-  return fetch(requestUrl.toString());
+  if (origin === DEFAULT_WORKER_ORIGIN && process.env.PAGESPEED_INSIGHTS_API) {
+    requestUrl.searchParams.append("key", process.env.PAGESPEED_INSIGHTS_API);
+  }
+  return fetch(requestUrl.toString(), {
+    headers: apiKey ? { "x-api-key": apiKey } : {},
+  });
 }

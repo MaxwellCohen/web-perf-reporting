@@ -10,12 +10,21 @@ import type { CruxReportMap, DeviceType, Scope } from "@/components/latest-crux/
 import { PercentTable } from "@/components/common/PercentTable";
 import { formatCruxReport, formatDate, groupBy } from "@/lib/utils";
 import { useState } from "react";
+import { LoadingMessage } from "@/components/common/LoadingMessage";
 
-export function CurrentPerformanceDashboard({ reportMap }: { reportMap: CruxReportMap }) {
+export function CurrentPerformanceDashboard({
+  reportMap,
+  pendingKeys = [],
+}: {
+  reportMap: CruxReportMap;
+  pendingKeys?: readonly string[];
+}) {
   const [ChartType, setChartType] = useState("bar");
   const [reportScope, setReportScope] = useState<Scope>("origin");
   const [deviceType, setDeviceType] = useState<DeviceType>("All");
-  const report = reportMap[`${reportScope}${deviceType}`];
+  const slotKey = `${reportScope}${deviceType}` as keyof CruxReportMap;
+  const slotPending = pendingKeys.includes(slotKey);
+  const report = reportMap[slotKey];
   const data = formatCruxReport(report);
 
   const groupedMetrics = data ? groupBy(data, ({ metric_name }) => metric_name || "") : {};
@@ -50,6 +59,9 @@ export function CurrentPerformanceDashboard({ reportMap }: { reportMap: CruxRepo
           />
         ) : null}
       </PerformanceOptions>
+      {slotPending ? (
+        <LoadingMessage />
+      ) : (
       <div className="mt-2 grid gap-1 grid-cols-2 md:grid-cols-3 lg:grid-cols-6 print:grid-cols-3">
         <CurrentPerformanceCard
           title="Largest Contentful Paint (LCP)"
@@ -76,6 +88,7 @@ export function CurrentPerformanceDashboard({ reportMap }: { reportMap: CruxRepo
           histogramData={groupedMetrics?.round_trip_time?.[0]}
         />
       </div>
+      )}
       {navigation_types ? <PercentTable title="Navigation Types" data={navigation_types} /> : null}
     </CurrentPerformanceChartContext.Provider>
   );

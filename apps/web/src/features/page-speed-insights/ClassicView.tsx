@@ -4,15 +4,13 @@ import { CWVMetricsComponent } from "@/features/page-speed-insights/CWVMetricsCo
 import { SectionStack } from "@/features/page-speed-insights/dashboard-view/SectionStack";
 import { JavaScriptPerformanceComponent } from "@/features/page-speed-insights/javascript-metrics/JavaScriptPerformanceComponent";
 import { LighthouseAuditsPanel } from "@/features/page-speed-insights/LighthouseAuditsPanel";
-import { LoadingExperiencesSection } from "@/features/page-speed-insights/loading-experience";
-import {
-  LoadTimelineSection,
-  NetworkResourcesSection,
-} from "@/features/page-speed-insights/network-metrics";
+import { LoadingExperiencesSection } from "@/features/page-speed-insights/loading-experience/LoadingExperiencesSection";
+import { LoadTimelineSection } from "@/features/page-speed-insights/network-metrics/LoadTimelineSection";
+import { NetworkResourcesSection } from "@/features/page-speed-insights/network-metrics/NetworkResourcesSection";
 import { UnifiedWaterfallSection } from "@/features/page-speed-insights/waterfall/UnifiedWaterfallSection";
-import { RecommendationsSection } from "@/features/page-speed-insights/RecommendationsSection";
+import { RecommendationsSection } from "@/features/page-speed-insights/RecommendationsSection/RecommendationsSection";
 import { RenderFilmStrip } from "@/features/page-speed-insights/RenderFilmStrip";
-import { ScriptTreemapSection } from "@/features/page-speed-insights/script-treemap";
+import { ScriptTreemapSection } from "@/features/page-speed-insights/script-treemap/ScriptTreemapSection";
 
 export function ClassicView() {
   return (

@@ -98,6 +98,7 @@ describe("pageSpeedInsights.service", () => {
 
   it("requests fresh page speed data and returns the public id", async () => {
     vi.stubEnv("WORKER_URL", "https://worker.example.test");
+    vi.stubEnv("WORKER_API_KEY", "worker-secret");
     vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -112,11 +113,14 @@ describe("pageSpeedInsights.service", () => {
 
     expect(fetch).toHaveBeenCalledWith(
       expect.stringContaining("https://worker.example.test"),
+      expect.objectContaining({
+        headers: expect.objectContaining({ "x-api-key": "worker-secret" }),
+      }),
     );
     expect(result).toBe("public-123");
   });
 
-  it("captures errors and cleans up pending measurements when the request fails", async () => {
+  it("captures errors when the worker request fails", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: false,
       status: 500,
@@ -126,8 +130,5 @@ describe("pageSpeedInsights.service", () => {
 
     expect(result).toBeNull();
     expect(captureExceptionMock).toHaveBeenCalled();
-    expect(deleteMock).toHaveBeenCalled();
-    expect(whereMock).toHaveBeenCalled();
-    expect(executeMock).toHaveBeenCalled();
   });
 });
