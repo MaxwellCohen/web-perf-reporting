@@ -234,8 +234,14 @@ describe("PageLoadTimeline", () => {
 
     const overview = screen.getByTestId("timeline-overview");
     const overviewToggle = within(overview).getByRole("button", { name: /Waterfall view/ });
-    expect(overviewToggle).toHaveAttribute("aria-expanded", "true");
+    expect(overviewToggle).toHaveAttribute("aria-expanded", "false");
     expect(within(overview).getByText("Waterfall view")).toBeInTheDocument();
+    expect(within(overview).queryByTestId("overview-lanes")).not.toBeInTheDocument();
+    expect(within(overview).queryByTestId("overview-focus")).not.toBeInTheDocument();
+    expect(within(overview).queryByTestId("overview-time-range")).not.toBeInTheDocument();
+
+    fireEvent.click(overviewToggle);
+    expect(overviewToggle).toHaveAttribute("aria-expanded", "true");
     const allLanes = within(overview).getByTestId("overview-lanes");
     expect(within(allLanes).getAllByTestId("overview-time-axis").length).toBeGreaterThan(0);
     expect(within(allLanes).getAllByTestId("overview-tick-grid").length).toBeGreaterThan(0);
@@ -301,6 +307,7 @@ describe("PageLoadTimeline", () => {
     render(<PageLoadTimeline />);
 
     const overview = screen.getByTestId("timeline-overview");
+    fireEvent.click(within(overview).getByRole("button", { name: /Waterfall view/ }));
     expect(within(overview).getByTestId("overview-lanes")).toHaveTextContent("hero.png");
     fireEvent.click(within(overview).getByTestId("legend-signal-long-task"));
 
@@ -320,6 +327,7 @@ describe("PageLoadTimeline", () => {
     render(<PageLoadTimeline />);
 
     const overview = screen.getByTestId("timeline-overview");
+    fireEvent.click(within(overview).getByRole("button", { name: /Waterfall view/ }));
     const range = within(overview).getByTestId("overview-time-range");
     const start = within(range).getByRole("slider", { name: "Range start" });
     const end = within(range).getByRole("slider", { name: "Range end" });
@@ -619,6 +627,7 @@ describe("PageLoadTimeline", () => {
     expect(screen.getByRole("heading", { name: "FCP" })).toBeInTheDocument();
     expect(filters).toHaveTextContent(/\d+ of \d+/);
 
+    fireEvent.click(screen.getByRole("button", { name: /Waterfall view/ }));
     const overview = screen.getByTestId("overview-lanes");
     expect(overview).not.toHaveTextContent("hero.png");
     expect(overview).toHaveTextContent("app.css");

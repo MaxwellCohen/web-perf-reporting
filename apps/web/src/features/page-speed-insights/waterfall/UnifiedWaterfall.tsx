@@ -356,7 +356,7 @@ export function UnifiedWaterfall({
     tasks,
     signals: signalParams,
   } = useDashboardSearchState();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [rangeStartMs, setRangeStartMs] = useState(0);
   const [rangeEndMs, setRangeEndMs] = useState(axisEndMs);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
