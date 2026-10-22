@@ -30,7 +30,6 @@ export function CruxHistogramChart({ histogramData }: { histogramData: CruxHisto
           />
           <ChartTooltip
             cursor={true}
-            defaultIndex={2}
             content={
               <ChartTooltipContent
                 labelFormatter={(value) => HISTOGRAM_STATUS_LABELS[String(value)] || ""}
