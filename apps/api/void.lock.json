@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "source": {
+    "name": "web-perf-report-api",
+    "workers_dev": true,
+    "preview_urls": true,
+    "routes": [],
+    "kv_namespaces": [
+      {
+        "binding": "KV",
+        "id": "a243d4365c5542e789045e74791afdda"
+      }
+    ],
+    "r2_buckets": [
+      {
+        "binding": "RESULTS_BUCKET",
+        "bucket_name": "api-results"
+      }
+    ]
+  },
+  "resolved": {
+    "name": "web-perf-report-api",
+    "kv_namespaces": [
+      {
+        "binding": "KV",
+        "id": "a243d4365c5542e789045e74791afdda"
+      }
+    ],
+    "r2_buckets": [
+      {
+        "binding": "RESULTS_BUCKET",
+        "bucket_name": "api-results"
+      }
+    ],
+    "account_id": "5663f61196617f243adfcd6b36b24dcc",
+    "d1_databases": [
+      {
+        "binding": "DB",
+        "database_name": "web-perf-report-api-db",
+        "database_id": "99a5f0e9-c245-40fc-afaa-52249441da0b",
+        "migrations_dir": "./db/migrations"
+      }
+    ],
+    "workers_dev": true,
+    "preview_urls": true,
+    "routes": []
+  },
+  "text": "{\n  \"name\": \"web-perf-report-api\",\n  \"kv_namespaces\": [\n    {\n      \"binding\": \"KV\",\n      \"id\": \"a243d4365c5542e789045e74791afdda\"\n    }\n  ],\n  \"r2_buckets\": [\n    {\n      \"binding\": \"RESULTS_BUCKET\",\n      \"bucket_name\": \"api-results\"\n    }\n  ],\n  \"account_id\": \"5663f61196617f243adfcd6b36b24dcc\",\n  \"d1_databases\": [\n    {\n      \"binding\": \"DB\",\n      \"database_name\": \"web-perf-report-api-db\",\n      \"database_id\": \"99a5f0e9-c245-40fc-afaa-52249441da0b\",\n      \"migrations_dir\": \"./db/migrations\"\n    }\n  ],\n  \"workers_dev\": true,\n  \"preview_urls\": true,\n  \"routes\": []\n}\n"
+}

@@ -27,7 +27,7 @@ Other root scripts: `pnpm test`, `pnpm typecheck`, `pnpm build:web`, `pnpm check
 |-----|----------|-------------------|
 | `apps/web` | `.env` (see [`.env.example`](apps/web/.env.example)) | `WORKER_URL`, `WORKER_API_KEY`, `NEXT_PUBLIC_POSTHOG_*` |
 | `apps/worker` | `.dev.vars` (see [`.dev.vars.example`](apps/worker/.dev.vars.example)) | `PAGESPEED_INSIGHTS_API` |
-| `apps/api` | `.env` (see [`.env.example`](apps/api/.env.example)) | `PAGESPEED_INSIGHTS_API`, `WORKER_API_KEY` |
+| `apps/api` | Cloudflare secrets (`void secret put`) | `PAGESPEED_INSIGHTS_API`, `WORKER_API_KEY` |
 
 If you still have `.env` at the repo root from before the monorepo move, copy it to `apps/web/.env`.
 

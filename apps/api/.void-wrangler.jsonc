@@ -1,0 +1,27 @@
+{
+  "name": "web-perf-report-api",
+  "kv_namespaces": [
+    {
+      "binding": "KV",
+      "id": "a243d4365c5542e789045e74791afdda"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "RESULTS_BUCKET",
+      "bucket_name": "api-results"
+    }
+  ],
+  "account_id": "5663f61196617f243adfcd6b36b24dcc",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "web-perf-report-api-db",
+      "database_id": "99a5f0e9-c245-40fc-afaa-52249441da0b",
+      "migrations_dir": "./db/migrations"
+    }
+  ],
+  "workers_dev": true,
+  "preview_urls": true,
+  "routes": []
+}

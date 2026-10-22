@@ -16,12 +16,13 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261019.1",
     "@libsql/client": "^0.18.0",
     "dotenv": "^16.6.1",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
     "vite": "^8.0.0",
     "vitest": "^4.1.11",
-    "@cloudflare/workers-types": "^5.20261019.1"
+    "wrangler": "^4.152.0"
   }
 }

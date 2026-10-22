@@ -8,3 +8,4 @@ dist
 .dev.vars
 *.tsbuildinfo
 .vercel
+.wrangler
