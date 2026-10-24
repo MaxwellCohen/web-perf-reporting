@@ -364,9 +364,11 @@ export function buildWaterfallRowsFromSources(
           ),
         );
 
-  const taskRows = groupTasksByGap(load.longTasks).map((group, index) =>
-    taskRow(group, index),
-  );
+  const taskGroups =
+    density === "collapsed"
+      ? groupTasksByGap(load.longTasks)
+      : load.longTasks.map((task) => [task]);
+  const taskRows = taskGroups.map((group, index) => taskRow(group, index));
   const timingRows = load.userTimings.map((timing, index) => userTimingRow(timing, index));
 
   return sortRowsByStart([...requestRows, ...taskRows, ...timingRows]);

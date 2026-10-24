@@ -300,7 +300,25 @@ describe("networkWaterfallData", () => {
     expect(task?.segments?.[0]).toMatchObject({ scriptCpu, chain });
   });
 
-  it("keeps tasks on one row when the gap is under 50ms, else splits", () => {
+  it("expands each task onto its own row", () => {
+    const rows = buildWaterfallRowsFromSources(
+      makeLoad({
+        longTasks: [
+          { startTime: 100, duration: 20 },
+          { startTime: 105, duration: 15 },
+          { startTime: 160, duration: 60 },
+        ],
+      }),
+      { density: "expanded" },
+    );
+
+    const tasks = rows.filter((row) => row.kind === "task");
+    expect(tasks).toHaveLength(3);
+    expect(tasks.every((row) => row.label === "Task")).toBe(true);
+    expect(tasks.map((row) => row.networkStart)).toEqual([100, 105, 160]);
+  });
+
+  it("collapses nearby tasks onto one row when the gap is under 50ms, else splits", () => {
     const rows = buildWaterfallRowsFromSources(
       makeLoad({
         requests: [
@@ -320,7 +338,7 @@ describe("networkWaterfallData", () => {
           { startTime: 300, duration: 20 }, // gap 80ms from 220 → new row
         ],
       }),
-      { density: "expanded" },
+      { density: "collapsed" },
     );
 
     const tasks = rows.filter((row) => row.kind === "task");
