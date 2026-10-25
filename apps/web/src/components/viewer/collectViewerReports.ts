@@ -2,11 +2,48 @@ import type { LhJsonFileEntry, LhJsonTextEntry } from "@/components/lh/types";
 import { PageSpeedInsights } from "@/lib/schema";
 import { parseViewerJsonString } from "@/components/viewer/parseViewerJson";
 
+async function importPsiShare(
+  url: string,
+): Promise<{ data: PageSpeedInsights[]; labels: string[] }> {
+  const trimmed = url.trim();
+  if (!trimmed) {
+    throw new Error("Enter a PageSpeed Insights share URL");
+  }
+
+  const response = await fetch("/api/viewer/psi-share", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url: trimmed }),
+  });
+
+  let payload: { data?: PageSpeedInsights[]; labels?: string[]; error?: string } | null = null;
+  try {
+    payload = (await response.json()) as {
+      data?: PageSpeedInsights[];
+      labels?: string[];
+      error?: string;
+    };
+  } catch {
+    payload = null;
+  }
+
+  if (!response.ok || !payload?.data?.length || !payload.labels) {
+    throw new Error(payload?.error || "Could not import PageSpeed report");
+  }
+
+  return { data: payload.data, labels: payload.labels };
+}
+
 export async function collectViewerReports(
   activeTab: string,
   jsonInputs: LhJsonTextEntry[],
   jsonFiles: LhJsonFileEntry[],
+  psiShareUrl = "",
 ): Promise<{ data: PageSpeedInsights[]; labels: string[] }> {
+  if (activeTab === "psi") {
+    return importPsiShare(psiShareUrl);
+  }
+
   const data: PageSpeedInsights[] = [];
   const labels: string[] = [];
 

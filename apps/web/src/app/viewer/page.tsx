@@ -1,17 +1,27 @@
 import { LighthouseViewerAppShell } from "@/components/lh/LighthouseViewerAppShell";
 import { toSearchString } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 import ViewerPage from "@/components/viewer/ViewerPage";
+import { getSiteUrl } from "@/lib/siteUrl";
+
+function firstSearchParam(value: string | string[] | undefined): string {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value[0] ?? "";
+  return "";
+}
 
 export default async function Home({
   searchParams = Promise.resolve({}),
 }: {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 } = {}) {
-  const initialSearch = toSearchString(await searchParams);
+  const params = await searchParams;
+  const { psi, ...dashboardParams } = params;
+  const initialSearch = toSearchString(dashboardParams);
+  const initialPsi = firstSearchParam(psi);
 
   return (
     <LighthouseViewerAppShell>
-      <ViewerPage initialSearch={initialSearch} />
+      <ViewerPage initialSearch={initialSearch} initialPsi={initialPsi} siteUrl={getSiteUrl()} />
     </LighthouseViewerAppShell>
   );
 }

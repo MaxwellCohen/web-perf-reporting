@@ -25,6 +25,7 @@ describe("ViewerPage", () => {
     window.alert = mockAlert;
     window.location.hash = "";
     mockAlert.mockClear();
+    vi.restoreAllMocks();
   });
 
   it("renders upload and paste tabs when no data", () => {
@@ -138,6 +139,51 @@ describe("ViewerPage", () => {
 
     await waitFor(() => {
       expect(container.textContent).toContain("Show Report");
+    });
+  });
+
+  it("renders a PSI share URL tab and bookmarklet", () => {
+    const { getByText } = render(<ViewerPage siteUrl="https://reports.example" />);
+    const link = getByText("PSI viewer bookmarklet");
+    expect(link.getAttribute("href")).toContain("https://reports.example/viewer?psi=");
+    expect(link.getAttribute("href")?.startsWith("javascript:")).toBe(true);
+  });
+
+  it("imports a PSI share URL into the dashboard", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      Response.json({
+        data: [{ lighthouseResult: { categories: {} } }],
+        labels: ["Mobile"],
+      }),
+    );
+    const { container, getByText, getByLabelText } = render(<ViewerPage />);
+
+    fireEvent.mouseDown(getByText("PSI share URL"));
+    fireEvent.change(getByLabelText("PageSpeed Insights URL"), {
+      target: { value: "https://pagespeed.web.dev/analysis/https-example-com/abc" },
+    });
+    fireEvent.click(getByText("Show Report"));
+
+    await waitFor(() => {
+      expect(container.querySelector('[data-testid="dashboard"]')).toBeTruthy();
+      expect(container.textContent).toContain("labels: Mobile");
+    });
+  });
+
+  it("auto-imports a psi query into the dashboard", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      Response.json({
+        data: [{ lighthouseResult: { categories: {} } }],
+        labels: ["Desktop"],
+      }),
+    );
+
+    const { container } = render(
+      <ViewerPage initialPsi="https://pagespeed.web.dev/analysis/https-example-com/abc" />,
+    );
+
+    await waitFor(() => {
+      expect(container.textContent).toContain("labels: Desktop");
     });
   });
 });
