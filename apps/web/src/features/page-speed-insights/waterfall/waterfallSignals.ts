@@ -3,6 +3,10 @@ import type { WaterfallRow, WaterfallSegment } from "@/features/page-speed-insig
 
 /** Row signals a user can isolate in the waterfall. Empty selection shows every row. */
 export const WATERFALL_SIGNALS = [
+  "render-blocking",
+  "before-fcp",
+  "before-lcp",
+  "fcp-to-lcp",
   "chain",
   "longest",
   "queue",
@@ -17,7 +21,16 @@ export const WATERFALL_SIGNALS = [
 
 export type WaterfallSignalId = (typeof WATERFALL_SIGNALS)[number];
 
+export type WaterfallSignalContext = {
+  fcpMs?: number;
+  lcpMs?: number;
+};
+
 export const WATERFALL_SIGNAL_LABEL: Record<WaterfallSignalId, string> = {
+  "render-blocking": "Render-blocking",
+  "before-fcp": "Active before FCP",
+  "before-lcp": "Active before LCP",
+  "fcp-to-lcp": "Between FCP and LCP",
   chain: "Critical chain",
   longest: "Longest path",
   queue: "Queue",
@@ -31,6 +44,12 @@ export const WATERFALL_SIGNAL_LABEL: Record<WaterfallSignalId, string> = {
 };
 
 const SIGNAL_IDS = new Set<string>(WATERFALL_SIGNALS);
+
+const MILESTONE_SIGNALS = new Set<WaterfallSignalId>([
+  "before-fcp",
+  "before-lcp",
+  "fcp-to-lcp",
+]);
 
 export function normalizeWaterfallSignals(values: readonly string[]): WaterfallSignalId[] {
   const selected = new Set(values);
@@ -53,12 +72,76 @@ function onChain(isCriticalChain?: boolean, chain: WaterfallSegment["chain"] = u
   return Boolean(isCriticalChain || chain);
 }
 
+function rowRange(row: WaterfallRow, segment?: WaterfallSegment): { start: number; end: number } {
+  if (segment) {
+    const start = segment.queueStart ?? segment.start;
+    return { start, end: Math.max(segment.end, segment.start) };
+  }
+  const start = row.queueStart ?? row.networkStart;
+  return { start, end: Math.max(row.networkEnd, row.networkStart) };
+}
+
+function overlapsEndBefore(endMs: number, start: number, end: number): boolean {
+  return endMs > 0 && start < endMs && end > 0;
+}
+
+function overlapsWindow(winStart: number, winEnd: number, start: number, end: number): boolean {
+  return winEnd > winStart && start < winEnd && end > winStart;
+}
+
+function isRenderBlockingRow(row: WaterfallRow, segment?: WaterfallSegment): boolean {
+  if (row.kind === "task") return true;
+  const status = segment?.renderBlocking ?? row.renderBlocking;
+  return status === "blocking" || status === "potentially-blocking";
+}
+
+function milestoneSignalAvailable(signal: WaterfallSignalId, context?: WaterfallSignalContext): boolean {
+  if (!MILESTONE_SIGNALS.has(signal)) return false;
+  const fcp = context?.fcpMs;
+  const lcp = context?.lcpMs;
+  if (signal === "before-fcp") return fcp != null && Number.isFinite(fcp) && fcp > 0;
+  if (signal === "before-lcp") return lcp != null && Number.isFinite(lcp) && lcp > 0;
+  if (signal === "fcp-to-lcp") {
+    return (
+      fcp != null &&
+      lcp != null &&
+      Number.isFinite(fcp) &&
+      Number.isFinite(lcp) &&
+      lcp > fcp
+    );
+  }
+  return false;
+}
+
 function matchesSignal(
   row: WaterfallRow,
   segment: WaterfallSegment | undefined,
   signal: WaterfallSignalId,
+  context?: WaterfallSignalContext,
 ): boolean {
+  const { start, end } = rowRange(row, segment);
+
   switch (signal) {
+    case "render-blocking":
+      return isRenderBlockingRow(row, segment);
+    case "before-fcp": {
+      const fcp = context?.fcpMs;
+      if (fcp == null || !Number.isFinite(fcp)) return false;
+      return overlapsEndBefore(fcp, start, end);
+    }
+    case "before-lcp": {
+      const lcp = context?.lcpMs;
+      if (lcp == null || !Number.isFinite(lcp)) return false;
+      return overlapsEndBefore(lcp, start, end);
+    }
+    case "fcp-to-lcp": {
+      const fcp = context?.fcpMs;
+      const lcp = context?.lcpMs;
+      if (fcp == null || lcp == null || !Number.isFinite(fcp) || !Number.isFinite(lcp) || lcp <= fcp) {
+        return false;
+      }
+      return overlapsWindow(fcp, lcp, start, end);
+    }
     case "chain":
       if (row.kind === "user-mark" || row.kind === "user-measure") return false;
       return segment
@@ -144,38 +227,64 @@ function retarget(row: WaterfallRow, segments: WaterfallSegment[]): WaterfallRow
   };
 }
 
-function narrowRow(row: WaterfallRow, signals: readonly WaterfallSignalId[]): WaterfallRow | null {
+function rowMatchesAnySignal(
+  row: WaterfallRow,
+  signals: readonly WaterfallSignalId[],
+  context?: WaterfallSignalContext,
+): boolean {
+  const segments = row.segments ?? [];
+  if (!segments.length) {
+    return signals.some((signal) => matchesSignal(row, undefined, signal, context));
+  }
+  return segments.some((segment) =>
+    signals.some((signal) => matchesSignal(row, segment, signal, context)),
+  );
+}
+
+function narrowRow(
+  row: WaterfallRow,
+  signals: readonly WaterfallSignalId[],
+  context?: WaterfallSignalContext,
+): WaterfallRow | null {
   if (row.kind === "user-mark" || row.kind === "user-measure") {
-    return signals.includes("user-timing") ? row : null;
+    return rowMatchesAnySignal(row, signals, context) ? row : null;
   }
 
   const segments = row.segments ?? [];
   if (!segments.length) {
-    return signals.some((signal) => matchesSignal(row, undefined, signal)) ? row : null;
+    return signals.some((signal) => matchesSignal(row, undefined, signal, context)) ? row : null;
   }
 
   const kept = segments.filter((segment) =>
-    signals.some((signal) => matchesSignal(row, segment, signal)),
+    signals.some((signal) => matchesSignal(row, segment, signal, context)),
   );
   if (!kept.length) return null;
   if (kept.length === segments.length) return row;
   return retarget(row, kept);
 }
 
-/** Signals that match at least one row. Order follows {@link WATERFALL_SIGNALS}. */
-export function availableWaterfallSignals(rows: WaterfallRow[]): WaterfallSignalId[] {
-  const present = new Set<WaterfallSignalId>();
+function signalPresentOnRows(
+  rows: WaterfallRow[],
+  signal: WaterfallSignalId,
+  context?: WaterfallSignalContext,
+): boolean {
+  if (milestoneSignalAvailable(signal, context)) return true;
   for (const row of rows) {
-    for (const signal of WATERFALL_SIGNALS) {
-      if (present.has(signal)) continue;
-      const segments = row.segments ?? [];
-      const hit = segments.length
-        ? segments.some((segment) => matchesSignal(row, segment, signal))
-        : matchesSignal(row, undefined, signal);
-      if (hit) present.add(signal);
-    }
+    const segments = row.segments ?? [];
+    const hit = segments.length
+      ? segments.some((segment) => matchesSignal(row, segment, signal, context))
+      : matchesSignal(row, undefined, signal, context);
+    if (hit) return true;
   }
-  return WATERFALL_SIGNALS.filter((id) => present.has(id));
+  return false;
+}
+
+/** Signals that match at least one row. Order follows {@link WATERFALL_SIGNALS}. */
+export function availableWaterfallSignals(
+  rows: WaterfallRow[],
+  context?: WaterfallSignalContext,
+): WaterfallSignalId[] {
+  return WATERFALL_SIGNALS.filter((signal) => signalPresentOnRows(rows, signal, context));
 }
 
 /**
@@ -186,13 +295,14 @@ export function availableWaterfallSignals(rows: WaterfallRow[]): WaterfallSignal
 export function filterWaterfallRowsBySignals(
   rows: WaterfallRow[],
   selected: readonly string[],
+  context?: WaterfallSignalContext,
 ): WaterfallRow[] {
   const signals = normalizeWaterfallSignals(selected);
   if (!signals.length) return rows;
 
   const visible: WaterfallRow[] = [];
   for (const row of rows) {
-    const next = narrowRow(row, signals);
+    const next = narrowRow(row, signals, context);
     if (next) visible.push(next);
   }
   return visible;

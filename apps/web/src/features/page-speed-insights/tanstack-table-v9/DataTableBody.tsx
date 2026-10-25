@@ -13,6 +13,8 @@ const rowModelStateSelector = (state: {
   globalFilter: unknown;
   columnSizing: unknown;
   columnResizing: unknown;
+  columnVisibility: unknown;
+  columnOrder: unknown;
 }) => ({
   columnFilters: state.columnFilters,
   sorting: state.sorting,
@@ -22,20 +24,46 @@ const rowModelStateSelector = (state: {
   globalFilter: state.globalFilter,
   columnSizing: state.columnSizing,
   columnResizing: state.columnResizing,
+  columnVisibility: state.columnVisibility,
+  columnOrder: state.columnOrder,
 });
+
+function rowClickIgnored(target: EventTarget | null): boolean {
+  return target instanceof Element && !!target.closest("a, button, input, select, textarea");
+}
 
 export function DataTableBody<TData extends RowData>({
   table,
+  onRowClick,
+  isRowSelected,
 }: {
   table: ReactTable<any, TData, any>;
+  onRowClick?: (row: TData) => void;
+  isRowSelected?: (row: TData) => boolean;
 }) {
   return (
     <table.Subscribe selector={rowModelStateSelector}>
       {() => (
         <TableBody>
           {table.getRowModel().rows.map((row) => {
+            const selected = isRowSelected?.(row.original) ?? false;
             return (
-              <TableRow key={row.id}>
+              <TableRow
+                key={row.id}
+                data-state={selected ? "selected" : undefined}
+                className={onRowClick ? "cursor-pointer" : undefined}
+                tabIndex={onRowClick ? 0 : undefined}
+                onClick={(event) => {
+                  if (!onRowClick || rowClickIgnored(event.target)) return;
+                  onRowClick(row.original);
+                }}
+                onKeyDown={(event) => {
+                  if (!onRowClick || (event.key !== "Enter" && event.key !== " ")) return;
+                  if (rowClickIgnored(event.target)) return;
+                  event.preventDefault();
+                  onRowClick(row.original);
+                }}
+              >
                 {row
                   .getVisibleCells()
                   .map((cell) => {

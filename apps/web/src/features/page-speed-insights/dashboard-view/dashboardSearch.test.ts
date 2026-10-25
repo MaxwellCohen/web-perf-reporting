@@ -33,6 +33,8 @@ describe("dashboardSearch", () => {
       open: null,
       groups: [],
       tasks: null,
+      stage: "",
+      suspect: "",
     });
   });
 
@@ -60,6 +62,34 @@ describe("dashboardSearch", () => {
       groups: ["performance"],
       tasks: [],
     });
+  });
+
+  it("opens Resources for legacy network and javascript tabs", () => {
+    expect(parseDashboardSearch("?tab=network").tab).toBe("resources");
+    expect(parseDashboardSearch("?tab=javascript&stage=unused").tab).toBe("resources");
+    expect(
+      parseDashboardSearch("?tab=javascript&stage=unused&suspect=https%3A%2F%2Fexample.com%2Fa.js"),
+    ).toMatchObject({
+      tab: "resources",
+      stage: "unused",
+      suspect: "https://example.com/a.js",
+    });
+    expect(parseDashboardSearch("?stage=nope").stage).toBe("");
+  });
+
+  it("writes and clears the resources investigation deep link", () => {
+    const next = applyDashboardSearchPatch(new URLSearchParams("tab=resources"), {
+      stage: "main-thread",
+      suspect: "https://example.com/app.js",
+    });
+    expect(parseDashboardSearch(`?${next.toString()}`)).toMatchObject({
+      stage: "main-thread",
+      suspect: "https://example.com/app.js",
+    });
+
+    const cleared = applyDashboardSearchPatch(next, { stage: null, suspect: null });
+    expect(cleared.has("stage")).toBe(false);
+    expect(cleared.has("suspect")).toBe(false);
   });
 
   it("ignores unknown layout and tab values", () => {

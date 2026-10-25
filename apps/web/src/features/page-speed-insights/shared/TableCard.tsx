@@ -35,6 +35,10 @@ type TableCardProps<TData extends RowData = RowData> = {
   pageSize?: number;
   /** Extra classes on the scroll/overflow wrapper around StockDataTable. */
   tableContainerClassName?: string;
+  tableAriaLabel?: string;
+  onRowClick?: (row: TData) => void;
+  isRowSelected?: (row: TData) => boolean;
+  showColumnLayout?: boolean;
 };
 
 /**
@@ -47,11 +51,21 @@ export function TableCard<TData extends RowData = RowData>({
   className = "md:col-span-2 lg:col-span-3",
   pageSize = 10,
   tableContainerClassName,
+  tableAriaLabel,
+  onRowClick,
+  isRowSelected,
+  showColumnLayout = false,
 }: TableCardProps<TData>) {
   return (
     <TableCardShell title={title} className={className}>
       <div className={cn("w-full overflow-x-auto", tableContainerClassName)}>
-        <StockDataTable table={table} />
+        <StockDataTable
+          table={table}
+          aria-label={tableAriaLabel}
+          onRowClick={onRowClick}
+          isRowSelected={isRowSelected}
+          showColumnLayout={showColumnLayout}
+        />
       </div>
       {showPagination && (
         <PaginatedTableControls
@@ -70,6 +84,7 @@ type LabeledStockTableProps<TData extends RowData = RowData> = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   table: ReactTable<any, TData, any>;
   showPagination?: boolean;
+  showColumnLayout?: boolean;
 };
 
 /** One labeled StockDataTable section inside a multi-report TableCardShell. */
@@ -77,12 +92,13 @@ export function LabeledStockTable<TData extends RowData = RowData>({
   label,
   table,
   showPagination = false,
+  showColumnLayout = false,
 }: LabeledStockTableProps<TData>) {
   return (
     <div>
       <h5 className="mb-2 text-sm font-semibold text-muted-foreground">{label}</h5>
       <div className="w-full overflow-x-auto">
-        <StockDataTable table={table} />
+        <StockDataTable table={table} showColumnLayout={showColumnLayout} />
       </div>
       {showPagination && (
         <PaginatedTableControls table={table} showManualControls className="mt-4 justify-center" />

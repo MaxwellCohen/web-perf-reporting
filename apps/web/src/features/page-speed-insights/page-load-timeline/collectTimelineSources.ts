@@ -7,7 +7,10 @@ import {
   resolveSimulatedThrottling,
   type TimelineClock,
 } from "./simulatedThrottling";
-import type { CriticalChainNode, ScriptCpu } from "@/features/page-speed-insights/shared/scriptResourceFacts";
+import type {
+  CriticalChainNode,
+  ScriptCpu,
+} from "@/features/page-speed-insights/shared/scriptResourceFacts";
 import type { LcpSegment, Rating, RenderBlockingStatus, ScreenshotFrame } from "./types";
 
 type MetricsItem = Record<string, unknown>;
@@ -265,7 +268,11 @@ function coverageKeys(url: string): string[] {
   return keys;
 }
 
-function rememberCoverage(map: Map<string, CodeCoverage>, url: string, coverage: CodeCoverage): void {
+function rememberCoverage(
+  map: Map<string, CodeCoverage>,
+  url: string,
+  coverage: CodeCoverage,
+): void {
   for (const key of coverageKeys(url)) map.set(key, coverage);
 }
 
@@ -379,11 +386,8 @@ function bootupCpuByUrl(audits: AuditResultsRecord | undefined): Map<string, Scr
     const scriptingMs = getNumber(row.scripting) ?? 0;
     const parseMs = getNumber(row.scriptParseCompile) ?? 0;
     if (totalMs <= 0 && scriptingMs <= 0 && parseMs <= 0) continue;
-    rememberBest(
-      map,
-      url,
-      { totalMs, scriptingMs, parseMs },
-      (current, next) => (next.totalMs > current.totalMs ? next : current),
+    rememberBest(map, url, { totalMs, scriptingMs, parseMs }, (current, next) =>
+      next.totalMs > current.totalMs ? next : current,
     );
   }
   return map;
@@ -554,7 +558,10 @@ function unmatchedObservedTasks(
   return observed.filter((_, index) => !usedObserved.has(index));
 }
 
-function longTasks(audits: AuditResultsRecord | undefined, clock: TimelineClock | null): RawLongTask[] {
+function longTasks(
+  audits: AuditResultsRecord | undefined,
+  clock: TimelineClock | null,
+): RawLongTask[] {
   const attributed = taskRows(audits, "long-tasks", true);
   const observed = taskRows(audits, "main-thread-tasks", false);
   if (!clock) return mergeTasks(attributed, observed);
@@ -735,7 +742,7 @@ function traceTimeToFirstByte(
   return { timeMs: simulated, observed: false };
 }
 
-function urlsMatch(left: string, right: string): boolean {
+export function urlsMatch(left: string, right: string): boolean {
   const keys = new Set(coverageKeys(left));
   return coverageKeys(right).some((key) => keys.has(key));
 }
@@ -951,7 +958,7 @@ export function collectTimelineSources(source: InsightsContextItem): CombinedLoa
     .filter((request) => !hopSet.has(request))
     .map(toCombined)
     .filter((request): request is CombinedRequest => request != null);
-  const combinedDocument = document ? toCombined(document) ?? undefined : undefined;
+  const combinedDocument = document ? (toCombined(document) ?? undefined) : undefined;
 
   let serverStartMs: number | undefined;
   let serverEndMs: number | undefined;

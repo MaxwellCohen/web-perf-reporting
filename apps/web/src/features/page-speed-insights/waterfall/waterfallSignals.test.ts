@@ -34,6 +34,7 @@ describe("filterWaterfallRowsBySignals", () => {
           label: "app.js",
           start: 10,
           end: 40,
+          renderBlocking: "blocking",
           isCriticalChain: true,
           chain: { isLongest: true, endMs: 40 },
           transferSize: 100,
@@ -114,6 +115,7 @@ describe("filterWaterfallRowsBySignals", () => {
 
   it("lists only signals present on the rows, in catalog order", () => {
     expect(availableWaterfallSignals(rows)).toEqual([
+      "render-blocking",
       "chain",
       "longest",
       "queue",
@@ -126,5 +128,35 @@ describe("filterWaterfallRowsBySignals", () => {
       "script-cpu",
     ]);
     expect(availableWaterfallSignals([rows[2]!])).toEqual(["user-timing"]);
+  });
+
+  it("filters by render-blocking and FCP/LCP windows when milestones are known", () => {
+    const context = { fcpMs: 50, lcpMs: 150 };
+    expect(availableWaterfallSignals(rows, context)).toEqual([
+      "render-blocking",
+      "before-fcp",
+      "before-lcp",
+      "fcp-to-lcp",
+      "chain",
+      "longest",
+      "queue",
+      "long-task",
+      "short-task",
+      "user-timing",
+      "preload",
+      "unused",
+      "high-priority",
+      "script-cpu",
+    ]);
+
+    expect(filterWaterfallRowsBySignals(rows, ["render-blocking"], context).map((row) => row.id)).toEqual(
+      ["scripts", "tasks"],
+    );
+    expect(filterWaterfallRowsBySignals(rows, ["before-fcp"], context).map((row) => row.id)).toEqual([
+      "scripts",
+    ]);
+    const fcpToLcp = filterWaterfallRowsBySignals(rows, ["fcp-to-lcp"], context);
+    expect(fcpToLcp.map((row) => row.id)).toEqual(["scripts", "tasks", "mark"]);
+    expect(fcpToLcp[0]?.segments?.map((segment) => segment.id)).toEqual(["vendor"]);
   });
 });

@@ -2,7 +2,9 @@
  * Shareable PSI dashboard state lives in the query string.
  *
  * view=dashboard|classic
- * tab=timeline|loading|network|javascript|recommendations|audits (overview is the default)
+ * tab=timeline|loading|resources|recommendations|audits (overview is the default)
+ * legacy tab=network|javascript open Resources
+ * stage=arrived|scripts|unused|main-thread  suspect= — Resources investigation deep link
  * labels, category, priority, expand, type, groups — repeatable; omitted means "all" or "none"
  * report — timeline and waterfall report label
  * tasks — timeline task filters; omitted means all on; `tasks=` means all off
@@ -17,11 +19,15 @@ export const DASHBOARD_TABS = [
   "overview",
   "timeline",
   "loading",
-  "network",
-  "javascript",
+  "resources",
   "recommendations",
   "audits",
 ] as const;
+
+const LEGACY_RESOURCE_TABS = new Set(["network", "javascript"]);
+
+export const RESOURCE_STAGES = ["arrived", "scripts", "unused", "main-thread"] as const;
+export type ResourceStageId = (typeof RESOURCE_STAGES)[number];
 
 export type DashboardTab = (typeof DASHBOARD_TABS)[number];
 
@@ -53,6 +59,8 @@ export const DASHBOARD_SEARCH_KEYS = [
   "open",
   "groups",
   "tasks",
+  "stage",
+  "suspect",
 ] as const;
 
 const DASHBOARD_SEARCH_EVENT = "dashboard-search";
@@ -80,6 +88,10 @@ export type DashboardSearchState = {
   open: string[] | null;
   groups: string[];
   tasks: string[] | null;
+  /** Resources investigation stage. Empty means the lead's default stage. */
+  stage: ResourceStageId | "";
+  /** Resources investigation URL suspect. */
+  suspect: string;
 };
 
 export type DashboardSearchPatch = {
@@ -104,6 +116,8 @@ export type DashboardSearchPatch = {
   groups?: string[] | null;
   /** null shows every task; [] hides every task filter. */
   tasks?: string[] | null;
+  stage?: ResourceStageId | null;
+  suspect?: string | null;
 };
 
 type SearchRecord = { [key: string]: string | string[] | undefined };
@@ -137,6 +151,18 @@ function readNullableList(params: URLSearchParams, key: string): string[] | null
   return readList(params, key);
 }
 
+function readTab(tab: string | null): DashboardTab {
+  if (tab && LEGACY_RESOURCE_TABS.has(tab)) return "resources";
+  return isDashboardTab(tab) ? tab : "overview";
+}
+
+function readStage(stage: string | null): ResourceStageId | "" {
+  if (stage && (RESOURCE_STAGES as readonly string[]).includes(stage)) {
+    return stage as ResourceStageId;
+  }
+  return "";
+}
+
 export function parseDashboardSearch(search: string): DashboardSearchState {
   const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
   const view = params.get("view");
@@ -147,7 +173,7 @@ export function parseDashboardSearch(search: string): DashboardSearchState {
 
   return {
     view: isDashboardViewMode(view) ? view : null,
-    tab: isDashboardTab(tab) ? tab : "overview",
+    tab: readTab(tab),
     labels: readList(params, "labels"),
     report: params.get("report") ?? "",
     categories: readList(params, "category"),
@@ -164,6 +190,8 @@ export function parseDashboardSearch(search: string): DashboardSearchState {
     open: readNullableList(params, "open"),
     groups: readList(params, "groups"),
     tasks: readNullableList(params, "tasks"),
+    stage: readStage(params.get("stage")),
+    suspect: params.get("suspect") ?? "",
   };
 }
 
@@ -220,6 +248,8 @@ export function applyDashboardSearchPatch(
   if (patch.open !== undefined) writeList(next, "open", patch.open, "blank");
   if (patch.groups !== undefined) writeList(next, "groups", patch.groups, "delete");
   if (patch.tasks !== undefined) writeList(next, "tasks", patch.tasks, "blank");
+  if (patch.stage !== undefined) writeText(next, "stage", patch.stage);
+  if (patch.suspect !== undefined) writeText(next, "suspect", patch.suspect);
 
   return next;
 }

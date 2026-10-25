@@ -5,6 +5,7 @@ import { Table } from "@/components/ui/table";
 import type { RowData } from "@tanstack/react-table";
 import { DataTableHeader } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
 import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/DataTableBody";
+import { ColumnLayoutControls } from "@/features/page-speed-insights/tanstack-table-v9/ColumnLayoutControls";
 import { CopyTableButton } from "@/features/page-speed-insights/tanstack-table-v9/CopyTableButton";
 import type { StockTable } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { cn } from "@/lib/utils";
@@ -18,14 +19,22 @@ type StockDataTableProps<TData extends RowData> = {
   caption?: ReactNode;
   children?: ReactNode;
   "aria-label"?: string;
+  onRowClick?: (row: TData) => void;
+  isRowSelected?: (row: TData) => boolean;
+  /** Show the shared column visibility, order, and clear controls. */
+  showColumnLayout?: boolean;
 };
 
 const columnSizeSelector = (state: {
   columnSizing: unknown;
   columnResizing: unknown;
+  columnVisibility: unknown;
+  columnOrder: unknown;
 }) => ({
   columnSizing: state.columnSizing,
   columnResizing: state.columnResizing,
+  columnVisibility: state.columnVisibility,
+  columnOrder: state.columnOrder,
 });
 
 /**
@@ -42,12 +51,16 @@ export function StockDataTable<TData extends RowData>({
   caption,
   children,
   "aria-label": ariaLabel,
+  onRowClick,
+  isRowSelected,
+  showColumnLayout = false,
 }: StockDataTableProps<TData>) {
   return (
     <div className={cn("w-full min-w-0", wrapperClassName)}>
-      {showCopy && (
-        <div className="mb-2 flex justify-end">
-          <CopyTableButton table={table} />
+      {(showCopy || showColumnLayout) && (
+        <div className="mb-2 flex justify-end gap-2">
+          {showColumnLayout ? <ColumnLayoutControls table={table} /> : null}
+          {showCopy ? <CopyTableButton table={table} /> : null}
         </div>
       )}
       <table.Subscribe selector={columnSizeSelector}>
@@ -63,7 +76,9 @@ export function StockDataTable<TData extends RowData>({
           >
             {caption}
             <DataTableHeader table={table} />
-            {children ?? <DataTableBody table={table} />}
+            {children ?? (
+              <DataTableBody table={table} onRowClick={onRowClick} isRowSelected={isRowSelected} />
+            )}
           </Table>
         )}
       </table.Subscribe>

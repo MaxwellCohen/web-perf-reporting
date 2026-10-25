@@ -107,6 +107,25 @@ vi.mock("@/features/page-speed-insights/network-metrics/LoadTimelineSection", ()
   LoadTimelineSection: () => <div>Load timeline section</div>,
 }));
 
+vi.mock("@/features/page-speed-insights/dashboard-view/OverviewTabPanel", () => ({
+  OverviewTabPanel: () => <div>Overview story</div>,
+}));
+
+vi.mock("@/features/page-speed-insights/dashboard-view/loading-story/LoadingStory", () => ({
+  LoadingStory: () => <div>Loading story</div>,
+}));
+
+vi.mock("@/features/page-speed-insights/dashboard-view/resources-story/ResourcesStory", () => ({
+  ResourcesStory: () => <div>Resources story</div>,
+}));
+
+vi.mock(
+  "@/features/page-speed-insights/dashboard-view/recommendations-story/RecommendationsStory",
+  () => ({
+    RecommendationsStory: () => <div>Recommendations story</div>,
+  }),
+);
+
 vi.mock("@/features/page-speed-insights/network-metrics/NetworkResourcesSection", () => ({
   NetworkResourcesSection: () => <div>Network resources section</div>,
 }));
@@ -166,15 +185,14 @@ describe("pageSpeedInsightsDashboard", () => {
     fireEvent.mouseDown(screen.getByRole("tab", { name }));
   }
 
-  it("defaults to the dashboard view with the overview tab", () => {
+  it("defaults to the dashboard view with the overview tab", async () => {
     render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
 
     expect(screen.getByRole("tab", { name: /dashboard/i })).toHaveAttribute(
       "aria-selected",
       "true",
     );
-    expect(screen.getByText("CWV metrics")).toBeInTheDocument();
-    expect(screen.getByText("Loading experience: Page Loading Experience")).toBeInTheDocument();
+    expect(await screen.findByText("Overview story")).toBeInTheDocument();
     expect(screen.queryByText("Film strip")).not.toBeInTheDocument();
     expect(screen.queryByText("Category row: row-1")).not.toBeInTheDocument();
   });
@@ -186,19 +204,15 @@ describe("pageSpeedInsightsDashboard", () => {
     expect(await screen.findByText("Page load timeline")).toBeInTheDocument();
 
     selectTab("Loading");
-    expect(await screen.findByText("Film strip")).toBeInTheDocument();
-    expect(screen.getByText("Load timeline section")).toBeInTheDocument();
+    expect(await screen.findByText("Loading story")).toBeInTheDocument();
 
-    selectTab("Network");
-    expect(await screen.findByText("Unified waterfall section")).toBeInTheDocument();
-    expect(screen.getByText("Network resources section")).toBeInTheDocument();
-
-    selectTab("JavaScript");
-    expect(await screen.findByText("Script treemap section")).toBeInTheDocument();
-    expect(screen.getByText("JavaScript metrics")).toBeInTheDocument();
+    selectTab("Resources");
+    expect(await screen.findByText("Resources story")).toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: "Network" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: "JavaScript" })).not.toBeInTheDocument();
 
     selectTab("Recommendations");
-    expect(await screen.findByText("Recommendations section")).toBeInTheDocument();
+    expect(await screen.findByText("Recommendations story")).toBeInTheDocument();
 
     selectTab("Audits");
     expect(await screen.findByText("Category row: row-1")).toBeInTheDocument();
@@ -258,12 +272,11 @@ describe("pageSpeedInsightsDashboard", () => {
   it("writes the selected tab into the URL", async () => {
     render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
     selectTab(/dashboard/i);
-    selectTab("Network");
+    selectTab("Resources");
 
-    expect(new URLSearchParams(window.location.search).get("tab")).toBe("network");
+    expect(new URLSearchParams(window.location.search).get("tab")).toBe("resources");
     expect(new URLSearchParams(window.location.search).get("view")).toBe("dashboard");
-    expect(await screen.findByText("Unified waterfall section")).toBeInTheDocument();
-    expect(screen.getByText("Network resources section")).toBeInTheDocument();
+    expect(await screen.findByText("Resources story")).toBeInTheDocument();
   });
 
   it("renders report title and mocked sections in the classic view", async () => {

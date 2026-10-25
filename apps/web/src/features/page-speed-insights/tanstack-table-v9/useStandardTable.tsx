@@ -12,6 +12,7 @@ export type TableConfigOptions<TData extends RowData> = {
   grouping?: string[];
   enablePagination?: boolean;
   defaultPageSize?: number;
+  initialSorting?: { id: string; desc: boolean }[];
   /**
    * When true, injects the expander column (hidden by default via columnVisibility).
    * Defaults to true when grouping is set, otherwise false.
@@ -30,6 +31,7 @@ export function useStandardTable<TData extends RowData>({
   enablePagination = false,
   defaultPageSize = 10,
   enableExpander = grouping.length > 0,
+  initialSorting,
 }: TableConfigOptions<TData>) {
   const tableColumns = enableExpander
     ? [
@@ -72,6 +74,7 @@ export function useStandardTable<TData extends RowData>({
           pageSize: defaultPageSize,
         },
       }),
+      ...(initialSorting?.length ? { sorting: initialSorting } : {}),
     },
   });
 

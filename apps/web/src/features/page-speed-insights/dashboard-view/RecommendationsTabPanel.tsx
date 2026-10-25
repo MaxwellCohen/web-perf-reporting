@@ -1,14 +1,7 @@
 "use client";
 
-import { RecommendationsSection } from "@/features/page-speed-insights/RecommendationsSection/RecommendationsSection";
-import { SectionStack } from "@/features/page-speed-insights/dashboard-view/SectionStack";
-
-const RECOMMENDATIONS_OPEN = ["recommendations"];
+import { RecommendationsStory } from "@/features/page-speed-insights/dashboard-view/recommendations-story/RecommendationsStory";
 
 export function RecommendationsTabPanel() {
-  return (
-    <SectionStack defaultOpen={RECOMMENDATIONS_OPEN}>
-      <RecommendationsSection />
-    </SectionStack>
-  );
+  return <RecommendationsStory />;
 }

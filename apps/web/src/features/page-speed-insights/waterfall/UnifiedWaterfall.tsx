@@ -16,6 +16,8 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -38,11 +40,16 @@ import {
 } from "@/features/page-speed-insights/page-load-timeline/filterTimelineMoments";
 import { filterWaterfallRowsByTasks } from "@/features/page-speed-insights/waterfall/filterWaterfallByTasks";
 import {
+  WATERFALL_DEBUG_PRESETS,
+  WATERFALL_SIGNAL_GROUPS,
+} from "@/features/page-speed-insights/waterfall/waterfallDebugPresets";
+import {
   availableWaterfallSignals,
   filterWaterfallRowsBySignals,
   isWaterfallSignalId,
   normalizeWaterfallSignals,
   WATERFALL_SIGNAL_LABEL,
+  type WaterfallSignalContext,
   type WaterfallSignalId,
 } from "@/features/page-speed-insights/waterfall/waterfallSignals";
 import {
@@ -56,7 +63,6 @@ import {
   type WaterfallSortBy,
 } from "@/features/page-speed-insights/waterfall/waterfallData";
 import { getNetworkBarColor } from "@/features/page-speed-insights/shared/networkResourceColors";
-import { MultiSelectFilterDropdown } from "@/features/page-speed-insights/shared/MultiSelectFilterDropdown";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { cn } from "@/lib/utils";
@@ -176,56 +182,61 @@ function ResourceTypeLegend({
   );
 }
 
-function ResourceTypeFilterDropdown({
-  options,
-  selected,
-  onSelectedChange,
-  className,
-}: {
-  options: string[];
-  selected: string[];
-  onSelectedChange: (next: string[]) => void;
-  className?: string;
-}) {
-  const label =
-    selected.length === 0
-      ? "All resource types"
-      : selected.length === 1
-        ? toTitleCase(selected[0] ?? "")
-        : `${selected.length} types`;
-
-  return (
-    <MultiSelectFilterDropdown
-      trigger={label}
-      options={options}
-      selected={selected}
-      onSelectedChange={onSelectedChange}
-      renderOption={toTitleCase}
-      buttonClassName={cn("h-8", className)}
-      chevronClassName="ml-1.5 h-3.5 w-3.5"
-      ariaLabel="Resource type"
-    />
-  );
+function typeAndSignalFilterLabel(
+  resourceTypes: string[],
+  signals: readonly WaterfallSignalId[],
+): string {
+  const typeActive = resourceTypes.length > 0;
+  const signalActive = signals.length > 0;
+  if (!typeActive && !signalActive) return "All filters";
+  if (typeActive && !signalActive) {
+    return resourceTypes.length === 1
+      ? toTitleCase(resourceTypes[0] ?? "")
+      : `${resourceTypes.length} types`;
+  }
+  if (!typeActive && signalActive) {
+    return signals.length === 1
+      ? WATERFALL_SIGNAL_LABEL[signals[0]!]
+      : `${signals.length} signals`;
+  }
+  const count = resourceTypes.length + signals.length;
+  return count === 2
+    ? `${toTitleCase(resourceTypes[0] ?? "")}, ${WATERFALL_SIGNAL_LABEL[signals[0]!]}`
+    : `${count} filters`;
 }
 
-function SignalFilterDropdown({
-  options,
-  selected,
-  onSelectedChange,
-}: {
-  options: readonly WaterfallSignalId[];
-  selected: readonly WaterfallSignalId[];
-  onSelectedChange: (next: WaterfallSignalId[]) => void;
-}) {
-  const listed = normalizeWaterfallSignals([...options, ...selected]);
-  if (!listed.length) return null;
+function listedSignalsInGroup(
+  groupIds: readonly WaterfallSignalId[],
+  available: ReadonlySet<WaterfallSignalId>,
+  selected: readonly WaterfallSignalId[],
+): WaterfallSignalId[] {
+  return groupIds.filter((id) => available.has(id) || selected.includes(id));
+}
 
-  const label =
-    selected.length === 0
-      ? "Signals"
-      : selected.length === 1
-        ? WATERFALL_SIGNAL_LABEL[selected[0]!]
-        : `${selected.length} signals`;
+function TypeAndSignalFilterDropdown({
+  typeOptions,
+  resourceTypes,
+  onResourceTypesChange,
+  availableSignals,
+  signals,
+  onSignalsChange,
+  onApplyPreset,
+}: {
+  typeOptions: string[];
+  resourceTypes: string[];
+  onResourceTypesChange: (next: string[]) => void;
+  availableSignals: readonly WaterfallSignalId[];
+  signals: readonly WaterfallSignalId[];
+  onSignalsChange: (next: WaterfallSignalId[]) => void;
+  onApplyPreset: (presetSignals: WaterfallSignalId[]) => void;
+}) {
+  const available = useMemo(() => new Set(availableSignals), [availableSignals]);
+  const hasActiveFilter = resourceTypes.length > 0 || signals.length > 0;
+  const label = typeAndSignalFilterLabel(resourceTypes, signals);
+  const signalGroups = WATERFALL_SIGNAL_GROUPS.map((group) => ({
+    ...group,
+    options: listedSignalsInGroup(group.ids, available, signals),
+  })).filter((group) => group.options.length > 0);
 
   return (
     <DropdownMenu>
@@ -235,33 +246,89 @@ function SignalFilterDropdown({
           size="sm"
           className="h-8 w-full lg:w-auto"
           data-testid="waterfall-signal-filter"
-          aria-label="Waterfall signals"
+          aria-label="Filter waterfall by loading metrics, resource types, and signals"
         >
           {label} <ChevronDown className="ml-1.5 h-3.5 w-3.5" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-56">
-        {listed.map((option) => (
-          <DropdownMenuCheckboxItem
-            key={option}
-            checked={selected.includes(option)}
-            onCheckedChange={(checked) => {
-              const next = checked
-                ? normalizeWaterfallSignals([...selected, option])
-                : selected.filter((item) => item !== option);
-              onSelectedChange(next);
-            }}
-          >
-            {WATERFALL_SIGNAL_LABEL[option]}
-          </DropdownMenuCheckboxItem>
-        ))}
-        {selected.length > 0 ? (
-          <div className="mt-1 border-t pt-1">
+      <DropdownMenuContent align="start" className="w-64 p-0">
+        <div className="max-h-72 overflow-y-auto overscroll-y-contain p-1">
+          <DropdownMenuLabel className="text-[10px] uppercase tracking-wide text-muted-foreground">
+            Quick presets
+          </DropdownMenuLabel>
+          {WATERFALL_DEBUG_PRESETS.map((preset) => (
+            <DropdownMenuItem
+              key={preset.id}
+              className="flex flex-col items-start gap-0.5 py-2"
+              onSelect={() => {
+                onResourceTypesChange([]);
+                onApplyPreset(preset.signals);
+              }}
+            >
+              <span className="font-medium">{preset.label}</span>
+              <span className="text-xs text-muted-foreground">{preset.description}</span>
+            </DropdownMenuItem>
+          ))}
+          {signalGroups.length > 0 ? <div className="my-1 border-t" /> : null}
+          {signalGroups.map((group) => (
+            <div key={group.label}>
+              <DropdownMenuLabel className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                {group.label}
+              </DropdownMenuLabel>
+              {group.options.map((option) => (
+                <DropdownMenuCheckboxItem
+                  key={option}
+                  checked={signals.includes(option)}
+                  onCheckedChange={(checked) => {
+                    const next = checked
+                      ? normalizeWaterfallSignals([...signals, option])
+                      : signals.filter((item) => item !== option);
+                    onSignalsChange(next);
+                  }}
+                >
+                  {WATERFALL_SIGNAL_LABEL[option]}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </div>
+          ))}
+          {typeOptions.length > 0 ? (
+            <>
+              <div className="my-1 border-t" />
+              <DropdownMenuLabel className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                Resource types
+              </DropdownMenuLabel>
+              {typeOptions.map((option) => (
+                <DropdownMenuCheckboxItem
+                  key={option}
+                  checked={resourceTypes.length === 0 || resourceTypes.includes(option)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      const next = resourceTypes.includes(option)
+                        ? [...resourceTypes]
+                        : [...resourceTypes, option];
+                      onResourceTypesChange(next.length === typeOptions.length ? [] : next);
+                    } else {
+                      const base = resourceTypes.length === 0 ? typeOptions : resourceTypes;
+                      onResourceTypesChange(base.filter((item) => item !== option));
+                    }
+                  }}
+                >
+                  {toTitleCase(option)}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </>
+          ) : null}
+        </div>
+        {hasActiveFilter ? (
+          <div className="border-t p-1">
             <Button
               variant="ghost"
               size="sm"
               className="w-full justify-start"
-              onClick={() => onSelectedChange([])}
+              onClick={() => {
+                onResourceTypesChange([]);
+                onSignalsChange([]);
+              }}
             >
               Clear
             </Button>
@@ -340,6 +407,14 @@ export function UnifiedWaterfall({
 
   const signals = useMemo(() => normalizeWaterfallSignals(signalParams), [signalParams]);
 
+  const signalContext = useMemo<WaterfallSignalContext>(
+    () => ({
+      ...(load.fcp != null ? { fcpMs: load.fcp } : {}),
+      ...(load.lcp != null ? { lcpMs: load.lcp } : {}),
+    }),
+    [load.fcp, load.lcp],
+  );
+
   const enabledTasks = useMemo<TaskFilterSelection>(
     () => resolveTaskFilterSelection(tasks),
     [tasks],
@@ -359,7 +434,10 @@ export function UnifiedWaterfall({
   );
 
   const resourceTypeOptions = getWaterfallResourceTypes(builtRows);
-  const signalOptions = useMemo(() => availableWaterfallSignals(allRows), [allRows]);
+  const signalOptions = useMemo(
+    () => availableWaterfallSignals(allRows, signalContext),
+    [allRows, signalContext],
+  );
   const guides = useMemo(() => buildGuidesFromEvents(events), [events]);
 
   const rangeActive = rangeStartMs > 0 || rangeEndMs < axisEndMs;
@@ -378,7 +456,10 @@ export function UnifiedWaterfall({
     search,
     blockingOnly: false,
   });
-  const displayRows = sortWaterfallRows(filterWaterfallRowsBySignals(filtered, signals), sortBy);
+  const displayRows = sortWaterfallRows(
+    filterWaterfallRowsBySignals(filtered, signals, signalContext),
+    sortBy,
+  );
 
   const timeRange = {
     minStart: rangeStartMs,
@@ -413,26 +494,19 @@ export function UnifiedWaterfall({
     <>
       {showToolbar ? (
         <div className="flex flex-wrap items-center gap-1.5">
-          <ToolbarField label="Type">
-            <ResourceTypeFilterDropdown
-              options={resourceTypeOptions}
-              selected={resourceTypes}
-              onSelectedChange={(next) =>
+          <ToolbarField label="Filter">
+            <TypeAndSignalFilterDropdown
+              typeOptions={resourceTypeOptions}
+              resourceTypes={resourceTypes}
+              onResourceTypesChange={(next) =>
                 patchDashboardSearch({ types: next.length ? next : null })
               }
-              className="h-8 w-full lg:w-auto"
+              availableSignals={signalOptions}
+              signals={signals}
+              onSignalsChange={setSignals}
+              onApplyPreset={setSignals}
             />
           </ToolbarField>
-
-          {signalOptions.length > 0 || signals.length > 0 ? (
-            <ToolbarField label="Signals">
-              <SignalFilterDropdown
-                options={signalOptions}
-                selected={signals}
-                onSelectedChange={setSignals}
-              />
-            </ToolbarField>
-          ) : null}
 
           <ToolbarField label="Rows">
             <Select

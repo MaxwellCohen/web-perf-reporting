@@ -20,9 +20,16 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
-const columnSizeSelector = (state: { columnSizing: unknown; columnResizing: unknown }) => ({
+const columnSizeSelector = (state: {
+  columnSizing: unknown;
+  columnResizing: unknown;
+  columnVisibility: unknown;
+  columnOrder: unknown;
+}) => ({
   columnSizing: state.columnSizing,
   columnResizing: state.columnResizing,
+  columnVisibility: state.columnVisibility,
+  columnOrder: state.columnOrder,
 });
 
 const DEFAULT_COMPACT_COLUMN_IDS = new Set(["expander"]);
@@ -105,11 +112,7 @@ export function DataTableHead<TData extends RowData>({
   );
 }
 
-function FilterPopover<TData extends RowData>({
-  header,
-}: {
-  header: Header<any, TData, unknown>;
-}) {
+function FilterPopover<TData extends RowData>({ header }: { header: Header<any, TData, unknown> }) {
   if (!header.column.getCanFilter()) {
     return null;
   }
