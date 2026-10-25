@@ -142,13 +142,6 @@ describe("ViewerPage", () => {
     });
   });
 
-  it("renders a PSI share URL tab and bookmarklet", () => {
-    const { getByText } = render(<ViewerPage siteUrl="https://reports.example" />);
-    const link = getByText("PSI viewer bookmarklet");
-    expect(link.getAttribute("href")).toContain("https://reports.example/viewer?psi=");
-    expect(link.getAttribute("href")?.startsWith("javascript:")).toBe(true);
-  });
-
   it("imports a PSI share URL into the dashboard", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       Response.json({

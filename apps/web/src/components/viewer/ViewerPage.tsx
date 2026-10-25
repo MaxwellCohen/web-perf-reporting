@@ -73,11 +73,10 @@ function PsiBookmarkletLink({ href }: { href: string }) {
 export default function ViewerPage({
   initialSearch = "",
   initialPsi = "",
-  siteUrl = "",
+  
 }: {
   initialSearch?: string;
   initialPsi?: string;
-  siteUrl?: string;
 }) {
   const [loading, setLoading] = useState(Boolean(initialPsi));
   const [data, setData] = useState<PageSpeedInsights[]>([]);
@@ -87,9 +86,7 @@ export default function ViewerPage({
   const [psiShareUrl, setPsiShareUrl] = useState(initialPsi);
   const [activeTab, setActiveTab] = useState(initialPsi ? "psi" : "file");
   const [hash, setHash] = useHash();
-  const bookmarkletHref = buildPsiViewerBookmarklet(
-    siteUrl || "https://web-perf-report.vercel.app",
-  );
+  const bookmarkletHref = buildPsiViewerBookmarklet();
 
   // Sync from external system (URL hash) — intentional set-state-in-effect.
   // Decode stays async so gzip (pako) loads only when a hash is present.

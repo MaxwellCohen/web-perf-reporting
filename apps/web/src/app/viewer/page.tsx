@@ -1,7 +1,6 @@
 import { LighthouseViewerAppShell } from "@/components/lh/LighthouseViewerAppShell";
 import { toSearchString } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 import ViewerPage from "@/components/viewer/ViewerPage";
-import { getSiteUrl } from "@/lib/siteUrl";
 
 function firstSearchParam(value: string | string[] | undefined): string {
   if (typeof value === "string") return value;
@@ -21,7 +20,7 @@ export default async function Home({
 
   return (
     <LighthouseViewerAppShell>
-      <ViewerPage initialSearch={initialSearch} initialPsi={initialPsi} siteUrl={getSiteUrl()} />
+      <ViewerPage initialSearch={initialSearch} initialPsi={initialPsi} />
     </LighthouseViewerAppShell>
   );
 }
