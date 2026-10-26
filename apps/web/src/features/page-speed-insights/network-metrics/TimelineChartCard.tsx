@@ -28,6 +28,7 @@ export function TimelineChartCard() {
 
   const chartData = buildTimelineChartRows(series);
   const reportLabels = series.map((m) => m.label);
+  const simulationLabel = series.map((m) => m.simulationLabel).find(Boolean);
 
   if (!series.length || chartData.length === 0) {
     return null;
@@ -57,7 +58,9 @@ export function TimelineChartCard() {
       <CardHeader className="pb-3">
         <CardTitle>Page Load Timeline</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Key navigation and paint timings compared across reports.
+          {simulationLabel
+            ? `Key navigation and paint timings on the lab clock (${simulationLabel}).`
+            : "Key navigation and paint timings compared across reports."}
         </p>
       </CardHeader>
       <CardContent>

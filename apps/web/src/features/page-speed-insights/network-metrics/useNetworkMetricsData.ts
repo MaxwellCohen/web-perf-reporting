@@ -1,6 +1,7 @@
 import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
 import { groupBy, getNumber } from "@/lib/utils";
 import { AuditDetailTable, TableItem } from "@/lib/schema";
+import { collectTimelineSources } from "@/features/page-speed-insights/page-load-timeline/collectTimelineSources";
 
 type MetricsAuditDetails = {
   details?: {
@@ -10,6 +11,8 @@ type MetricsAuditDetails = {
 
 export type NetworkMetricSeries = {
   label: string;
+  /** Present when times were warped onto Lighthouse simulated throttling. */
+  simulationLabel?: string;
   ttfb: number;
   fcp: number;
   lcp: number;
@@ -46,13 +49,20 @@ function metricNumber(value: unknown): number {
   return getNumber(value) ?? 0;
 }
 
+function orMetric(adjusted: number | undefined, fallback: number): number {
+  return adjusted != null && Number.isFinite(adjusted) ? adjusted : fallback;
+}
+
 export function mapItemsToNetworkMetrics(items: InsightsContextItem[]): NetworkMetricSeries[] {
-  return items.map(({ item, label }) => {
+  return items.map((entry) => {
+    const { item, label } = entry;
     const metricsAudit = item?.lighthouseResult?.audits?.metrics as MetricsAuditDetails | undefined;
     const metricsDetails = metricsAudit?.details?.items?.[0];
+    const load = collectTimelineSources(entry);
 
-    return {
+    const series: NetworkMetricSeries = {
       label,
+      simulationLabel: load?.simulationLabel,
       ttfb: metricNumber(metricsDetails?.timeToFirstByte),
       fcp: metricNumber(metricsDetails?.firstContentfulPaint),
       lcp: metricNumber(metricsDetails?.largestContentfulPaint),
@@ -83,6 +93,43 @@ export function mapItemsToNetworkMetrics(items: InsightsContextItem[]): NetworkM
         (item?.lighthouseResult?.audits?.["network-server-latency"]?.details as AuditDetailTable)
           ?.items || [],
     };
+
+    if (!load) return series;
+
+    // Observed paints / load events: absolute ms on the lab clock.
+    const adjusted: NetworkMetricSeries = {
+      ...series,
+      simulationLabel: load.simulationLabel,
+      domContentLoaded: orMetric(load.dcl, series.domContentLoaded),
+      loadTime: orMetric(load.load, series.loadTime),
+      observedFirstPaint: orMetric(load.firstPaint, series.observedFirstPaint),
+      observedFirstVisualChange: orMetric(load.firstVisual, series.observedFirstVisualChange),
+      observedFirstContentfulPaint: orMetric(load.observedFcp, series.observedFirstContentfulPaint),
+      observedLargestContentfulPaint: orMetric(
+        load.observedLcp,
+        series.observedLargestContentfulPaint,
+      ),
+      observedFirstContentfulPaintAllFrames: orMetric(
+        load.observedFcpAllFrames,
+        series.observedFirstContentfulPaintAllFrames,
+      ),
+      observedLargestContentfulPaintAllFrames: orMetric(
+        load.observedLcpAllFrames,
+        series.observedLargestContentfulPaintAllFrames,
+      ),
+      observedLastVisualChange: orMetric(load.lastVisual, series.observedLastVisualChange),
+      observedTraceEnd: orMetric(load.traceEnd, series.observedTraceEnd),
+    };
+
+    // Score metrics already match the lab clock when Lantern simulation is on.
+    if (load.simulationLabel) {
+      adjusted.ttfb = orMetric(load.ttfb, series.ttfb);
+      adjusted.fcp = orMetric(load.fcp, series.fcp);
+      adjusted.lcp = orMetric(load.lcp, series.lcp);
+      adjusted.interactive = orMetric(load.interactive, series.interactive);
+    }
+
+    return adjusted;
   });
 }
 

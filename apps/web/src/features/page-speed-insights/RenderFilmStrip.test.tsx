@@ -99,7 +99,26 @@ vi.mock("@/components/ui/accordion", () => {
 });
 
 vi.mock("@/features/page-speed-insights/Timeline", () => ({
-  Timeline: ({ device }: { device?: string }) => <div data-timeline>{device ?? "Timeline"}</div>,
+  Timeline: ({
+    device,
+    timeline,
+    markers,
+  }: {
+    device?: string;
+    timeline?: { items?: Array<{ timing: number }> };
+    markers?: Array<{ label: string; timeMs: number }>;
+  }) => (
+    <div
+      data-timeline
+      data-device={device}
+      data-timings={timeline?.items?.map((item) => item.timing).join(",") ?? ""}
+      data-markers={
+        markers?.map((marker) => `${marker.label}:${Math.round(marker.timeMs)}`).join(",") ?? ""
+      }
+    >
+      {device ?? "Timeline"}
+    </div>
+  ),
 }));
 
 function TestWrapper({

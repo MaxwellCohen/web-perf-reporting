@@ -38,19 +38,6 @@ const EVENT_MAP_ENTRIES = Object.entries(EVENT_MAP) as Array<
   [EventLabel, keyof NetworkMetricSeries]
 >;
 
-const EVENTS_WITH_TTFB = new Set([
-  "DOM Content Loaded",
-  "Load",
-  "First Paint",
-  "First Visual Change",
-  "FCP (Observed)",
-  "FCP (All Frames)",
-  "LCP (Observed)",
-  "LCP (All Frames)",
-  "Last Visual Change",
-  "Trace End",
-]);
-
 const EVENT_DESCRIPTIONS: Record<string, string> = {
   "Navigation Start":
     "The time when the browser starts navigating to the page. This is the earliest timestamp in the navigation timing API.",
@@ -93,8 +80,6 @@ function buildEventDataMap(
   const eventDataMap = new Map<string, Record<string, number | undefined>>();
 
   for (const metric of metrics) {
-    const ttfb = metric.ttfb ?? 0;
-
     for (const [eventLabel, propKey] of EVENT_MAP_ENTRIES) {
       const rawValue = metric[propKey] as number | undefined;
       if (rawValue === undefined) continue;
@@ -104,15 +89,8 @@ function buildEventDataMap(
       }
       const eventData = eventDataMap.get(eventLabel)!;
 
-      if (eventLabel === "Navigation Start") {
-        eventData[metric.label] = 0;
-      } else if (eventLabel === "TTFB") {
-        eventData[metric.label] = rawValue;
-      } else if (EVENTS_WITH_TTFB.has(eventLabel)) {
-        eventData[metric.label] = rawValue + ttfb;
-      } else {
-        eventData[metric.label] = rawValue;
-      }
+      // Values are already ms from navigation start on the lab clock.
+      eventData[metric.label] = eventLabel === "Navigation Start" ? 0 : rawValue;
     }
   }
 
@@ -153,13 +131,15 @@ function optionalMsCell(value: number | undefined) {
 function TimelineCardTable({
   data,
   columns,
+  title,
 }: {
   data: TimelineRow[];
   columns: StandardColumnDef<TimelineRow>[];
+  title: string;
 }) {
   const table = useStandardTable({ data, columns });
 
-  return <TableCard title="Timeline of Observed Events" table={table} />;
+  return <TableCard title={title} table={table} />;
 }
 
 export function TimelineCard() {
@@ -168,6 +148,10 @@ export function TimelineCard() {
   const reportLabels = series.map((m) => m.label);
   const eventDataMap = buildEventDataMap(series);
   const rows = buildTimelineRows(eventDataMap, reportLabels);
+  const simulationLabel = series.map((m) => m.simulationLabel).find(Boolean);
+  const title = simulationLabel
+    ? `Timeline of Observed Events (${simulationLabel})`
+    : "Timeline of Observed Events";
   const columnHelper = createStockColumnHelper<TimelineRow>();
   const tableColumns: StandardColumnDef<TimelineRow>[] = [
     columnHelper.accessor("event", {
@@ -207,5 +191,5 @@ export function TimelineCard() {
     return null;
   }
 
-  return <TimelineCardTable data={rows} columns={tableColumns} />;
+  return <TimelineCardTable data={rows} columns={tableColumns} title={title} />;
 }

@@ -8,9 +8,13 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
     class="flex flex-col space-y-1.5 p-6"
   >
     <div
-      class="font-semibold leading-none tracking-tight"
+      class="flex flex-wrap items-center justify-between gap-2"
     >
-      Timeline of Observed Events
+      <div
+        class="font-semibold leading-none tracking-tight"
+      >
+        Timeline of Observed Events
+      </div>
     </div>
   </div>
   <div
@@ -23,7 +27,7 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
         class="w-full min-w-0"
       >
         <div
-          class="mb-2 flex justify-end"
+          class="mb-2 flex justify-end gap-2"
         >
           <button
             aria-expanded="false"
@@ -287,9 +291,13 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
     class="flex flex-col space-y-1.5 p-6"
   >
     <div
-      class="font-semibold leading-none tracking-tight"
+      class="flex flex-wrap items-center justify-between gap-2"
     >
-      Timeline of Observed Events
+      <div
+        class="font-semibold leading-none tracking-tight"
+      >
+        Timeline of Observed Events
+      </div>
     </div>
   </div>
   <div
@@ -302,7 +310,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
         class="w-full min-w-0"
       >
         <div
-          class="mb-2 flex justify-end"
+          class="mb-2 flex justify-end gap-2"
         >
           <button
             aria-expanded="false"
@@ -651,9 +659,13 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
     class="flex flex-col space-y-1.5 p-6"
   >
     <div
-      class="font-semibold leading-none tracking-tight"
+      class="flex flex-wrap items-center justify-between gap-2"
     >
-      Timeline of Observed Events
+      <div
+        class="font-semibold leading-none tracking-tight"
+      >
+        Timeline of Observed Events
+      </div>
     </div>
   </div>
   <div
@@ -666,7 +678,7 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
         class="w-full min-w-0"
       >
         <div
-          class="mb-2 flex justify-end"
+          class="mb-2 flex justify-end gap-2"
         >
           <button
             aria-expanded="false"
@@ -908,7 +920,7 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
                   <span
                     data-testid="ms-value"
                   >
-                    300
+                    200
                      ms
                   </span>
                 </td>

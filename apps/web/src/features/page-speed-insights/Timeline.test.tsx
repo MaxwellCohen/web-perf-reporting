@@ -111,4 +111,28 @@ describe("Timeline", () => {
     const html = (container.firstChild as HTMLElement)?.outerHTML ?? "";
     expect(normalizeRadixIds(html)).toMatchSnapshot();
   });
+
+  it("labels frames with key paint timings", () => {
+    const timeline = {
+      type: "filmstrip" as const,
+      items: [
+        { data: "data:image/png;base64,a", timestamp: 0, timing: 300 },
+        { data: "data:image/png;base64,b", timestamp: 100, timing: 1200 },
+        { data: "data:image/png;base64,c", timestamp: 200, timing: 2500 },
+      ],
+      scale: 1,
+    };
+    const { getByText } = render(
+      <Timeline
+        timeline={timeline}
+        markers={[
+          { label: "FCP", timeMs: 1100 },
+          { label: "LCP", timeMs: 2400 },
+        ]}
+      />,
+    );
+    expect(getByText("FCP")).toBeTruthy();
+    expect(getByText("LCP")).toBeTruthy();
+  });
 });
+

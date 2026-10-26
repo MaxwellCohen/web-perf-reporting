@@ -121,6 +121,12 @@ export type CombinedLoad = {
   simulationLabel?: string;
   fcp?: number;
   lcp?: number;
+  /** Observed FCP on the lab clock (mapped when simulated throttling applies). */
+  observedFcp?: number;
+  /** Observed LCP on the lab clock (mapped when simulated throttling applies). */
+  observedLcp?: number;
+  observedFcpAllFrames?: number;
+  observedLcpAllFrames?: number;
   firstPaint?: number;
   firstVisual?: number;
   dcl?: number;
@@ -881,6 +887,10 @@ export function collectTimelineSources(source: InsightsContextItem): CombinedLoa
 
   const fcp = pickSimulated(metrics.firstContentfulPaint, metrics.observedFirstContentfulPaint);
   const lcp = pickSimulated(metrics.largestContentfulPaint, metrics.observedLargestContentfulPaint);
+  const observedFcp = mapMs(getNumber(metrics.observedFirstContentfulPaint));
+  const observedLcp = mapMs(getNumber(metrics.observedLargestContentfulPaint));
+  const observedFcpAllFrames = mapMs(getNumber(metrics.observedFirstContentfulPaintAllFrames));
+  const observedLcpAllFrames = mapMs(getNumber(metrics.observedLargestContentfulPaintAllFrames));
   const firstPaint = mapMs(getNumber(metrics.observedFirstPaint));
   const firstVisual = mapMs(getNumber(metrics.observedFirstVisualChange));
   const dcl = mapMs(getNumber(metrics.observedDomContentLoaded));
@@ -973,6 +983,10 @@ export function collectTimelineSources(source: InsightsContextItem): CombinedLoa
     simulationLabel: clock?.throttling.label,
     fcp,
     lcp,
+    observedFcp,
+    observedLcp,
+    observedFcpAllFrames,
+    observedLcpAllFrames,
     firstPaint,
     firstVisual,
     dcl,

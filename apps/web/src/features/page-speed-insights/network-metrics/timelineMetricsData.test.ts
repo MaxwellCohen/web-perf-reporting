@@ -3,7 +3,7 @@ import { buildTimelineChartRows } from "@/features/page-speed-insights/network-m
 import type { NetworkMetricSeries } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsData";
 
 describe("buildTimelineChartRows", () => {
-  it("builds sorted timeline rows with TTFB offset for load events", () => {
+  it("builds sorted timeline rows with absolute lab-clock times", () => {
     const series = [
       {
         label: "Mobile",
@@ -24,6 +24,6 @@ describe("buildTimelineChartRows", () => {
     const loadRow = rows.find((r) => r.event === "Load");
 
     expect(ttfbRow?.Mobile).toBe(100);
-    expect(loadRow?.Mobile).toBe(800);
+    expect(loadRow?.Mobile).toBe(700);
   });
 });

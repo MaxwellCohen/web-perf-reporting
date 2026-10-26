@@ -17,13 +17,6 @@ const TIMELINE_EVENT_ENTRIES = Object.entries(TIMELINE_EVENT_MAP) as Array<
   [TimelineEventLabel, keyof NetworkMetricSeries]
 >;
 
-const EVENTS_WITH_TTFB = new Set<TimelineEventLabel>([
-  "DOM Content Loaded",
-  "Load",
-  "FCP (Observed)",
-  "LCP (Observed)",
-]);
-
 export type TimelineChartRow = {
   event: string;
   [reportLabel: string]: string | number | undefined;
@@ -41,8 +34,6 @@ export function buildTimelineChartRows(series: readonly NetworkMetricSeries[]): 
   const eventDataMap = new Map<string, Record<string, number | undefined>>();
 
   for (const metric of series) {
-    const ttfb = metric.ttfb ?? 0;
-
     for (const [eventLabel, propKey] of TIMELINE_EVENT_ENTRIES) {
       const rawValue = metric[propKey] as number | undefined;
       if (rawValue === undefined) continue;
@@ -51,14 +42,8 @@ export function buildTimelineChartRows(series: readonly NetworkMetricSeries[]): 
         eventDataMap.set(eventLabel, {});
       }
       const eventData = eventDataMap.get(eventLabel)!;
-
-      if (eventLabel === "TTFB") {
-        eventData[metric.label] = rawValue;
-      } else if (EVENTS_WITH_TTFB.has(eventLabel)) {
-        eventData[metric.label] = rawValue + ttfb;
-      } else {
-        eventData[metric.label] = rawValue;
-      }
+      // Absolute ms from navigation start (lab clock when simulated).
+      eventData[metric.label] = rawValue;
     }
   }
 

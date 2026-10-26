@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 import { AuditDetailFilmstrip } from "@/lib/schema";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,16 +18,33 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { CarouselContent } from "@/components/ui/carousel";
-// import { Details } from '../ui/accordion';
+import {
+  labelsByFrameIndex,
+  type FilmstripMarker,
+} from "@/features/page-speed-insights/shared/filmstripMarkers";
 
 interface TimelineProps {
   timeline?: AuditDetailFilmstrip;
   device?: string;
+  markers?: FilmstripMarker[];
 }
 
-export function Timeline({ timeline, device }: TimelineProps) {
+function FrameLabels({ labels }: { labels: string[] }) {
+  if (!labels.length) return null;
+  return (
+    <div className="mt-0.5 text-center text-[10px] font-medium uppercase tracking-wide text-foreground">
+      {labels.join(" · ")}
+    </div>
+  );
+}
+
+export function Timeline({ timeline, device, markers = [] }: TimelineProps) {
   const [api, setApi] = useState<CarouselApi>();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const frameLabels = useMemo(
+    () => labelsByFrameIndex(timeline?.items ?? [], markers),
+    [timeline?.items, markers],
+  );
 
   useEffect(() => {
     if (api && openIndex !== null) {
@@ -39,10 +56,7 @@ export function Timeline({ timeline, device }: TimelineProps) {
 
   return (
     <div className="px-4">
-      {/* <Details className="mt-3 flex flex-col"> */}
-      {/* <summary className="flex flex-col gap-2 overflow-auto"> */}
       <h3 className="text-lg font-bold">{device ? `${device} - ` : ""} Timeline</h3>
-      {/* </summary> */}
       <Dialog>
         <div className="mt-3 flex flex-row gap-2 align-top overflow-x-auto pb-2">
           {timeline.items.map((item, i) => (
@@ -60,6 +74,7 @@ export function Timeline({ timeline, device }: TimelineProps) {
                     src={item.data}
                   />
                   <div>{item.timing} ms</div>
+                  <FrameLabels labels={frameLabels[i] ?? []} />
                 </button>
               </div>
             </DialogTrigger>
@@ -83,6 +98,7 @@ export function Timeline({ timeline, device }: TimelineProps) {
                         src={item.data}
                       />
                       <div className="text-center text-sm sm:text-base">{item.timing} ms</div>
+                      <FrameLabels labels={frameLabels[i] ?? []} />
                     </div>
                   </CarouselItem>
                 ))}
@@ -98,7 +114,6 @@ export function Timeline({ timeline, device }: TimelineProps) {
           </DialogContent>
         </div>
       </Dialog>
-      {/* </Details> */}
     </div>
   );
 }

@@ -157,9 +157,16 @@ function Filmstrip({
     scroller.scrollTo({ left });
   }, [selectedIndex, momentId]);
 
-  const selectedMoment = device.moments.find((moment) => moment.id === momentId);
-  const badgeIndex = selectedMoment ? frameIndexAt(device.frames, selectedMoment.timeMs) : -1;
-  const badge = badgeIndex >= 0 ? momentMeta(momentId).short : undefined;
+  const frameLabels = useMemo(() => {
+    const labels = device.frames.map(() => [] as string[]);
+    for (const moment of device.moments) {
+      const index = frameIndexAt(device.frames, moment.timeMs);
+      if (index < 0) continue;
+      const short = momentMeta(moment.id).short;
+      if (!labels[index].includes(short)) labels[index].push(short);
+    }
+    return labels;
+  }, [device.frames, device.moments]);
 
   return (
     <div
@@ -169,6 +176,7 @@ function Filmstrip({
     >
       {device.frames.map((frame, index) => {
         const selected = index === selectedIndex;
+        const labels = frameLabels[index] ?? [];
         return (
           <button
             key={`${frame.timing}-${index}`}
@@ -177,7 +185,11 @@ function Filmstrip({
             }}
             type="button"
             aria-pressed={selected}
-            aria-label={`${device.label} at ${formatMs(frame.timing)}`}
+            aria-label={
+              labels.length
+                ? `${device.label} at ${formatMs(frame.timing)} (${labels.join(", ")})`
+                : `${device.label} at ${formatMs(frame.timing)}`
+            }
             onClick={() => onSelect(index)}
             className={cn(
               "w-[4.75rem] shrink-0 overflow-hidden rounded-md border p-1 text-left",
@@ -194,9 +206,9 @@ function Filmstrip({
             <span className="mt-1 block text-center text-[10px] tabular-nums text-muted-foreground">
               {formatMs(frame.timing)}
             </span>
-            {badge && index === badgeIndex ? (
+            {labels.length ? (
               <span className="block truncate text-center text-[10px] font-medium uppercase tracking-wide">
-                {badge}
+                {labels.join(" · ")}
               </span>
             ) : null}
           </button>
