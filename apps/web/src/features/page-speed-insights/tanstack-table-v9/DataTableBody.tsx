@@ -1,6 +1,7 @@
 "use client";
 import { TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { flexRender, type ReactTable, type RowData } from "@tanstack/react-table";
+import { useFullWidthTables } from "@/features/page-speed-insights/tanstack-table-v9/fullWidthTables";
 import { cn } from "@/lib/utils";
 import { tanstackTableCellDataProps } from "@/features/page-speed-insights/shared/tanstackTableCellDataProps";
 
@@ -41,6 +42,8 @@ export function DataTableBody<TData extends RowData>({
   onRowClick?: (row: TData) => void;
   isRowSelected?: (row: TData) => boolean;
 }) {
+  const fillWidth = useFullWidthTables();
+
   return (
     <table.Subscribe selector={rowModelStateSelector}>
       {() => (
@@ -93,7 +96,7 @@ export function DataTableBody<TData extends RowData>({
                         style={{
                           width: `${size}px`,
                           minWidth: `${size}px`,
-                          maxWidth: `${size}px`,
+                          ...(fillWidth ? {} : { maxWidth: `${size}px` }),
                           ...(isExpanderColumn && { boxSizing: "border-box" }),
                         }}
                         {...tanstackTableCellDataProps(cell, row)}

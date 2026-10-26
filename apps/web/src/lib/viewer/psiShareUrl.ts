@@ -14,13 +14,27 @@ export class PsiShareFetchError extends Error {
 
 const SHARE_HOST = "pagespeed.web.dev";
 
-export function parsePsiShareUrl(input: string): URL {
+/** Accept paste of bare host or http; fetch still only hits allowlisted https. */
+function normalizePsiShareInput(input: string): string {
   const trimmed = input.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (trimmed.startsWith("//")) return `https:${trimmed}`;
+  if (/^pagespeed\.web\.dev([/:?]|$)/i.test(trimmed)) return `https://${trimmed}`;
+  return trimmed;
+}
+
+export function parsePsiShareUrl(input: string): URL {
+  const normalized = normalizePsiShareInput(input);
   let url: URL;
   try {
-    url = new URL(trimmed);
+    url = new URL(normalized);
   } catch {
     throw new PsiShareUrlError("Enter a PageSpeed Insights share URL");
+  }
+
+  // Upgrade http → https before host checks so wrong-host http gets a clear error.
+  if (url.protocol === "http:") {
+    url = new URL(url.href.replace(/^http:/i, "https:"));
   }
 
   if (url.protocol !== "https:") {

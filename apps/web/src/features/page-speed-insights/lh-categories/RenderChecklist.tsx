@@ -14,50 +14,63 @@ import { renderBoolean } from "@/features/page-speed-insights/lh-categories/rend
 import { Details } from "@/components/ui/accordion";
 import { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataItem";
 
-export function RenderChecklist({ items, title }: { items: TableDataItem[]; title: string }) {
+export function RenderChecklist({
+  items,
+  title,
+  embedded = false,
+}: {
+  items: TableDataItem[];
+  title: string;
+  embedded?: boolean;
+}) {
   const auditItems = items.map(
     (a) => (a?.auditResult.details as AuditDetailChecklist)?.items || {},
   );
 
   const keys = Object.keys(auditItems.reduce((acc, a) => ({ ...acc, ...a }), {}));
 
+  const table = (
+    <TableWithCopyToolbar>
+      {({ tableRef }) => (
+        <Table ref={tableRef}>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Checklist Item</TableHead>
+              {items.map((a, i) => {
+                const label = a?._userLabel || "";
+                return <TableHead key={`${label}_${i}`}>{label}</TableHead>;
+              })}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {keys.map((key) => {
+              const cells = auditItems.map((a) => a[key]);
+
+              return (
+                <TableRow key={key}>
+                  <TableCell>{cells.find((a) => a?.label)?.label || ""}</TableCell>
+                  {cells.map((a, i) => {
+                    return (
+                      <TableCell key={`${a}_${i}`}>{a ? renderBoolean(a.value) : null}</TableCell>
+                    );
+                  })}
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      )}
+    </TableWithCopyToolbar>
+  );
+
+  if (embedded) return table;
+
   return (
     <Details>
       <summary className="flex flex-col gap-2">
         <h4 className="text-md font-bold">{title} Audit Checklist Items</h4>
       </summary>
-
-      <TableWithCopyToolbar>
-        {({ tableRef }) => (
-          <Table ref={tableRef}>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Checklist Item</TableHead>
-                {items.map((a, i) => {
-                  const label = a?._userLabel || "";
-                  return <TableHead key={`${label}_${i}`}>{label}</TableHead>;
-                })}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {keys.map((key) => {
-                const items = auditItems.map((a) => a[key]);
-
-                return (
-                  <TableRow key={key}>
-                    <TableCell>{items.find((a) => a?.label)?.label || ""}</TableCell>
-                    {items.map((a, i) => {
-                      return (
-                        <TableCell key={`${a}_${i}`}>{a ? renderBoolean(a.value) : null}</TableCell>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        )}
-      </TableWithCopyToolbar>
+      {table}
     </Details>
   );
 }

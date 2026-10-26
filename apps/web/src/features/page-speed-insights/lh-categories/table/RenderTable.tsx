@@ -484,7 +484,15 @@ function DeviceCell(info: StockCellContext<DetailTableDataRow, unknown>) {
  * Main component that routes to the appropriate table implementation
  * based on the data structure and audit configuration
  */
-export function DetailTable({ rows, title }: { rows: DetailTableItem[]; title: string }) {
+export function DetailTable({
+  rows,
+  title,
+  embedded = false,
+}: {
+  rows: DetailTableItem[];
+  title: string;
+  embedded?: boolean;
+}) {
   const hasItems = hasDetailItems(rows);
 
   if (!hasItems) {
@@ -518,7 +526,7 @@ export function DetailTable({ rows, title }: { rows: DetailTableItem[]; title: s
   }
 
   if (auditId && shouldShowSeparateTablesPerReport(auditId)) {
-    return <DetailTableSeparatePerReport rows={rows} title={title} />;
+    return <DetailTableSeparatePerReport rows={rows} title={title} embedded={embedded} />;
   }
 
   const showUserLabel = rows.length > 1;
@@ -527,9 +535,9 @@ export function DetailTable({ rows, title }: { rows: DetailTableItem[]; title: s
   // Route to appropriate table component based on data structure
   if (!showUserLabel) {
     if (!hasSubitems) {
-      return <DetailTableWith1ReportAndNoSubitem rows={rows} title={title} />;
+      return <DetailTableWith1ReportAndNoSubitem rows={rows} title={title} embedded={embedded} />;
     }
-    return <DetailTableWithSubitems rows={rows} title={title} />;
+    return <DetailTableWithSubitems rows={rows} title={title} embedded={embedded} />;
   }
 
   return <DetailTableFull rows={rows} title={title} />;
@@ -554,7 +562,15 @@ const combineItemSubItemValue = (itemVal: unknown, subItemVal: unknown): unknown
   return subItemVal ?? itemVal;
 };
 
-function DetailTableWithSubitems({ rows, title }: { rows: DetailTableItem[]; title: string }) {
+function DetailTableWithSubitems({
+  rows,
+  title,
+  embedded = false,
+}: {
+  rows: DetailTableItem[];
+  title: string;
+  embedded?: boolean;
+}) {
   const data = flattenDetailRows(rows);
 
   // Create columns
@@ -649,16 +665,20 @@ function DetailTableWithSubitems({ rows, title }: { rows: DetailTableItem[]; tit
     enablePagination: false,
   });
 
+  const tableView = (
+    <div className="w-full overflow-x-auto">
+      <StockDataTable table={table} />
+    </div>
+  );
+
+  if (embedded) return tableView;
+
   return (
     <AccordionItem value={title}>
       <AccordionSectionTitleTrigger titleClassName="min-w-0 flex-1 truncate">
         {toTitleCase(title)}
       </AccordionSectionTitleTrigger>
-      <AccordionContent>
-        <div className="w-full overflow-x-auto">
-          <StockDataTable table={table} />
-        </div>
-      </AccordionContent>
+      <AccordionContent>{tableView}</AccordionContent>
     </AccordionItem>
   );
 }

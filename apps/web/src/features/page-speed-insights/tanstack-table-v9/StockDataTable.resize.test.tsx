@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { act, render, renderHook } from "@testing-library/react";
 import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
+import { FullWidthTables } from "@/features/page-speed-insights/tanstack-table-v9/fullWidthTables";
 import {
   useSimpleTable,
   type FlatColumnDef,
@@ -90,6 +91,25 @@ describe("StockDataTable column resize", () => {
     const after = result.current.getTotalSize();
     expect(after).toBeGreaterThan(before);
     expect(table?.style.width).toBe(`${after}px`);
+  });
+
+  it("stretches overview tables to the container and lets columns grow", () => {
+    const { result } = renderHook(() => useSimpleTable({ data, columns }));
+    const { container } = render(
+      <FullWidthTables>
+        <StockDataTable table={result.current} showCopy={false} />
+      </FullWidthTables>,
+    );
+
+    const total = result.current.getTotalSize();
+    const table = container.querySelector("table");
+    expect(table?.style.width).toBe("100%");
+    expect(table?.style.minWidth).toBe(`${total}px`);
+
+    const headers = container.querySelectorAll("th");
+    const nameHeader = Array.from(headers).find((th) => th.textContent?.includes("Name"));
+    expect(nameHeader?.style.maxWidth).toBe("");
+    expect(nameHeader?.style.minWidth).toBe(`${result.current.getColumn("name")!.getSize()}px`);
   });
 
   it("renders a column resize handle on resizable headers", () => {

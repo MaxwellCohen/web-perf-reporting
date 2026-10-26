@@ -13,12 +13,22 @@ export function DataTableNoGrouping<T extends RowData>({
   data,
   columns,
   title,
+  embedded = false,
 }: {
   data: T[];
   columns: FlatColumnDef<T>[];
   title: string;
+  embedded?: boolean;
 }) {
   const table = useSimpleTable({ data, columns });
+
+  if (embedded) {
+    return (
+      <div className="w-full overflow-x-auto">
+        <StockDataTable table={table} />
+      </div>
+    );
+  }
 
   return (
     <AccordionItem value={title}>

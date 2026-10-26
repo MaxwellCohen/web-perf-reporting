@@ -13,7 +13,14 @@ import { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataI
 import { JSUsageAccordion } from "@/features/page-speed-insights/JSUsage/JSUsageSection";
 import { RenderNetworkDependencyTree } from "@/features/page-speed-insights/lh-categories/table/RenderNetworkDependencyTree";
 
-export function RenderDetails({ items }: { items: TableDataItem[] }) {
+export function RenderDetails({
+  items,
+  embedded = false,
+}: {
+  items: TableDataItem[];
+  /** Skip accordion chrome. Used inside a cause row that already has a title. */
+  embedded?: boolean;
+}) {
   const details = items.map((a) => a?.auditResult.details);
   const types = [...new Set(details.map((a) => a?.type).filter(Boolean))];
   const detailType = types[0];
@@ -38,13 +45,13 @@ export function RenderDetails({ items }: { items: TableDataItem[] }) {
         </>
       );
     case "list":
-      return <RenderList rows={items} />;
+      return <RenderList rows={items} embedded={embedded} />;
     case "checklist":
-      return <RenderChecklist items={items} title={title} />;
+      return <RenderChecklist items={items} title={title} embedded={embedded} />;
     case "table":
     case "opportunity":
       // @ts-expect-error need better type narrowing
-      return <DetailTable rows={items} title={title} />;
+      return <DetailTable rows={items} title={title} embedded={embedded} />;
     case "criticalrequestchain":
       return (
         <div>
@@ -75,7 +82,7 @@ export function RenderDetails({ items }: { items: TableDataItem[] }) {
   }
 }
 
-function RenderList({ rows }: { rows: TableDataItem[] }) {
+function RenderList({ rows, embedded }: { rows: TableDataItem[]; embedded: boolean }) {
   // const auditData = rows.map((a) => a?.auditResult);
   if (!rows.every((r) => r?.auditResult?.details?.type === "list")) {
     return null;
@@ -95,7 +102,7 @@ function RenderList({ rows }: { rows: TableDataItem[] }) {
   });
 
   if (hasNetworkTree) {
-    return <RenderNetworkDependencyTree />;
+    return <RenderNetworkDependencyTree embedded={embedded} />;
   }
 
   const groupedItems: TableDataItem[][] = [];
@@ -123,7 +130,7 @@ function RenderList({ rows }: { rows: TableDataItem[] }) {
   return (
     <div>
       {groupedItems.map((item, index: number) => (
-        <RenderDetails key={index} items={item} />
+        <RenderDetails key={index} items={item} embedded={embedded} />
       ))}
     </div>
   );

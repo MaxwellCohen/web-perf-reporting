@@ -8,6 +8,7 @@ import { DataTableBody } from "@/features/page-speed-insights/tanstack-table-v9/
 import { ColumnLayoutControls } from "@/features/page-speed-insights/tanstack-table-v9/ColumnLayoutControls";
 import { CopyTableButton } from "@/features/page-speed-insights/tanstack-table-v9/CopyTableButton";
 import type { StockTable } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import { useFullWidthTables } from "@/features/page-speed-insights/tanstack-table-v9/fullWidthTables";
 import { cn } from "@/lib/utils";
 
 type StockDataTableProps<TData extends RowData> = {
@@ -55,6 +56,8 @@ export function StockDataTable<TData extends RowData>({
   isRowSelected,
   showColumnLayout = false,
 }: StockDataTableProps<TData>) {
+  const fillWidth = useFullWidthTables();
+
   return (
     <div className={cn("w-full min-w-0", wrapperClassName)}>
       {(showCopy || showColumnLayout) && (
@@ -66,10 +69,11 @@ export function StockDataTable<TData extends RowData>({
       <table.Subscribe selector={columnSizeSelector}>
         {() => (
           <Table
-            className={cn("w-max!", className)}
+            className={cn(fillWidth ? "min-w-full" : "w-max!", className)}
             style={{
               ...style,
-              width: table.getTotalSize(),
+              width: fillWidth ? "100%" : table.getTotalSize(),
+              ...(fillWidth ? { minWidth: table.getTotalSize() } : {}),
             }}
             aria-label={ariaLabel}
             wrapperClassName="min-w-0"

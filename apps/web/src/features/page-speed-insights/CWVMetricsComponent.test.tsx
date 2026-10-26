@@ -418,6 +418,61 @@ describe("CWVMetricsComponent", () => {
     ).toBeTruthy();
   });
 
+  it("orders cause cards by estimated savings highest to lowest", async () => {
+    pageSpeedItems = [
+      {
+        label: "Mobile",
+        item: {
+          lighthouseResult: {
+            categoryGroups: { metrics: { title: "Metrics" } },
+            audits: {
+              "first-contentful-paint": metricAudit(
+                "first-contentful-paint",
+                "First Contentful Paint",
+                { displayValue: "1.2 s" },
+              ),
+              "font-display-insight": causeAudit("font-display-insight", "Font display", {
+                FCP: 40,
+              }),
+              "render-blocking-insight": causeAudit(
+                "render-blocking-insight",
+                "Render blocking requests",
+                { FCP: 100 },
+              ),
+              "document-latency-insight": causeAudit(
+                "document-latency-insight",
+                "Document request latency",
+                { FCP: 0 },
+              ),
+            },
+          },
+        },
+      },
+    ];
+
+    const { container } = render(
+      <Accordion type="multiple" defaultValue={["cwv-cause-first-contentful-paint"]}>
+        <CWVMetricsComponent />
+      </Accordion>,
+    );
+
+    await waitFor(() => {
+      expect(
+        container.querySelector('[data-testid="cause-render-blocking-insight"]'),
+      ).not.toBeNull();
+    });
+
+    const section = container.querySelector('[data-value="cwv-cause-first-contentful-paint"]');
+    const causeIds = [...(section?.querySelectorAll('[data-testid^="cause-"]') ?? [])].map(
+      (el) => el.getAttribute("data-testid"),
+    );
+    expect(causeIds).toEqual([
+      "cause-render-blocking-insight",
+      "cause-font-display-insight",
+      "cause-document-latency-insight",
+    ]);
+  });
+
   it("shows the first filmstrip frame after FCP before other FCP cause cards", async () => {
     pageSpeedItems = [
       {
@@ -477,5 +532,89 @@ describe("CWVMetricsComponent", () => {
     expect(
       screenshot!.compareDocumentPosition(cause!) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
+  });
+
+  it("keeps the FCP section when a screenshot exists but there are no cause audits", () => {
+    pageSpeedItems = [
+      {
+        label: "Mobile",
+        item: {
+          lighthouseResult: {
+            categoryGroups: { metrics: { title: "Metrics" } },
+            audits: {
+              "first-contentful-paint": metricAudit(
+                "first-contentful-paint",
+                "First Contentful Paint",
+                { numericValue: 1200, displayValue: "1.2 s" },
+              ),
+              "screenshot-thumbnails": {
+                id: "screenshot-thumbnails",
+                title: "Screenshot Thumbnails",
+                score: 1,
+                scoreDisplayMode: "informative",
+                details: {
+                  type: "filmstrip",
+                  scale: 1,
+                  items: [{ data: "data:image/jpeg;base64,paint", timing: 1400, timestamp: 1400 }],
+                },
+              },
+            },
+          },
+        },
+      },
+    ];
+
+    const { container } = render(
+      <Accordion type="multiple" defaultValue={["cwv-cause-first-contentful-paint"]}>
+        <CWVMetricsComponent />
+      </Accordion>,
+    );
+
+    const section = container.querySelector('[data-value="cwv-cause-first-contentful-paint"]');
+    expect(section?.querySelector('[data-testid="fcp-screenshot"]')).not.toBeNull();
+    expect(section?.querySelector('[data-testid="metric-value-viz"]')?.textContent).toContain("Good");
+    expect(section?.textContent).toContain("1.80 s");
+    expect(section?.textContent).toContain("under good");
+    expect(section?.textContent).not.toContain("Related audits");
+    expect(container.querySelector('[data-value="cwv-cause-total-blocking-time"]')).toBeNull();
+  });
+
+  it("shows the lab scale and largest savings on the summary card", () => {
+    pageSpeedItems = [
+      {
+        label: "Mobile",
+        item: {
+          lighthouseResult: {
+            categoryGroups: { metrics: { title: "Metrics" } },
+            audits: {
+              "first-contentful-paint": metricAudit(
+                "first-contentful-paint",
+                "First Contentful Paint",
+                { numericValue: 1200, displayValue: "1.2 s", description: "FCP measures first paint." },
+              ),
+              "render-blocking-insight": causeAudit(
+                "render-blocking-insight",
+                "Render blocking requests",
+                { FCP: 100 },
+              ),
+            },
+          },
+        },
+      },
+    ];
+
+    const { container } = render(
+      <Accordion type="multiple" defaultValue={["cwv"]}>
+        <CWVMetricsComponent />
+      </Accordion>,
+    );
+
+    const summary = container.querySelector('[data-value="cwv"]');
+    expect(summary?.textContent).toContain("First Contentful Paint");
+    expect(summary?.textContent).toContain("Good");
+    expect(summary?.textContent).toContain("1.80 s");
+    expect(summary?.textContent).toContain("Up to 100 ms in estimated savings");
+    expect(summary?.textContent).toContain("FCP measures first paint.");
+    expect(summary?.textContent).not.toContain("Score: 80 / 100");
   });
 });

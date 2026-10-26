@@ -9,6 +9,12 @@ vi.mock("@/features/page-speed-insights/lh-categories/RenderDetails", () => ({
   ),
 }));
 
+vi.mock("@/features/page-speed-insights/RenderJSONDetails", () => ({
+  RenderJSONDetails: ({ title }: { title: string }) => (
+    <div data-testid="json-details">{title}</div>
+  ),
+}));
+
 vi.mock("@/components/ui/accordion", () => ({
   Accordion: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
 }));
@@ -44,11 +50,18 @@ describe("MetricCauseCard", () => {
 
     const { container } = render(<MetricCauseCard cause={cause} acronym="TBT" />);
 
-    expect(container.textContent).toContain("JavaScript execution time");
-    expect(container.textContent).toContain("Est. savings: 350 ms TBT");
+    const details = container.querySelector("details");
+    expect(details).not.toBeNull();
+    expect(details).not.toHaveAttribute("open");
+    expect(details?.querySelector("summary")?.textContent).toContain("JavaScript execution time");
+    expect(details?.querySelector("summary")?.textContent).toContain("Est. savings: 350 ms TBT");
+    expect(details?.querySelector("summary")?.textContent).not.toContain("Reduce JS execution");
     expect(container.textContent).toContain("Reduce JS execution");
     expect(container.querySelector('[data-testid="render-details"]')?.textContent).toBe(
       "bootup-time",
+    );
+    expect(container.querySelector('[data-testid="json-details"]')?.textContent).toBe(
+      "All Data for bootup-time",
     );
     expect(container.textContent).not.toContain("Possible Metric Savings");
   });
@@ -75,6 +88,73 @@ describe("MetricCauseCard", () => {
 
     const { container } = render(<MetricCauseCard cause={cause} acronym="CLS" />);
     expect(container.textContent).toContain("Est. savings: 0.120 CLS");
+  });
+
+  it("shows a muted savings label when estimated savings are zero", () => {
+    const cause: CauseAuditEntry = {
+      auditId: "font-display-insight",
+      title: "Font display",
+      description: "Consider font-display",
+      maxSavings: 0,
+      entries: [
+        {
+          label: "Mobile",
+          audit: {
+            id: "font-display-insight",
+            title: "Font display",
+            description: "Consider font-display",
+            score: 1,
+            scoreDisplayMode: "informative",
+            details: { type: "table", headings: [], items: [] },
+          },
+        },
+      ],
+    };
+
+    const { container } = render(<MetricCauseCard cause={cause} acronym="FCP" plain />);
+    const details = container.querySelector("details");
+    expect(container.textContent).not.toContain("No estimated savings");
+    expect(details).not.toBeNull();
+    expect(details).not.toHaveAttribute("open");
+    expect(details?.querySelector("summary")?.textContent).not.toContain("Consider font-display");
+    expect(container.textContent).toContain("Consider font-display");
+    expect(container.querySelector('[data-testid="render-details"]')).not.toBeNull();
+  });
+
+  it("scales a savings bar against the largest sibling cause", () => {
+    const cause: CauseAuditEntry = {
+      auditId: "render-blocking-insight",
+      title: "Render blocking requests",
+      description: "Requests are blocking",
+      maxSavings: 100,
+      entries: [
+        {
+          label: "Mobile",
+          audit: {
+            id: "render-blocking-insight",
+            title: "Render blocking requests",
+            description: "Requests are blocking",
+            score: 0.5,
+            scoreDisplayMode: "metricSavings",
+            metricSavings: { FCP: 100 },
+            details: { type: "table", headings: [], items: [] },
+          },
+        },
+      ],
+    };
+
+    const { container } = render(
+      <MetricCauseCard cause={cause} acronym="FCP" peerMaxSavings={200} plain />,
+    );
+
+    expect(container.textContent).toContain("Est. savings: 100 ms FCP");
+    const details = container.querySelector("details");
+    expect(details).not.toBeNull();
+    expect(details).not.toHaveAttribute("open");
+    expect(details?.querySelector("summary")?.textContent).toContain("Est. savings: 100 ms FCP");
+    expect(details?.querySelector("summary")?.textContent).not.toContain("Requests are blocking");
+    const bar = container.querySelector('[aria-hidden="true"] > div');
+    expect(bar).toHaveStyle({ width: "50%" });
   });
 
   it("summarizes main-thread tasks instead of listing every task", () => {

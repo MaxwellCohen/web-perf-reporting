@@ -4,17 +4,22 @@ import { CWVMetricsComponent } from "@/features/page-speed-insights/CWVMetricsCo
 import { PlatformNotesOverview } from "@/features/page-speed-insights/dashboard-view/PlatformNotes";
 import { SectionStack } from "@/features/page-speed-insights/dashboard-view/SectionStack";
 import { LoadingExperiencesSection } from "@/features/page-speed-insights/loading-experience/LoadingExperiencesSection";
+import { RenderFilmStrip } from "@/features/page-speed-insights/RenderFilmStrip";
+import { FullWidthTables } from "@/features/page-speed-insights/tanstack-table-v9/fullWidthTables";
 
-const OVERVIEW_OPEN = ["cwv", "loadingExperience", "originLoadingExperience"];
+const OVERVIEW_OPEN = ["cwv", "loadingExperience", "originLoadingExperience", "Screenshots"];
 
 export function OverviewTabPanel() {
   return (
-    <div className="flex flex-col gap-6">
-      <SectionStack defaultOpen={OVERVIEW_OPEN}>
-        <CWVMetricsComponent />
-        <LoadingExperiencesSection />
-      </SectionStack>
-      <PlatformNotesOverview />
-    </div>
+    <FullWidthTables>
+      <div className="flex flex-col gap-6">
+        <SectionStack defaultOpen={OVERVIEW_OPEN}>
+          <RenderFilmStrip />
+          <CWVMetricsComponent />
+          <LoadingExperiencesSection />
+        </SectionStack>
+        <PlatformNotesOverview />
+      </div>
+    </FullWidthTables>
   );
 }

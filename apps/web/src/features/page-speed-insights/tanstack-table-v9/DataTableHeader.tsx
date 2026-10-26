@@ -18,6 +18,7 @@ import { ColumnResizer } from "@/features/page-speed-insights/tanstack-table-v9/
 import { renderBoolean } from "@/features/page-speed-insights/lh-categories/renderBoolean";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useFullWidthTables } from "@/features/page-speed-insights/tanstack-table-v9/fullWidthTables";
 import { cn } from "@/lib/utils";
 
 const columnSizeSelector = (state: {
@@ -85,8 +86,13 @@ export function DataTableHead<TData extends RowData>({
   style,
   compactColumnIds = DEFAULT_COMPACT_COLUMN_IDS,
 }: DataTableHeadProps<TData>) {
+  const fillWidth = useFullWidthTables();
   const isCompact = compactColumnIds.has(header.column.id);
-  const columnSizeStyle = style ?? defaultHeaderCellStyle(header as Header<any, any, unknown>);
+  const columnSizeStyle =
+    style ??
+    (fillWidth
+      ? { width: `${header.getSize()}px`, minWidth: `${header.getSize()}px` }
+      : defaultHeaderCellStyle(header as Header<any, any, unknown>));
 
   return (
     <TableHead className={cn("relative overflow-hidden", className)} style={columnSizeStyle}>

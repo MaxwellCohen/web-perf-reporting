@@ -17,16 +17,35 @@ describe("parsePsiShareUrl", () => {
   });
 
   it.each([
+    "http://pagespeed.web.dev/analysis/https-example-com/abc?form_factor=mobile",
+    "pagespeed.web.dev/analysis/https-example-com/abc?form_factor=mobile",
+    "//pagespeed.web.dev/analysis/https-example-com/abc?form_factor=mobile",
+  ])("normalizes %s to https", (input) => {
+    const url = parsePsiShareUrl(input);
+    expect(url.protocol).toBe("https:");
+    expect(url.hostname).toBe("pagespeed.web.dev");
+    expect(url.pathname).toBe("/analysis/https-example-com/abc");
+    expect(url.searchParams.get("form_factor")).toBe("mobile");
+  });
+
+  it.each([
     "https://evil.example/analysis/abc",
+    "http://evil.example/analysis/abc",
     "https://pagespeed.web.dev.evil.example/analysis/abc",
-    "http://pagespeed.web.dev/analysis/abc",
     "https://pagespeed.web.dev/report/abc",
     "https://pagespeed.web.dev/analysis/",
     "https://user:pass@pagespeed.web.dev/analysis/abc",
     "https://pagespeed.web.dev:444/analysis/abc",
+    "ftp://pagespeed.web.dev/analysis/abc",
     "not a url",
   ])("rejects %s", (input) => {
     expect(() => parsePsiShareUrl(input)).toThrow(PsiShareUrlError);
+  });
+
+  it("rejects non-share http hosts with the host error, not https", () => {
+    expect(() => parsePsiShareUrl("http://evil.example/analysis/abc")).toThrow(
+      /pagespeed\.web\.dev analysis link/,
+    );
   });
 });
 
@@ -53,6 +72,21 @@ describe("fetchPsiShareHtml", () => {
       "<html>next</html>",
     );
     expect(fetchFn).toHaveBeenCalledTimes(2);
+  });
+
+  it("upgrades http redirect locations on pagespeed.web.dev", async () => {
+    const next = "http://pagespeed.web.dev/analysis/https-example-com/next";
+    const fetchFn = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(null, { status: 302, headers: { location: next } }))
+      .mockResolvedValueOnce(new Response("<html>next</html>", { status: 200 }));
+
+    await expect(fetchPsiShareHtml(parsePsiShareUrl(SHARE), fetchFn)).resolves.toBe(
+      "<html>next</html>",
+    );
+    expect(fetchFn.mock.calls[1]?.[0]).toEqual(
+      new URL("https://pagespeed.web.dev/analysis/https-example-com/next"),
+    );
   });
 
   it("rejects redirects off the allowlist", async () => {

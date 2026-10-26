@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 type TableCardShellProps = {
   title: string;
   className?: string;
+  /** Sits on the title row, e.g. an estimated-savings badge. */
+  headerAside?: React.ReactNode;
   children: React.ReactNode;
 };
 
@@ -15,11 +17,14 @@ type TableCardShellProps = {
  * Card chrome for tables (title + content). Use when the card holds multiple
  * tables or custom content; prefer TableCard for a single StockDataTable.
  */
-export function TableCardShell({ title, className, children }: TableCardShellProps) {
+export function TableCardShell({ title, className, headerAside, children }: TableCardShellProps) {
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <CardTitle>{title}</CardTitle>
+          {headerAside}
+        </div>
       </CardHeader>
       <CardContent>{children}</CardContent>
     </Card>

@@ -56,14 +56,31 @@ function getSortedReports(rowsByReport: Map<string, DetailTableItem[]>): Array<{
 export function DetailTableSeparatePerReport({
   rows,
   title,
+  embedded = false,
 }: {
   rows: DetailTableItem[];
   title: string;
+  embedded?: boolean;
 }) {
   const rowsByReport = groupRowsByReportLabel(rows);
 
   const sortedReports = getSortedReports(rowsByReport);
   const auditId = getAuditId(rows);
+
+  if (embedded) {
+    return (
+      <div className="space-y-4">
+        {sortedReports.map(({ reportLabel, reportRows, data }) => (
+          <div key={reportLabel}>
+            <h5 className="mb-2 text-sm font-medium text-muted-foreground">
+              {formatReportTableTitle(title, reportLabel, data.length)}
+            </h5>
+            <ReportTable reportLabel={reportLabel} data={data} rows={reportRows} auditId={auditId} />
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <Accordion type="single" collapsible className="w-full">
