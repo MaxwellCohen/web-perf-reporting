@@ -14,32 +14,37 @@ const baseRec: Recommendation = {
 };
 
 describe("RecommendationHeader", () => {
-  it("renders title and priority badge", () => {
-    const { container } = render(
-      <RecommendationHeader recommendation={baseRec} priorityColors={{ high: "bg-red-500" }} />,
-    );
+  it("renders title and priority label", () => {
+    const { container } = render(<RecommendationHeader recommendation={baseRec} />);
     expect(container.textContent).toContain("Test Title");
-    expect(container.textContent).toContain("high");
+    expect(container.textContent).toContain("High priority");
   });
 
-  it("renders potential savings when impact has metric and savings", () => {
+  it("renders estimated savings when impact has savings", () => {
     const rec: Recommendation = {
       ...baseRec,
       impact: { metric: "LCP", savings: 500, unit: "ms" },
     };
-    const { container } = render(
-      <RecommendationHeader recommendation={rec} priorityColors={{ high: "bg-red-500" }} />,
-    );
-    expect(container.textContent).toContain("Potential savings");
+    const { container } = render(<RecommendationHeader recommendation={rec} peerMaxSavings={1000} />);
+    expect(container.textContent).toContain("Est. savings");
     expect(container.textContent).toContain("500 ms");
     expect(container.textContent).toContain("LCP");
+    expect(container.querySelector("[aria-hidden]")).toBeTruthy();
   });
 
-  it("does not render savings when impact missing metric or savings", () => {
-    const { container } = render(
-      <RecommendationHeader recommendation={baseRec} priorityColors={{ high: "bg-red-500" }} />,
-    );
-    expect(container.textContent).not.toContain("Potential savings");
+  it("formats byte savings without treating them as milliseconds", () => {
+    const rec: Recommendation = {
+      ...baseRec,
+      impact: { savings: 2048, unit: "bytes" },
+    };
+    const { container } = render(<RecommendationHeader recommendation={rec} />);
+    expect(container.textContent).toContain("2.0 KiB");
+    expect(container.textContent).not.toContain("2048 ms");
+  });
+
+  it("does not render savings when impact missing savings", () => {
+    const { container } = render(<RecommendationHeader recommendation={baseRec} />);
+    expect(container.textContent).not.toContain("Est. savings");
   });
 
   it("renders markdown link in title", () => {
@@ -47,9 +52,7 @@ describe("RecommendationHeader", () => {
       ...baseRec,
       title: "Fix [this issue](https://example.com)",
     };
-    const { container } = render(
-      <RecommendationHeader recommendation={rec} priorityColors={{ high: "bg-red-500" }} />,
-    );
+    const { container } = render(<RecommendationHeader recommendation={rec} />);
     const link = container.querySelector('a[href="https://example.com"]');
     expect(link).toBeTruthy();
     expect(link?.getAttribute("target")).toBe("_blank");

@@ -19,9 +19,12 @@ vi.mock("@/components/ui/accordion", () => ({
 }));
 
 vi.mock("@/features/page-speed-insights/RecommendationsSection/RecommendationHeader", () => ({
-  RecommendationHeader: ({ recommendation }: { recommendation: { title: string } }) => (
-    <span>{recommendation.title}</span>
-  ),
+  RecommendationHeader: ({
+    recommendation,
+  }: {
+    recommendation: { title: string };
+    peerMaxSavings?: number;
+  }) => <span>{recommendation.title}</span>,
 }));
 
 vi.mock("@/features/page-speed-insights/RecommendationsSection/ActionableStepsTable", () => ({
@@ -60,19 +63,13 @@ const mockRec: Parameters<typeof RecommendationItem>[0]["rec"] = {
 
 describe("RecommendationItem", () => {
   it("renders recommendation header", () => {
-    const { container } = render(
-      <RecommendationItem rec={mockRec} items={[]} priorityColors={{ high: "red" }} />,
-    );
+    const { container } = render(<RecommendationItem rec={mockRec} items={[]} plain />);
     expect(container.textContent).toContain("Remove unused CSS");
   });
 
   it("renders description when present", () => {
     const { container } = render(
-      <RecommendationItem
-        rec={{ ...mockRec, description: "Fix this issue" }}
-        items={[]}
-        priorityColors={{}}
-      />,
+      <RecommendationItem rec={{ ...mockRec, description: "Fix this issue" }} items={[]} />,
     );
     expect(container.textContent).toContain("Fix this issue");
   });
@@ -82,7 +79,6 @@ describe("RecommendationItem", () => {
       <RecommendationItem
         rec={{ ...mockRec, items: [{ url: "https://example.com/style.css" } as any] }}
         items={[]}
-        priorityColors={{}}
       />,
     );
     expect(container.querySelector('[data-testid="resources-table"]')).toBeTruthy();

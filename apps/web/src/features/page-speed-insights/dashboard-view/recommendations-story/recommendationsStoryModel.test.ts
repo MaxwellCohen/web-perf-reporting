@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { recommendationsStoryFrom } from "@/features/page-speed-insights/dashboard-view/recommendations-story/recommendationsStoryModel";
+import {
+  peerMaxSavingsFor,
+  recommendationsStoryFrom,
+} from "@/features/page-speed-insights/dashboard-view/recommendations-story/recommendationsStoryModel";
 import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
 
 function recommendation({
@@ -100,5 +103,27 @@ describe("recommendationsStoryFrom", () => {
 
   it("returns null when there are no recommendations", () => {
     expect(recommendationsStoryFrom([])).toBeNull();
+  });
+
+  it("builds a lead magnitude from total time savings when present", () => {
+    const story = recommendationsStoryFrom([
+      recommendation({ id: "a", priority: "high", savings: 1000, unit: "ms" }),
+      recommendation({ id: "b", priority: "medium", savings: 500, unit: "bytes" }),
+    ]);
+
+    expect(story?.lead.magnitude).toBe("1.00 s");
+    expect(story?.lead.sentence).toContain("1 high-priority finding");
+    expect(story?.lead.sentence).toContain("Potential savings of 1.00 s and 500 B");
+  });
+
+  it("compares peer max savings only within the same unit family", () => {
+    const peers = [
+      recommendation({ id: "ms-a", priority: "high", savings: 100, unit: "ms" }),
+      recommendation({ id: "ms-b", priority: "medium", savings: 400, unit: "ms" }),
+      recommendation({ id: "bytes", priority: "low", savings: 9000, unit: "bytes" }),
+    ];
+
+    expect(peerMaxSavingsFor(peers[0], peers)).toBe(400);
+    expect(peerMaxSavingsFor(peers[2], peers)).toBe(9000);
   });
 });

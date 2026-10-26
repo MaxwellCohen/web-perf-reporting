@@ -9,6 +9,7 @@ import {
   analyzeAudits,
   hasDetails,
 } from "@/features/page-speed-insights/RecommendationsSection/analyzeAudits";
+import { peerMaxSavingsFor } from "@/features/page-speed-insights/dashboard-view/recommendations-story/recommendationsStoryModel";
 import { FilterControls } from "@/features/page-speed-insights/RecommendationsSection/FilterControls";
 import { RecommendationItem } from "@/features/page-speed-insights/RecommendationsSection/RecommendationItem";
 import {
@@ -16,12 +17,6 @@ import {
   RecommendationsSummary,
 } from "@/features/page-speed-insights/RecommendationsSection/RecommendationsSummary";
 import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
-
-const priorityColors = {
-  high: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-  medium: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-  low: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-};
 
 function RecommendationGroup({
   title,
@@ -39,20 +34,23 @@ function RecommendationGroup({
   if (!recs.length) return null;
 
   return (
-    <div className="mb-6">
-      <h3 className="text-lg font-semibold mb-4">{title}</h3>
+    <div className="mb-6 space-y-3">
+      <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+        {title}
+      </p>
       <Accordion
         type="multiple"
         value={expandedItems}
         onValueChange={onExpandedChange}
-        className="space-y-2"
+        className="divide-y overflow-hidden rounded-xl border bg-card"
       >
         {recs.map((rec) => (
           <RecommendationItem
             key={rec.id}
             rec={rec}
             items={items}
-            priorityColors={priorityColors}
+            peerMaxSavings={peerMaxSavingsFor(rec, recs)}
+            plain
           />
         ))}
       </Accordion>

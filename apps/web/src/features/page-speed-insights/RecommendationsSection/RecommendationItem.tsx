@@ -12,14 +12,35 @@ import { RecommendationIssuesSection } from "@/features/page-speed-insights/Reco
 import { RecommendationNetworkTree } from "@/features/page-speed-insights/RecommendationsSection/RecommendationNetworkTree";
 import { RecommendationAuditDetails } from "@/features/page-speed-insights/RecommendationsSection/RecommendationAuditDetails";
 import { getRecommendationAuditId } from "@/features/page-speed-insights/RecommendationsSection/recommendationHelpers";
+import { recommendationMarkdownComponents } from "@/features/page-speed-insights/RecommendationsSection/recommendationMarkdownComponents";
+import { cn } from "@/lib/cn";
 
 interface RecommendationItemProps {
   rec: Recommendation;
   items: InsightsContextItem[];
-  priorityColors: Record<string, string>;
+  /** @deprecated Kept for classic callers; priority styling lives in the header. */
+  priorityColors?: Record<string, string>;
+  peerMaxSavings?: number;
+  /** Row inside a divide-y panel, without its own card chrome. */
+  plain?: boolean;
 }
 
-export function RecommendationItem({ rec, items, priorityColors }: RecommendationItemProps) {
+const descriptionMarkdownComponents = recommendationMarkdownComponents();
+
+function SectionLabel({ children }: { children: string }) {
+  return (
+    <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+      {children}
+    </p>
+  );
+}
+
+export function RecommendationItem({
+  rec,
+  items,
+  peerMaxSavings = 0,
+  plain = false,
+}: RecommendationItemProps) {
   const insightsContextItems = usePageSpeedItems();
   const auditId = getRecommendationAuditId(rec.id);
   const auditDataForAllData = items.map(
@@ -28,29 +49,43 @@ export function RecommendationItem({ rec, items, priorityColors }: Recommendatio
   const reportLabels = items.map((item) => item.label);
 
   return (
-    <AccordionItem key={rec.id} value={rec.id} className="rounded-lg border">
-      <AccordionTrigger className="px-4 py-3 hover:no-underline">
-        <RecommendationHeader recommendation={rec} priorityColors={priorityColors} />
+    <AccordionItem
+      key={rec.id}
+      value={rec.id}
+      className={cn(
+        plain ? "border-0 border-x-0 py-0 last:border-b-0" : "rounded-lg border border-x-0",
+      )}
+    >
+      <AccordionTrigger
+        className={cn("hover:no-underline", plain ? "px-4 py-4" : "px-4 py-3")}
+      >
+        <RecommendationHeader recommendation={rec} peerMaxSavings={peerMaxSavings} />
       </AccordionTrigger>
       <AccordionContent className="px-4 pb-4">
-        {rec.description && (
-          <div className="mb-4 text-sm">
-            <ReactMarkdown>{rec.description}</ReactMarkdown>
-          </div>
-        )}
-        <div className="mb-4">
-          <h4 className="font-semibold text-sm mb-2">Actionable Steps:</h4>
-          <ActionableStepsTable rec={rec} items={items} />
+        <div className="space-y-4">
+          {rec.description ? (
+            <div className="text-sm text-muted-foreground">
+              <ReactMarkdown components={descriptionMarkdownComponents}>
+                {rec.description}
+              </ReactMarkdown>
+            </div>
+          ) : null}
+          {rec.actionableSteps.length > 0 ? (
+            <div>
+              <SectionLabel>Actionable steps</SectionLabel>
+              <ActionableStepsTable rec={rec} items={items} />
+            </div>
+          ) : null}
+          <RecommendationIssuesSection recommendation={rec} reportLabels={reportLabels} />
+          {rec.items && rec.items.length > 0 ? (
+            <div>
+              <SectionLabel>Resources to optimize</SectionLabel>
+              <ResourcesTable items={rec.items} />
+            </div>
+          ) : null}
+          <RecommendationNetworkTree recommendation={rec} insightsItems={insightsContextItems} />
+          <RecommendationAuditDetails auditId={auditId} auditData={auditDataForAllData} />
         </div>
-        <RecommendationIssuesSection recommendation={rec} reportLabels={reportLabels} />
-        {rec.items && rec.items.length > 0 && (
-          <div className="mt-4">
-            <h4 className="font-semibold text-sm mb-2">Resources to Optimize:</h4>
-            <ResourcesTable items={rec.items} />
-          </div>
-        )}
-        <RecommendationNetworkTree recommendation={rec} insightsItems={insightsContextItems} />
-        <RecommendationAuditDetails auditId={auditId} auditData={auditDataForAllData} />
       </AccordionContent>
     </AccordionItem>
   );

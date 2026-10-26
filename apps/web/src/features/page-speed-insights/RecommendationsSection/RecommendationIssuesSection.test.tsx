@@ -64,7 +64,7 @@ describe("RecommendationIssuesSection", () => {
       <RecommendationIssuesSection recommendation={rec} reportLabels={["Mobile"]} />,
     );
     expect(container.querySelector('[data-testid="issues-table"]')).toBeTruthy();
-    expect(container.textContent).toContain("Issues Found");
+    expect(container.textContent).toContain("Issues found");
   });
 
   it("renders separate tables per report when itemsByReport", async () => {
