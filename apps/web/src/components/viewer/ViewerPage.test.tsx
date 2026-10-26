@@ -1,4 +1,5 @@
 import { act, fireEvent, render, waitFor } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/features/page-speed-insights/pageSpeedInsightsDashboard", () => ({
@@ -6,12 +7,15 @@ vi.mock("@/features/page-speed-insights/pageSpeedInsightsDashboard", () => ({
     data,
     labels,
     shareUrl,
+    headerStart,
   }: {
     data: unknown[];
     labels: string[];
     shareUrl?: string;
+    headerStart?: ReactNode;
   }) => (
     <div data-testid="dashboard">
+      {headerStart}
       {shareUrl ? <span data-testid="share-url">{shareUrl}</span> : null}
       {data.length} reports, labels: {labels.join(", ")}
     </div>
@@ -156,7 +160,7 @@ describe("ViewerPage", () => {
   });
 
   it("imports a PSI share URL into the dashboard", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    vi.spyOn(globalThis, "fetch").mockImplementation(async () =>
       Response.json({
         data: [{ lighthouseResult: { categories: {} } }],
         labels: ["Mobile"],
@@ -175,8 +179,40 @@ describe("ViewerPage", () => {
     });
   });
 
+  it("imports two PSI share URLs with run labels into the dashboard", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async () =>
+      Response.json({
+        data: [{ lighthouseResult: { categories: {} } }],
+        labels: ["Mobile"],
+      }),
+    );
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const { container, getByText, getByLabelText } = render(<ViewerPage />);
+
+    fireEvent.change(getByLabelText("PageSpeed Insights URL"), {
+      target: { value: "https://pagespeed.web.dev/analysis/https-example-com/a" },
+    });
+    fireEvent.change(getByLabelText("Run label (optional)"), {
+      target: { value: "Before" },
+    });
+    fireEvent.change(getByLabelText("Second PageSpeed Insights URL"), {
+      target: { value: "https://pagespeed.web.dev/analysis/https-example-com/b" },
+    });
+    fireEvent.change(getByLabelText("Compare run label (optional)"), {
+      target: { value: "After" },
+    });
+    fireEvent.click(getByText("Show Report"));
+
+    await waitFor(() => {
+      expect(container.querySelector('[data-testid="dashboard"]')).toBeTruthy();
+      expect(container.textContent).toContain("labels: Before · Mobile, After · Mobile");
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    consoleErrorSpy.mockRestore();
+  });
+
   it("auto-imports a psi query into the dashboard", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    vi.spyOn(globalThis, "fetch").mockImplementation(async () =>
       Response.json({
         data: [{ lighthouseResult: { categories: {} } }],
         labels: ["Desktop"],
@@ -193,7 +229,7 @@ describe("ViewerPage", () => {
   });
 
   it("passes a PSI deep link shareUrl into the dashboard", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    vi.spyOn(globalThis, "fetch").mockImplementation(async () =>
       Response.json({
         data: [{ lighthouseResult: { categories: {} } }],
         labels: ["Mobile"],

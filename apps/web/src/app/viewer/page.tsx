@@ -14,13 +14,22 @@ export default async function Home({
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 } = {}) {
   const params = await searchParams;
-  const { psi, ...dashboardParams } = params;
+  const { psi, psi2, psiLabel, psi2Label, ...dashboardParams } = params;
   const initialSearch = toSearchString(dashboardParams);
   const initialPsi = firstSearchParam(psi);
+  const initialPsi2 = firstSearchParam(psi2);
+  const initialPsiLabel = firstSearchParam(psiLabel);
+  const initialPsi2Label = firstSearchParam(psi2Label);
 
   return (
     <LighthouseViewerAppShell>
-      <ViewerPage initialSearch={initialSearch} initialPsi={initialPsi} />
+      <ViewerPage
+        initialSearch={initialSearch}
+        initialPsi={initialPsi}
+        initialPsi2={initialPsi2}
+        initialPsiLabel={initialPsiLabel}
+        initialPsi2Label={initialPsi2Label}
+      />
     </LighthouseViewerAppShell>
   );
 }

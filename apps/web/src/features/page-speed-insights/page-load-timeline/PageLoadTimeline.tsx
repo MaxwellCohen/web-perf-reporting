@@ -24,6 +24,7 @@ import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedConte
 import { RenderNodeImage } from "@/features/page-speed-insights/lh-categories/table/RenderNode";
 import { patchDashboardSearch } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
+import { CompareRunSwitch } from "@/features/page-speed-insights/shared/CompareRunSwitch";
 import { formatMs, formatNetworkPriority } from "@/features/page-speed-insights/shared/format";
 import {
   chainLabel,
@@ -819,6 +820,11 @@ export function PageLoadTimeline() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <CompareRunSwitch
+              labels={bundles.map((bundle) => bundle.timeline.label)}
+              currentLabel={active.label}
+              onSelectLabel={(label) => patchDashboardSearch({ report: label })}
+            />
             {bundles.length > 1 ? (
               <div className="flex flex-wrap gap-2" role="tablist" aria-label="Report device">
                 {bundles.map((bundle) => {

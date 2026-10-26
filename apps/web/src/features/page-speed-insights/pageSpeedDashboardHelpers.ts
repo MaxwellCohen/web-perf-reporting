@@ -5,6 +5,7 @@ import type {
 } from "@/lib/schema";
 import type { PageSpeedDashboardItem, InsightsContextItem } from "@/lib/page-speed-insights/types";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
+import { compareReportLabels } from "@/features/page-speed-insights/shared/reportLabels";
 import {
   mapItemsToNetworkMetrics,
   mapNetworkMetricsToStats,
@@ -28,7 +29,7 @@ export function getDashboardItems(
   data: NullablePageSpeedInsights[] | undefined,
   labels: string[],
 ): PageSpeedDashboardItem[] {
-  return (
+  const items =
     data
       ?.map((item, index) => {
         const normalizedItem = normalizePageSpeedItem(item);
@@ -42,8 +43,10 @@ export function getDashboardItems(
           label: labels[index] || "",
         };
       })
-      .filter((item): item is PageSpeedDashboardItem => item != null) || []
-  );
+      .filter((item): item is PageSpeedDashboardItem => item != null) || [];
+
+  // Same form factor across compare runs stay adjacent (Mobile|Mobile, Desktop|Desktop).
+  return [...items].sort((a, b) => compareReportLabels(a.label, b.label));
 }
 
 export function getDashboardTitle(items: PageSpeedDashboardItem[]): string {

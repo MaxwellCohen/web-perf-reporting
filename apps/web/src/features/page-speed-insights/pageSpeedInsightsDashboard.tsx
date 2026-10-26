@@ -1,6 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, type ReactNode } from "react";
 import { LayoutDashboard, List } from "lucide-react";
 import {
   PageSpeedInsightsStoreProvider,
@@ -74,7 +74,13 @@ function useSyncUserLabelFilterFromUrl() {
   }, [available, current, urlLabels, store]);
 }
 
-function PageSpeedInsightsDashboardContent({ shareUrl }: { shareUrl?: string }) {
+function PageSpeedInsightsDashboardContent({
+  shareUrl,
+  headerStart,
+}: {
+  shareUrl?: string;
+  headerStart?: ReactNode;
+}) {
   const items = usePageSpeedItems();
   const reportTitle = usePageSpeedReportTitle();
   const [viewMode] = useDashboardViewMode();
@@ -82,7 +88,12 @@ function PageSpeedInsightsDashboardContent({ shareUrl }: { shareUrl?: string }) 
 
   return (
     <>
-      <PageSpeedInsightsCopyButtons items={items} shareUrl={shareUrl} />
+      <div className="flex flex-wrap items-center gap-2 px-3">
+        {headerStart ? <div className="shrink-0">{headerStart}</div> : null}
+        <div className="min-w-0 flex-1">
+          <PageSpeedInsightsCopyButtons items={items} shareUrl={shareUrl} />
+        </div>
+      </div>
       <div className="mb-4 flex flex-col gap-3 px-3">
         <h2 className="min-w-0 text-lg font-bold wrap-break-word sm:text-2xl">{reportTitle}</h2>
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -102,12 +113,14 @@ export function PageSpeedInsightsDashboard({
   labels,
   initialSearch = "",
   shareUrl,
+  headerStart,
 }: {
   data: NullablePageSpeedInsights[];
   labels: string[];
   hideReport?: boolean;
   initialSearch?: string;
   shareUrl?: string;
+  headerStart?: ReactNode;
 }) {
   const dataForStore: NullablePageSpeedInsights[] = Array.isArray(data) ? data : [];
   const store = usePageSpeedInsightsStore({
@@ -119,7 +132,7 @@ export function PageSpeedInsightsDashboard({
   return (
     <DashboardSearchProvider initialSearch={initialSearch}>
       <PageSpeedInsightsStoreProvider store={store}>
-        <PageSpeedInsightsDashboardContent shareUrl={shareUrl} />
+        <PageSpeedInsightsDashboardContent shareUrl={shareUrl} headerStart={headerStart} />
       </PageSpeedInsightsStoreProvider>
     </DashboardSearchProvider>
   );

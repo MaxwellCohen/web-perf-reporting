@@ -20,6 +20,8 @@ export type MetricScore = {
   title: string;
   displayValue: string | null;
   score: number | null;
+  /** Performance category auditRef weight (already a % of the Performance score). */
+  weight: number | null;
 };
 
 export type ReportScoreSummary = {
@@ -57,9 +59,23 @@ export function formatScore(score: number | null): string {
   return score === null ? "–" : String(Math.round(score * 100));
 }
 
+function performanceWeightByAuditId(
+  auditRefs: Array<{ id?: string; weight?: number }> | undefined,
+): Map<string, number> {
+  const weights = new Map<string, number>();
+  if (!auditRefs) return weights;
+  for (const ref of auditRefs) {
+    if (typeof ref.id === "string" && typeof ref.weight === "number" && Number.isFinite(ref.weight)) {
+      weights.set(ref.id, ref.weight);
+    }
+  }
+  return weights;
+}
+
 export function summarizeReport({ item, label }: InsightsContextItem): ReportScoreSummary {
   const categories = item.lighthouseResult?.categories ?? {};
   const audits = item.lighthouseResult?.audits ?? {};
+  const weights = performanceWeightByAuditId(categories.performance?.auditRefs);
 
   const toCategoryScore = (id: string): CategoryScore | null => {
     const category = categories[id];
@@ -84,6 +100,7 @@ export function summarizeReport({ item, label }: InsightsContextItem): ReportSco
           title: audit.title ?? id,
           displayValue: audit.displayValue ?? null,
           score: toScore(audit.score),
+          weight: weights.get(id) ?? null,
         },
       ];
     }),

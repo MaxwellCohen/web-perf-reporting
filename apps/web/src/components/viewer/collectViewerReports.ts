@@ -1,6 +1,15 @@
 import type { LhJsonFileEntry, LhJsonTextEntry } from "@/components/lh/types";
 import { PageSpeedInsights } from "@/lib/schema";
 import { parseViewerJsonString } from "@/components/viewer/parseViewerJson";
+import {
+  prefixPsiReportLabels,
+  resolvePsiRunLabels,
+} from "@/lib/viewer/psiCompareLabels";
+
+export type PsiRunInput = {
+  url: string;
+  label?: string;
+};
 
 async function importPsiShare(
   url: string,
@@ -34,14 +43,46 @@ async function importPsiShare(
   return { data: payload.data, labels: payload.labels };
 }
 
+async function collectPsiRuns(
+  primary: PsiRunInput,
+  compare?: PsiRunInput | null,
+): Promise<{ data: PageSpeedInsights[]; labels: string[] }> {
+  const compareUrl = compare?.url?.trim() ?? "";
+  if (!compareUrl) {
+    return importPsiShare(primary.url);
+  }
+
+  const [runA, runB] = resolvePsiRunLabels(primary.label, compare?.label);
+  const [resultA, resultB] = await Promise.all([
+    importPsiShare(primary.url),
+    importPsiShare(compareUrl),
+  ]);
+
+  return {
+    data: [...resultA.data, ...resultB.data],
+    labels: [
+      ...prefixPsiReportLabels(resultA.labels, runA),
+      ...prefixPsiReportLabels(resultB.labels, runB),
+    ],
+  };
+}
+
+function toPsiRunInput(psiShareUrl: string | PsiRunInput): PsiRunInput {
+  if (typeof psiShareUrl === "string") {
+    return { url: psiShareUrl };
+  }
+  return psiShareUrl;
+}
+
 export async function collectViewerReports(
   activeTab: string,
   jsonInputs: LhJsonTextEntry[],
   jsonFiles: LhJsonFileEntry[],
-  psiShareUrl = "",
+  psiShareUrl: string | PsiRunInput = "",
+  psiCompare?: PsiRunInput | null,
 ): Promise<{ data: PageSpeedInsights[]; labels: string[] }> {
   if (activeTab === "psi") {
-    return importPsiShare(psiShareUrl);
+    return collectPsiRuns(toPsiRunInput(psiShareUrl), psiCompare);
   }
 
   const data: PageSpeedInsights[] = [];

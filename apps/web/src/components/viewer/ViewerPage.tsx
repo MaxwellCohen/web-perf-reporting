@@ -73,13 +73,41 @@ function PsiBookmarkletLink({ href }: { href: string }) {
   );
 }
 
+const PSI_QUERY_KEYS = ["psi", "psi2", "psiLabel", "psi2Label"] as const;
+
+function stripPsiQueryParams() {
+  const url = new URL(window.location.href);
+  let changed = false;
+  for (const key of PSI_QUERY_KEYS) {
+    if (url.searchParams.has(key)) {
+      url.searchParams.delete(key);
+      changed = true;
+    }
+  }
+  if (changed) {
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  }
+}
+
+type ImportedPsiShare = {
+  url: string;
+  label?: string;
+  compareUrl?: string;
+  compareLabel?: string;
+};
+
 export default function ViewerPage({
   initialSearch = "",
   initialPsi = "",
-  
+  initialPsi2 = "",
+  initialPsiLabel = "",
+  initialPsi2Label = "",
 }: {
   initialSearch?: string;
   initialPsi?: string;
+  initialPsi2?: string;
+  initialPsiLabel?: string;
+  initialPsi2Label?: string;
 }) {
   const [loading, setLoading] = useState(Boolean(initialPsi));
   const [data, setData] = useState<PageSpeedInsights[]>([]);
@@ -87,7 +115,10 @@ export default function ViewerPage({
   const [jsonInputs, setJsonInputs] = useState<LhJsonTextEntry[]>([{ name: "", content: "" }]);
   const [jsonFiles, setJsonFiles] = useState<LhJsonFileEntry[]>([]);
   const [psiShareUrl, setPsiShareUrl] = useState(initialPsi);
-  const [importedPsiUrl, setImportedPsiUrl] = useState("");
+  const [psiRunLabel, setPsiRunLabel] = useState(initialPsiLabel);
+  const [psiCompareUrl, setPsiCompareUrl] = useState(initialPsi2);
+  const [psiCompareLabel, setPsiCompareLabel] = useState(initialPsi2Label);
+  const [importedPsi, setImportedPsi] = useState<ImportedPsiShare | null>(null);
   const [activeTab, setActiveTab] = useState("psi");
   const [hash, setHash] = useHash();
   const bookmarkletHref = buildPsiViewerBookmarklet();
@@ -117,9 +148,23 @@ export default function ViewerPage({
     void (async () => {
       setLoading(true);
       try {
-        const result = await collectViewerReports("psi", [], [], initialPsi);
+        const compare = initialPsi2.trim()
+          ? { url: initialPsi2, label: initialPsi2Label }
+          : null;
+        const result = await collectViewerReports(
+          "psi",
+          [],
+          [],
+          { url: initialPsi, label: initialPsiLabel },
+          compare,
+        );
         if (cancelled) return;
-        setImportedPsiUrl(initialPsi);
+        setImportedPsi({
+          url: initialPsi,
+          label: initialPsiLabel.trim() || undefined,
+          compareUrl: initialPsi2.trim() || undefined,
+          compareLabel: initialPsi2Label.trim() || undefined,
+        });
         setHash(await encodeViewerHash(result));
       } catch (e) {
         if (cancelled) return;
@@ -128,24 +173,38 @@ export default function ViewerPage({
       } finally {
         if (!cancelled) {
           setLoading(false);
-          const url = new URL(window.location.href);
-          if (url.searchParams.has("psi")) {
-            url.searchParams.delete("psi");
-            window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
-          }
+          stripPsiQueryParams();
         }
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [initialPsi, setHash]);
+  }, [initialPsi, initialPsi2, initialPsiLabel, initialPsi2Label, setHash]);
 
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const result = await collectViewerReports(activeTab, jsonInputs, jsonFiles, psiShareUrl);
-      setImportedPsiUrl(activeTab === "psi" ? psiShareUrl.trim() : "");
+      const compare = psiCompareUrl.trim()
+        ? { url: psiCompareUrl, label: psiCompareLabel }
+        : null;
+      const result = await collectViewerReports(
+        activeTab,
+        jsonInputs,
+        jsonFiles,
+        activeTab === "psi" ? { url: psiShareUrl, label: psiRunLabel } : psiShareUrl,
+        activeTab === "psi" ? compare : null,
+      );
+      setImportedPsi(
+        activeTab === "psi"
+          ? {
+              url: psiShareUrl.trim(),
+              label: psiRunLabel.trim() || undefined,
+              compareUrl: psiCompareUrl.trim() || undefined,
+              compareLabel: psiCompareLabel.trim() || undefined,
+            }
+          : null,
+      );
       setHash(await encodeViewerHash(result));
     } catch (e) {
       console.error("JSON parsing error:", e);
@@ -156,30 +215,33 @@ export default function ViewerPage({
   };
 
   if (Array.isArray(data) && data.length) {
-    const shareUrl = importedPsiUrl
-      ? buildPsiViewerDeepLink(importedPsiUrl, window.location.origin)
-      : undefined;
+    const shareUrl =
+      importedPsi?.url
+        ? buildPsiViewerDeepLink(importedPsi.url, window.location.origin, {
+            label: importedPsi.label,
+            compareUrl: importedPsi.compareUrl,
+            compareLabel: importedPsi.compareLabel,
+          })
+        : undefined;
     return (
-      <div className="flex flex-col">
-        <div className="mb-4">
+      <PageSpeedInsightsDashboard
+        data={data}
+        labels={labels}
+        hideReport
+        initialSearch={initialSearch}
+        shareUrl={shareUrl}
+        headerStart={
           <Button
             variant="link"
             onClick={() => {
               setHash("");
             }}
-            className="text-sm text-muted-foreground hover:text-primary"
+            className="shrink-0 px-0 text-sm text-muted-foreground hover:text-primary"
           >
             ← Back to input
           </Button>
-        </div>
-        <PageSpeedInsightsDashboard
-          data={data}
-          labels={labels}
-          hideReport
-          initialSearch={initialSearch}
-          shareUrl={shareUrl}
-        />
-      </div>
+        }
+      />
     );
   }
 
@@ -209,7 +271,16 @@ export default function ViewerPage({
           </TabsList>
           <LhFileInput jsonFiles={jsonFiles} setJsonFiles={setJsonFiles} />
           <LhTextInput jsonInputs={jsonInputs} setJsonInputs={setJsonInputs} />
-          <PsiShareUrlInput psiShareUrl={psiShareUrl} setPsiShareUrl={setPsiShareUrl} />
+          <PsiShareUrlInput
+            psiShareUrl={psiShareUrl}
+            setPsiShareUrl={setPsiShareUrl}
+            psiRunLabel={psiRunLabel}
+            setPsiRunLabel={setPsiRunLabel}
+            psiCompareUrl={psiCompareUrl}
+            setPsiCompareUrl={setPsiCompareUrl}
+            psiCompareLabel={psiCompareLabel}
+            setPsiCompareLabel={setPsiCompareLabel}
+          />
         </Tabs>
       </CardContent>
       <CardFooter className="flex flex-col items-stretch gap-3">

@@ -28,6 +28,11 @@ describe("normalizeReportLabel", () => {
   it("returns trimmed label for other groups", () => {
     expect(normalizeReportLabel("  Custom Label  ")).toBe("Custom Label");
   });
+
+  it("normalizes form factor from compare-run prefixes", () => {
+    expect(normalizeReportLabel("A · Mobile")).toBe("Mobile");
+    expect(normalizeReportLabel("Before · Desktop")).toBe("Desktop");
+  });
 });
 
 describe("compareReportLabels", () => {

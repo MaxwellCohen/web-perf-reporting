@@ -20,6 +20,7 @@ import {
 import { TransferWeightMap } from "@/features/page-speed-insights/dashboard-view/resources-story/TransferWeightMap";
 import { ResourcesTable } from "@/features/page-speed-insights/dashboard-view/resources-story/ResourcesTable";
 import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
+import { CompareRunSwitch } from "@/features/page-speed-insights/shared/CompareRunSwitch";
 import { BootupTimeChartCard } from "@/features/page-speed-insights/javascript-metrics/BootupTimeChartCard";
 import { MainThreadWorkChartCard } from "@/features/page-speed-insights/javascript-metrics/MainThreadWorkChartCard";
 import {
@@ -159,27 +160,36 @@ export function ResourcesInvestigationBrief({
       className="overflow-hidden rounded-xl border bg-card"
     >
       <div className="space-y-6 p-4 sm:p-6">
-        {reports.length > 1 ? (
-          <div role="group" aria-label="Report" className="flex flex-wrap gap-2">
-            {reports.map((report) => {
-              const selected = report.label === active.label;
-              return (
-                <button
-                  key={report.key}
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={() => onSelectReport(report.label)}
-                  className={cn(
-                    "rounded-md border px-2.5 py-1 text-sm",
-                    selected ? "border-foreground/40 bg-muted" : "border-border hover:bg-muted/50",
-                  )}
-                >
-                  {report.label}
-                </button>
-              );
-            })}
-          </div>
-        ) : null}
+        <div className="flex flex-col gap-2">
+          <CompareRunSwitch
+            labels={reports.map((report) => report.label)}
+            currentLabel={active.label}
+            onSelectLabel={onSelectReport}
+          />
+          {reports.length > 1 ? (
+            <div role="group" aria-label="Report" className="flex flex-wrap gap-2">
+              {reports.map((report) => {
+                const selected = report.label === active.label;
+                return (
+                  <button
+                    key={report.key}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => onSelectReport(report.label)}
+                    className={cn(
+                      "rounded-md border px-2.5 py-1 text-sm",
+                      selected
+                        ? "border-foreground/40 bg-muted"
+                        : "border-border hover:bg-muted/50",
+                    )}
+                  >
+                    {report.label}
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
+        </div>
         <header className="max-w-3xl animate-in fade-in slide-in-from-bottom-1 duration-500">
           <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
             Where to look

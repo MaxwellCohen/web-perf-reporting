@@ -14,6 +14,7 @@ import {
   useRequiredPageSpeedInsightsStore,
 } from "@/features/page-speed-insights/PageSpeedContext";
 import { patchDashboardSearch } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
+import { compareReportLabels } from "@/features/page-speed-insights/shared/reportLabels";
 import { ChevronDown } from "lucide-react";
 
 export function UserLabelFilter() {
@@ -26,7 +27,7 @@ export function UserLabelFilter() {
   }
 
   const activeFilter = userLabelFilter ?? labels;
-  const sortedLabels = [...labels].sort();
+  const sortedLabels = [...labels].sort(compareReportLabels);
 
   return (
     <DropdownMenu>

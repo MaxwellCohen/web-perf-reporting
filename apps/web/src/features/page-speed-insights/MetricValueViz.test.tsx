@@ -205,9 +205,9 @@ describe("MetricValueViz", () => {
         sources={[]}
       />,
     );
-    expect(summary.container.querySelector('[data-testid="metric-value-viz"]')?.className).toContain(
-      "flex-col",
-    );
+    expect(
+      summary.container.querySelector('[data-testid="metric-value-viz"] > div')?.className,
+    ).toContain("flex-col");
     summary.unmount();
 
     const detail = render(
@@ -218,9 +218,43 @@ describe("MetricValueViz", () => {
         sources={[]}
       />,
     );
-    expect(detail.container.querySelector('[data-testid="metric-value-viz"]')?.className).toContain(
-      "grid-cols-2",
+    expect(
+      detail.container.querySelector('[data-testid="metric-value-viz"] > div')?.className,
+    ).toContain("grid-cols-2");
+  });
+
+  it("shows a run-to-run delta when compare labels are paired", () => {
+    const { container } = render(
+      <MetricValueViz
+        detail={false}
+        auditId="first-contentful-paint"
+        auditItems={[
+          {
+            label: "A · Mobile",
+            audit: audit({
+              id: "first-contentful-paint",
+              title: "First Contentful Paint",
+              numericValue: 2000,
+              displayValue: "2.0 s",
+            }),
+          },
+          {
+            label: "B · Mobile",
+            audit: audit({
+              id: "first-contentful-paint",
+              title: "First Contentful Paint",
+              numericValue: 1500,
+              displayValue: "1.5 s",
+            }),
+          },
+        ]}
+        causes={[]}
+        sources={[]}
+      />,
     );
+
+    expect(container.querySelector('[data-testid="metric-compare-delta"]')).toBeTruthy();
+    expect(container.textContent).toContain("Δ -500 ms (A → B)");
   });
 
   it("keeps summary cards to the scale and the largest savings", () => {

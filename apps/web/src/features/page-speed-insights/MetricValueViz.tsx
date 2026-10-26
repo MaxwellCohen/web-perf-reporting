@@ -8,6 +8,10 @@ import {
   type MetricAuditId,
   type MetricAuditSource,
 } from "@/features/page-speed-insights/metricCauseAudits";
+import {
+  getCompareRuns,
+  pairByFormFactor,
+} from "@/features/page-speed-insights/shared/compareRuns";
 import type { AuditResult } from "@/lib/schema";
 
 /** Lighthouse lab thresholds: good ≤ good, poor > poor. */
@@ -314,6 +318,63 @@ function SavingsBars({
   );
 }
 
+function formatMetricDelta(
+  from: number,
+  to: number,
+  unit: "ms" | "cls",
+  runFrom: string,
+  runTo: string,
+): string {
+  const delta = to - from;
+  if (unit === "cls") {
+    const signed = delta > 0 ? `+${delta.toFixed(2)}` : delta.toFixed(2);
+    return `Δ ${signed} (${runFrom} → ${runTo})`;
+  }
+  const rounded = Math.round(delta);
+  const signed = rounded > 0 ? `+${rounded} ms` : `${rounded} ms`;
+  return `Δ ${signed} (${runFrom} → ${runTo})`;
+}
+
+function CompareMetricDeltas({
+  auditId,
+  rows,
+  runs,
+}: {
+  auditId: MetricAuditId;
+  rows: Array<{ audit: AuditResult; label: string }>;
+  runs: [string, string];
+}) {
+  const band = LAB_BANDS[auditId];
+  const pairs = pairByFormFactor(rows, runs);
+  const deltas = pairs.flatMap((pair) => {
+    const from = pair.a?.audit.numericValue;
+    const to = pair.b?.audit.numericValue;
+    if (from == null || to == null || !Number.isFinite(from) || !Number.isFinite(to)) {
+      return [];
+    }
+    return [
+      {
+        key: pair.formFactor,
+        formFactor: pair.formFactor,
+        text: formatMetricDelta(from, to, band.unit, runs[0], runs[1]),
+      },
+    ];
+  });
+
+  if (!deltas.length) return null;
+
+  return (
+    <ul className="space-y-0.5" data-testid="metric-compare-delta">
+      {deltas.map((delta) => (
+        <li key={delta.key} className="text-xs tabular-nums text-muted-foreground">
+          {pairs.length > 1 ? `${delta.formFactor}: ` : null}
+          {delta.text}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function MetricValueViz({
   auditId,
   auditItems,
@@ -335,28 +396,40 @@ export function MetricValueViz({
   );
   if (!rows.length) return null;
 
+  const compare = getCompareRuns(rows);
   const layoutClass =
     detail && rows.length > 1 ? "grid grid-cols-2 gap-3" : "flex flex-col gap-3";
 
   return (
-    <div className={layoutClass} data-testid="metric-value-viz">
-      {rows.map(({ audit, label }) => {
-        const source = sources.find((item) => item.label === label);
-        const savings = savingsForLabel(causes, acronym, label);
-        const savingsNote = detail ? undefined : Math.max(0, ...savings.map((slice) => slice.savings));
-        return (
-          <MetricScale
-            key={label}
-            audit={audit}
-            label={label}
-            showLabel={rows.length > 1}
-            auditId={auditId}
-            phases={detail && auditId === "largest-contentful-paint" ? lcpPhases(source?.audits) : []}
-            savings={detail ? savings : []}
-            savingsNote={savingsNote}
-          />
-        );
-      })}
+    <div className="space-y-2" data-testid="metric-value-viz">
+      <div className={layoutClass}>
+        {rows.map(({ audit, label }) => {
+          const source = sources.find((item) => item.label === label);
+          const savings = savingsForLabel(causes, acronym, label);
+          const savingsNote = detail
+            ? undefined
+            : Math.max(0, ...savings.map((slice) => slice.savings));
+          return (
+            <MetricScale
+              key={label}
+              audit={audit}
+              label={label}
+              showLabel={rows.length > 1}
+              auditId={auditId}
+              phases={
+                detail && auditId === "largest-contentful-paint"
+                  ? lcpPhases(source?.audits)
+                  : []
+              }
+              savings={detail ? savings : []}
+              savingsNote={savingsNote}
+            />
+          );
+        })}
+      </div>
+      {compare.mode === "compare" ? (
+        <CompareMetricDeltas auditId={auditId} rows={rows} runs={compare.runs} />
+      ) : null}
     </div>
   );
 }

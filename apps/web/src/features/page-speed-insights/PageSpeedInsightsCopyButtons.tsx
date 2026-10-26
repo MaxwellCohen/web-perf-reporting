@@ -12,7 +12,7 @@ export function PageSpeedInsightsCopyButtons({
   shareUrl,
 }: PageSpeedInsightsCopyButtonsProps) {
   return (
-    <div className="flex flex-wrap justify-end gap-2 px-3 sm:gap-4">
+    <div className="flex flex-wrap justify-end gap-2 sm:gap-4">
       {shareUrl ? (
         <CopyButton size="lg" className="min-w-0 max-w-full gap-2" text={shareUrl}>
           Share
