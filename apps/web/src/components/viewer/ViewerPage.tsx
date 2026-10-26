@@ -19,7 +19,10 @@ import { LhTextInput } from "@/components/lh/inputs/LhTextInput";
 import { PsiShareUrlInput } from "@/components/viewer/PsiShareUrlInput";
 import { collectViewerReports } from "@/components/viewer/collectViewerReports";
 import { decodeViewerHash, encodeViewerHash } from "@/components/viewer/viewerHash";
-import { buildPsiViewerBookmarklet } from "@/lib/viewer/psiBookmarklet";
+import {
+  buildPsiViewerBookmarklet,
+  buildPsiViewerDeepLink,
+} from "@/lib/viewer/psiBookmarklet";
 
 // Dashboard pulls recharts + react-markdown + tanstack tables (~730kB
 // client per audit). Viewer input form needs none of it; load the dashboard
@@ -84,7 +87,8 @@ export default function ViewerPage({
   const [jsonInputs, setJsonInputs] = useState<LhJsonTextEntry[]>([{ name: "", content: "" }]);
   const [jsonFiles, setJsonFiles] = useState<LhJsonFileEntry[]>([]);
   const [psiShareUrl, setPsiShareUrl] = useState(initialPsi);
-  const [activeTab, setActiveTab] = useState(initialPsi ? "psi" : "file");
+  const [importedPsiUrl, setImportedPsiUrl] = useState("");
+  const [activeTab, setActiveTab] = useState("psi");
   const [hash, setHash] = useHash();
   const bookmarkletHref = buildPsiViewerBookmarklet();
 
@@ -115,6 +119,7 @@ export default function ViewerPage({
       try {
         const result = await collectViewerReports("psi", [], [], initialPsi);
         if (cancelled) return;
+        setImportedPsiUrl(initialPsi);
         setHash(await encodeViewerHash(result));
       } catch (e) {
         if (cancelled) return;
@@ -140,6 +145,7 @@ export default function ViewerPage({
     setLoading(true);
     try {
       const result = await collectViewerReports(activeTab, jsonInputs, jsonFiles, psiShareUrl);
+      setImportedPsiUrl(activeTab === "psi" ? psiShareUrl.trim() : "");
       setHash(await encodeViewerHash(result));
     } catch (e) {
       console.error("JSON parsing error:", e);
@@ -150,6 +156,9 @@ export default function ViewerPage({
   };
 
   if (Array.isArray(data) && data.length) {
+    const shareUrl = importedPsiUrl
+      ? buildPsiViewerDeepLink(importedPsiUrl, window.location.origin)
+      : undefined;
     return (
       <div className="flex flex-col">
         <div className="mb-4">
@@ -168,6 +177,7 @@ export default function ViewerPage({
           labels={labels}
           hideReport
           initialSearch={initialSearch}
+          shareUrl={shareUrl}
         />
       </div>
     );
@@ -184,6 +194,10 @@ export default function ViewerPage({
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6 grid grid-cols-3">
+            <TabsTrigger value="psi" className="flex items-center gap-2">
+              <Globe size={16} />
+              <span>PSI share URL</span>
+            </TabsTrigger>
             <TabsTrigger value="file" className="flex items-center gap-2">
               <FileJson size={16} />
               <span>Upload JSON files</span>
@@ -191,10 +205,6 @@ export default function ViewerPage({
             <TabsTrigger value="text" className="flex items-center gap-2">
               <Code size={16} />
               <span>Paste JSON</span>
-            </TabsTrigger>
-            <TabsTrigger value="psi" className="flex items-center gap-2">
-              <Globe size={16} />
-              <span>PSI share URL</span>
             </TabsTrigger>
           </TabsList>
           <LhFileInput jsonFiles={jsonFiles} setJsonFiles={setJsonFiles} />

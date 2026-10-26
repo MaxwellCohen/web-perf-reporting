@@ -2,8 +2,17 @@ import { act, fireEvent, render, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/features/page-speed-insights/pageSpeedInsightsDashboard", () => ({
-  PageSpeedInsightsDashboard: ({ data, labels }: { data: unknown[]; labels: string[] }) => (
+  PageSpeedInsightsDashboard: ({
+    data,
+    labels,
+    shareUrl,
+  }: {
+    data: unknown[];
+    labels: string[];
+    shareUrl?: string;
+  }) => (
     <div data-testid="dashboard">
+      {shareUrl ? <span data-testid="share-url">{shareUrl}</span> : null}
       {data.length} reports, labels: {labels.join(", ")}
     </div>
   ),
@@ -30,19 +39,21 @@ describe("ViewerPage", () => {
 
   it("renders upload and paste tabs when no data", () => {
     const { container } = render(<ViewerPage />);
+    expect(container.textContent).toContain("PSI share URL");
     expect(container.textContent).toContain("Upload JSON files");
     expect(container.textContent).toContain("Paste JSON");
     expect(container.textContent).toContain("Show Report");
   });
 
   it("shows dashboard when JSON files uploaded", async () => {
-    const { container, getByLabelText } = render(<ViewerPage />);
+    const { container, getByLabelText, getByText } = render(<ViewerPage />);
     const file = new File(
       [JSON.stringify({ lighthouseResult: { categories: {} } })],
       "mobile.json",
       { type: "application/json" },
     );
 
+    fireEvent.mouseDown(getByText("Upload JSON files"));
     fireEvent.change(getByLabelText("Upload JSON Files"), {
       target: { files: [file] },
     });
@@ -62,6 +73,7 @@ describe("ViewerPage", () => {
     const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { getByText } = render(<ViewerPage />);
 
+    fireEvent.mouseDown(getByText("Upload JSON files"));
     fireEvent.click(getByText("Show Report"));
 
     await act(async () => {
@@ -90,13 +102,14 @@ describe("ViewerPage", () => {
   });
 
   it("writes the report into the URL hash so back restores the input form", async () => {
-    const { container, getByLabelText } = render(<ViewerPage />);
+    const { container, getByLabelText, getByText } = render(<ViewerPage />);
     const file = new File(
       [JSON.stringify({ lighthouseResult: { categories: {} } })],
       "mobile.json",
       { type: "application/json" },
     );
 
+    fireEvent.mouseDown(getByText("Upload JSON files"));
     fireEvent.change(getByLabelText("Upload JSON Files"), {
       target: { files: [file] },
     });
@@ -151,7 +164,6 @@ describe("ViewerPage", () => {
     );
     const { container, getByText, getByLabelText } = render(<ViewerPage />);
 
-    fireEvent.mouseDown(getByText("PSI share URL"));
     fireEvent.change(getByLabelText("PageSpeed Insights URL"), {
       target: { value: "https://pagespeed.web.dev/analysis/https-example-com/abc" },
     });
@@ -178,5 +190,47 @@ describe("ViewerPage", () => {
     await waitFor(() => {
       expect(container.textContent).toContain("labels: Desktop");
     });
+  });
+
+  it("passes a PSI deep link shareUrl into the dashboard", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      Response.json({
+        data: [{ lighthouseResult: { categories: {} } }],
+        labels: ["Mobile"],
+      }),
+    );
+    const psi = "https://pagespeed.web.dev/analysis/https-example-com/abc";
+    const { container, getByText, getByLabelText } = render(<ViewerPage />);
+
+    fireEvent.change(getByLabelText("PageSpeed Insights URL"), {
+      target: { value: psi },
+    });
+    fireEvent.click(getByText("Show Report"));
+
+    await waitFor(() => {
+      expect(container.querySelector('[data-testid="share-url"]')?.textContent).toBe(
+        `${window.location.origin}/viewer?psi=${encodeURIComponent(psi)}`,
+      );
+    });
+  });
+
+  it("does not pass shareUrl for JSON file uploads", async () => {
+    const { container, getByLabelText, getByText } = render(<ViewerPage />);
+    const file = new File(
+      [JSON.stringify({ lighthouseResult: { categories: {} } })],
+      "mobile.json",
+      { type: "application/json" },
+    );
+
+    fireEvent.mouseDown(getByText("Upload JSON files"));
+    fireEvent.change(getByLabelText("Upload JSON Files"), {
+      target: { files: [file] },
+    });
+    fireEvent.click(container.querySelector("button.w-full")!);
+
+    await waitFor(() => {
+      expect(container.querySelector('[data-testid="dashboard"]')).toBeTruthy();
+    });
+    expect(container.querySelector('[data-testid="share-url"]')).toBeNull();
   });
 });

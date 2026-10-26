@@ -1,5 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { buildPsiViewerBookmarklet } from "@/lib/viewer/psiBookmarklet";
+import {
+  buildPsiViewerBookmarklet,
+  buildPsiViewerDeepLink,
+} from "@/lib/viewer/psiBookmarklet";
+
+describe("buildPsiViewerDeepLink", () => {
+  it("builds a viewer URL with the PSI share as a query param", () => {
+    expect(
+      buildPsiViewerDeepLink(
+        "https://pagespeed.web.dev/analysis/https-example-com/abc",
+        "https://web-perf-report.vercel.app",
+      ),
+    ).toBe(
+      "https://web-perf-report.vercel.app/viewer?psi=https%3A%2F%2Fpagespeed.web.dev%2Fanalysis%2Fhttps-example-com%2Fabc",
+    );
+  });
+});
 
 describe("buildPsiViewerBookmarklet", () => {
   it("opens the viewer with the current PSI share URL", () => {

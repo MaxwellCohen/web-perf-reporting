@@ -74,7 +74,7 @@ function useSyncUserLabelFilterFromUrl() {
   }, [available, current, urlLabels, store]);
 }
 
-function PageSpeedInsightsDashboardContent() {
+function PageSpeedInsightsDashboardContent({ shareUrl }: { shareUrl?: string }) {
   const items = usePageSpeedItems();
   const reportTitle = usePageSpeedReportTitle();
   const [viewMode] = useDashboardViewMode();
@@ -82,7 +82,7 @@ function PageSpeedInsightsDashboardContent() {
 
   return (
     <>
-      <PageSpeedInsightsCopyButtons items={items} />
+      <PageSpeedInsightsCopyButtons items={items} shareUrl={shareUrl} />
       <div className="mb-4 flex flex-col gap-3 px-3">
         <h2 className="min-w-0 text-lg font-bold wrap-break-word sm:text-2xl">{reportTitle}</h2>
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -101,11 +101,13 @@ export function PageSpeedInsightsDashboard({
   data,
   labels,
   initialSearch = "",
+  shareUrl,
 }: {
   data: NullablePageSpeedInsights[];
   labels: string[];
   hideReport?: boolean;
   initialSearch?: string;
+  shareUrl?: string;
 }) {
   const dataForStore: NullablePageSpeedInsights[] = Array.isArray(data) ? data : [];
   const store = usePageSpeedInsightsStore({
@@ -117,7 +119,7 @@ export function PageSpeedInsightsDashboard({
   return (
     <DashboardSearchProvider initialSearch={initialSearch}>
       <PageSpeedInsightsStoreProvider store={store}>
-        <PageSpeedInsightsDashboardContent />
+        <PageSpeedInsightsDashboardContent shareUrl={shareUrl} />
       </PageSpeedInsightsStoreProvider>
     </DashboardSearchProvider>
   );
