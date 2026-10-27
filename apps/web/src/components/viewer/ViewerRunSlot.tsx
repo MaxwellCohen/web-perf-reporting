@@ -20,20 +20,19 @@ export type ViewerRunState = {
   jsonInputs: LhJsonTextEntry[];
 };
 
-let nextViewerRunId = 0;
-
+/** Stable IDs for SSR; avoid module counters (they diverge across server/client). */
 export function createEmptyViewerRun(
   overrides: Partial<ViewerRunState> = {},
 ): ViewerRunState {
-  nextViewerRunId += 1;
   return {
-    id: `run-${nextViewerRunId}`,
     method: "psi",
     label: "",
     psiUrl: "",
     jsonFiles: [],
     jsonInputs: [{ name: "", content: "" }],
     ...overrides,
+    // Prefer explicit id (SSR-safe). Fallback only for client-only creates.
+    id: overrides.id ?? crypto.randomUUID(),
   };
 }
 

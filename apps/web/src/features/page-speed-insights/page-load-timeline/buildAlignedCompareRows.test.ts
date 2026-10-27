@@ -29,39 +29,48 @@ describe("alignTimeBucketMs", () => {
 });
 
 describe("buildAlignedCompareRows", () => {
-  it("puts equal timestamps on the same row", () => {
+  it("puts the same step from both runs on one row despite different times", () => {
     const rows = buildAlignedCompareRows(
-      [event("nav", 0, "Nav A"), event("fcp", 1200, "FCP A")],
-      [event("nav", 0, "Nav B"), event("fcp", 1000, "FCP B")],
+      [event("navigation", 0, "Nav A"), event("conn-preconnect", 130, "Preconnect A")],
+      [event("navigation", 0, "Nav B"), event("conn-preconnect", 20, "Preconnect B")],
     );
 
-    expect(rows.map((row) => row.timeMs)).toEqual([0, 1000, 1200]);
-    expect(rows[0]?.left.map((e) => e.title)).toEqual(["Nav A"]);
-    expect(rows[0]?.right.map((e) => e.title)).toEqual(["Nav B"]);
-    expect(rows[1]?.left).toEqual([]);
-    expect(rows[1]?.right.map((e) => e.title)).toEqual(["FCP B"]);
-    expect(rows[2]?.left.map((e) => e.title)).toEqual(["FCP A"]);
-    expect(rows[2]?.right).toEqual([]);
+    expect(rows).toHaveLength(2);
+    expect(rows[1]?.left.map((e) => e.title)).toEqual(["Preconnect A"]);
+    expect(rows[1]?.right.map((e) => e.title)).toEqual(["Preconnect B"]);
+    expect(rows[1]?.leftTimeMs).toBe(130);
+    expect(rows[1]?.rightTimeMs).toBe(20);
+    expect(rows[1]?.timeMs).toBe(20);
   });
 
-  it("merges near-equal times that display as the same label", () => {
-    const rows = buildAlignedCompareRows(
-      [event("font-a", 1316, "Font A")],
-      [event("font-b", 1324, "Font B")],
-    );
+  it("matches indexed events by their base id", () => {
+    const rows = buildAlignedCompareRows([event("net-0", 300)], [event("net-4", 900)]);
     expect(rows).toHaveLength(1);
-    expect(rows[0]?.timeMs).toBe(1320);
-    expect(rows[0]?.left.map((e) => e.title)).toEqual(["Font A"]);
-    expect(rows[0]?.right.map((e) => e.title)).toEqual(["Font B"]);
+    expect(rows[0]?.left.map((e) => e.id)).toEqual(["net-0"]);
+    expect(rows[0]?.right.map((e) => e.id)).toEqual(["net-4"]);
   });
 
-  it("stacks multiple events that share a timestamp in one cell", () => {
+  it("gives unmatched events their own row in time order", () => {
     const rows = buildAlignedCompareRows(
-      [event("a", 500), event("b", 500)],
-      [event("c", 500)],
+      [event("navigation", 0), event("lcp", 2000)],
+      [event("navigation", 0), event("preload", 500), event("lcp", 1500)],
     );
-    expect(rows).toHaveLength(1);
-    expect(rows[0]?.left.map((e) => e.id)).toEqual(["a", "b"]);
-    expect(rows[0]?.right.map((e) => e.id)).toEqual(["c"]);
+
+    expect(rows.map((row) => [row.left.map((e) => e.id), row.right.map((e) => e.id)])).toEqual([
+      [["navigation"], ["navigation"]],
+      [[], ["preload"]],
+      [["lcp"], ["lcp"]],
+    ]);
+  });
+
+  it("keeps each side in its own time order", () => {
+    const rows = buildAlignedCompareRows(
+      [event("b", 100), event("a", 200)],
+      [event("a", 100), event("b", 200)],
+    );
+    const leftIds = rows.flatMap((row) => row.left.map((e) => e.id));
+    const rightIds = rows.flatMap((row) => row.right.map((e) => e.id));
+    expect(leftIds).toEqual(["b", "a"]);
+    expect(rightIds).toEqual(["a", "b"]);
   });
 });

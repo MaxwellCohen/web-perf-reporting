@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { Timeline } from "@/features/page-speed-insights/Timeline";
 
@@ -9,45 +9,6 @@ vi.mock("@/components/ui/button", () => ({
       {children}
     </button>
   ),
-}));
-
-vi.mock("@/components/ui/dialog", () => ({
-  Dialog: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  DialogTrigger: ({ children, asChild }: { children: React.ReactNode; asChild?: boolean }) => {
-    if (asChild && React.isValidElement(children)) {
-      return React.cloneElement(children, {
-        type: "button",
-        "aria-haspopup": "dialog",
-        "aria-expanded": false,
-        "aria-controls": "radix-_r_0_",
-        "data-state": "closed",
-      } as React.HTMLAttributes<HTMLElement>);
-    }
-    return <button type="button">{children}</button>;
-  },
-  DialogContent: () => null,
-  DialogTitle: ({ children }: { children: React.ReactNode }) => <h2>{children}</h2>,
-  DialogClose: ({ children, asChild }: { children: React.ReactNode; asChild?: boolean }) =>
-    asChild ? <>{children}</> : <button type="button">{children}</button>,
-}));
-
-vi.mock("@/components/ui/carousel", () => ({
-  Carousel: ({
-    children,
-    setApi,
-  }: {
-    children: React.ReactNode;
-    setApi?: (api: { scrollTo: (i: number) => void }) => void;
-  }) => {
-    React.useEffect(() => {
-      setApi?.({ scrollTo: () => {} });
-    }, [setApi]);
-    return <div data-testid="carousel">{children}</div>;
-  },
-  CarouselContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  CarouselItem: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  CarouselNext: () => <button type="button">Next</button>,
-  CarouselPrevious: () => <button type="button">Prev</button>,
 }));
 
 /** Normalize radix IDs to radix-_r_0_ for stable snapshots regardless of test order */
@@ -134,5 +95,27 @@ describe("Timeline", () => {
     expect(getByText("FCP")).toBeTruthy();
     expect(getByText("LCP")).toBeTruthy();
   });
-});
 
+  it("opens a full-screen viewer on click and steps between frames", () => {
+    const timeline = {
+      type: "filmstrip" as const,
+      items: [
+        { data: "data:image/png;base64,a", timestamp: 0, timing: 100 },
+        { data: "data:image/png;base64,b", timestamp: 100, timing: 200 },
+      ],
+      scale: 1,
+    };
+    render(<Timeline timeline={timeline} device="Mobile" />);
+    expect(screen.queryByRole("dialog")).toBeNull();
+
+    fireEvent.click(screen.getByLabelText("Open full-screen view at 200 ms"));
+    const dialog = screen.getByRole("dialog");
+    expect(dialog.textContent).toContain("Frame 2 of 2");
+
+    fireEvent.keyDown(dialog, { key: "ArrowLeft" });
+    expect(dialog.textContent).toContain("Frame 1 of 2");
+
+    fireEvent.click(screen.getByText("Next frame"));
+    expect(dialog.textContent).toContain("Frame 2 of 2");
+  });
+});

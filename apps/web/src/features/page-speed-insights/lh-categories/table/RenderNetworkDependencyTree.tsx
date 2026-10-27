@@ -53,7 +53,7 @@ function NetworkDependencyTreeSection({
 
   const treeView = (
     <div className="lh-crc w-full overflow-x-auto">
-      <div className="lh-crc-initial-nav mb-1 font-mono text-[11px] tracking-[0.14em] text-zinc-400 uppercase">
+      <div className="lh-crc-initial-nav mb-1 font-mono text-[11px] tracking-[0.14em] text-muted-foreground uppercase">
         Initial Navigation
       </div>
       <TreeView data={treeData} expandAll />

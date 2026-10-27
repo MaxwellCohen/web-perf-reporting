@@ -274,7 +274,7 @@ function CulpritExtraView({ extra }: { extra: CulpritExtra }) {
           </p>
         ) : null}
         {extra.snippet ? (
-          <p className="truncate font-mono text-[11px] text-blue-300" title={extra.snippet}>
+          <p className="truncate font-mono text-[11px] text-sky-300" title={extra.snippet}>
             {extra.snippet}
           </p>
         ) : null}
@@ -354,7 +354,7 @@ function ShiftList({ shifts, showCount }: { shifts: ShiftFinding[]; showCount?: 
                 ) : null}
                 {shift.snippet ? (
                   <p
-                    className="truncate font-mono text-[11px] text-blue-300"
+                    className="truncate font-mono text-[11px] text-sky-300"
                     title={shift.snippet}
                   >
                     {shift.snippet}

@@ -1,3 +1,4 @@
+import { LCP_PHASE_COLORS } from "@/features/page-speed-insights/shared/lcpPhaseColors";
 import {
   getNetworkRequestsTimeRange,
   type NetworkRequestTimeRange,
@@ -679,12 +680,6 @@ export function waterfallRowFromTimelineBar(
   };
 }
 
-const LCP_SEGMENT_COLOR: Record<string, string> = {
-  timeToFirstByte: "bg-sky-500/80",
-  resourceLoadDelay: "bg-violet-500/80",
-  resourceLoadDuration: "bg-emerald-500/80",
-  elementRenderDelay: "bg-rose-500/80",
-};
 
 /** LCP subparts → one multi-segment waterfall row on the absolute timeline. */
 export function waterfallRowFromLcpSegments(
@@ -712,7 +707,7 @@ export function waterfallRowFromLcpSegments(
       start: seg.startMs,
       end: seg.endMs,
       label: seg.label,
-      colorClass: LCP_SEGMENT_COLOR[seg.subpart] ?? "bg-muted-foreground/60",
+      colorClass: LCP_PHASE_COLORS[seg.subpart] ?? "bg-muted-foreground/60",
     })),
   };
 }

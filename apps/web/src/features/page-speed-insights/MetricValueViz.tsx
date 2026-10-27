@@ -13,6 +13,10 @@ import {
   pairByFormFactor,
 } from "@/features/page-speed-insights/shared/compareRuns";
 import type { AuditResult } from "@/lib/schema";
+import { cn } from "@/lib/utils";
+
+/** Grid rows one run occupies in subgrid mode: header, threshold track, headroom, savings note. */
+export const SUMMARY_ROWS_PER_RUN = 4;
 
 /** Lighthouse lab thresholds: good ≤ good, poor > poor. */
 const LAB_BANDS: Record<MetricAuditId, { good: number; poor: number; unit: "ms" | "cls" }> = {
@@ -216,6 +220,7 @@ function MetricScale({
   phases,
   savings,
   savingsNote,
+  subgrid = false,
 }: {
   audit: AuditResult;
   label: string;
@@ -225,6 +230,8 @@ function MetricScale({
   savings: SavingsSlice[];
   /** Compact summary line. Detail view uses the savings bars instead. */
   savingsNote?: number;
+  /** Render each part as a direct item of the parent's row subgrid (see `SUMMARY_ROWS_PER_RUN`). */
+  subgrid?: boolean;
 }) {
   const band = LAB_BANDS[auditId];
   const value = audit.numericValue;
@@ -233,10 +240,14 @@ function MetricScale({
   const rating = rate(value, band.good, band.poor);
   const max = scaleMax(value, band.poor);
   const shown = audit.displayValue ?? formatUnit(value, band.unit);
+  const hasSavingsNote = savingsNote != null && savingsNote > 0;
 
   return (
-    <div className="min-w-0 space-y-1.5" data-testid={`metric-scale-${auditId}`}>
-      <div className="flex items-baseline justify-between gap-2">
+    <div
+      className={subgrid ? "contents" : "min-w-0 space-y-1.5"}
+      data-testid={`metric-scale-${auditId}`}
+    >
+      <div className={cn("flex min-w-0 items-baseline justify-between gap-2", subgrid && "pt-3")}>
         <span className="flex min-w-0 items-center gap-2 text-xs font-medium">
           <span
             className="size-2 shrink-0 rounded-sm"
@@ -248,21 +259,26 @@ function MetricScale({
         </span>
         <span className="shrink-0 font-mono text-sm font-medium tabular-nums">{shown}</span>
       </div>
-      <ThresholdTrack
-        value={value}
-        good={band.good}
-        poor={band.poor}
-        max={max}
-        rating={rating}
-        unit={band.unit}
-      />
-      <p className="text-xs leading-snug text-muted-foreground">
+      <div className={cn("min-w-0", subgrid && "pt-1.5")}>
+        <ThresholdTrack
+          value={value}
+          good={band.good}
+          poor={band.poor}
+          max={max}
+          rating={rating}
+          unit={band.unit}
+        />
+      </div>
+      <p className={cn("text-xs leading-snug text-muted-foreground", subgrid && "pt-1.5")}>
         {headroomCopy(value, band.good, band.poor, band.unit)}
       </p>
-      {savingsNote != null && savingsNote > 0 ? (
-        <p className="text-xs leading-snug text-muted-foreground">
+      {hasSavingsNote ? (
+        <p className={cn("text-xs leading-snug text-muted-foreground", subgrid && "pt-1")}>
           Up to {formatUnit(savingsNote, band.unit)} in estimated savings
         </p>
+      ) : subgrid ? (
+        // Keeps the row filled so the next run's parts land on their own tracks.
+        <span aria-hidden />
       ) : null}
       {phases.length > 0 ? <PhaseTrack phases={phases} unit={band.unit} /> : null}
       {savings.length > 0 ? (
@@ -345,10 +361,12 @@ function CompareMetricDeltas({
   auditId,
   rows,
   runs,
+  className,
 }: {
   auditId: MetricAuditId;
   rows: Array<{ audit: AuditResult; label: string }>;
   runs: [string, string];
+  className?: string;
 }) {
   const band = LAB_BANDS[auditId];
   const pairs = pairByFormFactor(rows, runs);
@@ -370,7 +388,7 @@ function CompareMetricDeltas({
   if (!deltas.length) return null;
 
   return (
-    <ul className="space-y-0.5" data-testid="metric-compare-delta">
+    <ul className={cn("space-y-0.5", className)} data-testid="metric-compare-delta">
       {deltas.map((delta) => (
         <li key={delta.key} className="text-xs tabular-nums text-muted-foreground">
           {pairs.length > 1 ? `${delta.formFactor}: ` : null}
@@ -387,6 +405,7 @@ export function MetricValueViz({
   causes = [],
   sources = [],
   detail = true,
+  subgrid = false,
 }: {
   auditId: MetricAuditId;
   auditItems: Array<{ audit: AuditResult; label: string }>;
@@ -394,6 +413,12 @@ export function MetricValueViz({
   sources?: MetricAuditSource[];
   /** Detail sections include phase bars and per-audit savings. Summary cards stay compact. */
   detail?: boolean;
+  /**
+   * Compact mode only: flatten into the parent's row subgrid so every run's header, track,
+   * and captions line up with sibling cards. The parent reserves `SUMMARY_ROWS_PER_RUN`
+   * rows per run, and the delta row comes after them.
+   */
+  subgrid?: boolean;
 }) {
   const acronym: CwvMetricAcronym = METRIC_AUDIT_TO_ACRONYM[auditId];
 
@@ -403,11 +428,15 @@ export function MetricValueViz({
   if (!rows.length) return null;
 
   const compare = getCompareRuns(rows);
-  const layoutClass =
-    detail && rows.length > 1 ? "grid grid-cols-2 gap-3" : "flex flex-col gap-3";
+  const flatten = subgrid && !detail;
+  const layoutClass = flatten
+    ? "contents"
+    : detail && rows.length > 1
+      ? "grid grid-cols-2 gap-3"
+      : "flex flex-col gap-3";
 
   return (
-    <div className="space-y-2" data-testid="metric-value-viz">
+    <div className={flatten ? "contents" : "space-y-2"} data-testid="metric-value-viz">
       <div className={layoutClass}>
         {rows.map(({ audit, label }) => {
           const source = sources.find((item) => item.label === label);
@@ -429,12 +458,18 @@ export function MetricValueViz({
               }
               savings={detail ? savings : []}
               savingsNote={savingsNote}
+              subgrid={flatten}
             />
           );
         })}
       </div>
       {compare.mode === "compare" ? (
-        <CompareMetricDeltas auditId={auditId} rows={rows} runs={compare.runs} />
+        <CompareMetricDeltas
+          auditId={auditId}
+          rows={rows}
+          runs={compare.runs}
+          className={flatten ? "pt-3" : undefined}
+        />
       ) : null}
     </div>
   );

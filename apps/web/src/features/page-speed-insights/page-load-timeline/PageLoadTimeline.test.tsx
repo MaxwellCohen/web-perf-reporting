@@ -725,6 +725,17 @@ describe("PageLoadTimeline", () => {
     expect(within(zeroRow!).getAllByText("Navigation start")).toHaveLength(2);
   });
 
+  it("shows each moment's own time inside compare cards", () => {
+    window.history.replaceState(null, "", "/?report=Mobile&report=Desktop");
+    mockItems.current = [reportItem("Mobile"), reportItem("Desktop")];
+    render(<PageLoadTimeline />);
+
+    const aligned = screen.getByTestId("timeline-aligned-moments");
+    const times = within(aligned).getAllByTestId("moment-time");
+    expect(times.length).toBeGreaterThan(0);
+    expect(times.some((time) => / – /.test(time.textContent ?? ""))).toBe(true);
+  });
+
   it("lets multi-select pick any two A/B form-factor reports", () => {
     window.history.replaceState(null, "", "/");
     mockItems.current = [

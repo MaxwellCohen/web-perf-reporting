@@ -17,11 +17,11 @@ exports[`ScreenshotComponent > renders image when screenshot has valid data 1`] 
 
 exports[`ScreenshotComponent > shows "Image unavailable" when image fails to load 1`] = `
 <div
-  class="flex items-center justify-center border bg-gray-100"
+  class="flex items-center justify-center border bg-muted"
   style="width: 80px; height: 80px;"
 >
   <span
-    class="text-xs text-gray-500"
+    class="text-xs text-muted-foreground"
   >
     Image unavailable
   </span>
@@ -30,11 +30,11 @@ exports[`ScreenshotComponent > shows "Image unavailable" when image fails to loa
 
 exports[`ScreenshotComponent > shows "Image unavailable" when screenshot.data is empty 1`] = `
 <div
-  class="flex items-center justify-center border bg-gray-100"
+  class="flex items-center justify-center border bg-muted"
   style="width: 80px; height: 80px;"
 >
   <span
-    class="text-xs text-gray-500"
+    class="text-xs text-muted-foreground"
   >
     Image unavailable
   </span>

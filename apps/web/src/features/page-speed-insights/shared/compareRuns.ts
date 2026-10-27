@@ -107,7 +107,7 @@ export function switchCompareRunLabel(
   return sameFactor ?? candidates[0] ?? null;
 }
 
-/** Sort full report labels: run order (appearance), then form factor. */
+/** Run-prefixed labels keep their added order. */
 export function comparePrefixedReportLabels(
   labelA: string,
   labelB: string,

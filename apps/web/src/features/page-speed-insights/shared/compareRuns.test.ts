@@ -89,13 +89,8 @@ describe("switchCompareRunLabel", () => {
 });
 
 describe("compareReportLabels with run prefixes", () => {
-  it("keeps the same form factor adjacent across runs", () => {
+  it("keeps run-prefixed labels in the order they were added", () => {
     const labels = ["B · Desktop", "A · Mobile", "B · Mobile", "A · Desktop"];
-    expect([...labels].sort((a, b) => compareReportLabels(a, b, ["A", "B"]))).toEqual([
-      "A · Mobile",
-      "B · Mobile",
-      "A · Desktop",
-      "B · Desktop",
-    ]);
+    expect([...labels].sort((a, b) => compareReportLabels(a, b, ["A", "B"]))).toEqual(labels);
   });
 });

@@ -64,26 +64,15 @@ function compareFormFactorLabels(labelA: string, labelB: string): number {
 }
 
 /**
- * Sort report labels so the same device/form factor sits together across runs
- * (A·Mobile, B·Mobile, A·Desktop, B·Desktop). Within a form factor, keep run
- * order (first run, then second).
+ * Sort report labels by form factor. Labels from two run sets (run-prefixed)
+ * are not reordered: they keep the order they were added in.
  */
-export function compareReportLabels(labelA: string, labelB: string, runOrder: string[] = []): number {
+export function compareReportLabels(labelA: string, labelB: string, _runOrder: string[] = []): number {
   const a = splitRunPrefix(labelA);
   const b = splitRunPrefix(labelB);
 
   if (a.run || b.run) {
-    if (a.run && b.run) {
-      const formCmp = compareFormFactorLabels(a.rest, b.rest);
-      if (formCmp !== 0) return formCmp;
-
-      const indexA = runOrder.indexOf(a.run);
-      const indexB = runOrder.indexOf(b.run);
-      const orderA = indexA === -1 ? Number.MAX_SAFE_INTEGER : indexA;
-      const orderB = indexB === -1 ? Number.MAX_SAFE_INTEGER : indexB;
-      if (orderA !== orderB) return orderA - orderB;
-      return a.run.localeCompare(b.run);
-    }
+    if (a.run && b.run) return 0;
     if (a.run && !b.run) return -1;
     if (!a.run && b.run) return 1;
   }

@@ -6,6 +6,7 @@ import {
   createPendingRecord,
   getRecordByUrl,
   readStoredRecord,
+  readStrategy,
   writeStoredRecord,
   type RecordResponse,
 } from "./storage";
@@ -40,9 +41,17 @@ export async function enqueuePageSpeed(env: ApiBindings, recordPublicId: string,
 }
 
 export async function startPageSpeed(env: ApiBindings, requestUrl: string): Promise<RecordResponse | null> {
-  const existing = await getRecordByUrl(env, requestUrl, Date.now() - CACHE_DURATION_MS);
-  if (existing?.status === "completed" || existing?.status === "pending" || existing?.status === "processing") {
-    return pageSpeedResponse(env, existing.publicId);
+  // A successful run is reused for as long as its stored result exists; in-flight runs within the cache window.
+  const existing = await getRecordByUrl(env, requestUrl, 0);
+  if (existing) {
+    const inFlight = existing.status === "pending" || existing.status === "processing";
+    if (inFlight && existing.date >= Date.now() - CACHE_DURATION_MS) {
+      return pageSpeedResponse(env, existing.publicId);
+    }
+    if (!inFlight && existing.status !== "failed") {
+      const response = await pageSpeedResponse(env, existing.publicId);
+      if (response?.status === "completed" && response.data != null) return response;
+    }
   }
 
   const record = await createPendingRecord(env, requestUrl);
@@ -68,6 +77,9 @@ export async function ensurePageSpeedQueued(env: ApiBindings, publicId: string):
 export async function runPageSpeedStrategy(env: ApiBindings, message: PageSpeedMessage): Promise<void> {
   const apiKey = env.PAGESPEED_INSIGHTS_API;
   if (!apiKey) throw new Error("PAGESPEED_INSIGHTS_API is not set");
+  // Queue delivery is at-least-once; don't hit PSI again for a strategy that already succeeded.
+  const done = await readStrategy(env, message.publicId, message.strategy);
+  if (done?.status === "completed") return;
   const result = await fetchPageSpeedData(message.url, message.strategy, apiKey);
   const error =
     result && typeof result === "object" && "error" in result && typeof result.error === "string"

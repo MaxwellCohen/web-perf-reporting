@@ -48,7 +48,7 @@ export function LhFileInput({ jsonFiles, setJsonFiles, idPrefix = "" }: LhFileIn
           <div className="space-y-3">
             {jsonFiles.map((fileEntry, index) => (
               <div key={index} className="flex items-center gap-2 rounded-md border p-3">
-                <FileJson size={20} className="flex-shrink-0 text-blue-500" />
+                <FileJson size={20} className="flex-shrink-0 text-sky-400" />
                 <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center">
                   <span className="flex-shrink-0 truncate text-sm font-medium">
                     {fileEntry.file.name}

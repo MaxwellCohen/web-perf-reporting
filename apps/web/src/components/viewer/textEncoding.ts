@@ -44,7 +44,7 @@ export const TextEncoding = {
 
     if (options.gzip) {
       const { ungzip } = await import("pako");
-      return ungzip(bytes, { to: "string" }) as string;
+      return new TextDecoder().decode(ungzip(bytes));
     }
     return new TextDecoder().decode(bytes);
   },

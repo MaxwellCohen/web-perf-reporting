@@ -4,7 +4,6 @@
 import { TriangleAlert } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { usePageSpeedItems, usePageSpeedSelector } from "@/features/page-speed-insights/PageSpeedContext";
 import {
   LOAD_MOMENTS,
@@ -23,16 +22,14 @@ import {
 import type { Rating } from "@/features/page-speed-insights/page-load-timeline/types";
 import { selectPossibleLcpRemountMatches } from "@/features/page-speed-insights/network-metrics/possibleLcpRemount";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
+import {
+  FilmstripViewer,
+  type FilmstripViewerFrame,
+} from "@/features/page-speed-insights/shared/FilmstripViewer";
+import { LCP_PHASE_COLORS } from "@/features/page-speed-insights/shared/lcpPhaseColors";
 import { cn } from "@/lib/cn";
 
 type RatingValue = Rating;
-
-const PHASE_COLOR: Record<string, string> = {
-  timeToFirstByte: "bg-sky-500",
-  resourceLoadDelay: "bg-amber-500",
-  resourceLoadDuration: "bg-orange-500",
-  elementRenderDelay: "bg-violet-400",
-};
 
 function ratingClass(rating?: RatingValue): string {
   if (rating === "good") return "text-emerald-600 dark:text-emerald-400";
@@ -42,7 +39,7 @@ function ratingClass(rating?: RatingValue): string {
 }
 
 function phaseColor(id: string): string {
-  return PHASE_COLOR[id] ?? "bg-muted-foreground";
+  return LCP_PHASE_COLORS[id] ?? "bg-muted-foreground";
 }
 
 function momentMeta(id: StoryMomentId) {
@@ -135,6 +132,17 @@ function DeviceMomentTime({ device, momentId }: { device: DeviceStory; momentId:
   );
 }
 
+function momentLabelsByFrame(device: DeviceStory): string[][] {
+  const labels = device.frames.map(() => [] as string[]);
+  for (const moment of device.moments) {
+    const index = frameIndexAt(device.frames, moment.timeMs);
+    if (index < 0) continue;
+    const short = momentMeta(moment.id).short;
+    if (!labels[index].includes(short)) labels[index].push(short);
+  }
+  return labels;
+}
+
 function Filmstrip({
   device,
   selectedIndex,
@@ -157,16 +165,7 @@ function Filmstrip({
     scroller.scrollTo({ left });
   }, [selectedIndex, momentId]);
 
-  const frameLabels = useMemo(() => {
-    const labels = device.frames.map(() => [] as string[]);
-    for (const moment of device.moments) {
-      const index = frameIndexAt(device.frames, moment.timeMs);
-      if (index < 0) continue;
-      const short = momentMeta(moment.id).short;
-      if (!labels[index].includes(short)) labels[index].push(short);
-    }
-    return labels;
-  }, [device.frames, device.moments]);
+  const frameLabels = useMemo(() => momentLabelsByFrame(device), [device]);
 
   return (
     <div
@@ -269,6 +268,15 @@ function DeviceStage({
   const index = shownFrameIndex(device, momentId, override);
   const frame = index == null ? undefined : device.frames[index];
   const overridden = override != null && frame != null;
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  const viewerFrames = useMemo<FilmstripViewerFrame[]>(() => {
+    const labels = momentLabelsByFrame(device);
+    return device.frames.map((item, i) => ({
+      timeMs: item.timing,
+      labels: labels[i],
+      panes: [{ label: device.label, src: item.data }],
+    }));
+  }, [device]);
   const caption = stageCaption({
     momentLabel: meta.label,
     momentTime: moment?.timeMs,
@@ -293,32 +301,29 @@ function DeviceStage({
       </header>
 
       {frame ? (
-        <Dialog>
-          <DialogTrigger asChild>
-            <button
-              type="button"
-              className="flex min-h-52 items-center justify-center overflow-hidden rounded-lg border bg-muted/40"
-              aria-label={`Enlarge ${device.label} screenshot at ${formatMs(frame.timing)}`}
-            >
-              <img
-                src={frame.data}
-                alt=""
-                className="max-h-80 w-full object-contain object-top"
-                decoding="async"
-              />
-            </button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl">
-            <DialogTitle>
-              {device.label} at {formatMs(frame.timing)}
-            </DialogTitle>
+        <>
+          <button
+            type="button"
+            aria-haspopup="dialog"
+            onClick={() => setViewerIndex(index)}
+            className="flex min-h-52 cursor-zoom-in items-center justify-center overflow-hidden rounded-lg border bg-muted/40"
+            aria-label={`Enlarge ${device.label} screenshot at ${formatMs(frame.timing)}`}
+          >
             <img
               src={frame.data}
-              alt={`${device.label} at ${formatMs(frame.timing)}`}
-              className="max-h-[70vh] w-full object-contain"
+              alt=""
+              className="max-h-80 w-full object-contain object-top"
+              decoding="async"
             />
-          </DialogContent>
-        </Dialog>
+          </button>
+          <FilmstripViewer
+            title={device.label}
+            frames={viewerFrames}
+            index={viewerIndex}
+            onIndexChange={setViewerIndex}
+            onClose={() => setViewerIndex(null)}
+          />
+        </>
       ) : (
         <p className="flex min-h-32 items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
           {device.frames.length ? "This moment was not recorded." : "No screenshots were captured."}
@@ -359,7 +364,7 @@ function DeviceStage({
           </p>
           {device.lcpElementLabel ? <p className="text-sm">{device.lcpElementLabel}</p> : null}
           {device.lcpSnippet ? (
-            <p className="line-clamp-3 break-all font-mono text-xs leading-5 text-blue-500">
+            <p className="line-clamp-3 break-all font-mono text-xs leading-5 text-sky-400">
               {device.lcpSnippet}
             </p>
           ) : null}

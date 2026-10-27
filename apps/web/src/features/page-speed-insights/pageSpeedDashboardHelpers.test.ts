@@ -68,7 +68,7 @@ describe("pageSpeedDashboardHelpers", () => {
     expect(items[1]?.item.lighthouseResult.configSettings?.formFactor).toBe("desktop");
   });
 
-  it("orders compare-run labels so the same form factor sits together", () => {
+  it("keeps compare-run labels in the order they were added", () => {
     const items = getDashboardItems(
       [
         asNullablePageSpeedInsights({ lighthouseResult: createLighthouseResult() }),
@@ -85,8 +85,8 @@ describe("pageSpeedDashboardHelpers", () => {
 
     expect(items.map((item) => item.label)).toEqual([
       "A · Mobile",
-      "B · Mobile",
       "A · Desktop",
+      "B · Mobile",
       "B · Desktop",
     ]);
   });

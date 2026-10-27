@@ -100,10 +100,11 @@ function initialRunsFromPsiQuery(
   initialPsi2Label: string,
 ): ViewerRunState[] {
   if (!initialPsi.trim()) {
-    return [createEmptyViewerRun()];
+    return [createEmptyViewerRun({ id: "run-1" })];
   }
 
   const primary = createEmptyViewerRun({
+    id: "run-1",
     method: "psi",
     psiUrl: initialPsi,
     label: initialPsiLabel,
@@ -116,6 +117,7 @@ function initialRunsFromPsiQuery(
   return [
     primary,
     createEmptyViewerRun({
+      id: "run-2",
       method: "psi",
       psiUrl: initialPsi2,
       label: initialPsi2Label,
@@ -237,7 +239,9 @@ export default function ViewerPage({
   };
 
   const addCompareRun = () => {
-    setRuns((prev) => (prev.length >= 2 ? prev : [...prev, createEmptyViewerRun()]));
+    setRuns((prev) =>
+      prev.length >= 2 ? prev : [...prev, createEmptyViewerRun({ id: "run-2" })],
+    );
   };
 
   const removeCompareRun = () => {

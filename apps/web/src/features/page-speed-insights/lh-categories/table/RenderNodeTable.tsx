@@ -99,7 +99,7 @@ export function NodeSummary({ item, device }: { item: NodeValue; device: DeviceT
       <div className="flex flex-col gap-2 md:self-baseline">
         {item.nodeLabel ? <div className="px-2">{item.nodeLabel}</div> : null}
         {item.snippet && (
-          <div className="whitespace-pre-wrap break-all px-2 font-mono text-sm leading-5 text-blue-500">
+          <div className="whitespace-pre-wrap break-all px-2 font-mono text-sm leading-5 text-sky-400">
             {item.snippet}
           </div>
         )}

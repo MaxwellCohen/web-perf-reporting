@@ -3,6 +3,9 @@ import { z } from "zod";
 export type DeviceType = "Desktop" | "Mobile";
 const coerceNumber = z.coerce.number().default(0).catch(NaN);
 
+const hasType = (v: unknown, type: string) =>
+  typeof v === "object" && v !== null && (v as { type?: unknown }).type === type;
+
 const cruxHistogramItemSchema = z.object({
   start: coerceNumber,
   end: coerceNumber,
@@ -245,7 +248,7 @@ const PageSpeedApiLoadingExperienceV5schema = z.object({
 
 export type PageSpeedApiLoadingExperience = z.infer<typeof PageSpeedApiLoadingExperienceV5schema>;
 
-const artifactsSchema = z.record(z.any()).optional();
+const artifactsSchema = z.record(z.string(), z.any()).optional();
 
 const auditRefSchema = z
   .object({
@@ -268,12 +271,7 @@ export type DebugData = {
   [p: string]: any;
 };
 
-const DebugDataSchema = z.custom<DebugData>((v) => {
-  if (v.type === "debugdata") {
-    return v;
-  }
-  return null;
-});
+const DebugDataSchema = z.custom<DebugData>((v) => hasType(v, "debugdata"));
 
 const RectSchema = z.object({
   width: z.number(),
@@ -325,12 +323,7 @@ export interface AuditDetailTable extends BaseDetails {
   skipSumming?: Array<string>;
 }
 
-const AuditDetailTableSchema = z.custom<AuditDetailTable>((v) => {
-  if (v.type === "table") {
-    return v;
-  }
-  return null;
-});
+const AuditDetailTableSchema = z.custom<AuditDetailTable>((v) => hasType(v, "table"));
 
 export interface TreeMapNode {
   /** Could be a url, a path component from a source map, or an arbitrary string. */
@@ -346,12 +339,7 @@ export interface TreeMapData extends BaseDetails {
   nodes: TreeMapNode[];
 }
 
-const TreeMapDataSchema = z.custom<TreeMapData>((v) => {
-  if (v.type === "treemap-data") {
-    return v;
-  }
-  return null;
-});
+const TreeMapDataSchema = z.custom<TreeMapData>((v) => hasType(v, "treemap-data"));
 
 const AuditDetailListSchema = z.object({
   type: z.literal("list"),
@@ -407,12 +395,9 @@ export interface AuditDetailOpportunity extends BaseDetails {
   overallSavingsBytes?: number;
 }
 
-const AuditDetailOpportunitySchema = z.custom<AuditDetailOpportunity>((v) => {
-  if (v.type === "opportunity") {
-    return v;
-  }
-  return null;
-});
+const AuditDetailOpportunitySchema = z.custom<AuditDetailOpportunity>((v) =>
+  hasType(v, "opportunity"),
+);
 
 interface BaseDetails {
   /** Additional information, usually used for including debug or meta information in the LHR */
@@ -470,7 +455,8 @@ const ItemValueTypeSchema = z.union([
 /** String enum of possible types of values found within table items. */
 export type ItemValueType = z.infer<typeof ItemValueTypeSchema>;
 
-const SourceLocationValueSchema = z.object({  type: z.literal("source-location"),
+const SourceLocationValueSchema = z.object({
+  type: z.literal("source-location"),
   url: z.string(),
   urlProvider: z.enum(["network", "comment"]),
   line: z.number(),
@@ -600,6 +586,7 @@ export type TableItem = {
 const AuditDetailChecklistSchema = z.object({
   type: z.literal("checklist"),
   items: z.record(
+    z.string(),
     z.object({
       value: z.boolean(),
       label: z.string(),
@@ -610,12 +597,9 @@ const AuditDetailChecklistSchema = z.object({
 
 export type AuditDetailChecklist = z.infer<typeof AuditDetailChecklistSchema>;
 
-const AuditDetailCriticalRequestChainSchema = z.custom<CriticalRequestChain>((v) => {
-  if (v.type === "criticalrequestchain") {
-    return v;
-  }
-  return null;
-});
+const AuditDetailCriticalRequestChainSchema = z.custom<CriticalRequestChain>((v) =>
+  hasType(v, "criticalrequestchain"),
+);
 
 const AuditResultSchema = z.object({
   description: z.string().optional(),
@@ -646,11 +630,11 @@ const AuditResultSchema = z.object({
   warnings: z.array(z.any()).optional(),
   numericUnit: z.string().optional(),
   displayValue: z.string().optional(),
-  metricSavings: z.record(z.number()).optional(),
+  metricSavings: z.record(z.string(), z.number()).optional(),
 });
 
 export type AuditResult = z.infer<typeof AuditResultSchema>;
-const auditResultsRecordSchema = z.record(AuditResultSchema);
+const auditResultsRecordSchema = z.record(z.string(), AuditResultSchema);
 
 export type AuditResultsRecord = z.infer<typeof auditResultsRecordSchema>;
 
@@ -667,7 +651,7 @@ const categoryResultSchema = z
 
 export type CategoryResult = z.infer<typeof categoryResultSchema>;
 
-const configSettingsSchema = z.record(z.any());
+const configSettingsSchema = z.record(z.string(), z.any());
 
 const environmentSchema = z
   .object({
@@ -700,9 +684,9 @@ const entitiesSchema = z.array(
     .optional(),
 );
 
-
 const FullPageScreenshotSchema = z.object({
   nodes: z.record(
+    z.string(),
     z.object({
       bottom: coerceNumber,
       height: coerceNumber,
@@ -725,8 +709,8 @@ const lighthouseResultV5Schema = z
   .object({
     finalDisplayedUrl: urlSchema,
     artifacts: artifactsSchema,
-    categories: z.record(categoryResultSchema.partial()),
-    categoryGroups: z.record(categorySchema).optional(),
+    categories: z.record(z.string(), categoryResultSchema.partial()),
+    categoryGroups: z.record(z.string(), categorySchema).optional(),
     configSettings: configSettingsSchema,
     environment: environmentSchema,
     fetchTime: z.string(),

@@ -43,7 +43,7 @@ import {
   type WaterfallRowKind,
 } from "@/features/page-speed-insights/waterfall/waterfallData";
 import { cn } from "@/lib/cn";
-import { buildAlignedCompareRows } from "./buildAlignedCompareRows";
+import { buildAlignedCompareRows, type AlignedCompareRow } from "./buildAlignedCompareRows";
 import { buildPageLoadTimelineBundles } from "./buildPageLoadTimeline";
 import {
   TASK_FILTERS,
@@ -495,14 +495,34 @@ function PhaseHeader({ title }: { title: string }) {
   );
 }
 
+function MomentTime({ moment }: { moment: TimelineEvent }) {
+  if (!moment.hasTimestamp || !Number.isFinite(moment.timeMs)) return null;
+  const start = moment.startMs;
+  const end = moment.endMs ?? moment.timeMs;
+  const isInterval = start != null && Number.isFinite(start) && end > start;
+  return (
+    <span
+      className="rounded bg-muted px-1.5 py-0.5 text-[11px] font-medium tabular-nums text-muted-foreground"
+      data-testid="moment-time"
+    >
+      {isInterval
+        ? `${formatMs(start)} – ${formatMs(end)} · ${formatMs(end - start)}`
+        : formatMs(moment.timeMs)}
+    </span>
+  );
+}
+
 function MomentCard({
   moment,
   axisEnd,
   deviceLabel,
+  showTime = false,
 }: {
   moment: TimelineEvent;
   axisEnd: number;
   deviceLabel: string;
+  /** Show the event's own start / end inside the card (compare view). */
+  showTime?: boolean;
 }) {
   const muted = moment.status === "not-recorded";
   const downloadBlocking = blockingStatuses(moment.waterfall);
@@ -523,6 +543,7 @@ function MomentCard({
         <div className="min-w-0 flex-1 space-y-2 overflow-x-clip">
           <div className="flex flex-wrap items-center gap-2">
             <h4 className="text-sm font-semibold leading-snug sm:text-base">{moment.title}</h4>
+            {showTime ? <MomentTime moment={moment} /> : null}
             {moment.rating ? (
               <span
                 className={cn(
@@ -786,6 +807,28 @@ function VerticalTimeline({
   );
 }
 
+function CompareRowTime({ row }: { row: AlignedCompareRow }) {
+  const { leftTimeMs, rightTimeMs } = row;
+  if (leftTimeMs == null || rightTimeMs == null || leftTimeMs === rightTimeMs) {
+    return (
+      <span className="rounded-md bg-muted px-2 py-1 text-center text-xs font-semibold tabular-nums text-foreground">
+        {formatMs(row.timeMs)}
+      </span>
+    );
+  }
+  const delta = rightTimeMs - leftTimeMs;
+  return (
+    <span className="flex flex-col items-center gap-0.5 rounded-md bg-muted px-2 py-1 text-center text-xs font-semibold tabular-nums text-foreground">
+      <span>← {formatMs(leftTimeMs)}</span>
+      <span>{formatMs(rightTimeMs)} →</span>
+      <span className="text-[10px] font-medium text-muted-foreground">
+        {delta > 0 ? "+" : "−"}
+        {formatMs(Math.abs(delta))}
+      </span>
+    </span>
+  );
+}
+
 function AlignedCompareMoments({
   left,
   right,
@@ -808,9 +851,9 @@ function AlignedCompareMoments({
         <p className="truncate text-right">{right.label}</p>
       </div>
       <ol className="relative m-0 list-none space-y-3 p-0">
-        {rows.map((row) => (
+        {rows.map((row, rowIndex) => (
           <li
-            key={row.timeMs}
+            key={rowIndex}
             className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_4.5rem_minmax(0,1fr)] sm:items-start sm:gap-2"
             data-testid="timeline-aligned-row"
             data-time-ms={row.timeMs}
@@ -822,14 +865,13 @@ function AlignedCompareMoments({
                     moment={moment}
                     axisEnd={axisEndMs}
                     deviceLabel={left.label}
+                    showTime
                   />
                 </div>
               ))}
             </div>
             <div className="flex items-center justify-center sm:pt-3">
-              <span className="rounded-md bg-muted px-2 py-1 text-center text-xs font-semibold tabular-nums text-foreground">
-                {formatMs(row.timeMs)}
-              </span>
+              <CompareRowTime row={row} />
             </div>
             <div className="min-w-0 space-y-2">
               {row.right.map((moment) => (
@@ -838,6 +880,7 @@ function AlignedCompareMoments({
                     moment={moment}
                     axisEnd={axisEndMs}
                     deviceLabel={right.label}
+                    showTime
                   />
                 </div>
               ))}

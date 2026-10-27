@@ -20,10 +20,10 @@ export function ScreenshotComponent({
   if (imageError || !screenshot.data) {
     return (
       <div
-        className="flex items-center justify-center border bg-gray-100"
+        className="flex items-center justify-center border bg-muted"
         style={{ width: 80, height: 80 }}
       >
-        <span className="text-xs text-gray-500">Image unavailable</span>
+        <span className="text-xs text-muted-foreground">Image unavailable</span>
       </div>
     );
   }

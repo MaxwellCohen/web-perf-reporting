@@ -107,7 +107,7 @@ export function RenderEntityTable({
                         })}
                       </RenderTableRowContainer>
                       {item.subItems?.items.map((subItem, nestedIndex) => (
-                        <RenderTableRowContainer key={nestedIndex} className="border-red-500">
+                        <RenderTableRowContainer key={nestedIndex} className="border-rose-500">
                           {headings.map((heading, colIndex) => {
                             if (!heading.subItemsHeading?.key) return null;
                             return (

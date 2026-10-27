@@ -151,7 +151,7 @@ function FilterPopover<TData extends RowData>({ header }: { header: Header<any, 
         </Button>
       </PopoverTrigger>
       <PopoverContent>
-        <div className="border-muted-foreground/30 flex max-h-72 flex-col overflow-y-auto rounded-sm border bg-black p-4">
+        <div className="border-muted-foreground/30 flex max-h-72 flex-col overflow-y-auto rounded-sm border bg-popover p-4">
           {filterComponent()}
         </div>
       </PopoverContent>

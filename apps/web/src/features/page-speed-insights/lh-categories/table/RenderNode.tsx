@@ -30,7 +30,7 @@ export function NodeComponent({ item, device }: { item: NodeValue; device: strin
         <div className="flex flex-col gap-2 md:self-baseline">
           {item.nodeLabel ? <div>{item.nodeLabel}</div> : null}
           {item.snippet && (
-            <div className="whitespace-pre-wrap font-mono text-sm leading-5 text-blue-500">
+            <div className="whitespace-pre-wrap font-mono text-sm leading-5 text-sky-400">
               {item.snippet}
             </div>
           )}
@@ -127,13 +127,13 @@ export function RenderNodeImage({
     if (imageError || !screenshot.data) {
       return (
         <div
-          className="flex items-center justify-center overflow-hidden rounded border border-gray-300 bg-gray-100"
+          className="flex items-center justify-center overflow-hidden rounded border border-border bg-muted"
           style={{
             width: `${displayWidth}px`,
             height: `${displayHeight}px`,
           }}
         >
-          <span className="text-xs text-gray-500">Image unavailable</span>
+          <span className="text-xs text-muted-foreground">Image unavailable</span>
         </div>
       );
     }
@@ -141,7 +141,7 @@ export function RenderNodeImage({
     return (
       <Dialog>
         <DialogTrigger>
-          <div className="flex cursor-pointer items-center justify-center overflow-hidden rounded border border-gray-300 transition-transform hover:scale-110 hover:shadow-md">
+          <div className="flex cursor-pointer items-center justify-center overflow-hidden rounded border border-border transition-transform hover:scale-110 hover:shadow-md">
             <img
               src={screenshot.data}
               alt="Screenshot"
@@ -160,7 +160,7 @@ export function RenderNodeImage({
           <DialogTitle>Screenshot</DialogTitle>
           <div className="flex items-center justify-center">
             {imageError ? (
-              <div className="flex items-center justify-center p-8 text-gray-500">
+              <div className="flex items-center justify-center p-8 text-muted-foreground">
                 <span>Image unavailable</span>
               </div>
             ) : (
@@ -428,13 +428,13 @@ function ElementScreenshot({
     const displayHeight = Math.min(maxRenderSize.height, 150);
     return (
       <div
-        className="flex items-center justify-center overflow-hidden rounded border border-gray-300 bg-gray-100"
+        className="flex items-center justify-center overflow-hidden rounded border border-border bg-muted"
         style={{
           width: `${displayWidth}px`,
           height: `${displayHeight}px`,
         }}
       >
-        <span className="text-xs text-gray-500">Image unavailable</span>
+        <span className="text-xs text-muted-foreground">Image unavailable</span>
       </div>
     );
   }
@@ -553,13 +553,13 @@ function ThumbnailUnavailableFallback({
 }) {
   return (
     <div
-      className="flex items-center justify-center overflow-hidden rounded border border-gray-300 bg-gray-100 transition-transform"
+      className="flex items-center justify-center overflow-hidden rounded border border-border bg-muted transition-transform"
       style={{
         width: `${displayWidth}px`,
         height: `${displayHeight}px`,
       }}
     >
-      <span className="text-xs text-gray-500">Image unavailable</span>
+      <span className="text-xs text-muted-foreground">Image unavailable</span>
     </div>
   );
 }
@@ -577,7 +577,7 @@ function FullScreenshotThumbnail({
 }) {
   return (
     <div
-      className="flex items-center justify-center overflow-hidden rounded border border-gray-300 transition-transform"
+      className="flex items-center justify-center overflow-hidden rounded border border-border transition-transform"
       style={{
         width: `${displayWidth}px`,
         height: `${displayHeight}px`,
@@ -636,7 +636,7 @@ const RenderThumbnails = memo(function RThumbnails({
     return (
       <div
         key={index}
-        className="flex items-center justify-center overflow-hidden rounded border border-gray-300 transition-transform"
+        className="flex items-center justify-center overflow-hidden rounded border border-border transition-transform"
         style={{
           minWidth: `${maxThumbnailSize.width}px`,
           minHeight: `${maxThumbnailSize.height}px`,

@@ -90,7 +90,7 @@ export function AuditSummaryRow({ row }: { row: StockRow<TableDataItem> }) {
   return (
     <AccordionItem
       value={row.id}
-      className={clsx("items-center gap-4 border border-x-4 border-gray-400 py-2")}
+      className={clsx("items-center gap-4 border border-x-4 border-border py-2")}
     >
       <AccordionTrigger>
         <AuditDetailsSummary

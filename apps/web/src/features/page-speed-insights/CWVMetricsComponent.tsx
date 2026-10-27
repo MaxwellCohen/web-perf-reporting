@@ -17,7 +17,10 @@ import { CHART_SERIES_COLORS } from "@/features/page-speed-insights/shared/horiz
 import { FullWidthRow, SectionGrid } from "@/features/page-speed-insights/shared/MetricsSectionLayout";
 import { FcpScreenshotCard } from "@/features/page-speed-insights/FcpScreenshotCard";
 import { LcpElementSummary } from "@/features/page-speed-insights/LcpElementSummary";
-import { MetricValueViz } from "@/features/page-speed-insights/MetricValueViz";
+import {
+  MetricValueViz,
+  SUMMARY_ROWS_PER_RUN,
+} from "@/features/page-speed-insights/MetricValueViz";
 import { collectFcpScreenshots } from "@/features/page-speed-insights/fcpScreenshot";
 import { collectLcpElements } from "@/features/page-speed-insights/lcpElement";
 import {
@@ -162,17 +165,23 @@ function MetricSummaryCard({
   metric,
   causes,
   sources,
+  rowSpan,
 }: {
   metric: MetricSnapshot;
   causes: CauseAuditEntry[];
   sources: MetricAuditSource[];
+  /** Rows this card spans in the summary grid; shared by every card so their parts align. */
+  rowSpan: number;
 }) {
   const { auditId, title, description, auditItems } = metric;
   const measured = auditItems.filter((item) => hasNumericValue(item.audit));
   const unscored = auditItems.filter((item) => !hasNumericValue(item.audit));
 
   return (
-    <Card className="flex h-full min-w-0 w-full flex-col gap-3 overflow-hidden px-4 py-4">
+    <Card
+      className="mb-2 grid min-w-0 w-full grid-rows-subgrid gap-y-0 overflow-hidden px-4 py-4"
+      style={{ gridRow: `span ${rowSpan}` }}
+    >
       <CardTitle className="text-md min-w-0 leading-snug font-bold wrap-break-word">
         {title}
       </CardTitle>
@@ -183,10 +192,11 @@ function MetricSummaryCard({
           causes={causes}
           sources={sources}
           detail={false}
+          subgrid
         />
       ) : null}
       {unscored.length > 0 ? (
-        <div className="flex flex-col gap-3 text-sm">
+        <div className="flex flex-col gap-3 pt-3 text-sm [grid-row:-3]">
           {unscored.map(({ audit, label }, index) => (
             <MetricAuditRow
               key={`${auditId}_${label}`}
@@ -199,7 +209,7 @@ function MetricSummaryCard({
         </div>
       ) : null}
       {description ? (
-        <div className="mt-auto pt-1 text-xs leading-snug text-muted-foreground [&_p]:my-0">
+        <div className="self-end pt-4 text-xs leading-snug text-muted-foreground [grid-row:-2] [&_p]:my-0">
           <ReactMarkdown>{description}</ReactMarkdown>
         </div>
       ) : null}
@@ -209,17 +219,25 @@ function MetricSummaryCard({
 
 function CwvMetricsSummary({ sources }: { sources: MetricAuditSource[] }) {
   const metrics = METRIC_AUDIT_IDS.map((auditId) => readMetricSnapshot(auditId, sources));
+  const maxRuns = Math.max(
+    0,
+    ...metrics.map((metric) => metric.auditItems.filter((item) => hasNumericValue(item.audit)).length),
+  );
+  // Title, each run's parts, compare deltas, unscored audits, description.
+  const rowSpan = 1 + maxRuns * SUMMARY_ROWS_PER_RUN + 3;
 
   return (
     <AccordionItem value="cwv" className="print:border-0">
       <AccordionSectionTitleTrigger>Core Web Vitals Summary</AccordionSectionTitleTrigger>
-      <AccordionContent className="-mx-2 grid max-w-full grid-cols-1 items-stretch gap-2 min-[22rem]:grid-cols-[repeat(auto-fit,minmax(14rem,1fr))]">
+      {/* Cards subgrid these rows, so row gaps live on the cards (`mb-2`) to keep empty rows flat. */}
+      <AccordionContent className="-mx-2 grid max-w-full grid-cols-1 gap-x-2 gap-y-0 min-[22rem]:grid-cols-[repeat(auto-fit,minmax(14rem,1fr))]">
         {metrics.map((metric) => (
           <MetricSummaryCard
             key={metric.auditId}
             metric={metric}
             causes={collectCauseAuditsForMetric(metric.auditId, sources)}
             sources={sources}
+            rowSpan={rowSpan}
           />
         ))}
       </AccordionContent>

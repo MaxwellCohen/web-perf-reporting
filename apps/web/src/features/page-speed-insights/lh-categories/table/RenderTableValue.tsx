@@ -171,7 +171,7 @@ function SourceLocationLink({
       rel="noopener"
       target="_blank"
       {...props}
-      className={cn("break-all text-blue-600 underline hover:text-blue-800", props.className)}
+      className={cn("break-all text-sky-400 underline hover:text-sky-300", props.className)}
       title={title}
     >
       {children}

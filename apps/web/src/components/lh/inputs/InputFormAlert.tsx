@@ -17,7 +17,7 @@ export function InputFormAlert(props: InputFormAlertProps) {
   }
 
   return (
-    <Alert className="mt-4 border-green-200 bg-green-50 text-green-800">
+    <Alert className="mt-4 border-emerald-500/40 bg-emerald-500/10 text-emerald-300">
       <AlertTitle>Success</AlertTitle>
       <AlertDescription>JSON data has been successfully processed.</AlertDescription>
     </Alert>

@@ -1,6 +1,9 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { MetricValueViz } from "@/features/page-speed-insights/MetricValueViz";
+import {
+  MetricValueViz,
+  SUMMARY_ROWS_PER_RUN,
+} from "@/features/page-speed-insights/MetricValueViz";
 import type { CauseAuditEntry } from "@/features/page-speed-insights/metricCauseAudits";
 import type { AuditResult } from "@/lib/schema";
 
@@ -321,5 +324,26 @@ describe("MetricValueViz", () => {
     expect(text).toContain("Up to 100 ms in estimated savings");
     expect(text).not.toContain("Estimated savings");
     expect(text).not.toContain("Time to first byte");
+  });
+
+  it("flattens each run into a fixed number of subgrid items", () => {
+    const { container } = render(
+      <MetricValueViz
+        detail={false}
+        subgrid
+        auditId="total-blocking-time"
+        auditItems={["Mobile", "Desktop"].map((label) => ({
+          label,
+          audit: audit({ id: "total-blocking-time", title: "TBT", numericValue: 0 }),
+        }))}
+      />,
+    );
+
+    const scales = container.querySelectorAll('[data-testid="metric-scale-total-blocking-time"]');
+    expect(scales).toHaveLength(2);
+    for (const scale of scales) {
+      expect(scale.className).toBe("contents");
+      expect(scale.children).toHaveLength(SUMMARY_ROWS_PER_RUN);
+    }
   });
 });

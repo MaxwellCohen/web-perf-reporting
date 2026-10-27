@@ -151,7 +151,7 @@ function TreeResourceName({ value }: { value: string }) {
         {display.primary}
       </span>
       {display.secondary ? (
-        <span className="mt-0.5 block truncate font-mono text-[11px] leading-4 text-zinc-400">
+        <span className="mt-0.5 block truncate font-mono text-[11px] leading-4 text-muted-foreground">
           {display.secondary}
         </span>
       ) : null}
@@ -176,9 +176,9 @@ function TreeResourceName({ value }: { value: string }) {
 
 function MetricChip({ metric }: { metric: TreeMetric }) {
   return (
-    <span className="inline-flex items-baseline gap-1 rounded-sm bg-zinc-800/90 px-1.5 py-0.5 font-mono text-[10px] leading-4">
-      <span className="tracking-wider text-zinc-500 uppercase">{metric.label}</span>
-      <span className="text-zinc-100 tabular-nums">{metric.value}</span>
+    <span className="inline-flex items-baseline gap-1 rounded-sm bg-muted px-1.5 py-0.5 font-mono text-[10px] leading-4">
+      <span className="tracking-wider text-muted-foreground uppercase">{metric.label}</span>
+      <span className="text-foreground tabular-nums">{metric.value}</span>
     </span>
   );
 }
@@ -329,7 +329,7 @@ function TreeBranch({ items, depth }: { items: TreeDataItem[]; depth: number }) 
       role={depth === 0 ? "tree" : "group"}
       className={cn(
         "m-0 list-none p-0",
-        depth > 0 && "ml-2 border-l border-zinc-400",
+        depth > 0 && "ml-2 border-l border-border",
       )}
     >
       {items.map((item, index) => (
@@ -348,7 +348,7 @@ function TreeNode({ item, depth, isLast }: { item: TreeDataItem; depth: number; 
     <li role="treeitem" aria-expanded={hasChildren ? isExpanded : undefined} className="relative">
       {depth > 0 ? (
         <>
-          <span aria-hidden className="absolute top-3.5 -left-px h-px w-1.75 bg-zinc-400" />
+          <span aria-hidden className="absolute top-3.5 -left-px h-px w-1.75 bg-border" />
           {isLast ? (
             <span aria-hidden className="absolute top-3.75 -left-px bottom-0 w-px bg-background" />
           ) : null}
@@ -388,8 +388,8 @@ function TreeRow({ item, depth }: { item: TreeDataItem; depth: number }) {
     <div
       className={cn(
         "flex min-w-0 items-start gap-2 rounded-md py-1 pr-2",
-        highlight ? "bg-red-950/40 ring-1 ring-red-400/40 ring-inset" : "hover:bg-zinc-800/70",
-        isSelected && "ring-1 ring-zinc-300/70 ring-inset",
+        highlight ? "bg-rose-950/40 ring-1 ring-rose-400/40 ring-inset" : "hover:bg-accent",
+        isSelected && "ring-1 ring-ring/70 ring-inset",
         isDragOver && "bg-primary/15",
       )}
       onClick={() => {
@@ -409,7 +409,7 @@ function TreeRow({ item, depth }: { item: TreeDataItem; depth: number }) {
       {depth === 0 ? (
         <span aria-hidden className="mt-1.5 grid w-4 shrink-0 place-items-center">
           <span
-            className={cn("size-1.5 rounded-full", highlight ? "bg-red-400" : "bg-zinc-300")}
+            className={cn("size-1.5 rounded-full", highlight ? "bg-rose-400" : "bg-muted-foreground")}
           />
         </span>
       ) : null}
@@ -423,7 +423,7 @@ function TreeRow({ item, depth }: { item: TreeDataItem; depth: number }) {
               <MetricChip key={`${metric.label}-${metric.value}`} metric={metric} />
             ))}
             {highlight ? (
-              <span className="inline-flex items-center rounded-sm bg-red-500/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-red-300 uppercase">
+              <span className="inline-flex items-center rounded-sm bg-rose-500/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-rose-300 uppercase">
                 Longest chain
               </span>
             ) : null}

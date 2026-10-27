@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import type { Components } from "react-markdown";
 
-const linkClassName = "text-blue-600 dark:text-blue-400 hover:underline";
+const linkClassName = "text-sky-400 hover:underline";
 
 type RecommendationMarkdownOptions = {
   code?: boolean;
