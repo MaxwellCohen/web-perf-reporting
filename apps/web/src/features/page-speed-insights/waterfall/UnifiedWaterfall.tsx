@@ -67,8 +67,11 @@ import { formatMs } from "@/features/page-speed-insights/shared/format";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { cn } from "@/lib/utils";
 
-export function scrollToMoment(eventId: string) {
-  const el = document.getElementById(`timeline-moment-${eventId}`);
+export function scrollToMoment(eventId: string, idPrefix?: string) {
+  const id = idPrefix
+    ? `timeline-moment-${idPrefix}-${eventId}`
+    : `timeline-moment-${eventId}`;
+  const el = document.getElementById(id);
   el?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -372,6 +375,8 @@ export type UnifiedWaterfallProps = {
   /** When false, omit collapse chrome (ClassicView accordion already collapses). */
   collapsible?: boolean;
   showToolbar?: boolean;
+  /** Prefix for moment anchor ids when multiple timelines are mounted. */
+  momentIdPrefix?: string;
 };
 
 export function UnifiedWaterfall({
@@ -381,6 +386,7 @@ export function UnifiedWaterfall({
   stickyTopPx = 0,
   collapsible = true,
   showToolbar = true,
+  momentIdPrefix,
 }: UnifiedWaterfallProps) {
   const {
     types: resourceTypes,
@@ -581,7 +587,7 @@ export function UnifiedWaterfall({
           guides={rangedGuides}
           selectedId={selectedRowId}
           onSelectRow={setSelectedRowId}
-          onActivateMoment={scrollToMoment}
+          onActivateMoment={(eventId) => scrollToMoment(eventId, momentIdPrefix)}
           heightSize="full"
           overview
           emptyMessage={
@@ -603,7 +609,11 @@ export function UnifiedWaterfall({
           <button
             type="button"
             aria-expanded={open}
-            aria-controls="timeline-overview-panel"
+            aria-controls={
+              momentIdPrefix
+                ? `timeline-overview-panel-${momentIdPrefix}`
+                : "timeline-overview-panel"
+            }
             onClick={() => setOpen((value) => !value)}
             className="flex min-w-0 items-start gap-1.5 rounded-sm text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring sm:items-center"
           >
@@ -693,7 +703,11 @@ export function UnifiedWaterfall({
 
       {panelOpen ? (
         <div
-          id="timeline-overview-panel"
+          id={
+            momentIdPrefix
+              ? `timeline-overview-panel-${momentIdPrefix}`
+              : "timeline-overview-panel"
+          }
           role="region"
           aria-labelledby={summaryId}
           className="space-y-2"

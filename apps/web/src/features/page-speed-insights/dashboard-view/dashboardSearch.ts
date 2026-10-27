@@ -6,7 +6,7 @@
  * legacy tab=network|javascript open Resources
  * stage=arrived|scripts|unused|main-thread  suspect= — Resources investigation deep link
  * labels, category, priority, expand, type, groups — repeatable; omitted means "all" or "none"
- * report — timeline and waterfall report label
+ * report — timeline/waterfall report label(s); repeatable, up to 2 for side-by-side timeline
  * tasks — timeline task filters; omitted means all on; `tasks=` means all off
  * sort=start|end|duration|size  height=default|large|xl|full  rows=expanded|collapsed
  * blocking=1 — waterfall shows blocking items only
@@ -71,7 +71,8 @@ export type DashboardSearchState = {
   view: DashboardViewMode | null;
   tab: DashboardTab;
   labels: string[];
-  report: string;
+  /** Selected timeline/waterfall report labels (0–2). Empty → UI picks a default. */
+  report: string[];
   categories: string[];
   priorities: string[];
   expanded: string[];
@@ -98,7 +99,7 @@ export type DashboardSearchPatch = {
   view?: DashboardViewMode | null;
   tab?: DashboardTab | null;
   labels?: string[] | null;
-  report?: string | null;
+  report?: string[] | null;
   categories?: string[] | null;
   priorities?: string[] | null;
   expanded?: string[] | null;
@@ -175,7 +176,7 @@ export function parseDashboardSearch(search: string): DashboardSearchState {
     view: isDashboardViewMode(view) ? view : null,
     tab: readTab(tab),
     labels: readList(params, "labels"),
-    report: params.get("report") ?? "",
+    report: readList(params, "report"),
     categories: readList(params, "category"),
     priorities: readList(params, "priority"),
     expanded: readList(params, "expand"),
@@ -226,7 +227,7 @@ export function applyDashboardSearchPatch(
   if (patch.tab !== undefined)
     writeText(next, "tab", patch.tab && patch.tab !== "overview" ? patch.tab : null);
   if (patch.labels !== undefined) writeList(next, "labels", patch.labels, "delete");
-  if (patch.report !== undefined) writeText(next, "report", patch.report);
+  if (patch.report !== undefined) writeList(next, "report", patch.report, "delete");
   if (patch.categories !== undefined) writeList(next, "category", patch.categories, "delete");
   if (patch.priorities !== undefined) writeList(next, "priority", patch.priorities, "delete");
   if (patch.expanded !== undefined) writeList(next, "expand", patch.expanded, "delete");

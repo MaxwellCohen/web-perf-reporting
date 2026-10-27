@@ -229,7 +229,10 @@ export function ResourcesStory() {
   const items = usePageSpeedItems();
   const search = useDashboardSearchState();
   const reports = useMemo(() => resourcesInvestigationsFromItems(items), [items]);
-  const active = reports.find((report) => report.label === search.report) ?? reports[0];
+  const active =
+    search.report
+      .map((label) => reports.find((item) => item.label === label))
+      .find((item) => item != null) ?? reports[0];
 
   if (!active) {
     return (
@@ -278,7 +281,7 @@ export function ResourcesStory() {
       suspectUrl={search.suspect || null}
       entry={entry}
       onSelectReport={(label) =>
-        patchDashboardSearch({ report: label, stage: null, suspect: null })
+        patchDashboardSearch({ report: [label], stage: null, suspect: null })
       }
       onSelectStage={selectStage}
       onSelectSuspect={selectSuspect}

@@ -24,7 +24,10 @@ import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedConte
 import { RenderNodeImage } from "@/features/page-speed-insights/lh-categories/table/RenderNode";
 import { patchDashboardSearch } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
-import { CompareRunSwitch } from "@/features/page-speed-insights/shared/CompareRunSwitch";
+import {
+  getCompareRuns,
+  pairByFormFactor,
+} from "@/features/page-speed-insights/shared/compareRuns";
 import { formatMs, formatNetworkPriority } from "@/features/page-speed-insights/shared/format";
 import {
   chainLabel,
@@ -40,6 +43,7 @@ import {
   type WaterfallRowKind,
 } from "@/features/page-speed-insights/waterfall/waterfallData";
 import { cn } from "@/lib/cn";
+import { buildAlignedCompareRows } from "./buildAlignedCompareRows";
 import { buildPageLoadTimelineBundles } from "./buildPageLoadTimeline";
 import {
   TASK_FILTERS,
@@ -612,24 +616,34 @@ function MomentRail({ moment }: { moment: TimelineEvent }) {
   );
 }
 
-function momentAnchorId(id: string): string {
-  return `timeline-moment-${id}`;
+/** Slug for namespacing moment anchors when dual timelines mount. */
+export function momentIdPrefixFromLabel(label: string): string {
+  return label
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
+function momentAnchorId(id: string, idPrefix?: string): string {
+  return idPrefix ? `timeline-moment-${idPrefix}-${id}` : `timeline-moment-${id}`;
+}
 
 function MomentRow({
   moment,
   axisEnd,
   deviceLabel,
   showPhaseHeader,
+  idPrefix,
 }: {
   moment: TimelineEvent;
   axisEnd: number;
   deviceLabel: string;
   showPhaseHeader: boolean;
+  idPrefix?: string;
 }) {
   return (
-    <li className="relative scroll-mt-28" id={momentAnchorId(moment.id)}>
+    <li className="relative scroll-mt-28" id={momentAnchorId(moment.id, idPrefix)}>
       {showPhaseHeader ? <PhaseHeader title={moment.phaseTitle} /> : null}
 
       <div className="grid grid-cols-[4.75rem_minmax(0,1fr)] gap-3 sm:grid-cols-[5.75rem_minmax(0,1fr)]">
@@ -696,64 +710,229 @@ function TaskFilters({
   );
 }
 
+function TimelineLegend({ simulationLabel }: { simulationLabel?: string }) {
+  return (
+    <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground sm:text-sm">
+      <span className="inline-flex items-center gap-1">
+        <span className="size-2 rounded-full bg-rose-500" /> Blocking
+      </span>
+      <span className="inline-flex items-center gap-1">
+        <span className="size-2 rounded-full bg-amber-500" /> Core Web Vital
+      </span>
+      <span className="inline-flex items-center gap-1">
+        <span className="size-2 rounded-full bg-sky-500" /> Marker
+      </span>
+      <span className="text-muted-foreground/80">Scroll down from 0 ms</span>
+      {simulationLabel ? (
+        <span className="text-muted-foreground/80">
+          Times include simulated {simulationLabel}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
 function VerticalTimeline({
   load,
   timeline,
   stickyTopPx = 0,
+  idPrefix,
+  showMoments = true,
+  showLegend = true,
 }: {
   load: CombinedLoad;
   timeline: PageLoadTimeline;
   stickyTopPx?: number;
+  idPrefix?: string;
+  showMoments?: boolean;
+  showLegend?: boolean;
 }) {
   const { events, axisEndMs } = timeline;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground sm:text-sm">
-        <span className="inline-flex items-center gap-1">
-          <span className="size-2 rounded-full bg-rose-500" /> Blocking
-        </span>
-        <span className="inline-flex items-center gap-1">
-          <span className="size-2 rounded-full bg-amber-500" /> Core Web Vital
-        </span>
-        <span className="inline-flex items-center gap-1">
-          <span className="size-2 rounded-full bg-sky-500" /> Marker
-        </span>
-        <span className="text-muted-foreground/80">Scroll down from 0 ms</span>
-        {timeline.simulationLabel ? (
-          <span className="text-muted-foreground/80">
-            Times include simulated {timeline.simulationLabel}
-          </span>
-        ) : null}
-      </div>
+    <div className="flex flex-col gap-4" data-axis-end-ms={axisEndMs}>
+      {showLegend ? <TimelineLegend simulationLabel={timeline.simulationLabel} /> : null}
 
       <UnifiedWaterfall
         load={load}
         events={events}
         axisEndMs={axisEndMs}
         stickyTopPx={stickyTopPx}
+        momentIdPrefix={idPrefix}
       />
 
-      <div className="relative">
-        <div
-          aria-hidden
-          className="absolute bottom-4 left-[2.375rem] top-2 w-px -translate-x-1/2 bg-border sm:left-[2.875rem]"
-        />
+      {showMoments ? (
+        <div className="relative">
+          <div
+            aria-hidden
+            className="absolute bottom-4 left-[2.375rem] top-2 w-px -translate-x-1/2 bg-border sm:left-[2.875rem]"
+          />
 
-        <ol className="relative m-0 list-none p-0">
-          {events.map((moment) => (
-            <MomentRow
-              key={`${moment.phaseId}-${moment.id}`}
-              moment={moment}
-              axisEnd={axisEndMs}
-              deviceLabel={load.label}
-              showPhaseHeader={!!moment.isPhaseStart}
-            />
-          ))}
-        </ol>
-      </div>
+          <ol className="relative m-0 list-none p-0">
+            {events.map((moment) => (
+              <MomentRow
+                key={`${moment.phaseId}-${moment.id}`}
+                moment={moment}
+                axisEnd={axisEndMs}
+                deviceLabel={load.label}
+                showPhaseHeader={!!moment.isPhaseStart}
+                idPrefix={idPrefix}
+              />
+            ))}
+          </ol>
+        </div>
+      ) : null}
     </div>
   );
+}
+
+function AlignedCompareMoments({
+  left,
+  right,
+  axisEndMs,
+}: {
+  left: { label: string; events: TimelineEvent[]; idPrefix: string };
+  right: { label: string; events: TimelineEvent[]; idPrefix: string };
+  axisEndMs: number;
+}) {
+  const rows = buildAlignedCompareRows(left.events, right.events);
+
+  return (
+    <div className="relative" data-testid="timeline-aligned-moments">
+      <div
+        className="mb-2 grid grid-cols-[minmax(0,1fr)_4.5rem_minmax(0,1fr)] items-end gap-2 border-b border-border/70 pb-2 text-xs font-semibold text-muted-foreground"
+        aria-hidden
+      >
+        <p className="truncate">{left.label}</p>
+        <p className="text-center tabular-nums">Time</p>
+        <p className="truncate text-right">{right.label}</p>
+      </div>
+      <ol className="relative m-0 list-none space-y-3 p-0">
+        {rows.map((row) => (
+          <li
+            key={row.timeMs}
+            className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_4.5rem_minmax(0,1fr)] sm:items-start sm:gap-2"
+            data-testid="timeline-aligned-row"
+            data-time-ms={row.timeMs}
+          >
+            <div className="min-w-0 space-y-2">
+              {row.left.map((moment) => (
+                <div key={`l-${moment.phaseId}-${moment.id}`} id={momentAnchorId(moment.id, left.idPrefix)}>
+                  <MomentCard
+                    moment={moment}
+                    axisEnd={axisEndMs}
+                    deviceLabel={left.label}
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center justify-center sm:pt-3">
+              <span className="rounded-md bg-muted px-2 py-1 text-center text-xs font-semibold tabular-nums text-foreground">
+                {formatMs(row.timeMs)}
+              </span>
+            </div>
+            <div className="min-w-0 space-y-2">
+              {row.right.map((moment) => (
+                <div key={`r-${moment.phaseId}-${moment.id}`} id={momentAnchorId(moment.id, right.idPrefix)}>
+                  <MomentCard
+                    moment={moment}
+                    axisEnd={axisEndMs}
+                    deviceLabel={right.label}
+                  />
+                </div>
+              ))}
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+type TimelineBundle = NonNullable<ReturnType<typeof buildPageLoadTimelineBundles>[number]>;
+
+function filterBundleTimeline(
+  bundle: TimelineBundle,
+  enabledTasks: TaskFilterSelection,
+): PageLoadTimeline {
+  const events = filterTimelineMoments(bundle.timeline.events, enabledTasks);
+  return events === bundle.timeline.events
+    ? bundle.timeline
+    : { ...bundle.timeline, events };
+}
+
+function TimelinePane({
+  bundle,
+  timeline,
+  stickyTopPx,
+  showLabel,
+  idPrefix,
+  showMoments = true,
+  showLegend = true,
+}: {
+  bundle: TimelineBundle;
+  timeline: PageLoadTimeline;
+  stickyTopPx: number;
+  showLabel: boolean;
+  idPrefix?: string;
+  showMoments?: boolean;
+  showLegend?: boolean;
+}) {
+  const name = timeline.label?.trim() || "Report";
+  return (
+    <div className="min-w-0" data-testid="timeline-pane" data-timeline-label={name}>
+      {showLabel ? (
+        <p className="mb-2 truncate text-sm font-semibold text-muted-foreground">{name}</p>
+      ) : null}
+      <VerticalTimeline
+        key={name}
+        load={bundle.load}
+        timeline={timeline}
+        stickyTopPx={stickyTopPx}
+        idPrefix={idPrefix}
+        showMoments={showMoments}
+        showLegend={showLegend}
+      />
+    </div>
+  );
+}
+
+export const TIMELINE_COMPARE_MAX = 2;
+
+function defaultSelectedLabels(
+  bundles: TimelineBundle[],
+  labeledBundles: Array<{ label: string; bundle: TimelineBundle }>,
+): string[] {
+  const compare = getCompareRuns(labeledBundles);
+  if (compare.mode === "compare") {
+    const pair = pairByFormFactor(labeledBundles, compare.runs)[0];
+    if (pair) {
+      const labels = [pair.a?.label, pair.b?.label].filter((label): label is string => !!label);
+      if (labels.length) return labels.slice(0, TIMELINE_COMPARE_MAX);
+    }
+  }
+  return bundles[0] ? [bundles[0].timeline.label] : [];
+}
+
+function resolveSelectedLabels(
+  urlReports: string[],
+  bundles: TimelineBundle[],
+  labeledBundles: Array<{ label: string; bundle: TimelineBundle }>,
+): string[] {
+  const known = urlReports.filter((label) =>
+    bundles.some((bundle) => bundle.timeline.label === label),
+  );
+  if (known.length) return known.slice(0, TIMELINE_COMPARE_MAX);
+  return defaultSelectedLabels(bundles, labeledBundles);
+}
+
+function toggleSelectedLabel(selected: string[], label: string): string[] {
+  if (selected.includes(label)) {
+    if (selected.length <= 1) return selected;
+    return selected.filter((value) => value !== label);
+  }
+  if (selected.length < TIMELINE_COMPARE_MAX) return [...selected, label];
+  return [...selected.slice(1), label];
 }
 
 export function PageLoadTimeline() {
@@ -767,10 +946,33 @@ export function PageLoadTimeline() {
     [tasks],
   );
 
-  const activeBundle =
-    bundles.find((bundle) => bundle.timeline.label === report) ?? bundles[0] ?? null;
-  const active = activeBundle?.timeline ?? null;
-  const taskOptions = active ? availableTaskFilters(active.events) : [];
+  const labeledBundles = useMemo(
+    () => bundles.map((bundle) => ({ label: bundle.timeline.label, bundle })),
+    [bundles],
+  );
+
+  const selectedLabels = useMemo(
+    () => resolveSelectedLabels(report, bundles, labeledBundles),
+    [report, bundles, labeledBundles],
+  );
+
+  const selectedEntries = useMemo(
+    () =>
+      selectedLabels
+        .map((label) => labeledBundles.find((entry) => entry.label === label))
+        .filter((entry): entry is (typeof labeledBundles)[number] => entry != null),
+    [selectedLabels, labeledBundles],
+  );
+
+  const comparing = selectedEntries.length === TIMELINE_COMPARE_MAX;
+  const primary = selectedEntries[0] ?? null;
+
+  const taskSourceEvents = comparing
+    ? selectedEntries.flatMap((entry) => entry.bundle.timeline.events)
+    : (primary?.bundle.timeline.events ?? []);
+  const taskOptions = availableTaskFilters(taskSourceEvents);
+
+  const stickyKey = selectedLabels.join("|");
 
   useEffect(() => {
     const el = stickyHeaderRef.current;
@@ -780,19 +982,15 @@ export function PageLoadTimeline() {
     const observer = new ResizeObserver(update);
     observer.observe(el);
     return () => observer.disconnect();
-  }, [active?.label, taskOptions.length, bundles.length]);
+  }, [stickyKey, taskOptions.length, bundles.length]);
 
-  if (!bundles.length || !activeBundle || !active) {
+  if (!bundles.length || !primary) {
     return (
       <p className="px-1 py-6 text-sm text-muted-foreground" role="status">
         No lab metrics available to build a page load timeline.
       </p>
     );
   }
-
-  const reportName = active.label?.trim() || "Report";
-  const events = filterTimelineMoments(active.events, enabledTasks);
-  const timeline = events === active.events ? active : { ...active, events };
 
   function toggleTask(id: TaskFilterId) {
     const next = new Set(enabledTasks);
@@ -804,6 +1002,36 @@ export function PageLoadTimeline() {
     });
   }
 
+  function selectReport(label: string) {
+    patchDashboardSearch({ report: toggleSelectedLabel(selectedLabels, label) });
+  }
+
+  const filteredEntries = selectedEntries.map((entry) => ({
+    ...entry,
+    timeline: filterBundleTimeline(entry.bundle, enabledTasks),
+  }));
+
+  const sharedAxisEndMs = Math.max(
+    ...filteredEntries.map((entry) => entry.bundle.timeline.axisEndMs),
+    0,
+  );
+  const panes = filteredEntries.map((entry) => ({
+    ...entry,
+    timeline: comparing
+      ? { ...entry.timeline, axisEndMs: sharedAxisEndMs }
+      : entry.timeline,
+  }));
+
+  const shownCount = panes.reduce((sum, p) => sum + p.timeline.events.length, 0);
+  const totalCount = selectedEntries.reduce(
+    (sum, p) => sum + p.bundle.timeline.events.length,
+    0,
+  );
+  const markdown = panes.map((entry) => timelineToMarkdown(entry.timeline)).join("\n\n");
+  const headerTitle = comparing
+    ? panes.map((entry) => entry.label).join(" vs ")
+    : panes[0]?.label?.trim() || "Report";
+
   return (
     <div className="flex flex-col gap-4" data-testid="page-load-timeline">
       <div
@@ -813,23 +1041,22 @@ export function PageLoadTimeline() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              Viewing report
+              {comparing ? "Comparing" : "Viewing report"}
             </p>
             <p className="truncate text-base font-semibold" data-testid="timeline-report-label">
-              {reportName}
+              {headerTitle}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <CompareRunSwitch
-              labels={bundles.map((bundle) => bundle.timeline.label)}
-              currentLabel={active.label}
-              onSelectLabel={(label) => patchDashboardSearch({ report: label })}
-            />
             {bundles.length > 1 ? (
-              <div className="flex flex-wrap gap-2" role="tablist" aria-label="Report device">
+              <div
+                className="flex flex-wrap gap-2"
+                role="group"
+                aria-label="Reports to compare"
+              >
                 {bundles.map((bundle) => {
                   const name = bundle.timeline.label?.trim() || "Report";
-                  const selected = bundle.timeline.label === active.label;
+                  const selected = selectedLabels.includes(bundle.timeline.label);
                   return (
                     <Button
                       key={bundle.timeline.label}
@@ -837,7 +1064,7 @@ export function PageLoadTimeline() {
                       size="sm"
                       variant={selected ? "default" : "outline"}
                       aria-pressed={selected}
-                      onClick={() => patchDashboardSearch({ report: bundle.timeline.label })}
+                      onClick={() => selectReport(bundle.timeline.label)}
                     >
                       {name}
                     </Button>
@@ -846,7 +1073,7 @@ export function PageLoadTimeline() {
               </div>
             ) : null}
             <CopyButton
-              text={timelineToMarkdown(timeline)}
+              text={markdown}
               size="sm"
               title="Copy timeline as Markdown"
               aria-label="Copy timeline as Markdown"
@@ -859,17 +1086,58 @@ export function PageLoadTimeline() {
         <TaskFilters
           options={taskOptions}
           enabled={enabledTasks}
-          shown={events.length}
-          total={active.events.length}
+          shown={shownCount}
+          total={totalCount}
           onToggle={toggleTask}
         />
       </div>
-      <VerticalTimeline
-        key={active.label}
-        load={activeBundle.load}
-        timeline={timeline}
-        stickyTopPx={stickyTopPx}
-      />
+      {comparing ? (
+        <div
+          className="flex flex-col gap-4"
+          data-testid="timeline-compare"
+          data-shared-axis-end-ms={sharedAxisEndMs}
+        >
+          <TimelineLegend
+            simulationLabel={
+              panes.find((entry) => entry.timeline.simulationLabel)?.timeline.simulationLabel
+            }
+          />
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {panes.map((entry) => (
+              <TimelinePane
+                key={entry.label}
+                bundle={entry.bundle}
+                timeline={entry.timeline}
+                stickyTopPx={stickyTopPx}
+                showLabel
+                idPrefix={momentIdPrefixFromLabel(entry.label)}
+                showMoments={false}
+                showLegend={false}
+              />
+            ))}
+          </div>
+          <AlignedCompareMoments
+            left={{
+              label: panes[0].label,
+              events: panes[0].timeline.events,
+              idPrefix: momentIdPrefixFromLabel(panes[0].label),
+            }}
+            right={{
+              label: panes[1].label,
+              events: panes[1].timeline.events,
+              idPrefix: momentIdPrefixFromLabel(panes[1].label),
+            }}
+            axisEndMs={sharedAxisEndMs}
+          />
+        </div>
+      ) : (
+        <TimelinePane
+          bundle={panes[0].bundle}
+          timeline={panes[0].timeline}
+          stickyTopPx={stickyTopPx}
+          showLabel={false}
+        />
+      )}
     </div>
   );
 }

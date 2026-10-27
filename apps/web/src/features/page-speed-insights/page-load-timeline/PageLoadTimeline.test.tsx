@@ -641,15 +641,39 @@ describe("PageLoadTimeline", () => {
     expect(screen.getByTestId("overview-lanes")).toHaveTextContent("hero.png");
   });
 
-  it("switches between report labels", () => {
+  it("multi-selects a second report for side-by-side compare", () => {
+    window.history.replaceState(null, "", "/");
     mockItems.current = [reportItem("Mobile"), reportItem("Desktop")];
     render(<PageLoadTimeline />);
 
     expect(screen.getByTestId("timeline-report-label")).toHaveTextContent("Mobile");
-    expect(screen.getByRole("button", { name: "Mobile" })).toBeInTheDocument();
+    expect(screen.queryByTestId("timeline-compare")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Mobile" })).toHaveAttribute("aria-pressed", "true");
+
     fireEvent.click(screen.getByRole("button", { name: "Desktop" }));
-    expect(screen.getByTestId("timeline-report-label")).toHaveTextContent("Desktop");
-    expect(new URLSearchParams(window.location.search).get("report")).toBe("Desktop");
+
+    expect(screen.getByTestId("timeline-report-label")).toHaveTextContent("Mobile vs Desktop");
+    const compare = screen.getByTestId("timeline-compare");
+    const panes = within(compare).getAllByTestId("timeline-pane");
+    expect(panes).toHaveLength(2);
+    expect(panes[0]).toHaveAttribute("data-timeline-label", "Mobile");
+    expect(panes[1]).toHaveAttribute("data-timeline-label", "Desktop");
+    expect(new URLSearchParams(window.location.search).getAll("report")).toEqual([
+      "Mobile",
+      "Desktop",
+    ]);
+  });
+
+  it("deselects a report from the compare pair", () => {
+    window.history.replaceState(null, "", "/?report=Mobile&report=Desktop");
+    mockItems.current = [reportItem("Mobile"), reportItem("Desktop")];
+    render(<PageLoadTimeline />);
+
+    expect(screen.getByTestId("timeline-compare")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Desktop" }));
+    expect(screen.queryByTestId("timeline-compare")).not.toBeInTheDocument();
+    expect(screen.getByTestId("timeline-report-label")).toHaveTextContent("Mobile");
+    expect(new URLSearchParams(window.location.search).getAll("report")).toEqual(["Mobile"]);
   });
 
   it("opens the report named in the URL", () => {
@@ -658,6 +682,7 @@ describe("PageLoadTimeline", () => {
     render(<PageLoadTimeline />);
 
     expect(screen.getByTestId("timeline-report-label")).toHaveTextContent("Desktop");
+    expect(screen.getByRole("button", { name: "Desktop" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: "Non-blocking" })).toHaveAttribute(
       "aria-pressed",
       "true",
@@ -666,5 +691,95 @@ describe("PageLoadTimeline", () => {
       "aria-pressed",
       "false",
     );
+  });
+
+  it("defaults A/B runs to the first form-factor pair side-by-side", () => {
+    window.history.replaceState(null, "", "/");
+    mockItems.current = [reportItem("A · Mobile"), reportItem("B · Mobile")];
+    render(<PageLoadTimeline />);
+
+    expect(screen.getByTestId("timeline-report-label")).toHaveTextContent(
+      "A · Mobile vs B · Mobile",
+    );
+    const compare = screen.getByTestId("timeline-compare");
+    const panes = within(compare).getAllByTestId("timeline-pane");
+    expect(panes).toHaveLength(2);
+    expect(panes[0]).toHaveAttribute("data-timeline-label", "A · Mobile");
+    expect(panes[1]).toHaveAttribute("data-timeline-label", "B · Mobile");
+    expect(within(compare).getByTestId("timeline-aligned-moments")).toBeInTheDocument();
+    expect(document.getElementById("timeline-moment-a-mobile-sub-lcp")).toBeTruthy();
+    expect(document.getElementById("timeline-moment-b-mobile-sub-lcp")).toBeTruthy();
+    expect(document.getElementById("timeline-moment-sub-lcp")).toBeNull();
+  });
+
+  it("aligns equal timestamps on the same compare row", () => {
+    window.history.replaceState(null, "", "/?report=Mobile&report=Desktop");
+    mockItems.current = [reportItem("Mobile"), reportItem("Desktop")];
+    render(<PageLoadTimeline />);
+
+    const aligned = screen.getByTestId("timeline-aligned-moments");
+    const zeroRow = within(aligned)
+      .getAllByTestId("timeline-aligned-row")
+      .find((row) => row.getAttribute("data-time-ms") === "0");
+    expect(zeroRow).toBeTruthy();
+    expect(within(zeroRow!).getAllByText("Navigation start")).toHaveLength(2);
+  });
+
+  it("lets multi-select pick any two A/B form-factor reports", () => {
+    window.history.replaceState(null, "", "/");
+    mockItems.current = [
+      reportItem("A · Mobile"),
+      reportItem("A · Desktop"),
+      reportItem("B · Mobile"),
+      reportItem("B · Desktop"),
+    ];
+    render(<PageLoadTimeline />);
+
+    expect(screen.getByTestId("timeline-report-label")).toHaveTextContent(
+      "A · Mobile vs B · Mobile",
+    );
+    fireEvent.click(screen.getByRole("button", { name: "A · Mobile" }));
+    expect(screen.queryByTestId("timeline-compare")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "A · Desktop" }));
+    fireEvent.click(screen.getByRole("button", { name: "B · Desktop" }));
+    expect(screen.getByTestId("timeline-report-label")).toHaveTextContent(
+      "A · Desktop vs B · Desktop",
+    );
+    expect(new URLSearchParams(window.location.search).getAll("report")).toEqual([
+      "A · Desktop",
+      "B · Desktop",
+    ]);
+  });
+
+  it("shares the longer axis end across compare panes", () => {
+    window.history.replaceState(null, "", "/");
+    const short = reportItem("A · Mobile");
+    const long = reportItem("B · Mobile");
+    const longMetrics = long.item.lighthouseResult.audits.metrics.details.items[0] as Record<
+      string,
+      number
+    >;
+    longMetrics.interactive = 9000;
+    longMetrics.observedTraceEnd = 10000;
+    mockItems.current = [short, long];
+    render(<PageLoadTimeline />);
+
+    const compare = screen.getByTestId("timeline-compare");
+    const shared = Number(compare.getAttribute("data-shared-axis-end-ms"));
+    expect(shared).toBeGreaterThanOrEqual(10000);
+    const panes = within(compare).getAllByTestId("timeline-pane");
+    expect(panes).toHaveLength(2);
+    for (const pane of panes) {
+      const axis = pane.querySelector("[data-axis-end-ms]");
+      expect(axis).toHaveAttribute("data-axis-end-ms", String(shared));
+    }
+  });
+
+  it("keeps unprefixed moment ids in single-run mode", () => {
+    window.history.replaceState(null, "", "/");
+    mockItems.current = [reportItem("Mobile")];
+    render(<PageLoadTimeline />);
+    expect(document.getElementById("timeline-moment-sub-lcp")).toBeTruthy();
+    expect(screen.queryByTestId("timeline-compare")).not.toBeInTheDocument();
   });
 });

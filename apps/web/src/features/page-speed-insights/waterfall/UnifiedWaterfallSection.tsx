@@ -17,7 +17,10 @@ export function UnifiedWaterfallSection() {
   const items = usePageSpeedItems();
   const { report } = useDashboardSearchState();
   const bundles = useMemo(() => buildPageLoadTimelineBundles(items), [items]);
-  const active = bundles.find((bundle) => bundle.timeline.label === report) ?? bundles[0];
+  const active =
+    report
+      .map((label) => bundles.find((bundle) => bundle.timeline.label === label))
+      .find((bundle) => bundle != null) ?? bundles[0];
 
   if (!items.length || !active) {
     return null;
