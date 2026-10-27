@@ -41,6 +41,7 @@ import {
 } from "@/features/page-speed-insights/tanstack-table-v9/tableStateHelpers";
 import { tanstackTableCellDataProps } from "@/features/page-speed-insights/shared/tanstackTableCellDataProps";
 import { shouldShowSeparateTablesPerReport } from "@/features/page-speed-insights/auditTableConfig";
+import { AuditTableViz } from "@/features/page-speed-insights/audit-viz/AuditTableViz";
 import { MainThreadWorkBreakdownTable } from "@/features/page-speed-insights/javascript-metrics/MainThreadWorkBreakdownTable";
 import { buildMainThreadWorkTableFromDetailRows } from "@/features/page-speed-insights/javascript-metrics/mainThreadWorkTable";
 import { LCPBreakdownTable } from "@/features/page-speed-insights/network-metrics/LCPBreakdownTable";
@@ -500,47 +501,69 @@ export function DetailTable({
   }
 
   const auditId = getAuditId(rows);
+  const viz = <AuditTableViz rows={rows} />;
+
   if (auditId === "lcp-breakdown-insight") {
     const breakdown = buildLcpBreakdownTableFromDetailRows(rows);
-    if (!breakdown) return null;
+    if (!breakdown) return viz;
 
     return (
-      <div className="w-full overflow-x-auto">
-        <LCPBreakdownTable
-          tableRows={breakdown.tableRows}
-          reportLabels={breakdown.reportLabels}
-        />
+      <div className="w-full min-w-0 space-y-4">
+        {viz}
+        <div className="w-full overflow-x-auto">
+          <LCPBreakdownTable
+            tableRows={breakdown.tableRows}
+            reportLabels={breakdown.reportLabels}
+          />
+        </div>
       </div>
     );
   }
 
   if (auditId === "mainthread-work-breakdown") {
     const breakdown = buildMainThreadWorkTableFromDetailRows(rows);
-    if (!breakdown) return null;
+    if (!breakdown) return viz;
 
     return (
-      <div className="w-full overflow-x-auto">
-        <MainThreadWorkBreakdownTable rows={breakdown.rows} reportLabels={breakdown.reportLabels} />
+      <div className="w-full min-w-0 space-y-4">
+        {viz}
+        <div className="w-full overflow-x-auto">
+          <MainThreadWorkBreakdownTable rows={breakdown.rows} reportLabels={breakdown.reportLabels} />
+        </div>
       </div>
     );
   }
 
   if (auditId && shouldShowSeparateTablesPerReport(auditId)) {
-    return <DetailTableSeparatePerReport rows={rows} title={title} embedded={embedded} />;
+    return (
+      <div className="w-full min-w-0 space-y-4">
+        {viz}
+        <DetailTableSeparatePerReport rows={rows} title={title} embedded={embedded} />
+      </div>
+    );
   }
 
   const showUserLabel = rows.length > 1;
   const hasSubitems = hasDetailSubitems(rows);
 
   // Route to appropriate table component based on data structure
+  let table: ReactElement | null = null;
   if (!showUserLabel) {
     if (!hasSubitems) {
-      return <DetailTableWith1ReportAndNoSubitem rows={rows} title={title} embedded={embedded} />;
+      table = <DetailTableWith1ReportAndNoSubitem rows={rows} title={title} embedded={embedded} />;
+    } else {
+      table = <DetailTableWithSubitems rows={rows} title={title} embedded={embedded} />;
     }
-    return <DetailTableWithSubitems rows={rows} title={title} embedded={embedded} />;
+  } else {
+    table = <DetailTableFull rows={rows} title={title} />;
   }
 
-  return <DetailTableFull rows={rows} title={title} />;
+  return (
+    <div className="w-full min-w-0 space-y-4">
+      {viz}
+      {table}
+    </div>
+  );
 }
 
 /**

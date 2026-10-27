@@ -1,4 +1,5 @@
 import type { AuditResult, AuditResultsRecord } from "@/lib/schema";
+import { isEmptyResult } from "@/features/page-speed-insights/ScoreDisplay";
 
 const CWV_METRIC_ACRONYMS = ["FCP", "LCP", "TBT", "CLS", "SI"] as const;
 export type CwvMetricAcronym = (typeof CWV_METRIC_ACRONYMS)[number];
@@ -68,7 +69,8 @@ function isApplicable(audit: AuditResult): boolean {
 }
 
 function hasDetails(audit: AuditResult): boolean {
-  return !!audit.details;
+  // Match audits tab: empty table/opportunity rows are not actionable.
+  return !isEmptyResult(audit);
 }
 
 function maxSavingsForAcronym(
@@ -84,7 +86,8 @@ function maxSavingsForAcronym(
 /**
  * Collect cause audits for a CWV metric from one or more report audit maps.
  * Includes curated insight/diagnostic ids (even at 0 savings) and any other
- * audit with metricSavings[acronym] > 0. Skips notApplicable and audits with no details.
+ * audit with metricSavings[acronym] > 0. Skips notApplicable and audits with
+ * no details / empty table or opportunity items.
  */
 export function collectCauseAuditsForMetric(
   metricId: MetricAuditId,

@@ -2,14 +2,6 @@ import * as React from "react";
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@/components/ui/tabs", () => ({
-  TabsContent: ({ value, children }: { value: string; children: React.ReactNode }) => (
-    <div role="tabpanel" data-value={value}>
-      {children}
-    </div>
-  ),
-}));
-
 vi.mock("@/components/ui/input", () => ({
   Input: React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>((props, ref) => (
     <input ref={ref} {...props} />

@@ -38,10 +38,10 @@ describe("MetricValueViz", () => {
     expect(text).toContain("1.2 s");
     expect(text).toContain("1.80 s");
     expect(text).toContain("3.00 s");
-    expect(text).toContain("600 ms under good");
+    expect(text).toContain("600 ms good");
   });
 
-  it("draws LCP phases on the same scale as the metric", () => {
+  it("draws LCP phases on a separate subparts track", () => {
     const { container } = render(
       <MetricValueViz
         auditId="largest-contentful-paint"
@@ -96,10 +96,12 @@ describe("MetricValueViz", () => {
 
     const text = container.textContent ?? "";
     expect(text).toContain("Average");
+    expect(text).toContain("LCP subparts");
     expect(text).toContain("Time to first byte");
     expect(text).toContain("Element render delay");
     expect(text).toContain("1.80 s");
     expect(text).toContain("1.30 s into average");
+    expect(container.querySelector('[data-testid="lcp-phase-track"]')).toBeTruthy();
   });
 
   it("charts estimated savings against the measured value", () => {

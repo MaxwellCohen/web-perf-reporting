@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import { Tabs } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -58,8 +58,12 @@ export function LhInputForm() {
         <form id="lh-input-form" action={formAction}>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <LhTabList />
-            <LhTextInput jsonInputs={jsonInputs} setJsonInputs={setJsonInputs} />
-            <LhFileInput jsonFiles={jsonFiles} setJsonFiles={setJsonFiles} />
+            <TabsContent value="text">
+              <LhTextInput jsonInputs={jsonInputs} setJsonInputs={setJsonInputs} />
+            </TabsContent>
+            <TabsContent value="file">
+              <LhFileInput jsonFiles={jsonFiles} setJsonFiles={setJsonFiles} />
+            </TabsContent>
             <LhUrlInput jsonUrl={jsonUrl} setJsonUrl={setJsonUrl} />
           </Tabs>
 

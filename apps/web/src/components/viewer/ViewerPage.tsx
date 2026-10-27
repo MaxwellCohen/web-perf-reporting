@@ -3,7 +3,6 @@ import type { PageSpeedInsights } from "@/lib/schema";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
   CardContent,
@@ -12,17 +11,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Code, FileJson, Globe } from "lucide-react";
-import type { LhJsonFileEntry, LhJsonTextEntry } from "@/components/lh/types";
-import { LhFileInput } from "@/components/lh/inputs/LhFileInput";
-import { LhTextInput } from "@/components/lh/inputs/LhTextInput";
-import { PsiShareUrlInput } from "@/components/viewer/PsiShareUrlInput";
+import { Plus } from "lucide-react";
 import { collectViewerReports } from "@/components/viewer/collectViewerReports";
 import { decodeViewerHash, encodeViewerHash } from "@/components/viewer/viewerHash";
+import {
+  createEmptyViewerRun,
+  ViewerRunSlot,
+  type ViewerRunState,
+} from "@/components/viewer/ViewerRunSlot";
 import {
   buildPsiViewerBookmarklet,
   buildPsiViewerDeepLink,
 } from "@/lib/viewer/psiBookmarklet";
+import {
+  DEFAULT_PSI_RUN_LABEL_A,
+  DEFAULT_PSI_RUN_LABEL_B,
+} from "@/lib/viewer/psiCompareLabels";
 
 // Dashboard pulls recharts + react-markdown + tanstack tables (~730kB
 // client per audit). Viewer input form needs none of it; load the dashboard
@@ -89,12 +93,69 @@ function stripPsiQueryParams() {
   }
 }
 
+function initialRunsFromPsiQuery(
+  initialPsi: string,
+  initialPsi2: string,
+  initialPsiLabel: string,
+  initialPsi2Label: string,
+): ViewerRunState[] {
+  if (!initialPsi.trim()) {
+    return [createEmptyViewerRun()];
+  }
+
+  const primary = createEmptyViewerRun({
+    method: "psi",
+    psiUrl: initialPsi,
+    label: initialPsiLabel,
+  });
+
+  if (!initialPsi2.trim()) {
+    return [primary];
+  }
+
+  return [
+    primary,
+    createEmptyViewerRun({
+      method: "psi",
+      psiUrl: initialPsi2,
+      label: initialPsi2Label,
+    }),
+  ];
+}
+
 type ImportedPsiShare = {
   url: string;
   label?: string;
   compareUrl?: string;
   compareLabel?: string;
 };
+
+function toCollectInput(run: ViewerRunState) {
+  return {
+    method: run.method,
+    label: run.label,
+    psiUrl: run.psiUrl,
+    jsonFiles: run.jsonFiles,
+    jsonInputs: run.jsonInputs,
+  };
+}
+
+function psiShareFromRuns(runs: ViewerRunState[]): ImportedPsiShare | null {
+  if (!runs.every((run) => run.method === "psi")) {
+    return null;
+  }
+  const primary = runs[0];
+  if (!primary?.psiUrl.trim()) {
+    return null;
+  }
+  const compare = runs[1];
+  return {
+    url: primary.psiUrl.trim(),
+    label: primary.label.trim() || undefined,
+    compareUrl: compare?.psiUrl.trim() || undefined,
+    compareLabel: compare?.label.trim() || undefined,
+  };
+}
 
 export default function ViewerPage({
   initialSearch = "",
@@ -112,16 +173,13 @@ export default function ViewerPage({
   const [loading, setLoading] = useState(Boolean(initialPsi));
   const [data, setData] = useState<PageSpeedInsights[]>([]);
   const [labels, setLabels] = useState<string[]>([]);
-  const [jsonInputs, setJsonInputs] = useState<LhJsonTextEntry[]>([{ name: "", content: "" }]);
-  const [jsonFiles, setJsonFiles] = useState<LhJsonFileEntry[]>([]);
-  const [psiShareUrl, setPsiShareUrl] = useState(initialPsi);
-  const [psiRunLabel, setPsiRunLabel] = useState(initialPsiLabel);
-  const [psiCompareUrl, setPsiCompareUrl] = useState(initialPsi2);
-  const [psiCompareLabel, setPsiCompareLabel] = useState(initialPsi2Label);
+  const [runs, setRuns] = useState<ViewerRunState[]>(() =>
+    initialRunsFromPsiQuery(initialPsi, initialPsi2, initialPsiLabel, initialPsi2Label),
+  );
   const [importedPsi, setImportedPsi] = useState<ImportedPsiShare | null>(null);
-  const [activeTab, setActiveTab] = useState("psi");
   const [hash, setHash] = useHash();
   const bookmarkletHref = buildPsiViewerBookmarklet();
+  const comparing = runs.length > 1;
 
   // Sync from external system (URL hash) — intentional set-state-in-effect.
   // Decode stays async so gzip (pako) loads only when a hash is present.
@@ -148,23 +206,15 @@ export default function ViewerPage({
     void (async () => {
       setLoading(true);
       try {
-        const compare = initialPsi2.trim()
-          ? { url: initialPsi2, label: initialPsi2Label }
-          : null;
-        const result = await collectViewerReports(
-          "psi",
-          [],
-          [],
-          { url: initialPsi, label: initialPsiLabel },
-          compare,
+        const queryRuns = initialRunsFromPsiQuery(
+          initialPsi,
+          initialPsi2,
+          initialPsiLabel,
+          initialPsi2Label,
         );
+        const result = await collectViewerReports(queryRuns.map(toCollectInput));
         if (cancelled) return;
-        setImportedPsi({
-          url: initialPsi,
-          label: initialPsiLabel.trim() || undefined,
-          compareUrl: initialPsi2.trim() || undefined,
-          compareLabel: initialPsi2Label.trim() || undefined,
-        });
+        setImportedPsi(psiShareFromRuns(queryRuns));
         setHash(await encodeViewerHash(result));
       } catch (e) {
         if (cancelled) return;
@@ -182,29 +232,23 @@ export default function ViewerPage({
     };
   }, [initialPsi, initialPsi2, initialPsiLabel, initialPsi2Label, setHash]);
 
+  const updateRun = (index: number, next: ViewerRunState) => {
+    setRuns((prev) => prev.map((run, i) => (i === index ? next : run)));
+  };
+
+  const addCompareRun = () => {
+    setRuns((prev) => (prev.length >= 2 ? prev : [...prev, createEmptyViewerRun()]));
+  };
+
+  const removeCompareRun = () => {
+    setRuns((prev) => prev.slice(0, 1));
+  };
+
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const compare = psiCompareUrl.trim()
-        ? { url: psiCompareUrl, label: psiCompareLabel }
-        : null;
-      const result = await collectViewerReports(
-        activeTab,
-        jsonInputs,
-        jsonFiles,
-        activeTab === "psi" ? { url: psiShareUrl, label: psiRunLabel } : psiShareUrl,
-        activeTab === "psi" ? compare : null,
-      );
-      setImportedPsi(
-        activeTab === "psi"
-          ? {
-              url: psiShareUrl.trim(),
-              label: psiRunLabel.trim() || undefined,
-              compareUrl: psiCompareUrl.trim() || undefined,
-              compareLabel: psiCompareLabel.trim() || undefined,
-            }
-          : null,
-      );
+      const result = await collectViewerReports(runs.map(toCollectInput));
+      setImportedPsi(psiShareFromRuns(runs));
       setHash(await encodeViewerHash(result));
     } catch (e) {
       console.error("JSON parsing error:", e);
@@ -250,38 +294,28 @@ export default function ViewerPage({
       <CardHeader>
         <CardTitle>Lighthouse Report Viewer</CardTitle>
         <CardDescription>
-          Upload JSON, paste JSON, or import a PageSpeed Insights share link
+          Upload JSON, paste JSON, or import a PageSpeed Insights share link. Add a second run to
+          compare side-by-side.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6 grid grid-cols-3">
-            <TabsTrigger value="psi" className="flex items-center gap-2">
-              <Globe size={16} />
-              <span>PSI share URL</span>
-            </TabsTrigger>
-            <TabsTrigger value="file" className="flex items-center gap-2">
-              <FileJson size={16} />
-              <span>Upload JSON files</span>
-            </TabsTrigger>
-            <TabsTrigger value="text" className="flex items-center gap-2">
-              <Code size={16} />
-              <span>Paste JSON</span>
-            </TabsTrigger>
-          </TabsList>
-          <LhFileInput jsonFiles={jsonFiles} setJsonFiles={setJsonFiles} />
-          <LhTextInput jsonInputs={jsonInputs} setJsonInputs={setJsonInputs} />
-          <PsiShareUrlInput
-            psiShareUrl={psiShareUrl}
-            setPsiShareUrl={setPsiShareUrl}
-            psiRunLabel={psiRunLabel}
-            setPsiRunLabel={setPsiRunLabel}
-            psiCompareUrl={psiCompareUrl}
-            setPsiCompareUrl={setPsiCompareUrl}
-            psiCompareLabel={psiCompareLabel}
-            setPsiCompareLabel={setPsiCompareLabel}
+      <CardContent className="space-y-4">
+        {runs.map((run, index) => (
+          <ViewerRunSlot
+            key={run.id}
+            run={run}
+            onChange={(next) => updateRun(index, next)}
+            title={comparing ? (index === 0 ? "Run A" : "Run B") : "Run"}
+            labelPlaceholder={index === 0 ? DEFAULT_PSI_RUN_LABEL_A : DEFAULT_PSI_RUN_LABEL_B}
+            idPrefix={`${run.id}-`}
+            onRemove={comparing && index === 1 ? removeCompareRun : undefined}
           />
-        </Tabs>
+        ))}
+        {!comparing ? (
+          <Button type="button" variant="outline" className="w-full" onClick={addCompareRun}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add run to compare
+          </Button>
+        ) : null}
       </CardContent>
       <CardFooter className="flex flex-col items-stretch gap-3">
         <Button type="button" className="w-full" disabled={loading} onClick={handleSubmit}>

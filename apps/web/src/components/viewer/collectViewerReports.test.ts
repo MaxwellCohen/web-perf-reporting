@@ -10,14 +10,15 @@ describe("collectViewerReports", () => {
   });
 
   it("collects multiple pasted reports with labels", async () => {
-    const result = await collectViewerReports(
-      "text",
-      [
-        { name: "Mobile", content: json },
-        { name: "Desktop", content: json },
-      ],
-      [],
-    );
+    const result = await collectViewerReports([
+      {
+        method: "text",
+        jsonInputs: [
+          { name: "Mobile", content: json },
+          { name: "Desktop", content: json },
+        ],
+      },
+    ]);
 
     expect(result.data).toHaveLength(2);
     expect(result.labels).toEqual(["Mobile", "Desktop"]);
@@ -27,28 +28,31 @@ describe("collectViewerReports", () => {
     const mobile = new File([json], "mobile.json", { type: "application/json" });
     const desktop = new File([json], "desktop.json", { type: "application/json" });
 
-    const result = await collectViewerReports(
-      "file",
-      [],
-      [
-        { name: "Mobile", file: mobile },
-        { name: "Desktop", file: desktop },
-      ],
-    );
+    const result = await collectViewerReports([
+      {
+        method: "file",
+        jsonFiles: [
+          { name: "Mobile", file: mobile },
+          { name: "Desktop", file: desktop },
+        ],
+      },
+    ]);
 
     expect(result.data).toHaveLength(2);
     expect(result.labels).toEqual(["Mobile", "Desktop"]);
   });
 
   it("throws when no files are uploaded", async () => {
-    await expect(collectViewerReports("file", [], [])).rejects.toThrow(
+    await expect(collectViewerReports([{ method: "file", jsonFiles: [] }])).rejects.toThrow(
       "Please upload at least one JSON file",
     );
   });
 
   it("throws when pasted JSON is invalid", async () => {
     await expect(
-      collectViewerReports("text", [{ name: "Bad", content: "not json" }], []),
+      collectViewerReports([
+        { method: "text", jsonInputs: [{ name: "Bad", content: "not json" }] },
+      ]),
     ).rejects.toThrow();
   });
 
@@ -60,12 +64,12 @@ describe("collectViewerReports", () => {
       }),
     );
 
-    const result = await collectViewerReports(
-      "psi",
-      [],
-      [],
-      "https://pagespeed.web.dev/analysis/https-example-com/abc",
-    );
+    const result = await collectViewerReports([
+      {
+        method: "psi",
+        psiUrl: "https://pagespeed.web.dev/analysis/https-example-com/abc",
+      },
+    ]);
 
     expect(result.labels).toEqual(["Mobile", "Desktop"]);
     expect(globalThis.fetch).toHaveBeenCalledWith(
@@ -89,13 +93,10 @@ describe("collectViewerReports", () => {
       });
     });
 
-    const result = await collectViewerReports(
-      "psi",
-      [],
-      [],
-      { url: "https://pagespeed.web.dev/analysis/https-example-com/run-a" },
-      { url: "https://pagespeed.web.dev/analysis/https-example-com/run-b" },
-    );
+    const result = await collectViewerReports([
+      { method: "psi", psiUrl: "https://pagespeed.web.dev/analysis/https-example-com/run-a" },
+      { method: "psi", psiUrl: "https://pagespeed.web.dev/analysis/https-example-com/run-b" },
+    ]);
 
     expect(result.labels).toEqual(["A · Mobile", "B · Mobile"]);
     expect(result.data).toHaveLength(2);
@@ -110,19 +111,18 @@ describe("collectViewerReports", () => {
       }),
     );
 
-    const result = await collectViewerReports(
-      "psi",
-      [],
-      [],
+    const result = await collectViewerReports([
       {
-        url: "https://pagespeed.web.dev/analysis/https-example-com/a",
+        method: "psi",
+        psiUrl: "https://pagespeed.web.dev/analysis/https-example-com/a",
         label: "Before",
       },
       {
-        url: "https://pagespeed.web.dev/analysis/https-example-com/b",
+        method: "psi",
+        psiUrl: "https://pagespeed.web.dev/analysis/https-example-com/b",
         label: "After",
       },
-    );
+    ]);
 
     expect(result.labels).toEqual(["Before · Desktop", "After · Desktop"]);
   });
@@ -135,20 +135,50 @@ describe("collectViewerReports", () => {
       }),
     );
 
-    const result = await collectViewerReports(
-      "psi",
-      [],
-      [],
-      { url: "https://pagespeed.web.dev/analysis/https-example-com/a", label: "Run" },
-      { url: "https://pagespeed.web.dev/analysis/https-example-com/b", label: "Run" },
-    );
+    const result = await collectViewerReports([
+      {
+        method: "psi",
+        psiUrl: "https://pagespeed.web.dev/analysis/https-example-com/a",
+        label: "Run",
+      },
+      {
+        method: "psi",
+        psiUrl: "https://pagespeed.web.dev/analysis/https-example-com/b",
+        label: "Run",
+      },
+    ]);
 
     expect(result.labels).toEqual(["Run · Mobile", "Run (2) · Mobile"]);
   });
 
-  it("throws when the PSI share URL is empty", async () => {
-    await expect(collectViewerReports("psi", [], [], "  ")).rejects.toThrow(
-      "Enter a PageSpeed Insights share URL",
+  it("merges mixed methods with A/B run prefixes", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async () =>
+      Response.json({
+        data: [{ lighthouseResult: { categories: { psi: true } } }],
+        labels: ["Mobile"],
+      }),
     );
+
+    const result = await collectViewerReports([
+      {
+        method: "psi",
+        psiUrl: "https://pagespeed.web.dev/analysis/https-example-com/a",
+        label: "Before",
+      },
+      {
+        method: "text",
+        label: "After",
+        jsonInputs: [{ name: "Paste", content: json }],
+      },
+    ]);
+
+    expect(result.labels).toEqual(["Before · Mobile", "After · Paste"]);
+    expect(result.data).toHaveLength(2);
+  });
+
+  it("throws when the PSI share URL is empty", async () => {
+    await expect(
+      collectViewerReports([{ method: "psi", psiUrl: "  " }]),
+    ).rejects.toThrow("Enter a PageSpeed Insights share URL");
   });
 });

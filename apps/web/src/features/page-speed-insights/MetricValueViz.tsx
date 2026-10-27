@@ -55,9 +55,9 @@ function ratingColor(rating: Rating): string {
 
 function headroomCopy(value: number, good: number, poor: number, unit: "ms" | "cls"): string {
   const format = (n: number) => formatUnit(n, unit);
-  if (value <= good) return `${format(good - value)} under good`;
-  if (value <= poor) return `${format(value - good)} into average`;
-  return `${format(value - poor)} into bad`;
+  if (value <= good) return `${format(good - value)} - Good`;
+  if (value <= poor) return `${format(value - good)} - Average`;
+  return `${format(value - poor)} - Bad`;
 }
 
 function scaleMax(value: number, poor: number): number {
@@ -105,7 +105,6 @@ function ThresholdTrack({
   good,
   poor,
   max,
-  phases,
   rating,
   unit,
 }: {
@@ -113,7 +112,6 @@ function ThresholdTrack({
   good: number;
   poor: number;
   max: number;
-  phases: Phase[];
   rating: Rating;
   unit: "ms" | "cls";
 }) {
@@ -138,14 +136,10 @@ function ThresholdTrack({
         <Band left={0} width={goodPct} color="hsl(var(--chart-1) / 0.28)" />
         <Band left={goodPct} width={poorPct - goodPct} color="hsl(var(--chart-2) / 0.28)" />
         <Band left={poorPct} width={100 - poorPct} color="hsl(var(--chart-3) / 0.28)" />
-        {phases.length > 0 ? (
-          <PhaseFill phases={phases} max={max} />
-        ) : (
-          <div
-            className="absolute inset-y-0 left-0"
-            style={{ width: pct(value), backgroundColor: ratingColor(rating), opacity: 0.9 }}
-          />
-        )}
+        <div
+          className="absolute inset-y-0 left-0"
+          style={{ width: pct(value), backgroundColor: ratingColor(rating), opacity: 0.9 }}
+        />
         <div
           className="absolute inset-y-0 z-10 w-0.5 bg-foreground"
           style={{ left: `calc(${markerPct}% - 1px)` }}
@@ -177,27 +171,40 @@ function Band({ left, width, color }: { left: number; width: number; color: stri
   );
 }
 
-function PhaseFill({ phases, max }: { phases: Phase[]; max: number }) {
+function PhaseTrack({ phases, unit }: { phases: Phase[]; unit: "ms" | "cls" }) {
+  const total = phases.reduce((sum, phase) => sum + phase.duration, 0);
+  if (!(total > 0)) return null;
+
   const placed = phases.reduce<Array<{ phase: Phase; left: number }>>((acc, phase) => {
     const left = acc.length === 0 ? 0 : acc[acc.length - 1].left + acc[acc.length - 1].phase.duration;
     return [...acc, { phase, left }];
   }, []);
 
+  const labels = phases.map((phase) => `${phase.label} ${formatUnit(phase.duration, unit)}`).join(", ");
+
   return (
-    <>
-      {placed.map(({ phase, left }) => (
-        <div
-          key={phase.id}
-          className="absolute inset-y-0"
-          style={{
-            left: `${(left / max) * 100}%`,
-            width: `${(phase.duration / max) * 100}%`,
-            backgroundColor: PHASE_COLOR[phase.id] ?? "hsl(var(--chart-4))",
-          }}
-          title={phase.label}
-        />
-      ))}
-    </>
+    <div className="space-y-1.5" data-testid="lcp-phase-track">
+      <p className="text-xs font-medium text-muted-foreground">LCP subparts</p>
+      <div
+        className="relative h-3 overflow-hidden rounded-sm bg-muted"
+        role="img"
+        aria-label={`LCP subparts: ${labels}`}
+      >
+        {placed.map(({ phase, left }) => (
+          <div
+            key={phase.id}
+            className="absolute inset-y-0"
+            style={{
+              left: `${(left / total) * 100}%`,
+              width: `${(phase.duration / total) * 100}%`,
+              backgroundColor: PHASE_COLOR[phase.id] ?? "hsl(var(--chart-4))",
+            }}
+            title={`${phase.label}: ${formatUnit(phase.duration, unit)}`}
+          />
+        ))}
+      </div>
+      <PhaseLegend phases={phases} unit={unit} />
+    </div>
   );
 }
 
@@ -246,7 +253,6 @@ function MetricScale({
         good={band.good}
         poor={band.poor}
         max={max}
-        phases={phases}
         rating={rating}
         unit={band.unit}
       />
@@ -258,7 +264,7 @@ function MetricScale({
           Up to {formatUnit(savingsNote, band.unit)} in estimated savings
         </p>
       ) : null}
-      {phases.length > 0 ? <PhaseLegend phases={phases} unit={band.unit} /> : null}
+      {phases.length > 0 ? <PhaseTrack phases={phases} unit={band.unit} /> : null}
       {savings.length > 0 ? (
         <SavingsBars savings={savings} value={value} unit={band.unit} />
       ) : null}

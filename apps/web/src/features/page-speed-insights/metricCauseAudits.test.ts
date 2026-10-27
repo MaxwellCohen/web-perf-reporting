@@ -10,7 +10,7 @@ function audit(partial: Partial<AuditResult> & Pick<AuditResult, "id" | "title">
   return {
     score: 0.5,
     scoreDisplayMode: "informative",
-    details: { type: "table", headings: [], items: [] },
+    details: { type: "table", headings: [], items: [{ url: "https://example.com" }] },
     ...partial,
   };
 }
@@ -82,6 +82,34 @@ describe("collectCauseAuditsForMetric", () => {
     ]);
 
     expect(result).toEqual([]);
+  });
+
+  it("skips curated audits with empty table or opportunity items", () => {
+    const audits: AuditResultsRecord = {
+      "render-blocking-insight": audit({
+        id: "render-blocking-insight",
+        title: "Render-blocking requests",
+        metricSavings: { FCP: 100 },
+        details: { type: "table", headings: [], items: [] },
+      }),
+      "font-display-insight": audit({
+        id: "font-display-insight",
+        title: "Font display",
+        metricSavings: { FCP: 50 },
+        details: { type: "opportunity", headings: [], items: [] },
+      }),
+      "document-latency-insight": audit({
+        id: "document-latency-insight",
+        title: "Document latency",
+        metricSavings: { FCP: 0 },
+      }),
+    };
+
+    const result = collectCauseAuditsForMetric("first-contentful-paint", [
+      { audits, label: "Mobile" },
+    ]);
+
+    expect(result.map((r) => r.auditId)).toEqual(["document-latency-insight"]);
   });
 
   it("skips non-curated audits with zero savings", () => {

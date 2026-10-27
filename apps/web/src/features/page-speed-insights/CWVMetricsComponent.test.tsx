@@ -574,7 +574,7 @@ describe("CWVMetricsComponent", () => {
     expect(section?.querySelector('[data-testid="fcp-screenshot"]')).not.toBeNull();
     expect(section?.querySelector('[data-testid="metric-value-viz"]')?.textContent).toContain("Good");
     expect(section?.textContent).toContain("1.80 s");
-    expect(section?.textContent).toContain("under good");
+    expect(section?.textContent).toContain("good");
     expect(section?.textContent).not.toContain("Related audits");
     expect(container.querySelector('[data-value="cwv-cause-total-blocking-time"]')).toBeNull();
   });

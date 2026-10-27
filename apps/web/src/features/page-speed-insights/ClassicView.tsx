@@ -11,6 +11,7 @@ import { UnifiedWaterfallSection } from "@/features/page-speed-insights/waterfal
 import { RecommendationsSection } from "@/features/page-speed-insights/RecommendationsSection/RecommendationsSection";
 import { RenderFilmStrip } from "@/features/page-speed-insights/RenderFilmStrip";
 import { ScriptTreemapSection } from "@/features/page-speed-insights/script-treemap/ScriptTreemapSection";
+import { FullWidthTables } from "@/features/page-speed-insights/tanstack-table-v9/fullWidthTables";
 
 export function ClassicView() {
   return (
@@ -26,7 +27,9 @@ export function ClassicView() {
         <JavaScriptPerformanceComponent />
         <RecommendationsSection />
       </SectionStack>
-      <LighthouseAuditsPanel />
+      <FullWidthTables>
+        <LighthouseAuditsPanel />
+      </FullWidthTables>
     </>
   );
 }

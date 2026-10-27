@@ -15,6 +15,7 @@ import { DebugData } from "@/lib/schema";
 import { renderBoolean } from "@/features/page-speed-insights/lh-categories/renderBoolean";
 import { camelCaseToSentenceCase } from "@/features/page-speed-insights/lh-categories/camelCaseToSentenceCase";
 import { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataItem";
+import { AuditDebugViz } from "@/features/page-speed-insights/audit-viz/AuditDebugViz";
 import { flexRender, useTable } from "@tanstack/react-table";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import { debugDataTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
@@ -31,6 +32,8 @@ import { tanstackTableCellDataProps } from "@/features/page-speed-insights/share
 import { CopyTableButton } from "@/features/page-speed-insights/tanstack-table-v9/CopyTableButton";
 import { TableWithCopyToolbar } from "@/features/page-speed-insights/tanstack-table-v9/TableWithCopyToolbar";
 import { ColumnResizer } from "@/features/page-speed-insights/tanstack-table-v9/columnResizer";
+import { useFullWidthTables } from "@/features/page-speed-insights/tanstack-table-v9/fullWidthTables";
+import { cn } from "@/lib/utils";
 
 type DebugDataTableItem = {
   key: string;
@@ -44,19 +47,22 @@ function DebugDataTableCell({
   cell,
   row,
   rowSpan,
+  fillWidth,
 }: {
   cell: StockCell<DebugDataTableItem, unknown>;
   row: StockRow<DebugDataTableItem>;
   rowSpan?: number;
+  fillWidth: boolean;
 }) {
+  const size = cell.column.getSize();
   return (
     <TableCell
       {...(rowSpan != null ? { rowSpan } : {})}
-      style={{
-        width: `${cell.column.getSize()}px`,
-        minWidth: `${cell.column.getSize()}px`,
-        maxWidth: `${cell.column.getSize()}px`,
-      }}
+      style={
+        fillWidth
+          ? { width: `${size}px`, minWidth: `${size}px` }
+          : { width: `${size}px`, minWidth: `${size}px`, maxWidth: `${size}px` }
+      }
       {...tanstackTableCellDataProps(cell, row)}
     >
       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -87,10 +93,16 @@ export function RenderDebugData({ items }: { items: TableDataItem[] }) {
     return <EmptyDebugDataTable />;
   }
 
-  return <RenderDebugDataTable items={items} />;
+  return (
+    <div className="w-full min-w-0 space-y-4">
+      <AuditDebugViz items={items} />
+      <RenderDebugDataTable items={items} />
+    </div>
+  );
 }
 
 function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
+  const fillWidth = useFullWidthTables();
   const data = items?.reduce((acc: Array<DebugDataTableItem>, i) => {
     const d = Object.entries(cleanDebugData(i.auditResult.details as DebugData)).map((i2) => {
       return {
@@ -157,11 +169,18 @@ function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
   const tableWidth = table.getTotalSize();
 
   return (
-    <>
+    <div className="w-full min-w-0">
       <div className="mb-2 flex justify-end">
         <CopyTableButton table={table} />
       </div>
-      <Table style={{ width: tableWidth }} className="w-max!" wrapperClassName="min-w-0">
+      <Table
+        style={{
+          width: fillWidth ? "100%" : tableWidth,
+          ...(fillWidth ? { minWidth: tableWidth } : {}),
+        }}
+        className={cn(fillWidth ? "min-w-full" : "w-max!")}
+        wrapperClassName="min-w-0"
+      >
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => {
             return (
@@ -172,11 +191,15 @@ function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
                     <TableHead
                       key={header.id}
                       className="relative overflow-hidden"
-                      style={{
-                        width: `${size}px`,
-                        minWidth: `${size}px`,
-                        maxWidth: `${size}px`,
-                      }}
+                      style={
+                        fillWidth
+                          ? { width: `${size}px`, minWidth: `${size}px` }
+                          : {
+                              width: `${size}px`,
+                              minWidth: `${size}px`,
+                              maxWidth: `${size}px`,
+                            }
+                      }
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
                       <ColumnResizer header={header} />
@@ -205,11 +228,18 @@ function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
                               cell={cell}
                               row={sr}
                               rowSpan={row.subRows.length}
+                              fillWidth={fillWidth}
                             />
                           );
                         }
                         return (
-                          <DebugDataTableCell key={cell.id} cell={cell} row={sr} rowSpan={1} />
+                          <DebugDataTableCell
+                            key={cell.id}
+                            cell={cell}
+                            row={sr}
+                            rowSpan={1}
+                            fillWidth={fillWidth}
+                          />
                         );
                       })}
                     </TableRow>
@@ -220,14 +250,19 @@ function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
             return (
               <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell) => (
-                  <DebugDataTableCell key={cell.id} cell={cell} row={row} />
+                  <DebugDataTableCell
+                    key={cell.id}
+                    cell={cell}
+                    row={row}
+                    fillWidth={fillWidth}
+                  />
                 ))}
               </TableRow>
             );
           })}
         </TableBody>
       </Table>
-    </>
+    </div>
   );
 }
 

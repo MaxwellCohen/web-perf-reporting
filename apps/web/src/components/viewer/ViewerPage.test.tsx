@@ -44,8 +44,9 @@ describe("ViewerPage", () => {
   it("renders upload and paste tabs when no data", () => {
     const { container } = render(<ViewerPage />);
     expect(container.textContent).toContain("PSI share URL");
-    expect(container.textContent).toContain("Upload JSON files");
+    expect(container.textContent).toContain("Upload JSON");
     expect(container.textContent).toContain("Paste JSON");
+    expect(container.textContent).toContain("Add run to compare");
     expect(container.textContent).toContain("Show Report");
   });
 
@@ -57,11 +58,11 @@ describe("ViewerPage", () => {
       { type: "application/json" },
     );
 
-    fireEvent.mouseDown(getByText("Upload JSON files"));
+    fireEvent.mouseDown(getByText("Upload JSON"));
     fireEvent.change(getByLabelText("Upload JSON Files"), {
       target: { files: [file] },
     });
-    fireEvent.click(container.querySelector("button.w-full")!);
+    fireEvent.click(getByText("Show Report"));
 
     await act(async () => {
       await new Promise((r) => setTimeout(r, 0));
@@ -77,7 +78,7 @@ describe("ViewerPage", () => {
     const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { getByText } = render(<ViewerPage />);
 
-    fireEvent.mouseDown(getByText("Upload JSON files"));
+    fireEvent.mouseDown(getByText("Upload JSON"));
     fireEvent.click(getByText("Show Report"));
 
     await act(async () => {
@@ -113,11 +114,11 @@ describe("ViewerPage", () => {
       { type: "application/json" },
     );
 
-    fireEvent.mouseDown(getByText("Upload JSON files"));
+    fireEvent.mouseDown(getByText("Upload JSON"));
     fireEvent.change(getByLabelText("Upload JSON Files"), {
       target: { files: [file] },
     });
-    fireEvent.click(container.querySelector("button.w-full")!);
+    fireEvent.click(getByText("Show Report"));
 
     await waitFor(() => {
       expect(container.querySelector('[data-testid="dashboard"]')).toBeTruthy();
@@ -187,18 +188,19 @@ describe("ViewerPage", () => {
       }),
     );
     const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    const { container, getByText, getByLabelText } = render(<ViewerPage />);
+    const { container, getByText, getAllByLabelText } = render(<ViewerPage />);
 
-    fireEvent.change(getByLabelText("PageSpeed Insights URL"), {
+    fireEvent.change(getAllByLabelText("PageSpeed Insights URL")[0]!, {
       target: { value: "https://pagespeed.web.dev/analysis/https-example-com/a" },
     });
-    fireEvent.change(getByLabelText("Run label (optional)"), {
+    fireEvent.change(getAllByLabelText("Run label (optional)")[0]!, {
       target: { value: "Before" },
     });
-    fireEvent.change(getByLabelText("Second PageSpeed Insights URL"), {
+    fireEvent.click(getByText("Add run to compare"));
+    fireEvent.change(getAllByLabelText("PageSpeed Insights URL")[1]!, {
       target: { value: "https://pagespeed.web.dev/analysis/https-example-com/b" },
     });
-    fireEvent.change(getByLabelText("Compare run label (optional)"), {
+    fireEvent.change(getAllByLabelText("Run label (optional)")[1]!, {
       target: { value: "After" },
     });
     fireEvent.click(getByText("Show Report"));
@@ -258,11 +260,11 @@ describe("ViewerPage", () => {
       { type: "application/json" },
     );
 
-    fireEvent.mouseDown(getByText("Upload JSON files"));
+    fireEvent.mouseDown(getByText("Upload JSON"));
     fireEvent.change(getByLabelText("Upload JSON Files"), {
       target: { files: [file] },
     });
-    fireEvent.click(container.querySelector("button.w-full")!);
+    fireEvent.click(getByText("Show Report"));
 
     await waitFor(() => {
       expect(container.querySelector('[data-testid="dashboard"]')).toBeTruthy();

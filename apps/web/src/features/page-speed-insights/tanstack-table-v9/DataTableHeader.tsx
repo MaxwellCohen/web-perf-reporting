@@ -91,7 +91,13 @@ export function DataTableHead<TData extends RowData>({
   const columnSizeStyle =
     style ??
     (fillWidth
-      ? { width: `${header.getSize()}px`, minWidth: `${header.getSize()}px` }
+      ? isCompact
+        ? {
+            width: `${header.getSize()}px`,
+            minWidth: `${header.getSize()}px`,
+            maxWidth: `${header.getSize()}px`,
+          }
+        : { minWidth: `${header.getSize()}px` }
       : defaultHeaderCellStyle(header as Header<any, any, unknown>));
 
   return (
@@ -102,8 +108,12 @@ export function DataTableHead<TData extends RowData>({
         </div>
       ) : (
         <>
-          <div className="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1">
-            <div className="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate">
+          {/*
+            Keep sort/filter beside the title. justify-between + full-width columns
+            parks controls at the far right edge (easy to miss / feels broken).
+          */}
+          <div className="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1">
+            <div className="min-w-0 overflow-hidden text-ellipsis *:truncate">
               {flexRender(header.column.columnDef.header, header.getContext())}
             </div>
             <div className="flex shrink-0 flex-row items-center gap-1">

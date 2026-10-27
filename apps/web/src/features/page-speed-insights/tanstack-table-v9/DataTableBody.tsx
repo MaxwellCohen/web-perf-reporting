@@ -94,9 +94,13 @@ export function DataTableBody<TData extends RowData>({
                           "p-0! flex items-center justify-center overflow-hidden": isExpanderColumn,
                         })}
                         style={{
-                          width: `${size}px`,
+                          // Full-width mode: minWidth only so table-fixed can grow columns into leftover space.
                           minWidth: `${size}px`,
-                          ...(fillWidth ? {} : { maxWidth: `${size}px` }),
+                          ...(fillWidth
+                            ? isExpanderColumn
+                              ? { width: `${size}px`, maxWidth: `${size}px` }
+                              : {}
+                            : { width: `${size}px`, maxWidth: `${size}px` }),
                           ...(isExpanderColumn && { boxSizing: "border-box" }),
                         }}
                         {...tanstackTableCellDataProps(cell, row)}

@@ -28,7 +28,9 @@ export function SortingButton<TData extends RowData>({
             type="button"
             variant={"ghost"}
             size={"icon"}
+            className="relative z-20"
             onClick={(event) => {
+              event.stopPropagation();
               header.column.getToggleSortingHandler()?.(event);
             }}
             title={
