@@ -1,5 +1,5 @@
 "use client";
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useState } from "react";
 import {
   usePageSpeedItems,
   useRequiredPageSpeedInsightsStore,
@@ -16,6 +16,14 @@ export function LighthouseAuditsPanel() {
   const items = usePageSpeedItems();
   const table = useLHTable(items);
   const { audit, groups } = useDashboardSearchState();
+  const [expandAll, setExpandAll] = useState(false);
+  const rows = table.getRowModel().rows;
+
+  const toggleExpandAll = () => {
+    const next = !expandAll;
+    setExpandAll(next);
+    patchDashboardSearch({ groups: next ? rows.map((row) => row.id) : null });
+  };
 
   useLayoutEffect(() => {
     const column = table.getColumn("auditTitle");
@@ -38,6 +46,14 @@ export function LighthouseAuditsPanel() {
           </div>
           <div className="flex shrink-0 gap-2 sm:mb-2">
             <Button
+              variant="outline"
+              className="w-full sm:w-auto"
+              aria-pressed={expandAll}
+              onClick={toggleExpandAll}
+            >
+              {expandAll ? "Collapse all" : "Expand all"}
+            </Button>
+            <Button
               variant="ghost"
               className="w-full sm:w-auto"
               onClick={() => {
@@ -56,8 +72,8 @@ export function LighthouseAuditsPanel() {
         value={groups}
         onValueChange={(next) => patchDashboardSearch({ groups: next.length ? next : null })}
       >
-        {table.getRowModel().rows.map((row) => (
-          <CategoryRow key={row.id} row={row} />
+        {rows.map((row) => (
+          <CategoryRow key={row.id} row={row} expandAll={expandAll} />
         ))}
       </Accordion>
     </>

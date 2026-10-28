@@ -5,8 +5,8 @@ import type { TimelineEvent } from "./types";
 function event(id: string, timeMs: number, title = id): TimelineEvent {
   return {
     id,
-    phaseId: "load",
-    phaseTitle: "Load",
+    phaseId: "afterLoad",
+    phaseTitle: "After load",
     timeMs,
     title,
     detail: "",

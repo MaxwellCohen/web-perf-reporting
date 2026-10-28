@@ -51,9 +51,9 @@ import { ResourcesStory } from "@/features/page-speed-insights/dashboard-view/re
 
 const KB = 1024;
 
-function wastedReport(): InsightsContextItem {
+function wastedReport(label = "Mobile"): InsightsContextItem {
   return {
-    label: "Mobile",
+    label,
     item: {
       lighthouseResult: {
         audits: {
@@ -127,13 +127,45 @@ describe("ResourcesStory", () => {
     expect(screen.queryByText("Unused JavaScript")).not.toBeInTheDocument();
   });
 
-  it("switches the evidence when a stage is selected", () => {
+  it("selects a stage and keeps the resources table in view", () => {
     items = [wastedReport()];
     render(<ResourcesStory />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Arrived/ }));
+    const arrived = screen.getByRole("button", { name: /Arrived/ });
+    expect(arrived).toHaveAttribute("aria-pressed", "false");
+
+    fireEvent.click(arrived);
 
     expect(new URLSearchParams(window.location.search).get("stage")).toBe("arrived");
-    expect(screen.getByText("Waterfall exhibit")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Arrived/ })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("table", { name: "Downloaded resources" })).toBeInTheDocument();
+  });
+
+  it("compares two runs side by side", () => {
+    items = [wastedReport("Before · Mobile"), wastedReport("After · Mobile")];
+    render(<ResourcesStory />);
+
+    expect(screen.getByTestId("resources-compare-title")).toHaveTextContent(
+      "Before · Mobile vs After · Mobile",
+    );
+    expect(screen.getByRole("table", { name: "Resources comparison" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("list", { name: "Investigate next in Before · Mobile" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("list", { name: "Investigate next in After · Mobile" }),
+    ).toBeInTheDocument();
+  });
+
+  it("goes back to one report when a compared report is deselected", () => {
+    items = [wastedReport("Before · Mobile"), wastedReport("After · Mobile")];
+    render(<ResourcesStory />);
+
+    fireEvent.click(screen.getByRole("button", { name: "After · Mobile" }));
+
+    expect(new URLSearchParams(window.location.search).getAll("report")).toEqual([
+      "Before · Mobile",
+    ]);
+    expect(screen.getByRole("list", { name: "Investigate next" })).toBeInTheDocument();
   });
 });

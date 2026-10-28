@@ -2,100 +2,171 @@
 
 exports[`ScoreDisplay > renders binary failed 1`] = `
 <div
-  class="text-xs"
+  class="flex flex-wrap items-center gap-1.5 text-xs font-normal"
+  data-status="fail"
 >
-  ❌ - Failed
+  <span
+    class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-semibold border-red-600/40 bg-red-500/15 text-red-800 dark:text-red-300"
+  >
+    Fail
+  </span>
 </div>
 `;
 
 exports[`ScoreDisplay > renders binary passed 1`] = `
 <div
-  class="text-xs"
+  class="flex flex-wrap items-center gap-1.5 text-xs font-normal"
+  data-status="pass"
 >
-  ✅ - Passed
+  <span
+    class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-semibold border-emerald-600/40 bg-emerald-500/15 text-emerald-800 dark:text-emerald-300"
+  >
+    Pass
+  </span>
 </div>
 `;
 
 exports[`ScoreDisplay > renders device label when provided 1`] = `
 <div
-  class="text-xs"
+  class="flex flex-wrap items-center gap-1.5 text-xs font-normal"
+  data-status="pass"
 >
-  Mobile - 
-  ✅ - Passed
+  <span
+    class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-semibold border-emerald-600/40 bg-emerald-500/15 text-emerald-800 dark:text-emerald-300"
+  >
+    <span
+      class="font-bold"
+    >
+      Mobile
+      :
+    </span>
+    Pass
+  </span>
 </div>
 `;
 
 exports[`ScoreDisplay > renders error mode with errorMessage 1`] = `
 <div
-  class="text-xs"
+  class="flex flex-wrap items-center gap-1.5 text-xs font-normal"
+  data-status="error"
 >
-  Error: 
-  Audit failed to run
+  <span
+    class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-semibold border-red-600/40 bg-red-500/15 text-red-800 dark:text-red-300"
+  >
+    Audit failed to run
+  </span>
 </div>
 `;
 
 exports[`ScoreDisplay > renders manual mode 1`] = `
 <div
-  class="text-xs"
+  class="flex flex-wrap items-center gap-1.5 text-xs font-normal"
+  data-status="manual"
 >
-  Manual
+  <span
+    class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-semibold border-border bg-muted text-muted-foreground"
+  >
+    Manual
+  </span>
 </div>
 `;
 
 exports[`ScoreDisplay > renders metricSavings fallback with device but no displayValue 1`] = `
 <div
-  class="text-xs whitespace-nowrap"
+  class="flex flex-wrap items-center gap-1.5 text-xs font-normal"
+  data-status="average"
 >
-  Desktop
-   
-   | Score 60 / 100
+  <span
+    class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-semibold border-amber-600/40 bg-amber-500/15 text-amber-800 dark:text-amber-300"
+  >
+    <span
+      class="font-bold"
+    >
+      Desktop
+      :
+    </span>
+    Average
+  </span>
 </div>
 `;
 
 exports[`ScoreDisplay > renders metricSavings fallback with displayValue 1`] = `
 <div
-  class="text-xs whitespace-nowrap"
+  class="flex flex-wrap items-center gap-1.5 text-xs font-normal"
+  data-status="average"
 >
-  Mobile
-   
-   | 150 ms | Score 50 / 100
+  <span
+    class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-semibold border-amber-600/40 bg-amber-500/15 text-amber-800 dark:text-amber-300"
+  >
+    <span
+      class="font-bold"
+    >
+      Mobile
+      :
+    </span>
+    Average
+  </span>
+  <span
+    class="text-muted-foreground"
+  >
+    150 ms
+  </span>
 </div>
 `;
 
 exports[`ScoreDisplay > renders metricSavings fallback without displayValue 1`] = `
 <div
-  class="text-xs whitespace-nowrap"
+  class="flex flex-wrap items-center gap-1.5 text-xs font-normal"
+  data-status="average"
 >
-   
-   | Score 75 / 100
+  <span
+    class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-semibold border-amber-600/40 bg-amber-500/15 text-amber-800 dark:text-amber-300"
+  >
+    Average
+  </span>
 </div>
 `;
 
 exports[`ScoreDisplay > renders not applicable mode 1`] = `
 <div
-  class="text-xs"
+  class="flex flex-wrap items-center gap-1.5 text-xs font-normal"
+  data-status="notApplicable"
 >
-  Not Applicable
+  <span
+    class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-semibold border-border bg-muted text-muted-foreground"
+  >
+    N/A
+  </span>
 </div>
 `;
 
 exports[`ScoreDisplay > renders numeric score with displayValue 1`] = `
 <div
-  class="text-xs"
+  class="flex flex-wrap items-center gap-1.5 text-xs font-normal"
+  data-status="pass"
 >
-  1.2 s - 
-  Score: 
-  90
-   / 100
+  <span
+    class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-semibold border-emerald-600/40 bg-emerald-500/15 text-emerald-800 dark:text-emerald-300"
+  >
+    Pass 90
+  </span>
+  <span
+    class="text-muted-foreground"
+  >
+    1.2 s
+  </span>
 </div>
 `;
 
 exports[`ScoreDisplay > renders numeric score without displayValue 1`] = `
 <div
-  class="text-xs"
+  class="flex flex-wrap items-center gap-1.5 text-xs font-normal"
+  data-status="average"
 >
-  Score: 
-  85
-   / 100
+  <span
+    class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-semibold border-amber-600/40 bg-amber-500/15 text-amber-800 dark:text-amber-300"
+  >
+    Average 85
+  </span>
 </div>
 `;

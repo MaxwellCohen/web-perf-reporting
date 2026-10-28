@@ -48,6 +48,7 @@ type CruxQueue = { send(body: CruxMessage): Promise<void> };
 const JOB_PREFIX = "crux-job:";
 const INFLIGHT_SECONDS = 120;
 const EMPTY_HISTORY_SECONDS = 86_400;
+const INLINE_FETCH_TIMEOUT_MS = 8_000;
 
 function cruxQueue(): CruxQueue {
   const producer = (queues as { crux?: CruxQueue }).crux;
@@ -65,31 +66,49 @@ async function readJob(env: ApiBindings, jobId: string): Promise<CruxJobRecord |
   return JSON.parse(raw) as CruxJobRecord;
 }
 
+/**
+ * Fetches every uncached slot from Google in parallel inside the request, so a cold lookup
+ * returns in about a second. The queue is only a retry path for slots that time out or hit
+ * retryable errors; the client keeps polling for those.
+ */
 export async function startCruxJob(
   env: ApiBindings,
   kind: "current" | "history",
   pageUrl: string,
 ): Promise<CruxJobResponse> {
   const job: CruxJobRecord = { jobId: crypto.randomUUID(), pageUrl, kind };
-  await env.KV.put(`${JOB_PREFIX}${job.jobId}`, JSON.stringify(job));
-  const queue = cruxQueue();
+  const [slots] = await Promise.all([
+    Promise.all(cruxSlots().map((slot) => startSlot(env, job, slot))),
+    env.KV.put(`${JOB_PREFIX}${job.jobId}`, JSON.stringify(job)),
+  ]);
+  return { jobId: job.jobId, pageUrl, kind, slots };
+}
 
-  for (const slot of cruxSlots()) {
-    if (!(await shouldEnqueue(env, kind, pageUrl, slot))) continue;
-    const lock = inflightKey(kind, pageUrl, slot);
-    if (await env.KV.get(lock)) continue;
-    await env.KV.put(lock, job.jobId, { expirationTtl: INFLIGHT_SECONDS });
-    await queue.send({
-      kind,
-      jobId: job.jobId,
-      pageUrl,
-      slotKey: slot.key,
-      scope: slot.scope,
-      formFactor: slot.formFactor,
-    });
+async function startSlot(env: ApiBindings, job: CruxJobRecord, slot: CruxSlot): Promise<CruxSlotResult> {
+  if (!(await shouldEnqueue(env, job.kind, job.pageUrl, slot))) return resolveSlot(env, job, slot);
+  const lock = inflightKey(job.kind, job.pageUrl, slot);
+  // Another job is already fetching this slot; report it pending and let the client poll.
+  if (await env.KV.get(lock)) return resolveSlot(env, job, slot);
+  await env.KV.put(lock, job.jobId, { expirationTtl: INFLIGHT_SECONDS });
+
+  const message: CruxMessage = {
+    kind: job.kind,
+    jobId: job.jobId,
+    pageUrl: job.pageUrl,
+    slotKey: slot.key,
+    scope: slot.scope,
+    formFactor: slot.formFactor,
+  };
+  try {
+    return await runCruxMessage(env, message, AbortSignal.timeout(INLINE_FETCH_TIMEOUT_MS));
+  } catch (error) {
+    if (isRetryableCruxError(error)) {
+      await cruxQueue().send(message);
+    } else {
+      await failCruxMessage(env, message, error instanceof Error ? error.message : String(error));
+    }
+    return resolveSlot(env, job, slot);
   }
-
-  return readCruxJob(env, job.jobId);
 }
 
 export async function readCruxJob(env: ApiBindings, jobId: string): Promise<CruxJobResponse> {
@@ -97,10 +116,7 @@ export async function readCruxJob(env: ApiBindings, jobId: string): Promise<Crux
   if (!job) {
     return { jobId, pageUrl: "", kind: "current", slots: [] };
   }
-  const slots = [];
-  for (const slot of cruxSlots()) {
-    slots.push(await resolveSlot(env, job, slot));
-  }
+  const slots = await Promise.all(cruxSlots().map((slot) => resolveSlot(env, job, slot)));
   return { jobId: job.jobId, pageUrl: job.pageUrl, kind: job.kind, slots };
 }
 
@@ -156,32 +172,43 @@ async function resolveHistorySlot(
   return { key: slot.key, status: "pending", reports: null };
 }
 
-export async function runCruxMessage(env: ApiBindings, message: CruxMessage): Promise<void> {
+export async function runCruxMessage(
+  env: ApiBindings,
+  message: CruxMessage,
+  signal?: AbortSignal,
+): Promise<CruxSlotResult> {
   const apiKey = env.PAGESPEED_INSIGHTS_API;
   if (!apiKey) throw new Error("PAGESPEED_INSIGHTS_API is not set");
   const slot = slotFromMessage(message);
 
   if (message.kind === "current") {
-    const report = await queryCruxCurrent(apiKey, message.pageUrl, message.scope, message.formFactor);
-    await env.KV.put(
-      currentCacheKey(message.pageUrl, slot),
-      JSON.stringify({ report, fetchedAt: Date.now() }),
-      { expirationTtl: CURRENT_CACHE_SECONDS },
+    const report = await queryCruxCurrent(
+      apiKey,
+      message.pageUrl,
+      message.scope,
+      message.formFactor,
+      signal,
     );
-    await env.KV.delete(inflightKey("current", message.pageUrl, slot));
-    return;
+    await Promise.all([
+      env.KV.put(
+        currentCacheKey(message.pageUrl, slot),
+        JSON.stringify({ report, fetchedAt: Date.now() }),
+        { expirationTtl: CURRENT_CACHE_SECONDS },
+      ),
+      env.KV.delete(inflightKey("current", message.pageUrl, slot)),
+    ]);
+    return { key: slot.key, status: "ready", report };
   }
 
-  const raw = await queryCruxHistory(apiKey, message.pageUrl, message.scope, message.formFactor);
-  if (!raw) {
+  const raw = await queryCruxHistory(apiKey, message.pageUrl, message.scope, message.formFactor, signal);
+  const saved = raw ? await saveHistoryReports(env, message.pageUrl, slot, raw) : 0;
+  if (saved === 0) {
     await env.KV.put(historyEmptyKey(message.pageUrl, slot), "1", { expirationTtl: EMPTY_HISTORY_SECONDS });
-  } else {
-    const saved = await saveHistoryReports(env, message.pageUrl, slot, raw);
-    if (saved === 0) {
-      await env.KV.put(historyEmptyKey(message.pageUrl, slot), "1", { expirationTtl: EMPTY_HISTORY_SECONDS });
-    }
   }
   await env.KV.delete(inflightKey("history", message.pageUrl, slot));
+  if (saved === 0) return { key: slot.key, status: "ready", reports: [] };
+  const history = await readHistory(env, message.pageUrl, slot);
+  return { key: slot.key, status: "ready", reports: history.reports };
 }
 
 export async function failCruxMessage(env: ApiBindings, message: CruxMessage, error: string): Promise<void> {

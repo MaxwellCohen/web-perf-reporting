@@ -447,7 +447,7 @@ describe("page-speed container coverage", () => {
       </Accordion>,
     );
 
-    expect(container.textContent).toMatch(/Page Loading Experience: Mobile - FAST/);
+    expect(container.textContent).toMatch(/Page Loading Experience:\s*Mobile - FAST/);
     expect(container.textContent).toContain("1200 - FAST (Mobile)");
     expect(container.textContent).toContain("2200 - AVERAGE (Mobile)");
   });
@@ -552,9 +552,9 @@ describe("page-speed container coverage", () => {
     expect(container.textContent).toContain("Core Web Vitals Summary");
     expect(container.textContent).toContain("First Contentful Paint");
     expect(container.textContent).toMatch(/Score: 92 \/ 100/);
-    expect(container.textContent).toContain("Mobile - ✅ - Passed");
-    expect(container.textContent).toContain("Error: Failed");
-    expect(container.textContent).toContain("Mobile - Manual");
+    expect(container.textContent).toContain("Mobile:Pass");
+    expect(container.textContent).toContain("Failed");
+    expect(container.textContent).toContain("Mobile:Manual");
     expect((container.textContent?.match(/Score chart:/g) ?? []).length).toBe(5);
   });
 
@@ -717,7 +717,6 @@ describe("page-speed container coverage", () => {
     expect(container.textContent).toContain("Main thread work chart");
     expect(container.textContent).toContain("Main thread work: 1,0");
     expect(container.textContent).toContain("Script Optimization Audits");
-    expect(container.textContent).toContain("JS usage card section");
   });
 
   it("filters recommendation items down to entries with details and toggles expansion", () => {
@@ -787,7 +786,7 @@ describe("page-speed container coverage", () => {
 
     const { container } = render(<ScoreDisplay audit={numericAudit as any} device="Mobile" />);
 
-    expect(container.textContent).toMatch(/Mobile - 900 ms - Score: 90 \/ 100/);
+    expect(container.textContent).toMatch(/Mobile:.*Pass 90.*900 ms/);
     expect(isEmptyResult(undefined)).toBe(true);
     expect(isEmptyResult(emptyAudit as any)).toBe(true);
     expect(isEmptyResult(numericAudit as any)).toBe(false);

@@ -11,7 +11,7 @@ import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack
 type Row = { description: string; severity: string };
 
 const columnHelper = createStockColumnHelper<Row>();
-const columns: FlatColumnDef<Row>[] = [
+const columns = [
   columnHelper.accessor("description", {
     id: "description",
     header: "Description",
@@ -24,7 +24,7 @@ const columns: FlatColumnDef<Row>[] = [
     enableSorting: true,
     sortFn: "alphanumeric",
   }),
-];
+] as FlatColumnDef<Row>[];
 
 const data: Row[] = [
   { description: "No HSTS header found", severity: "High" },

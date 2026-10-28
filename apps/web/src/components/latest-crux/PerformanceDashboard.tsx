@@ -8,9 +8,16 @@ import {
 import { PerformanceOptions } from "@/components/latest-crux/PerformanceOptions";
 import type { CruxReportMap, DeviceType, Scope } from "@/components/latest-crux/types";
 import { PercentTable } from "@/components/common/PercentTable";
+import { AdMetricsTable } from "@/components/common/AdMetricsTable";
 import { formatCruxReport, formatDate, groupBy } from "@/lib/utils";
 import { useState } from "react";
 import { LoadingMessage } from "@/components/common/LoadingMessage";
+
+const softNavMetricNames = [
+  "experimental_largest_contentful_paint_with_softnavs",
+  "experimental_interaction_to_next_paint_with_softnavs",
+  "experimental_cumulative_layout_shift_with_softnavs",
+];
 
 export function CurrentPerformanceDashboard({
   reportMap,
@@ -32,6 +39,7 @@ export function CurrentPerformanceDashboard({
   const form_factors_date_range = reportMap[`${reportScope}All`]?.record?.collectionPeriod;
   const navigation_types = report?.record?.metrics?.navigation_types?.fractions;
   const collectionPeriod = report?.record?.collectionPeriod;
+  const hasSoftNavMetrics = softNavMetricNames.some((name) => groupedMetrics?.[name]?.length);
   return (
     <CurrentPerformanceChartContext.Provider value={ChartType}>
       <h2 className="text-lg">
@@ -89,7 +97,29 @@ export function CurrentPerformanceDashboard({
         />
       </div>
       )}
+      {!slotPending && hasSoftNavMetrics ? (
+        <>
+          <h3 className="mt-4 text-md">
+            Core Web Vitals including soft navigations (experimental)
+          </h3>
+          <div className="mt-2 grid gap-1 grid-cols-2 md:grid-cols-3 print:grid-cols-3">
+            <CurrentPerformanceCard
+              title="LCP with Soft Navigations"
+              histogramData={groupedMetrics?.experimental_largest_contentful_paint_with_softnavs?.[0]}
+            />
+            <CurrentPerformanceCard
+              title="INP with Soft Navigations"
+              histogramData={groupedMetrics?.experimental_interaction_to_next_paint_with_softnavs?.[0]}
+            />
+            <CurrentPerformanceCard
+              title="CLS with Soft Navigations"
+              histogramData={groupedMetrics?.experimental_cumulative_layout_shift_with_softnavs?.[0]}
+            />
+          </div>
+        </>
+      ) : null}
       {navigation_types ? <PercentTable title="Navigation Types" data={navigation_types} /> : null}
+      {!slotPending ? <AdMetricsTable className="mt-1" metrics={report?.record?.metrics} /> : null}
     </CurrentPerformanceChartContext.Provider>
   );
 }

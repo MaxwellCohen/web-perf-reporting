@@ -3,12 +3,9 @@
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import { getAuditId } from "@/features/page-speed-insights/lh-categories/table/detailTableData";
 import { ImageDeliveryCause } from "@/features/page-speed-insights/ImageDeliveryCause";
-import type { AuditResult, TableItem } from "@/lib/schema";
-import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
+import type { AuditResult } from "@/lib/schema";
 import { getNumber } from "@/lib/utils";
-import { buildGroupedComparison } from "@/features/page-speed-insights/shared/comparisonChartData";
-import { formatAxisMs } from "@/features/page-speed-insights/shared/horizontalBarChart";
-import { ReportComparisonBarChart } from "@/features/page-speed-insights/shared/ReportComparisonBarChart";
+import { formatBytes } from "@/features/page-speed-insights/shared/format";
 import { AuditBarChart } from "./AuditBarChart";
 import { AuditStackedBarChart } from "./AuditStackedBarChart";
 import { AuditGanttStrip, AuditRedirectChain } from "./AuditGanttStrip";
@@ -28,6 +25,11 @@ import {
   extractStackedSegmentPoints,
 } from "./extractAuditBarPoints";
 import { itemNumeric } from "./auditItemValues";
+import {
+  PERFORMANCE_AUDIT_VIZ_IDS,
+  PerformanceAuditViz,
+} from "./performanceAuditViz";
+import { QualityAuditViz } from "./qualityAuditViz";
 
 const BYTES_URL_AUDITS = new Set([
   "duplicated-javascript-insight",
@@ -38,67 +40,74 @@ const BYTES_URL_AUDITS = new Set([
   "total-byte-weight",
 ]);
 
-const MS_URL_AUDITS = new Set([
-  "font-display-insight",
-  "render-blocking-insight",
-  "forced-reflow-insight",
-]);
-
 function bytesLabelKeys(auditId: string): readonly string[] {
   if (auditId === "duplicated-javascript-insight") return ["source", "url"];
-  if (auditId === "forced-reflow-insight") return ["source", "url"];
   return ["url", "origin", "source"];
 }
 
-function bytesValueKeys(auditId: string): readonly string[] {
-  if (auditId === "total-byte-weight") return ["totalBytes"];
-  if (auditId === "forced-reflow-insight") return ["reflowTime"];
-  if (MS_URL_AUDITS.has(auditId)) return ["wastedMs"];
-  return ["wastedBytes", "totalBytes"];
+/** Bar = full resource size: used part plus the part Lighthouse says could be saved. */
+export function usedVsSavingsLabel(segments: Record<string, number>): string {
+  const used = segments.used ?? 0;
+  const savings = segments.savings ?? 0;
+  // Some audits (e.g. legacy-javascript-insight) only report wastedBytes, so no total is known.
+  if (used <= 0) return `${formatBytes(savings)} savings`;
+  return `used ${formatBytes(used)} / total ${formatBytes(used + savings)}`;
 }
 
 export function AuditTableViz({ rows }: { rows: DetailTableItem[] }) {
   const auditId = getAuditId(rows);
   if (!auditId) return null;
 
-  if (BYTES_URL_AUDITS.has(auditId) || MS_URL_AUDITS.has(auditId)) {
-    const unit = MS_URL_AUDITS.has(auditId) || auditId === "forced-reflow-insight" ? "ms" : "bytes";
-    const points = extractBarPoints(rows, {
+  if (BYTES_URL_AUDITS.has(auditId) && auditId !== "total-byte-weight") {
+    const points = extractStackedSegmentPoints(rows, {
       labelKeys: bytesLabelKeys(auditId),
-      valueKeys: bytesValueKeys(auditId),
+      segments: [],
+      usedUnusedFromBytes: true,
       limit: 12,
+    }).map((point) => ({
+      ...point,
+      segment: point.segment === "unused" ? "savings" : point.segment,
+    }));
+    return (
+      <div className="mb-4">
+        <AuditStackedBarChart
+          points={points}
+          segmentOrder={["used", "savings"]}
+          segmentLabels={{ used: "Used", savings: "Potential savings" }}
+          unit="bytes"
+          title="Potential byte savings (bar = total size)"
+          endLabel={usedVsSavingsLabel}
+        />
+      </div>
+    );
+  }
+
+  // Time-savings audits (font-display, render-blocking, forced-reflow) are table-only.
+  // total-byte-weight keeps only the page-size card; the table lists the largest transfers.
+  if (auditId === "total-byte-weight") {
+    const pageTotal = rows.map((row) => {
+      const numericValue = getNumber(
+        (row.auditResult as AuditResult | undefined)?.numericValue,
+      );
+      const fallback = (row.auditResult?.details?.items || []).reduce(
+        (sum, item) => sum + (itemNumeric(item, ["totalBytes"]) ?? 0),
+        0,
+      );
+      return {
+        reportLabel: row._userLabel || "Report",
+        metrics: [
+          {
+            label: "Page transfer",
+            value: numericValue ?? fallback,
+            format: "bytes" as const,
+          },
+        ],
+      };
     });
-    const title =
-      auditId === "total-byte-weight"
-        ? "Largest transfers"
-        : unit === "ms"
-          ? "Potential time savings"
-          : "Potential byte savings";
-    const pageTotal =
-      auditId === "total-byte-weight"
-        ? rows.map((row) => {
-            const numericValue = getNumber((row.auditResult as AuditResult | undefined)?.numericValue);
-            const fallback = (row.auditResult?.details?.items || []).reduce(
-              (sum, item) => sum + (itemNumeric(item, ["totalBytes"]) ?? 0),
-              0,
-            );
-            return {
-              reportLabel: row._userLabel || "Report",
-              metrics: [
-                {
-                  label: "Page transfer",
-                  value: numericValue ?? fallback,
-                  format: "bytes" as const,
-                },
-              ],
-            };
-          })
-        : null;
 
     return (
       <div className="mb-4 space-y-3">
-        {pageTotal ? <AuditKpiStrip groups={pageTotal} /> : null}
-        <AuditBarChart points={points} unit={unit} title={title} />
+        <AuditKpiStrip groups={pageTotal} />
       </div>
     );
   }
@@ -118,12 +127,21 @@ export function AuditTableViz({ rows }: { rows: DetailTableItem[] }) {
           segmentLabels={{ used: "Used", unused: "Unused" }}
           unit="bytes"
           title="Used vs unused JavaScript"
+          endLabel={(segments) =>
+            usedVsSavingsLabel({
+              used: segments.used ?? 0,
+              savings: segments.unused ?? 0,
+            })
+          }
         />
       </div>
     );
   }
 
-  if (auditId === "third-parties-insight" || auditId === "third-parties-details") {
+  if (
+    auditId === "third-parties-insight" ||
+    auditId === "third-parties-details"
+  ) {
     const transfer = extractBarPoints(rows, {
       labelKeys: ["entity", "url"],
       valueKeys: ["transferSize"],
@@ -136,8 +154,16 @@ export function AuditTableViz({ rows }: { rows: DetailTableItem[] }) {
     });
     return (
       <div className="mb-4 space-y-4">
-        <AuditBarChart points={transfer} unit="bytes" title="Transfer size by entity" />
-        <AuditBarChart points={mainThread} unit="ms" title="Main-thread time by entity" />
+        <AuditBarChart
+          points={transfer}
+          unit="bytes"
+          title="Transfer size by entity"
+        />
+        <AuditBarChart
+          points={mainThread}
+          unit="ms"
+          title="Main-thread time by entity"
+        />
       </div>
     );
   }
@@ -173,34 +199,7 @@ export function AuditTableViz({ rows }: { rows: DetailTableItem[] }) {
     );
   }
 
-  if (auditId === "mainthread-work-breakdown") {
-    const points = rows.flatMap(({ _userLabel, auditResult }) =>
-      ((auditResult?.details?.items || []) as TableItem[]).map((item) => {
-        const group = typeof item.group === "string" ? item.group : "";
-        const groupLabel = typeof item.groupLabel === "string" ? item.groupLabel : "";
-        return {
-          label: _userLabel || "Report",
-          category: groupLabel || toTitleCase(group) || "Other",
-          value: getNumber(item.duration) ?? 0,
-        };
-      }),
-    );
-    const { series, rows: chartRows } = buildGroupedComparison(points, { limit: 8 });
-    if (!chartRows.length) return null;
-    return (
-      <div className="mb-4 space-y-2">
-        <p className="text-sm font-medium text-muted-foreground">Main-thread work by category</p>
-        <ReportComparisonBarChart
-          data={chartRows}
-          series={series}
-          formatValue={formatAxisMs}
-          yAxis={{ min: 100, max: 160 }}
-          showValueAxis
-        />
-      </div>
-    );
-  }
-
+  // mainthread-work-breakdown is table-only (MainThreadWorkBreakdownTable in DetailTable).
   if (auditId === "bootup-time") {
     const points = extractStackedSegmentPoints(rows, {
       labelKeys: ["url"],
@@ -215,7 +214,10 @@ export function AuditTableViz({ rows }: { rows: DetailTableItem[] }) {
         <AuditStackedBarChart
           points={points}
           segmentOrder={["scripting", "scriptParseCompile"]}
-          segmentLabels={{ scripting: "Scripting", scriptParseCompile: "Parse / compile" }}
+          segmentLabels={{
+            scripting: "Scripting",
+            scriptParseCompile: "Parse / compile",
+          }}
           unit="ms"
           title="JavaScript bootup time"
         />
@@ -318,7 +320,11 @@ export function AuditTableViz({ rows }: { rows: DetailTableItem[] }) {
     });
     return (
       <div className="mb-4">
-        <AuditBarChart points={points} unit="ms" title="Server latency by origin" />
+        <AuditBarChart
+          points={points}
+          unit="ms"
+          title="Server latency by origin"
+        />
       </div>
     );
   }
@@ -355,5 +361,13 @@ export function AuditTableViz({ rows }: { rows: DetailTableItem[] }) {
     );
   }
 
-  return null;
+  if (PERFORMANCE_AUDIT_VIZ_IDS.has(auditId)) {
+    return (
+      <div className="mb-4">
+        <PerformanceAuditViz rows={rows} />
+      </div>
+    );
+  }
+
+  return <QualityAuditViz rows={rows} />;
 }

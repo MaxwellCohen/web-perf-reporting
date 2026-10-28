@@ -24,6 +24,9 @@ const HISTOGRAM_FIELDS = [
   "largest_contentful_paint",
   "round_trip_time",
   "first_contentful_paint",
+  "experimental_largest_contentful_paint_with_softnavs",
+  "experimental_interaction_to_next_paint_with_softnavs",
+  "experimental_cumulative_layout_shift_with_softnavs",
 ] as const;
 
 const PERCENTILE_FIELDS = [
@@ -31,6 +34,10 @@ const PERCENTILE_FIELDS = [
   "largest_contentful_paint_image_resource_load_delay",
   "largest_contentful_paint_image_resource_load_duration",
   "largest_contentful_paint_image_element_render_delay",
+  "experimental_ad_count",
+  "experimental_ad_density",
+  "experimental_ad_cpu",
+  "experimental_ad_kilobytes",
 ] as const;
 
 /** Matches `formatDate` in the web app so imported row ids stay stable. */

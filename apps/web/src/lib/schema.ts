@@ -105,6 +105,15 @@ export const cruxReportSchema = z.object({
         largest_contentful_paint_image_time_to_first_byte: CruxHistogramItem.omit({
           histogram: true,
         }).optional(),
+        // Experimental: CWVs that include soft (SPA route) navigations as well as full page loads.
+        experimental_largest_contentful_paint_with_softnavs: CruxHistogramItem.optional(),
+        experimental_interaction_to_next_paint_with_softnavs: CruxHistogramItem.optional(),
+        experimental_cumulative_layout_shift_with_softnavs: CruxHistogramItem.optional(),
+        // Experimental ad metrics: p75 only, no thresholds.
+        experimental_ad_count: CruxHistogramItem.omit({ histogram: true }).optional(),
+        experimental_ad_density: CruxHistogramItem.omit({ histogram: true }).optional(),
+        experimental_ad_cpu: CruxHistogramItem.omit({ histogram: true }).optional(),
+        experimental_ad_kilobytes: CruxHistogramItem.omit({ histogram: true }).optional(),
       })
       .partial(),
     collectionPeriod: z.object({
@@ -175,6 +184,15 @@ export const CruxHistoryReportSchema = z.object({
         histogramTimeseries: true,
       }).optional(),
       largest_contentful_paint_image_time_to_first_byte: CruxHistoryTimeseries.omit({
+        histogramTimeseries: true,
+      }).optional(),
+      experimental_largest_contentful_paint_with_softnavs: CruxHistoryTimeseries.optional(),
+      experimental_interaction_to_next_paint_with_softnavs: CruxHistoryTimeseries.optional(),
+      experimental_cumulative_layout_shift_with_softnavs: CruxHistoryTimeseries.optional(),
+      experimental_ad_count: CruxHistoryTimeseries.omit({ histogramTimeseries: true }).optional(),
+      experimental_ad_density: CruxHistoryTimeseries.omit({ histogramTimeseries: true }).optional(),
+      experimental_ad_cpu: CruxHistoryTimeseries.omit({ histogramTimeseries: true }).optional(),
+      experimental_ad_kilobytes: CruxHistoryTimeseries.omit({
         histogramTimeseries: true,
       }).optional(),
       form_factors: z

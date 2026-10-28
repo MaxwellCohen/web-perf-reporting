@@ -29,6 +29,10 @@ const ResourcesTabPanel = dynamic(
   () => import("./ResourcesTabPanel").then((mod) => mod.ResourcesTabPanel),
   { loading: () => <DashboardPanelFallback label="resources" /> },
 );
+const PageWeightTabPanel = dynamic(
+  () => import("./PageWeightTabPanel").then((mod) => mod.PageWeightTabPanel),
+  { loading: () => <DashboardPanelFallback label="page weight" /> },
+);
 const RecommendationsTabPanel = dynamic(
   () => import("./RecommendationsTabPanel").then((mod) => mod.RecommendationsTabPanel),
   { loading: () => <DashboardPanelFallback label="recommendations" /> },
@@ -72,6 +76,9 @@ export function PageSpeedDashboardView() {
             <TabsTrigger className={tabTriggerClassName} value="resources">
               Resources
             </TabsTrigger>
+            <TabsTrigger className={tabTriggerClassName} value="weight">
+              Page Weight
+            </TabsTrigger>
             <TabsTrigger className={tabTriggerClassName} value="recommendations">
               Recommendations
             </TabsTrigger>
@@ -91,6 +98,9 @@ export function PageSpeedDashboardView() {
         </TabPanel>
         <TabPanel value="resources">
           <ResourcesTabPanel />
+        </TabPanel>
+        <TabPanel value="weight">
+          <PageWeightTabPanel />
         </TabPanel>
         <TabPanel value="recommendations">
           <RecommendationsTabPanel />

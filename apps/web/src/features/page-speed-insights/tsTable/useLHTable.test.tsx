@@ -20,7 +20,13 @@ vi.mock("react-markdown", () => ({
 }));
 
 vi.mock("@/components/ui/accordion", () => ({
-  Accordion: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Accordion: ({
+    children,
+    defaultValue,
+  }: {
+    children: React.ReactNode;
+    defaultValue?: string[];
+  }) => <div data-default-open={defaultValue?.join("|")}>{children}</div>,
   AccordionItem: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   AccordionTrigger: ({
     children,
@@ -149,5 +155,75 @@ describe("AuditSummaryRow", () => {
   it("renders audit summary row", () => {
     const { container } = render(<AuditSummaryRowWrapper />);
     expect(container.querySelector('[data-testid="audit-summary"]')).toBeTruthy();
+  });
+});
+
+describe("CategoryRow status sections", () => {
+  function Wrapper({ labels, expandAll }: { labels: string[]; expandAll?: boolean }) {
+    const mk = (scores: Record<string, number>) =>
+      ({
+        lighthouseResult: {
+          categories: {
+            performance: {
+              title: "Performance",
+              score: 0.5,
+              auditRefs: Object.keys(scores).map((id) => ({ id, group: "diagnostics" })),
+            },
+          },
+          audits: Object.fromEntries(
+            Object.entries(scores).map(([id, score]) => [
+              id,
+              { id, title: id, score, scoreDisplayMode: "numeric" },
+            ]),
+          ),
+        },
+      }) as unknown as PageSpeedInsights;
+    const items = [
+      { item: mk({ good: 1, bad: 0.1, mid: 0.7 }), label: labels[0] },
+      ...(labels[1] ? [{ item: mk({ good: 1, bad: 1, mid: 0.7 }), label: labels[1] }] : []),
+    ];
+    const table = useLHTable(items);
+    return (
+      <div>
+        {table.getRowModel().rows.map((row) => (
+          <CategoryRow key={row.id} row={row} expandAll={expandAll} />
+        ))}
+      </div>
+    );
+  }
+
+  it("groups audits by status with a summary (single report)", () => {
+    const { getByTestId, container } = render(<Wrapper labels={["Mobile"]} />);
+    expect(getByTestId("audit-section-fail").hasAttribute("open")).toBe(true);
+    expect(getByTestId("audit-section-average").hasAttribute("open")).toBe(true);
+    expect(getByTestId("audit-section-pass").hasAttribute("open")).toBe(false);
+    expect(container.textContent).toContain("1 failed · 1 needs attention · 1 passed");
+  });
+
+  it("uses the worst status across two reports", () => {
+    const { getByTestId, container } = render(<Wrapper labels={["Mobile", "Desktop"]} />);
+    expect(getByTestId("audit-section-fail").querySelectorAll('[data-testid="audit-summary"]')).toHaveLength(1);
+    expect(container.textContent).toContain("1 failed · 1 needs attention · 1 passed");
+  });
+
+  it.each([[["Mobile"]], [["Mobile", "Desktop"]]])(
+    "expandAll opens every section and audit row (%j)",
+    (labels) => {
+      const { getByTestId, container } = render(<Wrapper labels={labels} expandAll />);
+      for (const status of ["fail", "average", "pass"]) {
+        const section = getByTestId(`audit-section-${status}`);
+        expect(section.hasAttribute("open")).toBe(true);
+        // Each section's audit accordion starts with all of its audits open.
+        const auditList = section.querySelector("[data-default-open]");
+        expect(auditList?.getAttribute("data-default-open")).toBeTruthy();
+      }
+      expect(container.textContent).toContain("1 failed · 1 needs attention · 1 passed");
+    },
+  );
+
+  it("keeps audit rows closed by default", () => {
+    const { getByTestId } = render(<Wrapper labels={["Mobile"]} />);
+    const auditList = getByTestId("audit-section-fail").querySelector("[data-default-open]");
+    expect(auditList?.getAttribute("data-default-open")).toBe("");
   });
 });

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CruxHistoryReport, CruxReport } from "@/lib/schema";
+import { cruxReportSchema } from "@/lib/schema";
 import {
   convertCruxHistoryToReports,
   formatCruxHistoryReport,
@@ -244,6 +245,67 @@ describe("utils", () => {
         },
       },
     });
+  });
+
+  it("keeps experimental soft-nav and ad metrics from current reports", () => {
+    const report = cruxReportSchema.parse({
+      record: {
+        key: { origin: "https://example.com", formFactor: "PHONE" },
+        metrics: {
+          experimental_cumulative_layout_shift_with_softnavs: {
+            histogram: [
+              { start: "0.00", end: "0.10", density: 0.58 },
+              { start: "0.10", end: "0.25", density: 0.33 },
+              { start: "0.25", density: 0.09 },
+            ],
+            percentiles: { p75: "0.17" },
+          },
+          experimental_ad_count: { percentiles: { p75: "0.51" } },
+          experimental_ad_density: { percentiles: { p75: 7 } },
+          experimental_ad_cpu: { percentiles: { p75: 1986 } },
+          experimental_ad_kilobytes: { percentiles: { p75: 4976 } },
+        },
+        collectionPeriod: baseCollectionPeriod,
+      },
+    });
+
+    expect(report.record.metrics.experimental_ad_count?.percentiles.p75).toBe(0.51);
+    expect(report.record.metrics.experimental_ad_kilobytes?.percentiles.p75).toBe(4976);
+    expect(formatCruxReport(report)).toEqual([
+      expect.objectContaining({
+        metric_name: "experimental_cumulative_layout_shift_with_softnavs",
+        P75: 0.17,
+        good_max: 0.1,
+        ni_max: 0.25,
+        poor_density: 0.09,
+      }),
+    ]);
+  });
+
+  it("carries experimental soft-nav and ad metrics through history conversion", () => {
+    const history = asCruxHistoryReport({
+      record: {
+        key: { origin: "https://example.com" },
+        collectionPeriods: [baseCollectionPeriod],
+        metrics: {
+          experimental_largest_contentful_paint_with_softnavs: {
+            histogramTimeseries: [
+              { start: 0, end: 2500, densities: [0.87] },
+              { start: 2500, end: 4000, densities: [0.07] },
+              { start: 4000, densities: [0.06] },
+            ],
+            percentilesTimeseries: { p75s: [1617] },
+          },
+          experimental_ad_cpu: { percentilesTimeseries: { p75s: [1960] } },
+        },
+      },
+    });
+
+    const [report] = convertCruxHistoryToReports(history);
+    expect(report?.record.metrics.experimental_ad_cpu).toEqual({ percentiles: { p75: 1960 } });
+    expect(
+      report?.record.metrics.experimental_largest_contentful_paint_with_softnavs?.percentiles.p75,
+    ).toBe(1617);
   });
 
   it("groups values and returns typed primitive helpers", () => {

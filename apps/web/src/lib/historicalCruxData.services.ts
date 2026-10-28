@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { convertCruxHistoryToReports, formatDate } from "@/lib/utils";
 import * as Sentry from "@sentry/nextjs";
 import { historicalMetrics } from "@/db/schema";
-import { eq, and, asc } from "drizzle-orm";
+import { eq, and, asc, sql } from "drizzle-orm";
 import { formFactor } from "@/lib/services";
 import { parseCruxHistoryResponse, queryCruxHistoryRecord } from "@/lib/crux/googleCruxApi";
 
@@ -50,7 +50,11 @@ export const getHistoricalCruxData = async ({
             };
           }),
         )
-        .onConflictDoNothing() // Handle duplicate entries gracefully
+        // Refresh cached periods so newly added CrUX metrics reach existing rows.
+        .onConflictDoUpdate({
+          target: historicalMetrics.id,
+          set: { data: sql`excluded.data` },
+        })
         .execute();
     }
     const dbData = await db

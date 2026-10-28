@@ -18,7 +18,7 @@ import {
   yAxisWidthForLabels,
 } from "@/features/page-speed-insights/shared/horizontalBarChart";
 import { formatBytes } from "@/features/page-speed-insights/shared/format";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
 
 type SegmentPoint = {
   label: string;
@@ -29,6 +29,8 @@ type SegmentPoint = {
 
 type Unit = "bytes" | "ms";
 
+const END_LABEL_KEY = "__endLabel";
+
 export function AuditStackedBarChart({
   points,
   segmentOrder,
@@ -36,6 +38,7 @@ export function AuditStackedBarChart({
   unit,
   title,
   limit = 12,
+  endLabel,
 }: {
   points: SegmentPoint[];
   segmentOrder: string[];
@@ -43,6 +46,8 @@ export function AuditStackedBarChart({
   unit: Unit;
   title?: string;
   limit?: number;
+  /** Text drawn after each bar, from that row's segment values (e.g. "used 12 KiB / total 40 KiB"). */
+  endLabel?: (segments: Record<string, number>) => string;
 }) {
   if (!points.length) return null;
 
@@ -82,6 +87,15 @@ export function AuditStackedBarChart({
 
   if (!data.length) return null;
 
+  if (endLabel) {
+    for (const row of data) {
+      const segments = Object.fromEntries(
+        segmentOrder.map((key) => [key, Number(row[key]) || 0]),
+      );
+      row[END_LABEL_KEY] = endLabel(segments);
+    }
+  }
+
   const series = segmentOrder.map((key) => ({
     key,
     label: segmentLabels[key] ?? key,
@@ -105,7 +119,7 @@ export function AuditStackedBarChart({
           accessibilityLayer
           data={data}
           layout="vertical"
-          margin={{ left: 8, right: 16, top: 4, bottom: 4 }}
+          margin={{ left: 8, right: endLabel ? 200 : 16, top: 4, bottom: 4 }}
           barCategoryGap="22%"
         >
           <CartesianGrid horizontal={false} strokeDasharray="3 3" className="stroke-border/40" />
@@ -156,7 +170,15 @@ export function AuditStackedBarChart({
               radius={index === segmentOrder.length - 1 ? barEndRadius : [0, 0, 0, 0]}
               maxBarSize={22}
               isAnimationActive={false}
-            />
+            >
+              {endLabel && index === segmentOrder.length - 1 ? (
+                <LabelList
+                  dataKey={END_LABEL_KEY}
+                  position="right"
+                  className="fill-muted-foreground font-mono text-[10px] tabular-nums"
+                />
+              ) : null}
+            </Bar>
           ))}
         </BarChart>
       </ChartContainer>

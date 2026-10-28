@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("recharts", () => ({
@@ -15,8 +15,8 @@ vi.mock("@/components/ui/chart", () => ({
   ChartTooltipContent: () => null,
 }));
 
-vi.mock("@/components/common/PageSpeedGaugeChart", () => ({
-  GaugeChart: () => <div data-testid="gauge-chart" />,
+vi.mock("@/components/latest-crux/charts/CruxGaugeChart", () => ({
+  CruxGaugeChart: () => <div data-testid="gauge-chart" />,
 }));
 
 vi.mock("@/components/latest-crux/charts/CruxRadialChart", () => ({
@@ -67,31 +67,31 @@ describe("CurrentPerformanceCard", () => {
     expect(container.textContent).toContain("Good: 0 to 1000");
   });
 
-  it("renders Gauge Chart when context is Gauge Chart", () => {
-    const { container } = render(
+  it("renders Gauge Chart when context is Gauge Chart", async () => {
+    render(
       <CurrentPerformanceChartContext.Provider value="Gauge Chart">
         <CurrentPerformanceCard title="LCP" histogramData={histogramData as any} />
       </CurrentPerformanceChartContext.Provider>,
     );
-    expect(container.querySelector('[data-testid="gauge-chart"]')).toBeTruthy();
+    expect(await screen.findByTestId("gauge-chart")).toBeTruthy();
   });
 
-  it("renders Stacked Bar when context is Stacked Bar", () => {
-    const { container } = render(
+  it("renders Stacked Bar when context is Stacked Bar", async () => {
+    render(
       <CurrentPerformanceChartContext.Provider value="Stacked Bar">
         <CurrentPerformanceCard title="LCP" histogramData={histogramData as any} />
       </CurrentPerformanceChartContext.Provider>,
     );
-    expect(container.querySelector('[data-testid="stacked-bar-chart"]')).toBeTruthy();
+    expect(await screen.findByTestId("stacked-bar-chart")).toBeTruthy();
   });
 
-  it("renders Radial Chart when context is Radial Chart", () => {
-    const { container } = render(
+  it("renders Radial Chart when context is Radial Chart", async () => {
+    render(
       <CurrentPerformanceChartContext.Provider value="Radial Chart">
         <CurrentPerformanceCard title="LCP" histogramData={histogramData as any} />
       </CurrentPerformanceChartContext.Provider>,
     );
-    expect(container.querySelector('[data-testid="radial-chart"]')).toBeTruthy();
+    expect(await screen.findByTestId("radial-chart")).toBeTruthy();
   });
 
   it("shows Needs Improvement status when P75 is between good_max and ni_max", () => {

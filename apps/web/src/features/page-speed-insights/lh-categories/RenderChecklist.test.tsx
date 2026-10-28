@@ -59,3 +59,50 @@ describe("RenderChecklist", () => {
     expect(container.textContent).toContain("Desktop");
   });
 });
+
+describe("RenderChecklist chips", () => {
+  it("renders pass/fail chips for a single report", () => {
+    const { container } = render(
+      <RenderChecklist
+        title="T"
+        items={[
+          makeItem("Mobile", {
+            a: { label: "Check A", value: true },
+            b: { label: "Check B", value: false },
+          }),
+        ]}
+      />,
+    );
+    const chips = container.querySelectorAll('[data-testid="checklist-chip"]');
+    expect(chips.length).toBe(2);
+    expect(chips[0].getAttribute("data-pass")).toBe("true");
+    expect(chips[1].getAttribute("data-pass")).toBe("false");
+  });
+
+  it("highlights differing rows across reports", () => {
+    const { container } = render(
+      <RenderChecklist
+        title="T"
+        items={[
+          makeItem("Mobile", {
+            a: { label: "Same", value: true },
+            b: { label: "Diff", value: true },
+          }),
+          makeItem("Desktop", {
+            a: { label: "Same", value: true },
+            b: { label: "Diff", value: false },
+          }),
+        ]}
+      />,
+    );
+    const rows = container.querySelectorAll("[data-differs]");
+    expect(rows.length).toBe(2);
+    expect(rows[0].getAttribute("data-differs")).toBe("false");
+    expect(rows[1].getAttribute("data-differs")).toBe("true");
+  });
+
+  it("renders no chips for an empty checklist", () => {
+    const { container } = render(<RenderChecklist title="T" items={[makeItem("Mobile", {})]} />);
+    expect(container.querySelector('[data-testid="checklist-chips"]')).toBeNull();
+  });
+});

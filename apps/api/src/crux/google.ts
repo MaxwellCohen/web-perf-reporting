@@ -24,11 +24,13 @@ export async function queryCruxCurrent(
   pageUrl: string,
   scope: "origin" | "url",
   formFactor: string,
+  signal?: AbortSignal,
 ): Promise<unknown> {
   const response = await fetch(`${CRUX_CONTENT_QUERY_RECORD}&key=${apiKey}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: cruxBody(pageUrl, scope, formFactor),
+    signal,
   });
   if (response.status === 404) return null;
   if (!response.ok) {
@@ -42,11 +44,13 @@ export async function queryCruxHistory(
   pageUrl: string,
   scope: "origin" | "url",
   formFactor: string,
+  signal?: AbortSignal,
 ): Promise<unknown> {
   const response = await fetch(`${CRUX_QUERY_HISTORY}?key=${apiKey}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: cruxBody(pageUrl, scope, formFactor, { collectionPeriodCount: 40 }),
+    signal,
   });
   if (response.status === 404) return null;
   if (!response.ok) {

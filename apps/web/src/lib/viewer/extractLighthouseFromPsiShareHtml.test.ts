@@ -9,7 +9,10 @@ function embed(report: object): string {
   return JSON.stringify(JSON.stringify(report));
 }
 
-function report(formFactor: string) {
+function report(formFactor: string): {
+  configSettings: { formFactor?: string; emulatedFormFactor?: string };
+  [key: string]: unknown;
+} {
   return {
     fetchTime: "2026-10-25T20:58:56.939Z",
     requestedUrl: "https://example.com/",
@@ -33,7 +36,6 @@ describe("extractLighthouseFromPsiShareHtml", () => {
 
   it("labels emulatedFormFactor when formFactor is missing", () => {
     const desktop = report("desktop");
-    delete (desktop.configSettings as { formFactor?: string }).formFactor;
     desktop.configSettings = { emulatedFormFactor: "desktop" };
     const html = embed(desktop);
     const [extracted] = extractLighthouseFromPsiShareHtml(html);

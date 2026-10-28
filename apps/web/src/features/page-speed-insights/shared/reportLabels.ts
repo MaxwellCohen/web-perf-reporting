@@ -106,13 +106,20 @@ export function getCombinedReportLabel(reportLabels: string[]): string {
   return ALL_DEVICES_LABEL;
 }
 
+/** Split a report label like "Run A · Mobile" into its run name (if any) and device. */
+export function splitReportLabel(label: string): { run: string | null; device: string } {
+  const { run } = splitRunPrefix(label);
+  return { run, device: normalizeReportLabel(label) };
+}
+
 export function formatReportTableTitle(
   title: string,
   reportLabel: string,
   itemCount: number,
 ): string {
   const auditTitle = toTitleCase(title);
-  const formattedLabel = normalizeReportLabel(reportLabel);
+  const { run, device } = splitReportLabel(reportLabel);
+  const formattedLabel = run ? `${run}${PSI_RUN_LABEL_SEPARATOR}${device}` : device;
   const itemLabel = itemCount === 1 ? "item" : "items";
 
   return `${auditTitle} Table for ${formattedLabel} (${itemCount} ${itemLabel})`;

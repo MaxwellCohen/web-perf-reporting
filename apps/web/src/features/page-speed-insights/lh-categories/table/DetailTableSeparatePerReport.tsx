@@ -11,6 +11,7 @@ import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9
 import {
   compareReportLabels,
   formatReportTableTitle,
+  splitReportLabel,
 } from "@/features/page-speed-insights/shared/reportLabels";
 import {
   useSimpleTable,
@@ -49,6 +50,42 @@ function getSortedReports(rowsByReport: Map<string, DetailTableItem[]>): Array<{
   }>;
 }
 
+/** Tables with more rows than this start collapsed so huge audits don't flood the page. */
+const OPEN_BY_DEFAULT_MAX_ROWS = 50;
+
+function ReportTableHeading({
+  title,
+  reportLabel,
+  itemCount,
+}: {
+  title: string;
+  reportLabel: string;
+  itemCount: number;
+}) {
+  const { run, device } = splitReportLabel(reportLabel);
+  return (
+    <div
+      className="flex flex-wrap items-center gap-2 text-left"
+      title={formatReportTableTitle(title, reportLabel, itemCount)}
+    >
+      {run ? <LabelChip name="Run" value={run} /> : null}
+      <LabelChip name="Device" value={device} />
+      <span className="text-sm text-muted-foreground">
+        {itemCount} {itemCount === 1 ? "item" : "items"}
+      </span>
+    </div>
+  );
+}
+
+function LabelChip({ name, value }: { name: string; value: string }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-md border bg-muted/30 px-2 py-0.5 text-sm">
+      <span className="text-muted-foreground">{name}</span>
+      <span className="font-semibold">{value}</span>
+    </span>
+  );
+}
+
 /**
  * Component that renders one table per report for audits configured to show separate tables.
  * This is useful for audits like dom-size-insight where you want to see each report's data separately.
@@ -72,8 +109,8 @@ export function DetailTableSeparatePerReport({
       <div className="space-y-4">
         {sortedReports.map(({ reportLabel, reportRows, data }) => (
           <div key={reportLabel}>
-            <h5 className="mb-2 text-sm font-medium text-muted-foreground">
-              {formatReportTableTitle(title, reportLabel, data.length)}
+            <h5 className="mb-2">
+              <ReportTableHeading title={title} reportLabel={reportLabel} itemCount={data.length} />
             </h5>
             <ReportTable reportLabel={reportLabel} data={data} rows={reportRows} auditId={auditId} />
           </div>
@@ -82,15 +119,19 @@ export function DetailTableSeparatePerReport({
     );
   }
 
+  const accordionValue = (reportLabel: string) =>
+    `${title}-${reportLabel}`.replace(/\s+/g, "-").toLowerCase();
+  const openByDefault = sortedReports
+    .filter(({ data }) => data.length <= OPEN_BY_DEFAULT_MAX_ROWS)
+    .map(({ reportLabel }) => accordionValue(reportLabel));
+
   return (
-    <Accordion type="single" collapsible className="w-full">
+    <Accordion type="multiple" defaultValue={openByDefault} className="w-full">
       {sortedReports.map(({ reportLabel, reportRows, data }) => {
-        const accordionValue = `${title}-${reportLabel}`.replace(/\s+/g, "-").toLowerCase();
-        const reportTitle = formatReportTableTitle(title, reportLabel, data.length);
         return (
-          <AccordionItem key={accordionValue} value={accordionValue}>
+          <AccordionItem key={accordionValue(reportLabel)} value={accordionValue(reportLabel)}>
             <AccordionTrigger>
-              <div className="text-base font-semibold text-left">{reportTitle}</div>
+              <ReportTableHeading title={title} reportLabel={reportLabel} itemCount={data.length} />
             </AccordionTrigger>
             <AccordionContent>
               <ReportTable

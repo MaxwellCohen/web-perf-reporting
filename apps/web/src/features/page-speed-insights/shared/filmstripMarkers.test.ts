@@ -50,7 +50,7 @@ describe("markersFromAudits", () => {
       "largest-contentful-paint": { numericValue: 2500 },
       "first-contentful-paint": { numericValue: 1200 },
       "server-response-time": { numericValue: 400 },
-    } as AuditResultsRecord;
+    } as unknown as AuditResultsRecord;
 
     expect(markersFromAudits(audits)).toEqual([
       { label: "TTFB", timeMs: 400 },
@@ -63,7 +63,7 @@ describe("markersFromAudits", () => {
   it("skips missing metrics", () => {
     const audits = {
       "first-contentful-paint": { numericValue: 900 },
-    } as AuditResultsRecord;
+    } as unknown as AuditResultsRecord;
 
     expect(markersFromAudits(audits)).toEqual([{ label: "FCP", timeMs: 900 }]);
   });
@@ -136,7 +136,7 @@ function mobileFilmstripItem(): InsightsContextItem {
           },
         },
       },
-    } as InsightsContextItem["item"],
+    } as unknown as InsightsContextItem["item"],
   };
 }
 
@@ -159,7 +159,7 @@ describe("filmstripTimelineFromItem", () => {
         ...item.item.lighthouseResult!,
         configSettings: { formFactor: "mobile", throttlingMethod: "devtools" },
       },
-    } as InsightsContextItem["item"];
+    } as unknown as InsightsContextItem["item"];
 
     const view = filmstripTimelineFromItem(item);
     expect(view!.simulationLabel).toBeUndefined();

@@ -1,5 +1,6 @@
 "use client";
 
+import type { SuspectTag } from "@/features/page-speed-insights/dashboard-view/resources-story/resourcesComparisonModel";
 import type {
   ActionHint,
   ResourceSuspect,
@@ -14,14 +15,24 @@ export const ACTION_LABEL: Record<ActionHint, string> = {
   "third-party-audit": "Look at whether this third party earns its bytes",
 };
 
+const TAG_LABEL: Record<Exclude<SuspectTag, null>, string> = {
+  new: "New",
+  dropped: "Dropped",
+};
+
 export function SuspectList({
   suspects,
   selectedUrl,
   onSelect,
+  tagFor,
+  ariaLabel = "Investigate next",
 }: {
   suspects: ResourceSuspect[];
   selectedUrl: string | null;
   onSelect: (url: string) => void;
+  /** Compare mode: marks suspects that are new or dropped versus the other report. */
+  tagFor?: (url: string) => SuspectTag;
+  ariaLabel?: string;
 }) {
   if (!suspects.length) {
     return <p className="text-sm text-muted-foreground">No single URL stood out.</p>;
@@ -32,9 +43,10 @@ export function SuspectList({
       <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
         Investigate next
       </p>
-      <ol aria-label="Investigate next" className="space-y-2">
+      <ol aria-label={ariaLabel} className="space-y-2">
         {suspects.map((suspect, index) => {
           const selected = suspect.url === selectedUrl;
+          const tag = tagFor?.(suspect.url) ?? null;
           return (
             <li key={suspect.url}>
               <button
@@ -52,7 +64,21 @@ export function SuspectList({
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <span className="min-w-0 space-y-1">
-                  <span className="block truncate text-sm font-medium">{suspect.label}</span>
+                  <span className="flex min-w-0 items-center gap-2">
+                    {tag ? (
+                      <span
+                        className={cn(
+                          "shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium uppercase",
+                          tag === "new"
+                            ? "bg-rose-500/10 text-rose-700 dark:text-rose-300"
+                            : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+                        )}
+                      >
+                        {TAG_LABEL[tag]}
+                      </span>
+                    ) : null}
+                    <span className="truncate text-sm font-medium">{suspect.label}</span>
+                  </span>
                   <span className="block text-xs text-muted-foreground">{suspect.why}</span>
                   <span className="block text-xs font-medium text-foreground">
                     {ACTION_LABEL[suspect.actionHint]}

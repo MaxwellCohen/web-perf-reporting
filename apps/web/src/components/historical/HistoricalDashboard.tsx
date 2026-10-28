@@ -16,6 +16,7 @@ import {
   HistoricalPerformanceCard,
 } from "@/components/historical/HistoricalPerformanceCard";
 import { PercentTable } from "@/components/common/PercentTable";
+import { AdMetricsTable } from "@/components/common/AdMetricsTable";
 import { Details } from "@/components/ui/accordion";
 
 // Helper function to convert CruxDate to YYYY-MM-DD string
@@ -105,6 +106,7 @@ export function HistoricalDashboard({
   const groupedMetics = data ? groupBy(data, ({ metric_name }) => metric_name || "") : {};
   const firstDate = reports[0]?.record?.collectionPeriod.lastDate;
   const endDate = reports.at(-1)?.record?.collectionPeriod.lastDate;
+  const latestReport = reports.at(-1);
   return (
     <CurrentPerformanceChartContext.Provider value={ChartType}>
       <Details>
@@ -164,8 +166,31 @@ export function HistoricalDashboard({
             title="Round Trip Time (RTT)"
             histogramData={groupedMetics?.round_trip_time}
           />
+          <HistoricalPerformanceCard
+            title="LCP with Soft Navigations (experimental)"
+            histogramData={groupedMetics?.experimental_largest_contentful_paint_with_softnavs}
+          />
+          <HistoricalPerformanceCard
+            title="INP with Soft Navigations (experimental)"
+            histogramData={groupedMetics?.experimental_interaction_to_next_paint_with_softnavs}
+          />
+          <HistoricalPerformanceCard
+            title="CLS with Soft Navigations (experimental)"
+            histogramData={groupedMetics?.experimental_cumulative_layout_shift_with_softnavs}
+          />
         </div>
         )}
+        {!slotPending ? (
+          <AdMetricsTable
+            className="mt-1"
+            metrics={latestReport?.record?.metrics}
+            dateRange={
+              latestReport
+                ? `${formatDate(latestReport.record.collectionPeriod.firstDate)} - ${formatDate(latestReport.record.collectionPeriod.lastDate)}`
+                : undefined
+            }
+          />
+        ) : null}
       </Details>
     </CurrentPerformanceChartContext.Provider>
   );

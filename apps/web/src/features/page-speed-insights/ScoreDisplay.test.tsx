@@ -236,3 +236,48 @@ describe("sortByScoreDisplayModes", () => {
     expect(sortByScoreDisplayModes(metricSavings as any, numeric as any)).toBeLessThan(0);
   });
 });
+
+describe("ScoreDisplay badges", () => {
+  const base = { id: "a", title: "A" } as const;
+
+  it("shows a green badge for a pass without a label", () => {
+    const { container } = render(
+      <ScoreDisplay audit={{ ...base, score: 1, scoreDisplayMode: "numeric" }} />,
+    );
+    const el = container.querySelector("[data-status]");
+    expect(el?.getAttribute("data-status")).toBe("pass");
+    expect(el?.textContent).toContain("Pass");
+  });
+
+  it("shows amber/red badges, the label, and displayValue when a device is given", () => {
+    const { container } = render(
+      <>
+        <ScoreDisplay
+          audit={{
+            ...base,
+            score: 0.6,
+            scoreDisplayMode: "metricSavings",
+            displayValue: "Est savings of 462 KiB",
+          }}
+          device="Mobile"
+        />
+        <ScoreDisplay audit={{ ...base, score: 0, scoreDisplayMode: "binary" }} device="Desktop" />
+      </>,
+    );
+    const els = container.querySelectorAll("[data-status]");
+    expect(els[0].getAttribute("data-status")).toBe("average");
+    expect(els[0].textContent).toContain("Mobile:");
+    expect(els[0].textContent).toContain("Est savings of 462 KiB");
+    expect(els[1].getAttribute("data-status")).toBe("fail");
+    expect(els[1].textContent).toContain("Desktop:");
+  });
+
+  it("shows the error message", () => {
+    const { container } = render(
+      <ScoreDisplay
+        audit={{ ...base, score: null, scoreDisplayMode: "error", errorMessage: "Boom" }}
+      />,
+    );
+    expect(container.textContent).toContain("Boom");
+  });
+});

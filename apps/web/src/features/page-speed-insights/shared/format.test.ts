@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   formatBytes,
   formatBytesOptional,
+  formatDurationMs,
   formatMs,
   formatMsOptional,
   formatNetworkPriority,
@@ -85,5 +86,19 @@ describe("shortUrl", () => {
   it("truncates long invalid urls", () => {
     const long = "x".repeat(70);
     expect(shortUrl(long)).toBe(`${"x".repeat(57)}…`);
+  });
+});
+
+describe("formatDurationMs", () => {
+  it("keeps short spans in ms / s", () => {
+    expect(formatDurationMs(250)).toBe("250 ms");
+    expect(formatDurationMs(12_000)).toBe("12.0 s");
+  });
+
+  it("reads long spans like cache TTLs as min / h / d", () => {
+    expect(formatDurationMs(30 * 60_000)).toBe("30 min");
+    expect(formatDurationMs(14_400_000)).toBe("4 h");
+    expect(formatDurationMs(86_400_000)).toBe("1 d");
+    expect(formatDurationMs(1.5 * 86_400_000)).toBe("1.5 d");
   });
 });

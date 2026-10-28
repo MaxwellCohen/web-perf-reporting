@@ -8,9 +8,13 @@ exports[`NetworkRTTCard > renders card with title and table when metrics have RT
     class="flex flex-col space-y-1.5 p-6"
   >
     <div
-      class="font-semibold leading-none tracking-tight"
+      class="flex flex-wrap items-center justify-between gap-2"
     >
-      Network Round Trip Times (RTT)
+      <div
+        class="font-semibold leading-none tracking-tight"
+      >
+        Network Round Trip Times (RTT)
+      </div>
     </div>
   </div>
   <div
@@ -23,7 +27,7 @@ exports[`NetworkRTTCard > renders card with title and table when metrics have RT
         class="w-full min-w-0"
       >
         <div
-          class="mb-2 flex justify-end"
+          class="mb-2 flex justify-end gap-2"
         >
           <button
             aria-expanded="false"
@@ -84,10 +88,10 @@ exports[`NetworkRTTCard > renders card with title and table when metrics have RT
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       Origin
                     </div>
@@ -95,7 +99,7 @@ exports[`NetworkRTTCard > renders card with title and table when metrics have RT
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort ascending"
                         type="button"
                       >
@@ -143,10 +147,10 @@ exports[`NetworkRTTCard > renders card with title and table when metrics have RT
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       RTT
                     </div>
@@ -154,7 +158,7 @@ exports[`NetworkRTTCard > renders card with title and table when metrics have RT
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort descending"
                         type="button"
                       >
@@ -215,7 +219,7 @@ exports[`NetworkRTTCard > renders card with title and table when metrics have RT
                   data-grouped="true"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <div
                     class="max-w-50 truncate"
@@ -234,7 +238,7 @@ exports[`NetworkRTTCard > renders card with title and table when metrics have RT
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <div
                     class="flex items-center gap-2 basis-full"
@@ -268,7 +272,7 @@ exports[`NetworkRTTCard > renders card with title and table when metrics have RT
                   data-grouped="true"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <div
                     class="max-w-50 truncate"
@@ -287,7 +291,7 @@ exports[`NetworkRTTCard > renders card with title and table when metrics have RT
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <div
                     class="flex items-center gap-2 basis-full"
