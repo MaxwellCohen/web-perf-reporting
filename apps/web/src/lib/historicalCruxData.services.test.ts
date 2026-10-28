@@ -5,7 +5,7 @@ vi.mock("@/db", () => ({
   db: {
     insert: vi.fn(() => ({
       values: vi.fn(() => ({
-        onConflictDoNothing: vi.fn(() => ({
+        onConflictDoUpdate: vi.fn(() => ({
           execute: vi.fn().mockResolvedValue(undefined),
         })),
       })),
