@@ -4,12 +4,13 @@
   "type": "module",
   "scripts": {
     "dev": "void dev",
-    "build": "void prepare && vite build",
+    "build": "void prepare && vite build && node scripts/write-deploy-pointer.mjs",
     "deploy": "void deploy --platform cloudflare",
     "check": "tsc --noEmit",
     "test": "vitest run",
     "db:generate": "void db generate",
-    "import:history": "tsx scripts/import-historical-metrics.ts"
+    "import:history": "tsx scripts/import-historical-metrics.ts",
+    "deploy:ci": "wrangler d1 migrations apply DB --remote --config dist/ssr/wrangler.json && wrangler deploy"
   },
   "dependencies": {
     "void": "^1.3.0",
