@@ -8,9 +8,13 @@ exports[`NetworkRequestsSummaryCard > does not show Report column when single va
     class="flex flex-col space-y-1.5 p-6"
   >
     <div
-      class="font-semibold leading-none tracking-tight"
+      class="flex flex-wrap items-center justify-between gap-2"
     >
-      Network Requests Summary
+      <div
+        class="font-semibold leading-none tracking-tight"
+      >
+        Network Requests Summary
+      </div>
     </div>
   </div>
   <div
@@ -23,7 +27,7 @@ exports[`NetworkRequestsSummaryCard > does not show Report column when single va
         class="w-full min-w-0"
       >
         <div
-          class="mb-2 flex justify-end"
+          class="mb-2 flex justify-end gap-2"
         >
           <button
             aria-expanded="false"
@@ -84,10 +88,10 @@ exports[`NetworkRequestsSummaryCard > does not show Report column when single va
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       Total Requests
                     </div>
@@ -95,7 +99,7 @@ exports[`NetworkRequestsSummaryCard > does not show Report column when single va
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort descending"
                         type="button"
                       >
@@ -143,10 +147,10 @@ exports[`NetworkRequestsSummaryCard > does not show Report column when single va
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       Transfer Size
                     </div>
@@ -154,7 +158,7 @@ exports[`NetworkRequestsSummaryCard > does not show Report column when single va
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort descending"
                         type="button"
                       >
@@ -202,10 +206,10 @@ exports[`NetworkRequestsSummaryCard > does not show Report column when single va
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       Resource Size
                     </div>
@@ -213,7 +217,7 @@ exports[`NetworkRequestsSummaryCard > does not show Report column when single va
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort descending"
                         type="button"
                       >
@@ -274,7 +278,7 @@ exports[`NetworkRequestsSummaryCard > does not show Report column when single va
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   5
                 </td>
@@ -288,7 +292,7 @@ exports[`NetworkRequestsSummaryCard > does not show Report column when single va
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class=""
@@ -307,7 +311,7 @@ exports[`NetworkRequestsSummaryCard > does not show Report column when single va
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class=""
@@ -334,9 +338,13 @@ exports[`NetworkRequestsSummaryCard > filters out stats with zero totalRequests 
     class="flex flex-col space-y-1.5 p-6"
   >
     <div
-      class="font-semibold leading-none tracking-tight"
+      class="flex flex-wrap items-center justify-between gap-2"
     >
-      Network Requests Summary
+      <div
+        class="font-semibold leading-none tracking-tight"
+      >
+        Network Requests Summary
+      </div>
     </div>
   </div>
   <div
@@ -349,7 +357,7 @@ exports[`NetworkRequestsSummaryCard > filters out stats with zero totalRequests 
         class="w-full min-w-0"
       >
         <div
-          class="mb-2 flex justify-end"
+          class="mb-2 flex justify-end gap-2"
         >
           <button
             aria-expanded="false"
@@ -410,10 +418,10 @@ exports[`NetworkRequestsSummaryCard > filters out stats with zero totalRequests 
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       Total Requests
                     </div>
@@ -421,7 +429,7 @@ exports[`NetworkRequestsSummaryCard > filters out stats with zero totalRequests 
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort descending"
                         type="button"
                       >
@@ -469,10 +477,10 @@ exports[`NetworkRequestsSummaryCard > filters out stats with zero totalRequests 
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       Transfer Size
                     </div>
@@ -480,7 +488,7 @@ exports[`NetworkRequestsSummaryCard > filters out stats with zero totalRequests 
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort descending"
                         type="button"
                       >
@@ -528,10 +536,10 @@ exports[`NetworkRequestsSummaryCard > filters out stats with zero totalRequests 
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       Resource Size
                     </div>
@@ -539,7 +547,7 @@ exports[`NetworkRequestsSummaryCard > filters out stats with zero totalRequests 
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort descending"
                         type="button"
                       >
@@ -600,7 +608,7 @@ exports[`NetworkRequestsSummaryCard > filters out stats with zero totalRequests 
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   3
                 </td>
@@ -614,7 +622,7 @@ exports[`NetworkRequestsSummaryCard > filters out stats with zero totalRequests 
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class=""
@@ -633,7 +641,7 @@ exports[`NetworkRequestsSummaryCard > filters out stats with zero totalRequests 
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class=""
@@ -660,9 +668,13 @@ exports[`NetworkRequestsSummaryCard > renders card with title and table when sta
     class="flex flex-col space-y-1.5 p-6"
   >
     <div
-      class="font-semibold leading-none tracking-tight"
+      class="flex flex-wrap items-center justify-between gap-2"
     >
-      Network Requests Summary
+      <div
+        class="font-semibold leading-none tracking-tight"
+      >
+        Network Requests Summary
+      </div>
     </div>
   </div>
   <div
@@ -675,7 +687,7 @@ exports[`NetworkRequestsSummaryCard > renders card with title and table when sta
         class="w-full min-w-0"
       >
         <div
-          class="mb-2 flex justify-end"
+          class="mb-2 flex justify-end gap-2"
         >
           <button
             aria-expanded="false"
@@ -736,10 +748,10 @@ exports[`NetworkRequestsSummaryCard > renders card with title and table when sta
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       Total Requests
                     </div>
@@ -747,7 +759,7 @@ exports[`NetworkRequestsSummaryCard > renders card with title and table when sta
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort descending"
                         type="button"
                       >
@@ -795,10 +807,10 @@ exports[`NetworkRequestsSummaryCard > renders card with title and table when sta
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       Transfer Size
                     </div>
@@ -806,7 +818,7 @@ exports[`NetworkRequestsSummaryCard > renders card with title and table when sta
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort descending"
                         type="button"
                       >
@@ -854,10 +866,10 @@ exports[`NetworkRequestsSummaryCard > renders card with title and table when sta
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       Resource Size
                     </div>
@@ -865,7 +877,7 @@ exports[`NetworkRequestsSummaryCard > renders card with title and table when sta
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort descending"
                         type="button"
                       >
@@ -926,7 +938,7 @@ exports[`NetworkRequestsSummaryCard > renders card with title and table when sta
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   10
                 </td>
@@ -940,7 +952,7 @@ exports[`NetworkRequestsSummaryCard > renders card with title and table when sta
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class=""
@@ -959,7 +971,7 @@ exports[`NetworkRequestsSummaryCard > renders card with title and table when sta
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class=""
@@ -986,9 +998,13 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
     class="flex flex-col space-y-1.5 p-6"
   >
     <div
-      class="font-semibold leading-none tracking-tight"
+      class="flex flex-wrap items-center justify-between gap-2"
     >
-      Network Requests Summary
+      <div
+        class="font-semibold leading-none tracking-tight"
+      >
+        Network Requests Summary
+      </div>
     </div>
   </div>
   <div
@@ -1001,7 +1017,7 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
         class="w-full min-w-0"
       >
         <div
-          class="mb-2 flex justify-end"
+          class="mb-2 flex justify-end gap-2"
         >
           <button
             aria-expanded="false"
@@ -1062,10 +1078,10 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       Total Requests
                     </div>
@@ -1073,7 +1089,7 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort descending"
                         type="button"
                       >
@@ -1121,10 +1137,10 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       Transfer Size
                     </div>
@@ -1132,7 +1148,7 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort descending"
                         type="button"
                       >
@@ -1180,10 +1196,10 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       Resource Size
                     </div>
@@ -1191,7 +1207,7 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort descending"
                         type="button"
                       >
@@ -1252,7 +1268,7 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   1
                 </td>
@@ -1266,7 +1282,7 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class=""
@@ -1285,7 +1301,7 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class=""
@@ -1308,7 +1324,7 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   1
                 </td>
@@ -1322,7 +1338,7 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class=""
@@ -1341,7 +1357,7 @@ exports[`NetworkRequestsSummaryCard > shows Report column when multiple valid st
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class=""
@@ -1368,9 +1384,13 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
     class="flex flex-col space-y-1.5 p-6"
   >
     <div
-      class="font-semibold leading-none tracking-tight"
+      class="flex flex-wrap items-center justify-between gap-2"
     >
-      Network Requests Summary
+      <div
+        class="font-semibold leading-none tracking-tight"
+      >
+        Network Requests Summary
+      </div>
     </div>
   </div>
   <div
@@ -1383,7 +1403,7 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
         class="w-full min-w-0"
       >
         <div
-          class="mb-2 flex justify-end"
+          class="mb-2 flex justify-end gap-2"
         >
           <button
             aria-expanded="false"
@@ -1444,10 +1464,10 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       Total Requests
                     </div>
@@ -1455,7 +1475,7 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort descending"
                         type="button"
                       >
@@ -1503,10 +1523,10 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       Transfer Size
                     </div>
@@ -1514,7 +1534,7 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort descending"
                         type="button"
                       >
@@ -1562,10 +1582,10 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       Resource Size
                     </div>
@@ -1573,7 +1593,7 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort descending"
                         type="button"
                       >
@@ -1634,7 +1654,7 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   1
                 </td>
@@ -1648,7 +1668,7 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class=""
@@ -1667,7 +1687,7 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class=""
@@ -1690,7 +1710,7 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   1
                 </td>
@@ -1704,7 +1724,7 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class=""
@@ -1723,7 +1743,7 @@ exports[`NetworkRequestsSummaryCard > shows Unknown for empty label when report 
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class=""

@@ -2,11 +2,11 @@
  * Shareable PSI dashboard state lives in the query string.
  *
  * view=dashboard|classic
- * tab=timeline|loading|resources|recommendations|audits (overview is the default)
+ * tab=timeline|loading|resources|weight|recommendations|audits (overview is the default)
  * legacy tab=network|javascript open Resources
  * stage=arrived|scripts|unused|main-thread  suspect= — Resources investigation deep link
  * labels, category, priority, expand, type, groups — repeatable; omitted means "all" or "none"
- * report — timeline/waterfall report label(s); repeatable, up to 2 for side-by-side timeline
+ * report — timeline/waterfall/page-weight report label(s); repeatable, up to 2 for side-by-side compare
  * tasks — timeline task filters; omitted means all on; `tasks=` means all off
  * sort=start|end|duration|size  height=default|large|xl|full  rows=expanded|collapsed
  * blocking=1 — waterfall shows blocking items only
@@ -20,6 +20,7 @@ export const DASHBOARD_TABS = [
   "timeline",
   "loading",
   "resources",
+  "weight",
   "recommendations",
   "audits",
 ] as const;

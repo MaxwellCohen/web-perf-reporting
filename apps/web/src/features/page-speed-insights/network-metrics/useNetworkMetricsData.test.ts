@@ -47,7 +47,7 @@ function mobileItem(): InsightsContextItem {
           },
         },
       },
-    } as InsightsContextItem["item"],
+    } as unknown as InsightsContextItem["item"],
   };
 }
 
@@ -69,7 +69,7 @@ describe("mapItemsToNetworkMetrics", () => {
         ...item.item.lighthouseResult!,
         configSettings: { formFactor: "mobile", throttlingMethod: "devtools" },
       },
-    } as InsightsContextItem["item"];
+    } as unknown as InsightsContextItem["item"];
 
     const [series] = mapItemsToNetworkMetrics([item]);
     expect(series?.simulationLabel).toBeUndefined();

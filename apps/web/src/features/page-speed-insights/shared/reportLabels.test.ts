@@ -4,6 +4,7 @@ import {
   compareReportLabels,
   formatReportLabelList,
   formatReportTableTitle,
+  splitReportLabel,
   getCombinedReportLabel,
   normalizeReportLabel,
   sortReportLabels,
@@ -96,5 +97,21 @@ describe("formatReportTableTitle", () => {
     expect(formatReportTableTitle("audit name", "Desktop", 5)).toBe(
       "Audit Name Table for Desktop (5 items)",
     );
+  });
+
+  it("keeps the run name for run-prefixed labels", () => {
+    expect(formatReportTableTitle("cache", "link · Desktop", 1)).toBe(
+      "Cache Table for link · Desktop (1 item)",
+    );
+  });
+});
+
+describe("splitReportLabel", () => {
+  it("splits run and device", () => {
+    expect(splitReportLabel("link · Mobile")).toEqual({ run: "link", device: "Mobile" });
+  });
+
+  it("returns no run for a plain device label", () => {
+    expect(splitReportLabel("Desktop")).toEqual({ run: null, device: "Desktop" });
   });
 });

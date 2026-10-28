@@ -34,10 +34,10 @@ describe("getSiteUrl", () => {
     expect(getSiteUrl()).toBe("https://web-perf-reporting.vercel.app");
   });
 
-  it("falls back to localhost when no env vars are set", () => {
+  it("falls back to the production default when no env vars are set", () => {
     delete process.env.NEXT_PUBLIC_SITE_URL;
     delete process.env.VERCEL_URL;
 
-    expect(getSiteUrl()).toBe("http://localhost:3000");
+    expect(getSiteUrl()).toBe("https://web-perf-report.vercel.app");
   });
 });

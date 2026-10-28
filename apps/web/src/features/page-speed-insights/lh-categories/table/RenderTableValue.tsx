@@ -13,7 +13,7 @@ import {
   TextValue,
   UrlValue,
 } from "@/lib/schema";
-import { formatBytes, formatMs } from "@/features/page-speed-insights/shared/format";
+import { formatBytes, formatDurationMs } from "@/features/page-speed-insights/shared/format";
 import { ResourceUrlCell } from "@/features/page-speed-insights/shared/ResourceUrlCell";
 const URL_PREFIXES = ["http://", "https://", "data:"];
 
@@ -377,7 +377,7 @@ export function RenderMSValue({
 }: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
   return (
     <span title="ms" {...props} className={cn("whitespace-nowrap tabular-nums", props.className)}>
-      {formatMs(Number(value))}
+      {formatDurationMs(Number(value))}
     </span>
   );
 }

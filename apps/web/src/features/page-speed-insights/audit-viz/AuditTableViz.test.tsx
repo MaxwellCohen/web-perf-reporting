@@ -8,6 +8,20 @@ vi.mock("@/features/page-speed-insights/shared/ReportComparisonBarChart", () => 
   ),
 }));
 
+vi.mock("./AuditStackedBarChart", () => ({
+  AuditStackedBarChart: ({
+    points,
+    segmentOrder,
+  }: {
+    points: Array<{ category: string; segment: string; value: number }>;
+    segmentOrder: string[];
+  }) => (
+    <div data-testid="stacked-chart" data-segments={segmentOrder.join(",")}>
+      {points.map((point) => `${point.category}:${point.segment}=${point.value}`).join(" ")}
+    </div>
+  ),
+}));
+
 vi.mock("@/features/page-speed-insights/ImageDeliveryCause", () => ({
   ImageDeliveryCause: () => <div data-testid="image-delivery">image delivery</div>,
 }));
@@ -20,7 +34,7 @@ vi.mock("@/features/page-speed-insights/network-metrics/LCPBreakdownChart", () =
   LCPBreakdownChart: () => <div data-testid="lcp-chart">lcp</div>,
 }));
 
-import { AuditTableViz } from "./AuditTableViz";
+import { AuditTableViz, usedVsSavingsLabel } from "./AuditTableViz";
 
 function row(id: string, items: Array<Record<string, unknown>>): DetailTableItem {
   return {
@@ -33,26 +47,75 @@ function row(id: string, items: Array<Record<string, unknown>>): DetailTableItem
 }
 
 describe("AuditTableViz", () => {
-  it("renders savings bar for unused-css-rules", () => {
-    const { container } = render(
+  it("renders used vs savings bars for unused-css-rules", () => {
+    const { getByTestId } = render(
       <AuditTableViz
         rows={[
           row("unused-css-rules", [
-            { url: "https://example.com/a.css", wastedBytes: 1200 },
+            { url: "https://example.com/a.css", wastedBytes: 1200, totalBytes: 2000 },
+            // No totalBytes: only the savings segment is drawn.
             { url: "https://example.com/b.css", wastedBytes: 800 },
           ]),
         ]}
       />,
     );
 
-    expect(container.querySelector('[data-testid="bar-chart"]')?.textContent).toContain("2 rows");
+    const chart = getByTestId("stacked-chart");
+    expect(chart.getAttribute("data-segments")).toBe("used,savings");
+    expect(chart.textContent).toContain("used=800");
+    expect(chart.textContent).toContain("savings=1200");
+    expect(chart.textContent).toContain("savings=800");
+    expect(chart.textContent).not.toContain("unused");
   });
 
-  it("skips custom viz for cache-insight (table only)", () => {
+  it.each(["font-display-insight", "render-blocking-insight", "forced-reflow-insight"])(
+    "renders no time-savings chart for %s (table only)",
+    (auditId) => {
+      const { container } = render(
+        <AuditTableViz
+          rows={[row(auditId, [{ url: "https://example.com/font.woff2", wastedMs: 133 }])]}
+        />,
+      );
+      expect(container.firstChild).toBeNull();
+    },
+  );
+
+  it("shows only the page-size card for total-byte-weight (no largest-transfers chart)", () => {
+    const { container, queryByTestId } = render(
+      <AuditTableViz
+        rows={[
+          {
+            ...row("total-byte-weight", [{ url: "https://example.com/a.js", totalBytes: 2048 }]),
+            _userLabel: "inline · Desktop",
+          },
+        ]}
+      />,
+    );
+    expect(queryByTestId("bar-chart")).toBeNull();
+    expect(container.textContent).toContain("Page transfer");
+    expect(container.textContent).not.toContain("Largest transfers");
+  });
+
+  it("renders no category chart for mainthread-work-breakdown (table only)", () => {
     const { container } = render(
       <AuditTableViz
         rows={[
-          row("cache-insight", [{ url: "https://example.com/a.js", wastedBytes: 1200 }]),
+          row("mainthread-work-breakdown", [
+            { group: "styleLayout", groupLabel: "Style & Layout", duration: 15 },
+          ]),
+        ]}
+      />,
+    );
+    expect(container.firstChild).toBeNull();
+  });
+
+  it("renders no chart for cache-insight (table only)", () => {
+    const { container } = render(
+      <AuditTableViz
+        rows={[
+          row("cache-insight", [
+            { url: "https://example.com/a.js", wastedBytes: 1200, totalBytes: 2000, cacheLifetimeMs: 0 },
+          ]),
         ]}
       />,
     );
@@ -96,7 +159,7 @@ describe("AuditTableViz", () => {
 
   it("renders null for unknown audits", () => {
     const { container } = render(
-      <AuditTableViz rows={[row("viewport-insight", [{ node: { type: "node", snippet: "<meta>" } }])]} />,
+      <AuditTableViz rows={[row("some-unknown-audit", [{ label: "x" }])]} />,
     );
     expect(container.firstChild).toBeNull();
   });
@@ -150,4 +213,12 @@ describe("AuditTableViz", () => {
   });
 });
 
+describe("usedVsSavingsLabel", () => {
+  it("shows used and total when the audit reports totalBytes", () => {
+    expect(usedVsSavingsLabel({ used: 1024, savings: 3072 })).toBe("used 1.0 KiB / total 4.0 KiB");
+  });
 
+  it("falls back to savings only when no total is known", () => {
+    expect(usedVsSavingsLabel({ used: 0, savings: 2048 })).toBe("2.0 KiB savings");
+  });
+});

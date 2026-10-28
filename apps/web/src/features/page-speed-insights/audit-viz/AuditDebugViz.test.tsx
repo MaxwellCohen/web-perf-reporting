@@ -13,6 +13,7 @@ import { AuditDebugViz } from "./AuditDebugViz";
 function item(id: string, label: string, numericValue: number): TableDataItem {
   return {
     _userLabel: label,
+    _category: { id: "performance", title: "Performance", score: 1 },
     auditResult: {
       id,
       title: id,
@@ -23,7 +24,7 @@ function item(id: string, label: string, numericValue: number): TableDataItem {
       details: { type: "debugdata", items: [{ cumulativeLayoutShiftMainFrame: numericValue }] },
     },
     auditRef: { id, weight: 0 },
-  } as TableDataItem;
+  } as unknown as TableDataItem;
 }
 
 describe("AuditDebugViz", () => {
@@ -48,6 +49,7 @@ describe("AuditDebugViz", () => {
         items={[
           {
             _userLabel: "Mobile",
+            _category: { id: "performance", title: "Performance", score: 1 },
             auditResult: {
               id: "diagnostics",
               title: "Diagnostics",
@@ -59,7 +61,7 @@ describe("AuditDebugViz", () => {
               },
             },
             auditRef: { id: "diagnostics", weight: 0 },
-          } as TableDataItem,
+          } as unknown as TableDataItem,
         ]}
       />,
     );

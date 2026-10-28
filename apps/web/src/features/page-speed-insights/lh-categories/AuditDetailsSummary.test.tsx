@@ -103,7 +103,7 @@ describe("AuditDetailsSummary", () => {
   });
 
   it("stops link click propagation so accordion triggers still receive clicks", () => {
-    const parentClick = vi.fn();
+    const parentClick = vi.fn<() => void>();
     const auditData = [
       {
         id: "a1",
@@ -132,5 +132,28 @@ describe("SmallText", () => {
   it("renders text when provided", () => {
     const { container } = render(<SmallText text="Hello" />);
     expect(container.textContent).toContain("Hello");
+  });
+});
+
+describe("AuditDetailsSummary disagreement", () => {
+  const mk = (score: number) => ({
+    id: "a",
+    title: "A",
+    score,
+    scoreDisplayMode: "numeric" as const,
+  });
+
+  it("shows nothing for a single report", () => {
+    const { container } = render(<AuditDetailsSummary auditData={[mk(0)]} labels={["Mobile"]} />);
+    expect(container.textContent).not.toContain("only");
+    expect(container.querySelector("[data-testid=score]")?.hasAttribute("data-device")).toBe(false);
+  });
+
+  it("shows which report fails when reports disagree", () => {
+    const { container } = render(
+      <AuditDetailsSummary auditData={[mk(0), mk(1)]} labels={["Mobile", "Desktop"]} />,
+    );
+    expect(container.textContent).toContain("Fails on Mobile only");
+    expect(container.querySelector("[data-device]")?.getAttribute("data-device")).toBe("Mobile");
   });
 });

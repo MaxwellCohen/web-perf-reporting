@@ -290,6 +290,8 @@ export function updateURl(url?: string) {
   }
 
   try {
+    // Throws on invalid input (e.g. spaces in the host); keep the user's original form otherwise.
+    new URL(normalized);
     return normalized;
   } catch {
     return "";

@@ -88,10 +88,10 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       <span
                         title="Performance events observed during page load, sorted by time"
@@ -103,7 +103,7 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort ascending"
                         type="button"
                       >
@@ -120,10 +120,10 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       Desktop
                     </div>
@@ -131,7 +131,7 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort descending"
                         type="button"
                       >
@@ -161,7 +161,7 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class="font-medium"
@@ -180,7 +180,7 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -203,7 +203,7 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class="font-medium"
@@ -222,7 +222,7 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -245,7 +245,7 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class="font-medium"
@@ -264,7 +264,7 @@ exports[`TimelineCard > renders card with timeline table when metrics have event
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -371,10 +371,10 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       <span
                         title="Performance events observed during page load, sorted by time"
@@ -386,7 +386,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort ascending"
                         type="button"
                       >
@@ -403,10 +403,10 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       Desktop
                     </div>
@@ -414,7 +414,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort descending"
                         type="button"
                       >
@@ -431,10 +431,10 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       Mobile
                     </div>
@@ -442,7 +442,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort descending"
                         type="button"
                       >
@@ -472,7 +472,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class="font-medium"
@@ -491,7 +491,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -510,7 +510,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -533,7 +533,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class="font-medium"
@@ -552,7 +552,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -571,7 +571,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -594,7 +594,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class="font-medium"
@@ -613,7 +613,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -632,7 +632,7 @@ exports[`TimelineCard > renders multiple report columns when multiple metrics 1`
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -739,10 +739,10 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       <span
                         title="Performance events observed during page load, sorted by time"
@@ -754,7 +754,7 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort ascending"
                         type="button"
                       >
@@ -771,10 +771,10 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
                   style="width: 150px; min-width: 150px; max-width: 150px;"
                 >
                   <div
-                    class="flex min-w-0 flex-row flex-wrap items-center justify-between gap-x-2 gap-y-1"
+                    class="flex min-w-0 flex-row flex-wrap items-center justify-start gap-x-2 gap-y-1"
                   >
                     <div
-                      class="min-w-0 flex-1 overflow-hidden text-ellipsis *:truncate"
+                      class="min-w-0 overflow-hidden text-ellipsis *:truncate"
                     >
                       Desktop
                     </div>
@@ -782,7 +782,7 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
                       class="flex shrink-0 flex-row items-center gap-1"
                     >
                       <button
-                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 relative z-20"
                         title="Sort descending"
                         type="button"
                       >
@@ -812,7 +812,7 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class="font-medium"
@@ -831,7 +831,7 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -854,7 +854,7 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class="font-medium"
@@ -873,7 +873,7 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"
@@ -896,7 +896,7 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     class="font-medium"
@@ -915,7 +915,7 @@ exports[`TimelineCard > shows N/A for missing values in report columns 1`] = `
                   data-grouped="false"
                   data-placeholder="false"
                   data-row-expanded="false"
-                  style="width: 150px; min-width: 150px; max-width: 150px;"
+                  style="min-width: 150px; width: 150px; max-width: 150px;"
                 >
                   <span
                     data-testid="ms-value"

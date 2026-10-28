@@ -1,5 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import { ScoreDisplay } from "@/features/page-speed-insights/ScoreDisplay";
+import { getDisagreementText } from "@/features/page-speed-insights/lh-categories/auditStatus";
 import { AuditResultsRecord } from "@/lib/schema";
 import { recommendationMarkdownComponents } from "@/features/page-speed-insights/RecommendationsSection/recommendationMarkdownComponents";
 
@@ -20,6 +21,8 @@ export function AuditDetailsSummary({
   const title = auditData?.find((audit) => audit?.title)?.title || "";
   const scoreDisplayMode =
     auditData?.find((audit) => audit?.scoreDisplayMode)?.scoreDisplayMode || "";
+  const multiple = auditData.length > 1;
+  const disagreement = getDisagreementText(auditData, labels);
   const description = auditData?.find((audit) => audit?.description)?.description || "";
 
   return (
@@ -31,10 +34,15 @@ export function AuditDetailsSummary({
         {auditData
           .map((audit, i) =>
             audit ? (
-              <ScoreDisplay key={`${i}_${audit.id}`} audit={audit} device={labels[i]} />
+              <ScoreDisplay key={`${i}_${audit.id}`} audit={audit} device={multiple ? labels[i] : undefined} />
             ) : null,
           )
           .filter(Boolean)}
+        {disagreement ? (
+          <span className="w-fit rounded border border-amber-600/40 bg-amber-500/10 px-1.5 py-0.5 text-xs font-medium text-amber-800 dark:text-amber-300">
+            {disagreement}
+          </span>
+        ) : null}
         <SmallText
           text={
             scoreDisplayMode === "notApplicable"

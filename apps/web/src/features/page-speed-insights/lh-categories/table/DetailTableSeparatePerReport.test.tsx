@@ -28,7 +28,7 @@ describe("DetailTableSeparatePerReport", () => {
     const { container } = render(
       <DetailTableSeparatePerReport rows={rows as any} title="DOM Size" />,
     );
-    expect(container.textContent).toContain("Dom Size");
+    expect(container.textContent).toContain("Device");
     expect(container.textContent).toContain("Desktop");
     expect(container.textContent).toContain("Mobile");
   });
@@ -42,7 +42,18 @@ describe("DetailTableSeparatePerReport", () => {
   it("renders accordion items for each report", () => {
     const rows = [createMockRow("Mobile", 1)];
     const { container } = render(<DetailTableSeparatePerReport rows={rows as any} title="Audit" />);
-    expect(container.textContent).toContain("Audit");
+    expect(container.textContent).toContain("1 item");
     expect(container.textContent).toContain("Mobile");
+  });
+
+  it("shows run and device separately for run-prefixed labels", () => {
+    const rows = [createMockRow("link · Desktop", 1), createMockRow("link · Mobile", 1)];
+    const { getAllByText } = render(
+      <DetailTableSeparatePerReport rows={rows as any} title="Cache" />,
+    );
+    expect(getAllByText("Run")).toHaveLength(2);
+    expect(getAllByText("link")).toHaveLength(2);
+    expect(getAllByText("Desktop")).toHaveLength(1);
+    expect(getAllByText("Mobile")).toHaveLength(1);
   });
 });

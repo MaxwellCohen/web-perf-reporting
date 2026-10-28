@@ -113,6 +113,15 @@ export type ResourceSuspect = {
   why: string;
 };
 
+export type InvestigationMetrics = {
+  transferBytes: number | null;
+  scriptBytes: number | null;
+  unusedBytes: number | null;
+  thirdPartyBytes: number | null;
+  mainThreadMs: number | null;
+  longTaskMs: number | null;
+};
+
 export type ResourcesInvestigation = {
   key: string;
   label: string;
@@ -122,6 +131,7 @@ export type ResourcesInvestigation = {
   suspects: ResourceSuspect[];
   requestCount: number | null;
   thirdPartyBytes: number | null;
+  metrics: InvestigationMetrics;
 };
 
 type MergedRow = {
@@ -584,6 +594,14 @@ export function buildResourcesInvestigation(
     suspects,
     requestCount,
     thirdPartyBytes: thirdParty,
+    metrics: {
+      transferBytes: transfer,
+      scriptBytes: script,
+      unusedBytes: unused,
+      thirdPartyBytes: thirdParty,
+      mainThreadMs,
+      longTaskMs,
+    },
   };
 }
 

@@ -19,7 +19,7 @@ function row(
     ? {
         type: "list" as const,
         items: [{ type: "table", headings: [], items: items as never }],
-      }
+      } as unknown as DetailTableItem["auditResult"]["details"]
     : { type: "table" as const, headings: [], items: items as never };
 
   return {

@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import {
   patchDashboardSearch,
   type ResourceStageId,
 } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 import { PayloadFlow } from "@/features/page-speed-insights/dashboard-view/resources-story/PayloadFlow";
+import { ResourcesComparisonBrief } from "@/features/page-speed-insights/dashboard-view/resources-story/ResourcesComparison";
+import { compareResourcesInvestigations } from "@/features/page-speed-insights/dashboard-view/resources-story/resourcesComparisonModel";
 import {
   extractActiveMetric,
   resourcesInvestigationsFromItems,
@@ -20,7 +22,8 @@ import {
 import { TransferWeightMap } from "@/features/page-speed-insights/dashboard-view/resources-story/TransferWeightMap";
 import { ResourcesTable } from "@/features/page-speed-insights/dashboard-view/resources-story/ResourcesTable";
 import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
-import { CompareRunSwitch } from "@/features/page-speed-insights/shared/CompareRunSwitch";
+import { CompareReportPicker } from "@/features/page-speed-insights/shared/CompareReportPicker";
+import { resolveCompareSelection } from "@/features/page-speed-insights/shared/compareSelection";
 import { BootupTimeChartCard } from "@/features/page-speed-insights/javascript-metrics/BootupTimeChartCard";
 import { MainThreadWorkChartCard } from "@/features/page-speed-insights/javascript-metrics/MainThreadWorkChartCard";
 import {
@@ -38,7 +41,6 @@ import { UnifiedWaterfall } from "@/features/page-speed-insights/waterfall/Unifi
 import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
 import type { TableItem } from "@/lib/schema";
 import { getUrlString } from "@/lib/utils";
-import { cn } from "@/lib/cn";
 
 function focusEvidence() {
   const node = document.getElementById("resources-evidence");
@@ -132,21 +134,19 @@ function InvestigationEvidence({
 }
 
 export function ResourcesInvestigationBrief({
-  reports,
+  picker,
   active,
   stage,
   suspectUrl,
   entry,
-  onSelectReport,
   onSelectStage,
   onSelectSuspect,
 }: {
-  reports: ResourcesInvestigation[];
+  picker: ReactNode;
   active: ResourcesInvestigation;
   stage: ResourceStageId;
   suspectUrl: string | null;
   entry: InsightsContextItem | undefined;
-  onSelectReport: (label: string) => void;
   onSelectStage: (id: ResourceStageId) => void;
   onSelectSuspect: (url: string) => void;
 }) {
@@ -160,36 +160,7 @@ export function ResourcesInvestigationBrief({
       className="overflow-hidden rounded-xl border bg-card"
     >
       <div className="space-y-6 p-4 sm:p-6">
-        <div className="flex flex-col gap-2">
-          <CompareRunSwitch
-            labels={reports.map((report) => report.label)}
-            currentLabel={active.label}
-            onSelectLabel={onSelectReport}
-          />
-          {reports.length > 1 ? (
-            <div role="group" aria-label="Report" className="flex flex-wrap gap-2">
-              {reports.map((report) => {
-                const selected = report.label === active.label;
-                return (
-                  <button
-                    key={report.key}
-                    type="button"
-                    aria-pressed={selected}
-                    onClick={() => onSelectReport(report.label)}
-                    className={cn(
-                      "rounded-md border px-2.5 py-1 text-sm",
-                      selected
-                        ? "border-foreground/40 bg-muted"
-                        : "border-border hover:bg-muted/50",
-                    )}
-                  >
-                    {report.label}
-                  </button>
-                );
-              })}
-            </div>
-          ) : null}
-        </div>
+        {picker}
         <header className="max-w-3xl animate-in fade-in slide-in-from-bottom-1 duration-500">
           <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
             Where to look
@@ -229,10 +200,13 @@ export function ResourcesStory() {
   const items = usePageSpeedItems();
   const search = useDashboardSearchState();
   const reports = useMemo(() => resourcesInvestigationsFromItems(items), [items]);
-  const active =
-    search.report
-      .map((label) => reports.find((item) => item.label === label))
-      .find((item) => item != null) ?? reports[0];
+  const labels = reports.map((report) => report.label);
+  const selectedLabels = resolveCompareSelection(search.report, labels);
+  const selected = selectedLabels
+    .map((label) => reports.find((item) => item.label === label))
+    .filter((item): item is ResourcesInvestigation => item != null);
+  const active = selected[0];
+  const other = selected[1];
 
   if (!active) {
     return (
@@ -242,10 +216,20 @@ export function ResourcesStory() {
     );
   }
 
-  const stage: ResourceStageId = active.stages.some((item) => item.id === search.stage)
+  const shown = other ? [active, other] : [active];
+  const stage: ResourceStageId = shown.some((report) =>
+    report.stages.some((item) => item.id === search.stage),
+  )
     ? (search.stage as ResourceStageId)
     : active.lead.stage;
   const entry = items.find((item) => item.label === active.label) ?? items[0];
+  const picker = (
+    <CompareReportPicker
+      labels={labels}
+      selected={selectedLabels}
+      resetPatch={{ stage: null, suspect: null }}
+    />
+  );
 
   function selectStage(id: ResourceStageId) {
     patchDashboardSearch({ stage: search.stage === id ? null : id, suspect: null });
@@ -254,7 +238,9 @@ export function ResourcesStory() {
 
   function selectSuspect(url: string) {
     const turningOff = search.suspect === url;
-    const suspect = active.suspects.find((item) => item.url === url);
+    const suspect = shown
+      .map((report) => report.suspects.find((item) => item.url === url))
+      .find((item) => item != null);
     const hintedStage: ResourceStageId | null = !suspect
       ? null
       : suspect.actionHint === "remove-unused"
@@ -263,7 +249,9 @@ export function ResourcesStory() {
           ? "main-thread"
           : "arrived";
     const stage =
-      !turningOff && hintedStage && active.stages.some((item) => item.id === hintedStage)
+      !turningOff &&
+      hintedStage &&
+      shown.some((report) => report.stages.some((item) => item.id === hintedStage))
         ? hintedStage
         : undefined;
     patchDashboardSearch({
@@ -273,16 +261,26 @@ export function ResourcesStory() {
     focusEvidence();
   }
 
+  if (other) {
+    return (
+      <ResourcesComparisonBrief
+        comparison={compareResourcesInvestigations(active, other)}
+        picker={picker}
+        stage={stage}
+        suspectUrl={search.suspect || null}
+        onSelectStage={selectStage}
+        onSelectSuspect={selectSuspect}
+      />
+    );
+  }
+
   return (
     <ResourcesInvestigationBrief
-      reports={reports}
+      picker={picker}
       active={active}
       stage={stage}
       suspectUrl={search.suspect || null}
       entry={entry}
-      onSelectReport={(label) =>
-        patchDashboardSearch({ report: [label], stage: null, suspect: null })
-      }
       onSelectStage={selectStage}
       onSelectSuspect={selectSuspect}
     />
