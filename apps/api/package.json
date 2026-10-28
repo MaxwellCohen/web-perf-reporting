@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "void dev",
+    "dev": "vite dev",
     "build": "void prepare && vite build && node scripts/write-deploy-pointer.mjs",
     "deploy": "void deploy --platform cloudflare",
     "check": "tsc --noEmit",
