@@ -1,6 +1,7 @@
 node_modules/
 .pnpm-debug.log*
 .DS_Store
+.claude
 
 # Local env (never commit secrets)
 .env
