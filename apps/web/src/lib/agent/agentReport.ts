@@ -4,6 +4,10 @@ import {
   buildSpeedUpPrompt,
   type SpeedUpFocusArea,
 } from "@/features/page-speed-insights/dashboard-view/speedUpPrompt";
+import {
+  collectPlatformNotes,
+  type PlatformNotes,
+} from "@/features/page-speed-insights/dashboard-view/collectPlatformNotes";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
 import type { PageSpeedDashboardItem } from "@/lib/page-speed-insights/types";
 import type { AuditResult, PageSpeedInsights } from "@/lib/schema";
@@ -54,6 +58,8 @@ export type AgentReportSummary = {
   lab: AgentLabMetric[];
   /** Real-user CrUX data for this URL; falls back to the origin when the URL has too little traffic. */
   field: { source: "url" | "origin"; metrics: AgentFieldMetric[] } | null;
+  /** Baseline browser-support status of features the page uses, and CSP findings. */
+  platformNotes: PlatformNotes | null;
 };
 
 export type AgentIssue = {
@@ -74,17 +80,14 @@ export type AgentIssue = {
 };
 
 export type AgentReport = {
-  status: "completed";
-  publicId: string;
   url: string;
-  dashboardUrl: string;
+  /** Personalized speed-up prompt built from this report's findings; hand it to a coding agent as-is. */
+  speedUpPrompt: string;
   reports: AgentReportSummary[];
   /** Grouped performance work with evidence and framework-agnostic advice. */
   focusAreas: SpeedUpFocusArea[];
   /** Failing audits across all categories, most impactful first. */
   issues: AgentIssue[];
-  /** Ready-to-use instructions for a coding agent. */
-  prompt: string;
 };
 
 // ---------------------------------------------------------------- helpers
@@ -199,6 +202,7 @@ function summarize({ item, label }: PageSpeedDashboardItem): AgentReportSummary 
     scores,
     lab,
     field: fieldData(item),
+    platformNotes: collectPlatformNotes(audits),
   };
 }
 
@@ -293,22 +297,17 @@ function collectIssues(items: PageSpeedDashboardItem[]): AgentIssue[] {
 // ---------------------------------------------------------------- public API
 
 export function buildAgentReport(input: {
-  publicId: string;
   url: string;
-  dashboardUrl: string;
   items: PageSpeedDashboardItem[];
 }): AgentReport {
   const items = input.items.filter((entry) => entry.item?.lighthouseResult);
   const prompt = buildSpeedUpPrompt(items);
   return {
-    status: "completed",
-    publicId: input.publicId,
     url: input.url,
-    dashboardUrl: input.dashboardUrl,
+    speedUpPrompt: prompt.text,
     reports: items.map(summarize),
     focusAreas: prompt.focusAreas,
     issues: collectIssues(items),
-    prompt: prompt.text,
   };
 }
 
@@ -316,11 +315,26 @@ function formatScore(score: number | null | undefined): string {
   return typeof score === "number" ? String(Math.round(score * 100)) : "–";
 }
 
+function platformNoteLines(notes: PlatformNotes | null): string[] {
+  if (!notes) return [];
+  const lines: string[] = [];
+  const { baseline, csp } = notes;
+  if (baseline) {
+    const limited = baseline.highlighted.filter((f) => f.tier === "limited").map((f) => f.id);
+    lines.push(
+      `Baseline features used: ${baseline.counts.widely} widely available, ${baseline.counts.newly} newly available, ${baseline.counts.limited} limited${limited.length ? ` (limited: ${limited.join(", ")})` : ""}`,
+    );
+  }
+  for (const finding of csp) {
+    const meta = [finding.severity, finding.directive].filter(Boolean).join(", ");
+    lines.push(`CSP: ${finding.description}${meta ? ` (${meta})` : ""}`);
+  }
+  return lines;
+}
+
 export function renderAgentReportMarkdown(report: AgentReport): string {
   const lines: string[] = [
     `# Web performance report: ${report.url}`,
-    "",
-    `Dashboard: ${report.dashboardUrl}`,
     "",
     "## Scores (0–100)",
     "",
@@ -346,7 +360,19 @@ export function renderAgentReportMarkdown(report: AgentReport): string {
           .join("; ")}`,
       );
     }
+    lines.push(...platformNoteLines(r.platformNotes));
   }
+
+  lines.push(
+    "",
+    "## Speed-up prompt",
+    "",
+    "Personalized from this report's findings. Follow it, or hand it to a coding agent as-is.",
+    "",
+    "````markdown",
+    report.speedUpPrompt,
+    "````",
+  );
 
   lines.push("", "## Issues (most impactful first)", "");
   if (report.issues.length === 0) lines.push("No failing audits.");
@@ -358,6 +384,6 @@ export function renderAgentReportMarkdown(report: AgentReport): string {
     for (const example of issue.examples) lines.push(`  - ${example}`);
   }
 
-  lines.push("", "## Fix plan", "", report.prompt, "");
+  lines.push("");
   return lines.join("\n");
 }

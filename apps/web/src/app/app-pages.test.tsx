@@ -22,6 +22,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/lib/utils", () => ({
+  cn: (...classes: unknown[]) => classes.filter(Boolean).join(" "),
   updateURl: (value: string | undefined) => updateUrlMock(value),
   normalizedCruxUrlFromSearchParams: async (
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>,

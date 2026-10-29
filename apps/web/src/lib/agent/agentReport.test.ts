@@ -7,9 +7,7 @@ const items = exampleReport as unknown as PageSpeedDashboardItem[];
 
 function build() {
   return buildAgentReport({
-    publicId: "abc",
     url: "https://www.clearchoice.com",
-    dashboardUrl: "https://example.test/page-speed/abc",
     items,
   });
 }
@@ -46,12 +44,7 @@ describe("buildAgentReport", () => {
 
   it("merges the same failing audit across reports", () => {
     const mobile = { ...items[0], label: "Mobile" };
-    const report = buildAgentReport({
-      publicId: "abc",
-      url: "u",
-      dashboardUrl: "d",
-      items: [mobile, items[0]],
-    });
+    const report = buildAgentReport({ url: "u", items: [mobile, items[0]] });
     const unused = report.issues.filter((issue) => issue.id === "unused-javascript");
     expect(unused).toHaveLength(1);
     expect(unused[0].reports).toEqual(["Mobile", "Desktop"]);
@@ -62,7 +55,7 @@ describe("buildAgentReport", () => {
     expect(md).toContain("| Desktop | 54 |");
     expect(md).toContain("Real users (CrUX p75, url)");
     expect(md).toContain("`unused-javascript`");
-    expect(md).toContain("## Fix plan");
+    expect(md).toContain("## Speed-up prompt");
     expect(md).toContain("Lock in the gains");
   });
 });

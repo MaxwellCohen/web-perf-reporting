@@ -1,109 +1,76 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CopyButton } from "@/components/ui/copy-button";
+import { getSiteUrl } from "@/lib/siteUrl";
 import type { Route } from "next";
 import Link from "next/link";
 
+const tools: { title: string; description: string; url: Route }[] = [
+  {
+    title: "Latest CrUX",
+    description: "Core Web Vitals from real Chrome users",
+    url: "/latest-crux",
+  },
+  {
+    title: "Historical trends",
+    description: "How your metrics change over time",
+    url: "/historical-crux",
+  },
+  {
+    title: "PageSpeed Insights",
+    description: "Lab audits and recommendations",
+    url: "/page-speed",
+  },
+  {
+    title: "Lighthouse viewer",
+    description: "Inspect reports from your experiments",
+    url: "/viewer",
+  },
+];
+
 export default function Home() {
+  const agentPrompt = `Read ${getSiteUrl()}/llms.txt and follow it to find performance improvements for this project: start its dev server, run Lighthouse against it, POST the results for analysis, then work through the speed-up prompt it returns, fixing one focus area at a time and re-measuring after each change.`;
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-extrabold mb-4">Web Performance Reports</h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          {`Comprehensive insights into your website's performance using Chrome UX Report (CrUX) data and PageSpeed metrics`}
+    <div className="container mx-auto px-4 py-12">
+      <section className="text-center mb-16">
+        <span className="inline-block rounded-full border px-3 py-1 text-xs text-muted-foreground mb-4">
+          Works with Claude Code · Codex · Cursor
+        </span>
+        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
+          Let your agent make your site fast
+        </h1>
+        <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+          Paste one prompt. Your agent runs Lighthouse, gets an analysis, and fixes issues one focus
+          area at a time. No API key needed, and localhost works.
         </p>
-      </div>
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        <HomeCard
-          title="Latest CrUX Metrics"
-          description="Analyze actual user experience data from Chrome UX Report"
-          content="Get insights into Core Web Vitals and other key performance metrics based on real user data."
-          url="/latest-crux"
-          linkText="View Latest CrUX Data"
-        />
-
-        <HomeCard
-          title="Historical Trends"
-          description="Track performance changes over time"
-          content="Monitor how your website's performance evolves with historical CrUX data analysis."
-          url="/historical-crux"
-          linkText="View Historical Data"
-        />
-
-        <HomeCard
-          title="PageSpeed Insights"
-          description="Lab data and optimization recommendations"
-          content="Get detailed performance audits and actionable recommendations to improve your site."
-          url="/page-speed"
-          linkText="Run PageSpeed Analysis"
-        />
-
-        <HomeCard
-          title="Lighthouse report viewer"
-          description="View Lighthouse reports from your Experiments"
-          content="Visualize LCP, FID, CLS, and INP metrics with detailed breakdowns and pass/fail indicators."
-          url="/viewer"
-          linkText="Go to Lighthouse Report Viewer"
-        />
-      </div>
-
-      <div className="text-center">
-        <h2 className="text-2xl font-bold mb-4">Why Monitor Web Performance?</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="p-4">
-            <h3 className="font-semibold mb-2">User Experience</h3>
-            <p className="text-muted-foreground">
-              Better performance leads to improved user satisfaction and engagement
-            </p>
-          </div>
-          <div className="p-4">
-            <h3 className="font-semibold mb-2">SEO Rankings</h3>
-            <p className="text-muted-foreground">
-              Core Web Vitals affect your search engine rankings
-            </p>
-          </div>
-          <div className="p-4">
-            <h3 className="font-semibold mb-2">Conversion Rates</h3>
-            <p className="text-muted-foreground">
-              Faster sites have higher conversion rates and lower bounce rates
-            </p>
-          </div>
-          <div className="p-4">
-            <h3 className="font-semibold mb-2">Mobile Performance</h3>
-            <p className="text-muted-foreground">
-              Optimize for mobile users with device-specific metrics
-            </p>
-          </div>
+        <div className="max-w-3xl mx-auto flex items-start gap-2 rounded-lg border bg-muted/50 p-3 text-left">
+          <pre className="flex-1 whitespace-pre-wrap font-mono text-sm">{agentPrompt}</pre>
+          <CopyButton text={agentPrompt} aria-label="Copy agent prompt" />
         </div>
-      </div>
-    </div>
-  );
-}
+      </section>
 
-function HomeCard({
-  title,
-  description,
-  content,
-  url,
-  linkText,
-}: {
-  title: string;
-  description: string;
-  content: string;
-  url: Route;
-  linkText: string;
-}) {
-  return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="flex-1">
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <p className="text-muted-foreground mb-4">{content}</p>
-        <Button asChild variant="outline" className="w-full">
-          <Link href={url}>{linkText}</Link>
-        </Button>
-      </CardContent>
-    </Card>
+      <section>
+        <h2 className="text-center text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-4">
+          Or explore the data yourself
+        </h2>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {tools.map((tool) => (
+            <Button
+              key={tool.url}
+              asChild
+              variant="outline"
+              className="h-auto flex-col items-start gap-1 whitespace-normal p-4 text-left no-underline"
+            >
+              <Link href={tool.url}>
+                <span className="font-semibold">{tool.title} →</span>
+                <span className="text-sm font-normal text-muted-foreground">
+                  {tool.description}
+                </span>
+              </Link>
+            </Button>
+          ))}
+        </div>
+      </section>
+    </div>
   );
 }

@@ -3,44 +3,56 @@ export function buildLlmsTxt(siteUrl: string): string {
   const api = `${siteUrl}/api/agent/report`;
   return `# Web Perf Report
 
-> Runs Google PageSpeed Insights (Lighthouse, mobile + desktop) and Chrome UX Report field data for any public URL, then returns a compact, ranked list of performance, accessibility, best-practice, and SEO issues with the offending elements/resources and a fix plan. Built for coding agents: one HTTP GET, no API key.
+> Turns a Lighthouse or PageSpeed Insights JSON report into a compact, ranked list of performance, accessibility, best-practice, and SEO issues, with the offending elements/resources, and a personalized speed-up prompt. Built for coding agents: you run the audit yourself, POST the JSON, and get back a short report. No API key needed.
 
 ## How to find performance improvements for a site
 
-1. Request a report (blocks up to ~50 s while Lighthouse runs):
-   GET ${api}?url=https://example.com&format=md
-2. If the response is HTTP 202 (status "pending"), wait \`retryAfterSeconds\` and GET the \`pollUrl\` it returns (same as ${api}?id=<publicId>). Repeat until HTTP 200. A full run usually takes 30–90 s.
+1. Run Lighthouse yourself (needs Node and Chrome). Mobile:
+
+   npx -y lighthouse https://example.com --output=json --output-path=mobile.json --only-categories=performance,accessibility,best-practices,seo --disable-full-page-screenshot --skip-audits=screenshot-thumbnails,final-screenshot --chrome-flags="--headless=new" --quiet
+
+   Desktop: same command with \`--preset=desktop --output-path=desktop.json\`.
+   Lighthouse runs locally, so localhost and dev/preview servers work. Audit a production build (e.g. \`next build && next start\`), not a dev server.
+
+   Alternative with real-user (CrUX) field data: call the PageSpeed Insights API with your own key:
+   curl -o mobile.json "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=https://example.com&strategy=mobile&category=PERFORMANCE&category=ACCESSIBILITY&category=BEST_PRACTICES&category=SEO&key=$PAGESPEED_API_KEY"
+   This only works for publicly reachable URLs.
+
+2. POST the result for analysis (markdown is the most token-efficient):
+
+   curl -s -X POST "${api}?format=md" -H "content-type: application/json" --data-binary @mobile.json
+
+   To analyze mobile and desktop together, POST a JSON array: \`jq -s . mobile.json desktop.json | curl -s -X POST "${api}?format=md" -H "content-type: application/json" --data-binary @-\`
+
 3. Read the report:
+   - **Speed-up prompt** (start here): a personalized, step-by-step optimization plan built from this report's failing audits and field data, with the real offending files quoted. Follow it, or hand it as-is to a coding agent working in the site's repo.
    - **Scores** per device (0–100). Below 90 needs work; below 50 is poor.
-   - **Lab metrics** (FCP, LCP, TBT, CLS, SI) and **real-user CrUX p75** (LCP, INP, CLS, FCP, TTFB). Prioritize what real users experience; INP is field-only.
+   - **Lab metrics** (FCP, LCP, TBT, CLS, SI), plus **real-user CrUX p75** (LCP, INP, CLS, FCP, TTFB) when the input came from the PageSpeed Insights API. Prioritize what real users experience.
    - **Issues**: failing audits, most impactful first, with estimated savings and up to 3 examples (CSS selector + HTML snippet, or resource URL). Use the examples to grep the codebase for the component, asset, or script responsible.
-   - **Fix plan**: grouped focus areas (server, LCP, render-blocking, JavaScript, third parties, fonts, images, CLS, caching, page weight) with evidence and framework-agnostic advice.
-4. Fix one focus area at a time, deploy or run a production build at a public URL, and request a new report to compare. Results for the same URL are reused for a few days; add a cache-busting query parameter (e.g. \`?v=2\`) to the tested URL to force a fresh run.
+   - **Focus areas** (JSON only): the prompt's sections as data (server, LCP, render-blocking, JavaScript, third parties, fonts, images, CLS, caching, page weight), each with evidence and advice.
+   - **Platform notes**: Baseline browser-support status of web features the page uses, and Content Security Policy findings.
+
+4. Work through the speed-up prompt one focus area at a time, rebuild, re-run Lighthouse, and POST again to compare. Lab scores vary a few points between runs; compare more than one run before concluding a change helped.
 
 ## API
 
-GET ${api}
+POST ${api}
+
+Body (JSON, under 4 MB — keep the screenshot flags above): one of
+- a Lighthouse result (\`lighthouse --output=json\`)
+- a PageSpeed Insights v5 API response (\`{ lighthouseResult, loadingExperience, ... }\`)
+- an array of the above (e.g. mobile + desktop)
 
 Query parameters:
-- \`url\` — page to test (scheme optional). Starts a run, or returns the cached one for that exact URL.
-- \`id\` — publicId of an existing run. Use instead of \`url\` to poll.
-- \`format\` — \`json\` (default) or \`md\`. \`Accept: text/markdown\` also selects markdown. Markdown is the most token-efficient way to read a report.
-- \`wait\` — seconds to block waiting for completion, 0–50 (default 50).
+- \`format\` — \`json\` (default) or \`md\`. \`Accept: text/markdown\` also selects markdown.
 
 Responses:
-- 200 — completed. JSON fields: \`publicId\`, \`url\`, \`dashboardUrl\` (human UI with charts, film strip, and full tables), \`reports[]\` (\`label\`, \`scores\`, \`lab\`, \`field\`), \`issues[]\` (\`id\`, \`category\`, \`title\`, \`description\`, \`score\`, \`displayValue\`, \`metricSavings\`, \`savingsBytes\`, \`reports\`, \`examples\`), \`focusAreas[]\` (\`id\`, \`title\`, \`evidence\`, \`advice\`), and \`prompt\` (the fix plan as text).
-- 202 — still running. JSON: \`status: "pending"\`, \`publicId\`, \`pollUrl\`, \`retryAfterSeconds\`.
-- 400 — missing or invalid \`url\`/\`id\`. 404 — unknown \`id\`. 502 — PageSpeed failed (often the page is unreachable, blocks Google's crawler, or timed out).
-
-## Limits
-
-- Only publicly reachable URLs work; localhost and pages behind a login cannot be tested. Use a preview deployment or a tunnel.
-- Lab scores vary a few points between runs. Compare more than one run before concluding a change helped.
-- CrUX field data only exists for pages/origins with enough Chrome traffic; it may be absent for new or low-traffic sites.
+- 200 — JSON fields: \`url\`, \`speedUpPrompt\` (the personalized prompt, markdown), \`reports[]\` (\`label\`, \`finalUrl\`, \`scores\`, \`lab\`, \`field\`, \`platformNotes\`), \`issues[]\` (\`id\`, \`category\`, \`title\`, \`description\`, \`score\`, \`displayValue\`, \`metricSavings\`, \`savingsBytes\`, \`reports\`, \`examples\`), \`focusAreas[]\` (\`id\`, \`title\`, \`evidence\`, \`advice\`).
+- 400 — body is not JSON or contains no Lighthouse result.
 
 ## Human UI
 
-- [PageSpeed dashboard](${siteUrl}/page-speed?url=https://example.com): the same run with full visualizations.
+- [Viewer](${siteUrl}/viewer): upload the same JSON to explore it with charts, film strip, and full tables.
 - [Latest CrUX](${siteUrl}/latest-crux) and [Historical CrUX](${siteUrl}/historical-crux): real-user Core Web Vitals over time.
 `;
 }
