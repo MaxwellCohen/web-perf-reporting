@@ -57,4 +57,29 @@ describe("RenderDebugData", () => {
     const { container } = render(<RenderDebugData items={items} />);
     expect(container.querySelector("table")).toBeTruthy();
   });
+
+  it("flattens nested objects and keeps precision on small values", () => {
+    const items = [
+      mockTableDataItem({
+        type: "debugdata",
+        items: [
+          {
+            cumulativeLayoutShiftMainFrame: 0.00001561317836328782,
+            newEngineResult: {
+              cumulativeLayoutShift: 0.00001561317836328782,
+              cumulativeLayoutShiftMainFrame: 0.00001561317836328782,
+            },
+            newEngineResultDiffered: false,
+          },
+        ],
+      }) as any,
+    ];
+    const { container } = render(<RenderDebugData items={items} />);
+    const text = container.textContent || "";
+    expect(text).toMatch(/engine result › cumulative layout shift0/i);
+    expect(text).toMatch(/engine result › cumulative layout shift \(main frame\)/i);
+    expect(text).toContain("0.0000156");
+    expect(text).not.toContain("0.00Mobile");
+    expect(text).toContain("Report");
+  });
 });

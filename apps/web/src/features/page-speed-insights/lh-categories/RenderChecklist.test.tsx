@@ -12,10 +12,6 @@ vi.mock("@/components/ui/table", () => ({
   TableCell: ({ children }: { children: React.ReactNode }) => <td>{children}</td>,
 }));
 
-vi.mock("@/components/ui/accordion", () => ({
-  Details: ({ children }: { children: React.ReactNode }) => <details>{children}</details>,
-}));
-
 vi.mock("@/features/page-speed-insights/lh-categories/renderBoolean", () => ({
   renderBoolean: (v: boolean) => <span>{v ? "Yes" : "No"}</span>,
 }));
@@ -36,10 +32,10 @@ function makeItem(
 }
 
 describe("RenderChecklist", () => {
-  it("renders table with title", () => {
+  it("renders table without a heading", () => {
     const items = [makeItem("Mobile", { item1: { label: "Item 1", value: true } })];
-    const { container } = render(<RenderChecklist items={items} title="Performance" />);
-    expect(container.textContent).toContain("Performance Audit Checklist Items");
+    const { container } = render(<RenderChecklist items={items} />);
+    expect(container.textContent).not.toContain("Audit Checklist Items");
     expect(container.querySelector("table")).toBeTruthy();
   });
 
@@ -48,61 +44,23 @@ describe("RenderChecklist", () => {
       makeItem("Mobile", { a: { label: "Check A", value: true } }),
       makeItem("Desktop", { a: { label: "Check A", value: false } }),
     ];
-    const { container } = render(<RenderChecklist items={items} title="Test" />);
+    const { container } = render(<RenderChecklist items={items} />);
     expect(container.textContent).toContain("Check A");
   });
 
   it("renders device labels as column headers", () => {
     const items = [makeItem("Mobile", {}), makeItem("Desktop", {})];
-    const { container } = render(<RenderChecklist items={items} title="Test" />);
+    const { container } = render(<RenderChecklist items={items} />);
     expect(container.textContent).toContain("Mobile");
     expect(container.textContent).toContain("Desktop");
   });
-});
 
-describe("RenderChecklist chips", () => {
-  it("renders pass/fail chips for a single report", () => {
-    const { container } = render(
-      <RenderChecklist
-        title="T"
-        items={[
-          makeItem("Mobile", {
-            a: { label: "Check A", value: true },
-            b: { label: "Check B", value: false },
-          }),
-        ]}
-      />,
-    );
-    const chips = container.querySelectorAll('[data-testid="checklist-chip"]');
-    expect(chips.length).toBe(2);
-    expect(chips[0].getAttribute("data-pass")).toBe("true");
-    expect(chips[1].getAttribute("data-pass")).toBe("false");
-  });
-
-  it("highlights differing rows across reports", () => {
-    const { container } = render(
-      <RenderChecklist
-        title="T"
-        items={[
-          makeItem("Mobile", {
-            a: { label: "Same", value: true },
-            b: { label: "Diff", value: true },
-          }),
-          makeItem("Desktop", {
-            a: { label: "Same", value: true },
-            b: { label: "Diff", value: false },
-          }),
-        ]}
-      />,
-    );
-    const rows = container.querySelectorAll("[data-differs]");
-    expect(rows.length).toBe(2);
-    expect(rows[0].getAttribute("data-differs")).toBe("false");
-    expect(rows[1].getAttribute("data-differs")).toBe("true");
-  });
-
-  it("renders no chips for an empty checklist", () => {
-    const { container } = render(<RenderChecklist title="T" items={[makeItem("Mobile", {})]} />);
+  it("renders the table directly without an accordion or chips", () => {
+    const items = [makeItem("Mobile", { a: { label: "Check A", value: true } })];
+    const { container } = render(<RenderChecklist items={items} />);
+    expect(container.querySelector("details")).toBeNull();
     expect(container.querySelector('[data-testid="checklist-chips"]')).toBeNull();
+    expect(container.querySelector("table")).toBeTruthy();
   });
+
 });

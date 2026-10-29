@@ -16,7 +16,7 @@ describe("SEO metadata routes", () => {
     expect(robots()).toEqual({
       rules: {
         userAgent: "*",
-        allow: "/",
+        allow: ["/", "/api/agent/", "/llms.txt"],
         disallow: ["/api/", "/monitoring", "/page-speed/"],
       },
       sitemap: expect.stringMatching(/\/sitemap\.xml$/),

@@ -22,22 +22,22 @@ export function LCPBreakdownTable({ tableRows, reportLabels }: Props) {
     columnHelper.accessor("label", {
       id: "subpart",
       header: "Subpart",
-      enableSorting: true,
+      enableSorting: false,
+      enableColumnFilter: false,
       enableResizing: true,
       size: 160,
       minSize: 100,
-      filterFn: "includesString",
       cell: (info) => <span className="font-medium">{info.getValue()}</span>,
     }),
     ...reportLabels.map((label) =>
       columnHelper.accessor((row) => row.valuesByReportLabel[label], {
         id: label,
         header: label,
-        enableSorting: true,
+        enableSorting: false,
+        enableColumnFilter: false,
         enableResizing: true,
         size: 180,
         minSize: 120,
-        filterFn: "inNumberRange",
         cell: (info) =>
           createOptionalNumericCell(RenderMSValue, info.getValue() as number | undefined),
       }),

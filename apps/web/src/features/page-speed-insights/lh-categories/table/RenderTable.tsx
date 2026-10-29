@@ -508,7 +508,7 @@ export function DetailTable({
     if (!breakdown) return viz;
 
     return (
-      <div className="w-full min-w-0 space-y-4">
+      <div className="w-full min-w-0 space-y-2">
         {viz}
         <div className="w-full overflow-x-auto">
           <LCPBreakdownTable

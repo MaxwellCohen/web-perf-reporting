@@ -143,6 +143,7 @@ function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
     }),
     columnHelper.accessor("label", {
       id: "label",
+      header: "Report",
       enableGrouping: true,
       enableResizing: true,
       size: 140,
@@ -270,7 +271,7 @@ function cleanDebugData(data: DebugData | undefined) {
   if (!data) {
     return {};
   }
-  return [
+  const merged = [
     Object.fromEntries(Object.entries(data || {}).filter((v) => !["type", "items"].includes(v[0]))),
     ...(data?.items || []),
   ].reduce(
@@ -280,7 +281,24 @@ function cleanDebugData(data: DebugData | undefined) {
     }),
     {},
   );
+  return flattenDebugData(merged);
 }
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/** Nested objects (e.g. CLS `newEngineResult`) become `parent.child` rows instead of blank cells. */
+function flattenDebugData(data: Record<string, unknown>, prefix = ""): Record<string, unknown> {
+  return Object.entries(data).reduce((acc: Record<string, unknown>, [key, value]) => {
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (isPlainObject(value)) {
+      return { ...acc, ...flattenDebugData(value, path) };
+    }
+    return { ...acc, [path]: value };
+  }, {});
+}
+
 const renderBytesValue = (v: unknown) => <RenderBytesValue value={v} />;
 const renderTSValue = RenderCountNumber;
 
@@ -320,8 +338,19 @@ const TitleMap: Record<string, DebugTitleMeta> = Object.fromEntries(
   }),
 );
 
+function lastKeySegment(key: string) {
+  return key.split(".").pop() || key;
+}
+
+/** Keeps small values readable: 0.0000156 stays 0.0000156 instead of 0.00. */
+export function formatDebugNumber(value: number) {
+  if (Number.isInteger(value)) return String(value);
+  if (Math.abs(value) >= 1) return value.toFixed(2);
+  return String(Number(value.toPrecision(3)));
+}
+
 function renderItem(item: unknown, key: string) {
-  const renderFn = TitleMap[key as keyof typeof TitleMap]?.renderFn;
+  const renderFn = TitleMap[lastKeySegment(key) as keyof typeof TitleMap]?.renderFn;
   if (renderFn) {
     return renderFn(item);
   }
@@ -330,14 +359,20 @@ function renderItem(item: unknown, key: string) {
     return item;
   }
   if (typeof item === "number") {
-    return item.toFixed(2);
+    return formatDebugNumber(item);
   }
   if (typeof item === "boolean") {
     return renderBoolean(item);
   }
-  return "";
+  if (item == null) {
+    return "";
+  }
+  return JSON.stringify(item);
 }
 
 function RenderTitle(s: string) {
-  return TitleMap[s as keyof typeof TitleMap]?.label || camelCaseToSentenceCase(s);
+  return s
+    .split(".")
+    .map((part) => TitleMap[part as keyof typeof TitleMap]?.label || camelCaseToSentenceCase(part))
+    .join(" › ");
 }

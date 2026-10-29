@@ -66,14 +66,16 @@ export function AuditLcpPhaseViz({ rows }: { rows: DetailTableItem[] }) {
   );
   const chartHeight = horizontalBarChartHeight(chartData.length, {
     legend: true,
-    rowPx: 48,
-    minPx: 140,
+    rowPx: 30,
+    chromePx: 40,
+    minPx: 0,
   });
 
   return (
-    <div className="w-full min-w-0 space-y-2">
-      <p className="text-sm font-medium text-muted-foreground">LCP phases</p>
+    <div className="w-full min-w-0 space-y-1">
+      <p className="text-xs font-medium text-muted-foreground">LCP phases</p>
       <LCPBreakdownChart
+        barSize={14}
         chartHeight={chartHeight}
         chartData={chartData}
         allSubparts={allSubparts}

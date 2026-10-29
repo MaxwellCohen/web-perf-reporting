@@ -23,6 +23,7 @@ type Props = {
   chartData: Array<Record<string, string | number>>;
   allSubparts: string[];
   subpartLabelBySubpart: Record<string, string>;
+  barSize?: number;
 };
 
 export function LCPBreakdownChart({
@@ -30,6 +31,7 @@ export function LCPBreakdownChart({
   chartData,
   allSubparts,
   subpartLabelBySubpart,
+  barSize = 22,
 }: Props) {
   const config = buildKeyedChartConfig(
     allSubparts.map((subpart) => ({
@@ -104,8 +106,8 @@ export function LCPBreakdownChart({
             stroke="hsl(var(--background))"
             strokeWidth={allSubparts.length > 1 ? 1 : 0}
             radius={stackBarRadius(index, allSubparts.length)}
-            barSize={22}
-            maxBarSize={28}
+            barSize={barSize}
+            maxBarSize={Math.max(barSize, 28)}
             isAnimationActive={false}
           >
             {subpart === lastSubpart ? (

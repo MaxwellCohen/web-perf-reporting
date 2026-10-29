@@ -47,7 +47,7 @@ export function RenderDetails({
     case "list":
       return <RenderList rows={items} embedded={embedded} />;
     case "checklist":
-      return <RenderChecklist items={items} title={title} embedded={embedded} />;
+      return <RenderChecklist items={items} />;
     case "table":
     case "opportunity":
       // @ts-expect-error need better type narrowing
