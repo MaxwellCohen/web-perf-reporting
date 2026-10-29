@@ -6,7 +6,7 @@ export function getSiteUrl(): string {
     return fromEnv.replace(/\/$/, "");
   }
 
-  const vercelUrl = process.env.VERCEL_URL?.trim();
+  const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
   if (vercelUrl) {
     return `https://${vercelUrl.replace(/\/$/, "")}`;
   }
