@@ -28,7 +28,7 @@ const tools: { title: string; description: string; url: Route }[] = [
 ];
 
 export default function Home() {
-  const agentPrompt = `Read ${getSiteUrl()}/llms.txt and follow it to find performance improvements for this project: start its dev server, run Lighthouse against it, POST the results for analysis, then work through the speed-up prompt it returns, fixing one focus area at a time and re-measuring after each change.`;
+  const agentPrompt = `Read ${getSiteUrl()}/llms.txt and follow it to find performance improvements for this project. First ask me what to test: a local production build of this repo, the staging environment, or live production. Then run Lighthouse against that target (never the dev server), POST the results for analysis, then work through the speed-up prompt it returns, fixing one focus area at a time and re-measuring after each change.`;
 
   return (
     <div className="container mx-auto px-4 py-12">

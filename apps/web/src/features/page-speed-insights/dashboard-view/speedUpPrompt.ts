@@ -30,7 +30,8 @@ export type SpeedUpPrompt = {
 const INTRO = `You are a web performance engineer. Improve this site's Core Web Vitals (LCP, CLS, INP) and Lighthouse performance score using the PageSpeed Insights findings below. First identify the meta framework in use (e.g. Next.js, Nuxt, SvelteKit, Astro, Remix/React Router, TanStack Start, SolidStart, Qwik) and apply each fix with that framework's native APIs. Only work on the focus areas listed — they were selected from the report data. Work in small, separately measurable changes.`;
 
 const MEASURE = [
-  "Audit a production build (preview server or deployed URL), never the dev server.",
+  "Before measuring, ask me which target to test: a local production build of the repo (build, then run the preview/start server), the staging environment URL, or the live production URL. Wait for my answer and do not assume.",
+  "Audit only a production build (local built output, staging, or production), never the dev server.",
   "Run Lighthouse several times and compare medians; single runs vary by several points.",
   "Make sure the preview/server applies Brotli or gzip, or results will be skewed.",
 ];
@@ -38,7 +39,7 @@ const MEASURE = [
 const LOCK_IN = [
   "Add bundle budgets enforced in CI (gzip bytes) for render-blocking CSS, total CSS, initial JS, and module preload count. Deferred downloads still count.",
   "Add browser tests that check main content exists before hydration, fonts load without reflow, hidden assets stay unloaded, and early scroll survives hydration.",
-  "For each change: explain what changed and why, then re-measure on a production build and report before/after LCP, CLS, TBT, and JS/CSS transfer sizes.",
+  "For each change: explain what changed and why, then re-measure on the same target I chose (built repo, staging, or production) and report before/after LCP, CLS, TBT, and JS/CSS transfer sizes.",
 ];
 
 // ---------------------------------------------------------------- audit helpers
