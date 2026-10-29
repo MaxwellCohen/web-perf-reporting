@@ -33,6 +33,8 @@ describe("SEO metadata routes", () => {
       "http://localhost:3000/page-speed",
       "http://localhost:3000/viewer",
       "http://localhost:3000/lh",
+      "http://localhost:3000/privacy",
+      "http://localhost:3000/terms",
     ]);
     expect(entries.every((entry) => entry.lastModified instanceof Date)).toBe(true);
   });

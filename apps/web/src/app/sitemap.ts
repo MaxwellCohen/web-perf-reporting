@@ -9,6 +9,8 @@ const PUBLIC_ROUTES = [
   "/page-speed",
   "/viewer",
   "/lh",
+  "/privacy",
+  "/terms",
 ] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {

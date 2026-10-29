@@ -16,6 +16,20 @@ exports[`app/layout > renders the shared layout shell around the page content 1`
     class="w-full text-center print:hidden"
   >
     Made by Maxwell Cohen, with data from Google crux report.
+     · 
+    <a
+      class="underline"
+      href="/privacy"
+    >
+      Privacy
+    </a>
+     · 
+    <a
+      class="underline"
+      href="/terms"
+    >
+      Terms
+    </a>
   </footer>
 </div>
 `;

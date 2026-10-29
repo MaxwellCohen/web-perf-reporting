@@ -26,6 +26,10 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
           api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
           person_profiles: "identified_only",
           capture_pageview: false,
+          disable_surveys: true,
+          // Cookieless: keep identifiers in memory only, so no consent banner is needed.
+          persistence: "memory",
+          disable_session_recording: true,
         });
       }
       if (!cancelled) {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ViewTransition } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -23,6 +24,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: "Web Performance Report",
   description: "Web performance report from CRUX data",
+  openGraph: {
+    type: "website",
+    siteName: "Web Performance Report",
+    title: "Web Performance Report",
+    description: "Web performance report from CRUX data",
+  },
+  twitter: { card: "summary" },
 };
 
 export default function RootLayout({
@@ -47,6 +55,14 @@ export default function RootLayout({
               </main>
               <footer className="w-full text-center print:hidden">
                 Made by Maxwell Cohen, with data from Google crux report.
+                {" · "}
+                <Link href="/privacy" className="underline">
+                  Privacy
+                </Link>
+                {" · "}
+                <Link href="/terms" className="underline">
+                  Terms
+                </Link>
               </footer>
             </div>
           </QueryProvider>

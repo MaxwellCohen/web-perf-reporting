@@ -35,6 +35,9 @@ describe("app/PostHogProvider", () => {
         api_host: undefined,
         person_profiles: "identified_only",
         capture_pageview: false,
+        disable_surveys: true,
+        persistence: "memory",
+        disable_session_recording: true,
       });
     });
     await waitFor(() => {
