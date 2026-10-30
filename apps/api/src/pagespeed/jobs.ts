@@ -41,17 +41,14 @@ export async function enqueuePageSpeed(env: ApiBindings, recordPublicId: string,
 }
 
 export async function startPageSpeed(env: ApiBindings, requestUrl: string): Promise<RecordResponse | null> {
-  // A successful run is reused for as long as its stored result exists; in-flight runs within the cache window.
+  // Share a run that is still queued/processing; otherwise start a fresh test.
   const existing = await getRecordByUrl(env, requestUrl, 0);
-  if (existing) {
-    const inFlight = existing.status === "pending" || existing.status === "processing";
-    if (inFlight && existing.date >= Date.now() - CACHE_DURATION_MS) {
-      return pageSpeedResponse(env, existing.publicId);
-    }
-    if (!inFlight && existing.status !== "failed") {
-      const response = await pageSpeedResponse(env, existing.publicId);
-      if (response?.status === "completed" && response.data != null) return response;
-    }
+  if (
+    existing &&
+    (existing.status === "pending" || existing.status === "processing") &&
+    existing.date >= Date.now() - CACHE_DURATION_MS
+  ) {
+    return pageSpeedResponse(env, existing.publicId);
   }
 
   const record = await createPendingRecord(env, requestUrl);

@@ -15,7 +15,7 @@ export function buildLlmsTxt(siteUrl: string): string {
    Lighthouse runs locally, so localhost and dev/preview servers work. Audit a production build (e.g. \`next build && next start\`), not a dev server.
 
    Alternative with real-user (CrUX) field data: call the PageSpeed Insights API with your own key:
-   curl -o mobile.json "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=https://example.com&strategy=mobile&category=PERFORMANCE&category=ACCESSIBILITY&category=BEST_PRACTICES&category=SEO&key=$PAGESPEED_API_KEY"
+   curl -o mobile.json "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=https://example.com&strategy=mobile&category=PERFORMANCE&category=ACCESSIBILITY&category=AGENTIC_BROWSING&category=BEST_PRACTICES&category=SEO&key=$PAGESPEED_API_KEY"
    This only works for publicly reachable URLs.
 
 2. POST the result for analysis (markdown is the most token-efficient):

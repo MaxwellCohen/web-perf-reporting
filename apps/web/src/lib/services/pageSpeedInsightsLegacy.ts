@@ -8,7 +8,7 @@ type FormFactor = "DESKTOP" | "MOBILE";
 export async function getPageSpeedDataUrl(testURL: string, formFactor: FormFactor) {
   const baseurl = new URL("https://www.googleapis.com/pagespeedonline/v5/runPagespeed");
   baseurl.searchParams.append("url", testURL);
-  ["ACCESSIBILITY", "BEST_PRACTICES", "PERFORMANCE", "PWA", "SEO"].forEach((category) =>
+  ["ACCESSIBILITY", "AGENTIC_BROWSING", "BEST_PRACTICES", "PERFORMANCE", "PWA", "SEO"].forEach((category) =>
     baseurl.searchParams.append("category", category),
   );
   baseurl.searchParams.append("key", process.env.PAGESPEED_INSIGHTS_API ?? "");
