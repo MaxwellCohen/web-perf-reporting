@@ -11,17 +11,19 @@ export function numericItemValue(value: unknown): number | undefined {
   return undefined;
 }
 
-export function itemLabel(
-  item: TableItem | OpportunityItem,
-  keys: readonly string[],
-): string {
+export function itemLabel(item: TableItem | OpportunityItem, keys: readonly string[]): string {
   for (const key of keys) {
     const raw = item[key];
     if (typeof raw === "string" && raw.trim()) {
       return key === "url" || key === "origin" ? shortUrl(raw) : raw;
     }
     if (raw && typeof raw === "object" && "type" in raw) {
-      const node = raw as { type?: string; snippet?: string; selector?: string; nodeLabel?: string };
+      const node = raw as {
+        type?: string;
+        snippet?: string;
+        selector?: string;
+        nodeLabel?: string;
+      };
       if (node.type === "node") {
         return node.nodeLabel || node.selector || node.snippet || "Element";
       }

@@ -18,10 +18,7 @@ function validateJson(jsonString: string): boolean {
   }
 }
 
-async function fetchJsonFromUrl(
-  url: string,
-  fetchFn: typeof fetch = fetch,
-): Promise<string> {
+async function fetchJsonFromUrl(url: string, fetchFn: typeof fetch = fetch): Promise<string> {
   const response = await fetchFn(url);
   if (!response.ok) {
     throw new Error(`Failed to fetch JSON from URL: ${response.statusText}`);

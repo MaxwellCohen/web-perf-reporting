@@ -3,7 +3,11 @@ import {
   getNetworkRequestsTimeRange,
   type NetworkRequestTimeRange,
 } from "@/features/page-speed-insights/shared/networkRequestsTable";
-import { formatCoverage, coverageLabel, shortUrl } from "@/features/page-speed-insights/shared/format";
+import {
+  formatCoverage,
+  coverageLabel,
+  shortUrl,
+} from "@/features/page-speed-insights/shared/format";
 import type {
   CombinedLoad,
   CombinedLongTask,
@@ -20,12 +24,7 @@ import type {
 import type { TableItem } from "@/lib/schema";
 import { getNumber, getUrlString } from "@/lib/utils";
 
-export type WaterfallRowKind =
-  | "request"
-  | "request-group"
-  | "task"
-  | "user-mark"
-  | "user-measure";
+export type WaterfallRowKind = "request" | "request-group" | "task" | "user-mark" | "user-measure";
 
 export type WaterfallDensity = "expanded" | "collapsed";
 
@@ -102,11 +101,7 @@ function queueWindow(
   rendererStart: number | undefined,
   networkStart: number,
 ): { queueStart?: number; queueEnd?: number } {
-  if (
-    rendererStart != null &&
-    Number.isFinite(rendererStart) &&
-    rendererStart < networkStart
-  ) {
+  if (rendererStart != null && Number.isFinite(rendererStart) && rendererStart < networkStart) {
     return { queueStart: rendererStart, queueEnd: networkStart };
   }
   return {};
@@ -241,9 +236,7 @@ function requestGroupRow(group: CombinedRequest[], index: number): WaterfallRow 
 const TASK_ROW_GAP_MS = 50;
 
 function groupTasksByGap(tasks: CombinedLongTask[]): CombinedLongTask[][] {
-  const ordered = [...tasks].sort(
-    (a, b) => a.startTime - b.startTime || b.duration - a.duration,
-  );
+  const ordered = [...tasks].sort((a, b) => a.startTime - b.startTime || b.duration - a.duration);
   if (!ordered.length) return [];
 
   const groups: CombinedLongTask[][] = [];
@@ -285,7 +278,8 @@ function taskRow(group: CombinedLongTask[], index: number): WaterfallRow {
     duration: Math.max(0, endMs - startMs),
     momentId,
     url: group.length === 1 ? group[0]?.url : undefined,
-    coverage: group.length === 1 && group[0]?.coverage ? formatCoverage(group[0].coverage) : undefined,
+    coverage:
+      group.length === 1 && group[0]?.coverage ? formatCoverage(group[0].coverage) : undefined,
     scriptCpu: group.length === 1 ? group[0]?.scriptCpu : undefined,
     chain: group.length === 1 ? group[0]?.chain : undefined,
     segments: group.map((task, segIndex) => {
@@ -296,9 +290,7 @@ function taskRow(group: CombinedLongTask[], index: number): WaterfallRow {
         end: task.startTime + task.duration,
         label: task.url ? shortUrl(task.url) : "Unattributed",
         taskKind: long ? ("long" as const) : ("short" as const),
-        renderBlocking: long
-          ? ("blocking" as const)
-          : ("potentially-blocking" as const),
+        renderBlocking: long ? ("blocking" as const) : ("potentially-blocking" as const),
         downloadStartMs: task.downloadStartMs,
         downloadEndMs: task.downloadEndMs,
         scriptTransferBytes: task.scriptTransferBytes,
@@ -311,8 +303,7 @@ function taskRow(group: CombinedLongTask[], index: number): WaterfallRow {
 }
 
 function userTimingRow(timing: UserTiming, index: number): WaterfallRow {
-  const isMeasure =
-    timing.timingType.toLowerCase() === "measure" && timing.duration != null;
+  const isMeasure = timing.timingType.toLowerCase() === "measure" && timing.duration != null;
   const start = timing.startTime;
   const end = isMeasure ? start + timing.duration! : start;
 
@@ -356,11 +347,7 @@ export function buildWaterfallRowsFromSources(
     density === "collapsed"
       ? groupDownloads(load.requests).map((group, index) => requestGroupRow(group, index))
       : load.requests.map((request, index) =>
-          requestRowFromCombined(
-            request,
-            index,
-            momentByUrl.get(request.url) ?? `net-${index}`,
-          ),
+          requestRowFromCombined(request, index, momentByUrl.get(request.url) ?? `net-${index}`),
         );
 
   const taskGroups =
@@ -526,13 +513,15 @@ export function sortWaterfallRows(rows: WaterfallRow[], sortBy: WaterfallSortBy)
       break;
     case "size":
       sorted.sort(
-        (a, b) =>
-          (b.transferSize ?? 0) - (a.transferSize ?? 0) || a.networkStart - b.networkStart,
+        (a, b) => (b.transferSize ?? 0) - (a.transferSize ?? 0) || a.networkStart - b.networkStart,
       );
       break;
     case "end":
       sorted.sort(
-        (a, b) => a.networkEnd - b.networkEnd || a.networkStart - b.networkStart || a.label.localeCompare(b.label),
+        (a, b) =>
+          a.networkEnd - b.networkEnd ||
+          a.networkStart - b.networkStart ||
+          a.label.localeCompare(b.label),
       );
       break;
     case "start":
@@ -677,7 +666,6 @@ export function waterfallRowFromTimelineBar(
     ],
   };
 }
-
 
 /** LCP subparts → one multi-segment waterfall row on the absolute timeline. */
 export function waterfallRowFromLcpSegments(

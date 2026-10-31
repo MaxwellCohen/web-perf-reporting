@@ -145,7 +145,11 @@ export function RenderFilmStrip() {
         const pairItems = [pair.a, pair.b].filter(Boolean) as InsightsContextItem[];
         if (!pairItems.some((item) => filmstripTimelineFromItem(item))) return null;
         return (
-          <div key={pair.formFactor} className="min-w-0 space-y-2" data-testid="filmstrip-form-pair">
+          <div
+            key={pair.formFactor}
+            className="min-w-0 space-y-2"
+            data-testid="filmstrip-form-pair"
+          >
             <p className="text-sm font-semibold">{pair.formFactor}</p>
             <AlignedFilmstrips items={pairItems} />
           </div>
@@ -175,12 +179,7 @@ export function RenderFilmStrip() {
         ? `${view.device} · ${view.simulationLabel}`
         : view.device;
       return (
-        <Timeline
-          key={index}
-          timeline={view.timeline}
-          device={device}
-          markers={view.markers}
-        />
+        <Timeline key={index} timeline={view.timeline} device={device} markers={view.markers} />
       );
     })
     .filter(Boolean);

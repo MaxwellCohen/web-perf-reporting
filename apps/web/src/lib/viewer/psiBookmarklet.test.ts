@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  buildPsiViewerBookmarklet,
-  buildPsiViewerDeepLink,
-} from "@/lib/viewer/psiBookmarklet";
+import { buildPsiViewerBookmarklet, buildPsiViewerDeepLink } from "@/lib/viewer/psiBookmarklet";
 
 describe("buildPsiViewerDeepLink", () => {
   it("builds a viewer URL with the PSI share as a query param", () => {

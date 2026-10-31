@@ -22,7 +22,10 @@ vi.mock("@/components/ui/chart", () => ({
   ChartTooltipContent: () => <div data-testid="chart-tooltip-content" />,
 }));
 
-import { HistoricalPerformanceAreaChart, HistoricalP75Chart } from "@/components/historical/HistoricalPerformanceAreaChart";
+import {
+  HistoricalPerformanceAreaChart,
+  HistoricalP75Chart,
+} from "@/components/historical/HistoricalPerformanceAreaChart";
 
 const historyItem = {
   end_date: "2024-01-31",

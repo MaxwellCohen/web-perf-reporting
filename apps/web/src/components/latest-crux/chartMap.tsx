@@ -16,7 +16,8 @@ const CruxStackedBarChart = dynamic(
   { loading: ChartFallback },
 );
 const CruxRadialChart = dynamic(
-  () => import("@/components/latest-crux/charts/CruxRadialChart").then((mod) => mod.CruxRadialChart),
+  () =>
+    import("@/components/latest-crux/charts/CruxRadialChart").then((mod) => mod.CruxRadialChart),
   { loading: ChartFallback },
 );
 const CruxGaugeChart = dynamic(

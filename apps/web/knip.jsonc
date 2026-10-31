@@ -1,12 +1,13 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
   "vitest": {
-    "config": "vitest.config.ts"
+    "config": "vitest.config.ts",
   },
+  "ignoreIssues": { "src/components/ui/*.tsx": ["exports", "types"] },
   "ignoreBinaries": ["fallow"],
   "rules": {
     // flatTableFeatures intentionally aliases standardTableFeatures (same bundle,
     // expander disabled at the hook). Not a copy-paste duplicate.
-    "duplicates": "off"
-  }
+    "duplicates": "off",
+  },
 }

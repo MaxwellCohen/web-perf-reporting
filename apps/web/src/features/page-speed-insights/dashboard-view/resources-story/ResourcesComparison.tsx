@@ -149,7 +149,10 @@ export function ResourcesComparisonBrief({
             <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
               Comparing
             </p>
-            <p className="mt-1 truncate text-lg font-semibold" data-testid="resources-compare-title">
+            <p
+              className="mt-1 truncate text-lg font-semibold"
+              data-testid="resources-compare-title"
+            >
               {a.label} vs {b.label}
             </p>
           </div>

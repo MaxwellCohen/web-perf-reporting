@@ -12,7 +12,6 @@ import {
   createStringAggregatedCell,
 } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
 
-
 type EntityTableRow = {
   label: string;
   name: string;
@@ -90,7 +89,9 @@ export function EntitiesTableCard({
     defaultPageSize: data.length,
     enablePagination: true,
   });
-  return <TableCard title="Third-Party Entities" table={table} className="md:col-span-2 lg:col-span-3" />;
+  return (
+    <TableCard title="Third-Party Entities" table={table} className="md:col-span-2 lg:col-span-3" />
+  );
 }
 
 export function useEntitiesTableData() {

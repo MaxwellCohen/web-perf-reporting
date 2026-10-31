@@ -154,8 +154,7 @@ function ThresholdTrack({
 }
 
 function Tick({ label, pct }: { label: string; pct: number }) {
-  const edge =
-    pct < 8 ? "translateX(0)" : pct > 92 ? "translateX(-100%)" : "translateX(-50%)";
+  const edge = pct < 8 ? "translateX(0)" : pct > 92 ? "translateX(-100%)" : "translateX(-50%)";
   return (
     <span
       className="absolute top-0 font-mono text-[10px] leading-none tabular-nums text-muted-foreground"
@@ -180,11 +179,14 @@ function PhaseTrack({ phases, unit }: { phases: Phase[]; unit: "ms" | "cls" }) {
   if (!(total > 0)) return null;
 
   const placed = phases.reduce<Array<{ phase: Phase; left: number }>>((acc, phase) => {
-    const left = acc.length === 0 ? 0 : acc[acc.length - 1].left + acc[acc.length - 1].phase.duration;
+    const left =
+      acc.length === 0 ? 0 : acc[acc.length - 1].left + acc[acc.length - 1].phase.duration;
     return [...acc, { phase, left }];
   }, []);
 
-  const labels = phases.map((phase) => `${phase.label} ${formatUnit(phase.duration, unit)}`).join(", ");
+  const labels = phases
+    .map((phase) => `${phase.label} ${formatUnit(phase.duration, unit)}`)
+    .join(", ");
 
   return (
     <div className="space-y-1.5" data-testid="lcp-phase-track">
@@ -281,9 +283,7 @@ function MetricScale({
         <span aria-hidden />
       ) : null}
       {phases.length > 0 ? <PhaseTrack phases={phases} unit={band.unit} /> : null}
-      {savings.length > 0 ? (
-        <SavingsBars savings={savings} value={value} unit={band.unit} />
-      ) : null}
+      {savings.length > 0 ? <SavingsBars savings={savings} value={value} unit={band.unit} /> : null}
     </div>
   );
 }
@@ -452,9 +452,7 @@ export function MetricValueViz({
               showLabel={rows.length > 1}
               auditId={auditId}
               phases={
-                detail && auditId === "largest-contentful-paint"
-                  ? lcpPhases(source?.audits)
-                  : []
+                detail && auditId === "largest-contentful-paint" ? lcpPhases(source?.audits) : []
               }
               savings={detail ? savings : []}
               savingsNote={savingsNote}

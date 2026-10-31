@@ -98,9 +98,7 @@ export function RecommendationsStory() {
   const { selectedCategories, selectedPriorities, expandedItems } = f;
 
   if (!story) {
-    return (
-      <p className="text-sm text-muted-foreground">This report has no recommendations.</p>
-    );
+    return <p className="text-sm text-muted-foreground">This report has no recommendations.</p>;
   }
 
   function openLargest(saving: LargestSaving) {

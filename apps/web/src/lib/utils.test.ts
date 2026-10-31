@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { CruxReport } from "@/lib/schema";
-import { formatCruxReport, formatDate, getNumber, getUrlString, groupBy, updateURl } from "@/lib/utils";
+import {
+  formatCruxReport,
+  formatDate,
+  getNumber,
+  getUrlString,
+  groupBy,
+  updateURl,
+} from "@/lib/utils";
 
 function asCruxReport(value: unknown): CruxReport {
   return value as CruxReport;
@@ -12,7 +19,6 @@ const baseCollectionPeriod = {
 };
 
 describe("utils", () => {
-
   it("formats crux reports and returns null when no url is present", () => {
     expect(formatCruxReport(asCruxReport({ record: { key: {} } }))).toBeNull();
 

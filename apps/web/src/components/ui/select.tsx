@@ -49,11 +49,7 @@ function SelectScrollButton(
     React.ElementRef<typeof Primitive>,
     React.ComponentPropsWithoutRef<typeof Primitive>
   >(({ className, ...props }, ref) => (
-    <Primitive
-      ref={ref}
-      className={cn(selectScrollEdgeButtonStyles, className)}
-      {...props}
-    >
+    <Primitive ref={ref} className={cn(selectScrollEdgeButtonStyles, className)} {...props}>
       <Icon className="h-4 w-4" />
     </Primitive>
   ));
@@ -102,14 +98,7 @@ const SelectItem = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
 >(({ className, children, ...props }, ref) => (
-  <SelectPrimitive.Item
-    ref={ref}
-    className={cn(
-      itemStyles,
-      className,
-    )}
-    {...props}
-  >
+  <SelectPrimitive.Item ref={ref} className={cn(itemStyles, className)} {...props}>
     <span className={itemIndicatorStyles}>
       <SelectPrimitive.ItemIndicator>
         <Check className="h-4 w-4" />

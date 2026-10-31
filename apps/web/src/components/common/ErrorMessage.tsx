@@ -62,10 +62,7 @@ export function ReportErrorCard({
   );
 }
 
-function ErrorMessageFallback({
-  title,
-  description,
-}: Omit<ErrorMessageProps, "children">) {
+function ErrorMessageFallback({ title, description }: Omit<ErrorMessageProps, "children">) {
   return <ReportErrorCard title={title} description={description} />;
 }
 

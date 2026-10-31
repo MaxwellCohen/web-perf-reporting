@@ -29,7 +29,9 @@ describe("JavascriptAuditBytesCards", () => {
         metrics={[
           {
             label: "Mobile",
-            legacyJS: [{ url: "https://example.com/script.js", wastedBytes: 1000, totalBytes: 2000 }],
+            legacyJS: [
+              { url: "https://example.com/script.js", wastedBytes: 1000, totalBytes: 2000 },
+            ],
           },
         ]}
       />,

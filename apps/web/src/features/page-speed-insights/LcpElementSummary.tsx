@@ -4,13 +4,7 @@ import { NodeComponent } from "@/features/page-speed-insights/lh-categories/tabl
 import { CompareRunsCard } from "@/features/page-speed-insights/shared/CompareRunsCard";
 import type { LcpElement } from "@/features/page-speed-insights/lcpElement";
 
-function LcpElementBlock({
-  element,
-  showLabel,
-}: {
-  element: LcpElement;
-  showLabel: boolean;
-}) {
+function LcpElementBlock({ element, showLabel }: { element: LcpElement; showLabel: boolean }) {
   const { label, node } = element;
   return (
     <div className="min-w-0 space-y-1">
@@ -31,7 +25,9 @@ export function LcpElementSummary({ elements }: { elements: LcpElement[] }) {
       singleKey={(element) =>
         `${element.label}:${element.node.lhId ?? element.node.selector ?? element.node.nodeLabel}`
       }
-      renderItem={(element, showLabel) => <LcpElementBlock element={element} showLabel={showLabel} />}
+      renderItem={(element, showLabel) => (
+        <LcpElementBlock element={element} showLabel={showLabel} />
+      )}
     />
   );
 }

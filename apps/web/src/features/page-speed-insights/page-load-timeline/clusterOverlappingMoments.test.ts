@@ -32,4 +32,3 @@ describe("momentInterval / isIntervalMoment", () => {
     expect(isIntervalMoment(download)).toBe(true);
   });
 });
-

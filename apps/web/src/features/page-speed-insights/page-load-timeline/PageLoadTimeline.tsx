@@ -745,9 +745,7 @@ function TimelineLegend({ simulationLabel }: { simulationLabel?: string }) {
       </span>
       <span className="text-muted-foreground/80">Scroll down from 0 ms</span>
       {simulationLabel ? (
-        <span className="text-muted-foreground/80">
-          Times include simulated {simulationLabel}
-        </span>
+        <span className="text-muted-foreground/80">Times include simulated {simulationLabel}</span>
       ) : null}
     </div>
   );
@@ -902,9 +900,7 @@ function filterBundleTimeline(
   enabledTasks: TaskFilterSelection,
 ): PageLoadTimeline {
   const events = filterTimelineMoments(bundle.timeline.events, enabledTasks);
-  return events === bundle.timeline.events
-    ? bundle.timeline
-    : { ...bundle.timeline, events };
+  return events === bundle.timeline.events ? bundle.timeline : { ...bundle.timeline, events };
 }
 
 function TimelinePane({
@@ -1063,16 +1059,11 @@ export function PageLoadTimeline() {
   );
   const panes = filteredEntries.map((entry) => ({
     ...entry,
-    timeline: comparing
-      ? { ...entry.timeline, axisEndMs: sharedAxisEndMs }
-      : entry.timeline,
+    timeline: comparing ? { ...entry.timeline, axisEndMs: sharedAxisEndMs } : entry.timeline,
   }));
 
   const shownCount = panes.reduce((sum, p) => sum + p.timeline.events.length, 0);
-  const totalCount = selectedEntries.reduce(
-    (sum, p) => sum + p.bundle.timeline.events.length,
-    0,
-  );
+  const totalCount = selectedEntries.reduce((sum, p) => sum + p.bundle.timeline.events.length, 0);
   const markdown = panes.map((entry) => timelineToMarkdown(entry.timeline)).join("\n\n");
   const headerTitle = comparing
     ? panes.map((entry) => entry.label).join(" vs ")
@@ -1095,11 +1086,7 @@ export function PageLoadTimeline() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {bundles.length > 1 ? (
-              <div
-                className="flex flex-wrap gap-2"
-                role="group"
-                aria-label="Reports to compare"
-              >
+              <div className="flex flex-wrap gap-2" role="group" aria-label="Reports to compare">
                 {bundles.map((bundle) => {
                   const name = bundle.timeline.label?.trim() || "Report";
                   const selected = selectedLabels.includes(bundle.timeline.label);

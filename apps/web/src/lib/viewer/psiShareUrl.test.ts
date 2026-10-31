@@ -85,18 +85,15 @@ describe("fetchPsiShareHtml", () => {
   });
 
   it("rejects redirects off the allowlist", async () => {
-    const fetchFn = vi
-      .fn()
-      .mockResolvedValue(
-        new Response(null, {
-          status: 302,
-          headers: { location: "https://evil.example/analysis/abc" },
-        }),
-      );
+    const fetchFn = vi.fn().mockResolvedValue(
+      new Response(null, {
+        status: 302,
+        headers: { location: "https://evil.example/analysis/abc" },
+      }),
+    );
     await expect(fetchPsiShareHtml(parsePsiShareUrl(SHARE), fetchFn)).rejects.toThrow(
       PsiShareUrlError,
     );
     expect(fetchFn).toHaveBeenCalledTimes(1);
   });
-
 });

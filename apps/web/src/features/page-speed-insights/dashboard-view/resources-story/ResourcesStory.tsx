@@ -12,9 +12,7 @@ import {
   resourcesInvestigationsFromItems,
   type ResourcesInvestigation,
 } from "@/features/page-speed-insights/dashboard-view/resources-story/resourcesInvestigationModel";
-import {
-  SuspectList,
-} from "@/features/page-speed-insights/dashboard-view/resources-story/SuspectList";
+import { SuspectList } from "@/features/page-speed-insights/dashboard-view/resources-story/SuspectList";
 import { TransferWeightMap } from "@/features/page-speed-insights/dashboard-view/resources-story/TransferWeightMap";
 import { ResourcesTable } from "@/features/page-speed-insights/dashboard-view/resources-story/ResourcesTable";
 import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";

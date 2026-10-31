@@ -264,7 +264,13 @@ function buildRows(sources: StorySource[]): TimingRow[] {
     const cells = sources.map((source) => {
       const timeMs = sourceMoment(source, id);
       const rating =
-        id === "ttfb" ? source.ttfbRating : id === "fcp" ? source.fcpRating : id === "lcp" ? source.lcpRating : undefined;
+        id === "ttfb"
+          ? source.ttfbRating
+          : id === "fcp"
+            ? source.fcpRating
+            : id === "lcp"
+              ? source.lcpRating
+              : undefined;
       return timeMs == null ? {} : { timeMs, rating };
     });
     if (cells.every((cell) => cell.timeMs == null)) return;
@@ -367,8 +373,9 @@ export function loadingStoryFromLoads(loads: CombinedLoad[]): LoadingStory | nul
 
   const devices = sources.map(toDevice);
   const momentsKey = devices
-    .map((device) =>
-      `${device.label}:${device.moments.map((moment) => `${moment.id}:${Math.round(moment.timeMs)}`).join(",")}`,
+    .map(
+      (device) =>
+        `${device.label}:${device.moments.map((moment) => `${moment.id}:${Math.round(moment.timeMs)}`).join(",")}`,
     )
     .join("|");
 

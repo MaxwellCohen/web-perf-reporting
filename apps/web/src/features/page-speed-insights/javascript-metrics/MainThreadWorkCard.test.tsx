@@ -67,9 +67,7 @@ describe("MainThreadWorkCard", () => {
       },
     }));
 
-    const { container } = render(
-      <DetailTable rows={rows} title="Minimize main-thread work" />,
-    );
+    const { container } = render(<DetailTable rows={rows} title="Minimize main-thread work" />);
 
     const headers = [...container.querySelectorAll("th")].map((header) => header.textContent);
     expect(headers).toEqual(["Category〰︎", "Mobile Time Spent〰︎", "Desktop Time Spent〰︎"]);

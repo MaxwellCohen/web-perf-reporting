@@ -8,9 +8,7 @@ export function rowsToMarkdown(rows: string[][]): string {
   const [header, ...dataRows] = rows;
   const headerLine = `| ${header.map(escapeMarkdownCell).join(" | ")} |`;
   const separator = `| ${header.map(() => "---").join(" | ")} |`;
-  const dataLines = dataRows.map(
-    (row) => `| ${row.map(escapeMarkdownCell).join(" | ")} |`,
-  );
+  const dataLines = dataRows.map((row) => `| ${row.map(escapeMarkdownCell).join(" | ")} |`);
 
   return [headerLine, separator, ...dataLines].join("\n");
 }

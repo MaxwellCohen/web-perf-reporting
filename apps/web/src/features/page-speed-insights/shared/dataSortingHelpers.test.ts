@@ -46,4 +46,3 @@ describe("sortByMaxValue", () => {
     expect(result[0]?.id).toBe("y");
   });
 });
-

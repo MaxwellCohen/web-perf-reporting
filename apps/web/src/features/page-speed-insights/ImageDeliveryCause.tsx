@@ -42,7 +42,9 @@ function OptimizationRow({
 }
 
 function ImageRow({ image }: { image: ImageDeliveryImage }) {
-  const maxSavings = Math.max(...image.optimizations.map((optimization) => optimization.wastedBytes));
+  const maxSavings = Math.max(
+    ...image.optimizations.map((optimization) => optimization.wastedBytes),
+  );
 
   return (
     <li className="space-y-3 px-3 py-3">

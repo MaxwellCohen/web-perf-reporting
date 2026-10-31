@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  prefixPsiReportLabels,
-  resolvePsiRunLabels,
-} from "@/lib/viewer/psiCompareLabels";
+import { prefixPsiReportLabels, resolvePsiRunLabels } from "@/lib/viewer/psiCompareLabels";
 
 describe("resolvePsiRunLabels", () => {
   it("defaults to A and B", () => {

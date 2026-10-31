@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import type {
-  StockCellContext,
-} from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import type { StockCellContext } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import { renderBoolean } from "@/features/page-speed-insights/lh-categories/renderBoolean";
 import { StatusCircle } from "@/features/page-speed-insights/JSUsage/StatusCircle";
@@ -34,7 +32,9 @@ const expanderColumn = columnHelper.display({
   },
 });
 
-const makeStatusColumn = (cell: (info: StockCellContext<TreeMapNode, unknown>) => React.JSX.Element) =>
+const makeStatusColumn = (
+  cell: (info: StockCellContext<TreeMapNode, unknown>) => React.JSX.Element,
+) =>
   columnHelper.display({
     id: "statusColumn",
     header: () => <></>,

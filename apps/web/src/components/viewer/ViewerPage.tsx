@@ -19,14 +19,8 @@ import {
   ViewerRunSlot,
   type ViewerRunState,
 } from "@/components/viewer/ViewerRunSlot";
-import {
-  buildPsiViewerBookmarklet,
-  buildPsiViewerDeepLink,
-} from "@/lib/viewer/psiBookmarklet";
-import {
-  DEFAULT_PSI_RUN_LABEL_A,
-  DEFAULT_PSI_RUN_LABEL_B,
-} from "@/lib/viewer/psiCompareLabels";
+import { buildPsiViewerBookmarklet, buildPsiViewerDeepLink } from "@/lib/viewer/psiBookmarklet";
+import { DEFAULT_PSI_RUN_LABEL_A, DEFAULT_PSI_RUN_LABEL_B } from "@/lib/viewer/psiCompareLabels";
 
 // Dashboard pulls recharts + react-markdown + tanstack tables (~730kB
 // client per audit). Viewer input form needs none of it; load the dashboard
@@ -239,9 +233,7 @@ export default function ViewerPage({
   };
 
   const addCompareRun = () => {
-    setRuns((prev) =>
-      prev.length >= 2 ? prev : [...prev, createEmptyViewerRun({ id: "run-2" })],
-    );
+    setRuns((prev) => (prev.length >= 2 ? prev : [...prev, createEmptyViewerRun({ id: "run-2" })]));
   };
 
   const removeCompareRun = () => {
@@ -263,14 +255,13 @@ export default function ViewerPage({
   };
 
   if (Array.isArray(data) && data.length) {
-    const shareUrl =
-      importedPsi?.url
-        ? buildPsiViewerDeepLink(importedPsi.url, window.location.origin, {
-            label: importedPsi.label,
-            compareUrl: importedPsi.compareUrl,
-            compareLabel: importedPsi.compareLabel,
-          })
-        : undefined;
+    const shareUrl = importedPsi?.url
+      ? buildPsiViewerDeepLink(importedPsi.url, window.location.origin, {
+          label: importedPsi.label,
+          compareUrl: importedPsi.compareUrl,
+          compareLabel: importedPsi.compareLabel,
+        })
+      : undefined;
     return (
       <PageSpeedInsightsDashboard
         data={data}

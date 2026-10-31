@@ -57,8 +57,11 @@ export function useRecommendationFilters(
   recommendations: Recommendation[],
   quickWins: Recommendation[],
 ) {
-  const { categories: selectedCategories, priorities: selectedPriorities, expanded: expandedItems } =
-    useDashboardSearchState();
+  const {
+    categories: selectedCategories,
+    priorities: selectedPriorities,
+    expanded: expandedItems,
+  } = useDashboardSearchState();
   const matches = (rec: Recommendation) =>
     (selectedCategories.length === 0 || selectedCategories.includes(rec.category)) &&
     (selectedPriorities.length === 0 || selectedPriorities.includes(rec.priority));
@@ -80,9 +83,7 @@ export function useRecommendationFilters(
       recs: recs.filter((rec) => !quickWinIds.has(rec.id)),
     })),
     toggleAll: () =>
-      setExpanded(
-        expandedItems.length === filtered.length ? [] : filtered.map((rec) => rec.id),
-      ),
+      setExpanded(expandedItems.length === filtered.length ? [] : filtered.map((rec) => rec.id)),
     onCategoriesChange: (next: string[]) =>
       patchDashboardSearch({ categories: next.length ? next : null }),
     onPrioritiesChange: (next: string[]) =>

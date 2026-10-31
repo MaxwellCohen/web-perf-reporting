@@ -21,7 +21,9 @@ describe("PerformanceAuditViz", () => {
 
   it("dispatches and returns null for unknown ids", () => {
     const { container } = render(
-      <PerformanceAuditViz rows={[makeRow("server-response-time", [{ url: "u", responseTime: 10 }])]} />,
+      <PerformanceAuditViz
+        rows={[makeRow("server-response-time", [{ url: "u", responseTime: 10 }])]}
+      />,
     );
     expect(container.textContent).toContain("10 ms");
     const none = render(<PerformanceAuditViz rows={[makeRow("nope", [{ a: 1 }])]} />);

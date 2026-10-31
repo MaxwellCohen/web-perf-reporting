@@ -67,9 +67,7 @@ function shareOf(part: number, totalBytes: number | null): number | null {
 
 function toDevice(summary: ResourceSummary): DeviceNetwork | null {
   const total = recorded(summary.tiles.find((tile) => tile.resourceType === "total"));
-  const thirdParty = recorded(
-    summary.tiles.find((tile) => tile.resourceType === "third-party"),
-  );
+  const thirdParty = recorded(summary.tiles.find((tile) => tile.resourceType === "third-party"));
   const totalBytes = total ? total.transferSize : null;
   const slices = summary.tiles.flatMap((tile) => {
     if (OVERLAPPING_TYPES.has(tile.resourceType) || !recorded(tile)) return [];

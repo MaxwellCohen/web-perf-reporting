@@ -2,7 +2,16 @@ import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
-import { createBytesColumn, createMSColumn, createPercentageColumn, createReportColumn, createTruncatedTextColumn, createURLColumn, metricTableEmptyDisplay, createOptionalNumericCell } from "@/features/page-speed-insights/shared/tableColumnHelpers";
+import {
+  createBytesColumn,
+  createMSColumn,
+  createPercentageColumn,
+  createReportColumn,
+  createTruncatedTextColumn,
+  createURLColumn,
+  metricTableEmptyDisplay,
+  createOptionalNumericCell,
+} from "@/features/page-speed-insights/shared/tableColumnHelpers";
 
 vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", () => ({
   RenderBytesValue: ({ value }: { value: number }) => <span>{value} B</span>,
@@ -129,6 +138,5 @@ describe("tableColumnHelpers", () => {
       const cell = (col.cell as Function)({ getValue: () => 3.456 } as any);
       expect(cell).toBe("3.5%");
     });
-
   });
 });

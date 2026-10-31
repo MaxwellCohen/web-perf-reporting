@@ -1,6 +1,9 @@
 import { renderHook, act } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { useStandardTable, type StandardColumnDef } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import {
+  useStandardTable,
+  type StandardColumnDef,
+} from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 
 type Row = { name: string; flag: boolean };
@@ -22,9 +25,7 @@ describe("useStandardTable boolean filter", () => {
       { name: "c", flag: true },
     ];
 
-    const { result } = renderHook(() =>
-      useStandardTable({ data, columns, grouping: [] }),
-    );
+    const { result } = renderHook(() => useStandardTable({ data, columns, grouping: [] }));
 
     expect(result.current.getRowModel().rows).toHaveLength(3);
 
@@ -54,14 +55,10 @@ describe("useStandardTable boolean filter", () => {
       { name: "b", flag: false },
     ];
 
-    const { result } = renderHook(() =>
-      useStandardTable({ data, columns, grouping: [] }),
-    );
+    const { result } = renderHook(() => useStandardTable({ data, columns, grouping: [] }));
 
     const flagColumn = result.current.getColumn("flag")!;
-    const sortedUniqueValues = Array.from(
-      flagColumn.getFacetedUniqueValues()?.keys() ?? [],
-    ).sort();
+    const sortedUniqueValues = Array.from(flagColumn.getFacetedUniqueValues()?.keys() ?? []).sort();
 
     act(() => {
       const v = false;
@@ -94,9 +91,7 @@ describe("useStandardTable boolean filter", () => {
       { name: "a", flag: false },
     ];
 
-    const { result } = renderHook(() =>
-      useStandardTable({ data, columns, grouping: ["name"] }),
-    );
+    const { result } = renderHook(() => useStandardTable({ data, columns, grouping: ["name"] }));
 
     act(() => {
       result.current.getColumn("flag")!.setFilterValue([true]);

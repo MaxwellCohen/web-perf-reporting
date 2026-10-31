@@ -48,11 +48,7 @@ const STATUS_TITLES: Record<AuditStatus, string> = {
 };
 
 /** Sections that start collapsed so failing audits are seen first. */
-const COLLAPSED_BY_DEFAULT: ReadonlySet<AuditStatus> = new Set([
-  "pass",
-  "notApplicable",
-  "manual",
-]);
+const COLLAPSED_BY_DEFAULT: ReadonlySet<AuditStatus> = new Set(["pass", "notApplicable", "manual"]);
 
 /** Status of a single audit result, or null when there is no result. */
 export function getAuditStatus(audit: Audit | null | undefined): AuditStatus | null {
@@ -96,7 +92,9 @@ const DISAGREEMENT_VERBS: Partial<Record<AuditStatus, string>> = {
 };
 
 function joinLabels(labels: string[]) {
-  return labels.length <= 2 ? labels.join(" and ") : `${labels.slice(0, -1).join(", ")} and ${labels.at(-1)}`;
+  return labels.length <= 2
+    ? labels.join(" and ")
+    : `${labels.slice(0, -1).join(", ")} and ${labels.at(-1)}`;
 }
 
 /**
@@ -155,8 +153,11 @@ export function partitionByStatus<T>(
 }
 
 /** e.g. "3 failed · 2 needs attention · 40 passed". Zero counts are omitted. */
-export function formatCategorySummary(sections: Pick<StatusSection<unknown>, "status" | "items">[]) {
-  const count = (status: AuditStatus) => sections.find((s) => s.status === status)?.items.length ?? 0;
+export function formatCategorySummary(
+  sections: Pick<StatusSection<unknown>, "status" | "items">[],
+) {
+  const count = (status: AuditStatus) =>
+    sections.find((s) => s.status === status)?.items.length ?? 0;
   const parts: string[] = [];
   if (count("fail")) parts.push(`${count("fail")} failed`);
   if (count("average")) parts.push(`${count("average")} needs attention`);

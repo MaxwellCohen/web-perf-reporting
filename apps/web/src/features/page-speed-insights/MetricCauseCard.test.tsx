@@ -252,7 +252,9 @@ describe("MetricCauseCard", () => {
     expect(container.textContent).toContain("app.js");
     expect(container.textContent).toContain("Unattributable");
     expect(container.textContent).toContain("70 ms");
-    expect(container.querySelector('a[href="https://cdn.example/static/chunks/app.js"]')).not.toBeNull();
+    expect(
+      container.querySelector('a[href="https://cdn.example/static/chunks/app.js"]'),
+    ).not.toBeNull();
   });
 
   it("lists each image once with its delivery changes", () => {

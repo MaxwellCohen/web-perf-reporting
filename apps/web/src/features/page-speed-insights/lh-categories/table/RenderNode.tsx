@@ -654,7 +654,9 @@ const RenderThumbnails = memo(function RThumbnails({
   // If no element rects provided, show at least the full screenshot
   if (elementRects.length === 0) {
     if (imageError || !screenshot.data) {
-      return <ThumbnailUnavailableFallback displayWidth={displayWidth} displayHeight={displayHeight} />;
+      return (
+        <ThumbnailUnavailableFallback displayWidth={displayWidth} displayHeight={displayHeight} />
+      );
     }
     return (
       <FullScreenshotThumbnail

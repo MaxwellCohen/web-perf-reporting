@@ -120,7 +120,10 @@ export function AuditNodeFindingsViz({ rows }: { rows: DetailTableItem[] }) {
       const node = nodeOf(item);
       return node?.selector || node?.snippet || node?.nodeLabel;
     },
-    () => ({ node: undefined as NodeLike | undefined, contrast: undefined as ContrastInfo | undefined }),
+    () => ({
+      node: undefined as NodeLike | undefined,
+      contrast: undefined as ContrastInfo | undefined,
+    }),
     (data, item) => {
       const node = nodeOf(item);
       data.node = data.node ?? node;

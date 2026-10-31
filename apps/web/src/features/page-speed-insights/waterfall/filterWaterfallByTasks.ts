@@ -1,6 +1,4 @@
-import type {
-  TaskFilterSelection,
-} from "@/features/page-speed-insights/page-load-timeline/filterTimelineMoments";
+import type { TaskFilterSelection } from "@/features/page-speed-insights/page-load-timeline/filterTimelineMoments";
 import { TASK_FILTERS } from "@/features/page-speed-insights/page-load-timeline/filterTimelineMoments";
 import type { WaterfallRow } from "@/features/page-speed-insights/waterfall/waterfallData";
 

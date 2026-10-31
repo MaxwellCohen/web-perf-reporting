@@ -3,7 +3,10 @@ import type { CSSProperties } from "react";
 import { TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import type { TreeMapNode } from "@/lib/schema";
-import type { StockHeader, StockHeaderGroup } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import type {
+  StockHeader,
+  StockHeaderGroup,
+} from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { DataTableHead } from "@/features/page-speed-insights/tanstack-table-v9/DataTableHeader";
 
 const DEPTH_OFFSET_REM = 2.25;

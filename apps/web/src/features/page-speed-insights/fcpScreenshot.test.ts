@@ -8,10 +8,7 @@ const frames = [
   { data: "later", timing: 1800, timestamp: 1800 },
 ];
 
-function auditsWithFilmstrip(
-  fcpMs: number | undefined,
-  items = frames,
-): AuditResultsRecord {
+function auditsWithFilmstrip(fcpMs: number | undefined, items = frames): AuditResultsRecord {
   return {
     "first-contentful-paint": {
       id: "first-contentful-paint",

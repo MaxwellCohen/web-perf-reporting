@@ -13,10 +13,7 @@ import { AuditKpiStrip } from "./AuditKpiStrip";
 import { AuditLcpPhaseViz, AuditInpPhaseViz } from "./AuditLcpInpPhaseViz";
 import { AuditNetworkWaterfallViz } from "./AuditNetworkWaterfallViz";
 import { AuditResourceSummaryViz } from "./AuditResourceSummaryViz";
-import {
-  AuditSeverityFindingsViz,
-  SECURITY_SEVERITY_AUDIT_IDS,
-} from "./AuditSeverityFindingsViz";
+import { AuditSeverityFindingsViz, SECURITY_SEVERITY_AUDIT_IDS } from "./AuditSeverityFindingsViz";
 import { AuditSourceMapsViz } from "./AuditSourceMapsViz";
 import { AuditClsCulpritsViz } from "./AuditClsCulpritsViz";
 import {
@@ -25,10 +22,7 @@ import {
   extractStackedSegmentPoints,
 } from "./extractAuditBarPoints";
 import { itemNumeric } from "./auditItemValues";
-import {
-  PERFORMANCE_AUDIT_VIZ_IDS,
-  PerformanceAuditViz,
-} from "./performanceAuditViz";
+import { PERFORMANCE_AUDIT_VIZ_IDS, PerformanceAuditViz } from "./performanceAuditViz";
 import { QualityAuditViz } from "./qualityAuditViz";
 
 const BYTES_URL_AUDITS = new Set([
@@ -86,9 +80,7 @@ export function AuditTableViz({ rows }: { rows: DetailTableItem[] }) {
   // total-byte-weight keeps only the page-size card; the table lists the largest transfers.
   if (auditId === "total-byte-weight") {
     const pageTotal = rows.map((row) => {
-      const numericValue = getNumber(
-        (row.auditResult as AuditResult | undefined)?.numericValue,
-      );
+      const numericValue = getNumber((row.auditResult as AuditResult | undefined)?.numericValue);
       const fallback = (row.auditResult?.details?.items || []).reduce(
         (sum, item) => sum + (itemNumeric(item, ["totalBytes"]) ?? 0),
         0,
@@ -138,10 +130,7 @@ export function AuditTableViz({ rows }: { rows: DetailTableItem[] }) {
     );
   }
 
-  if (
-    auditId === "third-parties-insight" ||
-    auditId === "third-parties-details"
-  ) {
+  if (auditId === "third-parties-insight" || auditId === "third-parties-details") {
     const transfer = extractBarPoints(rows, {
       labelKeys: ["entity", "url"],
       valueKeys: ["transferSize"],
@@ -154,16 +143,8 @@ export function AuditTableViz({ rows }: { rows: DetailTableItem[] }) {
     });
     return (
       <div className="mb-4 space-y-4">
-        <AuditBarChart
-          points={transfer}
-          unit="bytes"
-          title="Transfer size by entity"
-        />
-        <AuditBarChart
-          points={mainThread}
-          unit="ms"
-          title="Main-thread time by entity"
-        />
+        <AuditBarChart points={transfer} unit="bytes" title="Transfer size by entity" />
+        <AuditBarChart points={mainThread} unit="ms" title="Main-thread time by entity" />
       </div>
     );
   }
@@ -320,11 +301,7 @@ export function AuditTableViz({ rows }: { rows: DetailTableItem[] }) {
     });
     return (
       <div className="mb-4">
-        <AuditBarChart
-          points={points}
-          unit="ms"
-          title="Server latency by origin"
-        />
+        <AuditBarChart points={points} unit="ms" title="Server latency by origin" />
       </div>
     );
   }

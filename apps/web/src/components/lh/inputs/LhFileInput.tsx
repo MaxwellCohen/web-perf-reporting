@@ -66,12 +66,7 @@ export function LhFileInput({ jsonFiles, setJsonFiles, idPrefix = "" }: LhFileIn
                     />
                   </div>
                 </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => removeFile(index)}
-                >
+                <Button type="button" variant="ghost" size="icon" onClick={() => removeFile(index)}>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"

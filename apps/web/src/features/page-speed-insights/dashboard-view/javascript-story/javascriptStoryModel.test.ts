@@ -18,7 +18,11 @@ function metric(label: string, overrides: Partial<JSMetrics> = {}): JSMetrics {
   };
 }
 
-function stats(label: string, totalTransferSize = 0, totalScripts = totalTransferSize > 0 ? 1 : 0): JSStats {
+function stats(
+  label: string,
+  totalTransferSize = 0,
+  totalScripts = totalTransferSize > 0 ? 1 : 0,
+): JSStats {
   return {
     label,
     totalScripts,
@@ -38,12 +42,17 @@ describe("javascriptStoryFromMetrics", () => {
             { group: "other", groupLabel: "Other", duration: 0.5 },
           ],
           mainThreadTasks: [{ duration: 80 }, { duration: 25 }],
-          unusedJS: [{ url: "https://example.com/app.js", wastedBytes: 400 }, { url: "inline", wastedBytes: 100 }],
+          unusedJS: [
+            { url: "https://example.com/app.js", wastedBytes: 400 },
+            { url: "inline", wastedBytes: 100 },
+          ],
         }),
         metric("Desktop", {
           diagnostics: [{ totalTaskTime: 200 }],
           mainThreadTasks: [{ duration: 50 }],
-          mainThreadWork: [{ group: "scriptEvaluation", groupLabel: "Script Evaluation", duration: 10 }],
+          mainThreadWork: [
+            { group: "scriptEvaluation", groupLabel: "Script Evaluation", duration: 10 },
+          ],
           unusedJS: [{ url: "https://example.com/desktop.js", unusedBytes: 30 }],
         }),
       ],
@@ -74,7 +83,9 @@ describe("javascriptStoryFromMetrics", () => {
     const story = javascriptStoryFromMetrics({
       jsMetrics: [
         metric("Mobile", {
-          mainThreadWork: [{ group: "scriptEvaluation", groupLabel: "Script Evaluation", duration: 20 }],
+          mainThreadWork: [
+            { group: "scriptEvaluation", groupLabel: "Script Evaluation", duration: 20 },
+          ],
           unusedJS: [
             { url: "https://example.com/app.js" },
             { url: "https://example.com/vendor.js", wastedPercent: 40, totalBytes: 5000 },

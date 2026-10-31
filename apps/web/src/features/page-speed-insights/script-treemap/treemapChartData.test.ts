@@ -37,12 +37,12 @@ describe("getTreemapDisplayLabel", () => {
   });
 
   it("prioritizes path segments for URLs", () => {
-    expect(
-      getTreemapDisplayLabel("https://www.example.com/static/chunks/app-page.js", 40),
-    ).toEqual({
-      primary: "/chunks/app-page.js",
-      secondary: "www.example.com",
-    });
+    expect(getTreemapDisplayLabel("https://www.example.com/static/chunks/app-page.js", 40)).toEqual(
+      {
+        primary: "/chunks/app-page.js",
+        secondary: "www.example.com",
+      },
+    );
   });
 
   it("uses the hostname when the URL path is only /", () => {
@@ -81,10 +81,7 @@ describe("getTreemapLabel", () => {
   });
 
   it("returns path-first label for URLs", () => {
-    const label = getTreemapLabel(
-      "https://www.example.com/very/long/path/to/a/script/file.js",
-      40,
-    );
+    const label = getTreemapLabel("https://www.example.com/very/long/path/to/a/script/file.js", 40);
     expect(label.startsWith("/")).toBe(true);
     expect(label.includes("file.js")).toBe(true);
   });
@@ -173,9 +170,7 @@ describe("copyTreemapNodeName", () => {
       value: { writeText },
     });
 
-    await expect(
-      copyTreemapNodeName("https://example.com/script.js"),
-    ).resolves.toBe(true);
+    await expect(copyTreemapNodeName("https://example.com/script.js")).resolves.toBe(true);
     expect(writeText).toHaveBeenCalledWith("https://example.com/script.js");
   });
 

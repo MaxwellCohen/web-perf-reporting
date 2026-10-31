@@ -2,10 +2,7 @@ import { describe, expect, it } from "vitest";
 import { networkStoryFromSummaries } from "@/features/page-speed-insights/dashboard-view/network-story/networkStoryModel";
 import type { ResourceSummary } from "@/features/page-speed-insights/network-metrics/resourceSummary";
 
-function summary(
-  label: string,
-  tiles: ResourceSummary["tiles"],
-): ResourceSummary {
+function summary(label: string, tiles: ResourceSummary["tiles"]): ResourceSummary {
   return { label, tiles };
 }
 
@@ -42,7 +39,9 @@ describe("networkStoryFromSummaries", () => {
     expect(device.slices.map((slice) => slice.resourceType)).toEqual(["script", "image"]);
     expect(device.slices.map((slice) => slice.share)).toEqual([0.6, 0.4]);
     expect(device.slices.reduce((sum, slice) => sum + (slice.share ?? 0), 0)).toBeCloseTo(1);
-    expect(device.slices.reduce((sum, slice) => sum + slice.transferSize, 0)).toBe(device.totalBytes);
+    expect(device.slices.reduce((sum, slice) => sum + slice.transferSize, 0)).toBe(
+      device.totalBytes,
+    );
     expect(device.totalBytes).toBe(1000);
     expect(device.requestCount).toBe(10);
     expect(device.thirdPartyBytes).toBe(250);

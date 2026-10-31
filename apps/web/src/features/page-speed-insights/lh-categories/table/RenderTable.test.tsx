@@ -172,6 +172,4 @@ describe("DetailTable", () => {
     expect(container.textContent).toContain("(Mobile)");
     expect(container.textContent).toContain("(Desktop)");
   });
-
 });
-

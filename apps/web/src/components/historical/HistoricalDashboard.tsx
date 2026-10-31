@@ -141,44 +141,44 @@ export function HistoricalDashboard({
         {slotPending ? (
           <LoadingMessage variant="crux" />
         ) : (
-        <div className="mt-2 grid grid-cols-[repeat(auto-fill,minmax(14.5rem,1fr))] flex-wrap gap-1">
-          <HistoricalPerformanceCard
-            title="Largest Contentful Paint (LCP)"
-            histogramData={groupedMetics?.largest_contentful_paint}
-          />
-          <HistoricalPerformanceCard
-            title="Interaction to Next Paint (INP)"
-            histogramData={groupedMetics?.interaction_to_next_paint}
-          />
-          <HistoricalPerformanceCard
-            title="Cumulative Layout Shift (CLS)"
-            histogramData={groupedMetics?.cumulative_layout_shift}
-          />
-          <HistoricalPerformanceCard
-            title="First Contentful Paint (FCP)"
-            histogramData={groupedMetics?.first_contentful_paint}
-          />
-          <HistoricalPerformanceCard
-            title="Time to First Byte (TTFB)"
-            histogramData={groupedMetics?.experimental_time_to_first_byte}
-          />
-          <HistoricalPerformanceCard
-            title="Round Trip Time (RTT)"
-            histogramData={groupedMetics?.round_trip_time}
-          />
-          <HistoricalPerformanceCard
-            title="LCP with Soft Navigations (experimental)"
-            histogramData={groupedMetics?.experimental_largest_contentful_paint_with_softnavs}
-          />
-          <HistoricalPerformanceCard
-            title="INP with Soft Navigations (experimental)"
-            histogramData={groupedMetics?.experimental_interaction_to_next_paint_with_softnavs}
-          />
-          <HistoricalPerformanceCard
-            title="CLS with Soft Navigations (experimental)"
-            histogramData={groupedMetics?.experimental_cumulative_layout_shift_with_softnavs}
-          />
-        </div>
+          <div className="mt-2 grid grid-cols-[repeat(auto-fill,minmax(14.5rem,1fr))] flex-wrap gap-1">
+            <HistoricalPerformanceCard
+              title="Largest Contentful Paint (LCP)"
+              histogramData={groupedMetics?.largest_contentful_paint}
+            />
+            <HistoricalPerformanceCard
+              title="Interaction to Next Paint (INP)"
+              histogramData={groupedMetics?.interaction_to_next_paint}
+            />
+            <HistoricalPerformanceCard
+              title="Cumulative Layout Shift (CLS)"
+              histogramData={groupedMetics?.cumulative_layout_shift}
+            />
+            <HistoricalPerformanceCard
+              title="First Contentful Paint (FCP)"
+              histogramData={groupedMetics?.first_contentful_paint}
+            />
+            <HistoricalPerformanceCard
+              title="Time to First Byte (TTFB)"
+              histogramData={groupedMetics?.experimental_time_to_first_byte}
+            />
+            <HistoricalPerformanceCard
+              title="Round Trip Time (RTT)"
+              histogramData={groupedMetics?.round_trip_time}
+            />
+            <HistoricalPerformanceCard
+              title="LCP with Soft Navigations (experimental)"
+              histogramData={groupedMetics?.experimental_largest_contentful_paint_with_softnavs}
+            />
+            <HistoricalPerformanceCard
+              title="INP with Soft Navigations (experimental)"
+              histogramData={groupedMetics?.experimental_interaction_to_next_paint_with_softnavs}
+            />
+            <HistoricalPerformanceCard
+              title="CLS with Soft Navigations (experimental)"
+              histogramData={groupedMetics?.experimental_cumulative_layout_shift_with_softnavs}
+            />
+          </div>
         )}
         {!slotPending ? (
           <AdMetricsTable

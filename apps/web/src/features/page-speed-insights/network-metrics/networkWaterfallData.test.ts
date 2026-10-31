@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
 import type { CombinedLoad } from "@/features/page-speed-insights/page-load-timeline/collectTimelineSources";
-import { buildTimeAxisTicks, buildWaterfallRows, buildWaterfallRowsFromSources, countRequestRows, filterWaterfallRows, getSegmentStyle, getWaterfallResourceTypes, getWaterfallTimeRange, sortWaterfallRows } from "@/features/page-speed-insights/network-metrics/networkWaterfallData";
+import {
+  buildTimeAxisTicks,
+  buildWaterfallRows,
+  buildWaterfallRowsFromSources,
+  countRequestRows,
+  filterWaterfallRows,
+  getSegmentStyle,
+  getWaterfallResourceTypes,
+  getWaterfallTimeRange,
+  sortWaterfallRows,
+} from "@/features/page-speed-insights/network-metrics/networkWaterfallData";
 
 function makeLoad(overrides: Partial<CombinedLoad> = {}): CombinedLoad {
   return {
@@ -21,7 +31,6 @@ function makeLoad(overrides: Partial<CombinedLoad> = {}): CombinedLoad {
 }
 
 describe("networkWaterfallData", () => {
-
   it("builds rows and calculates time range", () => {
     const rows = buildWaterfallRows([
       { networkRequestTime: 10, networkEndTime: 100, url: "https://a.test/" },
@@ -197,12 +206,7 @@ describe("networkWaterfallData", () => {
       { density: "expanded" },
     );
 
-    expect(rows.map((row) => row.kind)).toEqual([
-      "user-mark",
-      "request",
-      "user-measure",
-      "task",
-    ]);
+    expect(rows.map((row) => row.kind)).toEqual(["user-mark", "request", "user-measure", "task"]);
     expect(rows.find((row) => row.kind === "request")?.renderBlocking).toBe("blocking");
     expect(rows.find((row) => row.kind === "user-mark")?.label).toBe("nav");
     expect(rows.find((row) => row.kind === "user-measure")?.duration).toBe(15);
@@ -291,11 +295,7 @@ describe("networkWaterfallData", () => {
     const tasks = rows.filter((row) => row.kind === "task");
     expect(tasks).toHaveLength(2);
     expect(tasks[0]?.label).toBe("Tasks (3)");
-    expect(tasks[0]?.segments?.map((seg) => seg.taskKind)).toEqual([
-      "short",
-      "short",
-      "long",
-    ]);
+    expect(tasks[0]?.segments?.map((seg) => seg.taskKind)).toEqual(["short", "short", "long"]);
     expect(tasks[0]?.networkStart).toBe(100);
     expect(tasks[0]?.networkEnd).toBe(220);
     expect(tasks[0]?.renderBlocking).toBe("blocking");

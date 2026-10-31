@@ -53,11 +53,10 @@ vi.mock("@/features/page-speed-insights/JSUsage/jsUsageTableHeader", () => ({
 }));
 
 vi.mock("@/components/ui/button", () => ({
-  Button: ({
-    children,
-    ...rest
-  }: React.PropsWithChildren<Record<string, unknown>>) => (
-    <button type="button" {...rest}>{children}</button>
+  Button: ({ children, ...rest }: React.PropsWithChildren<Record<string, unknown>>) => (
+    <button type="button" {...rest}>
+      {children}
+    </button>
   ),
 }));
 

@@ -64,7 +64,11 @@ describe("MetricValueViz", () => {
                       headings: [],
                       items: [
                         { subpart: "timeToFirstByte", label: "Time to first byte", duration: 400 },
-                        { subpart: "resourceLoadDelay", label: "Resource load delay", duration: 900 },
+                        {
+                          subpart: "resourceLoadDelay",
+                          label: "Resource load delay",
+                          duration: 900,
+                        },
                         {
                           subpart: "resourceLoadDuration",
                           label: "Resource load duration",
@@ -297,7 +301,9 @@ describe("MetricValueViz", () => {
                     {
                       type: "table",
                       headings: [],
-                      items: [{ subpart: "timeToFirstByte", label: "Time to first byte", duration: 400 }],
+                      items: [
+                        { subpart: "timeToFirstByte", label: "Time to first byte", duration: 400 },
+                      ],
                     },
                   ],
                 },

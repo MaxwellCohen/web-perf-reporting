@@ -73,5 +73,4 @@ describe("getWorkerEnvelopeToResponse", () => {
     expect(res.status).toBe(200);
     await expect(res.text()).resolves.toBe(JSON.stringify(env));
   });
-
 });

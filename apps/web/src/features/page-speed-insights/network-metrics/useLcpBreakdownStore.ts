@@ -6,4 +6,3 @@ import { selectLcpBreakdownComputed } from "./lcpBreakdownSelectors";
 export function useLcpBreakdownComputed() {
   return usePageSpeedSelector(selectLcpBreakdownComputed);
 }
-

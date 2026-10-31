@@ -251,12 +251,7 @@ function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
             return (
               <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell) => (
-                  <DebugDataTableCell
-                    key={cell.id}
-                    cell={cell}
-                    row={row}
-                    fillWidth={fillWidth}
-                  />
+                  <DebugDataTableCell key={cell.id} cell={cell} row={row} fillWidth={fillWidth} />
                 ))}
               </TableRow>
             );

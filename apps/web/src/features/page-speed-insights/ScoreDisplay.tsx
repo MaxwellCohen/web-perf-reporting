@@ -1,6 +1,9 @@
 import { AuditResultsRecord } from "@/lib/schema";
 import { cn } from "@/lib/utils";
-import { getAuditStatus, type AuditStatus } from "@/features/page-speed-insights/lh-categories/auditStatus";
+import {
+  getAuditStatus,
+  type AuditStatus,
+} from "@/features/page-speed-insights/lh-categories/auditStatus";
 
 export function isEmptyResult(auditData?: AuditResultsRecord[string] | null) {
   if (!auditData) {

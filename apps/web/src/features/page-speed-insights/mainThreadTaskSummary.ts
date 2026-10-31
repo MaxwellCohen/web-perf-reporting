@@ -95,9 +95,7 @@ function scriptUrlFromDebugTask(
  * Long-task rows with a script URL.
  * Prefers table items. Falls back to debugData urlIndex entries when items have no URL.
  */
-export function longTaskItemsFromAudit(
-  audit: AuditResult | undefined,
-): TableItem[] {
+export function longTaskItemsFromAudit(audit: AuditResult | undefined): TableItem[] {
   if (!audit) return [];
 
   const items = taskItemsFromAudit(audit);
@@ -130,9 +128,7 @@ export function longTaskItemsFromAudit(
  * Group long tasks by script URL.
  * Lighthouse attributes a task to the script that was running, or "Unattributable".
  */
-export function summarizeLongTaskScripts(
-  items: readonly TableItem[],
-): ScriptBlockingRow[] {
+export function summarizeLongTaskScripts(items: readonly TableItem[]): ScriptBlockingRow[] {
   const byUrl = new Map<string, ScriptBlockingRow>();
 
   for (const item of items) {
@@ -155,7 +151,9 @@ export function summarizeLongTaskScripts(
   }
 
   return [...byUrl.values()].sort(
-    (a, b) => b.blockingTimeMs - a.blockingTimeMs || b.taskCount - a.taskCount || a.url.localeCompare(b.url),
+    (a, b) =>
+      b.blockingTimeMs - a.blockingTimeMs ||
+      b.taskCount - a.taskCount ||
+      a.url.localeCompare(b.url),
   );
 }
-

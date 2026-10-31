@@ -21,7 +21,10 @@ describe("AuditSeoProblemsViz", () => {
   it("attributes hreflang problems across reports", () => {
     const { container } = render(
       <AuditSeoProblemsViz
-        rows={[makeRow("hreflang", [hreflang], "Mobile"), makeRow("hreflang", [hreflang], "Desktop")]}
+        rows={[
+          makeRow("hreflang", [hreflang], "Mobile"),
+          makeRow("hreflang", [hreflang], "Desktop"),
+        ]}
       />,
     );
     expect(container.textContent).toContain("Invalid hreflang code");
@@ -29,6 +32,10 @@ describe("AuditSeoProblemsViz", () => {
   });
 
   it("returns null when empty", () => {
-    expect(render(<AuditSeoProblemsViz rows={[makeRow("canonical", []), makeRow("canonical", [], "D")]} />).container.firstChild).toBeNull();
+    expect(
+      render(
+        <AuditSeoProblemsViz rows={[makeRow("canonical", []), makeRow("canonical", [], "D")]} />,
+      ).container.firstChild,
+    ).toBeNull();
   });
 });

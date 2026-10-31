@@ -23,9 +23,7 @@ function shortTasksAdjacent(prev: CombinedLongTask, next: CombinedLongTask): boo
  * A long task flushes any pending short group.
  */
 export function groupMainThreadTasks(tasks: CombinedLongTask[]): CombinedLongTask[][] {
-  const ordered = [...tasks].sort(
-    (a, b) => a.startTime - b.startTime || b.duration - a.duration,
-  );
+  const ordered = [...tasks].sort((a, b) => a.startTime - b.startTime || b.duration - a.duration);
   const groups: CombinedLongTask[][] = [];
   let shortGroup: CombinedLongTask[] = [];
 

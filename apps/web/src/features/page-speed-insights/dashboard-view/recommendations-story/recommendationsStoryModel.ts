@@ -69,11 +69,7 @@ function buildLead({
 }): RecommendationsLead {
   const high = counts.find((item) => item.priority === "high")?.count ?? 0;
   const magnitude =
-    milliseconds > 0
-      ? formatMs(milliseconds)
-      : bytes > 0
-        ? formatBytes(bytes)
-        : String(total);
+    milliseconds > 0 ? formatMs(milliseconds) : bytes > 0 ? formatBytes(bytes) : String(total);
 
   const focus =
     high > 0
@@ -86,10 +82,7 @@ function buildLead({
 }
 
 /** Peak savings among peers that share the same unit family (ms or bytes). */
-export function peerMaxSavingsFor(
-  recommendation: Recommendation,
-  peers: Recommendation[],
-): number {
+export function peerMaxSavingsFor(recommendation: Recommendation, peers: Recommendation[]): number {
   const kind = savingsKind(recommendation.impact?.unit);
   if (kind === "other") return 0;
   return peers.reduce((max, peer) => {

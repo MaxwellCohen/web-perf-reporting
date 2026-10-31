@@ -222,7 +222,8 @@ function renderBlockingArea(reports: Report[]): SpeedUpFocusArea | null {
     reports,
     "render-blocking-insight",
     (item) => num(item.wastedMs) || num(item.totalBytes),
-    (url, item) => `${url} (${formatBytes(num(item.totalBytes))}, blocks ~${formatMs(num(item.wastedMs))})`,
+    (url, item) =>
+      `${url} (${formatBytes(num(item.totalBytes))}, blocks ~${formatMs(num(item.wastedMs))})`,
   );
   const cssRows = urlRows(
     reports,
@@ -390,7 +391,8 @@ function cachingArea(reports: Report[]): SpeedUpFocusArea | null {
     reports,
     "cache-insight",
     (item) => num(item.wastedBytes),
-    (url, item) => `${url} (cache ${num(item.cacheLifetimeMs) ? formatDurationMs(num(item.cacheLifetimeMs)) : "none"}, ${formatBytes(num(item.totalBytes))})`,
+    (url, item) =>
+      `${url} (cache ${num(item.cacheLifetimeMs) ? formatDurationMs(num(item.cacheLifetimeMs)) : "none"}, ${formatBytes(num(item.totalBytes))})`,
   );
   if (evidence.length === 0) return null;
   return {

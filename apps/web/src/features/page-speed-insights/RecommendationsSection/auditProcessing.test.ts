@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { PageSpeedInsights } from "@/lib/schema";
-import { collectAuditData, getWorstScore, combineMetricSavings, combineAuditItems } from "@/features/page-speed-insights/RecommendationsSection/auditProcessing";
+import {
+  collectAuditData,
+  getWorstScore,
+  combineMetricSavings,
+  combineAuditItems,
+} from "@/features/page-speed-insights/RecommendationsSection/auditProcessing";
 
 function createItem(audits: Record<string, unknown> = {}): PageSpeedInsights {
   return {

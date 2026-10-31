@@ -1,8 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { NETWORK_REQUESTS_COLUMN_ORDER, WATERFALL_REPLACED_NETWORK_REQUEST_KEYS, getNetworkRequestsTimeRange, isNetworkRequestsAudit, isNetworkRequestsTable, sortHeadingsByKeyOrder } from "@/features/page-speed-insights/shared/networkRequestsTable";
+import {
+  NETWORK_REQUESTS_COLUMN_ORDER,
+  WATERFALL_REPLACED_NETWORK_REQUEST_KEYS,
+  getNetworkRequestsTimeRange,
+  isNetworkRequestsAudit,
+  isNetworkRequestsTable,
+  sortHeadingsByKeyOrder,
+} from "@/features/page-speed-insights/shared/networkRequestsTable";
 
 describe("networkRequestsTable", () => {
-
   it("recognizes network requests tables by required timing columns", () => {
     expect(
       isNetworkRequestsTable([

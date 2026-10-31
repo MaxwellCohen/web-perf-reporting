@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { createColumnFromHeading } from "@/features/page-speed-insights/shared/tableColumnUtils";
 
 describe("tableColumnUtils", () => {
-
   it("builds a table column definition from the heading metadata", () => {
     const heading = {
       key: "transferSize",

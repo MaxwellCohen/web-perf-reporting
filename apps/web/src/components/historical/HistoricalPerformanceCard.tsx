@@ -12,7 +12,8 @@ const HistoricalPerformanceBarChart = dynamic(
   { loading: ChartFallback },
 );
 const HistoricalPerformanceAreaChart = dynamic(
-  () => import("./HistoricalPerformanceAreaChart").then((mod) => mod.HistoricalPerformanceAreaChart),
+  () =>
+    import("./HistoricalPerformanceAreaChart").then((mod) => mod.HistoricalPerformanceAreaChart),
   { loading: ChartFallback },
 );
 const HistoricalP75Chart = dynamic(

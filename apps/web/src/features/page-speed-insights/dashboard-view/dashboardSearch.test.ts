@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { narrowLabelFilter, parseDashboardSearch, patchDashboardSearch, redirectSearchString, toSearchString } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
+import {
+  narrowLabelFilter,
+  parseDashboardSearch,
+  patchDashboardSearch,
+  redirectSearchString,
+  toSearchString,
+} from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 
 describe("dashboardSearch", () => {
   afterEach(() => {

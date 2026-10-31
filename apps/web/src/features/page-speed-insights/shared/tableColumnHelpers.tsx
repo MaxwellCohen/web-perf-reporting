@@ -270,9 +270,7 @@ export function createPercentageColumn<T extends RowData>(
   precisionOrOptions: number | (NumericColumnOptions & { precision?: number }) = 1,
 ): ColumnDef<T, unknown> {
   const options: NumericColumnOptions & { precision?: number } =
-    typeof precisionOrOptions === "number"
-      ? { precision: precisionOrOptions }
-      : precisionOrOptions;
+    typeof precisionOrOptions === "number" ? { precision: precisionOrOptions } : precisionOrOptions;
   const precision = options.precision ?? 1;
   const id = String(accessor);
   return createBaseNumericColumn(

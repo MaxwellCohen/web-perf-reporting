@@ -16,7 +16,8 @@ import {
 } from "./qualityVizShared";
 
 function sourceOf(item: AnyItem): string {
-  const raw = textOf(item.source) || textOf((item.sourceLocation as { urlProvider?: unknown })?.urlProvider);
+  const raw =
+    textOf(item.source) || textOf((item.sourceLocation as { urlProvider?: unknown })?.urlProvider);
   const lower = raw.toLowerCase();
   if (lower === "network") return "network";
   if (lower === "javascript") return "javascript";
@@ -72,9 +73,7 @@ export function AuditErrorsInConsoleViz({ rows }: { rows: DetailTableItem[] }) {
       <AuditBarChart points={sourcePoints} unit="count" title="Errors by source" />
       <AuditBarChart points={originPoints} unit="count" limit={8} title="Errors by origin" />
       <div className="space-y-1.5">
-        <p className="text-xs text-muted-foreground">
-          {plural(messages.length, "unique message")}
-        </p>
+        <p className="text-xs text-muted-foreground">{plural(messages.length, "unique message")}</p>
         <ul className="divide-y overflow-hidden rounded-md border text-sm">
           {messages.map((message) => (
             <li key={message.key} className="px-2.5 py-1.5">

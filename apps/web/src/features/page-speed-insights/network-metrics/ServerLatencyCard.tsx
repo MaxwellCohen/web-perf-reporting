@@ -3,7 +3,6 @@ import { NetworkOriginMsCard } from "@/features/page-speed-insights/network-metr
 import { useNetworkMetricSeries } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
 
 export function ServerLatencyCard() {
-  
   const series = useNetworkMetricSeries();
   return (
     <NetworkOriginMsCard

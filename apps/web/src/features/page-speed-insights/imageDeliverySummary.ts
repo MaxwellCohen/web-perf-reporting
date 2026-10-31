@@ -135,9 +135,7 @@ function wastedBytesFor(reports: ImageDeliveryReportSize[]): number {
  * Byte savings overlap when one image needs more than one change, so they are not summed.
  * The same URL is merged across reports, keeping the larger savings for each change.
  */
-export function summarizeImageDelivery(
-  entries: CauseAuditEntry["entries"],
-): ImageDeliverySummary {
+export function summarizeImageDelivery(entries: CauseAuditEntry["entries"]): ImageDeliverySummary {
   const images = new Map<string, PendingImage>();
 
   for (const { audit, label } of entries) {
@@ -193,7 +191,10 @@ export function summarizeImageDelivery(
     return {
       url: image.url,
       totalBytes: image.totalBytes,
-      wastedBytes: optimizations.reduce((max, optimization) => Math.max(max, optimization.wastedBytes), 0),
+      wastedBytes: optimizations.reduce(
+        (max, optimization) => Math.max(max, optimization.wastedBytes),
+        0,
+      ),
       optimizations,
     };
   });
@@ -208,11 +209,13 @@ function pixels(width?: number, height?: number): string | null {
   return `${width}×${height}`;
 }
 
-function sizesMatch(a: ImageDeliveryReportSize, b: ImageDeliveryReportSize, kind: "file" | "display") {
-  const left =
-    kind === "file" ? [a.fileWidth, a.fileHeight] : [a.displayWidth, a.displayHeight];
-  const right =
-    kind === "file" ? [b.fileWidth, b.fileHeight] : [b.displayWidth, b.displayHeight];
+function sizesMatch(
+  a: ImageDeliveryReportSize,
+  b: ImageDeliveryReportSize,
+  kind: "file" | "display",
+) {
+  const left = kind === "file" ? [a.fileWidth, a.fileHeight] : [a.displayWidth, a.displayHeight];
+  const right = kind === "file" ? [b.fileWidth, b.fileHeight] : [b.displayWidth, b.displayHeight];
   return left.every((value, index) => {
     const other = right[index];
     return value != null && other != null && Math.abs(value - other) <= 2;
@@ -222,7 +225,9 @@ function sizesMatch(a: ImageDeliveryReportSize, b: ImageDeliveryReportSize, kind
 /** Short lines under a size change: file size, then the size actually shown on each report. */
 export function imageSizeLines(reports: ImageDeliveryReportSize[]): string[] {
   const sized = reports.filter(
-    (report) => pixels(report.fileWidth, report.fileHeight) || pixels(report.displayWidth, report.displayHeight),
+    (report) =>
+      pixels(report.fileWidth, report.fileHeight) ||
+      pixels(report.displayWidth, report.displayHeight),
   );
   if (!sized.length) return [];
 

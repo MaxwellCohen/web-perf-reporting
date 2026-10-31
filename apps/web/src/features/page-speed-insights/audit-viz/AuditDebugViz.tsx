@@ -47,11 +47,7 @@ export function AuditDebugViz({ items }: { items: TableDataItem[] }) {
       }));
     return (
       <div className="mb-4 w-full min-w-0">
-        <MetricValueViz
-          auditId={auditId as MetricAuditId}
-          auditItems={auditItems}
-          detail={false}
-        />
+        <MetricValueViz auditId={auditId as MetricAuditId} auditItems={auditItems} detail={false} />
       </div>
     );
   }

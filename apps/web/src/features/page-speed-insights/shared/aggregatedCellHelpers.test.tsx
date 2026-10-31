@@ -1,6 +1,11 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { createNumericAggregatedCell, createStringAggregatedCell, createBytesAggregatedCell, createReportLabelAggregatedCell } from "./aggregatedCellHelpers";
+import {
+  createNumericAggregatedCell,
+  createStringAggregatedCell,
+  createBytesAggregatedCell,
+  createReportLabelAggregatedCell,
+} from "./aggregatedCellHelpers";
 
 vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", () => ({
   RenderMSValue: ({ value }: { value: number }) => <span>{value} ms</span>,
@@ -18,7 +23,6 @@ function createMockRow(leafRows: { columnValues: Record<string, unknown>; label?
 }
 
 describe("aggregatedCellHelpers", () => {
-
   describe("createNumericAggregatedCell", () => {
     it("returns N/A when no value pairs", () => {
       const row = createMockRow([{ columnValues: { duration: undefined } }]) as any;

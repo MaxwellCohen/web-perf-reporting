@@ -49,9 +49,7 @@ function Delta({ from, to }: { from: number; to: number }) {
   return (
     <span className={cn("font-mono tabular-nums", deltaClass(delta))}>
       {formatByteDelta(delta, formatBytes)}
-      {percent && delta !== 0 ? (
-        <span className="ml-1 text-xs opacity-80">({percent})</span>
-      ) : null}
+      {percent && delta !== 0 ? <span className="ml-1 text-xs opacity-80">({percent})</span> : null}
     </span>
   );
 }
@@ -151,11 +149,7 @@ function SingleTypeTable({ report }: { report: PageWeightReport }) {
   );
 }
 
-function CompareTypeTable({
-  comparison,
-}: {
-  comparison: ReturnType<typeof comparePageWeight>;
-}) {
+function CompareTypeTable({ comparison }: { comparison: ReturnType<typeof comparePageWeight> }) {
   const { a, b } = comparison;
   return (
     <Table aria-label="Weight by type">
@@ -285,17 +279,16 @@ function matchesFilter(row: UrlComparisonRow, filter: UrlFilter) {
   return row.status === filter;
 }
 
-function CompareUrlTable({
-  comparison,
-}: {
-  comparison: ReturnType<typeof comparePageWeight>;
-}) {
+function CompareUrlTable({ comparison }: { comparison: ReturnType<typeof comparePageWeight> }) {
   const [filter, setFilter] = useState<UrlFilter>("changed");
   const [showAll, setShowAll] = useState(false);
   const filtered = comparison.urls.filter((row) => matchesFilter(row, filter));
   const rows = showAll ? filtered : filtered.slice(0, URL_LIMIT);
   const counts = Object.fromEntries(
-    URL_FILTERS.map((key) => [key, comparison.urls.filter((row) => matchesFilter(row, key)).length]),
+    URL_FILTERS.map((key) => [
+      key,
+      comparison.urls.filter((row) => matchesFilter(row, key)).length,
+    ]),
   ) as Record<UrlFilter, number>;
 
   return (

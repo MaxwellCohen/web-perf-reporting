@@ -16,7 +16,6 @@ vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", (
 }));
 
 describe("jsUsageTableFilters", () => {
-
   describe("RangeFilter", () => {
     type Row = { id: number; value: number };
     const columnHelper = createColumnHelper<Row>();

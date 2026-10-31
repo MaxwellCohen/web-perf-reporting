@@ -105,9 +105,7 @@ function rawFilmstrip(audits: AuditResultsRecord | undefined): AuditDetailFilmst
  * Mobile simulated throttling warps observed filmstrip times onto Slow 4G / CPU
  * slowdown so they line up with FCP / LCP scores.
  */
-export function filmstripTimelineFromItem(
-  item: InsightsContextItem,
-): FilmstripTimelineView | null {
+export function filmstripTimelineFromItem(item: InsightsContextItem): FilmstripTimelineView | null {
   const load = collectTimelineSources(item);
   if (load?.screenshots.length) {
     const timeline = filmstripFromFrames(load.screenshots);

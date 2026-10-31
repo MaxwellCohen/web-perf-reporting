@@ -13,7 +13,9 @@ describe("AuditErrorsInConsoleViz", () => {
   it("renders one report without labels", () => {
     const { container } = render(
       <AuditErrorsInConsoleViz
-        rows={[makeRow("errors-in-console", [err("https://a.com/x.js"), err("https://b.com/y.js")])]}
+        rows={[
+          makeRow("errors-in-console", [err("https://a.com/x.js"), err("https://b.com/y.js")]),
+        ]}
       />,
     );
     expect(container.textContent).toContain("1 unique message");
@@ -26,7 +28,11 @@ describe("AuditErrorsInConsoleViz", () => {
       <AuditErrorsInConsoleViz
         rows={[
           makeRow("errors-in-console", [err("https://a.com/x.js")], "Mobile"),
-          makeRow("errors-in-console", [err("https://a.com/x.js"), err("https://a.com/z.js", "Boom")], "Desktop"),
+          makeRow(
+            "errors-in-console",
+            [err("https://a.com/x.js"), err("https://a.com/z.js", "Boom")],
+            "Desktop",
+          ),
         ]}
       />,
     );
@@ -36,12 +42,18 @@ describe("AuditErrorsInConsoleViz", () => {
 
   it("handles empty and missing reports", () => {
     expect(
-      render(<AuditErrorsInConsoleViz rows={[makeRow("errors-in-console", []), makeRow("errors-in-console", [], "Desktop")]} />)
-        .container.firstChild,
+      render(
+        <AuditErrorsInConsoleViz
+          rows={[makeRow("errors-in-console", []), makeRow("errors-in-console", [], "Desktop")]}
+        />,
+      ).container.firstChild,
     ).toBeNull();
     const { container } = render(
       <AuditErrorsInConsoleViz
-        rows={[makeRow("errors-in-console", []), makeRow("errors-in-console", [err("https://a.com/x.js")], "Desktop")]}
+        rows={[
+          makeRow("errors-in-console", []),
+          makeRow("errors-in-console", [err("https://a.com/x.js")], "Desktop"),
+        ]}
       />,
     );
     expect(container.textContent).toContain("1 unique message");

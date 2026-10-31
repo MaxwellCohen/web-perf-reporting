@@ -1,11 +1,6 @@
 import { act, fireEvent, render, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  getAlert,
-  getButton,
-  getTab,
-  submitForm,
-} from "./input-form-test-mocks";
+import { getAlert, getButton, getTab, submitForm } from "./input-form-test-mocks";
 import { executeSubmit } from "@/components/lh/input-form-action";
 import { LhInputForm } from "@/components/lh/LhInputForm";
 
@@ -25,8 +20,14 @@ vi.mock("@/components/ui/button", async () => (await lhFormMocksPromise).buttonM
 vi.mock("@/components/ui/label", async () => (await lhFormMocksPromise).labelMock);
 vi.mock("@/components/ui/alert", async () => (await lhFormMocksPromise).alertMock);
 vi.mock("@/components/lh/inputs/LhTabList", async () => (await lhFormMocksPromise).lhTabListMock);
-vi.mock("@/components/lh/inputs/LhTextInput", async () => (await lhFormMocksPromise).lhTextInputMock);
-vi.mock("@/components/lh/inputs/LhFileInput", async () => (await lhFormMocksPromise).lhFileInputMock);
+vi.mock(
+  "@/components/lh/inputs/LhTextInput",
+  async () => (await lhFormMocksPromise).lhTextInputMock,
+);
+vi.mock(
+  "@/components/lh/inputs/LhFileInput",
+  async () => (await lhFormMocksPromise).lhFileInputMock,
+);
 vi.mock("@/components/lh/inputs/LhUrlInput", async () => (await lhFormMocksPromise).lhUrlInputMock);
 
 async function switchToUrlTab(container: HTMLElement) {
@@ -180,9 +181,12 @@ describe("LhInputForm", () => {
       fireEvent.change(container.querySelector("#json-file")!, {
         target: { files: [file] },
       });
-      fireEvent.change(container.querySelector('input[placeholder="Enter a name for this file"]')!, {
-        target: { value: "MyFile" },
-      });
+      fireEvent.change(
+        container.querySelector('input[placeholder="Enter a name for this file"]')!,
+        {
+          target: { value: "MyFile" },
+        },
+      );
       submitForm();
       await waitFor(() => {
         expect(getAlert(container)).toHaveTextContent("Success");

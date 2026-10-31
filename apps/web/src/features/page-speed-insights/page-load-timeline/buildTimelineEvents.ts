@@ -56,11 +56,7 @@ function queueWindow(
   rendererStart: number | undefined,
   networkStart: number,
 ): { queueStartMs?: number; queueEndMs?: number } {
-  if (
-    rendererStart != null &&
-    Number.isFinite(rendererStart) &&
-    rendererStart < networkStart
-  ) {
+  if (rendererStart != null && Number.isFinite(rendererStart) && rendererStart < networkStart) {
     return { queueStartMs: rendererStart, queueEndMs: networkStart };
   }
   return {};
@@ -147,9 +143,7 @@ function phaseBounds(load: CombinedLoad): PhaseBound[] {
   const loadTime = load.load ?? load.lcp ?? 0;
   const hasPreconnect = load.preconnectCandidates.length > 0;
 
-  const bounds: PhaseBound[] = [
-    { id: "navigation", title: PHASE_TITLES.navigation, startMs: 0 },
-  ];
+  const bounds: PhaseBound[] = [{ id: "navigation", title: PHASE_TITLES.navigation, startMs: 0 }];
   if (hasPreconnect) {
     bounds.push({ id: "connection", title: PHASE_TITLES.connection, startMs: docStart });
   }
@@ -387,7 +381,12 @@ function networkEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent[
                 align: "end" as const,
               },
               ...(showPriority
-                ? [{ text: r.priority ? formatNetworkPriority(r.priority) : "", align: "end" as const }]
+                ? [
+                    {
+                      text: r.priority ? formatNetworkPriority(r.priority) : "",
+                      align: "end" as const,
+                    },
+                  ]
                 : []),
             ]),
           },
@@ -540,10 +539,7 @@ function preconnectEvent(
       hasTimestamp: false,
       evidence: candidates.map((c) => `${c.origin} (~${formatMs(c.wastedMs)} est. LCP savings)`),
       table: {
-        headers: [
-          { text: "Origin" },
-          { text: "Est. LCP savings", align: "end" },
-        ],
+        headers: [{ text: "Origin" }, { text: "Est. LCP savings", align: "end" }],
         rows: candidates.map((c) => [
           { text: c.origin },
           { text: formatMs(c.wastedMs), align: "end" as const },
@@ -667,12 +663,7 @@ function milestoneEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEven
       timedEvent(
         "req-ttfb",
         "TTFB",
-        ttfbStepDetail(
-          load.ttfb,
-          load.ttfbObserved,
-          load.simulatedTtfb,
-          load.simulationLabel,
-        ),
+        ttfbStepDetail(load.ttfb, load.ttfbObserved, load.simulatedTtfb, load.simulationLabel),
         load.ttfb,
         "requestResponse",
         bounds,
@@ -681,11 +672,20 @@ function milestoneEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEven
     );
   }
 
-  mark(load.firstVisual, "render-first-visual", "First visual change", "First visual change at", "firstRender");
+  mark(
+    load.firstVisual,
+    "render-first-visual",
+    "First visual change",
+    "First visual change at",
+    "firstRender",
+  );
 
   mark(load.firstPaint, "render-fp", "First Paint", "First Paint at", "firstRender");
 
-  mark(load.fcp, "render-fcp", "FCP", "First Contentful Paint at", "firstRender", { kind: "cwv", rating: load.fcpRating });
+  mark(load.fcp, "render-fcp", "FCP", "First Contentful Paint at", "firstRender", {
+    kind: "cwv",
+    rating: load.fcpRating,
+  });
 
   if (load.lcp != null && load.lcpSegments.length) {
     for (const seg of load.lcpSegments) {
@@ -749,17 +749,19 @@ function milestoneEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEven
 
   mark(load.load, "sub-load", "Window load", "Load event at", "subresources");
 
-  mark(load.lastVisual, "sub-last-visual", "Last visual change", "Last visual change at", "subresources");
+  mark(
+    load.lastVisual,
+    "sub-last-visual",
+    "Last visual change",
+    "Last visual change at",
+    "subresources",
+  );
 
   mark(load.interactive, "after-tti", "TTI (lab)", "Time to Interactive", "afterLoad");
 
   mark(load.traceEnd, "after-trace-end", "Trace end", "Performance trace ends at", "afterLoad");
 
-  const preconnect = preconnectEvent(
-    load.preconnectedText,
-    load.preconnectCandidates,
-    bounds,
-  );
+  const preconnect = preconnectEvent(load.preconnectedText, load.preconnectCandidates, bounds);
   if (preconnect) events.push(preconnect);
 
   return events;

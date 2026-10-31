@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { filmstripTimelineFromItem, labelsByFrameIndex } from "@/features/page-speed-insights/shared/filmstripMarkers";
+import {
+  filmstripTimelineFromItem,
+  labelsByFrameIndex,
+} from "@/features/page-speed-insights/shared/filmstripMarkers";
 import type { AuditResultsRecord } from "@/lib/schema";
 import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
 

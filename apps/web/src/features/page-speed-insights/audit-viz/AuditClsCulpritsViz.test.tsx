@@ -16,10 +16,10 @@ function row(
   const id = opts?.id ?? "cls-culprits-insight";
   const label = opts?.label ?? "Mobile";
   const details = opts?.listWrap
-    ? {
+    ? ({
         type: "list" as const,
         items: [{ type: "table", headings: [], items: items as never }],
-      } as unknown as DetailTableItem["auditResult"]["details"]
+      } as unknown as DetailTableItem["auditResult"]["details"])
     : { type: "table" as const, headings: [], items: items as never };
 
   return {
@@ -67,12 +67,7 @@ describe("AuditClsCulpritsViz", () => {
   it("renders causes with extras for each shift", () => {
     const { container } = render(
       <AuditClsCulpritsViz
-        rows={[
-          row([
-            { score: 0.15, node: { type: "text", value: "Total" } },
-            shiftWithCauses,
-          ]),
-        ]}
+        rows={[row([{ score: 0.15, node: { type: "text", value: "Total" } }, shiftWithCauses])]}
       />,
     );
 
@@ -121,7 +116,12 @@ describe("AuditClsCulpritsViz", () => {
                 node: { type: "node", nodeLabel: "Mobile hero" },
                 subItems: {
                   type: "subitems",
-                  items: [{ cause: "Web font", extra: { type: "url", value: "https://fonts.example.com/a.woff2" } }],
+                  items: [
+                    {
+                      cause: "Web font",
+                      extra: { type: "url", value: "https://fonts.example.com/a.woff2" },
+                    },
+                  ],
                 },
               },
             ],
@@ -134,7 +134,12 @@ describe("AuditClsCulpritsViz", () => {
                 node: { type: "node", nodeLabel: "Desktop hero" },
                 subItems: {
                   type: "subitems",
-                  items: [{ cause: "Web font", extra: { type: "url", value: "https://fonts.example.com/b.woff2" } }],
+                  items: [
+                    {
+                      cause: "Web font",
+                      extra: { type: "url", value: "https://fonts.example.com/b.woff2" },
+                    },
+                  ],
                 },
               },
             ],
@@ -155,4 +160,3 @@ describe("AuditClsCulpritsViz", () => {
     expect(container.textContent).toContain("compare reports");
   });
 });
-

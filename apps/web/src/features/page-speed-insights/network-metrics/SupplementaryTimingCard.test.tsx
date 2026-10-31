@@ -8,7 +8,9 @@ vi.mock("@/features/page-speed-insights/network-metrics/useNetworkMetricsStore",
 }));
 
 vi.mock("recharts", () => ({
-  BarChart: ({ children }: { children: React.ReactNode }) => <div data-testid="bar-chart">{children}</div>,
+  BarChart: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="bar-chart">{children}</div>
+  ),
   Bar: () => <div data-testid="bar" />,
   CartesianGrid: () => null,
   XAxis: () => null,

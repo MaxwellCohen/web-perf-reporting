@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { getCompareRuns, pairByFormFactor } from "@/features/page-speed-insights/shared/compareRuns";
+import {
+  getCompareRuns,
+  pairByFormFactor,
+} from "@/features/page-speed-insights/shared/compareRuns";
 import { compareReportLabels } from "@/features/page-speed-insights/shared/reportLabels";
 
 describe("getCompareRuns", () => {
@@ -17,10 +20,7 @@ describe("getCompareRuns", () => {
   });
 
   it("detects custom run names", () => {
-    const compare = getCompareRuns([
-      { label: "Before · Mobile" },
-      { label: "After · Mobile" },
-    ]);
+    const compare = getCompareRuns([{ label: "Before · Mobile" }, { label: "After · Mobile" }]);
     expect(compare.mode).toBe("compare");
     if (compare.mode === "compare") {
       expect(compare.runs).toEqual(["Before", "After"]);
@@ -28,9 +28,7 @@ describe("getCompareRuns", () => {
   });
 
   it("stays single when only one run prefix exists", () => {
-    expect(getCompareRuns([{ label: "A · Mobile" }, { label: "A · Desktop" }]).mode).toBe(
-      "single",
-    );
+    expect(getCompareRuns([{ label: "A · Mobile" }, { label: "A · Desktop" }]).mode).toBe("single");
   });
 });
 

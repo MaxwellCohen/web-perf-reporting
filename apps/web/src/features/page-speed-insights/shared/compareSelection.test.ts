@@ -28,10 +28,7 @@ describe("toggleCompareSelection", () => {
   it("toggles up to two labels and never empties the selection", () => {
     expect(toggleCompareSelection(["Mobile"], "Mobile")).toEqual(["Mobile"]);
     expect(toggleCompareSelection(["Mobile"], "Desktop")).toEqual(["Mobile", "Desktop"]);
-    expect(toggleCompareSelection(["Mobile", "Desktop"], "Tablet")).toEqual([
-      "Desktop",
-      "Tablet",
-    ]);
+    expect(toggleCompareSelection(["Mobile", "Desktop"], "Tablet")).toEqual(["Desktop", "Tablet"]);
     expect(toggleCompareSelection(["Mobile", "Desktop"], "Mobile")).toEqual(["Desktop"]);
   });
 });
@@ -39,7 +36,12 @@ describe("toggleCompareSelection", () => {
 describe("orderCompareLabels", () => {
   it("orders chips A then B per form factor, Mobile first", () => {
     expect(
-      orderCompareLabels(["inline · Mobile", "inline · Desktop", "link · Desktop", "link · Mobile"]),
+      orderCompareLabels([
+        "inline · Mobile",
+        "inline · Desktop",
+        "link · Desktop",
+        "link · Mobile",
+      ]),
     ).toEqual(["inline · Mobile", "link · Mobile", "inline · Desktop", "link · Desktop"]);
   });
 

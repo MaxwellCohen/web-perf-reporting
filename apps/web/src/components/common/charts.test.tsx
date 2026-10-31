@@ -17,7 +17,10 @@ vi.mock("@/components/ui/chart", () => ({
   ChartTooltipContent: () => <div>Tooltip content</div>,
 }));
 
-import { GaugeChart, HorizontalGaugeChart as HorizontalPageSpeedGaugeChart } from "@/components/common/PageSpeedGaugeChart";
+import {
+  GaugeChart,
+  HorizontalGaugeChart as HorizontalPageSpeedGaugeChart,
+} from "@/components/common/PageSpeedGaugeChart";
 
 const pageLoadMetric = {
   percentile: 1200,
@@ -42,5 +45,4 @@ describe("common charts", () => {
     expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
     expect(container.textContent).toContain("1200 - FAST");
   });
-
 });

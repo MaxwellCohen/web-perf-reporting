@@ -118,7 +118,9 @@ export function fetchPageSpeedInsightsByPublicId(
   publicId: string,
 ): PromiseWithStatus<PageSpeedLoadResult> {
   if (!cache.has(publicId)) {
-    const promise = getPageSpeedInsightsByPublicId(publicId) as PromiseWithStatus<PageSpeedLoadResult>;
+    const promise = getPageSpeedInsightsByPublicId(
+      publicId,
+    ) as PromiseWithStatus<PageSpeedLoadResult>;
     promise.status = "pending";
     promise.then(
       (value) => {

@@ -128,7 +128,8 @@ function collectBaselineNote(audit: AuditResult | undefined): BaselineNote | nul
     .sort((a, b) => TIER_ORDER[a.tier] - TIER_ORDER[b.tier]);
   const highlighted = highlightedSource.slice(0, FEATURE_LINK_LIMIT);
 
-  const debugData = audit.details && "debugData" in audit.details ? audit.details.debugData : undefined;
+  const debugData =
+    audit.details && "debugData" in audit.details ? audit.details.debugData : undefined;
   const newestId = displayText(debugData?.newestFeatureId);
   const newestYear = displayText(debugData?.newestFeatureYear);
 

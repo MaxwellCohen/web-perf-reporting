@@ -35,10 +35,7 @@ function filmstripItems(details: unknown): FilmstripFrame[] | undefined {
  * first frame at or after FCP is the page as it looked once first content had
  * painted.
  */
-function frameAtFcp(
-  items: FilmstripFrame[],
-  timeMs: number,
-): FilmstripFrame | undefined {
+function frameAtFcp(items: FilmstripFrame[], timeMs: number): FilmstripFrame | undefined {
   const frames = items.filter((item) => item.data && Number.isFinite(item.timing));
 
   return frames.find((frame) => frame.timing >= timeMs) ?? frames[frames.length - 1];

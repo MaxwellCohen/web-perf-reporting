@@ -65,7 +65,11 @@ function performanceWeightByAuditId(
   const weights = new Map<string, number>();
   if (!auditRefs) return weights;
   for (const ref of auditRefs) {
-    if (typeof ref.id === "string" && typeof ref.weight === "number" && Number.isFinite(ref.weight)) {
+    if (
+      typeof ref.id === "string" &&
+      typeof ref.weight === "number" &&
+      Number.isFinite(ref.weight)
+    ) {
       weights.set(ref.id, ref.weight);
     }
   }

@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { extractLighthouseFromPsiShareHtml, labelForPsiLighthouse } from "@/lib/viewer/extractLighthouseFromPsiShareHtml";
+import {
+  extractLighthouseFromPsiShareHtml,
+  labelForPsiLighthouse,
+} from "@/lib/viewer/extractLighthouseFromPsiShareHtml";
 
 function embed(report: object): string {
   return JSON.stringify(JSON.stringify(report));
@@ -37,5 +40,4 @@ describe("extractLighthouseFromPsiShareHtml", () => {
     const [extracted] = extractLighthouseFromPsiShareHtml(html);
     expect(labelForPsiLighthouse(extracted!, 0)).toBe("Desktop");
   });
-
 });

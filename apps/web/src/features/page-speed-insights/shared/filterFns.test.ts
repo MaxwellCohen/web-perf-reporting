@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { booleanFilterFn, standardFilterFns } from "@/features/page-speed-insights/shared/filterFns";
+import {
+  booleanFilterFn,
+  standardFilterFns,
+} from "@/features/page-speed-insights/shared/filterFns";
 
 function createRow(value: unknown) {
   return {
@@ -21,5 +24,4 @@ describe("filterFns", () => {
     expect(booleanFilterFn(createRow(false), "enabled", [true], noopAddMeta)).toBe(false);
     expect(booleanFilterFn(createRow(0), "enabled", [false], noopAddMeta)).toBe(true);
   });
-
 });

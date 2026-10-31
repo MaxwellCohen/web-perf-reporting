@@ -41,7 +41,11 @@ describe("summarizeMainThreadTasks", () => {
   });
 
   it("ignores items without a numeric duration", () => {
-    const summary = summarizeMainThreadTasks([{ startTime: 1 }, { duration: "90" }, { duration: 90 }]);
+    const summary = summarizeMainThreadTasks([
+      { startTime: 1 },
+      { duration: "90" },
+      { duration: 90 },
+    ]);
 
     expect(summary.totalTasks).toBe(1);
     expect(summary.blockingTimeMs).toBe(40);

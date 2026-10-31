@@ -8,8 +8,7 @@ export const UrlLookupForm = () => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     // Dynamic import keeps posthog-js out of the initial client bundle.
     // Analytics is fire-and-forget; failures must not break form submit.
-    const searchValue = (e.target as HTMLFormElement & { url?: { value?: string } })?.url
-      ?.value;
+    const searchValue = (e.target as HTMLFormElement & { url?: { value?: string } })?.url?.value;
     void import("posthog-js").then(({ default: posthog }) => {
       posthog.capture("Search for URL", {
         search_value: searchValue,

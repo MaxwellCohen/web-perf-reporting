@@ -168,7 +168,11 @@ function CompareScoreOverview({
   const pairs = pairByFormFactor(items, runs);
 
   return (
-    <section aria-label="Score overview" className="flex flex-col gap-2" data-testid="score-compare">
+    <section
+      aria-label="Score overview"
+      className="flex flex-col gap-2"
+      data-testid="score-compare"
+    >
       {pairs.map((pair) => (
         <div key={pair.formFactor} className="grid grid-cols-1 gap-2 lg:grid-cols-2">
           {pair.a ? <ReportScoreCard summary={summarizeReport(pair.a)} /> : <div />}

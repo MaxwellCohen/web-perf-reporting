@@ -14,7 +14,10 @@ import {
   usePageSpeedItems,
 } from "@/features/page-speed-insights/PageSpeedContext";
 import { CHART_SERIES_COLORS } from "@/features/page-speed-insights/shared/horizontalBarChart";
-import { FullWidthRow, SectionGrid } from "@/features/page-speed-insights/shared/MetricsSectionLayout";
+import {
+  FullWidthRow,
+  SectionGrid,
+} from "@/features/page-speed-insights/shared/MetricsSectionLayout";
 import { FcpScreenshotCard } from "@/features/page-speed-insights/FcpScreenshotCard";
 import { LcpElementSummary } from "@/features/page-speed-insights/LcpElementSummary";
 import {
@@ -221,7 +224,9 @@ function CwvMetricsSummary({ sources }: { sources: MetricAuditSource[] }) {
   const metrics = METRIC_AUDIT_IDS.map((auditId) => readMetricSnapshot(auditId, sources));
   const maxRuns = Math.max(
     0,
-    ...metrics.map((metric) => metric.auditItems.filter((item) => hasNumericValue(item.audit)).length),
+    ...metrics.map(
+      (metric) => metric.auditItems.filter((item) => hasNumericValue(item.audit)).length,
+    ),
   );
   // Title, each run's parts, compare deltas, unscored audits, description.
   const rowSpan = 1 + maxRuns * SUMMARY_ROWS_PER_RUN + 3;

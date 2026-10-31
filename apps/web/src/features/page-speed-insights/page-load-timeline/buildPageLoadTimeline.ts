@@ -1,9 +1,6 @@
 import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
 import { axisEndMs, buildTimelineEvents } from "./buildTimelineEvents";
-import {
-  collectTimelineSources,
-  type CombinedLoad,
-} from "./collectTimelineSources";
+import { collectTimelineSources, type CombinedLoad } from "./collectTimelineSources";
 import type { PageLoadTimeline } from "./types";
 
 export type PageLoadTimelineBundle = {

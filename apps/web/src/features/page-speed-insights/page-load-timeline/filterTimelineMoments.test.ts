@@ -7,7 +7,9 @@ import {
 } from "./filterTimelineMoments";
 import type { TimelineEvent, TimelineWaterfallBar } from "./types";
 
-function moment(partial: Partial<TimelineEvent> & Pick<TimelineEvent, "id" | "phaseId">): TimelineEvent {
+function moment(
+  partial: Partial<TimelineEvent> & Pick<TimelineEvent, "id" | "phaseId">,
+): TimelineEvent {
   return {
     phaseTitle: partial.phaseId,
     timeMs: 0,

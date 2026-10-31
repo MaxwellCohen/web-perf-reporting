@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { processMetricSavingsAudit, processFailedAudit } from "@/features/page-speed-insights/RecommendationsSection/recommendationProcessing";
+import {
+  processMetricSavingsAudit,
+  processFailedAudit,
+} from "@/features/page-speed-insights/RecommendationsSection/recommendationProcessing";
 
 const baseAudit = {
   id: "unused-css",
@@ -13,7 +16,6 @@ const baseAudit = {
 };
 
 describe("recommendationProcessing", () => {
-
   describe("processMetricSavingsAudit", () => {
     it("returns recommendation with id, title, priority, category, impact, actionableSteps", () => {
       const entries = [

@@ -8,7 +8,6 @@ const node = (content: string) => ({
 });
 
 describe("AuditViewportViz", () => {
-
   it("renders one report", () => {
     const { container } = render(
       <AuditViewportViz rows={[makeRow("viewport-insight", [node("width=device-width")])]} />,

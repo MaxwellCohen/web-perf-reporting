@@ -26,7 +26,11 @@ vi.mock("@/components/ui/chart", () => ({
   ),
 }));
 
-import { GaugeChart, HorizontalGaugeChart, HorizontalScoreChart } from "@/components/common/PageSpeedGaugeChart";
+import {
+  GaugeChart,
+  HorizontalGaugeChart,
+  HorizontalScoreChart,
+} from "@/components/common/PageSpeedGaugeChart";
 
 const validMetricData = {
   percentile: 1200,

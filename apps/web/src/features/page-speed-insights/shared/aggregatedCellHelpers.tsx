@@ -137,8 +137,7 @@ function scrollableValueWithLabelGroups<T>(
   options?: { resolveLabel?: (uniqueLabels: string[]) => string | undefined },
 ) {
   const resolveLabel =
-    options?.resolveLabel ??
-    ((unique: string[]) => (unique.length === 1 ? unique[0] : undefined));
+    options?.resolveLabel ?? ((unique: string[]) => (unique.length === 1 ? unique[0] : undefined));
   return (
     <div className="flex flex-col gap-1 max-h-24 overflow-y-auto">
       {Array.from(valueGroups.entries()).map(([value, labels], i) => {
@@ -269,10 +268,7 @@ export function createPercentageAggregatedCell(columnId: string, precision: numb
       uniqueLabels,
       true,
       (only, label) => (
-        <ValueWithLabel
-          value={<span>{`${only.toFixed(precision)}%`}</span>}
-          label={label}
-        />
+        <ValueWithLabel value={<span>{`${only.toFixed(precision)}%`}</span>} label={label} />
       ),
       (only) => <span>{`${only.toFixed(precision)}%`}</span>,
     );

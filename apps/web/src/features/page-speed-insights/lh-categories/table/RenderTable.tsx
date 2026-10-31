@@ -514,7 +514,10 @@ export function DetailTable({
       <div className="w-full min-w-0 space-y-4">
         {viz}
         <div className="w-full overflow-x-auto">
-          <MainThreadWorkBreakdownTable rows={breakdown.rows} reportLabels={breakdown.reportLabels} />
+          <MainThreadWorkBreakdownTable
+            rows={breakdown.rows}
+            reportLabels={breakdown.reportLabels}
+          />
         </div>
       </div>
     );
@@ -589,77 +592,77 @@ function DetailTableWithSubitems({
   ];
   const firstRow = rows[0];
   if (firstRow) {
-  firstRow.auditResult.details.headings.forEach((h) => {
-    if (!h.key) {
-      return;
-    }
+    firstRow.auditResult.details.headings.forEach((h) => {
+      if (!h.key) {
+        return;
+      }
 
-    const key = h.key;
-    const subItemKey = h.subItemsHeading?.key;
-    if (!subItemKey) {
-      return;
-    }
+      const key = h.key;
+      const subItemKey = h.subItemsHeading?.key;
+      if (!subItemKey) {
+        return;
+      }
 
-    const subItem = {
-      ...h,
-      ...h.subItemsHeading,
-    };
-    const valueType = h.valueType || "text";
+      const subItem = {
+        ...h,
+        ...h.subItemsHeading,
+      };
+      const valueType = h.valueType || "text";
 
-    columnDef.push(
-      sColumnHelper.accessor(
-        (r) => {
-          const subItemVal = r.subitem?.[subItemKey];
-          const itemVal = r.item[key];
-          return combineItemSubItemValue(itemVal, subItemVal);
-        },
-        {
-          id: `${key}_${subItemKey}`,
-          header: (subItem.label as string) || "",
-          enableGrouping: canGroup(valueType),
-          enableHiding: true,
-          enableSorting: true,
-          enableMultiSort: true,
-          filterFn: getFilterFn(valueType),
-          getGroupingValue: (r) => {
-            const val = r.item[key];
-            return typeof val === "string" ? val : undefined;
-          },
-          ...setSizeSetting(valueType),
-          cell: (info) => {
-            const r = info.row.original;
+      columnDef.push(
+        sColumnHelper.accessor(
+          (r) => {
             const subItemVal = r.subitem?.[subItemKey];
             const itemVal = r.item[key];
-            const val = subItemVal ?? itemVal;
+            return combineItemSubItemValue(itemVal, subItemVal);
+          },
+          {
+            id: `${key}_${subItemKey}`,
+            header: (subItem.label as string) || "",
+            enableGrouping: canGroup(valueType),
+            enableHiding: true,
+            enableSorting: true,
+            enableMultiSort: true,
+            filterFn: getFilterFn(valueType),
+            getGroupingValue: (r) => {
+              const val = r.item[key];
+              return typeof val === "string" ? val : undefined;
+            },
+            ...setSizeSetting(valueType),
+            cell: (info) => {
+              const r = info.row.original;
+              const subItemVal = r.subitem?.[subItemKey];
+              const itemVal = r.item[key];
+              const val = subItemVal ?? itemVal;
 
-            return (
-              <RenderTableValue
-                key={JSON.stringify(val)}
-                value={val as ItemValue}
-                heading={subItem}
-                device={r._userLabel || ""}
-              />
-            );
-          },
-          aggregatedCell(props) {
-            const value = props.row.original.item[key];
-            return (
-              <RenderTableValue
-                value={value as ItemValue}
-                heading={h}
-                device={firstRow._userLabel || ""}
-              />
-            );
-          },
-          meta: {
-            heading: {
-              heading: subItem,
+              return (
+                <RenderTableValue
+                  key={JSON.stringify(val)}
+                  value={val as ItemValue}
+                  heading={subItem}
+                  device={r._userLabel || ""}
+                />
+              );
+            },
+            aggregatedCell(props) {
+              const value = props.row.original.item[key];
+              return (
+                <RenderTableValue
+                  value={value as ItemValue}
+                  heading={h}
+                  device={firstRow._userLabel || ""}
+                />
+              );
+            },
+            meta: {
+              heading: {
+                heading: subItem,
+              },
             },
           },
-        },
-      ),
-    );
-  });
+        ),
+      );
+    });
   }
   const columns = columnDef;
 

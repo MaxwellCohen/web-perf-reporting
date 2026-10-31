@@ -232,9 +232,7 @@ vi.mock("@/features/page-speed-insights/network-metrics/ResourceTypeChartCard", 
 }));
 
 vi.mock("@/features/page-speed-insights/network-metrics/OriginLatencyChartCard", () => ({
-  OriginLatencyChartCard: ({ mode }: { mode: string }) => (
-    <div>Origin latency chart: {mode}</div>
-  ),
+  OriginLatencyChartCard: ({ mode }: { mode: string }) => <div>Origin latency chart: {mode}</div>,
 }));
 
 vi.mock("@/features/page-speed-insights/network-metrics/TopResourcesCard", () => ({
@@ -637,7 +635,10 @@ describe("page-speed container coverage", () => {
     });
 
     const { container } = render(
-      <Accordion type="multiple" defaultValue={["javascriptPerformance", "scriptOptimizationAudits"]}>
+      <Accordion
+        type="multiple"
+        defaultValue={["javascriptPerformance", "scriptOptimizationAudits"]}
+      >
         <JavaScriptPerformanceComponent />
       </Accordion>,
     );
@@ -700,5 +701,4 @@ describe("page-speed container coverage", () => {
 
     expect(container.textContent).toContain("Expanded count: 2");
   });
-
 });

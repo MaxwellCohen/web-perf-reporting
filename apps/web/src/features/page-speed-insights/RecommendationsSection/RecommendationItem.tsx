@@ -56,9 +56,7 @@ export function RecommendationItem({
         plain ? "border-0 border-x-0 py-0 last:border-b-0" : "rounded-lg border border-x-0",
       )}
     >
-      <AccordionTrigger
-        className={cn("hover:no-underline", plain ? "px-4 py-4" : "px-4 py-3")}
-      >
+      <AccordionTrigger className={cn("hover:no-underline", plain ? "px-4 py-4" : "px-4 py-3")}>
         <RecommendationHeader recommendation={rec} peerMaxSavings={peerMaxSavings} />
       </AccordionTrigger>
       <AccordionContent className="px-4 pb-4">

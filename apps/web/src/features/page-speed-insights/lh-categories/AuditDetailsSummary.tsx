@@ -34,7 +34,11 @@ export function AuditDetailsSummary({
         {auditData
           .map((audit, i) =>
             audit ? (
-              <ScoreDisplay key={`${i}_${audit.id}`} audit={audit} device={multiple ? labels[i] : undefined} />
+              <ScoreDisplay
+                key={`${i}_${audit.id}`}
+                audit={audit}
+                device={multiple ? labels[i] : undefined}
+              />
             ) : null,
           )
           .filter(Boolean)}

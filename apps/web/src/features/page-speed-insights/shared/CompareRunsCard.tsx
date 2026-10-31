@@ -2,7 +2,10 @@
 
 import { Fragment, type ReactNode } from "react";
 import { TableCardShell } from "@/features/page-speed-insights/shared/TableCard";
-import { getCompareRuns, pairByFormFactor } from "@/features/page-speed-insights/shared/compareRuns";
+import {
+  getCompareRuns,
+  pairByFormFactor,
+} from "@/features/page-speed-insights/shared/compareRuns";
 
 /** Card that lists one item per report, grouped by form factor when comparing two runs. */
 export function CompareRunsCard<T extends { label: string }>({

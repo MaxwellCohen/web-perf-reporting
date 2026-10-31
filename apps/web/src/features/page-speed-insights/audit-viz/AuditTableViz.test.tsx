@@ -114,7 +114,12 @@ describe("AuditTableViz", () => {
       <AuditTableViz
         rows={[
           row("cache-insight", [
-            { url: "https://example.com/a.js", wastedBytes: 1200, totalBytes: 2000, cacheLifetimeMs: 0 },
+            {
+              url: "https://example.com/a.js",
+              wastedBytes: 1200,
+              totalBytes: 2000,
+              cacheLifetimeMs: 0,
+            },
           ]),
         ]}
       />,
@@ -211,4 +216,3 @@ describe("AuditTableViz", () => {
     expect(container.textContent).toContain("cdn.example.com");
   });
 });
-

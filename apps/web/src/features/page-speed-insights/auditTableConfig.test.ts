@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { shouldShowSeparateTablesPerReport } from "@/features/page-speed-insights/auditTableConfig";
 
 describe("auditTableConfig", () => {
-
   it("returns true for audit IDs in the list", () => {
     expect(shouldShowSeparateTablesPerReport("dom-size-insight")).toBe(true);
     expect(shouldShowSeparateTablesPerReport("network-requests")).toBe(true);

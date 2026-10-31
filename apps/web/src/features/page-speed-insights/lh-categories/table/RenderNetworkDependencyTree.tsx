@@ -77,7 +77,9 @@ function NetworkDependencyTreeSection({
       <summary className="flex flex-col gap-2">
         <div className="text-lg font-bold">Network Dependency Tree for {label}</div>
         {tree.longestChain && (
-          <div className="text-sm">Longest Chain Duration: {formatMs(tree.longestChain.duration)}</div>
+          <div className="text-sm">
+            Longest Chain Duration: {formatMs(tree.longestChain.duration)}
+          </div>
         )}
       </summary>
       {treeView}

@@ -56,9 +56,7 @@ describe("ScriptTreemapSection", () => {
   });
 
   it("renders chart and table when treemap data exists", () => {
-    vi.mocked(useScriptTreemapItems).mockReturnValue([
-      { label: "Mobile", treeData: mockTreeData },
-    ]);
+    vi.mocked(useScriptTreemapItems).mockReturnValue([{ label: "Mobile", treeData: mockTreeData }]);
 
     renderSection();
 

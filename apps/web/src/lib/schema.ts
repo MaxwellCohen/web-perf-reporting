@@ -18,7 +18,6 @@ const cruxHistogramSchema = z.tuple([
   cruxHistogramItemSchema.omit({ end: true }),
 ]);
 
-
 const cruxDateSchema = z.object({
   year: coerceNumber,
   month: coerceNumber,

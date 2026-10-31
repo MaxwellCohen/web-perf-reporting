@@ -40,15 +40,13 @@ function segmentBarColor(row: WaterfallRow, segment: WaterfallSegment): string {
 }
 
 function isEmphasizedBlocking(segment: WaterfallSegment): boolean {
-  return (
-    segment.renderBlocking === "blocking" || segment.renderBlocking === "potentially-blocking"
-  );
+  return segment.renderBlocking === "blocking" || segment.renderBlocking === "potentially-blocking";
 }
 
 export type CriticalChainMark = "chain" | "longest";
 
 /** Network requests on the critical chain. Longest-path nodes are called out separately. */
-export function criticalChainMark(
+function criticalChainMark(
   row: Pick<WaterfallRow, "kind" | "isCriticalChain" | "chain">,
   segment?: Pick<WaterfallSegment, "isCriticalChain" | "chain">,
 ): CriticalChainMark | null {

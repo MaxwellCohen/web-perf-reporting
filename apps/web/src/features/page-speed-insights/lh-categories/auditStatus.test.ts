@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest";
 import type { AuditResultsRecord } from "@/lib/schema";
-import { formatCategorySummary, getAuditStatus, getDisagreementText, partitionByStatus } from "@/features/page-speed-insights/lh-categories/auditStatus";
+import {
+  formatCategorySummary,
+  getAuditStatus,
+  getDisagreementText,
+  partitionByStatus,
+} from "@/features/page-speed-insights/lh-categories/auditStatus";
 
 type Audit = AuditResultsRecord[string];
-const audit = (
-  scoreDisplayMode: Audit["scoreDisplayMode"],
-  score: number | null,
-): Audit => ({ id: "a", title: "A", score, scoreDisplayMode }) as Audit;
+const audit = (scoreDisplayMode: Audit["scoreDisplayMode"], score: number | null): Audit =>
+  ({ id: "a", title: "A", score, scoreDisplayMode }) as Audit;
 
 describe("getAuditStatus", () => {
   it("uses Lighthouse thresholds for scored audits", () => {

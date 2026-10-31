@@ -1,10 +1,7 @@
 import type { LhJsonFileEntry, LhJsonTextEntry } from "@/components/lh/types";
 import { PageSpeedInsights } from "@/lib/schema";
 import { parseViewerJsonString } from "@/components/viewer/parseViewerJson";
-import {
-  prefixPsiReportLabels,
-  resolvePsiRunLabels,
-} from "@/lib/viewer/psiCompareLabels";
+import { prefixPsiReportLabels, resolvePsiRunLabels } from "@/lib/viewer/psiCompareLabels";
 
 export type ViewerRunMethod = "psi" | "file" | "text";
 

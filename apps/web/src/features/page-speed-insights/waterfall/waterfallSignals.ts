@@ -1,5 +1,8 @@
 import type { RenderBlockingStatus } from "@/features/page-speed-insights/page-load-timeline/types";
-import type { WaterfallRow, WaterfallSegment } from "@/features/page-speed-insights/waterfall/waterfallData";
+import type {
+  WaterfallRow,
+  WaterfallSegment,
+} from "@/features/page-speed-insights/waterfall/waterfallData";
 
 /** Row signals a user can isolate in the waterfall. Empty selection shows every row. */
 const WATERFALL_SIGNALS = [
@@ -45,11 +48,7 @@ export const WATERFALL_SIGNAL_LABEL: Record<WaterfallSignalId, string> = {
 
 const SIGNAL_IDS = new Set<string>(WATERFALL_SIGNALS);
 
-const MILESTONE_SIGNALS = new Set<WaterfallSignalId>([
-  "before-fcp",
-  "before-lcp",
-  "fcp-to-lcp",
-]);
+const MILESTONE_SIGNALS = new Set<WaterfallSignalId>(["before-fcp", "before-lcp", "fcp-to-lcp"]);
 
 export function normalizeWaterfallSignals(values: readonly string[]): WaterfallSignalId[] {
   const selected = new Set(values);
@@ -95,20 +94,17 @@ function isRenderBlockingRow(row: WaterfallRow, segment?: WaterfallSegment): boo
   return status === "blocking" || status === "potentially-blocking";
 }
 
-function milestoneSignalAvailable(signal: WaterfallSignalId, context?: WaterfallSignalContext): boolean {
+function milestoneSignalAvailable(
+  signal: WaterfallSignalId,
+  context?: WaterfallSignalContext,
+): boolean {
   if (!MILESTONE_SIGNALS.has(signal)) return false;
   const fcp = context?.fcpMs;
   const lcp = context?.lcpMs;
   if (signal === "before-fcp") return fcp != null && Number.isFinite(fcp) && fcp > 0;
   if (signal === "before-lcp") return lcp != null && Number.isFinite(lcp) && lcp > 0;
   if (signal === "fcp-to-lcp") {
-    return (
-      fcp != null &&
-      lcp != null &&
-      Number.isFinite(fcp) &&
-      Number.isFinite(lcp) &&
-      lcp > fcp
-    );
+    return fcp != null && lcp != null && Number.isFinite(fcp) && Number.isFinite(lcp) && lcp > fcp;
   }
   return false;
 }
@@ -137,7 +133,13 @@ function matchesSignal(
     case "fcp-to-lcp": {
       const fcp = context?.fcpMs;
       const lcp = context?.lcpMs;
-      if (fcp == null || lcp == null || !Number.isFinite(fcp) || !Number.isFinite(lcp) || lcp <= fcp) {
+      if (
+        fcp == null ||
+        lcp == null ||
+        !Number.isFinite(fcp) ||
+        !Number.isFinite(lcp) ||
+        lcp <= fcp
+      ) {
         return false;
       }
       return overlapsWindow(fcp, lcp, start, end);

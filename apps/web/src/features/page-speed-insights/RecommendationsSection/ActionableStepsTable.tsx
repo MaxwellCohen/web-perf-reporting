@@ -103,24 +103,24 @@ export function ActionableStepsTable({ rec, items }: ActionableStepsTableProps) 
     <div className="w-full overflow-x-auto">
       <TableWithCopyToolbar>
         {({ tableRef }) => (
-      <Table ref={tableRef} className="w-full">
-        <TableHeader>
-          <TableRow className="hover:bg-transparent">
-            <TableHead className="text-xs font-semibold">Report</TableHead>
-            <TableHead className="text-xs font-semibold">Steps</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {rows.map(({ reportLabel, steps }) => (
-            <TableRow key={reportLabel} className="hover:bg-transparent">
-              <TableCell className="text-sm py-2 font-medium">{reportLabel}</TableCell>
-              <TableCell className="text-sm py-2">
-                <StepsList steps={steps} />
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          <Table ref={tableRef} className="w-full">
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="text-xs font-semibold">Report</TableHead>
+                <TableHead className="text-xs font-semibold">Steps</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map(({ reportLabel, steps }) => (
+                <TableRow key={reportLabel} className="hover:bg-transparent">
+                  <TableCell className="text-sm py-2 font-medium">{reportLabel}</TableCell>
+                  <TableCell className="text-sm py-2">
+                    <StepsList steps={steps} />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </TableWithCopyToolbar>
     </div>

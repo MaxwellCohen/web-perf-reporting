@@ -55,8 +55,7 @@ export type PageSpeedInsightsSnapshot = ReturnType<PageSpeedInsightsStore["getSn
 
 const PageSpeedInsightsStoreContext = createContext<PageSpeedInsightsStore | null>(null);
 
-const selectPageSpeedItems = (snapshot: PageSpeedInsightsSnapshot) =>
-  snapshot.context.items;
+const selectPageSpeedItems = (snapshot: PageSpeedInsightsSnapshot) => snapshot.context.items;
 
 const selectPageSpeedReportTitle = (snapshot: PageSpeedInsightsSnapshot) =>
   snapshot.context.reportTitle;

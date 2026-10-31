@@ -566,7 +566,7 @@ describe("buildPageLoadTimeline", () => {
     expect(ttfb?.timeMs).toBe(955);
     expect(ttfb?.rating).toBe("needs-improvement");
     expect(fcp?.rating).toBe("poor");
-      });
+  });
 
   it("emits only timed milestones, network rows, and long tasks", () => {
     const timeline = buildPageLoadTimeline(makeItem({}));
@@ -588,7 +588,7 @@ describe("buildPageLoadTimeline", () => {
     expect(steps.some((s) => s.id === "nav-beforeunload")).toBe(false);
     expect(steps.some((s) => s.id === "req-preload-scanner")).toBe(false);
     expect(steps.some((s) => s.id === "head-css")).toBe(false);
-        expect(timeline!.events.some((e) => e.phaseId === "connection")).toBe(false);
+    expect(timeline!.events.some((e) => e.phaseId === "connection")).toBe(false);
   });
 
   it("creates one moment per network request with start and end", () => {
@@ -664,9 +664,9 @@ describe("buildPageLoadTimeline", () => {
     expect(ttfb?.timeMs).toBe(85);
     expect(ttfb?.title).toBe("TTFB");
     expect(css?.waterfall?.[0]?.renderBlocking).toBe("blocking");
-    expect(netMoments.find((m) => m.title === "Script downloaded")?.waterfall?.[0]?.renderBlocking).toBe(
-      "non-blocking",
-    );
+    expect(
+      netMoments.find((m) => m.title === "Script downloaded")?.waterfall?.[0]?.renderBlocking,
+    ).toBe("non-blocking");
   });
 
   it("adds coverage to each stylesheet and script", () => {
@@ -947,7 +947,9 @@ describe("buildPageLoadTimeline", () => {
     expect(images?.detail).not.toMatch(/within 10 ms/);
     expect(images?.waterfall?.every((bar) => bar.renderBlocking === "non-blocking")).toBe(true);
 
-    const earlyScript = netMoments.find((m) => m.title === "Script downloaded" && m.startMs === 200);
+    const earlyScript = netMoments.find(
+      (m) => m.title === "Script downloaded" && m.startMs === 200,
+    );
     expect(earlyScript?.waterfall?.[0]?.label).toMatch(/a\.js/);
 
     const styles = netMoments.find((m) => m.title === "Stylesheet downloaded");
@@ -1013,18 +1015,18 @@ describe("buildPageLoadTimeline", () => {
       "potentially-blocking",
     ]);
     expect(styles?.kind).toBe("blocking");
-    expect(
-      timeline!.events.find((m) => m.title === "Font")?.waterfall?.[0]?.renderBlocking,
-    ).toBe("potentially-blocking");
-    expect(
-      timeline!.events.find((m) => m.title === "Image")?.waterfall?.[0]?.renderBlocking,
-    ).toBe("non-blocking");
+    expect(timeline!.events.find((m) => m.title === "Font")?.waterfall?.[0]?.renderBlocking).toBe(
+      "potentially-blocking",
+    );
+    expect(timeline!.events.find((m) => m.title === "Image")?.waterfall?.[0]?.renderBlocking).toBe(
+      "non-blocking",
+    );
     expect(
       timeline!.events.find((m) => m.title === "Script downloaded")?.waterfall?.[0]?.renderBlocking,
     ).toBe("potentially-blocking");
-    expect(networkBars(timeline!).find((bar) => bar.url.endsWith("app.css"))?.isRenderBlocking).toBe(
-      true,
-    );
+    expect(
+      networkBars(timeline!).find((bar) => bar.url.endsWith("app.css"))?.isRenderBlocking,
+    ).toBe(true);
     expect(
       networkBars(timeline!).find((bar) => bar.url.endsWith("print.css"))?.isRenderBlocking,
     ).toBe(false);
@@ -1304,7 +1306,9 @@ describe("buildPageLoadTimeline", () => {
     expect(redirects?.endMs).toBe(120);
     expect(timeline!.events.filter((moment) => moment.id === "nav-redirects")).toHaveLength(1);
     expect(
-      timeline!.events.filter((moment) => moment.id.startsWith("net-")).map((moment) => moment.title),
+      timeline!.events
+        .filter((moment) => moment.id.startsWith("net-"))
+        .map((moment) => moment.title),
     ).toEqual(["Document", "Image"]);
   });
 
@@ -1397,7 +1401,10 @@ describe("buildPageLoadTimeline", () => {
     expect(findMarked(timeline!, "req-ttfb")?.detail).toMatch(/First byte at 601 ms/);
     expect(firstByte?.durationMs).toBe(601);
     expect(render?.durationMs).toBeCloseTo(6980 - 601, 5);
-    expect(lcpSegments(timeline!).reduce((sum, seg) => sum + seg.durationMs, 0)).toBeCloseTo(6980, 5);
+    expect(lcpSegments(timeline!).reduce((sum, seg) => sum + seg.durationMs, 0)).toBeCloseTo(
+      6980,
+      5,
+    );
   });
 
   it("places long-task rows between FCP and LCP under simulation", () => {
@@ -1437,9 +1444,9 @@ describe("buildPageLoadTimeline", () => {
     expect(tasks.map((moment) => moment.startMs)).toEqual([2600, 9000]);
     expect(tasks.map((moment) => moment.timeMs)).toEqual([2800, 9100]);
     expect(between.some((moment) => moment.id.startsWith("long-task-"))).toBe(true);
-    expect(moments.some((moment) => moment.id.startsWith("long-task-") && moment.timeMs > 6980)).toBe(
-      true,
-    );
+    expect(
+      moments.some((moment) => moment.id.startsWith("long-task-") && moment.timeMs > 6980),
+    ).toBe(true);
   });
 
   it("places mobile TTFB on the observed trace instead of the throttled lab score", () => {

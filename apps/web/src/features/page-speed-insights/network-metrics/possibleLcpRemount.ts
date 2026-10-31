@@ -21,9 +21,7 @@ type BreakdownSubpart = {
 };
 
 function isTextLcp(audits: Record<string, unknown> | undefined): boolean {
-  const discovery = audits?.["lcp-discovery-insight"] as
-    | { scoreDisplayMode?: string }
-    | undefined;
+  const discovery = audits?.["lcp-discovery-insight"] as { scoreDisplayMode?: string } | undefined;
   return discovery?.scoreDisplayMode === "notApplicable";
 }
 

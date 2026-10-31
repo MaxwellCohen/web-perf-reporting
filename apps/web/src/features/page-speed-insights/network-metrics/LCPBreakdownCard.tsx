@@ -50,7 +50,10 @@ export function LCPBreakdownCard() {
           </div>
 
           <div className="relative z-0 overflow-x-auto">
-            <LCPBreakdownTable tableRows={breakdown.tableRows} reportLabels={breakdown.reportLabels} />
+            <LCPBreakdownTable
+              tableRows={breakdown.tableRows}
+              reportLabels={breakdown.reportLabels}
+            />
           </div>
         </div>
       </CardContent>

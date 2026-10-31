@@ -18,7 +18,9 @@ export default function TermsPage() {
 
       <h2>Use of the Service</h2>
       <ul>
-        <li>Use the Service only for lawful purposes and only on URLs you are permitted to test.</li>
+        <li>
+          Use the Service only for lawful purposes and only on URLs you are permitted to test.
+        </li>
         <li>
           Do not attempt to overload, scrape at abusive rates, probe, or disrupt the Service, or
           circumvent rate limits.

@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { AuditResult, AuditResultsRecord } from "@/lib/schema";
-import { collectCauseAuditsForMetric, METRIC_AUDIT_TO_ACRONYM } from "@/features/page-speed-insights/metricCauseAudits";
+import {
+  collectCauseAuditsForMetric,
+  METRIC_AUDIT_TO_ACRONYM,
+} from "@/features/page-speed-insights/metricCauseAudits";
 
 function audit(partial: Partial<AuditResult> & Pick<AuditResult, "id" | "title">): AuditResult {
   return {
@@ -177,5 +180,4 @@ describe("collectCauseAuditsForMetric", () => {
     expect(result[0].entries.map((e) => e.label)).toEqual(["Mobile", "Desktop"]);
     expect(result[0].maxSavings).toBe(0.12);
   });
-
 });

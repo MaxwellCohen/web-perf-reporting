@@ -38,7 +38,9 @@ export function AuditServerResponseTimeViz({ rows }: { rows: DetailTableItem[] }
                 <span
                   className={cn(
                     "font-mono font-semibold tabular-nums",
-                    good ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400",
+                    good
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-red-600 dark:text-red-400",
                   )}
                 >
                   {formatMs(entry.ms)} · {good ? "Good" : "Slow"}

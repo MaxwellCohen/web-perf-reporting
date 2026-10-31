@@ -6,9 +6,7 @@ import type { CruxReportMap } from "@/components/latest-crux/types";
 import { useCruxJob } from "@/lib/crux/useCruxJob";
 import type { CruxReport } from "@/lib/schema";
 
-function reportFromSlots(
-  slots: { key: string; report?: unknown }[],
-): CruxReportMap {
+function reportFromSlots(slots: { key: string; report?: unknown }[]): CruxReportMap {
   const map = {} as CruxReportMap;
   for (const slot of slots) {
     map[slot.key as keyof CruxReportMap] = (slot.report ?? null) as CruxReport | null;

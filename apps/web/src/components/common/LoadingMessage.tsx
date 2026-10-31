@@ -92,14 +92,7 @@ export function LoadingMessage({ variant = "lab" }: { variant?: LoadingMessageVa
             viewBox="0 0 120 120"
             aria-hidden
           >
-            <circle
-              cx="60"
-              cy="60"
-              r="54"
-              fill="none"
-              stroke="hsl(var(--muted))"
-              strokeWidth="6"
-            />
+            <circle cx="60" cy="60" r="54" fill="none" stroke="hsl(var(--muted))" strokeWidth="6" />
             <circle
               cx="60"
               cy="60"

@@ -77,9 +77,7 @@ export function RecommendationsSummary({ recommendations }: RecommendationsSumma
           label="Potential Savings"
           value={
             <>
-              {summary.totalMsSavings > 0 ? (
-                <span>{formatMs(summary.totalMsSavings)}</span>
-              ) : null}
+              {summary.totalMsSavings > 0 ? <span>{formatMs(summary.totalMsSavings)}</span> : null}
               {summary.totalMsSavings > 0 && summary.totalByteSavings > 0 ? (
                 <span className="text-muted-foreground"> + </span>
               ) : null}

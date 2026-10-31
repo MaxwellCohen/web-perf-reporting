@@ -168,7 +168,9 @@ describe("CategoryRow status sections", () => {
 
   it("uses the worst status across two reports", () => {
     const { getByTestId, container } = render(<Wrapper labels={["Mobile", "Desktop"]} />);
-    expect(getByTestId("audit-section-fail").querySelectorAll('[data-testid="audit-summary"]')).toHaveLength(1);
+    expect(
+      getByTestId("audit-section-fail").querySelectorAll('[data-testid="audit-summary"]'),
+    ).toHaveLength(1);
     expect(container.textContent).toContain("1 failed · 1 needs attention · 1 passed");
   });
 

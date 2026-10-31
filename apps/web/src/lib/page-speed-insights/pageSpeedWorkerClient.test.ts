@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { resolveWorkerEnvelope, type WorkerJobEnvelope } from "@/lib/page-speed-insights/resolveWorkerEnvelope";
+import {
+  resolveWorkerEnvelope,
+  type WorkerJobEnvelope,
+} from "@/lib/page-speed-insights/resolveWorkerEnvelope";
 
 describe("resolveWorkerEnvelope", () => {
   it("stringifies object data when completed", () => {

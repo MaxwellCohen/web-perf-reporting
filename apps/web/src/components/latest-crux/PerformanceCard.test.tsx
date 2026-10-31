@@ -27,7 +27,11 @@ vi.mock("@/components/latest-crux/charts/CruxStackedBarChart", () => ({
   PerformanceStackedBarChart: () => <div data-testid="stacked-bar-chart" />,
 }));
 
-import { CurrentPerformanceCard, CurrentPerformanceChartContext, ChartMap } from "@/components/latest-crux/PerformanceCard";
+import {
+  CurrentPerformanceCard,
+  CurrentPerformanceChartContext,
+  ChartMap,
+} from "@/components/latest-crux/PerformanceCard";
 
 const histogramData = {
   good_density: 0.5,
@@ -136,4 +140,3 @@ describe("ChartMap", () => {
     expect(ChartMap).toHaveProperty("Gauge Chart");
   });
 });
-

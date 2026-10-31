@@ -4,7 +4,10 @@
 import { TriangleAlert } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { usePageSpeedItems, usePageSpeedSelector } from "@/features/page-speed-insights/PageSpeedContext";
+import {
+  usePageSpeedItems,
+  usePageSpeedSelector,
+} from "@/features/page-speed-insights/PageSpeedContext";
 import {
   LOAD_MOMENTS,
   frameIndexAt,
@@ -71,7 +74,11 @@ function MomentRail({
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-2 lg:grid-cols-4" role="group" aria-label="Choose a load moment">
+      <div
+        className="grid grid-cols-2 gap-2 lg:grid-cols-4"
+        role="group"
+        aria-label="Choose a load moment"
+      >
         {LOAD_MOMENTS.map((moment) => {
           const pressed = moment.id === momentId;
           const recorded = story.devices.some((device) =>
@@ -112,7 +119,8 @@ function MomentRail({
 
 function SingleMomentTime({ device, momentId }: { device: DeviceStory; momentId: StoryMomentId }) {
   const moment = device.moments.find((item) => item.id === momentId);
-  if (!moment) return <span className="text-2xl font-semibold tabular-nums text-muted-foreground">—</span>;
+  if (!moment)
+    return <span className="text-2xl font-semibold tabular-nums text-muted-foreground">—</span>;
   return (
     <span className={cn("text-2xl font-semibold tabular-nums", ratingClass(moment.rating))}>
       {formatMs(moment.timeMs)}
@@ -294,7 +302,12 @@ function DeviceStage({
           ) : null}
         </div>
         {caption.headlineMs != null ? (
-          <p className={cn("text-right text-2xl font-semibold tabular-nums", ratingClass(moment?.rating))}>
+          <p
+            className={cn(
+              "text-right text-2xl font-semibold tabular-nums",
+              ratingClass(moment?.rating),
+            )}
+          >
             {formatMs(caption.headlineMs)}
           </p>
         ) : null}
@@ -433,12 +446,16 @@ function TimingTableRow({
         {onSelect ? (
           <button type="button" onClick={onSelect} className="text-left">
             <span className="block">{row.label}</span>
-            <span className="block text-xs font-normal text-muted-foreground">{row.description}</span>
+            <span className="block text-xs font-normal text-muted-foreground">
+              {row.description}
+            </span>
           </button>
         ) : (
           <>
             <span className="block">{row.label}</span>
-            <span className="block text-xs font-normal text-muted-foreground">{row.description}</span>
+            <span className="block text-xs font-normal text-muted-foreground">
+              {row.description}
+            </span>
           </>
         )}
       </th>
@@ -475,8 +492,8 @@ function LoadingStoryView({
             <AlertTitle>Possible LCP remount</AlertTitle>
             <AlertDescription>
               {remountLabels.join(", ")}: text LCP, mostly element render delay, and observed LCP
-              well after FCP. This can happen when hydration replaces DOM and Chrome re-records
-              LCP. Confirm with a performance trace.
+              well after FCP. This can happen when hydration replaces DOM and Chrome re-records LCP.
+              Confirm with a performance trace.
             </AlertDescription>
           </Alert>
         ) : null}

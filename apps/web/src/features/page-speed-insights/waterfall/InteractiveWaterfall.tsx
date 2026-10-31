@@ -167,7 +167,13 @@ function mobileMetaValue(row: WaterfallRow): string {
   return "";
 }
 
-function RowMeta({ row, layout = "desktop" }: { row: WaterfallRow; layout?: "desktop" | "mobile" }) {
+function RowMeta({
+  row,
+  layout = "desktop",
+}: {
+  row: WaterfallRow;
+  layout?: "desktop" | "mobile";
+}) {
   const label = displayLabel(row);
 
   if (layout === "mobile") {
@@ -381,10 +387,7 @@ export function InteractiveWaterfall({
             />
           </div>
 
-          <div
-            className="relative z-1"
-            style={{ gridColumn: 2, gridRow: `2 / ${rowCount + 2}` }}
-          >
+          <div className="relative z-1" style={{ gridColumn: 2, gridRow: `2 / ${rowCount + 2}` }}>
             <TickGridOverlay minStart={minStart} maxEnd={maxEnd} overview={overview} />
             <GuideOverlay
               minStart={minStart}

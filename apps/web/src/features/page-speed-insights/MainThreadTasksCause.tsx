@@ -8,7 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { CauseAuditEntry, MetricAuditSource } from "@/features/page-speed-insights/metricCauseAudits";
+import type {
+  CauseAuditEntry,
+  MetricAuditSource,
+} from "@/features/page-speed-insights/metricCauseAudits";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
 import {
   longTaskItemsFromAudit,
@@ -74,7 +77,9 @@ function ScriptBlockingTable({ rows }: { rows: ScriptBlockingRow[] }) {
                 <ScriptLabel url={row.url} />
               </TableCell>
               <TableCell className="font-mono tabular-nums">{row.taskCount}</TableCell>
-              <TableCell className="font-mono tabular-nums">{formatMs(row.blockingTimeMs)}</TableCell>
+              <TableCell className="font-mono tabular-nums">
+                {formatMs(row.blockingTimeMs)}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -87,8 +92,8 @@ function LongTaskTable({ summary }: { summary: MainThreadTaskSummary }) {
   if (summary.longTaskCount === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        No tasks longer than {LONG_TASK_THRESHOLD_MS} ms, so this trace adds no Total Blocking
-        Time from main-thread tasks.
+        No tasks longer than {LONG_TASK_THRESHOLD_MS} ms, so this trace adds no Total Blocking Time
+        from main-thread tasks.
       </p>
     );
   }

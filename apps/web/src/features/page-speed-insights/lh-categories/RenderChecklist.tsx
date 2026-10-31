@@ -13,11 +13,7 @@ import { AuditDetailChecklist } from "@/lib/schema";
 import { renderBoolean } from "@/features/page-speed-insights/lh-categories/renderBoolean";
 import { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataItem";
 
-export function RenderChecklist({
-  items,
-}: {
-  items: TableDataItem[];
-}) {
+export function RenderChecklist({ items }: { items: TableDataItem[] }) {
   const auditItems = items.map(
     (a) => (a?.auditResult.details as AuditDetailChecklist)?.items || {},
   );

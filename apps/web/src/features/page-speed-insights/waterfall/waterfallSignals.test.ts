@@ -1,12 +1,17 @@
 import { describe, expect, it } from "vitest";
-import type { WaterfallRow, WaterfallSegment } from "@/features/page-speed-insights/waterfall/waterfallData";
+import type {
+  WaterfallRow,
+  WaterfallSegment,
+} from "@/features/page-speed-insights/waterfall/waterfallData";
 import {
   availableWaterfallSignals,
   filterWaterfallRowsBySignals,
   normalizeWaterfallSignals,
 } from "@/features/page-speed-insights/waterfall/waterfallSignals";
 
-function segment(overrides: Partial<WaterfallSegment> & Pick<WaterfallSegment, "id">): WaterfallSegment {
+function segment(
+  overrides: Partial<WaterfallSegment> & Pick<WaterfallSegment, "id">,
+): WaterfallSegment {
   return { start: 0, end: 10, ...overrides };
 }
 
@@ -149,12 +154,12 @@ describe("filterWaterfallRowsBySignals", () => {
       "script-cpu",
     ]);
 
-    expect(filterWaterfallRowsBySignals(rows, ["render-blocking"], context).map((row) => row.id)).toEqual(
-      ["scripts", "tasks"],
-    );
-    expect(filterWaterfallRowsBySignals(rows, ["before-fcp"], context).map((row) => row.id)).toEqual([
-      "scripts",
-    ]);
+    expect(
+      filterWaterfallRowsBySignals(rows, ["render-blocking"], context).map((row) => row.id),
+    ).toEqual(["scripts", "tasks"]);
+    expect(
+      filterWaterfallRowsBySignals(rows, ["before-fcp"], context).map((row) => row.id),
+    ).toEqual(["scripts"]);
     const fcpToLcp = filterWaterfallRowsBySignals(rows, ["fcp-to-lcp"], context);
     expect(fcpToLcp.map((row) => row.id)).toEqual(["scripts", "tasks", "mark"]);
     expect(fcpToLcp[0]?.segments?.map((segment) => segment.id)).toEqual(["vendor"]);

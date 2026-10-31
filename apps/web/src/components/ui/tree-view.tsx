@@ -142,7 +142,9 @@ function describeResource(value: string): ResourceDisplay | null {
 function TreeResourceName({ value }: { value: string }) {
   const display = describeResource(value);
   if (!display) {
-    return <span className="font-mono text-[13px] leading-5 break-all text-foreground">{value}</span>;
+    return (
+      <span className="font-mono text-[13px] leading-5 break-all text-foreground">{value}</span>
+    );
   }
 
   const text = (
@@ -202,7 +204,11 @@ function useTreeContext() {
   return context;
 }
 
-function collectExpandedIds(data: TreeDataItem[] | TreeDataItem, expandAll?: boolean, initialSelectedItemId?: string) {
+function collectExpandedIds(
+  data: TreeDataItem[] | TreeDataItem,
+  expandAll?: boolean,
+  initialSelectedItemId?: string,
+) {
   if (expandAll) {
     const ids = new Set<string>();
     const collectAllIds = (items: TreeDataItem[] | TreeDataItem) => {
@@ -327,10 +333,7 @@ function TreeBranch({ items, depth }: { items: TreeDataItem[]; depth: number }) 
   return (
     <ul
       role={depth === 0 ? "tree" : "group"}
-      className={cn(
-        "m-0 list-none p-0",
-        depth > 0 && "ml-2 border-l border-border",
-      )}
+      className={cn("m-0 list-none p-0", depth > 0 && "ml-2 border-l border-border")}
     >
       {items.map((item, index) => (
         <TreeNode key={item.id} item={item} depth={depth} isLast={index === items.length - 1} />
@@ -356,7 +359,9 @@ function TreeNode({ item, depth, isLast }: { item: TreeDataItem; depth: number; 
       ) : null}
       <div className={cn("min-w-0", depth > 0 && "pl-1.5")}>
         <TreeRow item={item} depth={depth} />
-        {isExpanded && item.children ? <TreeBranch items={item.children} depth={depth + 1} /> : null}
+        {isExpanded && item.children ? (
+          <TreeBranch items={item.children} depth={depth + 1} />
+        ) : null}
       </div>
     </li>
   );
@@ -409,7 +414,10 @@ function TreeRow({ item, depth }: { item: TreeDataItem; depth: number }) {
       {depth === 0 ? (
         <span aria-hidden className="mt-1.5 grid w-4 shrink-0 place-items-center">
           <span
-            className={cn("size-1.5 rounded-full", highlight ? "bg-rose-400" : "bg-muted-foreground")}
+            className={cn(
+              "size-1.5 rounded-full",
+              highlight ? "bg-rose-400" : "bg-muted-foreground",
+            )}
           />
         </span>
       ) : null}

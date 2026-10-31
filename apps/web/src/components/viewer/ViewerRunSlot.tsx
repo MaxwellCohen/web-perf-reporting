@@ -21,9 +21,7 @@ export type ViewerRunState = {
 };
 
 /** Stable IDs for SSR; avoid module counters (they diverge across server/client). */
-export function createEmptyViewerRun(
-  overrides: Partial<ViewerRunState> = {},
-): ViewerRunState {
+export function createEmptyViewerRun(overrides: Partial<ViewerRunState> = {}): ViewerRunState {
   return {
     method: "psi",
     label: "",
