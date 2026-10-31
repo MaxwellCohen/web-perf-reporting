@@ -40,9 +40,6 @@ export const standardTableFeatures = tableFeatures({
   aggregationFns,
 });
 
-/** Flat tables share the standard feature bundle (expander disabled at the hook). */
-export const flatTableFeatures = standardTableFeatures;
-
 /**
  * LH audit accordion tables: filtering, grouping, expansion, faceting (no client sort model).
  */

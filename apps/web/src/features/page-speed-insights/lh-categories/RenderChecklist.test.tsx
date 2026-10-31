@@ -62,5 +62,4 @@ describe("RenderChecklist", () => {
     expect(container.querySelector('[data-testid="checklist-chips"]')).toBeNull();
     expect(container.querySelector("table")).toBeTruthy();
   });
-
 });

@@ -6,7 +6,7 @@ import { hasAnyItems, reportLabel, rowItems } from "./performanceVizShared";
 
 const CONTENT_RE = /\bcontent\s*=\s*(?:"([^"]*)"|'([^']*)')/i;
 
-export function viewportContentFromSnippet(snippet: unknown): string | undefined {
+function viewportContentFromSnippet(snippet: unknown): string | undefined {
   if (typeof snippet !== "string") return undefined;
   const match = snippet.match(CONTENT_RE);
   return match ? (match[1] ?? match[2]) : undefined;
@@ -30,7 +30,9 @@ export function AuditViewportViz({ rows }: { rows: DetailTableItem[] }) {
             className="flex flex-wrap items-center gap-2 rounded-md border px-3 py-2 text-sm"
             data-testid="viewport-row"
           >
-            {multi ? <span className="text-xs font-medium uppercase text-muted-foreground">{label}</span> : null}
+            {multi ? (
+              <span className="text-xs font-medium uppercase text-muted-foreground">{label}</span>
+            ) : null}
             <span
               className={cn(
                 "rounded-full px-2 py-0.5 text-xs font-semibold",

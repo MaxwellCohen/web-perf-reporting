@@ -6,14 +6,11 @@ import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack
 import type { StockColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
 import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
-import { AccordionContent, AccordionItem } from "@/components/ui/accordion";
-import { AccordionSectionTitleTrigger } from "@/components/ui/accordion-section-title-trigger";
 import {
   createBooleanAggregatedCell,
   createOriginsArrayAggregatedCell,
   createStringAggregatedCell,
 } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
-
 
 type EntityTableRow = {
   label: string;
@@ -78,22 +75,6 @@ const cols: StockColumnDef<EntityTableRow, any>[] = [
   }),
 ];
 
-export function EntitiesTable() {
-  const { data, columns, hasEntities } = useEntitiesTableData();
-
-  if (!hasEntities) {
-    return null;
-  }
-  return (
-    <AccordionItem value={"entities"}>
-      <AccordionSectionTitleTrigger>Entities</AccordionSectionTitleTrigger>
-      <AccordionContent>
-        <EntitiesTableCard data={data} columns={columns} />
-      </AccordionContent>
-    </AccordionItem>
-  );
-}
-
 export function EntitiesTableCard({
   data,
   columns,
@@ -108,7 +89,9 @@ export function EntitiesTableCard({
     defaultPageSize: data.length,
     enablePagination: true,
   });
-  return <TableCard title="Third-Party Entities" table={table} className="md:col-span-2 lg:col-span-3" />;
+  return (
+    <TableCard title="Third-Party Entities" table={table} className="md:col-span-2 lg:col-span-3" />
+  );
 }
 
 export function useEntitiesTableData() {

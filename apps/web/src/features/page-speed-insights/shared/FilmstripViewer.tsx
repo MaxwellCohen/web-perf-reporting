@@ -3,16 +3,11 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
 import { cn } from "@/lib/utils";
 
-export type FilmstripViewerPane = {
+type FilmstripViewerPane = {
   /** Shown above the image when several runs are compared side by side. */
   label?: string;
   /** Null before the run has painted anything. */
@@ -104,11 +99,14 @@ export function FilmstripViewer({
   const multi = (frame?.panes.length ?? 0) > 1;
 
   return (
-    <Dialog open={open} onOpenChange={(next) => {
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
         if (next) return;
         setPlaying(false);
         onClose();
-      }}>
+      }}
+    >
       <DialogContent
         className="flex h-[95dvh] w-[96vw] max-w-[96vw] flex-col gap-3 p-3 sm:p-5"
         onKeyDown={handleKeyDown}

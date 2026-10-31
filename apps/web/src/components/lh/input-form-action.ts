@@ -9,7 +9,7 @@ export type FormInputs = {
   activeTab: string;
 };
 
-export function validateJson(jsonString: string): boolean {
+function validateJson(jsonString: string): boolean {
   try {
     JSON.parse(jsonString);
     return true;
@@ -18,10 +18,7 @@ export function validateJson(jsonString: string): boolean {
   }
 }
 
-export async function fetchJsonFromUrl(
-  url: string,
-  fetchFn: typeof fetch = fetch,
-): Promise<string> {
+async function fetchJsonFromUrl(url: string, fetchFn: typeof fetch = fetch): Promise<string> {
   const response = await fetchFn(url);
   if (!response.ok) {
     throw new Error(`Failed to fetch JSON from URL: ${response.statusText}`);

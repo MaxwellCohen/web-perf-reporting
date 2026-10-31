@@ -9,7 +9,12 @@ describe("AuditThirdPartyCookiesViz", () => {
   it("groups cookies by origin for one report", () => {
     const { container } = render(
       <AuditThirdPartyCookiesViz
-        rows={[makeRow("third-party-cookies", [{ url: yt, name: "YSC" }, { url: yt, name: "VISITOR" }])]}
+        rows={[
+          makeRow("third-party-cookies", [
+            { url: yt, name: "YSC" },
+            { url: yt, name: "VISITOR" },
+          ]),
+        ]}
       />,
     );
     expect(container.textContent).toContain("1 third-party origin");
@@ -23,7 +28,14 @@ describe("AuditThirdPartyCookiesViz", () => {
       <AuditThirdPartyCookiesViz
         rows={[
           makeRow("third-party-cookies", [{ url: yt, name: "YSC" }], "Mobile"),
-          makeRow("third-party-cookies", [{ url: yt, name: "YSC" }, { url: "https://ads.io/a", name: "id" }], "Desktop"),
+          makeRow(
+            "third-party-cookies",
+            [
+              { url: yt, name: "YSC" },
+              { url: "https://ads.io/a", name: "id" },
+            ],
+            "Desktop",
+          ),
         ]}
       />,
     );
@@ -32,6 +44,9 @@ describe("AuditThirdPartyCookiesViz", () => {
   });
 
   it("returns null when empty", () => {
-    expect(render(<AuditThirdPartyCookiesViz rows={[makeRow("third-party-cookies", [])]} />).container.firstChild).toBeNull();
+    expect(
+      render(<AuditThirdPartyCookiesViz rows={[makeRow("third-party-cookies", [])]} />).container
+        .firstChild,
+    ).toBeNull();
   });
 });

@@ -25,7 +25,9 @@ describe("RecommendationHeader", () => {
       ...baseRec,
       impact: { metric: "LCP", savings: 500, unit: "ms" },
     };
-    const { container } = render(<RecommendationHeader recommendation={rec} peerMaxSavings={1000} />);
+    const { container } = render(
+      <RecommendationHeader recommendation={rec} peerMaxSavings={1000} />,
+    );
     expect(container.textContent).toContain("Est. savings");
     expect(container.textContent).toContain("500 ms");
     expect(container.textContent).toContain("LCP");

@@ -34,7 +34,7 @@ vi.mock("@/features/page-speed-insights/network-metrics/LCPBreakdownChart", () =
   LCPBreakdownChart: () => <div data-testid="lcp-chart">lcp</div>,
 }));
 
-import { AuditTableViz, usedVsSavingsLabel } from "./AuditTableViz";
+import { AuditTableViz } from "./AuditTableViz";
 
 function row(id: string, items: Array<Record<string, unknown>>): DetailTableItem {
   return {
@@ -114,7 +114,12 @@ describe("AuditTableViz", () => {
       <AuditTableViz
         rows={[
           row("cache-insight", [
-            { url: "https://example.com/a.js", wastedBytes: 1200, totalBytes: 2000, cacheLifetimeMs: 0 },
+            {
+              url: "https://example.com/a.js",
+              wastedBytes: 1200,
+              totalBytes: 2000,
+              cacheLifetimeMs: 0,
+            },
           ]),
         ]}
       />,
@@ -122,7 +127,6 @@ describe("AuditTableViz", () => {
 
     expect(container.firstChild).toBeNull();
   });
-
 
   it("renders image delivery cause for image-delivery-insight", () => {
     const { container } = render(
@@ -210,15 +214,5 @@ describe("AuditTableViz", () => {
     expect(container.textContent).toContain("Unsized image element");
     expect(container.textContent).toContain("Web font");
     expect(container.textContent).toContain("cdn.example.com");
-  });
-});
-
-describe("usedVsSavingsLabel", () => {
-  it("shows used and total when the audit reports totalBytes", () => {
-    expect(usedVsSavingsLabel({ used: 1024, savings: 3072 })).toBe("used 1.0 KiB / total 4.0 KiB");
-  });
-
-  it("falls back to savings only when no total is known", () => {
-    expect(usedVsSavingsLabel({ used: 0, savings: 2048 })).toBe("2.0 KiB savings");
   });
 });

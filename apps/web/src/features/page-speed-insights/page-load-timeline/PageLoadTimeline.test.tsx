@@ -290,9 +290,9 @@ describe("PageLoadTimeline", () => {
     expect(markerCol?.textContent).toMatch(/1\.00 s/);
     expect(markerCol?.textContent).toMatch(/1\.20 s/);
     expect(within(longTask!).getByTestId("moment-waterfall")).toBeInTheDocument();
-    expect(
-      within(longTask!).getByTestId("moment-waterfall").textContent,
-    ).toMatch(/1\.00 s–1\.20 s/);
+    expect(within(longTask!).getByTestId("moment-waterfall").textContent).toMatch(
+      /1\.00 s–1\.20 s/,
+    );
     expect(within(longTask!).getByRole("link", { name: /a\.js/ })).toBeInTheDocument();
     // A single task stays open. Groups fold the bars into a Tasks disclosure.
     expect(within(longTask!).queryByText("Tasks")).not.toBeInTheDocument();
@@ -412,8 +412,8 @@ describe("PageLoadTimeline", () => {
     const audits = item.item.lighthouseResult.audits as {
       "network-requests": { details: { items: Array<Record<string, unknown>> } };
     };
-    audits["network-requests"].details.items = audits["network-requests"].details.items.map(
-      (row) => (row.url === "https://example.com/app.css" ? { ...row, priority: "High" } : row),
+    audits["network-requests"].details.items = audits["network-requests"].details.items.map((row) =>
+      row.url === "https://example.com/app.css" ? { ...row, priority: "High" } : row,
     );
     mockItems.current = [item];
     render(<PageLoadTimeline />);
@@ -560,9 +560,9 @@ describe("PageLoadTimeline", () => {
     const waterfall = scope.getByTestId("moment-waterfall");
     const label = within(waterfall).getByRole("button", { name: "Unattributed" });
     expect(label).toHaveAttribute("aria-describedby");
-    expect(
-      document.getElementById(label.getAttribute("aria-describedby")!),
-    ).toHaveTextContent(/did not attribute it to a script URL/i);
+    expect(document.getElementById(label.getAttribute("aria-describedby")!)).toHaveTextContent(
+      /did not attribute it to a script URL/i,
+    );
     expect(waterfall).toHaveTextContent(/1\.00 s–1\.58 s · 580 ms/);
 
     const attributed = rows.find(

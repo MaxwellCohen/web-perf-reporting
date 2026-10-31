@@ -44,8 +44,9 @@ export function urlOf(value: unknown): string {
 }
 
 export function subItemsOf(item: AnyItem): Array<Record<string, unknown>> {
-  return ((item.subItems as { items?: unknown[] } | undefined)?.items ||
-    []) as Array<Record<string, unknown>>;
+  return ((item.subItems as { items?: unknown[] } | undefined)?.items || []) as Array<
+    Record<string, unknown>
+  >;
 }
 
 export type Group<T> = { key: string; count: number; labels: string[]; data: T };

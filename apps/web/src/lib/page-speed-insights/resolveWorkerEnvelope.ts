@@ -7,14 +7,14 @@ export type ResolvedWorkerEnvelope =
   | { kind: "ready"; body: string }
   | { kind: "ready_envelope"; envelope: WorkerJobEnvelope };
 
-export function getTestUrlFromEnvelope(data: WorkerJobEnvelope): string | undefined {
+function getTestUrlFromEnvelope(data: WorkerJobEnvelope): string | undefined {
   if (typeof data.url === "string" && data.url.length > 0) {
     return data.url;
   }
   return undefined;
 }
 
-export function getFailureMessageFromEnvelope(data: WorkerJobEnvelope): string {
+function getFailureMessageFromEnvelope(data: WorkerJobEnvelope): string {
   const payload = data.data;
   if (
     payload &&
@@ -61,25 +61,4 @@ export function resolveWorkerEnvelope(
   }
 
   return { kind: "ready_envelope", envelope: data };
-}
-
-export type CompletedPayloadResult =
-  | { ok: true; payload: string }
-  | { ok: false; reason: "not_ready" | "failed" | "empty" };
-
-export function getCompletedPayloadFromEnvelope(
-  data: WorkerJobEnvelope | null | undefined,
-): CompletedPayloadResult {
-  const resolved = resolveWorkerEnvelope(data);
-  switch (resolved.kind) {
-    case "ready":
-      return { ok: true, payload: resolved.body };
-    case "failed":
-      return { ok: false, reason: "failed" };
-    case "pending":
-      return { ok: false, reason: "not_ready" };
-    case "missing":
-    case "ready_envelope":
-      return { ok: false, reason: "empty" };
-  }
 }

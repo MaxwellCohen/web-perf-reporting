@@ -61,8 +61,8 @@ export default function PrivacyPage() {
       <h2>Cookies and local storage</h2>
       <p>
         The Service does not set cookies or write to local storage for analytics or tracking.
-        PostHog runs in memory-only mode, so identifiers disappear when you close or reload the
-        tab. Sentry error reporting does not use cookies either.
+        PostHog runs in memory-only mode, so identifiers disappear when you close or reload the tab.
+        Sentry error reporting does not use cookies either.
       </p>
 
       <h2>Retention</h2>
@@ -78,7 +78,9 @@ export default function PrivacyPage() {
       </p>
 
       <h2>Children</h2>
-      <p>The Service is not directed to children under 13 and we do not knowingly collect their data.</p>
+      <p>
+        The Service is not directed to children under 13 and we do not knowingly collect their data.
+      </p>
 
       <h2>Changes</h2>
       <p>We may update this policy; the date above reflects the latest revision.</p>

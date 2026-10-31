@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  NETWORK_REQUESTS_AUDIT_ID,
   NETWORK_REQUESTS_COLUMN_ORDER,
   WATERFALL_REPLACED_NETWORK_REQUEST_KEYS,
   getNetworkRequestsTimeRange,
@@ -10,11 +9,6 @@ import {
 } from "@/features/page-speed-insights/shared/networkRequestsTable";
 
 describe("networkRequestsTable", () => {
-  it("recognizes the network requests audit id", () => {
-    expect(isNetworkRequestsAudit(NETWORK_REQUESTS_AUDIT_ID)).toBe(true);
-    expect(isNetworkRequestsAudit("unused-javascript")).toBe(false);
-  });
-
   it("recognizes network requests tables by required timing columns", () => {
     expect(
       isNetworkRequestsTable([

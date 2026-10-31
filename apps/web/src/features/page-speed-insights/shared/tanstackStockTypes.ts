@@ -3,7 +3,6 @@ import type {
   Cell,
   CellContext,
   ColumnDef,
-  FilterFn,
   Header,
   HeaderContext,
   HeaderGroup,
@@ -29,9 +28,3 @@ export type StockCellContext<TData extends RowData, TValue = unknown> = CellCont
   TData,
   TValue
 >;
-export type StockHeaderContext<TData extends RowData, TValue = unknown> = HeaderContext<
-  any,
-  TData,
-  TValue
->;
-export type StockFilterFn = FilterFn<any, any>;

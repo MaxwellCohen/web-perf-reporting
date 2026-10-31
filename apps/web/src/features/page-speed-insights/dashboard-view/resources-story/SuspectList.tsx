@@ -7,7 +7,7 @@ import type {
 } from "@/features/page-speed-insights/dashboard-view/resources-story/resourcesInvestigationModel";
 import { cn } from "@/lib/cn";
 
-export const ACTION_LABEL: Record<ActionHint, string> = {
+const ACTION_LABEL: Record<ActionHint, string> = {
   "remove-unused": "Look at code that never ran",
   "cut-weight": "Look at cutting this file's weight",
   defer: "Look at deferring this script",

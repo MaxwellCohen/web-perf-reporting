@@ -123,11 +123,7 @@ export function AuditGanttStrip({
 }
 
 /** Redirect / chain steps as sequential wastedMs bars. */
-export function AuditRedirectChain({
-  rows,
-}: {
-  rows: DetailTableItem[];
-}) {
+export function AuditRedirectChain({ rows }: { rows: DetailTableItem[] }) {
   const groups = rows
     .map((row) => {
       const items = (row.auditResult?.details?.items || []).map((item, index) => ({

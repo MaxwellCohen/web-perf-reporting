@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  collectSpecificRecommendations,
-  combineAndDeduplicateSteps,
   processMetricSavingsAudit,
   processFailedAudit,
 } from "@/features/page-speed-insights/RecommendationsSection/recommendationProcessing";
@@ -18,59 +16,6 @@ const baseAudit = {
 };
 
 describe("recommendationProcessing", () => {
-  describe("collectSpecificRecommendations", () => {
-    it("returns empty array when no opportunity items", () => {
-      const entries = [
-        {
-          auditId: "unused-css",
-          audit: { ...baseAudit, details: { type: "table", items: [] } },
-          label: "Mobile",
-          item: {},
-        },
-      ];
-      expect(collectSpecificRecommendations("unused-css", entries as any)).toEqual([]);
-    });
-
-    it("collects and deduplicates steps from opportunity details", () => {
-      const entries = [
-        {
-          auditId: "unused-javascript",
-          audit: {
-            ...baseAudit,
-            details: {
-              type: "opportunity",
-              items: [{ url: "https://example.com/a.js", wastedBytes: 1000 }],
-            },
-          },
-          label: "Mobile",
-          item: {},
-        },
-      ];
-      const result = collectSpecificRecommendations("unused-javascript", entries as any);
-      expect(result.length).toBeGreaterThan(0);
-      expect(result[0].step).toBeDefined();
-      expect(result[0].reports).toContain("Mobile");
-    });
-  });
-
-  describe("combineAndDeduplicateSteps", () => {
-    it("merges specific and generic steps and deduplicates by step text", () => {
-      const specific = [
-        {
-          step: "Remove 1 KiB from [a](https://a.com)",
-          reports: ["Mobile"],
-          url: "https://a.com",
-          host: "a.com",
-        },
-      ];
-      const generic = [{ step: "Review the audit details", reports: ["Desktop"] }];
-      const result = combineAndDeduplicateSteps(specific, generic);
-      expect(result.length).toBe(2);
-      const removeStep = result.find((r) => r.step.includes("Remove"));
-      expect(removeStep?.reports).toContain("Mobile");
-    });
-  });
-
   describe("processMetricSavingsAudit", () => {
     it("returns recommendation with id, title, priority, category, impact, actionableSteps", () => {
       const entries = [

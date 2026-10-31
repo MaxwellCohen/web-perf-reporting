@@ -35,9 +35,9 @@ const ISSUE_LIMIT = 40;
 const EXAMPLE_LIMIT = 3;
 const DESCRIPTION_LIMIT = 400;
 
-export type Rating = "good" | "needs-improvement" | "poor";
+type Rating = "good" | "needs-improvement" | "poor";
 
-export type AgentLabMetric = {
+type AgentLabMetric = {
   id: string;
   acronym: string;
   value: string | null;
@@ -45,13 +45,13 @@ export type AgentLabMetric = {
   rating: Rating | null;
 };
 
-export type AgentFieldMetric = {
+type AgentFieldMetric = {
   acronym: string;
   p75: string;
   category: string | null;
 };
 
-export type AgentReportSummary = {
+type AgentReportSummary = {
   label: string;
   finalUrl: string | null;
   scores: Partial<Record<CategoryId, number | null>>;
@@ -62,7 +62,7 @@ export type AgentReportSummary = {
   platformNotes: PlatformNotes | null;
 };
 
-export type AgentIssue = {
+type AgentIssue = {
   id: string;
   category: CategoryId;
   title: string;

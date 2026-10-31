@@ -70,32 +70,32 @@ export function CurrentPerformanceDashboard({
       {slotPending ? (
         <LoadingMessage variant="crux" />
       ) : (
-      <div className="mt-2 grid gap-1 grid-cols-2 md:grid-cols-3 lg:grid-cols-6 print:grid-cols-3">
-        <CurrentPerformanceCard
-          title="Largest Contentful Paint (LCP)"
-          histogramData={groupedMetrics?.largest_contentful_paint?.[0]}
-        />
-        <CurrentPerformanceCard
-          title="Interaction to Next Paint (INP)"
-          histogramData={groupedMetrics?.interaction_to_next_paint?.[0]}
-        />
-        <CurrentPerformanceCard
-          title="Cumulative Layout Shift (CLS)"
-          histogramData={groupedMetrics?.cumulative_layout_shift?.[0]}
-        />
-        <CurrentPerformanceCard
-          title="First Contentful Paint (FCP)"
-          histogramData={groupedMetrics?.first_contentful_paint?.[0]}
-        />
-        <CurrentPerformanceCard
-          title="Time to First Byte (TTFB)"
-          histogramData={groupedMetrics?.experimental_time_to_first_byte?.[0]}
-        />
-        <CurrentPerformanceCard
-          title="Round Trip Time (RTT)"
-          histogramData={groupedMetrics?.round_trip_time?.[0]}
-        />
-      </div>
+        <div className="mt-2 grid gap-1 grid-cols-2 md:grid-cols-3 lg:grid-cols-6 print:grid-cols-3">
+          <CurrentPerformanceCard
+            title="Largest Contentful Paint (LCP)"
+            histogramData={groupedMetrics?.largest_contentful_paint?.[0]}
+          />
+          <CurrentPerformanceCard
+            title="Interaction to Next Paint (INP)"
+            histogramData={groupedMetrics?.interaction_to_next_paint?.[0]}
+          />
+          <CurrentPerformanceCard
+            title="Cumulative Layout Shift (CLS)"
+            histogramData={groupedMetrics?.cumulative_layout_shift?.[0]}
+          />
+          <CurrentPerformanceCard
+            title="First Contentful Paint (FCP)"
+            histogramData={groupedMetrics?.first_contentful_paint?.[0]}
+          />
+          <CurrentPerformanceCard
+            title="Time to First Byte (TTFB)"
+            histogramData={groupedMetrics?.experimental_time_to_first_byte?.[0]}
+          />
+          <CurrentPerformanceCard
+            title="Round Trip Time (RTT)"
+            histogramData={groupedMetrics?.round_trip_time?.[0]}
+          />
+        </div>
       )}
       {!slotPending && hasSoftNavMetrics ? (
         <>
@@ -105,15 +105,21 @@ export function CurrentPerformanceDashboard({
           <div className="mt-2 grid gap-1 grid-cols-2 md:grid-cols-3 print:grid-cols-3">
             <CurrentPerformanceCard
               title="LCP with Soft Navigations"
-              histogramData={groupedMetrics?.experimental_largest_contentful_paint_with_softnavs?.[0]}
+              histogramData={
+                groupedMetrics?.experimental_largest_contentful_paint_with_softnavs?.[0]
+              }
             />
             <CurrentPerformanceCard
               title="INP with Soft Navigations"
-              histogramData={groupedMetrics?.experimental_interaction_to_next_paint_with_softnavs?.[0]}
+              histogramData={
+                groupedMetrics?.experimental_interaction_to_next_paint_with_softnavs?.[0]
+              }
             />
             <CurrentPerformanceCard
               title="CLS with Soft Navigations"
-              histogramData={groupedMetrics?.experimental_cumulative_layout_shift_with_softnavs?.[0]}
+              histogramData={
+                groupedMetrics?.experimental_cumulative_layout_shift_with_softnavs?.[0]
+              }
             />
           </div>
         </>

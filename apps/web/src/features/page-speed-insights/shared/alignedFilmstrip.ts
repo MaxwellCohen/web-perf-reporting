@@ -5,7 +5,7 @@ export type AlignedFilmstripInput = {
   markers: FilmstripMarker[];
 };
 
-export type AlignedFilmstripCell = {
+type AlignedFilmstripCell = {
   /** Latest frame painted at or before the column time; null before first paint. */
   frame: { timing: number; data: string } | null;
   /** True when the frame differs from the previous column (visual change). */
@@ -23,7 +23,7 @@ export type AlignedFilmstrip = {
 const STEP_CANDIDATES_MS = [100, 200, 250, 500, 1000, 2000];
 
 /** Smallest step that keeps the shared axis at or under `maxColumns`. */
-export function pickStepMs(endMs: number, maxColumns: number): number {
+function pickStepMs(endMs: number, maxColumns: number): number {
   for (const step of STEP_CANDIDATES_MS) {
     if (Math.ceil(endMs / step) <= maxColumns) return step;
   }

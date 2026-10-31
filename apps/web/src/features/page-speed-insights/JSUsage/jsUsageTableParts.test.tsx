@@ -1,12 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { ExpandRow, RenderBytesCell } from "@/features/page-speed-insights/JSUsage/jsUsageTableParts";
+import {
+  ExpandRow,
+  RenderBytesCell,
+} from "@/features/page-speed-insights/JSUsage/jsUsageTableParts";
 
 vi.mock("@/components/ui/button", () => ({
-  Button: ({
-    children,
-    ...props
-  }: React.PropsWithChildren<Record<string, unknown>>) => (
+  Button: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => (
     <button type="button" {...props}>
       {children}
     </button>

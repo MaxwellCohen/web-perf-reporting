@@ -78,9 +78,7 @@ describe("segmentTooltipLines", () => {
         priority: "High",
         coverage: "50% used",
       }),
-    ).toEqual(
-      expect.arrayContaining(["High priority", "Coverage 50% used"]),
-    );
+    ).toEqual(expect.arrayContaining(["High priority", "Coverage 50% used"]));
   });
 
   it("formats VeryHigh priority with a space", () => {

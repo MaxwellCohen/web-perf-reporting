@@ -8,10 +8,7 @@ import { cn } from "@/lib/utils";
  * Radix (or any) component + `cn(base, className)` forwardRef wrapper.
  * Cuts duplicated forwardRef blocks across dialog / tabs / select / menus.
  */
-export function radixClassForward<E extends React.ElementType>(
-  Element: E,
-  baseClass: string,
-) {
+export function radixClassForward<E extends React.ElementType>(Element: E, baseClass: string) {
   const Comp = React.forwardRef<
     React.ComponentRef<E>,
     React.ComponentPropsWithoutRef<E> & { className?: string }

@@ -12,7 +12,11 @@ describe("AuditInspectorIssuesViz", () => {
   it("collapses URLs under issue type (1 report)", () => {
     const { container } = render(
       <AuditInspectorIssuesViz
-        rows={[makeRow("inspector-issues", [issue("Cookie", ["https://yt.com/a", "https://yt.com/a", "https://yt.com/b"])])]}
+        rows={[
+          makeRow("inspector-issues", [
+            issue("Cookie", ["https://yt.com/a", "https://yt.com/a", "https://yt.com/b"]),
+          ]),
+        ]}
       />,
     );
     expect(container.textContent).toContain("Cookie");
@@ -26,7 +30,11 @@ describe("AuditInspectorIssuesViz", () => {
       <AuditInspectorIssuesViz
         rows={[
           makeRow("inspector-issues", [issue("Cookie", ["https://yt.com/a"])], "Mobile"),
-          makeRow("inspector-issues", [issue("Cookie", ["https://yt.com/a"]), issue("Mixed", ["http://x.com/1"])], "Desktop"),
+          makeRow(
+            "inspector-issues",
+            [issue("Cookie", ["https://yt.com/a"]), issue("Mixed", ["http://x.com/1"])],
+            "Desktop",
+          ),
         ]}
       />,
     );
@@ -35,6 +43,12 @@ describe("AuditInspectorIssuesViz", () => {
   });
 
   it("returns null when empty", () => {
-    expect(render(<AuditInspectorIssuesViz rows={[makeRow("inspector-issues", []), makeRow("inspector-issues", [], "D")]} />).container.firstChild).toBeNull();
+    expect(
+      render(
+        <AuditInspectorIssuesViz
+          rows={[makeRow("inspector-issues", []), makeRow("inspector-issues", [], "D")]}
+        />,
+      ).container.firstChild,
+    ).toBeNull();
   });
 });

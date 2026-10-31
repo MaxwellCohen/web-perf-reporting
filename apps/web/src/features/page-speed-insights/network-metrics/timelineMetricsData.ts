@@ -11,30 +11,30 @@ const TIMELINE_EVENT_MAP = {
   Interactive: "interactive",
 } as const;
 
-type TimelineEventLabel = keyof typeof TIMELINE_EVENT_MAP;
-
-const TIMELINE_EVENT_ENTRIES = Object.entries(TIMELINE_EVENT_MAP) as Array<
-  [TimelineEventLabel, keyof NetworkMetricSeries]
->;
-
 export type TimelineChartRow = {
   event: string;
   [reportLabel: string]: string | number | undefined;
 };
 
-function sortNumeric(a: number | undefined, b: number | undefined): number {
+export function sortNumeric(a: number | undefined, b: number | undefined): number {
   if (a === undefined && b === undefined) return 0;
   if (a === undefined) return 1;
   if (b === undefined) return -1;
   return a - b;
 }
 
-export function buildTimelineChartRows(series: readonly NetworkMetricSeries[]): TimelineChartRow[] {
+export function buildTimelineChartRows(
+  series: readonly NetworkMetricSeries[],
+  eventMap: Record<string, string> = TIMELINE_EVENT_MAP,
+  /** Event whose value is pinned to 0 (the origin of the lab clock). */
+  zeroEvent?: string,
+): TimelineChartRow[] {
+  const entries = Object.entries(eventMap) as Array<[string, keyof NetworkMetricSeries]>;
   const reportLabels = series.map((m) => m.label);
   const eventDataMap = new Map<string, Record<string, number | undefined>>();
 
   for (const metric of series) {
-    for (const [eventLabel, propKey] of TIMELINE_EVENT_ENTRIES) {
+    for (const [eventLabel, propKey] of entries) {
       const rawValue = metric[propKey] as number | undefined;
       if (rawValue === undefined) continue;
 
@@ -43,7 +43,7 @@ export function buildTimelineChartRows(series: readonly NetworkMetricSeries[]): 
       }
       const eventData = eventDataMap.get(eventLabel)!;
       // Absolute ms from navigation start (lab clock when simulated).
-      eventData[metric.label] = rawValue;
+      eventData[metric.label] = eventLabel === zeroEvent ? 0 : rawValue;
     }
   }
 

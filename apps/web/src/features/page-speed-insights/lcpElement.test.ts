@@ -35,7 +35,9 @@ describe("collectLcpElements", () => {
         scoreDisplayMode: "informative",
         details: {
           type: "list",
-          items: [{ ...lcpNode, nodeLabel: "Desktop hero", lhId: "page-1-IMG" }] as unknown as AuditDetailList["items"],
+          items: [
+            { ...lcpNode, nodeLabel: "Desktop hero", lhId: "page-1-IMG" },
+          ] as unknown as AuditDetailList["items"],
         },
       },
     };

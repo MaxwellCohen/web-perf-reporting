@@ -21,7 +21,9 @@ function formatCellValue(value: unknown): string {
           Array.isArray(entry) && entry.length === 2 && typeof entry[0] === "string",
       )
     ) {
-      return value.map(([device, deviceValue]) => `${device}: ${formatCellValue(deviceValue)}`).join(", ");
+      return value
+        .map(([device, deviceValue]) => `${device}: ${formatCellValue(deviceValue)}`)
+        .join(", ");
     }
     return value.map(formatCellValue).join(", ");
   }
@@ -59,9 +61,9 @@ export function getTableExportData<TData extends RowData>(
 ): { headers: string[]; rows: string[][] } {
   const columns = table.getVisibleLeafColumns().filter((column) => !SKIP_COLUMN_IDS.has(column.id));
   const headers = columns.map((column) => getColumnHeaderLabel(column));
-  const rows = table.getRowModel().rows.map((row) =>
-    columns.map((column) => formatCellValue(row.getValue(column.id))),
-  );
+  const rows = table
+    .getRowModel()
+    .rows.map((row) => columns.map((column) => formatCellValue(row.getValue(column.id))));
 
   return { headers, rows };
 }

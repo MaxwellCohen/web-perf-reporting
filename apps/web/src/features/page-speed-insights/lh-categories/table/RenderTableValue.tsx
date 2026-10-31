@@ -266,10 +266,7 @@ function RenderSourceLocation({
   );
 }
 
-function renderHttpUrl(
-  url: string,
-  props: React.HTMLAttributes<HTMLElement>,
-): React.JSX.Element {
+function renderHttpUrl(url: string, props: React.HTMLAttributes<HTMLElement>): React.JSX.Element {
   return (
     <div {...props} className={cn("min-w-0", props.className)}>
       <ResourceUrlCell url={url} />
@@ -315,7 +312,9 @@ function RenderBaselineStatus({
     >
       <span
         className="size-2 shrink-0 rounded-full"
-        style={{ backgroundColor: BASELINE_STATUS_COLOR[value.status] ?? "hsl(var(--muted-foreground))" }}
+        style={{
+          backgroundColor: BASELINE_STATUS_COLOR[value.status] ?? "hsl(var(--muted-foreground))",
+        }}
         aria-hidden
       />
       {baselineStatusLabel(value)}
@@ -351,7 +350,11 @@ export function RenderBytesValue({
   ...props
 }: { value: unknown } & React.HTMLAttributes<HTMLElement>) {
   return (
-    <span title="bytes" {...props} className={cn("whitespace-nowrap tabular-nums", props.className)}>
+    <span
+      title="bytes"
+      {...props}
+      className={cn("whitespace-nowrap tabular-nums", props.className)}
+    >
       {children}
       {formatBytes(Number(value))}
     </span>

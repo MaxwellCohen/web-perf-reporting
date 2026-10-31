@@ -78,7 +78,9 @@ function BaselineNoteSection({ note }: { note: BaselineNote }) {
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-baseline gap-x-2">
         <h3 className="text-sm font-semibold">Baseline</h3>
-        {note.asOf ? <span className="text-xs text-muted-foreground">as of {note.asOf}</span> : null}
+        {note.asOf ? (
+          <span className="text-xs text-muted-foreground">as of {note.asOf}</span>
+        ) : null}
       </div>
       <CountLine note={note} />
       {note.highlighted.length > 0 ? (
@@ -127,14 +129,17 @@ function CspNoteSection({ findings }: { findings: CspFindingNote[] }) {
       <h3 className="text-sm font-semibold">Content Security Policy</h3>
       <ul className="flex flex-col gap-1">
         {findings.map((finding, index) => (
-          <CspFinding key={`${finding.description}-${finding.directive ?? index}`} finding={finding} />
+          <CspFinding
+            key={`${finding.description}-${finding.directive ?? index}`}
+            finding={finding}
+          />
         ))}
       </ul>
     </div>
   );
 }
 
-export function PlatformNotes({ notes }: { notes: PlatformNotesData }) {
+function PlatformNotes({ notes }: { notes: PlatformNotesData }) {
   return (
     <div className="flex flex-col gap-3">
       {notes.baseline ? <BaselineNoteSection note={notes.baseline} /> : null}

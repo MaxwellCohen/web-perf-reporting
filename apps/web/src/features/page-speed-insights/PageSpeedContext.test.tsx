@@ -4,7 +4,6 @@ import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
   PageSpeedInsightsStoreProvider,
-  selectPageSpeedIsLoading,
   useFullPageScreenshots,
   usePageSpeedInsightsStore,
   usePageSpeedItems,
@@ -99,7 +98,7 @@ function StoreConsumer() {
   const items = usePageSpeedItems();
   const reportTitle = usePageSpeedReportTitle();
   const fullPageScreenshots = useFullPageScreenshots();
-  const isLoading = usePageSpeedSelector(selectPageSpeedIsLoading);
+  const isLoading = usePageSpeedSelector((snapshot) => snapshot.context.isLoading);
 
   return (
     <>
@@ -226,7 +225,10 @@ describe("PageSpeedContext", () => {
         <>
           <div data-testid="item-labels">{items.map((item) => item.label).join(",")}</div>
           <div data-testid="filtered-report-title">{reportTitle}</div>
-          <button type="button" onClick={() => store.trigger.setUserLabelFilter({ labels: ["Mobile"] })}>
+          <button
+            type="button"
+            onClick={() => store.trigger.setUserLabelFilter({ labels: ["Mobile"] })}
+          >
             Filter mobile
           </button>
         </>
@@ -242,7 +244,9 @@ describe("PageSpeedContext", () => {
     const mobileDate = new Date("2024-02-03T12:00:00.000Z").toLocaleDateString();
     const desktopDate = new Date("2024-02-04T12:00:00.000Z").toLocaleDateString();
 
-    expect(container.querySelector('[data-testid="item-labels"]')).toHaveTextContent("Mobile,Desktop");
+    expect(container.querySelector('[data-testid="item-labels"]')).toHaveTextContent(
+      "Mobile,Desktop",
+    );
     expect(container.querySelector('[data-testid="filtered-report-title"]')).toHaveTextContent(
       `Report for https://mobile.example.com on Mobile at ${mobileDate}, https://desktop.example.com on Desktop at ${desktopDate}`,
     );

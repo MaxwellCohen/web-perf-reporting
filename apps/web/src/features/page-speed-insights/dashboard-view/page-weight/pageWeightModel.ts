@@ -16,13 +16,13 @@ const TYPE_ORDER = [
 /** resource-summary rows that are rollups, not resource types. */
 const SUMMARY_ROLLUPS = new Set(["total", "third-party"]);
 
-export type PageWeightType = {
+type PageWeightType = {
   resourceType: string;
   requestCount: number;
   transferSize: number;
 };
 
-export type PageWeightUrl = {
+type PageWeightUrl = {
   /** URL without query or hash, so cache-busting params still match across runs. */
   key: string;
   url: string;
@@ -42,7 +42,7 @@ export type PageWeightReport = {
 
 export type WeightDeltaStatus = "added" | "removed" | "grew" | "shrank" | "same";
 
-export type TypeComparisonRow = {
+type TypeComparisonRow = {
   resourceType: string;
   a: PageWeightType | null;
   b: PageWeightType | null;
@@ -73,7 +73,7 @@ function finite(value: unknown): number {
   return typeof number === "number" && Number.isFinite(number) && number > 0 ? number : 0;
 }
 
-export function canonicalResourceType(value: unknown): string {
+function canonicalResourceType(value: unknown): string {
   const text = typeof value === "string" ? value.trim() : "";
   if (!text) return "Other";
   const lower = text.toLowerCase();
@@ -85,7 +85,7 @@ function typeRank(resourceType: string): number {
   return index === -1 ? TYPE_ORDER.length : index;
 }
 
-export function urlKey(url: string): string {
+function urlKey(url: string): string {
   try {
     const parsed = new URL(url);
     return `${parsed.origin}${parsed.pathname}`;
@@ -147,7 +147,7 @@ function sortTypes(types: PageWeightType[]): PageWeightType[] {
   );
 }
 
-export function pageWeightReportFromEntry(entry: InsightsContextItem): PageWeightReport | null {
+function pageWeightReportFromEntry(entry: InsightsContextItem): PageWeightReport | null {
   const urls = urlsFrom(entry);
   const summary = tableItems(entry, "resource-summary");
   const rowFor = (type: string) =>

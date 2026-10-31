@@ -36,18 +36,18 @@ const MOMENT_ORDER: StoryMomentId[] = ["ttfb", "fcp", "lcp", "load"];
 const CLOSE_MS = 15;
 const CAPTURED_AT_MOMENT_MS = 80;
 
-export type StoryFrame = {
+type StoryFrame = {
   timing: number;
   data: string;
 };
 
-export type StoryPhase = {
+type StoryPhase = {
   id: string;
   label: string;
   durationMs: number;
 };
 
-export type DeviceMoment = {
+type DeviceMoment = {
   id: StoryMomentId;
   timeMs: number;
   rating?: Rating;
@@ -63,7 +63,7 @@ export type DeviceStory = {
   lcpSnippet?: string;
 };
 
-export type TimingCell = {
+type TimingCell = {
   timeMs?: number;
   rating?: Rating;
 };
@@ -264,7 +264,13 @@ function buildRows(sources: StorySource[]): TimingRow[] {
     const cells = sources.map((source) => {
       const timeMs = sourceMoment(source, id);
       const rating =
-        id === "ttfb" ? source.ttfbRating : id === "fcp" ? source.fcpRating : id === "lcp" ? source.lcpRating : undefined;
+        id === "ttfb"
+          ? source.ttfbRating
+          : id === "fcp"
+            ? source.fcpRating
+            : id === "lcp"
+              ? source.lcpRating
+              : undefined;
       return timeMs == null ? {} : { timeMs, rating };
     });
     if (cells.every((cell) => cell.timeMs == null)) return;
@@ -367,8 +373,9 @@ export function loadingStoryFromLoads(loads: CombinedLoad[]): LoadingStory | nul
 
   const devices = sources.map(toDevice);
   const momentsKey = devices
-    .map((device) =>
-      `${device.label}:${device.moments.map((moment) => `${moment.id}:${Math.round(moment.timeMs)}`).join(",")}`,
+    .map(
+      (device) =>
+        `${device.label}:${device.moments.map((moment) => `${moment.id}:${Math.round(moment.timeMs)}`).join(",")}`,
     )
     .join("|");
 

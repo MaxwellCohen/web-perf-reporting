@@ -201,4 +201,3 @@ export function selectLcpBreakdownComputed(
   lastComputed = computeLcpBreakdownComputed(items);
   return lastComputed;
 }
-

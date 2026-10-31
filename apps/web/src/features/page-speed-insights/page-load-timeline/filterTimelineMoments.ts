@@ -1,7 +1,12 @@
 import type { TimelineEvent, TimelineWaterfallBar } from "./types";
 
 /** Categories a user can show or hide. Milestones, screenshots, and the document stay visible. */
-export const TASK_FILTERS = ["blocking", "potentially-blocking", "non-blocking", "long-task"] as const;
+export const TASK_FILTERS = [
+  "blocking",
+  "potentially-blocking",
+  "non-blocking",
+  "long-task",
+] as const;
 
 export type TaskFilterId = (typeof TASK_FILTERS)[number];
 
@@ -14,7 +19,7 @@ export const TASK_FILTER_LABEL: Record<TaskFilterId, string> = {
   "long-task": "Long tasks",
 };
 
-export function allTaskFilters(): TaskFilterSelection {
+function allTaskFilters(): TaskFilterSelection {
   return new Set(TASK_FILTERS);
 }
 

@@ -9,7 +9,7 @@ import type {
  */
 const OVERLAPPING_TYPES = new Set(["total", "third-party"]);
 
-export const NETWORK_FACTS = [
+const NETWORK_FACTS = [
   {
     id: "total",
     label: "Transfer",
@@ -27,9 +27,9 @@ export const NETWORK_FACTS = [
   },
 ] as const;
 
-export type NetworkFactId = (typeof NETWORK_FACTS)[number]["id"];
+type NetworkFactId = (typeof NETWORK_FACTS)[number]["id"];
 
-export type NetworkSlice = {
+type NetworkSlice = {
   resourceType: string;
   label: string;
   transferSize: number;
@@ -38,7 +38,7 @@ export type NetworkSlice = {
   share: number | null;
 };
 
-export type DeviceNetwork = {
+type DeviceNetwork = {
   label: string;
   totalBytes: number | null;
   requestCount: number | null;
@@ -67,9 +67,7 @@ function shareOf(part: number, totalBytes: number | null): number | null {
 
 function toDevice(summary: ResourceSummary): DeviceNetwork | null {
   const total = recorded(summary.tiles.find((tile) => tile.resourceType === "total"));
-  const thirdParty = recorded(
-    summary.tiles.find((tile) => tile.resourceType === "third-party"),
-  );
+  const thirdParty = recorded(summary.tiles.find((tile) => tile.resourceType === "third-party"));
   const totalBytes = total ? total.transferSize : null;
   const slices = summary.tiles.flatMap((tile) => {
     if (OVERLAPPING_TYPES.has(tile.resourceType) || !recorded(tile)) return [];

@@ -1,7 +1,6 @@
 import type { ResourceStageId } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 import { javascriptStoryFromMetrics } from "@/features/page-speed-insights/dashboard-view/javascript-story/javascriptStoryModel";
 import { networkStoryFromSummaries } from "@/features/page-speed-insights/dashboard-view/network-story/networkStoryModel";
-import { extractJSMetrics } from "@/features/page-speed-insights/javascript-metrics/extractJSMetrics";
 import type { JSMetrics } from "@/features/page-speed-insights/javascript-metrics/extractJSMetrics";
 import { selectJavaScriptMetrics } from "@/features/page-speed-insights/javascript-metrics/javascriptMetricsSelectors";
 import { collectResourceSummaries } from "@/features/page-speed-insights/network-metrics/resourceSummary";
@@ -35,7 +34,7 @@ const KNOWN_TYPES = [
   "Other",
 ];
 
-export type LeadKind =
+type LeadKind =
   | "wasted-download"
   | "script-weight"
   | "third-party"
@@ -44,7 +43,7 @@ export type LeadKind =
 
 export type ActionHint = "remove-unused" | "cut-weight" | "defer" | "split" | "third-party-audit";
 
-export type InvestigationRequest = {
+type InvestigationRequest = {
   url: string;
   resourceType: string;
   transferSize: number;
@@ -52,7 +51,7 @@ export type InvestigationRequest = {
   entity?: string;
 };
 
-export type InvestigationScript = {
+type InvestigationScript = {
   url: string;
   transferSize: number;
   unusedBytes: number;
@@ -73,7 +72,7 @@ export type ResourcesInvestigationInput = {
   scripts: InvestigationScript[];
 };
 
-export type InvestigationLead = {
+type InvestigationLead = {
   kind: LeadKind;
   magnitude: string;
   sentence: string;
@@ -713,9 +712,4 @@ export function resourcesInvestigationsFromItems(
     const investigation = buildResourcesInvestigation(inputFromEntry(entry));
     return investigation ? [investigation] : [];
   });
-}
-
-export function extractActiveMetric(entry: InsightsContextItem | undefined): JSMetrics | null {
-  if (!entry) return null;
-  return extractJSMetrics(entry);
 }

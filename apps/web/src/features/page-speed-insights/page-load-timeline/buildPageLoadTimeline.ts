@@ -1,9 +1,6 @@
 import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
 import { axisEndMs, buildTimelineEvents } from "./buildTimelineEvents";
-import {
-  collectTimelineSources,
-  type CombinedLoad,
-} from "./collectTimelineSources";
+import { collectTimelineSources, type CombinedLoad } from "./collectTimelineSources";
 import type { PageLoadTimeline } from "./types";
 
 export type PageLoadTimelineBundle = {
@@ -27,16 +24,6 @@ export function buildPageLoadTimelineBundle(
       simulationLabel: load.simulationLabel,
     },
   };
-}
-
-export function buildPageLoadTimeline(source: InsightsContextItem): PageLoadTimeline | null {
-  return buildPageLoadTimelineBundle(source)?.timeline ?? null;
-}
-
-export function buildPageLoadTimelines(items: InsightsContextItem[]): PageLoadTimeline[] {
-  return items
-    .map((item) => buildPageLoadTimeline(item))
-    .filter((t): t is PageLoadTimeline => t != null);
 }
 
 export function buildPageLoadTimelineBundles(

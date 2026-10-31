@@ -128,10 +128,7 @@ export function deriveFilteredDashboardState(
   };
 }
 
-function normalizeUserLabelFilter(
-  labels: string[],
-  selectedLabels: string[],
-): string[] | null {
+function normalizeUserLabelFilter(labels: string[], selectedLabels: string[]): string[] | null {
   if (selectedLabels.length === 0 || selectedLabels.length === labels.length) {
     return null;
   }

@@ -1,15 +1,9 @@
 import { fireEvent, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { StockFilterFn, StockRow } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import type { StockRow } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import { useSimpleTable } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
-import {
-  formatFilterValue,
-  RangeFilter,
-  useDebouncedCallback,
-  numericRangeFilter,
-} from "@/features/page-speed-insights/JSUsage/jsUsageTableFilters";
-
+import { RangeFilterInputs as RangeFilter } from "@/features/page-speed-insights/JSUsage/jsUsageTableFilters";
 
 vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", () => ({
   RenderBytesValue: ({ value }: { value: number }) => <span data-testid="bytes">{value} B</span>,
@@ -21,78 +15,7 @@ vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", (
   ),
 }));
 
-function UseDebouncedCallbackHarness({ delay = 100 }: { delay?: number }) {
-  const cb = useDebouncedCallback((x: number) => {
-    (window as unknown as { lastArg?: number }).lastArg = x;
-  }, delay);
-  return <button onClick={() => cb(42)}>Call</button>;
-}
-
 describe("jsUsageTableFilters", () => {
-  describe("numericRangeFilter", () => {
-    const noopAddMeta = () => {};
-    const getRow = (value: number) =>
-      ({ getValue: () => value }) as unknown as StockRow<{ x: number }>;
-    const filter = numericRangeFilter as unknown as StockFilterFn;
-
-    it("returns true when value is within [min, max]", () => {
-      expect(filter(getRow(50) as never, "x", [0, 100], noopAddMeta)).toBe(true);
-      expect(filter(getRow(0) as never, "x", [0, 100], noopAddMeta)).toBe(true);
-      expect(filter(getRow(100) as never, "x", [0, 100], noopAddMeta)).toBe(true);
-    });
-
-    it("returns false when value is below min", () => {
-      expect(filter(getRow(10) as never, "x", [20, 100], noopAddMeta)).toBe(false);
-    });
-
-    it("returns false when value is above max", () => {
-      expect(filter(getRow(150) as never, "x", [0, 100], noopAddMeta)).toBe(false);
-    });
-
-    it("handles undefined min (only max check)", () => {
-      expect(filter(getRow(50) as never, "x", [undefined, 100], noopAddMeta)).toBe(true);
-      expect(filter(getRow(150) as never, "x", [undefined, 100], noopAddMeta)).toBe(false);
-    });
-
-    it("handles undefined max (only min check)", () => {
-      expect(filter(getRow(50) as never, "x", [0, undefined], noopAddMeta)).toBe(true);
-      expect(filter(getRow(0) as never, "x", [10, undefined], noopAddMeta)).toBe(false);
-    });
-  });
-
-  describe("formatFilterValue", () => {
-    it("renders bytes for size column", () => {
-      const { container } = render(
-        <div>{formatFilterValue(1024, "resourceBytes", "Resource Size")}</div>,
-      );
-      expect(container.querySelector('[data-testid="bytes"]')).toBeTruthy();
-    });
-
-    it("renders ms for time column", () => {
-      const { container } = render(<div>{formatFilterValue(500, "scripting", "Scripting")}</div>);
-      expect(container.querySelector('[data-testid="ms"]')).toBeTruthy();
-    });
-
-    it("renders number for other columns", () => {
-      const { container } = render(<div>{formatFilterValue(1234, "count", "Count")}</div>);
-      expect(container.textContent).toContain("1,234");
-    });
-  });
-
-  describe("useDebouncedCallback", () => {
-    beforeEach(() => vi.useFakeTimers());
-    afterEach(() => vi.useRealTimers());
-
-    it("invokes callback after delay", async () => {
-      (window as unknown as { lastArg?: number }).lastArg = undefined;
-      const { container } = render(<UseDebouncedCallbackHarness delay={100} />);
-      fireEvent.click(container.querySelector("button")!);
-      expect((window as unknown as { lastArg?: number }).lastArg).toBeUndefined();
-      await vi.advanceTimersByTimeAsync(100);
-      expect((window as unknown as { lastArg?: number }).lastArg).toBe(42);
-    });
-  });
-
   describe("RangeFilter", () => {
     type Row = { id: number; value: number };
     const columnHelper = createColumnHelper<Row>();

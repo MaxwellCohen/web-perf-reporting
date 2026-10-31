@@ -11,7 +11,7 @@ import { JSUsageTableRow } from "@/features/page-speed-insights/JSUsage/jsUsageT
 import type { StockColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { standardTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 
-export function useUseJSUsageTable(data: TreeMapData["nodes"]) {
+function useUseJSUsageTable(data: TreeMapData["nodes"]) {
   const table = useTable({
     features: standardTableFeatures,
     columns: columns as StockColumnDef<TreeMapNode>[],

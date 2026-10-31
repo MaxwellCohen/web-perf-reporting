@@ -29,41 +29,20 @@ export function PaginationCard({
   if (pageCount <= 1) {
     return null;
   }
+  const pageButtons: [string, () => void, boolean][] = [
+    ["<<", () => table.firstPage(), !table.getCanPreviousPage()],
+    ["<", () => table.previousPage(), !table.getCanPreviousPage()],
+    [">", () => table.nextPage(), !table.getCanNextPage()],
+    [">>", () => table.lastPage(), !table.getCanNextPage()],
+  ];
   return (
     <Card className="flex w-full max-w-full flex-wrap items-center gap-2 p-2 sm:w-auto">
       <div className="flex flex-wrap items-center gap-1">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => table.firstPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          {"<<"}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          {"<"}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          {">"}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => table.lastPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          {">>"}
-        </Button>
+        {pageButtons.map(([label, go, disabled]) => (
+          <Button key={label} variant="ghost" size="sm" onClick={go} disabled={disabled}>
+            {label}
+          </Button>
+        ))}
       </div>
       {showManualControls ? <PaginationControlsManualPageSelection table={table} /> : null}
     </Card>

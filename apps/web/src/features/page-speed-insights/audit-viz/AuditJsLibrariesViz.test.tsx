@@ -6,7 +6,13 @@ import { makeRow } from "./qualityVizTestUtils";
 describe("AuditJsLibrariesViz", () => {
   it("renders chips with versions for one report", () => {
     const { container } = render(
-      <AuditJsLibrariesViz rows={[makeRow("js-libraries", [{ name: "core-js", npm: "core-js", version: "core-js-global@3.9.1" }])]} />,
+      <AuditJsLibrariesViz
+        rows={[
+          makeRow("js-libraries", [
+            { name: "core-js", npm: "core-js", version: "core-js-global@3.9.1" },
+          ]),
+        ]}
+      />,
     );
     expect(container.textContent).toContain("core-js 3.9.1");
     expect(container.textContent).not.toContain("only");
@@ -17,7 +23,14 @@ describe("AuditJsLibrariesViz", () => {
       <AuditJsLibrariesViz
         rows={[
           makeRow("js-libraries", [{ name: "jQuery", version: "3.0.0" }], "Mobile"),
-          makeRow("js-libraries", [{ name: "jQuery", version: "3.0.0" }, { name: "React", version: "18.0.0" }], "Desktop"),
+          makeRow(
+            "js-libraries",
+            [
+              { name: "jQuery", version: "3.0.0" },
+              { name: "React", version: "18.0.0" },
+            ],
+            "Desktop",
+          ),
         ]}
       />,
     );
@@ -27,6 +40,8 @@ describe("AuditJsLibrariesViz", () => {
   });
 
   it("returns null when empty", () => {
-    expect(render(<AuditJsLibrariesViz rows={[makeRow("js-libraries", [])]} />).container.firstChild).toBeNull();
+    expect(
+      render(<AuditJsLibrariesViz rows={[makeRow("js-libraries", [])]} />).container.firstChild,
+    ).toBeNull();
   });
 });

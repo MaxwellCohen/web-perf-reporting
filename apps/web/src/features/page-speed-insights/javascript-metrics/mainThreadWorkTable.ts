@@ -48,7 +48,9 @@ function orderedReportLabels(labels: string[]): string[] {
   return [...new Set(labels.filter(Boolean))].sort(compareReportLabels);
 }
 
-export function buildMainThreadWorkTable(metrics: MainThreadWorkMetric[]): MainThreadWorkTableModel {
+export function buildMainThreadWorkTable(
+  metrics: MainThreadWorkMetric[],
+): MainThreadWorkTableModel {
   const validMetrics = metrics.filter((metric) => metric.mainThreadWork.length > 0);
   const reportLabels = orderedReportLabels(validMetrics.map((metric) => metric.label));
   const rowsByCategory = new Map<string, MainThreadWorkTableRow>();

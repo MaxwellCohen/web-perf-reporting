@@ -177,8 +177,8 @@ describe("collectViewerReports", () => {
   });
 
   it("throws when the PSI share URL is empty", async () => {
-    await expect(
-      collectViewerReports([{ method: "psi", psiUrl: "  " }]),
-    ).rejects.toThrow("Enter a PageSpeed Insights share URL");
+    await expect(collectViewerReports([{ method: "psi", psiUrl: "  " }])).rejects.toThrow(
+      "Enter a PageSpeed Insights share URL",
+    );
   });
 });

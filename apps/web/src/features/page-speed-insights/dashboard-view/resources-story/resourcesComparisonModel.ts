@@ -7,7 +7,7 @@ import { formatBytes, formatMs } from "@/features/page-speed-insights/shared/for
 
 export type ComparisonUnit = "bytes" | "ms" | "count";
 
-export type ResourcesMetricRow = {
+type ResourcesMetricRow = {
   id: keyof InvestigationMetrics | "requestCount";
   label: string;
   /** Stage this row deep-links to. */
@@ -41,10 +41,7 @@ const METRIC_ROWS: Array<Omit<ResourcesMetricRow, "a" | "b" | "delta">> = [
   { id: "longTaskMs", label: "Long tasks", stage: "main-thread", unit: "ms" },
 ];
 
-function metricValue(
-  report: ResourcesInvestigation,
-  id: ResourcesMetricRow["id"],
-): number | null {
+function metricValue(report: ResourcesInvestigation, id: ResourcesMetricRow["id"]): number | null {
   return id === "requestCount" ? report.requestCount : report.metrics[id];
 }
 
@@ -56,7 +53,9 @@ export function compareResourcesInvestigations(
     const left = metricValue(a, row.id);
     const right = metricValue(b, row.id);
     if (left == null && right == null) return [];
-    return [{ ...row, a: left, b: right, delta: left != null && right != null ? right - left : null }];
+    return [
+      { ...row, a: left, b: right, delta: left != null && right != null ? right - left : null },
+    ];
   });
   const urlsA = new Set(a.suspects.map((suspect) => suspect.url));
   const urlsB = new Set(b.suspects.map((suspect) => suspect.url));

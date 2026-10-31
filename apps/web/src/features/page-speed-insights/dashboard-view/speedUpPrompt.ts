@@ -116,6 +116,18 @@ function topRows(
     .map((row) => row.text);
 }
 
+function urlRows(
+  reports: Report[],
+  auditId: string,
+  weight: (item: TableItem) => number,
+  describe: (url: string, item: TableItem) => string,
+): string[] {
+  return topRows(reports, auditId, weight, (item) => {
+    const url = resourceUrl(item.url);
+    return url ? describe(url, item) : null;
+  });
+}
+
 function auditSummaries(reports: Report[], auditIds: string[]): string[] {
   const multi = reports.length > 1;
   const lines: string[] = [];
@@ -206,21 +218,18 @@ function lcpArea(reports: Report[]): SpeedUpFocusArea | null {
 }
 
 function renderBlockingArea(reports: Report[]): SpeedUpFocusArea | null {
-  const evidence = topRows(
+  const evidence = urlRows(
     reports,
     "render-blocking-insight",
     (item) => num(item.wastedMs) || num(item.totalBytes),
-    (item) =>
-      resourceUrl(item.url) &&
-      `${resourceUrl(item.url)} (${formatBytes(num(item.totalBytes))}, blocks ~${formatMs(num(item.wastedMs))})`,
+    (url, item) =>
+      `${url} (${formatBytes(num(item.totalBytes))}, blocks ~${formatMs(num(item.wastedMs))})`,
   );
-  const cssRows = topRows(
+  const cssRows = urlRows(
     reports,
     "unused-css-rules",
     (item) => num(item.wastedBytes),
-    (item) =>
-      resourceUrl(item.url) &&
-      `Unused CSS: ${resourceUrl(item.url)} (${formatBytes(num(item.wastedBytes))} unused)`,
+    (url, item) => `Unused CSS: ${url} (${formatBytes(num(item.wastedBytes))} unused)`,
   );
   if (evidence.length === 0 && cssRows.length === 0) return null;
   return {
@@ -237,29 +246,23 @@ function renderBlockingArea(reports: Report[]): SpeedUpFocusArea | null {
 
 function javascriptArea(reports: Report[]): SpeedUpFocusArea | null {
   const tbtPoor = metricPoor(reports, "total-blocking-time");
-  const unused = topRows(
+  const unused = urlRows(
     reports,
     "unused-javascript",
     (item) => num(item.wastedBytes),
-    (item) =>
-      resourceUrl(item.url) &&
-      `Unused JS: ${resourceUrl(item.url)} (${formatBytes(num(item.wastedBytes))} unused)`,
+    (url, item) => `Unused JS: ${url} (${formatBytes(num(item.wastedBytes))} unused)`,
   );
-  const bootup = topRows(
+  const bootup = urlRows(
     reports,
     "bootup-time",
     (item) => num(item.total),
-    (item) =>
-      resourceUrl(item.url) &&
-      `Execution time: ${resourceUrl(item.url)} (${formatMs(num(item.total))})`,
+    (url, item) => `Execution time: ${url} (${formatMs(num(item.total))})`,
   );
-  const legacy = topRows(
+  const legacy = urlRows(
     reports,
     "legacy-javascript-insight",
     (item) => num(item.wastedBytes),
-    (item) =>
-      resourceUrl(item.url) &&
-      `Legacy polyfills: ${resourceUrl(item.url)} (${formatBytes(num(item.wastedBytes))})`,
+    (url, item) => `Legacy polyfills: ${url} (${formatBytes(num(item.wastedBytes))})`,
   );
   const evidence = [
     ...(tbtPoor ? auditSummaries(reports, ["total-blocking-time"]) : []),
@@ -324,12 +327,11 @@ function thirdPartyArea(reports: Report[]): SpeedUpFocusArea | null {
 }
 
 function fontArea(reports: Report[]): SpeedUpFocusArea | null {
-  const evidence = topRows(
+  const evidence = urlRows(
     reports,
     "font-display-insight",
     (item) => num(item.wastedMs),
-    (item) =>
-      resourceUrl(item.url) && `${resourceUrl(item.url)} (est. ${formatMs(num(item.wastedMs))})`,
+    (url, item) => `${url} (est. ${formatMs(num(item.wastedMs))})`,
   );
   if (evidence.length === 0) return null;
   return {
@@ -345,13 +347,11 @@ function fontArea(reports: Report[]): SpeedUpFocusArea | null {
 }
 
 function imageArea(reports: Report[]): SpeedUpFocusArea | null {
-  const delivery = topRows(
+  const delivery = urlRows(
     reports,
     "image-delivery-insight",
     (item) => num(item.wastedBytes),
-    (item) =>
-      resourceUrl(item.url) &&
-      `${resourceUrl(item.url)} (${formatBytes(num(item.wastedBytes))} could be saved)`,
+    (url, item) => `${url} (${formatBytes(num(item.wastedBytes))} could be saved)`,
   );
   const unsized = auditSummaries(reports, ["unsized-images", "offscreen-images"]);
   const evidence = [...delivery, ...unsized];
@@ -387,13 +387,12 @@ function clsArea(reports: Report[], fieldClsSlow: boolean): SpeedUpFocusArea | n
 }
 
 function cachingArea(reports: Report[]): SpeedUpFocusArea | null {
-  const evidence = topRows(
+  const evidence = urlRows(
     reports,
     "cache-insight",
     (item) => num(item.wastedBytes),
-    (item) =>
-      resourceUrl(item.url) &&
-      `${resourceUrl(item.url)} (cache ${num(item.cacheLifetimeMs) ? formatDurationMs(num(item.cacheLifetimeMs)) : "none"}, ${formatBytes(num(item.totalBytes))})`,
+    (url, item) =>
+      `${url} (cache ${num(item.cacheLifetimeMs) ? formatDurationMs(num(item.cacheLifetimeMs)) : "none"}, ${formatBytes(num(item.totalBytes))})`,
   );
   if (evidence.length === 0) return null;
   return {

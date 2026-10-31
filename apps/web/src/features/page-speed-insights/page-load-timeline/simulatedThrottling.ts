@@ -23,14 +23,14 @@ export type SimulatedThrottling = {
 };
 
 /** Lighthouse `mobileSlow4G` — what PSI applies for a mobile lab run. */
-export const MOBILE_SLOW_4G: Omit<SimulatedThrottling, "label"> = {
+const MOBILE_SLOW_4G: Omit<SimulatedThrottling, "label"> = {
   rttMs: 150,
   throughputKbps: 1.6 * 1024,
   cpuSlowdownMultiplier: 4,
 };
 
 /** Lighthouse `desktopDense4G`. CPU stays at 1×; the network is still throttled. */
-export const DESKTOP_DENSE_4G: Omit<SimulatedThrottling, "label"> = {
+const DESKTOP_DENSE_4G: Omit<SimulatedThrottling, "label"> = {
   rttMs: 40,
   throughputKbps: 10 * 1024,
   cpuSlowdownMultiplier: 1,
@@ -38,7 +38,7 @@ export const DESKTOP_DENSE_4G: Omit<SimulatedThrottling, "label"> = {
 
 type Anchor = { observed: number; simulated: number };
 
-export type TimedRequest = {
+type TimedRequest = {
   url: string;
   networkRequestTime?: number;
   networkEndTime?: number;
@@ -50,16 +50,16 @@ export type TimedRequest = {
   mimeType?: string;
 };
 
-export type TimedTask = {
+type TimedTask = {
   startTime: number;
   duration: number;
 };
 
-export type TimedFrame = {
+type TimedFrame = {
   timing: number;
 };
 
-export type LcpSubpartTiming = {
+type LcpSubpartTiming = {
   subpart: string;
   label: string;
   duration: number;
@@ -227,7 +227,7 @@ function buildMapTime(input: ClockInput): (observedMs: number) => number {
  * Lantern's TCP slow-start download time. Throughput is kilobits/second, matching
  * Lighthouse throttling settings (`throughputKbps * 1024` bits/second).
  */
-export function simulatedTransferMs(options: {
+function simulatedTransferMs(options: {
   bytes: number;
   rttMs: number;
   throughputKbps: number;

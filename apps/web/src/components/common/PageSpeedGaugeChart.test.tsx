@@ -30,7 +30,6 @@ import {
   GaugeChart,
   HorizontalGaugeChart,
   HorizontalScoreChart,
-  LineChart,
 } from "@/components/common/PageSpeedGaugeChart";
 
 const validMetricData = {
@@ -132,65 +131,6 @@ describe("HorizontalGaugeChart", () => {
       <HorizontalGaugeChart metric="Test" data={dataWithOptional as any} />,
     );
     expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
-  });
-});
-
-describe("LineChart", () => {
-  const baseChartData = [
-    { name: "Good", value: 100, fill: "#0f0" },
-    { name: "NI", value: 200, fill: "#ff0" },
-    { name: "Poor", value: 300, fill: "#f00" },
-  ];
-
-  it("renders segments and a value marker", () => {
-    const { container } = render(<LineChart chartData={baseChartData as any} value={150} />);
-    expect(container.querySelector('[role="img"]')).toBeTruthy();
-    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
-  });
-
-  it("renders when value equals maxValue", () => {
-    const { container } = render(<LineChart chartData={baseChartData as any} value={600} />);
-    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
-  });
-
-  it("renders when value is 0", () => {
-    const { container } = render(<LineChart chartData={baseChartData as any} value={0} />);
-    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
-  });
-
-  it("formats small values correctly when value <= 1", () => {
-    const smallData = [
-      { name: "Good", value: 0.5, fill: "#0f0" },
-      { name: "NI", value: 0.3, fill: "#ff0" },
-      { name: "Poor", value: 0.2, fill: "#f00" },
-    ];
-    const { container } = render(<LineChart chartData={smallData as any} value={0.5} />);
-    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
-    expect(container.textContent).toContain("0.5");
-  });
-
-  it("formats values with toFixed when value > 1", () => {
-    const { container } = render(<LineChart chartData={baseChartData as any} value={200} />);
-    expect(container.textContent).toContain("100");
-    expect(container.textContent).toContain("200");
-  });
-
-  it("positions marker at 100% when value equals maxValue", () => {
-    const { container } = render(<LineChart chartData={baseChartData as any} value={300} />);
-    const marker = container.querySelector('[data-testid="gauge-value-marker"]') as HTMLElement;
-    expect(marker.style.left).toBe("100%");
-  });
-
-  it("positions marker at 0% when value is 0", () => {
-    const { container } = render(<LineChart chartData={baseChartData as any} value={0} />);
-    const marker = container.querySelector('[data-testid="gauge-value-marker"]') as HTMLElement;
-    expect(marker.style.left).toBe("0%");
-  });
-
-  it("positions marker between ends for mid values", () => {
-    const { container } = render(<LineChart chartData={baseChartData as any} value={150} />);
-    const marker = container.querySelector('[data-testid="gauge-value-marker"]') as HTMLElement;
-    expect(marker.style.left).toBe("50%");
   });
 });
 

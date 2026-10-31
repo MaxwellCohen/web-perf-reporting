@@ -8,7 +8,7 @@ import {
 } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
 
-export { isDashboardViewMode, type DashboardViewMode };
+export { isDashboardViewMode };
 
 const STORAGE_KEY = "page-speed-insights:view-mode";
 const DEFAULT_VIEW_MODE: DashboardViewMode = "dashboard";

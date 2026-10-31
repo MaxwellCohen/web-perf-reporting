@@ -61,10 +61,7 @@ const DropdownMenuContent = React.forwardRef<
     <DropdownMenuPrimitive.Content
       ref={ref}
       sideOffset={sideOffset}
-      className={cn(
-        dropdownSubContentStyles,
-        className,
-      )}
+      className={cn(dropdownSubContentStyles, className)}
       {...props}
     />
   </DropdownMenuPrimitive.Portal>
@@ -79,11 +76,7 @@ const DropdownMenuItem = React.forwardRef<
 >(({ className, inset, ...props }, ref) => (
   <DropdownMenuPrimitive.Item
     ref={ref}
-    className={cn(
-      itemStyles,
-      inset && "pl-8",
-      className,
-    )}
+    className={cn(itemStyles, inset && "pl-8", className)}
     {...props}
   />
 ));

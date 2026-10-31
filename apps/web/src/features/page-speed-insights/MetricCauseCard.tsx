@@ -34,13 +34,7 @@ function toTableDataItems(cause: CauseAuditEntry): TableDataItem[] {
   }));
 }
 
-function CauseBody({
-  cause,
-  sources,
-}: {
-  cause: CauseAuditEntry;
-  sources: MetricAuditSource[];
-}) {
+function CauseBody({ cause, sources }: { cause: CauseAuditEntry; sources: MetricAuditSource[] }) {
   const isMainThreadTasks = cause.auditId === "main-thread-tasks";
   const isImageDelivery = cause.auditId === "image-delivery-insight";
   const items = toTableDataItems(cause);
@@ -49,7 +43,9 @@ function CauseBody({
     <div className="space-y-3">
       {!isMainThreadTasks && cause.description ? (
         <div className="text-sm text-muted-foreground">
-          <ReactMarkdown components={descriptionMarkdownComponents}>{cause.description}</ReactMarkdown>
+          <ReactMarkdown components={descriptionMarkdownComponents}>
+            {cause.description}
+          </ReactMarkdown>
         </div>
       ) : null}
       {isMainThreadTasks ? (
@@ -101,7 +97,9 @@ export function MetricCauseCard({
           <CardTitle className="min-w-0 text-base leading-snug">{title}</CardTitle>
         )}
         {savingsLabel ? (
-          <span className="shrink-0 font-mono text-xs font-medium tabular-nums">{savingsLabel}</span>
+          <span className="shrink-0 font-mono text-xs font-medium tabular-nums">
+            {savingsLabel}
+          </span>
         ) : null}
       </div>
       {barPct != null ? (

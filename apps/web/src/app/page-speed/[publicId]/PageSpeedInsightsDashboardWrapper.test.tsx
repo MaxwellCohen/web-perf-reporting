@@ -4,7 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PageSpeedInsightsDashboardContent } from "./PageSpeedInsightsDashboardWrapper";
 
 vi.mock("next/dynamic", () => ({
-  default: (loader: () => Promise<ComponentType<unknown> | Record<string, ComponentType<unknown>>>) => {
+  default: (
+    loader: () => Promise<ComponentType<unknown> | Record<string, ComponentType<unknown>>>,
+  ) => {
     return function DynamicComponent(props: Record<string, unknown>) {
       const [Component, setComponent] = useState<ComponentType<unknown> | null>(null);
 
@@ -124,4 +126,3 @@ describe("PageSpeedInsightsDashboardContent", () => {
     expect(container.firstChild).toMatchSnapshot();
   });
 });
-

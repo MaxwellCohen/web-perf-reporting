@@ -25,8 +25,7 @@ function getResourceUrlParts(url: string): ResourceUrlParts {
     return { primary: parsed.path, secondary: parsed.hostname };
   }
 
-  const directory =
-    segments.length > 1 ? `/${segments.slice(0, -1).join("/")}/` : "/";
+  const directory = segments.length > 1 ? `/${segments.slice(0, -1).join("/")}/` : "/";
 
   return {
     primary: filename,

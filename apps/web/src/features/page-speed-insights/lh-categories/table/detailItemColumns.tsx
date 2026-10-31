@@ -1,6 +1,5 @@
-import type { StockCellContext, StockColumnDef, StockHeader, StockHeaderContext, StockHeaderGroup, StockRow, StockTable, StockCell } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import type { StockColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { ItemValue, OpportunityItem, TableItem } from "@/lib/schema";
-import { ColumnDef } from "@tanstack/react-table";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import { RenderTableValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import {

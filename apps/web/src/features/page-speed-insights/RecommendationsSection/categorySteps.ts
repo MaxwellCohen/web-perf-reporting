@@ -165,11 +165,11 @@ function firstMatchingRule(auditId: string): CategoryRule | undefined {
   return CATEGORY_RULES.find((rule) => rule.match(auditId));
 }
 
-export function getCategoryFromAuditId(auditId: string): string {
+function getCategoryFromAuditId(auditId: string): string {
   return firstMatchingRule(auditId)?.category ?? "Performance";
 }
 
-export function getGenericStepsForCategory(
+function getGenericStepsForCategory(
   auditId: string,
   specificRecs: ActionableStep[],
 ): ActionableStep[] {

@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  createTimelineClock,
-  resolveSimulatedThrottling,
-  simulatedTransferMs,
-} from "./simulatedThrottling";
+import { createTimelineClock, resolveSimulatedThrottling } from "./simulatedThrottling";
 
 describe("resolveSimulatedThrottling", () => {
   it("uses PSI mobile and desktop presets when the report omits throttling settings", () => {
@@ -45,36 +41,6 @@ describe("resolveSimulatedThrottling", () => {
       resolveSimulatedThrottling({ throttlingMethod: "provided", formFactor: "desktop" }),
     ).toBeNull();
     expect(resolveSimulatedThrottling(undefined)).toBeNull();
-  });
-});
-
-describe("simulatedTransferMs", () => {
-  it("makes a large download much slower on Slow 4G than a small one", () => {
-    const shared = {
-      rttMs: 150,
-      throughputKbps: 1.6 * 1024,
-      serverLatencyMs: 0,
-      cold: false,
-      ssl: true,
-      h2: true,
-    };
-    const small = simulatedTransferMs({ ...shared, bytes: 10_000 });
-    const large = simulatedTransferMs({ ...shared, bytes: 1_000_000 });
-    expect(large).toBeGreaterThan(small);
-    expect(large).toBeGreaterThan(1000);
-  });
-
-  it("adds connection setup and server time for a cold document", () => {
-    const duration = simulatedTransferMs({
-      bytes: 70_973,
-      rttMs: 150,
-      throughputKbps: 1.6 * 1024,
-      serverLatencyMs: 94,
-      cold: true,
-      ssl: true,
-      h2: true,
-    });
-    expect(duration).toBeGreaterThan(94 + 150);
   });
 });
 

@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
-  applyDashboardSearchPatch,
   narrowLabelFilter,
   parseDashboardSearch,
   patchDashboardSearch,
@@ -77,67 +76,11 @@ describe("dashboardSearch", () => {
     expect(parseDashboardSearch("?stage=nope").stage).toBe("");
   });
 
-  it("writes and clears the resources investigation deep link", () => {
-    const next = applyDashboardSearchPatch(new URLSearchParams("tab=resources"), {
-      stage: "main-thread",
-      suspect: "https://example.com/app.js",
-    });
-    expect(parseDashboardSearch(`?${next.toString()}`)).toMatchObject({
-      stage: "main-thread",
-      suspect: "https://example.com/app.js",
-    });
-
-    const cleared = applyDashboardSearchPatch(next, { stage: null, suspect: null });
-    expect(cleared.has("stage")).toBe(false);
-    expect(cleared.has("suspect")).toBe(false);
-  });
-
   it("ignores unknown layout and tab values", () => {
     expect(parseDashboardSearch("?view=compact&tab=nope")).toMatchObject({
       view: null,
       tab: "overview",
     });
-  });
-
-  it("omits default filters and keeps unrelated params", () => {
-    const next = applyDashboardSearchPatch(new URLSearchParams("utm=spring&tab=timeline"), {
-      view: "dashboard",
-      tab: "overview",
-      labels: [],
-      sort: "start",
-      height: "default",
-      query: "",
-      open: null,
-      tasks: ["blocking", "long-task"],
-    });
-
-    expect(next.get("utm")).toBe("spring");
-    expect(next.get("view")).toBe("dashboard");
-    expect(next.has("tab")).toBe(false);
-    expect(next.getAll("tasks")).toEqual(["blocking", "long-task"]);
-  });
-
-  it("writes an explicit collapsed accordion and cleared task filters", () => {
-    const next = applyDashboardSearchPatch(new URLSearchParams("open=cwv&tasks=blocking"), {
-      open: [],
-      tasks: [],
-    });
-
-    expect(next.getAll("open")).toEqual([""]);
-    expect(next.getAll("tasks")).toEqual([""]);
-    expect(parseDashboardSearch(`?${next.toString()}`)).toMatchObject({ open: [], tasks: [] });
-  });
-
-  it("writes waterfall signals and clears them", () => {
-    const next = applyDashboardSearchPatch(new URLSearchParams("tab=timeline"), {
-      signals: ["chain", "long-task"],
-    });
-    expect(next.getAll("signal")).toEqual(["chain", "long-task"]);
-    expect(parseDashboardSearch(`?${next.toString()}`).signals).toEqual(["chain", "long-task"]);
-
-    const cleared = applyDashboardSearchPatch(next, { signals: [] });
-    expect(cleared.has("signal")).toBe(false);
-    expect(parseDashboardSearch(`?${cleared.toString()}`).signals).toEqual([]);
   });
 
   it("treats a full label set as no filter", () => {

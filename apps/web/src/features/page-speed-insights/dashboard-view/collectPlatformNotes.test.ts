@@ -35,7 +35,11 @@ describe("collectPlatformNotes", () => {
         },
       },
       {
-        featureId: { type: "link", text: "field-sizing", url: "https://webstatus.dev/features/field-sizing" },
+        featureId: {
+          type: "link",
+          text: "field-sizing",
+          url: "https://webstatus.dev/features/field-sizing",
+        },
         displayStatus: {
           type: "baseline-status",
           status: "low",
@@ -66,7 +70,10 @@ describe("collectPlatformNotes", () => {
 
     expect(notes?.baseline?.asOf).toBe("2026-09-17");
     expect(notes?.baseline?.counts).toEqual({ limited: 1, newly: 1, widely: 1 });
-    expect(notes?.baseline?.highlighted.map((feature) => feature.id)).toEqual(["popover", "field-sizing"]);
+    expect(notes?.baseline?.highlighted.map((feature) => feature.id)).toEqual([
+      "popover",
+      "field-sizing",
+    ]);
     expect(notes?.baseline?.highlighted[0]?.href).toBe("https://webstatus.dev/features/popover");
     expect(notes?.baseline?.newest).toEqual({ id: "field-sizing", year: "2026" });
     expect(notes?.csp).toEqual([]);
@@ -92,7 +99,9 @@ describe("collectPlatformNotes", () => {
               severity: "Syntax",
               subItems: {
                 type: "subitems",
-                items: [{ description: "Missing object-src", directive: "object-src", severity: "High" }],
+                items: [
+                  { description: "Missing object-src", directive: "object-src", severity: "High" },
+                ],
               },
             },
           ],

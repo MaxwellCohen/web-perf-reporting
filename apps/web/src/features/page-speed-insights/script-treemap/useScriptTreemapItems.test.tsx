@@ -8,7 +8,11 @@ vi.mock("@/features/page-speed-insights/PageSpeedContext", () => ({
 
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
 
-function HookProbe({ onResult }: { onResult: (value: ReturnType<typeof useScriptTreemapItems>) => void }) {
+function HookProbe({
+  onResult,
+}: {
+  onResult: (value: ReturnType<typeof useScriptTreemapItems>) => void;
+}) {
   onResult(useScriptTreemapItems());
   return null;
 }
@@ -16,8 +20,16 @@ function HookProbe({ onResult }: { onResult: (value: ReturnType<typeof useScript
 describe("useScriptTreemapItems", () => {
   it("returns empty when no page speed items", () => {
     vi.mocked(usePageSpeedItems).mockReturnValue([]);
-    let result: ReturnType<typeof useScriptTreemapItems> = [{ label: "x", treeData: { type: "treemap-data", nodes: [] } }];
-    render(<HookProbe onResult={(value) => { result = value; }} />);
+    let result: ReturnType<typeof useScriptTreemapItems> = [
+      { label: "x", treeData: { type: "treemap-data", nodes: [] } },
+    ];
+    render(
+      <HookProbe
+        onResult={(value) => {
+          result = value;
+        }}
+      />,
+    );
     expect(result).toEqual([]);
   });
 
@@ -53,7 +65,13 @@ describe("useScriptTreemapItems", () => {
     ] as never);
 
     let result: ReturnType<typeof useScriptTreemapItems> = [];
-    render(<HookProbe onResult={(value) => { result = value; }} />);
+    render(
+      <HookProbe
+        onResult={(value) => {
+          result = value;
+        }}
+      />,
+    );
     expect(result).toHaveLength(1);
     expect(result[0]?.label).toBe("Desktop");
   });

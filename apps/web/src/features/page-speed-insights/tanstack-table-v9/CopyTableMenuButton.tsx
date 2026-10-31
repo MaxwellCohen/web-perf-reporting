@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
-export type CopyTableFormat = "csv" | "markdown";
+type CopyTableFormat = "csv" | "markdown";
 
 type CopyTableMenuButtonProps = Omit<ButtonProps, "onClick"> & {
   getCopyText: (format: CopyTableFormat) => string | null;

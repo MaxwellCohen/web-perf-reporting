@@ -32,7 +32,7 @@ function mergeActionableStepIntoMap(
   }
 }
 
-export function collectSpecificRecommendations(
+function collectSpecificRecommendations(
   auditId: string,
   auditEntries: AuditEntry[],
 ): ActionableStep[] {
@@ -68,7 +68,7 @@ export function collectSpecificRecommendations(
   }));
 }
 
-export function combineAndDeduplicateSteps(
+function combineAndDeduplicateSteps(
   specificRecs: ActionableStep[],
   genericSteps: ActionableStep[],
 ): ActionableStep[] {

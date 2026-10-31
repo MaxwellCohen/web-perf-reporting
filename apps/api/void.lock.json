@@ -16,10 +16,45 @@
         "binding": "RESULTS_BUCKET",
         "bucket_name": "api-results"
       }
-    ]
+    ],
+    "previews": {
+      "kv_namespaces": [
+        {
+          "binding": "KV",
+          "id": "40c6d96ec7d14fc4871a056b58c43441"
+        }
+      ],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_id": "7401df6e-b3f2-41bc-a6d3-792817284e9d"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "RESULTS_BUCKET",
+          "bucket_name": "api-results-preview"
+        }
+      ],
+      "queues": {
+        "producers": [
+          {
+            "binding": "QUEUE_CRUX",
+            "queue": "crux-preview"
+          },
+          {
+            "binding": "QUEUE_PAGESPEED",
+            "queue": "pagespeed-preview"
+          }
+        ]
+      }
+    }
   },
   "resolved": {
     "name": "web-perf-report-api",
+    "workers_dev": true,
+    "preview_urls": true,
+    "routes": [],
     "kv_namespaces": [
       {
         "binding": "KV",
@@ -41,9 +76,38 @@
         "migrations_dir": "./db/migrations"
       }
     ],
-    "workers_dev": true,
-    "preview_urls": true,
-    "routes": []
+    "previews": {
+      "kv_namespaces": [
+        {
+          "binding": "KV",
+          "id": "40c6d96ec7d14fc4871a056b58c43441"
+        }
+      ],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_id": "7401df6e-b3f2-41bc-a6d3-792817284e9d"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "RESULTS_BUCKET",
+          "bucket_name": "api-results-preview"
+        }
+      ],
+      "queues": {
+        "producers": [
+          {
+            "binding": "QUEUE_CRUX",
+            "queue": "crux-preview"
+          },
+          {
+            "binding": "QUEUE_PAGESPEED",
+            "queue": "pagespeed-preview"
+          }
+        ]
+      }
+    }
   },
-  "text": "{\n  \"name\": \"web-perf-report-api\",\n  \"kv_namespaces\": [\n    {\n      \"binding\": \"KV\",\n      \"id\": \"a243d4365c5542e789045e74791afdda\"\n    }\n  ],\n  \"r2_buckets\": [\n    {\n      \"binding\": \"RESULTS_BUCKET\",\n      \"bucket_name\": \"api-results\"\n    }\n  ],\n  \"account_id\": \"5663f61196617f243adfcd6b36b24dcc\",\n  \"d1_databases\": [\n    {\n      \"binding\": \"DB\",\n      \"database_name\": \"web-perf-report-api-db\",\n      \"database_id\": \"99a5f0e9-c245-40fc-afaa-52249441da0b\",\n      \"migrations_dir\": \"./db/migrations\"\n    }\n  ],\n  \"workers_dev\": true,\n  \"preview_urls\": true,\n  \"routes\": []\n}\n"
+  "text": "{\n  \"name\": \"web-perf-report-api\",\n  \"workers_dev\": true,\n  \"preview_urls\": true,\n  \"routes\": [],\n  \"kv_namespaces\": [\n    {\n      \"binding\": \"KV\",\n      \"id\": \"a243d4365c5542e789045e74791afdda\"\n    }\n  ],\n  \"r2_buckets\": [\n    {\n      \"binding\": \"RESULTS_BUCKET\",\n      \"bucket_name\": \"api-results\"\n    }\n  ],\n  \"account_id\": \"5663f61196617f243adfcd6b36b24dcc\",\n  \"d1_databases\": [\n    {\n      \"binding\": \"DB\",\n      \"database_name\": \"web-perf-report-api-db\",\n      \"database_id\": \"99a5f0e9-c245-40fc-afaa-52249441da0b\",\n      \"migrations_dir\": \"./db/migrations\"\n    }\n  ],\n  \"previews\": {\n    \"kv_namespaces\": [\n      {\n        \"binding\": \"KV\",\n        \"id\": \"40c6d96ec7d14fc4871a056b58c43441\"\n      }\n    ],\n    \"d1_databases\": [\n      {\n        \"binding\": \"DB\",\n        \"database_id\": \"7401df6e-b3f2-41bc-a6d3-792817284e9d\"\n      }\n    ],\n    \"r2_buckets\": [\n      {\n        \"binding\": \"RESULTS_BUCKET\",\n        \"bucket_name\": \"api-results-preview\"\n      }\n    ],\n    \"queues\": {\n      \"producers\": [\n        {\n          \"binding\": \"QUEUE_CRUX\",\n          \"queue\": \"crux-preview\"\n        },\n        {\n          \"binding\": \"QUEUE_PAGESPEED\",\n          \"queue\": \"pagespeed-preview\"\n        }\n      ]\n    }\n  }\n}\n"
 }

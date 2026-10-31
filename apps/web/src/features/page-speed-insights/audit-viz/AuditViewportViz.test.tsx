@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render } from "@testing-library/react";
-import { AuditViewportViz, viewportContentFromSnippet } from "./AuditViewportViz";
+import { AuditViewportViz } from "./AuditViewportViz";
 import { makeRow } from "./performanceVizTestUtils";
 
 const node = (content: string) => ({
@@ -8,13 +8,6 @@ const node = (content: string) => ({
 });
 
 describe("AuditViewportViz", () => {
-  it("parses content from snippet", () => {
-    expect(viewportContentFromSnippet('<meta name="viewport" content="width=device-width">')).toBe(
-      "width=device-width",
-    );
-    expect(viewportContentFromSnippet(undefined)).toBeUndefined();
-  });
-
   it("renders one report", () => {
     const { container } = render(
       <AuditViewportViz rows={[makeRow("viewport-insight", [node("width=device-width")])]} />,

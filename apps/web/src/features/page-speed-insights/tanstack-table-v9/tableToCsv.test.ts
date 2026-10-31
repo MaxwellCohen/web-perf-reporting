@@ -38,9 +38,7 @@ describe("tableToCsv", () => {
 
     const { result } = renderHook(() => useSimpleTable({ data, columns: columns as never }));
 
-    expect(tableToCsv(result.current as never)).toBe(
-      "ID,Name,Score\n1,Alpha,90\n2,Beta,75",
-    );
+    expect(tableToCsv(result.current as never)).toBe("ID,Name,Score\n1,Alpha,90\n2,Beta,75");
   });
 
   it("excludes the expander column", () => {

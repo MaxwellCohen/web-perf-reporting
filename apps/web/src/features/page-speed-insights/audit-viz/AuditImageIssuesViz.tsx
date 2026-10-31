@@ -37,7 +37,7 @@ function str(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value : undefined;
 }
 
-export function imageIssueDescription(auditId: string, item: DetailItem): string {
+function imageIssueDescription(auditId: string, item: DetailItem): string {
   const parts: string[] = [];
   for (const [key, label] of DETAIL_KEYS[auditId] ?? []) {
     const value = str(item[key]);

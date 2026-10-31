@@ -15,7 +15,7 @@ export const booleanFilterFn: AppFilterFn = (row, columnId, filterValue, _addMet
 /**
  * Standard filter function for string-based filtering (case-insensitive)
  */
-export const includesStringFilter: AppFilterFn = (row, columnId, filterValue, _addMeta) => {
+const includesStringFilter: AppFilterFn = (row, columnId, filterValue, _addMeta) => {
   const cellValue = String(row.getValue(columnId) || "").toLowerCase();
   const filter = String(filterValue || "").toLowerCase();
   return cellValue.includes(filter);
@@ -24,7 +24,7 @@ export const includesStringFilter: AppFilterFn = (row, columnId, filterValue, _a
 /**
  * Standard filter function for numeric range filtering
  */
-export const inNumberRangeFilter: AppFilterFn = (row, columnId, filterValue, _addMeta) => {
+const inNumberRangeFilter: AppFilterFn = (row, columnId, filterValue, _addMeta) => {
   const cellValue = Number(row.getValue(columnId)) || 0;
   const [min, max] = (filterValue as [number, number]) || [0, Infinity];
   return cellValue >= min && cellValue <= max;

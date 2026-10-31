@@ -2,7 +2,14 @@
 
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import { shortUrl } from "@/features/page-speed-insights/shared/format";
-import { Attribution, groupAcross, hasAnyItems, plural, reportsOf, textOf } from "./qualityVizShared";
+import {
+  Attribution,
+  groupAcross,
+  hasAnyItems,
+  plural,
+  reportsOf,
+  textOf,
+} from "./qualityVizShared";
 
 export function AuditLinkTextViz({ rows }: { rows: DetailTableItem[] }) {
   const reports = reportsOf(rows);
@@ -22,8 +29,11 @@ export function AuditLinkTextViz({ rows }: { rows: DetailTableItem[] }) {
   return (
     <div className="w-full min-w-0 space-y-1.5">
       <p className="text-xs text-muted-foreground">
-        {plural(groups.reduce((n, g) => n + g.count, 0), "link")} with non-descriptive text ·{" "}
-        {plural(groups.length, "distinct label")}
+        {plural(
+          groups.reduce((n, g) => n + g.count, 0),
+          "link",
+        )}{" "}
+        with non-descriptive text · {plural(groups.length, "distinct label")}
       </p>
       <ul className="divide-y overflow-hidden rounded-md border text-sm">
         {groups.map((group) => (

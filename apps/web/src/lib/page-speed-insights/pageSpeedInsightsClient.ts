@@ -118,7 +118,9 @@ export function fetchPageSpeedInsightsByPublicId(
   publicId: string,
 ): PromiseWithStatus<PageSpeedLoadResult> {
   if (!cache.has(publicId)) {
-    const promise = getPageSpeedInsightsByPublicId(publicId) as PromiseWithStatus<PageSpeedLoadResult>;
+    const promise = getPageSpeedInsightsByPublicId(
+      publicId,
+    ) as PromiseWithStatus<PageSpeedLoadResult>;
     promise.status = "pending";
     promise.then(
       (value) => {
@@ -135,13 +137,4 @@ export function fetchPageSpeedInsightsByPublicId(
     cache.set(publicId, promise);
   }
   return cache.get(publicId)!;
-}
-
-/** Test helper / refresh: drop a cached Promise so the next fetch starts fresh. */
-export function clearPageSpeedInsightsByPublicIdCache(publicId?: string) {
-  if (publicId === undefined) {
-    cache.clear();
-    return;
-  }
-  cache.delete(publicId);
 }

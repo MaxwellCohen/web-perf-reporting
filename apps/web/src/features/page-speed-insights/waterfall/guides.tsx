@@ -1,5 +1,8 @@
 import { formatMs } from "@/features/page-speed-insights/shared/format";
-import type { Rating, TimelineEvent } from "@/features/page-speed-insights/page-load-timeline/types";
+import type {
+  Rating,
+  TimelineEvent,
+} from "@/features/page-speed-insights/page-load-timeline/types";
 import { isIntervalMoment } from "@/features/page-speed-insights/page-load-timeline/clusterOverlappingMoments";
 import { cn } from "@/lib/utils";
 
@@ -80,11 +83,7 @@ function guideLabelClass(guide: WaterfallGuide): string {
 }
 
 /** Stagger labels that sit within ~6% of each other so they don't collide. */
-function guideLabelLanes(
-  guides: WaterfallGuide[],
-  startMs: number,
-  windowMs: number,
-): number[] {
+function guideLabelLanes(guides: WaterfallGuide[], startMs: number, windowMs: number): number[] {
   const lanes: number[] = [];
   const occupied: { left: number; lane: number }[] = [];
   const minGapPct = 6;
@@ -118,11 +117,7 @@ export function GuideOverlay({
   if (!guides.length || range <= 0) return null;
 
   return (
-    <div
-      className="pointer-events-none absolute inset-0 z-1"
-      data-testid={testId}
-      aria-hidden
-    >
+    <div className="pointer-events-none absolute inset-0 z-1" data-testid={testId} aria-hidden>
       {guides.map((guide) => {
         const leftPct = ((guide.timeMs - minStart) / range) * 100;
         if (leftPct < 0 || leftPct > 100) return null;
@@ -250,26 +245,12 @@ export function guidesFromMilestones(milestones?: WaterfallMilestones): Waterfal
   return guides;
 }
 
-export function getMilestoneItems(milestones?: WaterfallMilestones) {
+function getMilestoneItems(milestones?: WaterfallMilestones) {
   return guidesFromMilestones(milestones).map((guide) => ({
     key: guide.id === "render-fcp" ? "fcp" : guide.id === "sub-lcp" ? "lcp" : "dcl",
     label: guide.label,
     value: guide.timeMs,
   }));
-}
-
-export function MilestoneOverlay({
-  minStart,
-  maxEnd,
-  milestones,
-}: {
-  minStart: number;
-  maxEnd: number;
-  milestones?: WaterfallMilestones;
-}) {
-  return (
-    <GuideOverlay minStart={minStart} maxEnd={maxEnd} guides={guidesFromMilestones(milestones)} />
-  );
 }
 
 export function MilestoneLegend({ milestones }: { milestones?: WaterfallMilestones }) {
@@ -293,9 +274,7 @@ export function MilestoneLegend({ milestones }: { milestones?: WaterfallMileston
           className="inline-flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground"
           title={`${item.label}: ${formatMs(item.value)}`}
         >
-          <span
-            className={cn("h-2 w-2 shrink-0 rounded-full", DOT[item.key] ?? "bg-primary")}
-          />
+          <span className={cn("h-2 w-2 shrink-0 rounded-full", DOT[item.key] ?? "bg-primary")} />
           {item.label}
           <span className="tabular-nums font-normal">{formatMs(item.value)}</span>
         </span>

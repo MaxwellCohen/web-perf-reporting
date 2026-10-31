@@ -36,7 +36,7 @@ function labelFor(item: PageSpeedInsights, index: number): string {
   return `Report ${index + 1}`;
 }
 
-export function toDashboardItems(body: unknown): PageSpeedDashboardItem[] {
+function toDashboardItems(body: unknown): PageSpeedDashboardItem[] {
   const entries = Array.isArray(body) ? body : [body];
   return entries.flatMap((entry, index) => {
     const item = toPsi(entry);

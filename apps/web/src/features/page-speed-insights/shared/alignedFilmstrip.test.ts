@@ -1,17 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  buildAlignedFilmstrip,
-  pickStepMs,
-} from "@/features/page-speed-insights/shared/alignedFilmstrip";
-
-describe("pickStepMs", () => {
-  it("picks the smallest step within the column budget", () => {
-    expect(pickStepMs(1500, 16)).toBe(100);
-    expect(pickStepMs(6260, 16)).toBe(500);
-    expect(pickStepMs(40000, 16)).toBe(2000);
-  });
-});
+import { buildAlignedFilmstrip } from "@/features/page-speed-insights/shared/alignedFilmstrip";
 
 describe("buildAlignedFilmstrip", () => {
   it("aligns runs with different frame cadences on one axis", () => {

@@ -13,7 +13,7 @@ export type AlignedCompareRow = {
  * Snap to the same precision as `formatMs` so labels like "1.32 s" read the same
  * even when raw ms differ slightly (e.g. 1316 vs 1324).
  */
-export function alignTimeBucketMs(timeMs: number): number {
+function alignTimeBucketMs(timeMs: number): number {
   if (!Number.isFinite(timeMs)) return 0;
   const abs = Math.abs(timeMs);
   if (abs < 1000) return Math.round(timeMs);
@@ -22,7 +22,7 @@ export function alignTimeBucketMs(timeMs: number): number {
 }
 
 /** Same step across runs: ids minus their per-run index (`net-3` → `net`). */
-export function compareMatchKey(event: TimelineEvent): string {
+function compareMatchKey(event: TimelineEvent): string {
   return `${event.phaseId}:${event.id.replace(/-\d+$/, "")}`;
 }
 
@@ -64,9 +64,7 @@ export function buildAlignedCompareRows(
   for (let i = a.length - 1; i >= 0; i--) {
     for (let j = b.length - 1; j >= 0; j--) {
       lcs[i][j] =
-        aKeys[i] === bKeys[j]
-          ? lcs[i + 1][j + 1] + 1
-          : Math.max(lcs[i + 1][j], lcs[i][j + 1]);
+        aKeys[i] === bKeys[j] ? lcs[i + 1][j + 1] + 1 : Math.max(lcs[i + 1][j], lcs[i][j + 1]);
     }
   }
 

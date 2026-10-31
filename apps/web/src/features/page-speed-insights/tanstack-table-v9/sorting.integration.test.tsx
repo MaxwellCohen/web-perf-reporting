@@ -1,6 +1,9 @@
 import { renderHook, act } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { useStandardTable, type StandardColumnDef } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import {
+  useStandardTable,
+  type StandardColumnDef,
+} from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 
 type Row = { name: string; score: number };

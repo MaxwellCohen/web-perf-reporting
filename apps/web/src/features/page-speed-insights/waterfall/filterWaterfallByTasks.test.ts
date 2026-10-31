@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { allTaskFilters } from "@/features/page-speed-insights/page-load-timeline/filterTimelineMoments";
+import { TASK_FILTERS } from "@/features/page-speed-insights/page-load-timeline/filterTimelineMoments";
 import { filterWaterfallRowsByTasks } from "@/features/page-speed-insights/waterfall/filterWaterfallByTasks";
 import type { WaterfallRow } from "@/features/page-speed-insights/waterfall/waterfallData";
 
@@ -38,7 +38,7 @@ describe("filterWaterfallRowsByTasks", () => {
         segments: [{ id: "t0", start: 0, end: 60, taskKind: "long" as const }],
       },
     ];
-    expect(filterWaterfallRowsByTasks(rows, allTaskFilters())).toHaveLength(3);
+    expect(filterWaterfallRowsByTasks(rows, new Set(TASK_FILTERS))).toHaveLength(3);
   });
 
   it("hides non-blocking requests and long tasks when those filters are off", () => {

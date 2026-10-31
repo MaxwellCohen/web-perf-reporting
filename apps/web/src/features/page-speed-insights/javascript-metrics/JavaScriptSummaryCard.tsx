@@ -23,6 +23,10 @@ export function JavaScriptSummaryCard({ stats }: JavaScriptSummaryCardProps) {
     totalResourceSize: s.totalResourceSize,
   }));
   return (
-    <BytesCountSummaryCard title="JavaScript Summary" countColumnTitle="Total Scripts" rows={rows} />
+    <BytesCountSummaryCard
+      title="JavaScript Summary"
+      countColumnTitle="Total Scripts"
+      rows={rows}
+    />
   );
 }

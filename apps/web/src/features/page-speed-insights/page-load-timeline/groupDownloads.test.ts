@@ -2,11 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { CombinedRequest } from "./collectTimelineSources";
 import { groupDownloads } from "./groupDownloads";
 
-function request(
-  url: string,
-  resourceType: string,
-  networkRequestTime: number,
-): CombinedRequest {
+function request(url: string, resourceType: string, networkRequestTime: number): CombinedRequest {
   return {
     url,
     resourceType,

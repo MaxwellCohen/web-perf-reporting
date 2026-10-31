@@ -3,7 +3,7 @@ import { formatBytes, formatMs } from "@/features/page-speed-insights/shared/for
 
 const PRIORITY_ORDER = ["high", "medium", "low"] as const;
 
-export type PriorityCount = {
+type PriorityCount = {
   priority: Recommendation["priority"];
   count: number;
 };
@@ -17,7 +17,7 @@ export type LargestSaving = {
   metric?: string;
 };
 
-export type RecommendationsLead = {
+type RecommendationsLead = {
   magnitude: string;
   sentence: string;
 };
@@ -30,9 +30,9 @@ export type RecommendationsStoryFacts = {
   lead: RecommendationsLead;
 };
 
-export type SavingsKind = "ms" | "bytes" | "other";
+type SavingsKind = "ms" | "bytes" | "other";
 
-export function savingsKind(unit: string | undefined): SavingsKind {
+function savingsKind(unit: string | undefined): SavingsKind {
   const normalized = unit?.toLowerCase() ?? "";
   if (normalized.includes("ms") || normalized.includes("millisecond")) return "ms";
   if (normalized.includes("byte")) return "bytes";
@@ -69,11 +69,7 @@ function buildLead({
 }): RecommendationsLead {
   const high = counts.find((item) => item.priority === "high")?.count ?? 0;
   const magnitude =
-    milliseconds > 0
-      ? formatMs(milliseconds)
-      : bytes > 0
-        ? formatBytes(bytes)
-        : String(total);
+    milliseconds > 0 ? formatMs(milliseconds) : bytes > 0 ? formatBytes(bytes) : String(total);
 
   const focus =
     high > 0
@@ -86,10 +82,7 @@ function buildLead({
 }
 
 /** Peak savings among peers that share the same unit family (ms or bytes). */
-export function peerMaxSavingsFor(
-  recommendation: Recommendation,
-  peers: Recommendation[],
-): number {
+export function peerMaxSavingsFor(recommendation: Recommendation, peers: Recommendation[]): number {
   const kind = savingsKind(recommendation.impact?.unit);
   if (kind === "other") return 0;
   return peers.reduce((max, peer) => {

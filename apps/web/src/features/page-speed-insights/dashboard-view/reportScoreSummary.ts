@@ -6,7 +6,7 @@ import {
   type MetricAuditId,
 } from "@/features/page-speed-insights/metricCauseAudits";
 
-export type ScoreTone = "good" | "average" | "poor" | "unknown";
+type ScoreTone = "good" | "average" | "poor" | "unknown";
 
 export type CategoryScore = {
   id: string;
@@ -44,7 +44,7 @@ function toScore(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
-export function scoreTone(score: number | null | undefined): ScoreTone {
+function scoreTone(score: number | null | undefined): ScoreTone {
   if (typeof score !== "number") return "unknown";
   if (score >= 0.9) return "good";
   if (score >= 0.5) return "average";
@@ -65,7 +65,11 @@ function performanceWeightByAuditId(
   const weights = new Map<string, number>();
   if (!auditRefs) return weights;
   for (const ref of auditRefs) {
-    if (typeof ref.id === "string" && typeof ref.weight === "number" && Number.isFinite(ref.weight)) {
+    if (
+      typeof ref.id === "string" &&
+      typeof ref.weight === "number" &&
+      Number.isFinite(ref.weight)
+    ) {
       weights.set(ref.id, ref.weight);
     }
   }

@@ -1,7 +1,6 @@
 import React from "react";
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ScoreDisplayModes } from "@/features/page-speed-insights/ScoreDisplay";
 
 let pageSpeedItems: unknown[] = [];
 
@@ -134,7 +133,7 @@ function metricAudit(id: string, title: string, extras: Record<string, unknown> 
     title,
     description: `${title} description`,
     score: 0.8,
-    scoreDisplayMode: ScoreDisplayModes.NUMERIC,
+    scoreDisplayMode: "numeric",
     displayValue: "1.0 s",
     ...extras,
   };
@@ -463,8 +462,8 @@ describe("CWVMetricsComponent", () => {
     });
 
     const section = container.querySelector('[data-value="cwv-cause-first-contentful-paint"]');
-    const causeIds = [...(section?.querySelectorAll('[data-testid^="cause-"]') ?? [])].map(
-      (el) => el.getAttribute("data-testid"),
+    const causeIds = [...(section?.querySelectorAll('[data-testid^="cause-"]') ?? [])].map((el) =>
+      el.getAttribute("data-testid"),
     );
     expect(causeIds).toEqual([
       "cause-render-blocking-insight",
@@ -572,7 +571,9 @@ describe("CWVMetricsComponent", () => {
 
     const section = container.querySelector('[data-value="cwv-cause-first-contentful-paint"]');
     expect(section?.querySelector('[data-testid="fcp-screenshot"]')).not.toBeNull();
-    expect(section?.querySelector('[data-testid="metric-value-viz"]')?.textContent).toContain("Good");
+    expect(section?.querySelector('[data-testid="metric-value-viz"]')?.textContent).toContain(
+      "Good",
+    );
     expect(section?.textContent).toContain("1.80 s");
     expect(section?.textContent).toContain("600 ms - Good");
     expect(section?.textContent).not.toContain("Related audits");
@@ -590,7 +591,11 @@ describe("CWVMetricsComponent", () => {
               "first-contentful-paint": metricAudit(
                 "first-contentful-paint",
                 "First Contentful Paint",
-                { numericValue: 1200, displayValue: "1.2 s", description: "FCP measures first paint." },
+                {
+                  numericValue: 1200,
+                  displayValue: "1.2 s",
+                  description: "FCP measures first paint.",
+                },
               ),
               "render-blocking-insight": causeAudit(
                 "render-blocking-insight",

@@ -11,8 +11,6 @@ import { AuditNodeFindingsViz, isNodeFindingsAudit } from "./AuditNodeFindingsVi
 import { AuditSeoProblemsViz, SEO_PROBLEM_AUDIT_IDS } from "./AuditSeoProblemsViz";
 import { AuditThirdPartyCookiesViz } from "./AuditThirdPartyCookiesViz";
 
-export { isNodeFindingsAudit };
-
 export function QualityAuditViz({ rows }: { rows: DetailTableItem[] }) {
   const auditId = getAuditId(rows);
   if (!auditId) return null;

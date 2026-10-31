@@ -81,25 +81,19 @@ describe("StringFilterHeader", () => {
 
   it("renders filter UI with column", () => {
     const column = createColumnMock();
-    const { container } = render(
-      <StringFilterHeader column={column as never} name="Name" />,
-    );
+    const { container } = render(<StringFilterHeader column={column as never} name="Name" />);
     expect(container.firstChild).toMatchSnapshot();
   });
 
   it("renders with filter value", () => {
     const column = createColumnMock({ getFilterValue: () => "test" });
-    const { container } = render(
-      <StringFilterHeader column={column as never} name="Host" />,
-    );
+    const { container } = render(<StringFilterHeader column={column as never} name="Host" />);
     expect(container.firstChild).toMatchSnapshot();
   });
 
   it("calls setFilterValue when clear button is clicked", () => {
     const column = createColumnMock();
-    const { container } = render(
-      <StringFilterHeader column={column as never} name="Name" />,
-    );
+    const { container } = render(<StringFilterHeader column={column as never} name="Name" />);
     const button = container.querySelector("button");
     fireEvent.click(button!);
     expect(column.setFilterValue).toHaveBeenCalledWith("");
@@ -107,9 +101,7 @@ describe("StringFilterHeader", () => {
 
   it("wires input onChange to setFilterValue", () => {
     const column = createColumnMock();
-    const { container } = render(
-      <StringFilterHeader column={column as never} name="Name" />,
-    );
+    const { container } = render(<StringFilterHeader column={column as never} name="Name" />);
     const input = container.querySelector("input");
     fireEvent.change(input!, { target: { value: "foo" } });
     expect(column.setFilterValue).toHaveBeenCalledWith("foo");
@@ -117,9 +109,7 @@ describe("StringFilterHeader", () => {
 
   it("associates datalist with input via list attribute", () => {
     const column = createColumnMock({ id: "host" });
-    const { container } = render(
-      <StringFilterHeader column={column as never} name="Host" />,
-    );
+    const { container } = render(<StringFilterHeader column={column as never} name="Host" />);
     const datalist = container.querySelector("datalist");
     const input = container.querySelector("input");
     expect(datalist?.id).toBeTruthy();

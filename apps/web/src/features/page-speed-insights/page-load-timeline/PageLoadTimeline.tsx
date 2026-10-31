@@ -638,7 +638,7 @@ function MomentRail({ moment }: { moment: TimelineEvent }) {
 }
 
 /** Slug for namespacing moment anchors when dual timelines mount. */
-export function momentIdPrefixFromLabel(label: string): string {
+function momentIdPrefixFromLabel(label: string): string {
   return label
     .trim()
     .toLowerCase()
@@ -745,9 +745,7 @@ function TimelineLegend({ simulationLabel }: { simulationLabel?: string }) {
       </span>
       <span className="text-muted-foreground/80">Scroll down from 0 ms</span>
       {simulationLabel ? (
-        <span className="text-muted-foreground/80">
-          Times include simulated {simulationLabel}
-        </span>
+        <span className="text-muted-foreground/80">Times include simulated {simulationLabel}</span>
       ) : null}
     </div>
   );
@@ -829,6 +827,31 @@ function CompareRowTime({ row }: { row: AlignedCompareRow }) {
   );
 }
 
+function CompareColumn({
+  moments,
+  side,
+  keyPrefix,
+  axisEndMs,
+}: {
+  moments: TimelineEvent[];
+  side: { label: string; idPrefix: string };
+  keyPrefix: string;
+  axisEndMs: number;
+}) {
+  return (
+    <div className="min-w-0 space-y-2">
+      {moments.map((moment) => (
+        <div
+          key={`${keyPrefix}-${moment.phaseId}-${moment.id}`}
+          id={momentAnchorId(moment.id, side.idPrefix)}
+        >
+          <MomentCard moment={moment} axisEnd={axisEndMs} deviceLabel={side.label} showTime />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function AlignedCompareMoments({
   left,
   right,
@@ -858,33 +881,11 @@ function AlignedCompareMoments({
             data-testid="timeline-aligned-row"
             data-time-ms={row.timeMs}
           >
-            <div className="min-w-0 space-y-2">
-              {row.left.map((moment) => (
-                <div key={`l-${moment.phaseId}-${moment.id}`} id={momentAnchorId(moment.id, left.idPrefix)}>
-                  <MomentCard
-                    moment={moment}
-                    axisEnd={axisEndMs}
-                    deviceLabel={left.label}
-                    showTime
-                  />
-                </div>
-              ))}
-            </div>
+            <CompareColumn moments={row.left} side={left} keyPrefix="l" axisEndMs={axisEndMs} />
             <div className="flex items-center justify-center sm:pt-3">
               <CompareRowTime row={row} />
             </div>
-            <div className="min-w-0 space-y-2">
-              {row.right.map((moment) => (
-                <div key={`r-${moment.phaseId}-${moment.id}`} id={momentAnchorId(moment.id, right.idPrefix)}>
-                  <MomentCard
-                    moment={moment}
-                    axisEnd={axisEndMs}
-                    deviceLabel={right.label}
-                    showTime
-                  />
-                </div>
-              ))}
-            </div>
+            <CompareColumn moments={row.right} side={right} keyPrefix="r" axisEndMs={axisEndMs} />
           </li>
         ))}
       </ol>
@@ -899,9 +900,7 @@ function filterBundleTimeline(
   enabledTasks: TaskFilterSelection,
 ): PageLoadTimeline {
   const events = filterTimelineMoments(bundle.timeline.events, enabledTasks);
-  return events === bundle.timeline.events
-    ? bundle.timeline
-    : { ...bundle.timeline, events };
+  return events === bundle.timeline.events ? bundle.timeline : { ...bundle.timeline, events };
 }
 
 function TimelinePane({
@@ -940,7 +939,7 @@ function TimelinePane({
   );
 }
 
-export const TIMELINE_COMPARE_MAX = 2;
+const TIMELINE_COMPARE_MAX = 2;
 
 function defaultSelectedLabels(
   bundles: TimelineBundle[],
@@ -1060,16 +1059,11 @@ export function PageLoadTimeline() {
   );
   const panes = filteredEntries.map((entry) => ({
     ...entry,
-    timeline: comparing
-      ? { ...entry.timeline, axisEndMs: sharedAxisEndMs }
-      : entry.timeline,
+    timeline: comparing ? { ...entry.timeline, axisEndMs: sharedAxisEndMs } : entry.timeline,
   }));
 
   const shownCount = panes.reduce((sum, p) => sum + p.timeline.events.length, 0);
-  const totalCount = selectedEntries.reduce(
-    (sum, p) => sum + p.bundle.timeline.events.length,
-    0,
-  );
+  const totalCount = selectedEntries.reduce((sum, p) => sum + p.bundle.timeline.events.length, 0);
   const markdown = panes.map((entry) => timelineToMarkdown(entry.timeline)).join("\n\n");
   const headerTitle = comparing
     ? panes.map((entry) => entry.label).join(" vs ")
@@ -1092,11 +1086,7 @@ export function PageLoadTimeline() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {bundles.length > 1 ? (
-              <div
-                className="flex flex-wrap gap-2"
-                role="group"
-                aria-label="Reports to compare"
-              >
+              <div className="flex flex-wrap gap-2" role="group" aria-label="Reports to compare">
                 {bundles.map((bundle) => {
                   const name = bundle.timeline.label?.trim() || "Report";
                   const selected = selectedLabels.includes(bundle.timeline.label);

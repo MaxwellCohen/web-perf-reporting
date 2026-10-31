@@ -149,7 +149,7 @@ function extractCauses(item: TableItem): CulpritCause[] {
   return causes;
 }
 
-export function extractClsCulpritData(rows: DetailTableItem[]): {
+function extractClsCulpritData(rows: DetailTableItem[]): {
   summaries: ClusterSummary[];
   shifts: ShiftFinding[];
   barPoints: Array<{ label: string; category: string; value: number }>;
@@ -269,7 +269,10 @@ function CulpritExtraView({ extra }: { extra: CulpritExtra }) {
           {extra.label}
         </p>
         {extra.selector ? (
-          <p className="truncate font-mono text-[11px] text-muted-foreground" title={extra.selector}>
+          <p
+            className="truncate font-mono text-[11px] text-muted-foreground"
+            title={extra.selector}
+          >
             {extra.selector}
           </p>
         ) : null}
@@ -353,10 +356,7 @@ function ShiftList({ shifts, showCount }: { shifts: ShiftFinding[]; showCount?: 
                   </p>
                 ) : null}
                 {shift.snippet ? (
-                  <p
-                    className="truncate font-mono text-[11px] text-sky-300"
-                    title={shift.snippet}
-                  >
+                  <p className="truncate font-mono text-[11px] text-sky-300" title={shift.snippet}>
                     {shift.snippet}
                   </p>
                 ) : null}

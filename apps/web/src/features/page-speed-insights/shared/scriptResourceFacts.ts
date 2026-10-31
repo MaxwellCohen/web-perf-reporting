@@ -2,7 +2,7 @@ import { LONG_TASK_THRESHOLD_MS } from "@/features/page-speed-insights/mainThrea
 import { formatMs } from "@/features/page-speed-insights/shared/format";
 
 /** Other must also be at least this share of total CPU to warn. */
-export const SCRIPT_CPU_OTHER_SHARE_THRESHOLD = 0.25;
+const SCRIPT_CPU_OTHER_SHARE_THRESHOLD = 0.25;
 
 /** Main-thread cost of one script, from the bootup-time audit. */
 export type ScriptCpu = {
@@ -26,12 +26,12 @@ function labeledMs(label: string, ms: number): string | null {
 }
 
 /** Residual main-thread time attributed to the script but not parse/eval. */
-export function scriptCpuOtherMs(cpu: ScriptCpu): number {
+function scriptCpuOtherMs(cpu: ScriptCpu): number {
   return Math.max(0, cpu.totalMs - cpu.parseMs - cpu.scriptingMs);
 }
 
 /** Other is long-task sized and a meaningful share of this script's CPU. */
-export function isHighScriptCpuOther(cpu: ScriptCpu): boolean {
+function isHighScriptCpuOther(cpu: ScriptCpu): boolean {
   const otherMs = scriptCpuOtherMs(cpu);
   if (otherMs < LONG_TASK_THRESHOLD_MS || !(cpu.totalMs > 0)) return false;
   return otherMs / cpu.totalMs >= SCRIPT_CPU_OTHER_SHARE_THRESHOLD;
@@ -43,7 +43,7 @@ function otherLine(cpu: ScriptCpu): string | null {
   return `${line} · high`;
 }
 
-export function scriptCpuLines(cpu: ScriptCpu | undefined): string[] {
+function scriptCpuLines(cpu: ScriptCpu | undefined): string[] {
   if (!cpu) return [];
   return [
     labeledMs("Total CPU Time", cpu.totalMs),
@@ -53,7 +53,7 @@ export function scriptCpuLines(cpu: ScriptCpu | undefined): string[] {
   ].filter((line): line is string => line != null);
 }
 
-export function chainLines(node: CriticalChainNode | undefined): string[] {
+function chainLines(node: CriticalChainNode | undefined): string[] {
   if (!node) return [];
   const lines: string[] = [];
   if (node.isLongest) lines.push("Longest chain");

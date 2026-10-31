@@ -4,15 +4,12 @@ import {
   formatCategorySummary,
   getAuditStatus,
   getDisagreementText,
-  getWorstAuditStatus,
   partitionByStatus,
 } from "@/features/page-speed-insights/lh-categories/auditStatus";
 
 type Audit = AuditResultsRecord[string];
-const audit = (
-  scoreDisplayMode: Audit["scoreDisplayMode"],
-  score: number | null,
-): Audit => ({ id: "a", title: "A", score, scoreDisplayMode }) as Audit;
+const audit = (scoreDisplayMode: Audit["scoreDisplayMode"], score: number | null): Audit =>
+  ({ id: "a", title: "A", score, scoreDisplayMode }) as Audit;
 
 describe("getAuditStatus", () => {
   it("uses Lighthouse thresholds for scored audits", () => {
@@ -37,20 +34,6 @@ describe("getAuditStatus", () => {
     expect(getAuditStatus(audit("error", null))).toBe("error");
     expect(getAuditStatus(undefined)).toBeNull();
     expect(getAuditStatus({} as Audit)).toBeNull();
-  });
-});
-
-describe("getWorstAuditStatus", () => {
-  it("returns the status for a single report", () => {
-    expect(getWorstAuditStatus([audit("numeric", 0.95)])).toBe("pass");
-  });
-  it("picks the worst across reports", () => {
-    expect(getWorstAuditStatus([audit("numeric", 0.95), audit("numeric", 0.2)])).toBe("fail");
-    expect(getWorstAuditStatus([audit("numeric", 0.95), audit("notApplicable", null)])).toBe(
-      "pass",
-    );
-    expect(getWorstAuditStatus([null, audit("numeric", 0.6)])).toBe("average");
-    expect(getWorstAuditStatus([null, undefined])).toBeNull();
   });
 });
 

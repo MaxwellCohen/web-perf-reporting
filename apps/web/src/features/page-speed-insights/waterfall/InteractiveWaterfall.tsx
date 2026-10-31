@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment } from "react";
+import { Fragment, type KeyboardEvent } from "react";
 import type { WaterfallRow } from "@/features/page-speed-insights/waterfall/waterfallData";
 import type { NetworkRequestTimeRange } from "@/features/page-speed-insights/shared/networkRequestsTable";
 import { getNetworkBarColor } from "@/features/page-speed-insights/shared/networkResourceColors";
@@ -24,9 +24,7 @@ import {
 import { RenderBlockingBadge } from "@/features/page-speed-insights/waterfall/renderBlockingBadge";
 import { cn } from "@/lib/utils";
 
-export type { WaterfallMilestones, WaterfallGuide };
-
-export type WaterfallHeightSize = "default" | "large" | "xl" | "full";
+type WaterfallHeightSize = "default" | "large" | "xl" | "full";
 
 const WATERFALL_HEIGHT_CLASS: Record<WaterfallHeightSize, string> = {
   default: "max-h-[60vh]",
@@ -169,7 +167,13 @@ function mobileMetaValue(row: WaterfallRow): string {
   return "";
 }
 
-function RowMeta({ row, layout = "desktop" }: { row: WaterfallRow; layout?: "desktop" | "mobile" }) {
+function RowMeta({
+  row,
+  layout = "desktop",
+}: {
+  row: WaterfallRow;
+  layout?: "desktop" | "mobile";
+}) {
   const label = displayLabel(row);
 
   if (layout === "mobile") {
@@ -290,6 +294,19 @@ export function InteractiveWaterfall({
     }
   };
 
+  const rowButtonProps = (row: WaterfallRow, isSelected: boolean) => ({
+    role: "button",
+    tabIndex: 0,
+    "aria-selected": isSelected,
+    onClick: () => handleRowActivate(row),
+    onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        handleRowActivate(row);
+      }
+    },
+  });
+
   if (!rows.length && !guides.length) {
     return (
       <p className="py-4 text-center text-sm text-muted-foreground" data-testid="overview-lanes">
@@ -370,10 +387,7 @@ export function InteractiveWaterfall({
             />
           </div>
 
-          <div
-            className="relative z-1"
-            style={{ gridColumn: 2, gridRow: `2 / ${rowCount + 2}` }}
-          >
+          <div className="relative z-1" style={{ gridColumn: 2, gridRow: `2 / ${rowCount + 2}` }}>
             <TickGridOverlay minStart={minStart} maxEnd={maxEnd} overview={overview} />
             <GuideOverlay
               minStart={minStart}
@@ -389,40 +403,22 @@ export function InteractiveWaterfall({
             return (
               <Fragment key={row.id}>
                 <div
-                  role="button"
-                  tabIndex={0}
-                  aria-selected={isSelected}
+                  {...rowButtonProps(row, isSelected)}
                   style={{ gridRow, gridColumn: 1 }}
                   className={cn(
                     "group sticky left-0 z-10 cursor-pointer border-b border-border/30 px-1.5 py-0.5 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
                     isSelected ? "bg-muted/60" : "bg-card hover:bg-muted/30",
                   )}
-                  onClick={() => handleRowActivate(row)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      handleRowActivate(row);
-                    }
-                  }}
                 >
                   <RowMeta row={row} layout="desktop" />
                 </div>
                 <div
-                  role="button"
-                  tabIndex={0}
-                  aria-selected={isSelected}
+                  {...rowButtonProps(row, isSelected)}
                   style={{ gridRow, gridColumn: 2 }}
                   className={cn(
                     "group relative z-2 flex cursor-pointer items-center border-b border-border/30 px-1 py-0.5 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
                     isSelected ? "bg-muted/60" : "hover:bg-muted/30",
                   )}
-                  onClick={() => handleRowActivate(row)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      handleRowActivate(row);
-                    }
-                  }}
                 >
                   <WaterfallBarTrack row={row} minStart={minStart} maxEnd={maxEnd} />
                 </div>
@@ -492,6 +488,3 @@ export function InteractiveWaterfall({
     </div>
   );
 }
-
-/** @deprecated Use InteractiveWaterfall */
-export const InteractiveNetworkWaterfall = InteractiveWaterfall;

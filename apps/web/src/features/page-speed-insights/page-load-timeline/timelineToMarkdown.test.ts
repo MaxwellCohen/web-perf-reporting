@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import { timelineToMarkdown } from "./timelineToMarkdown";
 import type { PageLoadTimeline, TimelineEvent } from "./types";
 
-function event(partial: Partial<TimelineEvent> & Pick<TimelineEvent, "id" | "title">): TimelineEvent {
+function event(
+  partial: Partial<TimelineEvent> & Pick<TimelineEvent, "id" | "title">,
+): TimelineEvent {
   return {
     phaseId: "firstRender",
     phaseTitle: "First render",
@@ -94,7 +96,9 @@ describe("timelineToMarkdown", () => {
           ],
           table: {
             headers: [{ text: "URL" }, { text: "Size", align: "end" }],
-            rows: [[{ text: "hero.png", href: "https://example.com/hero.png" }, { text: "20 KiB" }]],
+            rows: [
+              [{ text: "hero.png", href: "https://example.com/hero.png" }, { text: "20 KiB" }],
+            ],
           },
           isPhaseStart: true,
         }),

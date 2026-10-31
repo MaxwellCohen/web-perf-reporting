@@ -5,7 +5,7 @@ export class PsiShareUrlError extends Error {
   }
 }
 
-export class PsiShareFetchError extends Error {
+class PsiShareFetchError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "PsiShareFetchError";

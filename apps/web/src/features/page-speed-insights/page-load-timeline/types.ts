@@ -6,7 +6,7 @@ import type { NodeValue } from "@/lib/schema";
 
 export type Rating = "good" | "needs-improvement" | "poor";
 export type MarkerKind = "blocking" | "potentially-blocking" | "cwv" | "marker" | "fact";
-export type StepStatus = "measured" | "inferred" | "not-recorded";
+type StepStatus = "measured" | "inferred" | "not-recorded";
 
 /** How a download affected rendering. Matches the Network panel's render-blocking column. */
 export type RenderBlockingStatus = "blocking" | "potentially-blocking" | "non-blocking";
@@ -21,7 +21,7 @@ export type PhaseId =
   | "subresources"
   | "afterLoad";
 
-export type TimelineTableCell = {
+type TimelineTableCell = {
   text: string;
   /** Full URL when the cell is a resource link */
   href?: string;

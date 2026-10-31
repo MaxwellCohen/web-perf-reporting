@@ -30,8 +30,7 @@ export function PaginatedTableControls({
   const rowCount = table.getRowCount();
   const pageCount = table.getPageCount();
   const { pageSize } = getPaginationState(table);
-  const isShowingAll =
-    showAllResults || (pageSize >= rowCount && rowCount > defaultPageSize);
+  const isShowingAll = showAllResults || (pageSize >= rowCount && rowCount > defaultPageSize);
   const canPaginate = rowCount > defaultPageSize || pageCount > 1;
   const showPaginationControls = pageCount > 1 && !isShowingAll;
 
@@ -41,7 +40,9 @@ export function PaginatedTableControls({
 
   return (
     <div className={cn("flex flex-wrap items-center gap-3", className)}>
-      {showPaginationControls && <PaginationCard table={table} showManualControls={showManualControls} />}
+      {showPaginationControls && (
+        <PaginationCard table={table} showManualControls={showManualControls} />
+      )}
       {!isShowingAll && (
         <Button
           variant="outline"

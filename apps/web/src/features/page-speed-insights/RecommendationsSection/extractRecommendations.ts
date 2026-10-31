@@ -107,63 +107,31 @@ export function extractSpecificRecommendations(
     // Create markdown link if URL exists
     const resourceLink = url ? `[${resourceName}](${url})` : resourceName;
 
-    if (item.wastedBytes && item.wastedBytes > 0) {
-      return {
-        step: `Remove ${formatBytesOptional(item.wastedBytes)} of unused code from ${resourceLink}`,
-        reports: reportLabels,
-        url,
-        host,
-      };
-    }
-    if (item.wastedMs && item.wastedMs > 0) {
-      return {
-        step: `Optimize ${resourceLink} to save ${formatMsOptional(item.wastedMs)}`,
-        reports: reportLabels,
-        url,
-        host,
-      };
-    }
-    if (item.wastedPercent && item.wastedPercent > 50) {
-      return {
-        step: `Remove ${item.wastedPercent.toFixed(0)}% of unused code from ${resourceLink}`,
-        reports: reportLabels,
-        url,
-        host,
-      };
-    }
-    if (item.scripting && item.scripting > 100) {
-      return {
-        step: `Reduce JavaScript execution time in ${resourceLink} (${formatMsOptional(item.scripting)} spent on scripting)`,
-        reports: reportLabels,
-        url,
-        host,
-      };
-    }
-    if (item.scriptParseCompile && item.scriptParseCompile > 100) {
-      return {
-        step: `Optimize script parsing/compilation for ${resourceLink} (${formatMsOptional(item.scriptParseCompile)} spent)`,
-        reports: reportLabels,
-        url,
-        host,
-      };
-    }
-    if (item.total && item.total > 500) {
-      return {
-        step: `Optimize ${resourceLink} (${formatMsOptional(item.total)} total CPU time)`,
-        reports: reportLabels,
-        url,
-        host,
-      };
-    }
-    if (item.totalBytes && item.totalBytes > 0) {
-      return {
-        step: `Optimize ${resourceLink} (${formatBytesOptional(item.totalBytes)})`,
-        reports: reportLabels,
-        url,
-        host,
-      };
-    }
-    return { step: `Review and optimize ${resourceLink}`, reports: reportLabels, url, host };
+    const describe = (): string => {
+      if (item.wastedBytes && item.wastedBytes > 0) {
+        return `Remove ${formatBytesOptional(item.wastedBytes)} of unused code from ${resourceLink}`;
+      }
+      if (item.wastedMs && item.wastedMs > 0) {
+        return `Optimize ${resourceLink} to save ${formatMsOptional(item.wastedMs)}`;
+      }
+      if (item.wastedPercent && item.wastedPercent > 50) {
+        return `Remove ${item.wastedPercent.toFixed(0)}% of unused code from ${resourceLink}`;
+      }
+      if (item.scripting && item.scripting > 100) {
+        return `Reduce JavaScript execution time in ${resourceLink} (${formatMsOptional(item.scripting)} spent on scripting)`;
+      }
+      if (item.scriptParseCompile && item.scriptParseCompile > 100) {
+        return `Optimize script parsing/compilation for ${resourceLink} (${formatMsOptional(item.scriptParseCompile)} spent)`;
+      }
+      if (item.total && item.total > 500) {
+        return `Optimize ${resourceLink} (${formatMsOptional(item.total)} total CPU time)`;
+      }
+      if (item.totalBytes && item.totalBytes > 0) {
+        return `Optimize ${resourceLink} (${formatBytesOptional(item.totalBytes)})`;
+      }
+      return `Review and optimize ${resourceLink}`;
+    };
+    return { step: describe(), reports: reportLabels, url, host };
   });
 
   recommendations.push(...topResources);

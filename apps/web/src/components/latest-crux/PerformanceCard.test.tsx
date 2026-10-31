@@ -31,7 +31,6 @@ import {
   CurrentPerformanceCard,
   CurrentPerformanceChartContext,
   ChartMap,
-  HorizontalScoreChart,
 } from "@/components/latest-crux/PerformanceCard";
 
 const histogramData = {
@@ -139,17 +138,5 @@ describe("ChartMap", () => {
     expect(ChartMap).toHaveProperty("Stacked Bar");
     expect(ChartMap).toHaveProperty("Radial Chart");
     expect(ChartMap).toHaveProperty("Gauge Chart");
-  });
-});
-
-describe("HorizontalScoreChart", () => {
-  it("renders with score", () => {
-    const { container } = render(<HorizontalScoreChart score={0.75} />);
-    expect(container.querySelector("svg")).toBeTruthy();
-  });
-
-  it("renders with className", () => {
-    const { container } = render(<HorizontalScoreChart score={0.5} className="custom" />);
-    expect(container.querySelector(".custom")).toBeTruthy();
   });
 });

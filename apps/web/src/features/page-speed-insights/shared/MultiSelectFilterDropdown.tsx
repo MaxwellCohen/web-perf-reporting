@@ -8,6 +8,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 
+/** Next selection after toggling `option`; [] means "all selected". */
+export function toggleMultiSelect<TOption extends string>(
+  options: readonly TOption[],
+  selected: readonly TOption[],
+  option: TOption,
+  checked: boolean,
+): TOption[] {
+  if (checked) {
+    const next = selected.includes(option) ? [...selected] : [...selected, option];
+    return next.length === options.length ? [] : next;
+  }
+  const base = selected.length === 0 ? options : selected;
+  return base.filter((item) => item !== option);
+}
+
 /**
  * Multi-select dropdown where an empty selection means "show everything".
  */
@@ -44,17 +59,7 @@ export function MultiSelectFilterDropdown<TOption extends string>({
             key={option}
             checked={selected.length === 0 || selected.includes(option)}
             onCheckedChange={(checked) => {
-              if (checked) {
-                // If adding back the last unchecked item, reset to [] ("all selected")
-                const next: TOption[] = selected.includes(option)
-                  ? [...selected]
-                  : [...selected, option];
-                onSelectedChange(next.length === options.length ? [] : next);
-              } else {
-                // If currently "all selected" (empty), explicitly select all except this one
-                const base = selected.length === 0 ? options : selected;
-                onSelectedChange(base.filter((item) => item !== option));
-              }
+              onSelectedChange(toggleMultiSelect(options, selected, option, checked));
             }}
           >
             {renderOption ? renderOption(option) : option}

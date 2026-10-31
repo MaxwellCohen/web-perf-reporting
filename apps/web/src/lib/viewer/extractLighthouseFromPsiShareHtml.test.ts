@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  PsiShareExtractError,
   extractLighthouseFromPsiShareHtml,
   labelForPsiLighthouse,
 } from "@/lib/viewer/extractLighthouseFromPsiShareHtml";
@@ -40,11 +39,5 @@ describe("extractLighthouseFromPsiShareHtml", () => {
     const html = embed(desktop);
     const [extracted] = extractLighthouseFromPsiShareHtml(html);
     expect(labelForPsiLighthouse(extracted!, 0)).toBe("Desktop");
-  });
-
-  it("throws when the page has no lighthouse payload", () => {
-    expect(() => extractLighthouseFromPsiShareHtml("<html>no report</html>")).toThrow(
-      PsiShareExtractError,
-    );
   });
 });

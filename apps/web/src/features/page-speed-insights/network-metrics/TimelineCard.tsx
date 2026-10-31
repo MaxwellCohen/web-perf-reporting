@@ -8,12 +8,11 @@ import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack
 import { createOptionalNumericCell } from "@/features/page-speed-insights/shared/tableColumnHelpers";
 import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 import { useNetworkMetricSeries } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
-import type { NetworkMetricSeries } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsData";
-
-type TimelineRow = {
-  event: string;
-  [reportLabel: string]: string | number | undefined;
-};
+import {
+  buildTimelineChartRows,
+  sortNumeric,
+  type TimelineChartRow,
+} from "@/features/page-speed-insights/network-metrics/timelineMetricsData";
 
 const EVENT_MAP: Record<string, string> = {
   "Navigation Start": "observedNavigationStart",
@@ -32,11 +31,6 @@ const EVENT_MAP: Record<string, string> = {
   Interactive: "interactive",
   "Trace End": "observedTraceEnd",
 };
-
-type EventLabel = keyof typeof EVENT_MAP;
-const EVENT_MAP_ENTRIES = Object.entries(EVENT_MAP) as Array<
-  [EventLabel, keyof NetworkMetricSeries]
->;
 
 const EVENT_DESCRIPTIONS: Record<string, string> = {
   "Navigation Start":
@@ -67,63 +61,6 @@ const EVENT_DESCRIPTIONS: Record<string, string> = {
     "The time when the performance trace ends, marking the completion of the performance measurement.",
 };
 
-function sortNumeric(a: number | undefined, b: number | undefined): number {
-  if (a === undefined && b === undefined) return 0;
-  if (a === undefined) return 1;
-  if (b === undefined) return -1;
-  return a - b;
-}
-
-function buildEventDataMap(
-  metrics: readonly NetworkMetricSeries[],
-): Map<string, Record<string, number | undefined>> {
-  const eventDataMap = new Map<string, Record<string, number | undefined>>();
-
-  for (const metric of metrics) {
-    for (const [eventLabel, propKey] of EVENT_MAP_ENTRIES) {
-      const rawValue = metric[propKey] as number | undefined;
-      if (rawValue === undefined) continue;
-
-      if (!eventDataMap.has(eventLabel)) {
-        eventDataMap.set(eventLabel, {});
-      }
-      const eventData = eventDataMap.get(eventLabel)!;
-
-      // Values are already ms from navigation start on the lab clock.
-      eventData[metric.label] = eventLabel === "Navigation Start" ? 0 : rawValue;
-    }
-  }
-
-  return eventDataMap;
-}
-
-function buildTimelineRows(
-  eventDataMap: Map<string, Record<string, number | undefined>>,
-  reportLabels: string[],
-): TimelineRow[] {
-  const rows: TimelineRow[] = [];
-
-  eventDataMap.forEach((data, eventLabel) => {
-    const row: TimelineRow = { event: eventLabel };
-    for (const reportLabel of reportLabels) {
-      row[reportLabel] = data[reportLabel] ?? undefined;
-    }
-    rows.push(row);
-  });
-
-  if (reportLabels.length > 0) {
-    const firstReportLabel = reportLabels[0];
-    rows.sort((a, b) =>
-      sortNumeric(
-        a[firstReportLabel] as number | undefined,
-        b[firstReportLabel] as number | undefined,
-      ),
-    );
-  }
-
-  return rows;
-}
-
 function optionalMsCell(value: number | undefined) {
   return createOptionalNumericCell(RenderMSValue, value);
 }
@@ -133,8 +70,8 @@ function TimelineCardTable({
   columns,
   title,
 }: {
-  data: TimelineRow[];
-  columns: StandardColumnDef<TimelineRow>[];
+  data: TimelineChartRow[];
+  columns: StandardColumnDef<TimelineChartRow>[];
   title: string;
 }) {
   const table = useStandardTable({ data, columns });
@@ -146,14 +83,13 @@ export function TimelineCard() {
   const series = useNetworkMetricSeries();
 
   const reportLabels = series.map((m) => m.label);
-  const eventDataMap = buildEventDataMap(series);
-  const rows = buildTimelineRows(eventDataMap, reportLabels);
+  const rows = buildTimelineChartRows(series, EVENT_MAP, "Navigation Start");
   const simulationLabel = series.map((m) => m.simulationLabel).find(Boolean);
   const title = simulationLabel
     ? `Timeline of Observed Events (${simulationLabel})`
     : "Timeline of Observed Events";
-  const columnHelper = createStockColumnHelper<TimelineRow>();
-  const tableColumns: StandardColumnDef<TimelineRow>[] = [
+  const columnHelper = createStockColumnHelper<TimelineChartRow>();
+  const tableColumns: StandardColumnDef<TimelineChartRow>[] = [
     columnHelper.accessor("event", {
       id: "event",
       header: () => (

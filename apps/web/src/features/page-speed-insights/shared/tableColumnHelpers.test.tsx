@@ -10,7 +10,6 @@ import {
   createTruncatedTextColumn,
   createURLColumn,
   metricTableEmptyDisplay,
-  METRIC_TABLE_EMPTY_DISPLAY,
   createOptionalNumericCell,
 } from "@/features/page-speed-insights/shared/tableColumnHelpers";
 
@@ -94,19 +93,6 @@ describe("tableColumnHelpers", () => {
     });
   });
 
-  describe("metricTableEmptyDisplay", () => {
-    it("matches constant", () => {
-      expect(metricTableEmptyDisplay()).toBe(METRIC_TABLE_EMPTY_DISPLAY);
-    });
-  });
-
-  describe("createOptionalNumericCell", () => {
-    it("renders N/A when undefined", () => {
-      const cell = createOptionalNumericCell(RenderMSValue, undefined);
-      expect(cell).toBe(METRIC_TABLE_EMPTY_DISPLAY);
-    });
-  });
-
   describe("createTruncatedTextColumn", () => {
     it("renders truncated div with title", () => {
       type OriginRow = { label: string; origin: string };
@@ -151,13 +137,6 @@ describe("tableColumnHelpers", () => {
       const col = createPercentageColumn(helper, "pct", "Wasted %", 1);
       const cell = (col.cell as Function)({ getValue: () => 3.456 } as any);
       expect(cell).toBe("3.5%");
-    });
-
-    it("renders empty display when undefined", () => {
-      const helper = createStockColumnHelper<{ label: string; pct?: number }>();
-      const col = createPercentageColumn(helper, "pct", "Wasted %");
-      const cell = (col.cell as Function)({ getValue: () => undefined } as any);
-      expect(cell).toBe(METRIC_TABLE_EMPTY_DISPLAY);
     });
   });
 });

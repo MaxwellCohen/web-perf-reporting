@@ -7,7 +7,7 @@ import {
 const NOT_READY_MESSAGE = "Data is not yet ready no data!!";
 
 /** Maps a resolved worker envelope to an HTTP response for GET `/api/pagespeed/:publicId`. */
-export function workerEnvelopeToHttpResponse(resolved: ResolvedWorkerEnvelope): Response {
+function workerEnvelopeToHttpResponse(resolved: ResolvedWorkerEnvelope): Response {
   switch (resolved.kind) {
     case "missing":
       return new Response(NOT_READY_MESSAGE, { status: 404 });

@@ -104,7 +104,8 @@ export function AuditInpPhaseViz({ rows }: { rows: DetailTableItem[] }) {
       const duration = itemNumeric(item, ["duration", "value"]) ?? 0;
       if (!phaseMap.has(subpart)) {
         phaseMap.set(subpart, {
-          label: typeof item.label === "string" ? item.label : itemLabel(item, ["label", "subpart"]),
+          label:
+            typeof item.label === "string" ? item.label : itemLabel(item, ["label", "subpart"]),
           values: {},
         });
       }

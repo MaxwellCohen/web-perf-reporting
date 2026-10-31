@@ -10,7 +10,9 @@ const dep = (value: string, url = "https://a.com/app.js") => ({
 
 describe("AuditDeprecationsViz", () => {
   it("renders one report", () => {
-    const { container } = render(<AuditDeprecationsViz rows={[makeRow("deprecations", [dep("Foo is deprecated")])]} />);
+    const { container } = render(
+      <AuditDeprecationsViz rows={[makeRow("deprecations", [dep("Foo is deprecated")])]} />,
+    );
     expect(container.textContent).toContain("1 deprecated API");
     expect(container.textContent).toContain("a.com/app.js:10");
     expect(container.textContent).not.toContain("Mobile");
@@ -30,6 +32,8 @@ describe("AuditDeprecationsViz", () => {
   });
 
   it("returns null when empty", () => {
-    expect(render(<AuditDeprecationsViz rows={[makeRow("deprecations", [])]} />).container.firstChild).toBeNull();
+    expect(
+      render(<AuditDeprecationsViz rows={[makeRow("deprecations", [])]} />).container.firstChild,
+    ).toBeNull();
   });
 });

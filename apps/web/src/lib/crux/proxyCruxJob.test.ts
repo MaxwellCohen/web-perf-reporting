@@ -38,9 +38,9 @@ describe("proxyCruxJob", () => {
 
   it("reads a CrUX job without sending the API key", async () => {
     vi.stubEnv("WORKER_URL", "https://web-perf-report-api.example.workers.dev");
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(JSON.stringify({ jobId: "job-1" }), { status: 200 }),
-    );
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response(JSON.stringify({ jobId: "job-1" }), { status: 200 }));
 
     const response = await proxyCruxGet(
       "history",

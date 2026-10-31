@@ -67,7 +67,11 @@ function compareFormFactorLabels(labelA: string, labelB: string): number {
  * Sort report labels by form factor. Labels from two run sets (run-prefixed)
  * are not reordered: they keep the order they were added in.
  */
-export function compareReportLabels(labelA: string, labelB: string, _runOrder: string[] = []): number {
+export function compareReportLabels(
+  labelA: string,
+  labelB: string,
+  _runOrder: string[] = [],
+): number {
   const a = splitRunPrefix(labelA);
   const b = splitRunPrefix(labelB);
 

@@ -19,7 +19,7 @@ type ColumnDef<T extends RowData, TValue = unknown> = StockColumnDef<T, TValue>;
 type ColumnHelper<T extends RowData> = StockColumnHelper<T>;
 
 /** Placeholder for missing numeric / metric values in grouped metric tables */
-export const METRIC_TABLE_EMPTY_DISPLAY = "N/A" as const;
+const METRIC_TABLE_EMPTY_DISPLAY = "N/A" as const;
 
 export function metricTableEmptyDisplay(): React.ReactNode {
   return METRIC_TABLE_EMPTY_DISPLAY;
@@ -270,9 +270,7 @@ export function createPercentageColumn<T extends RowData>(
   precisionOrOptions: number | (NumericColumnOptions & { precision?: number }) = 1,
 ): ColumnDef<T, unknown> {
   const options: NumericColumnOptions & { precision?: number } =
-    typeof precisionOrOptions === "number"
-      ? { precision: precisionOrOptions }
-      : precisionOrOptions;
+    typeof precisionOrOptions === "number" ? { precision: precisionOrOptions } : precisionOrOptions;
   const precision = options.precision ?? 1;
   const id = String(accessor);
   return createBaseNumericColumn(

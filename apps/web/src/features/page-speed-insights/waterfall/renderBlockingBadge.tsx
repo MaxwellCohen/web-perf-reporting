@@ -7,7 +7,7 @@ const RENDER_BLOCKING_LABEL: Record<RenderBlockingStatus, string> = {
   "non-blocking": "Non-blocking",
 };
 
-export function renderBlockingClass(status: RenderBlockingStatus): string {
+function renderBlockingClass(status: RenderBlockingStatus): string {
   if (status === "blocking") return "bg-rose-500/15 text-rose-700 dark:text-rose-300";
   if (status === "potentially-blocking") {
     return "bg-amber-500/15 text-amber-800 dark:text-amber-300";

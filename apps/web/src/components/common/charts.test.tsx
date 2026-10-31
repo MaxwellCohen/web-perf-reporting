@@ -18,14 +18,8 @@ vi.mock("@/components/ui/chart", () => ({
 }));
 
 import {
-  FormFactorPercentPieChart,
-  PercentTable,
-  toSentenceCase,
-} from "@/components/common/FormFactorPercentPieChart";
-import {
   GaugeChart,
   HorizontalGaugeChart as HorizontalPageSpeedGaugeChart,
-  LineChart,
 } from "@/components/common/PageSpeedGaugeChart";
 
 const pageLoadMetric = {
@@ -39,29 +33,6 @@ const pageLoadMetric = {
 };
 
 describe("common charts", () => {
-  it("converts snake case labels into sentence case", () => {
-    expect(toSentenceCase("largest_contentful_paint")).toBe("Largest contentful paint");
-    expect(toSentenceCase("")).toBe("");
-  });
-
-  it("renders the radial form factor chart and percent table", () => {
-    const { container } = render(
-      <div>
-        <FormFactorPercentPieChart
-          title="Form Factors"
-          form_factors={{ desktop: 0.5, phone: 0.3, tablet: 0.2 }}
-        />
-        <PercentTable
-          title="Navigation Types"
-          data={{ navigate: 0.7, reload: 0.3 }}
-          dateRange="Jan 1 - Jan 31"
-        />
-      </div>,
-    );
-
-    expect(container.firstChild).toMatchSnapshot();
-  });
-
   it("renders the main page speed gauge variants when valid metric data is provided", () => {
     const { container } = render(
       <div>
@@ -74,26 +45,4 @@ describe("common charts", () => {
     expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
     expect(container.textContent).toContain("1200 - FAST");
   });
-
-  it("renders nothing for invalid gauge data and draws the fallback line chart", () => {
-    const { container } = render(
-      <div>
-        <GaugeChart metric="LCP" data={undefined as any} />
-        <HorizontalPageSpeedGaugeChart metric="CLS" data={undefined as any} />
-        <LineChart
-          chartData={[
-            { name: "Good", value: 100, fill: "#0f0" },
-            { name: "NI", value: 200, fill: "#ff0" },
-            { name: "Poor", value: 300, fill: "#f00" },
-          ]}
-          value={300}
-        />
-      </div>,
-    );
-
-    expect(container.querySelectorAll('[data-testid="gauge-value-marker"]')).toHaveLength(1);
-    expect(container.textContent).not.toContain("LCP");
-    expect(container.textContent).not.toContain("CLS");
-  });
-
 });

@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
-  allTaskFilters,
+  TASK_FILTERS,
   availableTaskFilters,
   filterTimelineMoments,
   type TaskFilterId,
 } from "./filterTimelineMoments";
 import type { TimelineEvent, TimelineWaterfallBar } from "./types";
 
-function moment(partial: Partial<TimelineEvent> & Pick<TimelineEvent, "id" | "phaseId">): TimelineEvent {
+function moment(
+  partial: Partial<TimelineEvent> & Pick<TimelineEvent, "id" | "phaseId">,
+): TimelineEvent {
   return {
     phaseTitle: partial.phaseId,
     timeMs: 0,
@@ -30,7 +32,7 @@ function bar(
 }
 
 function without(id: TaskFilterId) {
-  const enabled = new Set(allTaskFilters());
+  const enabled = new Set(TASK_FILTERS);
   enabled.delete(id);
   return enabled;
 }
@@ -38,7 +40,7 @@ function without(id: TaskFilterId) {
 describe("filterTimelineMoments", () => {
   it("returns the same list when every task filter is on", () => {
     const moments = [moment({ id: "fcp", phaseId: "firstRender" })];
-    expect(filterTimelineMoments(moments, allTaskFilters())).toBe(moments);
+    expect(filterTimelineMoments(moments, new Set(TASK_FILTERS))).toBe(moments);
   });
 
   it("hides non-blocking downloads and keeps the document, milestones, and other tasks", () => {

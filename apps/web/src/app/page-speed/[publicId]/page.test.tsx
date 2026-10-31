@@ -3,7 +3,9 @@ import { type ComponentType, type ReactNode, useEffect, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/dynamic", () => ({
-  default: (loader: () => Promise<ComponentType<unknown> | Record<string, ComponentType<unknown>>>) => {
+  default: (
+    loader: () => Promise<ComponentType<unknown> | Record<string, ComponentType<unknown>>>,
+  ) => {
     return function DynamicComponent(props: Record<string, unknown>) {
       const [Component, setComponent] = useState<ComponentType<unknown> | null>(null);
 

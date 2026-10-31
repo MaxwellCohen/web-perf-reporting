@@ -89,9 +89,7 @@ export function AuditStackedBarChart({
 
   if (endLabel) {
     for (const row of data) {
-      const segments = Object.fromEntries(
-        segmentOrder.map((key) => [key, Number(row[key]) || 0]),
-      );
+      const segments = Object.fromEntries(segmentOrder.map((key) => [key, Number(row[key]) || 0]));
       row[END_LABEL_KEY] = endLabel(segments);
     }
   }

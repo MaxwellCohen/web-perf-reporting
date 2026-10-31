@@ -14,7 +14,10 @@ const sized = {
 describe("AuditImageIssuesViz", () => {
   it("renders count and offender detail for one report", () => {
     const { container } = render(
-      <AuditImageIssuesViz auditId="image-size-responsive" rows={[makeRow("image-size-responsive", [sized])]} />,
+      <AuditImageIssuesViz
+        auditId="image-size-responsive"
+        rows={[makeRow("image-size-responsive", [sized])]}
+      />,
     );
     expect(container.textContent).toContain("Images with wrong resolution");
     expect(container.textContent).toContain("a.com/hero.png");

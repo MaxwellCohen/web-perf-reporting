@@ -1,7 +1,6 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
-  extractValueLabelPairs,
   createNumericAggregatedCell,
   createStringAggregatedCell,
   createBytesAggregatedCell,
@@ -24,25 +23,6 @@ function createMockRow(leafRows: { columnValues: Record<string, unknown>; label?
 }
 
 describe("aggregatedCellHelpers", () => {
-  describe("extractValueLabelPairs", () => {
-    it("filters out undefined and null values", () => {
-      const row = createMockRow([
-        { columnValues: { duration: 100 }, label: "Mobile" },
-        { columnValues: { duration: undefined }, label: "Desktop" },
-        { columnValues: { duration: null }, label: "Tablet" },
-      ]) as any;
-      const result = extractValueLabelPairs<number>(row, "duration");
-      expect(result).toHaveLength(1);
-      expect(result[0]).toEqual({ value: 100, label: "Mobile" });
-    });
-
-    it("filters out NaN values", () => {
-      const row = createMockRow([{ columnValues: { duration: NaN }, label: "Mobile" }]) as any;
-      const result = extractValueLabelPairs<number>(row, "duration");
-      expect(result).toHaveLength(0);
-    });
-  });
-
   describe("createNumericAggregatedCell", () => {
     it("returns N/A when no value pairs", () => {
       const row = createMockRow([{ columnValues: { duration: undefined } }]) as any;

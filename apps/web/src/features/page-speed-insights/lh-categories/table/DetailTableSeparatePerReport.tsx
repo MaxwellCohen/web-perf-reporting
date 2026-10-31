@@ -112,7 +112,12 @@ export function DetailTableSeparatePerReport({
             <h5 className="mb-2">
               <ReportTableHeading title={title} reportLabel={reportLabel} itemCount={data.length} />
             </h5>
-            <ReportTable reportLabel={reportLabel} data={data} rows={reportRows} auditId={auditId} />
+            <ReportTable
+              reportLabel={reportLabel}
+              data={data}
+              rows={reportRows}
+              auditId={auditId}
+            />
           </div>
         ))}
       </div>

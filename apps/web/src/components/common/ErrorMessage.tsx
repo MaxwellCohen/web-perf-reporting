@@ -6,7 +6,7 @@ import { catchError } from "next/error";
 import Link from "next/link";
 import { AlertCircle } from "lucide-react";
 
-export type ErrorMessageProps = {
+type ErrorMessageProps = {
   title?: string;
   description?: string;
   children: React.ReactNode;
@@ -62,10 +62,7 @@ export function ReportErrorCard({
   );
 }
 
-function ErrorMessageFallback({
-  title,
-  description,
-}: Omit<ErrorMessageProps, "children">) {
+function ErrorMessageFallback({ title, description }: Omit<ErrorMessageProps, "children">) {
   return <ReportErrorCard title={title} description={description} />;
 }
 

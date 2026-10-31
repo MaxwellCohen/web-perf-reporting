@@ -33,10 +33,7 @@ function extractIssues(rows: DetailTableItem[]): SourceMapIssue[] {
         .filter(Boolean);
       if (!errors.length && !sourceMapUrl) return;
 
-      const missingCount = errors.reduce(
-        (sum, error) => sum + missingCountFromError(error),
-        0,
-      );
+      const missingCount = errors.reduce((sum, error) => sum + missingCountFromError(error), 0);
       const error = errors[0] || "Source map issue";
       const existing = byScript.get(scriptUrl);
       if (!existing) {

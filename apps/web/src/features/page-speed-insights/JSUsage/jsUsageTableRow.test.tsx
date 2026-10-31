@@ -1,6 +1,11 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { useTable, tableFeatures, createExpandedRowModel, stockFeatures } from "@tanstack/react-table";
+import {
+  useTable,
+  tableFeatures,
+  createExpandedRowModel,
+  stockFeatures,
+} from "@tanstack/react-table";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import { JSUsageTableRow } from "@/features/page-speed-insights/JSUsage/jsUsageTableRow";
 import type { StockRow } from "@/features/page-speed-insights/shared/tanstackStockTypes";

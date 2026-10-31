@@ -4,7 +4,7 @@ import {
   normalizeReportLabel,
 } from "@/features/page-speed-insights/shared/reportLabels";
 
-export type ParsedCompareLabel = {
+type ParsedCompareLabel = {
   /** Full report label as stored on the item. */
   label: string;
   /** Run prefix when present (`A`, `Before`, …); null for single-run labels. */
@@ -21,7 +21,7 @@ export type CompareRunsState<T extends { label: string } = { label: string }> =
       items: T[];
     };
 
-export function parseCompareLabel(label: string): ParsedCompareLabel {
+function parseCompareLabel(label: string): ParsedCompareLabel {
   const trimmed = label.trim();
   const sep = PSI_RUN_LABEL_SEPARATOR;
   const index = trimmed.indexOf(sep);
@@ -84,34 +84,4 @@ export function pairByFormFactor<T extends { label: string }>(
   return [...byFactor.values()].sort((left, right) =>
     compareReportLabels(left.formFactor, right.formFactor),
   );
-}
-
-/**
- * Given the active report label, return the label in `targetRun` with the same
- * form factor (falls back to the first label in that run).
- */
-export function switchCompareRunLabel(
-  currentLabel: string,
-  targetRun: string,
-  labels: string[],
-): string | null {
-  const current = parseCompareLabel(currentLabel);
-  const candidates = labels.filter((label) => parseCompareLabel(label).run === targetRun);
-  if (!candidates.length) return null;
-
-  const sameFactor = candidates.find(
-    (label) =>
-      normalizeReportLabel(parseCompareLabel(label).formFactor) ===
-      normalizeReportLabel(current.formFactor),
-  );
-  return sameFactor ?? candidates[0] ?? null;
-}
-
-/** Run-prefixed labels keep their added order. */
-export function comparePrefixedReportLabels(
-  labelA: string,
-  labelB: string,
-  runOrder: string[] = [],
-): number {
-  return compareReportLabels(labelA, labelB, runOrder);
 }

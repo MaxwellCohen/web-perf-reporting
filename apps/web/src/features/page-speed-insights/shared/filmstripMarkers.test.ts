@@ -2,8 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   filmstripTimelineFromItem,
   labelsByFrameIndex,
-  markersFromAudits,
-  markersFromLoad,
 } from "@/features/page-speed-insights/shared/filmstripMarkers";
 import type { AuditResultsRecord } from "@/lib/schema";
 import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
@@ -40,45 +38,6 @@ describe("labelsByFrameIndex", () => {
 
   it("returns empty label lists when there are no frames", () => {
     expect(labelsByFrameIndex([], [{ label: "FCP", timeMs: 100 }])).toEqual([]);
-  });
-});
-
-describe("markersFromAudits", () => {
-  it("collects TTFB, FCP, LCP, and TTI in time order", () => {
-    const audits = {
-      interactive: { numericValue: 3800 },
-      "largest-contentful-paint": { numericValue: 2500 },
-      "first-contentful-paint": { numericValue: 1200 },
-      "server-response-time": { numericValue: 400 },
-    } as unknown as AuditResultsRecord;
-
-    expect(markersFromAudits(audits)).toEqual([
-      { label: "TTFB", timeMs: 400 },
-      { label: "FCP", timeMs: 1200 },
-      { label: "LCP", timeMs: 2500 },
-      { label: "TTI", timeMs: 3800 },
-    ]);
-  });
-
-  it("skips missing metrics", () => {
-    const audits = {
-      "first-contentful-paint": { numericValue: 900 },
-    } as unknown as AuditResultsRecord;
-
-    expect(markersFromAudits(audits)).toEqual([{ label: "FCP", timeMs: 900 }]);
-  });
-});
-
-describe("markersFromLoad", () => {
-  it("uses load clock values", () => {
-    expect(
-      markersFromLoad({ ttfb: 600, fcp: 2200, lcp: 4500, interactive: 7000 }),
-    ).toEqual([
-      { label: "TTFB", timeMs: 600 },
-      { label: "FCP", timeMs: 2200 },
-      { label: "LCP", timeMs: 4500 },
-      { label: "TTI", timeMs: 7000 },
-    ]);
   });
 });
 

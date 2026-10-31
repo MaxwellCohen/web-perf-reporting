@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { alignTimeBucketMs, buildAlignedCompareRows } from "./buildAlignedCompareRows";
+import { buildAlignedCompareRows } from "./buildAlignedCompareRows";
 import type { TimelineEvent } from "./types";
 
 function event(id: string, timeMs: number, title = id): TimelineEvent {
@@ -16,17 +16,6 @@ function event(id: string, timeMs: number, title = id): TimelineEvent {
     evidence: [],
   };
 }
-
-describe("alignTimeBucketMs", () => {
-  it("snaps sub-second times to whole ms", () => {
-    expect(alignTimeBucketMs(500.4)).toBe(500);
-  });
-
-  it("snaps 1.xx s times to 10ms so formatMs labels match", () => {
-    expect(alignTimeBucketMs(1316)).toBe(1320);
-    expect(alignTimeBucketMs(1324)).toBe(1320);
-  });
-});
 
 describe("buildAlignedCompareRows", () => {
   it("puts the same step from both runs on one row despite different times", () => {

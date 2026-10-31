@@ -26,5 +26,17 @@ export default defineConfig({
     routes: [],
     kv_namespaces: [{ binding: "KV", id: "a243d4365c5542e789045e74791afdda" }],
     r2_buckets: [{ binding: "RESULTS_BUCKET", bucket_name: "api-results" }],
+    // Isolated resources for `wrangler preview` (non-production branch builds).
+    previews: {
+      kv_namespaces: [{ binding: "KV", id: "40c6d96ec7d14fc4871a056b58c43441" }],
+      d1_databases: [{ binding: "DB", database_id: "7401df6e-b3f2-41bc-a6d3-792817284e9d" }],
+      r2_buckets: [{ binding: "RESULTS_BUCKET", bucket_name: "api-results-preview" }],
+      queues: {
+        producers: [
+          { binding: "QUEUE_CRUX", queue: "crux-preview" },
+          { binding: "QUEUE_PAGESPEED", queue: "pagespeed-preview" },
+        ],
+      },
+    },
   },
 });

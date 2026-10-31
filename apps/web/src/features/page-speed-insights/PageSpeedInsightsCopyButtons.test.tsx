@@ -27,10 +27,7 @@ describe("PageSpeedInsightsCopyButtons", () => {
 
   it("puts Share in the same row as report copy buttons", () => {
     const { container } = render(
-      <PageSpeedInsightsCopyButtons
-        items={items}
-        shareUrl="https://example.com/viewer?psi=abc"
-      />,
+      <PageSpeedInsightsCopyButtons items={items} shareUrl="https://example.com/viewer?psi=abc" />,
     );
     const labels = [...container.querySelectorAll("button")].map((el) => el.textContent);
     expect(labels.some((t) => t?.includes("Share"))).toBe(true);

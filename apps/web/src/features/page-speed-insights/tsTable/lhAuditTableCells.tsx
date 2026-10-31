@@ -8,7 +8,11 @@ export function LHCategoryTitleCell(props: StockCellContext<TableDataItem, strin
     props.column.id === props.row.groupingColumnId
       ? String(props.row.groupingValue ?? "")
       : props.getValue<string>();
-  return <div className="w-full min-w-0 basis-full text-lg font-bold sm:basis-48 sm:text-xl">{category}</div>;
+  return (
+    <div className="w-full min-w-0 basis-full text-lg font-bold sm:basis-48 sm:text-xl">
+      {category}
+    </div>
+  );
 }
 
 export function LHCategoryScoreCell(props: StockCellContext<TableDataItem, string>) {
@@ -23,7 +27,10 @@ export function LHCategoryScoreCell(props: StockCellContext<TableDataItem, strin
     const [scoreStr = 0, label = ""] = v.split(":::");
     const score = +scoreStr;
     return (
-      <div key={v} className="flex w-full min-w-0 flex-row items-center gap-2 sm:w-auto sm:max-w-64 sm:flex-1">
+      <div
+        key={v}
+        className="flex w-full min-w-0 flex-row items-center gap-2 sm:w-auto sm:max-w-64 sm:flex-1"
+      >
         <div className="flex w-full min-w-0 grow flex-col gap-2 align-top hover:no-underline sm:max-w-64">
           <div className="text-center text-xs hover:no-underline">
             {label ? `${label} - ` : ""}
@@ -39,9 +46,7 @@ export function LHCategoryScoreCell(props: StockCellContext<TableDataItem, strin
   });
 }
 
-export function LHAuditDescriptionCell(
-  props: StockCellContext<TableDataItem, string | undefined>,
-) {
+export function LHAuditDescriptionCell(props: StockCellContext<TableDataItem, string | undefined>) {
   const str = props.getValue<string | undefined>()?.toString() || "";
   if (!str) {
     return null;

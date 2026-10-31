@@ -15,7 +15,7 @@
  * open — accordion sections; omitted means the tab default; `open=` means all collapsed
  */
 
-export const DASHBOARD_TABS = [
+const DASHBOARD_TABS = [
   "overview",
   "timeline",
   "loading",
@@ -27,21 +27,21 @@ export const DASHBOARD_TABS = [
 
 const LEGACY_RESOURCE_TABS = new Set(["network", "javascript"]);
 
-export const RESOURCE_STAGES = ["arrived", "scripts", "unused", "main-thread"] as const;
+const RESOURCE_STAGES = ["arrived", "scripts", "unused", "main-thread"] as const;
 export type ResourceStageId = (typeof RESOURCE_STAGES)[number];
 
 export type DashboardTab = (typeof DASHBOARD_TABS)[number];
 
-export const DASHBOARD_SORTS = ["start", "end", "duration", "size"] as const;
-export type DashboardSort = (typeof DASHBOARD_SORTS)[number];
+const DASHBOARD_SORTS = ["start", "end", "duration", "size"] as const;
+type DashboardSort = (typeof DASHBOARD_SORTS)[number];
 
-export const DASHBOARD_HEIGHTS = ["default", "large", "xl", "full"] as const;
-export type DashboardHeight = (typeof DASHBOARD_HEIGHTS)[number];
+const DASHBOARD_HEIGHTS = ["default", "large", "xl", "full"] as const;
+type DashboardHeight = (typeof DASHBOARD_HEIGHTS)[number];
 
-export const DASHBOARD_ROW_DENSITIES = ["expanded", "collapsed"] as const;
+const DASHBOARD_ROW_DENSITIES = ["expanded", "collapsed"] as const;
 export type DashboardRowDensity = (typeof DASHBOARD_ROW_DENSITIES)[number];
 
-export const DASHBOARD_SEARCH_KEYS = [
+const DASHBOARD_SEARCH_KEYS = [
   "view",
   "tab",
   "labels",
@@ -218,7 +218,7 @@ function writeText(params: URLSearchParams, key: string, value: string | null) {
   else params.delete(key);
 }
 
-export function applyDashboardSearchPatch(
+function applyDashboardSearchPatch(
   current: URLSearchParams,
   patch: DashboardSearchPatch,
 ): URLSearchParams {

@@ -2,11 +2,7 @@ import type { StockRow } from "@/features/page-speed-insights/shared/tanstackSto
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { PageSpeedInsights } from "@/lib/schema";
-import {
-  useLHTable,
-  CategoryRow,
-  AuditSummaryRow,
-} from "@/features/page-speed-insights/tsTable/useLHTable";
+import { useLHTable, CategoryRow } from "@/features/page-speed-insights/tsTable/useLHTable";
 import type { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataItem";
 import { useTable } from "@tanstack/react-table";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
@@ -128,36 +124,6 @@ describe("CategoryRow", () => {
   });
 });
 
-function AuditSummaryRowWrapper() {
-  const columnHelper = createColumnHelper<{
-    auditRef: { acronym?: string };
-    auditResult: unknown;
-    _userLabel: string;
-  }>();
-  const columns = [columnHelper.accessor("auditRef.acronym", { id: "acronym", header: "Acronym" })];
-  const data = [
-    {
-      auditRef: { acronym: "FCP" },
-      auditResult: { title: "FCP" },
-      _userLabel: "Mobile",
-    },
-  ];
-  const table = useTable({
-    features: lhTableFeatures,
-    data,
-    columns: columns as never,
-  });
-  const row = table.getRowModel().rows[0];
-  return <AuditSummaryRow row={row as unknown as StockRow<TableDataItem>} />;
-}
-
-describe("AuditSummaryRow", () => {
-  it("renders audit summary row", () => {
-    const { container } = render(<AuditSummaryRowWrapper />);
-    expect(container.querySelector('[data-testid="audit-summary"]')).toBeTruthy();
-  });
-});
-
 describe("CategoryRow status sections", () => {
   function Wrapper({ labels, expandAll }: { labels: string[]; expandAll?: boolean }) {
     const mk = (scores: Record<string, number>) =>
@@ -202,7 +168,9 @@ describe("CategoryRow status sections", () => {
 
   it("uses the worst status across two reports", () => {
     const { getByTestId, container } = render(<Wrapper labels={["Mobile", "Desktop"]} />);
-    expect(getByTestId("audit-section-fail").querySelectorAll('[data-testid="audit-summary"]')).toHaveLength(1);
+    expect(
+      getByTestId("audit-section-fail").querySelectorAll('[data-testid="audit-summary"]'),
+    ).toHaveLength(1);
     expect(container.textContent).toContain("1 failed · 1 needs attention · 1 passed");
   });
 

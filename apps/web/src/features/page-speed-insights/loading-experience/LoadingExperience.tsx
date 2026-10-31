@@ -60,7 +60,10 @@ export function LoadingExperience({ title, experienceKey }: LoadingExperiencePro
         <AccordionContent className="-mx-2 grid max-w-full grid-cols-1 items-start gap-2 min-[22rem]:grid-cols-[repeat(auto-fit,minmax(14rem,1fr))]">
           {metrics.map(({ metric, key }) => {
             return (
-              <Card key={key} className="flex min-w-0 w-full flex-col gap-2 overflow-hidden px-4 py-4">
+              <Card
+                key={key}
+                className="flex min-w-0 w-full flex-col gap-2 overflow-hidden px-4 py-4"
+              >
                 <CardTitle className="text-sm font-bold">{metric}</CardTitle>
                 <div className="flex flex-col gap-3">
                   {experiences.map((experience, idx) => {

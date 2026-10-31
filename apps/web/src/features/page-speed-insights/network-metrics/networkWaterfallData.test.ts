@@ -9,7 +9,6 @@ import {
   getSegmentStyle,
   getWaterfallResourceTypes,
   getWaterfallTimeRange,
-  normalizeNetworkRequest,
   sortWaterfallRows,
 } from "@/features/page-speed-insights/network-metrics/networkWaterfallData";
 
@@ -32,49 +31,6 @@ function makeLoad(overrides: Partial<CombinedLoad> = {}): CombinedLoad {
 }
 
 describe("networkWaterfallData", () => {
-  it("normalizes a row with queue and network segments", () => {
-    const row = normalizeNetworkRequest(
-      {
-        url: "https://example.com/app.js",
-        resourceType: "Script",
-        networkRequestTime: 100,
-        networkEndTime: 250,
-        rendererStartTime: 80,
-        transferSize: 12000,
-        statusCode: 200,
-      },
-      0,
-    );
-
-    expect(row.kind).toBe("request");
-    expect(row.queueStart).toBe(80);
-    expect(row.queueEnd).toBe(100);
-    expect(row.networkStart).toBe(100);
-    expect(row.networkEnd).toBe(250);
-    expect(row.duration).toBe(170);
-  });
-
-  it("omits queue segment when rendererStartTime is missing or not before network start", () => {
-    expect(
-      normalizeNetworkRequest(
-        { url: "https://example.com/", networkRequestTime: 50, networkEndTime: 120 },
-        0,
-      ).queueStart,
-    ).toBeUndefined();
-
-    expect(
-      normalizeNetworkRequest(
-        {
-          url: "https://example.com/",
-          networkRequestTime: 50,
-          networkEndTime: 120,
-          rendererStartTime: 50,
-        },
-        0,
-      ).queueStart,
-    ).toBeUndefined();
-  });
-
   it("builds rows and calculates time range", () => {
     const rows = buildWaterfallRows([
       { networkRequestTime: 10, networkEndTime: 100, url: "https://a.test/" },
@@ -250,12 +206,7 @@ describe("networkWaterfallData", () => {
       { density: "expanded" },
     );
 
-    expect(rows.map((row) => row.kind)).toEqual([
-      "user-mark",
-      "request",
-      "user-measure",
-      "task",
-    ]);
+    expect(rows.map((row) => row.kind)).toEqual(["user-mark", "request", "user-measure", "task"]);
     expect(rows.find((row) => row.kind === "request")?.renderBlocking).toBe("blocking");
     expect(rows.find((row) => row.kind === "user-mark")?.label).toBe("nav");
     expect(rows.find((row) => row.kind === "user-measure")?.duration).toBe(15);
@@ -344,11 +295,7 @@ describe("networkWaterfallData", () => {
     const tasks = rows.filter((row) => row.kind === "task");
     expect(tasks).toHaveLength(2);
     expect(tasks[0]?.label).toBe("Tasks (3)");
-    expect(tasks[0]?.segments?.map((seg) => seg.taskKind)).toEqual([
-      "short",
-      "short",
-      "long",
-    ]);
+    expect(tasks[0]?.segments?.map((seg) => seg.taskKind)).toEqual(["short", "short", "long"]);
     expect(tasks[0]?.networkStart).toBe(100);
     expect(tasks[0]?.networkEnd).toBe(220);
     expect(tasks[0]?.renderBlocking).toBe("blocking");

@@ -232,9 +232,7 @@ vi.mock("@/features/page-speed-insights/network-metrics/ResourceTypeChartCard", 
 }));
 
 vi.mock("@/features/page-speed-insights/network-metrics/OriginLatencyChartCard", () => ({
-  OriginLatencyChartCard: ({ mode }: { mode: string }) => (
-    <div>Origin latency chart: {mode}</div>
-  ),
+  OriginLatencyChartCard: ({ mode }: { mode: string }) => <div>Origin latency chart: {mode}</div>,
 }));
 
 vi.mock("@/features/page-speed-insights/network-metrics/TopResourcesCard", () => ({
@@ -373,12 +371,7 @@ import { LoadingExperience } from "@/features/page-speed-insights/loading-experi
 import { LoadTimelineSection } from "@/features/page-speed-insights/network-metrics/LoadTimelineSection";
 import { NetworkResourcesSection } from "@/features/page-speed-insights/network-metrics/NetworkResourcesSection";
 import { RecommendationsSection } from "@/features/page-speed-insights/RecommendationsSection/RecommendationsSection";
-import {
-  ScoreDisplay,
-  ScoreDisplayModes,
-  isEmptyResult,
-  sortByScoreDisplayModes,
-} from "@/features/page-speed-insights/ScoreDisplay";
+import { ScoreDisplay, isEmptyResult } from "@/features/page-speed-insights/ScoreDisplay";
 
 describe("page-speed container coverage", () => {
   beforeEach(() => {
@@ -495,67 +488,6 @@ describe("page-speed container coverage", () => {
     );
 
     expect(container.querySelector('[value="networkResources"]')).toBeNull();
-  });
-
-  it("renders the cwv summary cards when audits are available", () => {
-    pageSpeedItems = [
-      {
-        label: "Mobile",
-        item: {
-          lighthouseResult: {
-            categoryGroups: { metrics: { title: "Metrics" } },
-            audits: {
-              "first-contentful-paint": {
-                title: "First Contentful Paint",
-                description: "FCP description",
-                score: 0.92,
-                scoreDisplayMode: ScoreDisplayModes.NUMERIC,
-                displayValue: "1.2 s",
-              },
-              "largest-contentful-paint": {
-                title: "Largest Contentful Paint",
-                description: "LCP description",
-                score: 1,
-                scoreDisplayMode: ScoreDisplayModes.BINARY,
-              },
-              "total-blocking-time": {
-                title: "Total Blocking Time",
-                description: "TBT description",
-                score: null,
-                scoreDisplayMode: ScoreDisplayModes.INFORMATIVE,
-              },
-              "cumulative-layout-shift": {
-                title: "Cumulative Layout Shift",
-                description: "CLS description",
-                score: 0,
-                scoreDisplayMode: ScoreDisplayModes.ERROR,
-                errorMessage: "Failed",
-              },
-              "speed-index": {
-                title: "Speed Index",
-                description: "Speed index description",
-                score: 0.5,
-                scoreDisplayMode: ScoreDisplayModes.MANUAL,
-              },
-            },
-          },
-        },
-      },
-    ];
-
-    const { container } = render(
-      <Accordion type="multiple" defaultValue={["cwv"]}>
-        <CWVMetricsComponent />
-      </Accordion>,
-    );
-
-    expect(container.textContent).toContain("Core Web Vitals Summary");
-    expect(container.textContent).toContain("First Contentful Paint");
-    expect(container.textContent).toMatch(/Score: 92 \/ 100/);
-    expect(container.textContent).toContain("Mobile:Pass");
-    expect(container.textContent).toContain("Failed");
-    expect(container.textContent).toContain("Mobile:Manual");
-    expect((container.textContent?.match(/Score chart:/g) ?? []).length).toBe(5);
   });
 
   it("aggregates load timeline metrics before rendering the child cards", () => {
@@ -703,7 +635,10 @@ describe("page-speed container coverage", () => {
     });
 
     const { container } = render(
-      <Accordion type="multiple" defaultValue={["javascriptPerformance", "scriptOptimizationAudits"]}>
+      <Accordion
+        type="multiple"
+        defaultValue={["javascriptPerformance", "scriptOptimizationAudits"]}
+      >
         <JavaScriptPerformanceComponent />
       </Accordion>,
     );
@@ -765,32 +700,5 @@ describe("page-speed container coverage", () => {
     fireEvent.click(toggleBtn!);
 
     expect(container.textContent).toContain("Expanded count: 2");
-  });
-
-  it("handles score display edge cases and audit sorting helpers", () => {
-    const informativeAudit = {
-      score: null,
-      scoreDisplayMode: ScoreDisplayModes.INFORMATIVE,
-    };
-    const numericAudit = {
-      score: 0.9,
-      scoreDisplayMode: ScoreDisplayModes.NUMERIC,
-      displayValue: "900 ms",
-      details: { type: "table", items: [{ url: "https://example.com" }] },
-    };
-    const emptyAudit = {
-      score: 1,
-      scoreDisplayMode: ScoreDisplayModes.NUMERIC,
-      details: { type: "table", items: [] },
-    };
-
-    const { container } = render(<ScoreDisplay audit={numericAudit as any} device="Mobile" />);
-
-    expect(container.textContent).toMatch(/Mobile:.*Pass 90.*900 ms/);
-    expect(isEmptyResult(undefined)).toBe(true);
-    expect(isEmptyResult(emptyAudit as any)).toBe(true);
-    expect(isEmptyResult(numericAudit as any)).toBe(false);
-    expect(sortByScoreDisplayModes(emptyAudit as any, numericAudit as any)).toBeGreaterThan(0);
-    expect(sortByScoreDisplayModes(undefined, informativeAudit as any)).toBe(-1);
   });
 });

@@ -2,7 +2,10 @@ import * as React from "react";
 
 import { cn } from "@/lib/cn";
 
-export function withDisplayName<T extends { displayName?: string }>(component: T, displayName: string): T {
+export function withDisplayName<T extends { displayName?: string }>(
+  component: T,
+  displayName: string,
+): T {
   component.displayName = displayName;
   return component;
 }
@@ -25,7 +28,7 @@ export function tableElementProps<R, P extends object>(
   };
 }
 
-export function forwardTableDiv(displayName: string, role: React.AriaRole, defaultClass: string) {
+function forwardTableDiv(displayName: string, role: React.AriaRole, defaultClass: string) {
   const Comp = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
     ({ className, ...props }, ref) => (
       <div ref={ref} className={cn(defaultClass, className)} role={role} {...props} />

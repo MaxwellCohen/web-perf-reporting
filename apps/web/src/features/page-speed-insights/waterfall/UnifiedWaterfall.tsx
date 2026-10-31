@@ -64,13 +64,12 @@ import {
 } from "@/features/page-speed-insights/waterfall/waterfallData";
 import { getNetworkBarColor } from "@/features/page-speed-insights/shared/networkResourceColors";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
+import { toggleMultiSelect } from "@/features/page-speed-insights/shared/MultiSelectFilterDropdown";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { cn } from "@/lib/utils";
 
-export function scrollToMoment(eventId: string, idPrefix?: string) {
-  const id = idPrefix
-    ? `timeline-moment-${idPrefix}-${eventId}`
-    : `timeline-moment-${eventId}`;
+function scrollToMoment(eventId: string, idPrefix?: string) {
+  const id = idPrefix ? `timeline-moment-${idPrefix}-${eventId}` : `timeline-moment-${eventId}`;
   const el = document.getElementById(id);
   el?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
@@ -93,7 +92,9 @@ function LegendSwatch({
 }) {
   return (
     <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
-      <span className={cn("h-1.5 shrink-0 rounded-sm", wide ? "w-2.5" : "w-1.5", swatchClassName)} />
+      <span
+        className={cn("h-1.5 shrink-0 rounded-sm", wide ? "w-2.5" : "w-1.5", swatchClassName)}
+      />
       {label}
     </span>
   );
@@ -125,7 +126,9 @@ function LegendSignalButton({
         pressed ? "bg-muted text-foreground ring-1 ring-foreground" : "text-muted-foreground",
       )}
     >
-      <span className={cn("h-1.5 shrink-0 rounded-sm", wide ? "w-2.5" : "w-1.5", swatchClassName)} />
+      <span
+        className={cn("h-1.5 shrink-0 rounded-sm", wide ? "w-2.5" : "w-1.5", swatchClassName)}
+      />
       {label}
     </button>
   );
@@ -144,12 +147,7 @@ function ResourceTypeLegend({
 }) {
   const available = new Set(availableSignals);
 
-  function signalItem(
-    id: WaterfallSignalId,
-    label: string,
-    swatchClassName: string,
-    wide = false,
-  ) {
+  function signalItem(id: WaterfallSignalId, label: string, swatchClassName: string, wide = false) {
     if (!available.has(id) && !selectedSignals.includes(id)) {
       return <LegendSwatch key={id} label={label} swatchClassName={swatchClassName} wide={wide} />;
     }
@@ -172,12 +170,14 @@ function ResourceTypeLegend({
       data-testid="waterfall-resource-type-legend"
     >
       {types.map((type) => (
-        <LegendSwatch key={type} label={toTitleCase(type)} swatchClassName={getNetworkBarColor(type)} />
+        <LegendSwatch
+          key={type}
+          label={toTitleCase(type)}
+          swatchClassName={getNetworkBarColor(type)}
+        />
       ))}
       {WATERFALL_SPECIAL_LEGEND.map((entry) =>
-        isWaterfallSignalId(entry.key)
-          ? signalItem(entry.key, entry.label, entry.className)
-          : null,
+        isWaterfallSignalId(entry.key) ? signalItem(entry.key, entry.label, entry.className) : null,
       )}
       {signalItem("queue", "Queue", QUEUE_SWATCH, true)}
       {signalItem("chain", "Critical chain", CHAIN_SWATCH, true)}
@@ -198,9 +198,7 @@ function typeAndSignalFilterLabel(
       : `${resourceTypes.length} types`;
   }
   if (!typeActive && signalActive) {
-    return signals.length === 1
-      ? WATERFALL_SIGNAL_LABEL[signals[0]!]
-      : `${signals.length} signals`;
+    return signals.length === 1 ? WATERFALL_SIGNAL_LABEL[signals[0]!] : `${signals.length} signals`;
   }
   const count = resourceTypes.length + signals.length;
   return count === 2
@@ -305,15 +303,9 @@ function TypeAndSignalFilterDropdown({
                   key={option}
                   checked={resourceTypes.length === 0 || resourceTypes.includes(option)}
                   onCheckedChange={(checked) => {
-                    if (checked) {
-                      const next = resourceTypes.includes(option)
-                        ? [...resourceTypes]
-                        : [...resourceTypes, option];
-                      onResourceTypesChange(next.length === typeOptions.length ? [] : next);
-                    } else {
-                      const base = resourceTypes.length === 0 ? typeOptions : resourceTypes;
-                      onResourceTypesChange(base.filter((item) => item !== option));
-                    }
+                    onResourceTypesChange(
+                      toggleMultiSelect(typeOptions, resourceTypes, option, checked),
+                    );
                   }}
                 >
                   {toTitleCase(option)}
@@ -352,7 +344,12 @@ function ToolbarField({
   className?: string;
 }) {
   return (
-    <div className={cn("flex w-full min-w-0 flex-col gap-0.5 sm:w-[calc(50%-0.25rem)] lg:w-auto", className)}>
+    <div
+      className={cn(
+        "flex w-full min-w-0 flex-col gap-0.5 sm:w-[calc(50%-0.25rem)] lg:w-auto",
+        className,
+      )}
+    >
       <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </span>
@@ -575,12 +572,17 @@ export function UnifiedWaterfall({
           availableSignals={signalOptions}
           selectedSignals={signals}
           onToggleSignal={(id) =>
-            setSignals(signals.includes(id) ? signals.filter((item) => item !== id) : [...signals, id])
+            setSignals(
+              signals.includes(id) ? signals.filter((item) => item !== id) : [...signals, id],
+            )
           }
         />
       ) : null}
 
-      <div className="min-w-0" style={stickyTopPx > 0 ? { scrollMarginTop: stickyTopPx } : undefined}>
+      <div
+        className="min-w-0"
+        style={stickyTopPx > 0 ? { scrollMarginTop: stickyTopPx } : undefined}
+      >
         <InteractiveWaterfall
           rows={displayRows}
           timeRange={timeRange}
@@ -704,9 +706,7 @@ export function UnifiedWaterfall({
       {panelOpen ? (
         <div
           id={
-            momentIdPrefix
-              ? `timeline-overview-panel-${momentIdPrefix}`
-              : "timeline-overview-panel"
+            momentIdPrefix ? `timeline-overview-panel-${momentIdPrefix}` : "timeline-overview-panel"
           }
           role="region"
           aria-labelledby={summaryId}

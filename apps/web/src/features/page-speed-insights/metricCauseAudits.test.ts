@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import type { AuditResult, AuditResultsRecord } from "@/lib/schema";
 import {
   collectCauseAuditsForMetric,
-  CURATED_CAUSE_AUDIT_IDS,
   METRIC_AUDIT_TO_ACRONYM,
 } from "@/features/page-speed-insights/metricCauseAudits";
 
@@ -180,10 +179,5 @@ describe("collectCauseAuditsForMetric", () => {
     expect(result).toHaveLength(1);
     expect(result[0].entries.map((e) => e.label)).toEqual(["Mobile", "Desktop"]);
     expect(result[0].maxSavings).toBe(0.12);
-  });
-
-  it("covers curated ids for TBT and Speed Index", () => {
-    expect(CURATED_CAUSE_AUDIT_IDS["total-blocking-time"]).toContain("bootup-time");
-    expect(CURATED_CAUSE_AUDIT_IDS["speed-index"]).toContain("unused-css-rules");
   });
 });

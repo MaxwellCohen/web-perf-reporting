@@ -1,8 +1,4 @@
-import {
-  type CellData,
-  type ColumnDef,
-  type RowData,
-} from "@tanstack/react-table";
+import { type CellData, type ColumnDef, type RowData } from "@tanstack/react-table";
 import {
   useStandardTable,
   type StandardColumnDef,
@@ -23,7 +19,10 @@ export type SimpleTableOptions<TData extends RowData> = {
  * Flat TanStack table: sorting, filtering, resize (no expander).
  * Thin wrapper over useStandardTable for call-site clarity.
  */
-export function useSimpleTable<TData extends RowData>({ data, columns }: SimpleTableOptions<TData>) {
+export function useSimpleTable<TData extends RowData>({
+  data,
+  columns,
+}: SimpleTableOptions<TData>) {
   return useStandardTable({
     data,
     columns: columns as StandardColumnDef<TData>[],

@@ -35,53 +35,7 @@ vi.mock("drizzle-orm", () => ({
   gt: (...args: unknown[]) => ({ type: "gt", args }),
 }));
 
-import {
-  getPageSpeedDataUrl,
-  getSavedPageSpeedData,
-} from "@/lib/services/pageSpeedInsightsLegacy";
 import { requestPageSpeedData } from "@/lib/services/pageSpeedInsights.service";
-
-describe("pageSpeedInsightsLegacy", () => {
-  beforeEach(() => {
-    captureExceptionMock.mockReset();
-    findFirstMock.mockReset();
-    vi.restoreAllMocks();
-  });
-
-  it("builds the google pagespeed url with categories and strategy", async () => {
-    const url = await getPageSpeedDataUrl("https://example.com/home", "DESKTOP");
-
-    expect(url).toContain("https://www.googleapis.com/pagespeedonline/v5/runPagespeed");
-    expect(url).toContain("url=https%3A%2F%2Fexample.com%2Fhome");
-    expect(url).toContain("strategy=DESKTOP");
-    expect(url).toContain("category=PERFORMANCE");
-    expect(url).toContain("category=SEO");
-  });
-
-  it("returns the saved page speed record when the database query succeeds", async () => {
-    findFirstMock.mockResolvedValue({
-      status: "completed",
-      data: '{"ok":true}',
-    });
-
-    const result = await getSavedPageSpeedData("https://example.com");
-
-    expect(findFirstMock).toHaveBeenCalled();
-    expect(result).toEqual({
-      status: "completed",
-      data: '{"ok":true}',
-    });
-  });
-
-  it("captures errors when the saved page speed query fails", async () => {
-    findFirstMock.mockRejectedValue(new Error("db failed"));
-
-    const result = await getSavedPageSpeedData("https://example.com");
-
-    expect(result).toBeNull();
-    expect(captureExceptionMock).toHaveBeenCalled();
-  });
-});
 
 describe("pageSpeedInsights.service", () => {
   beforeEach(() => {

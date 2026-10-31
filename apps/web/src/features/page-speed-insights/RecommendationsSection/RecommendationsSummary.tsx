@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { RenderBytesValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
@@ -77,9 +77,7 @@ export function RecommendationsSummary({ recommendations }: RecommendationsSumma
           label="Potential Savings"
           value={
             <>
-              {summary.totalMsSavings > 0 ? (
-                <span>{formatMs(summary.totalMsSavings)}</span>
-              ) : null}
+              {summary.totalMsSavings > 0 ? <span>{formatMs(summary.totalMsSavings)}</span> : null}
               {summary.totalMsSavings > 0 && summary.totalByteSavings > 0 ? (
                 <span className="text-muted-foreground"> + </span>
               ) : null}

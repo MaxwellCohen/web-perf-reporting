@@ -1,10 +1,7 @@
 import type { LhJsonFileEntry, LhJsonTextEntry } from "@/components/lh/types";
 import { PageSpeedInsights } from "@/lib/schema";
 import { parseViewerJsonString } from "@/components/viewer/parseViewerJson";
-import {
-  prefixPsiReportLabels,
-  resolvePsiRunLabels,
-} from "@/lib/viewer/psiCompareLabels";
+import { prefixPsiReportLabels, resolvePsiRunLabels } from "@/lib/viewer/psiCompareLabels";
 
 export type ViewerRunMethod = "psi" | "file" | "text";
 
@@ -48,6 +45,18 @@ async function importPsiShare(
   return { data: payload.data, labels: payload.labels };
 }
 
+function appendReports(
+  data: PageSpeedInsights[],
+  labels: string[],
+  reports: PageSpeedInsights[],
+  label: string,
+) {
+  for (const report of reports) {
+    data.push(report);
+    labels.push(reports.length > 1 ? `${label} (${labels.length + 1})` : label);
+  }
+}
+
 async function collectFileRun(
   jsonFiles: LhJsonFileEntry[],
 ): Promise<{ data: PageSpeedInsights[]; labels: string[] }> {
@@ -62,10 +71,7 @@ async function collectFileRun(
     const fileContent = await fileEntry.file.text();
     const reports = parseViewerJsonString(fileContent);
     const label = fileEntry.name.trim() || fileEntry.file.name.replace(/\.[^/.]+$/, "");
-    for (const report of reports) {
-      data.push(report);
-      labels.push(reports.length > 1 ? `${label} (${labels.length + 1})` : label);
-    }
+    appendReports(data, labels, reports, label);
   }
 
   return { data, labels };
@@ -85,10 +91,7 @@ async function collectTextRun(
   for (const [index, input] of filledInputs.entries()) {
     const reports = parseViewerJsonString(input.content);
     const label = input.name.trim() || `Report ${index + 1}`;
-    for (const report of reports) {
-      data.push(report);
-      labels.push(reports.length > 1 ? `${label} (${labels.length + 1})` : label);
-    }
+    appendReports(data, labels, reports, label);
   }
 
   return { data, labels };

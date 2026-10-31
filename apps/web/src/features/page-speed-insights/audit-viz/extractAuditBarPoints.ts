@@ -11,10 +11,7 @@ export type BarFieldConfig = {
   limit?: number;
 };
 
-export function extractBarPoints(
-  rows: DetailTableItem[],
-  config: BarFieldConfig,
-): LabeledValue[] {
+export function extractBarPoints(rows: DetailTableItem[], config: BarFieldConfig): LabeledValue[] {
   const points: LabeledValue[] = [];
   const limit = config.limit ?? 12;
 
@@ -125,7 +122,9 @@ export function extractDebugKpis(
   metrics: Array<{ key: string; label: string; value: number; format: DebugKpiFormat }>;
 }> {
   return items.map((row) => {
-    const details = row.auditResult?.details as { items?: Array<Record<string, unknown>> } | undefined;
+    const details = row.auditResult?.details as
+      | { items?: Array<Record<string, unknown>> }
+      | undefined;
     const debug = details?.items?.[0] ?? {};
     const metrics = keys
       .map((def) => {

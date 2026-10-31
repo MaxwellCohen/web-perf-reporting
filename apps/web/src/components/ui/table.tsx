@@ -33,17 +33,16 @@ function forwardTableCell<E extends "th" | "td">(
   type Props = E extends "th"
     ? React.ThHTMLAttributes<HTMLTableCellElement>
     : React.TdHTMLAttributes<HTMLTableCellElement>;
-  const Comp = React.forwardRef<HTMLTableCellElement, Props>(
-    ({ className, ...props }, ref) =>
-      React.createElement(
-        element,
-        tableElementProps<HTMLTableCellElement, Props>(
-          defaultClass,
-          className,
-          ref,
-          props as unknown as Props,
-        ),
+  const Comp = React.forwardRef<HTMLTableCellElement, Props>(({ className, ...props }, ref) =>
+    React.createElement(
+      element,
+      tableElementProps<HTMLTableCellElement, Props>(
+        defaultClass,
+        className,
+        ref,
+        props as unknown as Props,
       ),
+    ),
   );
   return withDisplayName(Comp, displayName);
 }

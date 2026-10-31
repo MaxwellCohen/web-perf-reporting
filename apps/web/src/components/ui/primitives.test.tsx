@@ -172,20 +172,6 @@ vi.mock("@/components/ui/tabs", () => {
   return { Tabs: TabsRoot, TabsList, TabsTrigger, TabsContent };
 });
 
-vi.mock("@/components/ui/navigation-menu", () => ({
-  NavigationMenu: ({ children }: { children: React.ReactNode }) => <nav>{children}</nav>,
-  NavigationMenuList: ({ children }: { children: React.ReactNode }) => <ul>{children}</ul>,
-  NavigationMenuItem: ({ children }: { children: React.ReactNode }) => <li>{children}</li>,
-  NavigationMenuTrigger: ({ children }: { children: React.ReactNode }) => (
-    <button type="button">{children}</button>
-  ),
-  NavigationMenuContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  NavigationMenuLink: ({ children, href }: { children: React.ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
-  ),
-  NavigationMenuIndicator: () => null,
-}));
-
 import {
   Accordion,
   AccordionContent,
@@ -199,15 +185,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuIndicator,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Table,
@@ -288,37 +265,20 @@ describe("ui primitive smoke tests", () => {
     expect(container.textContent).toContain("Second content");
   });
 
-  it("opens a popover and renders navigation menu content", () => {
+  it("opens a popover", () => {
     const { container } = render(
       <div>
         <Popover>
           <PopoverTrigger>Open popover</PopoverTrigger>
           <PopoverContent>Popover body</PopoverContent>
         </Popover>
-        <NavigationMenu>
-          <NavigationMenuList>
-            <NavigationMenuItem>
-              <NavigationMenuTrigger>Docs</NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <NavigationMenuLink href="/docs">Read docs</NavigationMenuLink>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-          <NavigationMenuIndicator />
-        </NavigationMenu>
       </div>,
     );
     const openBtn = Array.from(container.querySelectorAll("button")).find(
       (b) => b.textContent?.trim() === "Open popover",
     );
     fireEvent.click(openBtn!);
-    const docsBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      /Docs/.test(b.textContent ?? ""),
-    );
-    fireEvent.click(docsBtn!);
     expect(container.textContent).toContain("Popover body");
-    const link = container.querySelector('a[href="/docs"]');
-    expect(link?.textContent).toContain("Read docs");
   });
 
   it("renders accordion trigger and content", () => {

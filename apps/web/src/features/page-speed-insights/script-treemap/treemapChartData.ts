@@ -93,9 +93,7 @@ function truncatePathPreservingFilename(path: string, maxLength: number): string
   }
 
   const truncatedDirectory =
-    directory.length > prefixBudget
-      ? `…/${directory.slice(-(prefixBudget - 1))}`
-      : `/${directory}`;
+    directory.length > prefixBudget ? `…/${directory.slice(-(prefixBudget - 1))}` : `/${directory}`;
 
   return `${truncatedDirectory}/${fileWithQuery}`;
 }
@@ -131,8 +129,7 @@ function buildUrlPrimary(url: URL, maxLength: number): string {
 
   const idParam = url.searchParams.get("id");
   const fileName = segments.at(-1) ?? segments[0];
-  const twoSegmentPath =
-    segments.length > 1 ? `/${segments.slice(-2).join("/")}` : `/${fileName}`;
+  const twoSegmentPath = segments.length > 1 ? `/${segments.slice(-2).join("/")}` : `/${fileName}`;
   const filePath = `/${fileName}`;
 
   const withId = (path: string) => {

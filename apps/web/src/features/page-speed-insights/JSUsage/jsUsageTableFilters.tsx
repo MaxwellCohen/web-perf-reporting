@@ -1,11 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
-import type {
-  StockColumnDef,
-  StockHeaderContext,
-} from "@/features/page-speed-insights/shared/tanstackStockTypes";
-import type { RowData } from "@tanstack/react-table";
 import {
   RenderBytesValue,
   RenderMSValue,
@@ -13,10 +8,10 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import type { TableColumnHeading, TreeMapNode } from "@/lib/schema";
+import type { TableColumnHeading } from "@/lib/schema";
 import type { ReactNode } from "react";
 
-export function useDebouncedCallback(callback: (...arg: any[]) => any, delay = 100) {
+function useDebouncedCallback(callback: (...arg: any[]) => any, delay = 100) {
   const timerIdRef = useRef<null | ReturnType<typeof setTimeout>>(null);
   const latestCallback = useRef(callback);
   latestCallback.current = callback;
@@ -63,7 +58,7 @@ const MS_KEYWORDS = [
   "ms",
 ];
 
-export function formatFilterValue(value: number, columnId: string, header?: string): ReactNode {
+function formatFilterValue(value: number, columnId: string, header?: string): ReactNode {
   const search = `${columnId} ${header ?? ""}`.toLowerCase();
 
   if (BYTES_KEYWORDS.some((k) => search.includes(k))) {
@@ -240,28 +235,3 @@ export function RangeFilterInputs({ column }: { column: RangeFilterColumn }) {
     </div>
   );
 }
-
-export function RangeFilter<TData extends RowData>({
-  column,
-}: Pick<StockHeaderContext<TData, unknown>, "column">) {
-  return <RangeFilterInputs column={column as RangeFilterColumn} />;
-}
-
-export const numericRangeFilter: StockColumnDef<TreeMapNode>["filterFn"] = (
-  row,
-  columnId,
-  filterValue,
-) => {
-  const rowValue = row.getValue(columnId) as number;
-  const [min, max] = filterValue;
-
-  if (min !== undefined && rowValue < min) {
-    return false;
-  }
-
-  if (max !== undefined && rowValue > max) {
-    return false;
-  }
-
-  return true;
-};

@@ -7,7 +7,7 @@ import { itemNumeric } from "./auditItemValues";
 import { hasAnyItems, reportLabel, rowItems } from "./performanceVizShared";
 
 /** Lighthouse server-response-time target. */
-export const SERVER_RESPONSE_THRESHOLD_MS = 600;
+const SERVER_RESPONSE_THRESHOLD_MS = 600;
 
 export function AuditServerResponseTimeViz({ rows }: { rows: DetailTableItem[] }) {
   if (!hasAnyItems(rows)) return null;
@@ -38,7 +38,9 @@ export function AuditServerResponseTimeViz({ rows }: { rows: DetailTableItem[] }
                 <span
                   className={cn(
                     "font-mono font-semibold tabular-nums",
-                    good ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400",
+                    good
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-red-600 dark:text-red-400",
                   )}
                 >
                   {formatMs(entry.ms)} · {good ? "Good" : "Slow"}
