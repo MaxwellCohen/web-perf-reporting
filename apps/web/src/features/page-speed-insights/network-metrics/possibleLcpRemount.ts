@@ -2,10 +2,10 @@ import type { PageSpeedInsightsSnapshot } from "@/features/page-speed-insights/P
 import { getNumber } from "@/lib/utils";
 
 /** Share of LCP breakdown duration that must be element render delay. */
-export const ELEMENT_RENDER_DELAY_SHARE_THRESHOLD = 0.8;
+const ELEMENT_RENDER_DELAY_SHARE_THRESHOLD = 0.8;
 
 /** Minimum observed LCP − FCP gap (ms) treated as “seconds later”. */
-export const LCP_AFTER_FCP_MS_THRESHOLD = 1000;
+const LCP_AFTER_FCP_MS_THRESHOLD = 1000;
 
 export type PossibleLcpRemountMatch = {
   label: string;
@@ -68,7 +68,7 @@ function observedPaintGapMs(audits: Record<string, unknown> | undefined): {
 }
 
 /** Weak PSI proxy for hydration remount delaying LCP; a Chrome trace is required to confirm. */
-export function detectPossibleLcpRemount(
+function detectPossibleLcpRemount(
   items: PageSpeedInsightsSnapshot["context"]["items"],
 ): PossibleLcpRemountMatch[] {
   const matches: PossibleLcpRemountMatch[] = [];

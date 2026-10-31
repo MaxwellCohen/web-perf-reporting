@@ -6,7 +6,7 @@ import { hasAnyItems, reportLabel, rowItems } from "./performanceVizShared";
 
 const CONTENT_RE = /\bcontent\s*=\s*(?:"([^"]*)"|'([^']*)')/i;
 
-export function viewportContentFromSnippet(snippet: unknown): string | undefined {
+function viewportContentFromSnippet(snippet: unknown): string | undefined {
   if (typeof snippet !== "string") return undefined;
   const match = snippet.match(CONTENT_RE);
   return match ? (match[1] ?? match[2]) : undefined;

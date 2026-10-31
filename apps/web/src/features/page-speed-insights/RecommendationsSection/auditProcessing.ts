@@ -63,7 +63,7 @@ export function combineMetricSavings(auditEntries: AuditEntry[]): Record<string,
   return combinedMetricSavings;
 }
 
-export function extractTableFromListItems(listDetails: AuditDetailList): {
+function extractTableFromListItems(listDetails: AuditDetailList): {
   items: TableItem[];
   headings: TableColumnHeading[] | undefined;
 } {

@@ -92,7 +92,7 @@ function asOfDate(description: string | undefined): string | null {
 
 const TIER_ORDER: Record<BaselineTier, number> = { limited: 0, newly: 1, widely: 2 };
 
-export function collectBaselineNote(audit: AuditResult | undefined): BaselineNote | null {
+function collectBaselineNote(audit: AuditResult | undefined): BaselineNote | null {
   if (!audit || isNotApplicable(audit)) {
     return null;
   }
@@ -151,7 +151,7 @@ function findingFromItem(item: TableItem): CspFindingNote | null {
   };
 }
 
-export function collectCspFindings(audit: AuditResult | undefined): CspFindingNote[] {
+function collectCspFindings(audit: AuditResult | undefined): CspFindingNote[] {
   if (!audit || isNotApplicable(audit)) {
     return [];
   }

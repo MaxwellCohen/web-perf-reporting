@@ -599,6 +599,20 @@ function layoutShiftEvents(shifts: LayoutShiftEvent[], bounds: PhaseBound[]): Ti
 
 function milestoneEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent[] {
   const events: TimelineEvent[] = [];
+  const mark = (
+    time: number | undefined,
+    id: string,
+    title: string,
+    detailPrefix: string,
+    phaseId: PhaseId,
+    extras?: Partial<TimelineEvent>,
+  ) => {
+    if (time != null) {
+      events.push(
+        timedEvent(id, title, `${detailPrefix} ${formatMs(time)}.`, time, phaseId, bounds, extras),
+      );
+    }
+  };
 
   events.push(
     timedEvent(
@@ -667,45 +681,11 @@ function milestoneEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEven
     );
   }
 
-  if (load.firstVisual != null) {
-    events.push(
-      timedEvent(
-        "render-first-visual",
-        "First visual change",
-        `First visual change at ${formatMs(load.firstVisual)}.`,
-        load.firstVisual,
-        "firstRender",
-        bounds,
-      ),
-    );
-  }
+  mark(load.firstVisual, "render-first-visual", "First visual change", "First visual change at", "firstRender");
 
-  if (load.firstPaint != null) {
-    events.push(
-      timedEvent(
-        "render-fp",
-        "First Paint",
-        `First Paint at ${formatMs(load.firstPaint)}.`,
-        load.firstPaint,
-        "firstRender",
-        bounds,
-      ),
-    );
-  }
+  mark(load.firstPaint, "render-fp", "First Paint", "First Paint at", "firstRender");
 
-  if (load.fcp != null) {
-    events.push(
-      timedEvent(
-        "render-fcp",
-        "FCP",
-        `First Contentful Paint at ${formatMs(load.fcp)}.`,
-        load.fcp,
-        "firstRender",
-        bounds,
-        { kind: "cwv", rating: load.fcpRating },
-      ),
-    );
-  }
+  mark(load.fcp, "render-fcp", "FCP", "First Contentful Paint at", "firstRender", { kind: "cwv", rating: load.fcpRating });
 
   if (load.lcp != null && load.lcpSegments.length) {
     for (const seg of load.lcpSegments) {
@@ -729,18 +709,7 @@ function milestoneEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEven
     }
   }
 
-  if (load.dcl != null) {
-    events.push(
-      timedEvent(
-        "parse-dcl",
-        "DOMContentLoaded",
-        `DOMContentLoaded at ${formatMs(load.dcl)}.`,
-        load.dcl,
-        "parsingComplete",
-        bounds,
-      ),
-    );
-  }
+  mark(load.dcl, "parse-dcl", "DOMContentLoaded", "DOMContentLoaded at", "parsingComplete");
 
   if (load.lcp != null) {
     const largest = [...load.lcpSegments].sort((a, b) => b.durationMs - a.durationMs)[0];
@@ -778,57 +747,13 @@ function milestoneEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEven
     );
   }
 
-  if (load.load != null) {
-    events.push(
-      timedEvent(
-        "sub-load",
-        "Window load",
-        `Load event at ${formatMs(load.load)}.`,
-        load.load,
-        "subresources",
-        bounds,
-      ),
-    );
-  }
+  mark(load.load, "sub-load", "Window load", "Load event at", "subresources");
 
-  if (load.lastVisual != null) {
-    events.push(
-      timedEvent(
-        "sub-last-visual",
-        "Last visual change",
-        `Last visual change at ${formatMs(load.lastVisual)}.`,
-        load.lastVisual,
-        "subresources",
-        bounds,
-      ),
-    );
-  }
+  mark(load.lastVisual, "sub-last-visual", "Last visual change", "Last visual change at", "subresources");
 
-  if (load.interactive != null) {
-    events.push(
-      timedEvent(
-        "after-tti",
-        "TTI (lab)",
-        `Time to Interactive ${formatMs(load.interactive)}.`,
-        load.interactive,
-        "afterLoad",
-        bounds,
-      ),
-    );
-  }
+  mark(load.interactive, "after-tti", "TTI (lab)", "Time to Interactive", "afterLoad");
 
-  if (load.traceEnd != null) {
-    events.push(
-      timedEvent(
-        "after-trace-end",
-        "Trace end",
-        `Performance trace ends at ${formatMs(load.traceEnd)}.`,
-        load.traceEnd,
-        "afterLoad",
-        bounds,
-      ),
-    );
-  }
+  mark(load.traceEnd, "after-trace-end", "Trace end", "Performance trace ends at", "afterLoad");
 
   const preconnect = preconnectEvent(
     load.preconnectedText,

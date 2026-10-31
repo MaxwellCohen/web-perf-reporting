@@ -46,7 +46,7 @@ function bytesLabelKeys(auditId: string): readonly string[] {
 }
 
 /** Bar = full resource size: used part plus the part Lighthouse says could be saved. */
-export function usedVsSavingsLabel(segments: Record<string, number>): string {
+function usedVsSavingsLabel(segments: Record<string, number>): string {
   const used = segments.used ?? 0;
   const savings = segments.savings ?? 0;
   // Some audits (e.g. legacy-javascript-insight) only report wastedBytes, so no total is known.

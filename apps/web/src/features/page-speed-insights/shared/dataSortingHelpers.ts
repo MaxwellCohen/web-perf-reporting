@@ -34,15 +34,3 @@ export function sortByMaxValue<T>(
 ): T[] {
   return sortDataByKeyMaxValue(data, getKey, getValue, numReports);
 }
-
-/**
- * Sorts data by maximum value per composite key (e.g., URL + Type)
- */
-export function sortByMaxValueComposite<T>(
-  data: T[],
-  getCompositeKey: (item: T) => string,
-  getValue: (item: T) => number,
-  numReports: number,
-): T[] {
-  return sortDataByKeyMaxValue(data, getCompositeKey, getValue, numReports);
-}

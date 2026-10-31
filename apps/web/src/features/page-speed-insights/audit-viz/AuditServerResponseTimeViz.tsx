@@ -7,7 +7,7 @@ import { itemNumeric } from "./auditItemValues";
 import { hasAnyItems, reportLabel, rowItems } from "./performanceVizShared";
 
 /** Lighthouse server-response-time target. */
-export const SERVER_RESPONSE_THRESHOLD_MS = 600;
+const SERVER_RESPONSE_THRESHOLD_MS = 600;
 
 export function AuditServerResponseTimeViz({ rows }: { rows: DetailTableItem[] }) {
   if (!hasAnyItems(rows)) return null;

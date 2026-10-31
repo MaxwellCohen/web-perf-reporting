@@ -343,7 +343,7 @@ function lastKeySegment(key: string) {
 }
 
 /** Keeps small values readable: 0.0000156 stays 0.0000156 instead of 0.00. */
-export function formatDebugNumber(value: number) {
+function formatDebugNumber(value: number) {
   if (Number.isInteger(value)) return String(value);
   if (Math.abs(value) >= 1) return value.toFixed(2);
   return String(Number(value.toPrecision(3)));

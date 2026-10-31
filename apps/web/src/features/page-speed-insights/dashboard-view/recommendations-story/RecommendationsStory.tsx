@@ -1,22 +1,22 @@
 "use client";
 
 import { useMemo } from "react";
-import { Accordion } from "@/components/ui/accordion";
 import { patchDashboardSearch } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 import {
   formatRecommendationSavings,
-  peerMaxSavingsFor,
   recommendationsStoryFrom,
   type LargestSaving,
 } from "@/features/page-speed-insights/dashboard-view/recommendations-story/recommendationsStoryModel";
-import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
 import {
   analyzeAudits,
   hasDetails,
 } from "@/features/page-speed-insights/RecommendationsSection/analyzeAudits";
 import { FilterControls } from "@/features/page-speed-insights/RecommendationsSection/FilterControls";
-import { RecommendationItem } from "@/features/page-speed-insights/RecommendationsSection/RecommendationItem";
+import {
+  RecommendationGroup,
+  useRecommendationFilters,
+} from "@/features/page-speed-insights/RecommendationsSection/RecommendationGroup";
 import { getQuickWinRecommendations } from "@/features/page-speed-insights/RecommendationsSection/RecommendationsSummary";
 import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
 import { FullWidthTables } from "@/features/page-speed-insights/tanstack-table-v9/fullWidthTables";
@@ -83,53 +83,8 @@ function FixNextList({
   );
 }
 
-function RecommendationGroup({
-  title,
-  recs,
-  items,
-  expandedItems,
-  onExpandedChange,
-}: {
-  title: string;
-  recs: Recommendation[];
-  items: ReturnType<typeof usePageSpeedItems>;
-  expandedItems: string[];
-  onExpandedChange: (value: string[]) => void;
-}) {
-  if (!recs.length) return null;
-
-  return (
-    <div className="space-y-3">
-      <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-        {title}
-      </p>
-      <Accordion
-        type="multiple"
-        value={expandedItems}
-        onValueChange={onExpandedChange}
-        className="divide-y overflow-hidden rounded-xl border bg-card"
-      >
-        {recs.map((rec) => (
-          <RecommendationItem
-            key={rec.id}
-            rec={rec}
-            items={items}
-            peerMaxSavings={peerMaxSavingsFor(rec, recs)}
-            plain
-          />
-        ))}
-      </Accordion>
-    </div>
-  );
-}
-
 export function RecommendationsStory() {
   const items = usePageSpeedItems();
-  const {
-    categories: selectedCategories,
-    priorities: selectedPriorities,
-    expanded: expandedItems,
-  } = useDashboardSearchState();
   const { recommendations, story } = useMemo(() => {
     const nextRecommendations = analyzeAudits(items).filter(hasDetails);
     return {
@@ -138,31 +93,14 @@ export function RecommendationsStory() {
     };
   }, [items]);
 
+  const quickWins = getQuickWinRecommendations(recommendations);
+  const f = useRecommendationFilters(recommendations, quickWins);
+  const { selectedCategories, selectedPriorities, expandedItems } = f;
+
   if (!story) {
     return (
       <p className="text-sm text-muted-foreground">This report has no recommendations.</p>
     );
-  }
-
-  const quickWins = getQuickWinRecommendations(recommendations);
-  const categories = Array.from(new Set(recommendations.map((rec) => rec.category))).sort();
-  const priorities = Array.from(new Set(recommendations.map((rec) => rec.priority))).sort();
-  const filteredRecommendations = recommendations.filter((rec) => {
-    const categoryMatch =
-      selectedCategories.length === 0 || selectedCategories.includes(rec.category);
-    const priorityMatch =
-      selectedPriorities.length === 0 || selectedPriorities.includes(rec.priority);
-    return categoryMatch && priorityMatch;
-  });
-  const grouped: Record<string, Recommendation[]> = {};
-  filteredRecommendations.forEach((rec) => {
-    if (!grouped[rec.category]) grouped[rec.category] = [];
-    grouped[rec.category].push(rec);
-  });
-  const quickWinIds = new Set(quickWins.map((rec) => rec.id));
-
-  function setExpanded(next: string[]) {
-    patchDashboardSearch({ expanded: next.length ? next : null });
   }
 
   function openLargest(saving: LargestSaving) {
@@ -183,20 +121,6 @@ export function RecommendationsStory() {
     });
   }
 
-  function toggleAll() {
-    const next =
-      expandedItems.length === filteredRecommendations.length
-        ? []
-        : filteredRecommendations.map((recommendation) => recommendation.id);
-    patchDashboardSearch({ expanded: next.length ? next : null });
-  }
-
-  const filteredQuickWins = quickWins.filter(
-    (rec) =>
-      (selectedCategories.length === 0 || selectedCategories.includes(rec.category)) &&
-      (selectedPriorities.length === 0 || selectedPriorities.includes(rec.priority)),
-  );
-
   return (
     <FullWidthTables>
       <section aria-label="Recommendations" className="overflow-hidden rounded-xl border bg-card">
@@ -214,37 +138,31 @@ export function RecommendationsStory() {
         </div>
         <div className="space-y-6 border-t p-4 sm:p-6">
           <FilterControls
-            categories={categories}
-            priorities={priorities}
+            categories={f.categories}
+            priorities={f.priorities}
             selectedCategories={selectedCategories}
             selectedPriorities={selectedPriorities}
-            onCategoriesChange={(next) =>
-              patchDashboardSearch({ categories: next.length ? next : null })
-            }
-            onPrioritiesChange={(next) =>
-              patchDashboardSearch({ priorities: next.length ? next : null })
-            }
-            filteredCount={filteredRecommendations.length}
+            onCategoriesChange={f.onCategoriesChange}
+            onPrioritiesChange={f.onPrioritiesChange}
+            filteredCount={f.filtered.length}
             totalCount={recommendations.length}
-            onToggleAll={toggleAll}
+            onToggleAll={f.toggleAll}
             expandedCount={expandedItems.length}
-            totalFiltered={filteredRecommendations.length}
+            totalFiltered={f.filtered.length}
           />
           <RecommendationGroup
             title="Quick wins"
-            recs={filteredQuickWins}
+            recs={f.filteredQuickWins}
             items={items}
             expandedItems={expandedItems}
-            onExpandedChange={setExpanded}
           />
-          {Object.entries(grouped).map(([category, recs]) => (
+          {f.groups.map(({ category, recs }) => (
             <RecommendationGroup
               key={category}
               title={category}
-              recs={recs.filter((rec) => !quickWinIds.has(rec.id))}
+              recs={recs}
               items={items}
               expandedItems={expandedItems}
-              onExpandedChange={setExpanded}
             />
           ))}
         </div>

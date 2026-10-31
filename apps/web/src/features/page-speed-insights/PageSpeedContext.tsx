@@ -70,9 +70,6 @@ export const selectPageSpeedUserLabelFilter = (snapshot: PageSpeedInsightsSnapsh
 const selectPageSpeedFullPageScreenshots = (snapshot: PageSpeedInsightsSnapshot) =>
   snapshot.context.fullPageScreenshots;
 
-export const selectPageSpeedIsLoading = (snapshot: PageSpeedInsightsSnapshot) =>
-  snapshot.context.isLoading;
-
 export function PageSpeedInsightsStoreProvider({
   store,
   children,

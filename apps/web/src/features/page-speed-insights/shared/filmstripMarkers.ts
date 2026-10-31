@@ -49,7 +49,7 @@ function sortMarkers(markers: FilmstripMarker[]): FilmstripMarker[] {
   return markers.sort((a, b) => a.timeMs - b.timeMs);
 }
 
-export function markersFromAudits(audits: AuditResultsRecord | undefined): FilmstripMarker[] {
+function markersFromAudits(audits: AuditResultsRecord | undefined): FilmstripMarker[] {
   if (!audits) return [];
 
   const markers: FilmstripMarker[] = [];
@@ -63,7 +63,7 @@ export function markersFromAudits(audits: AuditResultsRecord | undefined): Films
 }
 
 /** Markers on the same clock as `collectTimelineSources` (simulated when mobile). */
-export function markersFromLoad(
+function markersFromLoad(
   load: Pick<CombinedLoad, "ttfb" | "fcp" | "lcp" | "interactive">,
 ): FilmstripMarker[] {
   const candidates: Array<[string, number | undefined]> = [

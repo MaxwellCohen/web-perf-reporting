@@ -4,17 +4,8 @@ import { describe, expect, it, vi } from "vitest";
 import type { StockTable } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { useTable, type RowData } from "@tanstack/react-table";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
-import {
-  flatTableFeatures,
-  standardTableFeatures,
-} from "@/features/page-speed-insights/tanstack-table-v9/features";
-import {
-  ColumnSelector,
-  DropdownFilter,
-  PageSizeSelector,
-  PaginationCard,
-  TableControls,
-} from "@/features/page-speed-insights/JSUsage/TableControls";
+import { standardTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
+import { TableControls } from "@/features/page-speed-insights/JSUsage/TableControls";
 vi.mock("lucide-react", () => ({
   ChevronDown: () => <span data-testid="chevron" />,
   Copy: () => <span data-testid="copy" />,
@@ -103,7 +94,7 @@ function useControlsTestTable<T extends RowData>(
   options?: { paginated?: boolean; pageSize?: number },
 ) {
   return useTable({
-    features: options?.paginated ? standardTableFeatures : flatTableFeatures,
+    features: standardTableFeatures,
     data,
     columns: columns as never,
     ...(options?.paginated && {
@@ -165,178 +156,5 @@ describe("TableControls", () => {
     const { container } = render(<TableWithControls />);
     expect(container.textContent).toContain("Columns");
     expect(container.textContent).toMatch(/1 of 2/);
-  });
-});
-
-function ColumnSelectorWrapper() {
-  const data = [{ id: 1, name: "A" }];
-  const columns = [
-    columnHelper.accessor("id", { id: "id" }),
-    columnHelper.accessor("name", { id: "name", enableHiding: true }),
-  ];
-  const table = useControlsTestTable(data, columns);
-  return <ColumnSelector table={table as StockTable<Row>} />;
-}
-
-describe("ColumnSelector", () => {
-  it("renders column toggle dropdown", () => {
-    const { container } = render(<ColumnSelectorWrapper />);
-    expect(container.textContent).toContain("Columns");
-    expect(container.querySelectorAll('[role="checkbox"]')).toHaveLength(2);
-  });
-
-  it("toggles column visibility when checkbox clicked", () => {
-    const { container } = render(<ColumnSelectorWrapper />);
-    const trigger = container.querySelector("button");
-    fireEvent.click(trigger!);
-    const checkbox = container.querySelector('[role="checkbox"]');
-    expect(checkbox).toBeTruthy();
-    fireEvent.click(checkbox!);
-    expect(container.querySelector('[role="checkbox"]')).toBeTruthy();
-  });
-});
-
-function PageSizeSelectorWrapper() {
-  const data = [{ id: 1, name: "A" }];
-  const columns = [
-    columnHelper.accessor("id", { id: "id" }),
-    columnHelper.accessor("name", { id: "name" }),
-  ];
-  const table = useControlsTestTable(data, columns, { paginated: true });
-  return <PageSizeSelector table={table as StockTable<Row>} />;
-}
-
-describe("PageSizeSelector", () => {
-  it("renders page size select", () => {
-    const { container } = render(<PageSizeSelectorWrapper />);
-    expect(container.textContent).toContain("Page Size");
-    expect(container.textContent).toContain("10 per page");
-  });
-
-  it("shows All Items when rowCount matches page size", () => {
-    function PageSizeWithFewRows() {
-      const data = [
-        { id: 1, name: "A" },
-        { id: 2, name: "B" },
-      ];
-      const columns = [
-        columnHelper.accessor("id", { id: "id" }),
-        columnHelper.accessor("name", { id: "name" }),
-      ];
-      const table = useControlsTestTable(data, columns, { paginated: true });
-      return <PageSizeSelector table={table as StockTable<Row>} />;
-    }
-    const { container } = render(<PageSizeWithFewRows />);
-    expect(container.textContent).toContain("All items");
-  });
-});
-
-function PaginationCardSinglePage() {
-  const data = [{ id: 1, name: "A" }];
-  const columns = [
-    columnHelper.accessor("id", { id: "id" }),
-    columnHelper.accessor("name", { id: "name" }),
-  ];
-  const table = useControlsTestTable(data, columns, { paginated: true });
-  return <PaginationCard table={table as StockTable<Row>} />;
-}
-
-function PaginationCardMultiPage() {
-  const data = Array.from({ length: 6 }, (_, i) => ({ id: i, name: `n${i}` }));
-  const columns = [
-    columnHelper.accessor("id", { id: "id" }),
-    columnHelper.accessor("name", { id: "name" }),
-  ];
-  const table = useControlsTestTable(data, columns, { paginated: true });
-  return <PaginationCard table={table as StockTable<Row>} showManualControls />;
-}
-
-describe("PaginationCard", () => {
-  it("returns null when only one page", () => {
-    const { container } = render(<PaginationCardSinglePage />);
-    expect(container.firstChild).toBeNull();
-  });
-
-  it("renders pagination buttons when multiple pages", () => {
-    const { container } = render(<PaginationCardMultiPage />);
-    expect(container.textContent).toMatch(/Page/);
-    expect(container.textContent).toMatch(/1 of 2/);
-    fireEvent.click(getButton(container, ">")!);
-    expect(container.textContent).toMatch(/2 of 2/);
-  });
-
-  it("navigates with first/prev/next/last buttons", () => {
-    const { container } = render(<PaginationCardMultiPage />);
-    fireEvent.click(getButton(container, ">>")!);
-    expect(container.textContent).toMatch(/2 of 2/);
-    fireEvent.click(getButton(container, "<<")!);
-    expect(container.textContent).toMatch(/1 of 2/);
-    fireEvent.click(getButton(container, ">")!);
-    fireEvent.click(getButton(container, "<")!);
-    expect(container.textContent).toMatch(/1 of 2/);
-  });
-});
-
-function PaginationControlsManualWrapper() {
-  const data = Array.from({ length: 6 }, (_, i) => ({ id: i, name: `n${i}` }));
-  const columns = [
-    columnHelper.accessor("id", { id: "id" }),
-    columnHelper.accessor("name", { id: "name" }),
-  ];
-  const table = useControlsTestTable(data, columns, { paginated: true });
-  return <PaginationCard table={table as StockTable<Row>} showManualControls />;
-}
-
-describe("PaginationCard manual page selection", () => {
-  it("renders page index input", () => {
-    const { container } = render(<PaginationControlsManualWrapper />);
-    expect(container.textContent).toMatch(/Go to/);
-    expect(container.querySelector('input[type="number"]')).toHaveValue(1);
-  });
-
-  it("changes page when input value changes", () => {
-    const { container } = render(<PaginationControlsManualWrapper />);
-    const input = container.querySelector('input[type="number"]');
-    fireEvent.change(input!, { target: { value: "2" } });
-    expect(container.textContent).toMatch(/2 of 2/);
-  });
-});
-
-function DropdownFilterMissingColumn() {
-  const data = [{ id: 1, name: "A" }];
-  const columns = [
-    columnHelper.accessor("id", { id: "id" }),
-    columnHelper.accessor("name", { id: "name" }),
-  ];
-  const table = useControlsTestTable(data, columns);
-  return <DropdownFilter table={table as StockTable<Row>} columnId="missing" />;
-}
-
-function DropdownFilterWithColumn() {
-  const data = [
-    { id: 1, name: "Alpha" },
-    { id: 2, name: "Beta" },
-  ];
-  const columns = [
-    columnHelper.accessor("id", { id: "id" }),
-    columnHelper.accessor("name", { id: "name", header: "Name" }),
-  ];
-  const table = useControlsTestTable(data, columns);
-  return <DropdownFilter table={table as StockTable<Row>} columnId="name" />;
-}
-
-describe("DropdownFilter", () => {
-  it("returns null when column does not exist", () => {
-    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    const { container } = render(<DropdownFilterMissingColumn />);
-    expect(container.firstChild).toBeNull();
-    consoleErrorSpy.mockRestore();
-  });
-
-  it("renders filter dropdown when column exists", () => {
-    const { container } = render(<DropdownFilterWithColumn />);
-    expect(container.textContent).toContain("Filter");
-    expect(container.textContent).toContain("Name");
-    expect(container.querySelectorAll('[role="checkbox"]').length).toBeGreaterThan(0);
   });
 });

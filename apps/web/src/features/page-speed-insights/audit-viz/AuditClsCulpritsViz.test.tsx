@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { render } from "@testing-library/react";
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
-import { AuditClsCulpritsViz, extractClsCulpritData } from "./AuditClsCulpritsViz";
+import { AuditClsCulpritsViz } from "./AuditClsCulpritsViz";
 
 vi.mock("@/features/page-speed-insights/shared/ReportComparisonBarChart", () => ({
   ReportComparisonBarChart: ({ data }: { data: unknown[] }) => (
@@ -62,55 +62,6 @@ const shiftWithCauses = {
     ],
   },
 };
-
-describe("extractClsCulpritData", () => {
-  it("extracts cluster total, shifts, and root causes", () => {
-    const { summaries, shifts, barPoints } = extractClsCulpritData([
-      row([
-        { score: 0.15, node: { type: "text", value: "Total" } },
-        shiftWithCauses,
-        {
-          score: 0.03,
-          node: { type: "node", nodeLabel: "Footer links" },
-          subItems: { type: "subitems", items: [] },
-        },
-      ]),
-    ]);
-
-    expect(summaries).toHaveLength(1);
-    expect(summaries[0]?.totalScore).toBe(0.15);
-    expect(summaries[0]?.shiftCount).toBe(2);
-    expect(summaries[0]?.causeCount).toBe(3);
-    expect(summaries[0]?.causeBreakdown.map((c) => c.cause)).toEqual([
-      "Injected iframe",
-      "Unsized image element",
-      "Web font",
-    ]);
-
-    expect(shifts).toHaveLength(2);
-    expect(shifts[0]?.elementLabel).toBe("Hero banner");
-    expect(shifts[0]?.causes).toHaveLength(3);
-    expect(shifts[0]?.causes[0]?.cause).toBe("Unsized image element");
-    expect(shifts[0]?.causes[1]?.extra).toEqual({
-      kind: "url",
-      url: "https://fonts.example.com/inter.woff2",
-    });
-    expect(barPoints.some((p) => p.category === "Hero banner" && p.value === 0.12)).toBe(true);
-    expect(barPoints.some((p) => p.category === "Total")).toBe(false);
-  });
-
-  it("unwraps list-wrapped cls-culprits tables", () => {
-    const { shifts } = extractClsCulpritData([
-      row([shiftWithCauses], { listWrap: true }),
-    ]);
-    expect(shifts).toHaveLength(1);
-    expect(shifts[0]?.causes.map((c) => c.cause)).toEqual([
-      "Unsized image element",
-      "Web font",
-      "Injected iframe",
-    ]);
-  });
-});
 
 describe("AuditClsCulpritsViz", () => {
   it("renders causes with extras for each shift", () => {

@@ -14,7 +14,7 @@ export const TASK_FILTER_LABEL: Record<TaskFilterId, string> = {
   "long-task": "Long tasks",
 };
 
-export function allTaskFilters(): TaskFilterSelection {
+function allTaskFilters(): TaskFilterSelection {
   return new Set(TASK_FILTERS);
 }
 

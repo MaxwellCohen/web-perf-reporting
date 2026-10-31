@@ -227,28 +227,21 @@ export function imageSizeLines(reports: ImageDeliveryReportSize[]): string[] {
   if (!sized.length) return [];
 
   const lines: string[] = [];
-  const fileSize = pixels(sized[0].fileWidth, sized[0].fileHeight);
-  const sameFile = fileSize && sized.every((report) => sizesMatch(sized[0], report, "file"));
-  if (sameFile && fileSize) {
-    lines.push(`File ${fileSize}`);
-  } else {
-    for (const report of sized) {
-      const size = pixels(report.fileWidth, report.fileHeight);
-      if (size) lines.push(`${report.label} file ${size}`);
+  const addSize = (kind: "file" | "display", same: string, each: string) => {
+    const w = `${kind}Width` as const;
+    const h = `${kind}Height` as const;
+    const size = pixels(sized[0][w], sized[0][h]);
+    if (size && sized.every((report) => sizesMatch(sized[0], report, kind))) {
+      lines.push(`${same} ${size}`);
+      return;
     }
-  }
-
-  const displaySize = pixels(sized[0].displayWidth, sized[0].displayHeight);
-  const sameDisplay =
-    displaySize && sized.every((report) => sizesMatch(sized[0], report, "display"));
-  if (sameDisplay && displaySize) {
-    lines.push(`Shown at ${displaySize}`);
-  } else {
     for (const report of sized) {
-      const size = pixels(report.displayWidth, report.displayHeight);
-      if (size) lines.push(`${report.label} shown at ${size}`);
+      const value = pixels(report[w], report[h]);
+      if (value) lines.push(`${report.label} ${each} ${value}`);
     }
-  }
+  };
+  addSize("file", "File", "file");
+  addSize("display", "Shown at", "shown at");
 
   return lines;
 }

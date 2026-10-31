@@ -23,7 +23,7 @@ export const METRIC_AUDIT_TO_ACRONYM: Record<MetricAuditId, CwvMetricAcronym> = 
 };
 
 /** Insights / diagnostics that explain a metric even when estimated savings are 0. */
-export const CURATED_CAUSE_AUDIT_IDS: Record<MetricAuditId, readonly string[]> = {
+const CURATED_CAUSE_AUDIT_IDS: Record<MetricAuditId, readonly string[]> = {
   "first-contentful-paint": [
     "document-latency-insight",
     "render-blocking-insight",

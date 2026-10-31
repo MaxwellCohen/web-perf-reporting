@@ -1,21 +1,12 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { ChartFallback } from "@/components/common/ChartFallback";
 import type { ComponentType } from "react";
 import type { CruxHistoryItem } from "@/lib/schema";
 import { CruxHistogramChart } from "@/components/latest-crux/charts/CruxHistogramChart";
 
 type HistogramChartProps = { histogramData: CruxHistoryItem };
-
-function ChartFallback() {
-  return (
-    <div
-      className="h-24 animate-pulse rounded-md bg-muted"
-      role="status"
-      aria-label="Loading chart"
-    />
-  );
-}
 
 const CruxStackedBarChart = dynamic(
   () =>

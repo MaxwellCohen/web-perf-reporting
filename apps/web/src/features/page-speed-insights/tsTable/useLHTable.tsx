@@ -165,7 +165,7 @@ export function CategoryRow({
   );
 }
 
-export function AuditSummaryRow({ row }: { row: StockRow<TableDataItem> }) {
+function AuditSummaryRow({ row }: { row: StockRow<TableDataItem> }) {
   const auditData = row.subRows.map((sr) => sr.original.auditResult || {});
   const labels = row.subRows.map((sr) => sr.original._userLabel || "");
   return (

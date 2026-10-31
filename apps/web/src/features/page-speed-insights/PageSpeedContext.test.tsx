@@ -2,16 +2,7 @@ import * as React from "react";
 import type { ReactNode } from "react";
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import {
-  PageSpeedInsightsStoreProvider,
-  selectPageSpeedIsLoading,
-  useFullPageScreenshots,
-  usePageSpeedInsightsStore,
-  usePageSpeedItems,
-  usePageSpeedReportTitle,
-  usePageSpeedSelector,
-  useRequiredPageSpeedInsightsStore,
-} from "@/features/page-speed-insights/PageSpeedContext";
+import { PageSpeedInsightsStoreProvider, useFullPageScreenshots, usePageSpeedInsightsStore, usePageSpeedItems, usePageSpeedReportTitle, usePageSpeedSelector, useRequiredPageSpeedInsightsStore } from "@/features/page-speed-insights/PageSpeedContext";
 
 vi.mock("@xstate/store-react", () => {
   function createStore(config: {
@@ -99,7 +90,7 @@ function StoreConsumer() {
   const items = usePageSpeedItems();
   const reportTitle = usePageSpeedReportTitle();
   const fullPageScreenshots = useFullPageScreenshots();
-  const isLoading = usePageSpeedSelector(selectPageSpeedIsLoading);
+  const isLoading = usePageSpeedSelector((snapshot) => snapshot.context.isLoading);
 
   return (
     <>

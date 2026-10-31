@@ -1,5 +1,4 @@
 import type {
-  TaskFilterId,
   TaskFilterSelection,
 } from "@/features/page-speed-insights/page-load-timeline/filterTimelineMoments";
 import { TASK_FILTERS } from "@/features/page-speed-insights/page-load-timeline/filterTimelineMoments";
@@ -69,22 +68,4 @@ export function filterWaterfallRowsByTasks(
     if (kept) next.push(kept);
   }
   return next;
-}
-
-export function availableWaterfallTaskFilters(rows: WaterfallRow[]): TaskFilterId[] {
-  const present = new Set<TaskFilterId>();
-  for (const row of rows) {
-    if (row.kind === "task") {
-      if (row.segments?.some((seg) => seg.taskKind === "long")) present.add("long-task");
-      else present.add("potentially-blocking");
-    }
-    if (row.kind === "request" || row.kind === "request-group") {
-      if (row.resourceType === "Document" || !row.renderBlocking) continue;
-      if (row.renderBlocking) present.add(row.renderBlocking);
-      for (const seg of row.segments ?? []) {
-        if (seg.renderBlocking) present.add(seg.renderBlocking);
-      }
-    }
-  }
-  return TASK_FILTERS.filter((id) => present.has(id));
 }

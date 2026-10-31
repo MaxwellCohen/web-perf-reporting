@@ -451,7 +451,7 @@ function TimingTableRow({
   );
 }
 
-export function LoadingStoryView({
+function LoadingStoryView({
   story,
   remountLabels,
 }: {

@@ -3,7 +3,7 @@ import type { TableColumnHeading, ItemValueType } from "@/lib/schema";
 /**
  * Determines the appropriate filter function based on value type
  */
-export function getFilterFnForValueType(
+function getFilterFnForValueType(
   valueType?: ItemValueType | string | number,
 ): "includesString" | "inNumberRange" | undefined {
   if (!valueType || typeof valueType !== "string") {
@@ -27,7 +27,7 @@ export function getFilterFnForValueType(
 /**
  * Determines the initial column size based on key, label, and value type
  */
-export function getColumnSize(
+function getColumnSize(
   key: string,
   label: string,
   valueType?: ItemValueType | string | number,

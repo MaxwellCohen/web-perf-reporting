@@ -9,7 +9,7 @@ export type FormInputs = {
   activeTab: string;
 };
 
-export function validateJson(jsonString: string): boolean {
+function validateJson(jsonString: string): boolean {
   try {
     JSON.parse(jsonString);
     return true;
@@ -18,7 +18,7 @@ export function validateJson(jsonString: string): boolean {
   }
 }
 
-export async function fetchJsonFromUrl(
+async function fetchJsonFromUrl(
   url: string,
   fetchFn: typeof fetch = fetch,
 ): Promise<string> {

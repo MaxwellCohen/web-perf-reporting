@@ -638,7 +638,7 @@ function MomentRail({ moment }: { moment: TimelineEvent }) {
 }
 
 /** Slug for namespacing moment anchors when dual timelines mount. */
-export function momentIdPrefixFromLabel(label: string): string {
+function momentIdPrefixFromLabel(label: string): string {
   return label
     .trim()
     .toLowerCase()
@@ -829,6 +829,31 @@ function CompareRowTime({ row }: { row: AlignedCompareRow }) {
   );
 }
 
+function CompareColumn({
+  moments,
+  side,
+  keyPrefix,
+  axisEndMs,
+}: {
+  moments: TimelineEvent[];
+  side: { label: string; idPrefix: string };
+  keyPrefix: string;
+  axisEndMs: number;
+}) {
+  return (
+    <div className="min-w-0 space-y-2">
+      {moments.map((moment) => (
+        <div
+          key={`${keyPrefix}-${moment.phaseId}-${moment.id}`}
+          id={momentAnchorId(moment.id, side.idPrefix)}
+        >
+          <MomentCard moment={moment} axisEnd={axisEndMs} deviceLabel={side.label} showTime />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function AlignedCompareMoments({
   left,
   right,
@@ -858,33 +883,11 @@ function AlignedCompareMoments({
             data-testid="timeline-aligned-row"
             data-time-ms={row.timeMs}
           >
-            <div className="min-w-0 space-y-2">
-              {row.left.map((moment) => (
-                <div key={`l-${moment.phaseId}-${moment.id}`} id={momentAnchorId(moment.id, left.idPrefix)}>
-                  <MomentCard
-                    moment={moment}
-                    axisEnd={axisEndMs}
-                    deviceLabel={left.label}
-                    showTime
-                  />
-                </div>
-              ))}
-            </div>
+            <CompareColumn moments={row.left} side={left} keyPrefix="l" axisEndMs={axisEndMs} />
             <div className="flex items-center justify-center sm:pt-3">
               <CompareRowTime row={row} />
             </div>
-            <div className="min-w-0 space-y-2">
-              {row.right.map((moment) => (
-                <div key={`r-${moment.phaseId}-${moment.id}`} id={momentAnchorId(moment.id, right.idPrefix)}>
-                  <MomentCard
-                    moment={moment}
-                    axisEnd={axisEndMs}
-                    deviceLabel={right.label}
-                    showTime
-                  />
-                </div>
-              ))}
-            </div>
+            <CompareColumn moments={row.right} side={right} keyPrefix="r" axisEndMs={axisEndMs} />
           </li>
         ))}
       </ol>
@@ -940,7 +943,7 @@ function TimelinePane({
   );
 }
 
-export const TIMELINE_COMPARE_MAX = 2;
+const TIMELINE_COMPARE_MAX = 2;
 
 function defaultSelectedLabels(
   bundles: TimelineBundle[],

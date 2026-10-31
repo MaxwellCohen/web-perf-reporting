@@ -4,7 +4,7 @@
  *
  * Add audit IDs to this array to enable separate table rendering per report.
  */
-export const AUDITS_WITH_SEPARATE_TABLES_PER_REPORT: string[] = [
+const AUDITS_WITH_SEPARATE_TABLES_PER_REPORT: string[] = [
   "cache-insight",
   "dom-size-insight",
   "cls-culprits-insight",

@@ -2,7 +2,7 @@ import type { RenderBlockingStatus } from "@/features/page-speed-insights/page-l
 import type { WaterfallRow, WaterfallSegment } from "@/features/page-speed-insights/waterfall/waterfallData";
 
 /** Row signals a user can isolate in the waterfall. Empty selection shows every row. */
-export const WATERFALL_SIGNALS = [
+const WATERFALL_SIGNALS = [
   "render-blocking",
   "before-fcp",
   "before-lcp",

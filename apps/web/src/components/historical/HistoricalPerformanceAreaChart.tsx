@@ -29,7 +29,7 @@ interface DotProps {
   };
 }
 
-export const Dot = ({
+const Dot = ({
   cx,
   cy,
   r,

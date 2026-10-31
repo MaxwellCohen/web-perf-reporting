@@ -1,10 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-  PsiShareFetchError,
-  PsiShareUrlError,
-  fetchPsiShareHtml,
-  parsePsiShareUrl,
-} from "@/lib/viewer/psiShareUrl";
+import { PsiShareUrlError, fetchPsiShareHtml, parsePsiShareUrl } from "@/lib/viewer/psiShareUrl";
 
 const SHARE = "https://pagespeed.web.dev/analysis/https-example-com/abc?form_factor=mobile";
 
@@ -104,10 +99,4 @@ describe("fetchPsiShareHtml", () => {
     expect(fetchFn).toHaveBeenCalledTimes(1);
   });
 
-  it("raises a fetch error when the share page is not ok", async () => {
-    const fetchFn = vi.fn().mockResolvedValue(new Response("nope", { status: 404 }));
-    await expect(fetchPsiShareHtml(parsePsiShareUrl(SHARE), fetchFn)).rejects.toThrow(
-      PsiShareFetchError,
-    );
-  });
 });

@@ -3,7 +3,7 @@ import type { JSStats } from "@/features/page-speed-insights/javascript-metrics/
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import type { TableItem } from "@/lib/schema";
 
-export const JAVASCRIPT_FACTS = [
+const JAVASCRIPT_FACTS = [
   {
     id: "transfer",
     label: "Script transfer",
@@ -30,23 +30,23 @@ export const JAVASCRIPT_FACTS = [
   },
 ] as const;
 
-export type JavaScriptFactId = (typeof JAVASCRIPT_FACTS)[number]["id"];
-export type JavaScriptFactUnit = (typeof JAVASCRIPT_FACTS)[number]["unit"];
+type JavaScriptFactId = (typeof JAVASCRIPT_FACTS)[number]["id"];
+type JavaScriptFactUnit = (typeof JAVASCRIPT_FACTS)[number]["unit"];
 
-export type JavaScriptFact = {
+type JavaScriptFact = {
   id: JavaScriptFactId;
   label: string;
   description: string;
   unit: JavaScriptFactUnit;
 };
 
-export type JavaScriptCategory = {
+type JavaScriptCategory = {
   id: string;
   label: string;
   durationMs: number;
 };
 
-export type JavaScriptReport = {
+type JavaScriptReport = {
   label: string;
   values: Partial<Record<JavaScriptFactId, number>>;
   categories: JavaScriptCategory[];

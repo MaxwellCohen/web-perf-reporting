@@ -3,7 +3,7 @@ import {
   getNetworkRequestsTimeRange,
   type NetworkRequestTimeRange,
 } from "@/features/page-speed-insights/shared/networkRequestsTable";
-import { formatBytes, formatCoverage, coverageLabel, shortUrl } from "@/features/page-speed-insights/shared/format";
+import { formatCoverage, coverageLabel, shortUrl } from "@/features/page-speed-insights/shared/format";
 import type {
   CombinedLoad,
   CombinedLongTask,
@@ -60,8 +60,6 @@ export type WaterfallSegment = {
   chain?: CriticalChainNode;
 };
 
-/** Alias kept for call sites that still say NetworkWaterfallRow. */
-export type NetworkWaterfallRow = WaterfallRow;
 export type WaterfallRow = {
   id: string;
   kind: WaterfallRowKind;
@@ -375,7 +373,7 @@ export function buildWaterfallRowsFromSources(
   return sortRowsByStart([...requestRows, ...taskRows, ...timingRows]);
 }
 
-export function normalizeNetworkRequest(row: TableItem, index: number): WaterfallRow {
+function normalizeNetworkRequest(row: TableItem, index: number): WaterfallRow {
   const networkStart = getNumber(row.networkRequestTime) ?? 0;
   const networkEnd = getNumber(row.networkEndTime) ?? networkStart;
   const rendererStart = getNumber(row.rendererStartTime);

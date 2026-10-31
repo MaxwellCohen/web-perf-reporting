@@ -13,7 +13,7 @@ import {
 } from "./qualityVizShared";
 
 /** Audits that have node items but are visualized elsewhere or are not "failing elements" lists. */
-export const NODE_FINDINGS_EXCLUDED_IDS = new Set([
+const NODE_FINDINGS_EXCLUDED_IDS = new Set([
   "valid-source-maps",
   "has-hsts",
   "csp-xss",
@@ -62,11 +62,11 @@ export function isNodeFindingsAudit(rows: DetailTableItem[], auditId?: string): 
   return reports.every((report) => report.items.every((item) => nodeOf(item)));
 }
 
-export type ContrastInfo = { ratio?: number; fg?: string; bg?: string; expected?: string };
+type ContrastInfo = { ratio?: number; fg?: string; bg?: string; expected?: string };
 
 const COLOR_RE = /(#[0-9a-f]{3,8}|rgba?\([^)]*\))/i;
 
-export function parseContrast(explanation: string | undefined): ContrastInfo | undefined {
+function parseContrast(explanation: string | undefined): ContrastInfo | undefined {
   if (!explanation) return undefined;
   const ratio = explanation.match(/contrast of\s+(\d+(?:\.\d+)?)/i);
   const fg = explanation.match(/foreground color:\s*([^,)]+(?:\([^)]*\))?)/i);

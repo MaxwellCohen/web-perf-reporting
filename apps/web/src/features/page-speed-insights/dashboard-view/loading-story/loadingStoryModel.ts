@@ -36,18 +36,18 @@ const MOMENT_ORDER: StoryMomentId[] = ["ttfb", "fcp", "lcp", "load"];
 const CLOSE_MS = 15;
 const CAPTURED_AT_MOMENT_MS = 80;
 
-export type StoryFrame = {
+type StoryFrame = {
   timing: number;
   data: string;
 };
 
-export type StoryPhase = {
+type StoryPhase = {
   id: string;
   label: string;
   durationMs: number;
 };
 
-export type DeviceMoment = {
+type DeviceMoment = {
   id: StoryMomentId;
   timeMs: number;
   rating?: Rating;
@@ -63,7 +63,7 @@ export type DeviceStory = {
   lcpSnippet?: string;
 };
 
-export type TimingCell = {
+type TimingCell = {
   timeMs?: number;
   rating?: Rating;
 };

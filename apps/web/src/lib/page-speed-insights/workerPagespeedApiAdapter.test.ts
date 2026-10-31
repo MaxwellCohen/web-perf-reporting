@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  getWorkerEnvelopeToResponse,
-  workerEnvelopeToHttpResponse,
-} from "@/lib/page-speed-insights/workerPagespeedApiAdapter";
+import { getWorkerEnvelopeToResponse } from "@/lib/page-speed-insights/workerPagespeedApiAdapter";
 import {
   resolveWorkerEnvelope,
   type WorkerJobEnvelope,
@@ -77,10 +74,4 @@ describe("getWorkerEnvelopeToResponse", () => {
     await expect(res.text()).resolves.toBe(JSON.stringify(env));
   });
 
-  it("maps pending to 404 via workerEnvelopeToHttpResponse", async () => {
-    const res = workerEnvelopeToHttpResponse(
-      resolveWorkerEnvelope({ status: "PENDING" } as WorkerJobEnvelope),
-    );
-    expect(res.status).toBe(404);
-  });
 });

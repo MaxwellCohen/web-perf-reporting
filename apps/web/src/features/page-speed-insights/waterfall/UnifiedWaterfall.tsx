@@ -64,10 +64,11 @@ import {
 } from "@/features/page-speed-insights/waterfall/waterfallData";
 import { getNetworkBarColor } from "@/features/page-speed-insights/shared/networkResourceColors";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
+import { toggleMultiSelect } from "@/features/page-speed-insights/shared/MultiSelectFilterDropdown";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { cn } from "@/lib/utils";
 
-export function scrollToMoment(eventId: string, idPrefix?: string) {
+function scrollToMoment(eventId: string, idPrefix?: string) {
   const id = idPrefix
     ? `timeline-moment-${idPrefix}-${eventId}`
     : `timeline-moment-${eventId}`;
@@ -305,15 +306,9 @@ function TypeAndSignalFilterDropdown({
                   key={option}
                   checked={resourceTypes.length === 0 || resourceTypes.includes(option)}
                   onCheckedChange={(checked) => {
-                    if (checked) {
-                      const next = resourceTypes.includes(option)
-                        ? [...resourceTypes]
-                        : [...resourceTypes, option];
-                      onResourceTypesChange(next.length === typeOptions.length ? [] : next);
-                    } else {
-                      const base = resourceTypes.length === 0 ? typeOptions : resourceTypes;
-                      onResourceTypesChange(base.filter((item) => item !== option));
-                    }
+                    onResourceTypesChange(
+                      toggleMultiSelect(typeOptions, resourceTypes, option, checked),
+                    );
                   }}
                 >
                   {toTitleCase(option)}

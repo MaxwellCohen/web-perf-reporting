@@ -9,14 +9,10 @@ import { PayloadFlow } from "@/features/page-speed-insights/dashboard-view/resou
 import { ResourcesComparisonBrief } from "@/features/page-speed-insights/dashboard-view/resources-story/ResourcesComparison";
 import { compareResourcesInvestigations } from "@/features/page-speed-insights/dashboard-view/resources-story/resourcesComparisonModel";
 import {
-  extractActiveMetric,
   resourcesInvestigationsFromItems,
-  type LeadKind,
-  type ResourceSuspect,
   type ResourcesInvestigation,
 } from "@/features/page-speed-insights/dashboard-view/resources-story/resourcesInvestigationModel";
 import {
-  ACTION_LABEL,
   SuspectList,
 } from "@/features/page-speed-insights/dashboard-view/resources-story/SuspectList";
 import { TransferWeightMap } from "@/features/page-speed-insights/dashboard-view/resources-story/TransferWeightMap";
@@ -24,23 +20,9 @@ import { ResourcesTable } from "@/features/page-speed-insights/dashboard-view/re
 import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
 import { CompareReportPicker } from "@/features/page-speed-insights/shared/CompareReportPicker";
 import { resolveCompareSelection } from "@/features/page-speed-insights/shared/compareSelection";
-import { BootupTimeChartCard } from "@/features/page-speed-insights/javascript-metrics/BootupTimeChartCard";
-import { MainThreadWorkChartCard } from "@/features/page-speed-insights/javascript-metrics/MainThreadWorkChartCard";
-import {
-  EntitiesTableCard,
-  useEntitiesTableData,
-} from "@/features/page-speed-insights/lh-categories/table/EntitiesTable";
-import {
-  buildPageLoadTimelineBundle,
-  type PageLoadTimelineBundle,
-} from "@/features/page-speed-insights/page-load-timeline/buildPageLoadTimeline";
+import { buildPageLoadTimelineBundle } from "@/features/page-speed-insights/page-load-timeline/buildPageLoadTimeline";
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
-import { ScriptTreemapChartCard } from "@/features/page-speed-insights/script-treemap/ScriptTreemapChartCard";
-import { useScriptTreemapItems } from "@/features/page-speed-insights/script-treemap/useScriptTreemapItems";
-import { UnifiedWaterfall } from "@/features/page-speed-insights/waterfall/UnifiedWaterfall";
 import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
-import type { TableItem } from "@/lib/schema";
-import { getUrlString } from "@/lib/utils";
 
 function focusEvidence() {
   const node = document.getElementById("resources-evidence");
@@ -49,91 +31,7 @@ function focusEvidence() {
   }
 }
 
-function matchingRows(items: TableItem[], url: string | null): TableItem[] {
-  if (!url) return items;
-  return items.filter((item) => getUrlString(item.url) === url);
-}
-
-function SuspectExhibit({ suspect }: { suspect: ResourceSuspect }) {
-  return (
-    <article className="rounded-lg border bg-muted/30 px-4 py-3">
-      <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-        Suspect
-      </p>
-      <h3 className="mt-1 break-all text-base font-medium">{suspect.label}</h3>
-      <p className="mt-1 text-sm text-muted-foreground">{suspect.why}</p>
-      <p className="mt-2 text-sm font-medium">{ACTION_LABEL[suspect.actionHint]}</p>
-    </article>
-  );
-}
-
-function InvestigationEvidence({
-  stage,
-  leadKind,
-  suspect,
-  entry,
-  bundle,
-}: {
-  stage: ResourceStageId;
-  leadKind: LeadKind;
-  suspect: ResourceSuspect | null;
-  entry: InsightsContextItem | undefined;
-  bundle: PageLoadTimelineBundle | null;
-}) {
-  const metric = extractActiveMetric(entry);
-  const treemapItems = useScriptTreemapItems();
-  const entities = useEntitiesTableData();
-  const suspectUrl = suspect?.url ?? null;
-  const treemap = treemapItems.find((item) => item.label === entry?.label) ?? treemapItems[0];
-  const treemapNodes = treemap?.treeData.nodes ?? [];
-  const label = entry?.label ?? "";
-  const bootupItems = suspectUrl
-    ? matchingRows(metric?.bootupTime ?? [], suspectUrl)
-    : (metric?.bootupTime ?? []);
-  const showEntities =
-    leadKind === "third-party" && stage === "arrived" && !suspect && entities.hasEntities;
-
-  return (
-    <div id="resources-evidence" className="space-y-4 scroll-mt-4">
-      {suspect ? <SuspectExhibit suspect={suspect} /> : null}
-      {showEntities ? <EntitiesTableCard data={entities.data} columns={entities.columns} /> : null}
-      {stage === "scripts" && treemap && treemapNodes.length > 0 ? (
-        <ScriptTreemapChartCard treeData={treemap.treeData} label={treemap.label} />
-      ) : null}
-      {stage === "scripts" && treemapNodes.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Script bytes are in the weight map. This report has no script-treemap audit.
-        </p>
-      ) : null}
-      {stage === "main-thread" && bootupItems.length > 0 ? (
-        <BootupTimeChartCard metrics={[{ label, bootupTime: bootupItems }]} />
-      ) : null}
-      {stage === "main-thread" && (metric?.mainThreadWork.length ?? 0) > 0 ? (
-        <MainThreadWorkChartCard
-          metrics={[{ label, mainThreadWork: metric?.mainThreadWork ?? [] }]}
-        />
-      ) : null}
-      {stage === "main-thread" &&
-      bootupItems.length === 0 &&
-      (metric?.mainThreadWork.length ?? 0) === 0 ? (
-        <p className="text-sm text-muted-foreground">This report has no main-thread breakdown.</p>
-      ) : null}
-      {stage === "arrived" && !showEntities && bundle ? (
-        <UnifiedWaterfall
-          load={bundle.load}
-          events={bundle.timeline.events}
-          axisEndMs={bundle.timeline.axisEndMs}
-          collapsible={false}
-        />
-      ) : null}
-      {stage === "arrived" && !showEntities && !bundle ? (
-        <p className="text-sm text-muted-foreground">This report has no request waterfall.</p>
-      ) : null}
-    </div>
-  );
-}
-
-export function ResourcesInvestigationBrief({
+function ResourcesInvestigationBrief({
   picker,
   active,
   stage,
@@ -150,7 +48,6 @@ export function ResourcesInvestigationBrief({
   onSelectStage: (id: ResourceStageId) => void;
   onSelectSuspect: (url: string) => void;
 }) {
-  const suspect = active.suspects.find((item) => item.url === suspectUrl) ?? null;
   const emphasizeUnused = active.lead.kind === "wasted-download" || stage === "unused";
   const bundle = useMemo(() => (entry ? buildPageLoadTimelineBundle(entry) : null), [entry]);
 

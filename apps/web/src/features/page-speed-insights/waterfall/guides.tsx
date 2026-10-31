@@ -250,26 +250,12 @@ export function guidesFromMilestones(milestones?: WaterfallMilestones): Waterfal
   return guides;
 }
 
-export function getMilestoneItems(milestones?: WaterfallMilestones) {
+function getMilestoneItems(milestones?: WaterfallMilestones) {
   return guidesFromMilestones(milestones).map((guide) => ({
     key: guide.id === "render-fcp" ? "fcp" : guide.id === "sub-lcp" ? "lcp" : "dcl",
     label: guide.label,
     value: guide.timeMs,
   }));
-}
-
-export function MilestoneOverlay({
-  minStart,
-  maxEnd,
-  milestones,
-}: {
-  minStart: number;
-  maxEnd: number;
-  milestones?: WaterfallMilestones;
-}) {
-  return (
-    <GuideOverlay minStart={minStart} maxEnd={maxEnd} guides={guidesFromMilestones(milestones)} />
-  );
 }
 
 export function MilestoneLegend({ milestones }: { milestones?: WaterfallMilestones }) {

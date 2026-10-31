@@ -134,7 +134,7 @@ function CspNoteSection({ findings }: { findings: CspFindingNote[] }) {
   );
 }
 
-export function PlatformNotes({ notes }: { notes: PlatformNotesData }) {
+function PlatformNotes({ notes }: { notes: PlatformNotesData }) {
   return (
     <div className="flex flex-col gap-3">
       {notes.baseline ? <BaselineNoteSection note={notes.baseline} /> : null}

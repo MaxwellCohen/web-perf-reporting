@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export const LEGAL_LAST_UPDATED = "October 29, 2026";
+const LEGAL_LAST_UPDATED = "October 29, 2026";
 export const PRIVACY_ISSUES_URL =
   "https://github.com/MaxwellCohen/web-perf-reporting/issues/new?title=Privacy%20request&labels=privacy";
 

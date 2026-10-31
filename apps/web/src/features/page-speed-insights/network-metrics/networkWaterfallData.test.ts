@@ -1,17 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CombinedLoad } from "@/features/page-speed-insights/page-load-timeline/collectTimelineSources";
-import {
-  buildTimeAxisTicks,
-  buildWaterfallRows,
-  buildWaterfallRowsFromSources,
-  countRequestRows,
-  filterWaterfallRows,
-  getSegmentStyle,
-  getWaterfallResourceTypes,
-  getWaterfallTimeRange,
-  normalizeNetworkRequest,
-  sortWaterfallRows,
-} from "@/features/page-speed-insights/network-metrics/networkWaterfallData";
+import { buildTimeAxisTicks, buildWaterfallRows, buildWaterfallRowsFromSources, countRequestRows, filterWaterfallRows, getSegmentStyle, getWaterfallResourceTypes, getWaterfallTimeRange, sortWaterfallRows } from "@/features/page-speed-insights/network-metrics/networkWaterfallData";
 
 function makeLoad(overrides: Partial<CombinedLoad> = {}): CombinedLoad {
   return {
@@ -32,48 +21,6 @@ function makeLoad(overrides: Partial<CombinedLoad> = {}): CombinedLoad {
 }
 
 describe("networkWaterfallData", () => {
-  it("normalizes a row with queue and network segments", () => {
-    const row = normalizeNetworkRequest(
-      {
-        url: "https://example.com/app.js",
-        resourceType: "Script",
-        networkRequestTime: 100,
-        networkEndTime: 250,
-        rendererStartTime: 80,
-        transferSize: 12000,
-        statusCode: 200,
-      },
-      0,
-    );
-
-    expect(row.kind).toBe("request");
-    expect(row.queueStart).toBe(80);
-    expect(row.queueEnd).toBe(100);
-    expect(row.networkStart).toBe(100);
-    expect(row.networkEnd).toBe(250);
-    expect(row.duration).toBe(170);
-  });
-
-  it("omits queue segment when rendererStartTime is missing or not before network start", () => {
-    expect(
-      normalizeNetworkRequest(
-        { url: "https://example.com/", networkRequestTime: 50, networkEndTime: 120 },
-        0,
-      ).queueStart,
-    ).toBeUndefined();
-
-    expect(
-      normalizeNetworkRequest(
-        {
-          url: "https://example.com/",
-          networkRequestTime: 50,
-          networkEndTime: 120,
-          rendererStartTime: 50,
-        },
-        0,
-      ).queueStart,
-    ).toBeUndefined();
-  });
 
   it("builds rows and calculates time range", () => {
     const rows = buildWaterfallRows([

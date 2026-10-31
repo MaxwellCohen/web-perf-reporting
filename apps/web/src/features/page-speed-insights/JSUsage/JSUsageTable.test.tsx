@@ -1,10 +1,6 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import {
-  useUseJSUsageTable,
-  JSUsageTableWithControls,
-} from "@/features/page-speed-insights/JSUsage/JSUsageTable";
-import { ExpandAll, ExpandRow } from "@/features/page-speed-insights/JSUsage/jsUsageTableParts";
+import { JSUsageTableWithControls } from "@/features/page-speed-insights/JSUsage/JSUsageTable";
 
 type MockRow = {
   name: string;
@@ -95,38 +91,7 @@ const mockTreeNodes: MockRow[] = [
   },
 ];
 
-function JSUsageTableWrapper({ data }: { data: MockRow[] }) {
-  const table = useUseJSUsageTable(data);
-  return <div data-testid="table">{table.getRowModel().rows.length} rows</div>;
-}
-
 describe("JSUsageTable", () => {
-  describe("ExpandAll", () => {
-    function ExpandAllWrapper() {
-      const table = useUseJSUsageTable(mockTreeNodes);
-      return <ExpandAll table={table} />;
-    }
-    it("renders expand/collapse button", () => {
-      const { container } = render(<ExpandAllWrapper />);
-      expect(container.querySelector("button")).toBeTruthy();
-      expect(container.querySelector("button")?.getAttribute("aria-label")).toMatch(
-        /Expand all|Collapse all/,
-      );
-    });
-  });
-
-  describe("useUseJSUsageTable", () => {
-    it("returns table with rows from data", () => {
-      const { container } = render(<JSUsageTableWrapper data={mockTreeNodes} />);
-      expect(container.querySelector('[data-testid="table"]')?.textContent).toBe("1 rows");
-    });
-
-    it("returns table with 0 rows for empty data", () => {
-      const { container } = render(<JSUsageTableWrapper data={[]} />);
-      expect(container.querySelector('[data-testid="table"]')?.textContent).toBe("0 rows");
-    });
-  });
-
   describe("JSUsageTableWithControls", () => {
     it("renders table with rows when data provided", () => {
       const { container } = render(<JSUsageTableWithControls data={mockTreeNodes} />);

@@ -7,7 +7,7 @@ import { formatBytes, formatMs } from "@/features/page-speed-insights/shared/for
 
 export type ComparisonUnit = "bytes" | "ms" | "count";
 
-export type ResourcesMetricRow = {
+type ResourcesMetricRow = {
   id: keyof InvestigationMetrics | "requestCount";
   label: string;
   /** Stage this row deep-links to. */

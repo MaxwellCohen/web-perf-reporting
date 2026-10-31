@@ -6,12 +6,7 @@ vi.mock("lucide-react", () => ({
   X: () => null,
 }));
 
-import {
-  ScoreDisplay,
-  ScoreDisplayModes,
-  isEmptyResult,
-  sortByScoreDisplayModes,
-} from "@/features/page-speed-insights/ScoreDisplay";
+import { ScoreDisplay, isEmptyResult } from "@/features/page-speed-insights/ScoreDisplay";
 
 describe("ScoreDisplay", () => {
   it("returns null when audit is undefined", () => {
@@ -211,29 +206,6 @@ describe("isEmptyResult", () => {
         details: { type: "table", items: [{ url: "x" }] },
       } as any),
     ).toBe(false);
-  });
-});
-
-describe("sortByScoreDisplayModes", () => {
-  it("returns -1 when a is undefined", () => {
-    expect(sortByScoreDisplayModes(undefined, { scoreDisplayMode: "numeric" } as any)).toBe(-1);
-  });
-
-  it("returns -1 when b is undefined", () => {
-    expect(sortByScoreDisplayModes({ scoreDisplayMode: "numeric" } as any, undefined)).toBe(-1);
-  });
-
-  it("sorts by score when same display mode", () => {
-    const a = { scoreDisplayMode: "numeric" as const, score: 0.5 };
-    const b = { scoreDisplayMode: "numeric" as const, score: 0.9 };
-    expect(sortByScoreDisplayModes(a as any, b as any)).toBeLessThan(0);
-    expect(sortByScoreDisplayModes(b as any, a as any)).toBeGreaterThan(0);
-  });
-
-  it("sorts by display mode ranking", () => {
-    const metricSavings = { scoreDisplayMode: "metricSavings" as const, score: 0 };
-    const numeric = { scoreDisplayMode: "numeric" as const, score: 1 };
-    expect(sortByScoreDisplayModes(metricSavings as any, numeric as any)).toBeLessThan(0);
   });
 });
 

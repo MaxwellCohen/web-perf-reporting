@@ -1,11 +1,7 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { Accordion } from "@/components/ui/accordion";
-import {
-  DetailTable,
-  makeColumnDef,
-  simpleTableCell,
-} from "@/features/page-speed-insights/lh-categories/table/RenderTable";
+import { DetailTable } from "@/features/page-speed-insights/lh-categories/table/RenderTable";
 import type { CellContext } from "@tanstack/react-table";
 
 vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", () => ({
@@ -179,36 +175,3 @@ describe("DetailTable", () => {
 
 });
 
-describe("makeColumnDef", () => {
-  it("returns column definitions for heading", () => {
-    const defs = makeColumnDef(
-      {
-        heading: { key: "size", valueType: "bytes", label: "Size" },
-        _userLabel: "",
-      },
-      { showUserLabel: false },
-    );
-    expect(defs.length).toBeGreaterThan(0);
-    expect(defs[0].id).toContain("size");
-  });
-
-  it("returns empty array for heading without key", () => {
-    const defs = makeColumnDef(
-      { heading: { key: "", label: "", valueType: "text" }, _userLabel: "" },
-      { showUserLabel: false },
-    );
-    expect(defs).toEqual([]);
-  });
-});
-
-describe("simpleTableCell", () => {
-  it("renders value via RenderTableValue for non-array", () => {
-    const mockCell = {
-      getValue: () => "test",
-      column: { columnDef: { meta: { heading: { heading: { valueType: "text" } } } } },
-      row: { original: { _userLabel: "" } },
-    } as never;
-    const result = simpleTableCell(mockCell);
-    expect(result).toBeTruthy();
-  });
-});

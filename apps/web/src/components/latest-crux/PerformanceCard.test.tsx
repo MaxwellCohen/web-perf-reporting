@@ -27,12 +27,7 @@ vi.mock("@/components/latest-crux/charts/CruxStackedBarChart", () => ({
   PerformanceStackedBarChart: () => <div data-testid="stacked-bar-chart" />,
 }));
 
-import {
-  CurrentPerformanceCard,
-  CurrentPerformanceChartContext,
-  ChartMap,
-  HorizontalScoreChart,
-} from "@/components/latest-crux/PerformanceCard";
+import { CurrentPerformanceCard, CurrentPerformanceChartContext, ChartMap } from "@/components/latest-crux/PerformanceCard";
 
 const histogramData = {
   good_density: 0.5,
@@ -142,14 +137,3 @@ describe("ChartMap", () => {
   });
 });
 
-describe("HorizontalScoreChart", () => {
-  it("renders with score", () => {
-    const { container } = render(<HorizontalScoreChart score={0.75} />);
-    expect(container.querySelector("svg")).toBeTruthy();
-  });
-
-  it("renders with className", () => {
-    const { container } = render(<HorizontalScoreChart score={0.5} className="custom" />);
-    expect(container.querySelector(".custom")).toBeTruthy();
-  });
-});

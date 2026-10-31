@@ -149,7 +149,7 @@ function extractCauses(item: TableItem): CulpritCause[] {
   return causes;
 }
 
-export function extractClsCulpritData(rows: DetailTableItem[]): {
+function extractClsCulpritData(rows: DetailTableItem[]): {
   summaries: ClusterSummary[];
   shifts: ShiftFinding[];
   barPoints: Array<{ label: string; category: string; value: number }>;

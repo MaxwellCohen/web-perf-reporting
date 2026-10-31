@@ -6,8 +6,6 @@ import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack
 import type { StockColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
 import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
-import { AccordionContent, AccordionItem } from "@/components/ui/accordion";
-import { AccordionSectionTitleTrigger } from "@/components/ui/accordion-section-title-trigger";
 import {
   createBooleanAggregatedCell,
   createOriginsArrayAggregatedCell,
@@ -77,22 +75,6 @@ const cols: StockColumnDef<EntityTableRow, any>[] = [
     aggregatedCell: createOriginsArrayAggregatedCell<EntityTableRow>(),
   }),
 ];
-
-export function EntitiesTable() {
-  const { data, columns, hasEntities } = useEntitiesTableData();
-
-  if (!hasEntities) {
-    return null;
-  }
-  return (
-    <AccordionItem value={"entities"}>
-      <AccordionSectionTitleTrigger>Entities</AccordionSectionTitleTrigger>
-      <AccordionContent>
-        <EntitiesTableCard data={data} columns={columns} />
-      </AccordionContent>
-    </AccordionItem>
-  );
-}
 
 export function EntitiesTableCard({
   data,

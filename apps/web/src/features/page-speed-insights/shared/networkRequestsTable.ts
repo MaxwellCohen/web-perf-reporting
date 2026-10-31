@@ -10,7 +10,7 @@ export type NetworkRequestTimeRange = {
   maxEnd: number;
 };
 
-export const NETWORK_REQUESTS_AUDIT_ID = "network-requests";
+const NETWORK_REQUESTS_AUDIT_ID = "network-requests";
 const NETWORK_REQUEST_TIMING_KEYS: readonly string[] = [
   "networkRequestTime",
   "networkEndTime",

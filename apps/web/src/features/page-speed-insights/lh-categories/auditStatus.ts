@@ -12,11 +12,11 @@ export type AuditStatus =
   | "error";
 
 /** Lighthouse thresholds. */
-export const PASS_THRESHOLD = 0.9;
-export const AVERAGE_THRESHOLD = 0.5;
+const PASS_THRESHOLD = 0.9;
+const AVERAGE_THRESHOLD = 0.5;
 
 /** Order sections are displayed in. */
-export const STATUS_DISPLAY_ORDER: AuditStatus[] = [
+const STATUS_DISPLAY_ORDER: AuditStatus[] = [
   "fail",
   "average",
   "pass",
@@ -37,7 +37,7 @@ const STATUS_SEVERITY: Record<AuditStatus, number> = {
   notApplicable: 6,
 };
 
-export const STATUS_TITLES: Record<AuditStatus, string> = {
+const STATUS_TITLES: Record<AuditStatus, string> = {
   fail: "Failed",
   average: "Needs attention",
   pass: "Passed",
@@ -48,7 +48,7 @@ export const STATUS_TITLES: Record<AuditStatus, string> = {
 };
 
 /** Sections that start collapsed so failing audits are seen first. */
-export const COLLAPSED_BY_DEFAULT: ReadonlySet<AuditStatus> = new Set([
+const COLLAPSED_BY_DEFAULT: ReadonlySet<AuditStatus> = new Set([
   "pass",
   "notApplicable",
   "manual",
@@ -77,7 +77,7 @@ export function getAuditStatus(audit: Audit | null | undefined): AuditStatus | n
 }
 
 /** Worst status across reports; null if no report has a result. */
-export function getWorstStatus(statuses: (AuditStatus | null | undefined)[]): AuditStatus | null {
+function getWorstStatus(statuses: (AuditStatus | null | undefined)[]): AuditStatus | null {
   let worst: AuditStatus | null = null;
   for (const s of statuses) {
     if (!s) continue;
@@ -86,7 +86,7 @@ export function getWorstStatus(statuses: (AuditStatus | null | undefined)[]): Au
   return worst;
 }
 
-export function getWorstAuditStatus(audits: (Audit | null | undefined)[]): AuditStatus | null {
+function getWorstAuditStatus(audits: (Audit | null | undefined)[]): AuditStatus | null {
   return getWorstStatus(audits.map(getAuditStatus));
 }
 

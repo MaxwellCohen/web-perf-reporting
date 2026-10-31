@@ -1,6 +1,6 @@
 import { PageSpeedInsights } from "@/lib/schema";
 
-export function normalizePageSpeedInsights(raw: unknown): PageSpeedInsights {
+function normalizePageSpeedInsights(raw: unknown): PageSpeedInsights {
   if ((raw as PageSpeedInsights).lighthouseResult) {
     return { lighthouseResult: (raw as PageSpeedInsights).lighthouseResult } as any;
   }

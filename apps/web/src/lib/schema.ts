@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export type DeviceType = "Desktop" | "Mobile";
+type DeviceType = "Desktop" | "Mobile";
 const coerceNumber = z.coerce.number().default(0).catch(NaN);
 
 const hasType = (v: unknown, type: string) =>
@@ -18,7 +18,6 @@ const cruxHistogramSchema = z.tuple([
   cruxHistogramItemSchema.omit({ end: true }),
 ]);
 
-export type CruxHistogram = z.infer<typeof cruxHistogramSchema>;
 
 const cruxDateSchema = z.object({
   year: coerceNumber,
@@ -36,6 +35,7 @@ const CruxHistogramItem = z.object({
   histogram: cruxHistogramSchema,
   percentiles: cruxPercentileSchema,
 });
+const CruxP75Item = CruxHistogramItem.omit({ histogram: true }).optional();
 
 const urlSchema = z.string().url();
 
@@ -61,7 +61,7 @@ const FormFactorFractionsSchema = z.object({
   tablet: coerceNumber,
 });
 
-export const cruxReportSchema = z.object({
+const cruxReportSchema = z.object({
   record: z.object({
     key: keySchema,
     metrics: z
@@ -93,27 +93,19 @@ export const cruxReportSchema = z.object({
             fractions: FormFactorFractionsSchema,
           })
           .optional(),
-        largest_contentful_paint_image_resource_load_duration: CruxHistogramItem.omit({
-          histogram: true,
-        }).optional(),
-        largest_contentful_paint_image_element_render_delay: CruxHistogramItem.omit({
-          histogram: true,
-        }).optional(),
-        largest_contentful_paint_image_resource_load_delay: CruxHistogramItem.omit({
-          histogram: true,
-        }).optional(),
-        largest_contentful_paint_image_time_to_first_byte: CruxHistogramItem.omit({
-          histogram: true,
-        }).optional(),
+        largest_contentful_paint_image_resource_load_duration: CruxP75Item,
+        largest_contentful_paint_image_element_render_delay: CruxP75Item,
+        largest_contentful_paint_image_resource_load_delay: CruxP75Item,
+        largest_contentful_paint_image_time_to_first_byte: CruxP75Item,
         // Experimental: CWVs that include soft (SPA route) navigations as well as full page loads.
         experimental_largest_contentful_paint_with_softnavs: CruxHistogramItem.optional(),
         experimental_interaction_to_next_paint_with_softnavs: CruxHistogramItem.optional(),
         experimental_cumulative_layout_shift_with_softnavs: CruxHistogramItem.optional(),
         // Experimental ad metrics: p75 only, no thresholds.
-        experimental_ad_count: CruxHistogramItem.omit({ histogram: true }).optional(),
-        experimental_ad_density: CruxHistogramItem.omit({ histogram: true }).optional(),
-        experimental_ad_cpu: CruxHistogramItem.omit({ histogram: true }).optional(),
-        experimental_ad_kilobytes: CruxHistogramItem.omit({ histogram: true }).optional(),
+        experimental_ad_count: CruxP75Item,
+        experimental_ad_density: CruxP75Item,
+        experimental_ad_cpu: CruxP75Item,
+        experimental_ad_kilobytes: CruxP75Item,
       })
       .partial(),
     collectionPeriod: z.object({
@@ -125,119 +117,6 @@ export const cruxReportSchema = z.object({
 });
 
 export type CruxReport = z.infer<typeof cruxReportSchema>;
-
-const cruxHistogramTimeseriesItemSchema = z.object({
-  start: coerceNumber,
-  end: coerceNumber,
-  densities: z.array(coerceNumber),
-});
-
-const CruxHistoryHistogramTimeseries = z.tuple([
-  cruxHistogramTimeseriesItemSchema,
-  cruxHistogramTimeseriesItemSchema,
-  cruxHistogramTimeseriesItemSchema.omit({ end: true }),
-]);
-
-export type CruxHistoryHistogramTimeseries = z.infer<typeof CruxHistoryHistogramTimeseries>;
-
-const CruxHistoryPercentilesTimeseries = z.object({
-  p75s: z.array(z.union([z.null(), z.number(), z.string()])).optional(),
-});
-
-type CruxHistoryPercentilesTimeseries = z.infer<typeof CruxHistoryPercentilesTimeseries>;
-
-const CruxHistoryReportCollectionPeriods = z.array(
-  z.object({
-    firstDate: cruxDateSchema,
-    lastDate: cruxDateSchema,
-  }),
-);
-
-type CruxHistoryReportCollectionPeriods = z.infer<typeof CruxHistoryReportCollectionPeriods>;
-
-const CruxHistoryTimeseries = z.object({
-  histogramTimeseries: CruxHistoryHistogramTimeseries,
-  percentilesTimeseries: CruxHistoryPercentilesTimeseries,
-});
-
-const CruxFractionsSchema = z.object({
-  fractions: z.array(coerceNumber),
-});
-
-export const CruxHistoryReportSchema = z.object({
-  record: z.object({
-    key: keySchema,
-    metrics: z.object({
-      round_trip_time: CruxHistoryTimeseries,
-      experimental_time_to_first_byte: CruxHistoryTimeseries,
-      first_contentful_paint: CruxHistoryTimeseries,
-      interaction_to_next_paint: CruxHistoryTimeseries,
-      cumulative_layout_shift: CruxHistoryTimeseries,
-      largest_contentful_paint: CruxHistoryTimeseries,
-      largest_contentful_paint_image_resource_load_delay: CruxHistoryTimeseries.omit({
-        histogramTimeseries: true,
-      }).optional(),
-      largest_contentful_paint_image_element_render_delay: CruxHistoryTimeseries.omit({
-        histogramTimeseries: true,
-      }).optional(),
-      largest_contentful_paint_image_resource_load_duration: CruxHistoryTimeseries.omit({
-        histogramTimeseries: true,
-      }).optional(),
-      largest_contentful_paint_image_time_to_first_byte: CruxHistoryTimeseries.omit({
-        histogramTimeseries: true,
-      }).optional(),
-      experimental_largest_contentful_paint_with_softnavs: CruxHistoryTimeseries.optional(),
-      experimental_interaction_to_next_paint_with_softnavs: CruxHistoryTimeseries.optional(),
-      experimental_cumulative_layout_shift_with_softnavs: CruxHistoryTimeseries.optional(),
-      experimental_ad_count: CruxHistoryTimeseries.omit({ histogramTimeseries: true }).optional(),
-      experimental_ad_density: CruxHistoryTimeseries.omit({ histogramTimeseries: true }).optional(),
-      experimental_ad_cpu: CruxHistoryTimeseries.omit({ histogramTimeseries: true }).optional(),
-      experimental_ad_kilobytes: CruxHistoryTimeseries.omit({
-        histogramTimeseries: true,
-      }).optional(),
-      form_factors: z
-        .object({
-          fractionTimeseries: z.object({
-            desktop: z.object({
-              fractions: z.array(coerceNumber),
-            }),
-            phone: z.object({
-              fractions: z.array(coerceNumber),
-            }),
-            tablet: z.object({
-              fractions: z.array(coerceNumber),
-            }),
-          }),
-        })
-        .optional(),
-      largest_contentful_paint_resource_type: z
-        .object({
-          fractionTimeseries: z.object({
-            image: CruxFractionsSchema,
-            text: CruxFractionsSchema,
-          }),
-        })
-        .optional(),
-      navigation_types: z
-        .object({
-          fractionTimeseries: z.object({
-            navigate: CruxFractionsSchema,
-            navigate_cache: CruxFractionsSchema,
-            reload: CruxFractionsSchema,
-            restore: CruxFractionsSchema,
-            back_forward: CruxFractionsSchema,
-            back_forward_cache: CruxFractionsSchema,
-            prerender: CruxFractionsSchema,
-          }),
-        })
-        .optional(),
-    }),
-    collectionPeriods: CruxHistoryReportCollectionPeriods,
-  }),
-  urlNormalizationDetails,
-});
-
-export type CruxHistoryReport = z.infer<typeof CruxHistoryReportSchema>;
 
 const UserPageLoadMetricV5schema = z.object({
   percentile: z.number(),
@@ -263,8 +142,6 @@ const PageSpeedApiLoadingExperienceV5schema = z.object({
   }),
   overall_category: z.string(),
 });
-
-export type PageSpeedApiLoadingExperience = z.infer<typeof PageSpeedApiLoadingExperienceV5schema>;
 
 const artifactsSchema = z.record(z.string(), z.any()).optional();
 

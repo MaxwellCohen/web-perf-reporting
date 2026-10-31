@@ -33,16 +33,14 @@ export function AuditErrorsInConsoleViz({ rows }: { rows: DetailTableItem[] }) {
   if (!hasAnyItems(reports)) return null;
   const multi = rows.length > 1;
 
-  const sourcePoints = reports.flatMap((report) => {
-    const counts = new Map<string, number>();
-    report.items.forEach((item) => counts.set(sourceOf(item), (counts.get(sourceOf(item)) || 0) + 1));
-    return [...counts].map(([category, value]) => ({ label: report.label, category, value }));
-  });
-  const originPoints = reports.flatMap((report) => {
-    const counts = new Map<string, number>();
-    report.items.forEach((item) => counts.set(originOf(item), (counts.get(originOf(item)) || 0) + 1));
-    return [...counts].map(([category, value]) => ({ label: report.label, category, value }));
-  });
+  const countPoints = (keyOf: (item: AnyItem) => string) =>
+    reports.flatMap((report) => {
+      const counts = new Map<string, number>();
+      report.items.forEach((item) => counts.set(keyOf(item), (counts.get(keyOf(item)) || 0) + 1));
+      return [...counts].map(([category, value]) => ({ label: report.label, category, value }));
+    });
+  const sourcePoints = countPoints(sourceOf);
+  const originPoints = countPoints(originOf);
 
   const messages = groupAcross(
     reports,

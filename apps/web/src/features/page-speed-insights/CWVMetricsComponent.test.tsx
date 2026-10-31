@@ -1,7 +1,6 @@
 import React from "react";
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ScoreDisplayModes } from "@/features/page-speed-insights/ScoreDisplay";
 
 let pageSpeedItems: unknown[] = [];
 
@@ -134,7 +133,7 @@ function metricAudit(id: string, title: string, extras: Record<string, unknown> 
     title,
     description: `${title} description`,
     score: 0.8,
-    scoreDisplayMode: ScoreDisplayModes.NUMERIC,
+    scoreDisplayMode: "numeric",
     displayValue: "1.0 s",
     ...extras,
   };

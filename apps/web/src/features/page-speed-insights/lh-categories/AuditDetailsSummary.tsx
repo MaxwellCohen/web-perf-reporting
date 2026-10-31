@@ -62,7 +62,7 @@ export function AuditDetailsSummary({
   );
 }
 
-export function SmallText({ text }: { text: string | null }) {
+function SmallText({ text }: { text: string | null }) {
   if (!text) return null;
   return <div className="text-xs">{text}</div>;
 }

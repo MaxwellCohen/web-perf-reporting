@@ -35,7 +35,7 @@ function filmstripItems(details: unknown): FilmstripFrame[] | undefined {
  * first frame at or after FCP is the page as it looked once first content had
  * painted.
  */
-export function frameAtFcp(
+function frameAtFcp(
   items: FilmstripFrame[],
   timeMs: number,
 ): FilmstripFrame | undefined {

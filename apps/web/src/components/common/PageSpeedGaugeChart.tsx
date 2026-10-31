@@ -192,7 +192,7 @@ export function HorizontalGaugeChart({
   );
 }
 
-export function LineChart({ chartData, value }: { chartData: ChartData; value: number }) {
+function LineChart({ chartData, value }: { chartData: ChartData; value: number }) {
   const maxValue = Math.max(...chartData.map((dist) => dist.value), value, Number.EPSILON);
   const toPct = (v: number) => clampPercent((v / maxValue) * 100);
 

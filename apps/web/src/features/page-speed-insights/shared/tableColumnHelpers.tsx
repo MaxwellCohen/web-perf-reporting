@@ -19,7 +19,7 @@ type ColumnDef<T extends RowData, TValue = unknown> = StockColumnDef<T, TValue>;
 type ColumnHelper<T extends RowData> = StockColumnHelper<T>;
 
 /** Placeholder for missing numeric / metric values in grouped metric tables */
-export const METRIC_TABLE_EMPTY_DISPLAY = "N/A" as const;
+const METRIC_TABLE_EMPTY_DISPLAY = "N/A" as const;
 
 export function metricTableEmptyDisplay(): React.ReactNode {
   return METRIC_TABLE_EMPTY_DISPLAY;

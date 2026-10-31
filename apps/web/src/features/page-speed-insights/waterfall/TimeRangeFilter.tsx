@@ -5,7 +5,7 @@ import { formatMs } from "@/features/page-speed-insights/shared/format";
 import { cn } from "@/lib/utils";
 
 /** About 200 drag stops, and a divisor of the axis so the end thumb can sit on the trace end. */
-export function timeRangeStep(axisEndMs: number): number {
+function timeRangeStep(axisEndMs: number): number {
   const target = Math.max(1, Math.round(axisEndMs / 200));
   for (let step = target; step > 1; step--) {
     if (axisEndMs % step === 0) return step;

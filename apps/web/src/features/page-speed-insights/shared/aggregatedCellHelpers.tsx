@@ -38,7 +38,7 @@ function ValueWithLabel({
 /**
  * Extracts value and label pairs from leaf rows for a given column
  */
-export function extractValueLabelPairs<T, TData extends RowData = RowData>(
+function extractValueLabelPairs<T, TData extends RowData = RowData>(
   row: StockRow<TData>,
   columnId: string,
   labelColumnId: string = "label",
@@ -180,42 +180,22 @@ export function createNumericAggregatedCell(
     const uniqueLabels = [...new Set(validPairs.map((p) => p.label))];
     const uniqueValues = [...new Set(validPairs.map((p) => p.value))];
 
-    // Check if all values are exactly the same
-    if (uniqueValues.length === 1) {
-      // If value is same for all reports, show each device on separate lines
-      if (uniqueLabels.length > 1) {
-        return (
-          <div className="flex flex-col gap-1">
-            {uniqueLabels.map((label, i) => (
-              <ValueWithLabel key={i} value={renderValue(uniqueValues[0])} label={label} />
-            ))}
-          </div>
-        );
-      }
-      // Single report, show the value with device label
-      return <ValueWithLabel value={renderValue(uniqueValues[0])} label={uniqueLabels[0]} />;
-    }
+    const renderSame = (value: number) =>
+      uniqueLabels.length > 1 ? (
+        <div className="flex flex-col gap-1">
+          {uniqueLabels.map((label, i) => (
+            <ValueWithLabel key={i} value={renderValue(value)} label={label} />
+          ))}
+        </div>
+      ) : (
+        <ValueWithLabel value={renderValue(value)} label={uniqueLabels[0]} />
+      );
 
-    // If values are not exactly the same, check if they round to the same value
-    // This handles cases where values like 4.0 and 4.1 both display as "4 ms"
-    const roundedValues = validPairs.map((p) => Math.round(p.value));
-    const uniqueRoundedValues = [...new Set(roundedValues)];
+    if (uniqueValues.length === 1) return renderSame(uniqueValues[0]);
 
-    if (uniqueRoundedValues.length === 1) {
-      // All values round to the same number
-      if (uniqueLabels.length > 1) {
-        // Multiple devices, show each device on separate lines
-        return (
-          <div className="flex flex-col gap-1">
-            {uniqueLabels.map((label, i) => (
-              <ValueWithLabel key={i} value={renderValue(uniqueRoundedValues[0])} label={label} />
-            ))}
-          </div>
-        );
-      }
-      // Single device, show device label
-      return <ValueWithLabel value={renderValue(uniqueRoundedValues[0])} label={uniqueLabels[0]} />;
-    }
+    // Values like 4.0 and 4.1 both display as "4 ms", so collapse values that round alike
+    const uniqueRoundedValues = [...new Set(validPairs.map((p) => Math.round(p.value)))];
+    if (uniqueRoundedValues.length === 1) return renderSame(uniqueRoundedValues[0]);
 
     const valueGroups = groupValueLabelPairs(validPairs);
 

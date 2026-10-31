@@ -1,11 +1,8 @@
 import { act, render, screen } from "@testing-library/react";
 import React, { Suspense } from "react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { usePageSpeedInsightsQueryByPublicId } from "@/features/page-speed-insights/data/usePageSpeedInsightsQuery";
-import {
-  clearPageSpeedInsightsByPublicIdCache,
-  type PageSpeedLoadResult,
-} from "@/lib/page-speed-insights/pageSpeedInsightsClient";
+import { type PageSpeedLoadResult } from "@/lib/page-speed-insights/pageSpeedInsightsClient";
 
 function HookProbe({
   publicId,
@@ -43,10 +40,6 @@ async function renderHookProbe(publicId: string) {
 }
 
 describe("usePageSpeedInsightsQueryByPublicId", () => {
-  beforeEach(() => {
-    clearPageSpeedInsightsByPublicIdCache();
-  });
-
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -79,7 +72,7 @@ describe("usePageSpeedInsightsQueryByPublicId", () => {
       text: async () => "Server error",
     } as Response);
 
-    const { getLatest } = await renderHookProbe("public-123");
+    const { getLatest } = await renderHookProbe("public-2");
 
     expect(screen.getByTestId("hook-result")).toBeInTheDocument();
     expect(getLatest()).toEqual({ status: "failed" });
@@ -97,7 +90,7 @@ describe("usePageSpeedInsightsQueryByPublicId", () => {
         }),
     } as Response);
 
-    const { getLatest } = await renderHookProbe("public-123");
+    const { getLatest } = await renderHookProbe("public-3");
 
     expect(screen.getByTestId("hook-result")).toBeInTheDocument();
     expect(getLatest()).toEqual({
@@ -113,7 +106,7 @@ describe("usePageSpeedInsightsQueryByPublicId", () => {
       text: async () => "invalid json",
     } as Response);
 
-    const { getLatest } = await renderHookProbe("public-123");
+    const { getLatest } = await renderHookProbe("public-4");
 
     expect(screen.getByTestId("hook-result")).toBeInTheDocument();
     expect(getLatest()).toEqual({
@@ -128,8 +121,8 @@ describe("usePageSpeedInsightsQueryByPublicId", () => {
       text: async () => JSON.stringify([]),
     } as Response);
 
-    await renderHookProbe("public-123");
-    await renderHookProbe("public-123");
+    await renderHookProbe("public-5");
+    await renderHookProbe("public-5");
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });

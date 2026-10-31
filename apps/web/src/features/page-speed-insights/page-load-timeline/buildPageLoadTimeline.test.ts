@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
-import { buildPageLoadTimeline, buildPageLoadTimelines } from "./buildPageLoadTimeline";
+import { buildPageLoadTimelineBundle } from "./buildPageLoadTimeline";
 import type { PageLoadTimeline } from "./types";
+
+function buildPageLoadTimeline(source: InsightsContextItem) {
+  return buildPageLoadTimelineBundle(source)?.timeline ?? null;
+}
 
 function findMarked(timeline: PageLoadTimeline, id: string) {
   for (const step of timeline.events) {
@@ -1614,18 +1618,6 @@ describe("buildPageLoadTimeline", () => {
     );
 
     expect(timeline!.events.some((m) => m.id.startsWith("layout-shift-"))).toBe(false);
-  });
-
-  it("builds timelines for multiple reports and skips empty ones", () => {
-    const result = buildPageLoadTimelines([
-      makeItem({ label: "Mobile" }),
-      {
-        label: "Broken",
-        item: {} as InsightsContextItem["item"],
-      },
-      makeItem({ label: "Desktop", metrics: { timeToFirstByte: 100 } }),
-    ]);
-    expect(result.map((t) => t.label)).toEqual(["Mobile", "Desktop"]);
   });
 
   it("moves timeline numbers onto simulated CPU and network throttling", () => {

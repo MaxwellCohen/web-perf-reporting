@@ -1,11 +1,11 @@
 import type { CombinedLongTask } from "./collectTimelineSources";
 
 /** Short tasks that start within this window of the previous short task join one row. */
-export const SHORT_TASK_START_WINDOW_MS = 10;
+const SHORT_TASK_START_WINDOW_MS = 10;
 /** Short tasks that begin this soon after the previous short task ends are contiguous. */
-export const SHORT_TASK_CONTIGUOUS_GAP_MS = 1;
+const SHORT_TASK_CONTIGUOUS_GAP_MS = 1;
 /** Chrome / Lighthouse long-task threshold. */
-export const LONG_TASK_MS = 50;
+const LONG_TASK_MS = 50;
 
 export function isLongTask(task: CombinedLongTask): boolean {
   return task.duration >= LONG_TASK_MS;

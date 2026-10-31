@@ -29,16 +29,6 @@ export function buildPageLoadTimelineBundle(
   };
 }
 
-export function buildPageLoadTimeline(source: InsightsContextItem): PageLoadTimeline | null {
-  return buildPageLoadTimelineBundle(source)?.timeline ?? null;
-}
-
-export function buildPageLoadTimelines(items: InsightsContextItem[]): PageLoadTimeline[] {
-  return items
-    .map((item) => buildPageLoadTimeline(item))
-    .filter((t): t is PageLoadTimeline => t != null);
-}
-
 export function buildPageLoadTimelineBundles(
   items: InsightsContextItem[],
 ): PageLoadTimelineBundle[] {

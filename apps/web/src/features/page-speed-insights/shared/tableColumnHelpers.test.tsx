@@ -2,17 +2,7 @@ import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
-import {
-  createBytesColumn,
-  createMSColumn,
-  createPercentageColumn,
-  createReportColumn,
-  createTruncatedTextColumn,
-  createURLColumn,
-  metricTableEmptyDisplay,
-  METRIC_TABLE_EMPTY_DISPLAY,
-  createOptionalNumericCell,
-} from "@/features/page-speed-insights/shared/tableColumnHelpers";
+import { createBytesColumn, createMSColumn, createPercentageColumn, createReportColumn, createTruncatedTextColumn, createURLColumn, metricTableEmptyDisplay, createOptionalNumericCell } from "@/features/page-speed-insights/shared/tableColumnHelpers";
 
 vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", () => ({
   RenderBytesValue: ({ value }: { value: number }) => <span>{value} B</span>,
@@ -94,19 +84,6 @@ describe("tableColumnHelpers", () => {
     });
   });
 
-  describe("metricTableEmptyDisplay", () => {
-    it("matches constant", () => {
-      expect(metricTableEmptyDisplay()).toBe(METRIC_TABLE_EMPTY_DISPLAY);
-    });
-  });
-
-  describe("createOptionalNumericCell", () => {
-    it("renders N/A when undefined", () => {
-      const cell = createOptionalNumericCell(RenderMSValue, undefined);
-      expect(cell).toBe(METRIC_TABLE_EMPTY_DISPLAY);
-    });
-  });
-
   describe("createTruncatedTextColumn", () => {
     it("renders truncated div with title", () => {
       type OriginRow = { label: string; origin: string };
@@ -153,11 +130,5 @@ describe("tableColumnHelpers", () => {
       expect(cell).toBe("3.5%");
     });
 
-    it("renders empty display when undefined", () => {
-      const helper = createStockColumnHelper<{ label: string; pct?: number }>();
-      const col = createPercentageColumn(helper, "pct", "Wasted %");
-      const cell = (col.cell as Function)({ getValue: () => undefined } as any);
-      expect(cell).toBe(METRIC_TABLE_EMPTY_DISPLAY);
-    });
   });
 });

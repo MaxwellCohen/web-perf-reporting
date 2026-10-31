@@ -1,24 +1,7 @@
 import { describe, expect, it } from "vitest";
-import {
-  createColumnFromHeading,
-  getColumnSize,
-  getFilterFnForValueType,
-} from "@/features/page-speed-insights/shared/tableColumnUtils";
+import { createColumnFromHeading } from "@/features/page-speed-insights/shared/tableColumnUtils";
 
 describe("tableColumnUtils", () => {
-  it("chooses numeric and string filter functions appropriately", () => {
-    expect(getFilterFnForValueType("bytes")).toBe("inNumberRange");
-    expect(getFilterFnForValueType("text")).toBe("includesString");
-    expect(getFilterFnForValueType(undefined)).toBe("includesString");
-    expect(getFilterFnForValueType(42)).toBe("includesString");
-  });
-
-  it("sizes columns based on key, label, and value type", () => {
-    expect(getColumnSize("url", "Request URL", "url")).toBe(300);
-    expect(getColumnSize("transferSize", "Transfer Size", "bytes")).toBe(120);
-    expect(getColumnSize("protocol", "Protocol", "text")).toBe(100);
-    expect(getColumnSize("resource", "Resource", "text")).toBe(150);
-  });
 
   it("builds a table column definition from the heading metadata", () => {
     const heading = {

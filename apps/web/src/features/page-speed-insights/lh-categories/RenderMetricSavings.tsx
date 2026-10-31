@@ -5,7 +5,7 @@ import { formatMs } from "@/features/page-speed-insights/shared/format";
 import { AuditResultsRecord } from "@/lib/schema";
 
 /** Format a savings value for a metric: CLS is unitless, everything else is milliseconds. */
-export function formatMetricSaving(metric: string, value: number): string {
+function formatMetricSaving(metric: string, value: number): string {
   const sign = value < 0 ? "+" : "−";
   const abs = Math.abs(value);
   if (metric === "CLS") {

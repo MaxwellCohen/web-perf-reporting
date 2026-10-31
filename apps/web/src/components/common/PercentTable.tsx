@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
-export function toSentenceCase(str: string) {
+function toSentenceCase(str: string) {
   if (!str) {
     return "";
   }

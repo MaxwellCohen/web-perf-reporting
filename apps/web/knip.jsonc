@@ -3,7 +3,6 @@
   "vitest": {
     "config": "vitest.config.ts"
   },
-  "ignore": ["src/components/ui/*.tsx"],
   "ignoreBinaries": ["fallow"],
   "rules": {
     // flatTableFeatures intentionally aliases standardTableFeatures (same bundle,

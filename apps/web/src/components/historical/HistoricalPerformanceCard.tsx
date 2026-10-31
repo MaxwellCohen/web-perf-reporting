@@ -4,13 +4,8 @@ import { CruxHistoryItem } from "@/lib/schema";
 import { useContext, useMemo } from "react";
 import { HistoricalPerformanceChartData } from "@/components/common/ChartSettings";
 import dynamic from "next/dynamic";
+import { ChartFallback } from "@/components/common/ChartFallback";
 import { CurrentPerformanceChartContext } from "@/components/latest-crux/PerformanceCard";
-
-function ChartFallback() {
-  return (
-    <div className="h-24 animate-pulse rounded-md bg-muted" role="status" aria-label="Loading chart" />
-  );
-}
 
 const HistoricalPerformanceBarChart = dynamic(
   () => import("./HistoricalPerformanceBarChart").then((mod) => mod.HistoricalPerformanceBarChart),

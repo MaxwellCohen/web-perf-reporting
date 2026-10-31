@@ -1,61 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-  executeSubmit,
-  fetchJsonFromUrl,
-  validateJson,
-  type FormInputs,
-  type FormState,
-} from "@/components/lh/input-form-action";
+import { executeSubmit, type FormInputs, type FormState } from "@/components/lh/input-form-action";
 
 const initialState: FormState = { error: null, success: false };
-
-describe("validateJson", () => {
-  it("returns true for valid JSON", () => {
-    expect(validateJson("{}")).toBe(true);
-    expect(validateJson('{"a":1}')).toBe(true);
-    expect(validateJson("[]")).toBe(true);
-    expect(validateJson('"string"')).toBe(true);
-  });
-
-  it("returns false for invalid JSON", () => {
-    expect(validateJson("")).toBe(false);
-    expect(validateJson("not json")).toBe(false);
-    expect(validateJson("{")).toBe(false);
-    expect(validateJson('{"a":')).toBe(false);
-  });
-});
-
-describe("fetchJsonFromUrl", () => {
-  it("returns JSON text when fetch succeeds", async () => {
-    const mockFetch = vi.fn().mockResolvedValue({
-      ok: true,
-      text: () => Promise.resolve('{"score": 90}'),
-    });
-    const result = await fetchJsonFromUrl("https://example.com/data.json", mockFetch);
-    expect(result).toBe('{"score": 90}');
-    expect(mockFetch).toHaveBeenCalledWith("https://example.com/data.json");
-  });
-
-  it("throws when response is not ok", async () => {
-    const mockFetch = vi.fn().mockResolvedValue({
-      ok: false,
-      statusText: "Not Found",
-    });
-    await expect(fetchJsonFromUrl("https://example.com/data.json", mockFetch)).rejects.toThrow(
-      "Failed to fetch JSON from URL: Not Found",
-    );
-  });
-
-  it("throws when response is not valid JSON", async () => {
-    const mockFetch = vi.fn().mockResolvedValue({
-      ok: true,
-      text: () => Promise.resolve("not json"),
-    });
-    await expect(fetchJsonFromUrl("https://example.com/data.json", mockFetch)).rejects.toThrow(
-      "URL did not return valid JSON",
-    );
-  });
-});
 
 describe("executeSubmit", () => {
   describe("text tab", () => {

@@ -62,7 +62,7 @@ export type UserTiming = {
   duration?: number;
 };
 
-export type LcpDiscoveryCheck = {
+type LcpDiscoveryCheck = {
   id: string;
   label: string;
   value: boolean;
@@ -75,7 +75,7 @@ export type LayoutShiftEvent = {
   nodeLabel?: string;
 };
 
-export type CodeCoverage = {
+type CodeCoverage = {
   totalBytes: number;
   wastedBytes: number;
 };

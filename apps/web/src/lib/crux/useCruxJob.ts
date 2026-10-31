@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-export type CruxJobSlot = {
+type CruxJobSlot = {
   key: string;
   status: "pending" | "ready" | "failed";
   report?: unknown;
@@ -10,7 +10,7 @@ export type CruxJobSlot = {
   error?: string;
 };
 
-export type CruxJobSnapshot = {
+type CruxJobSnapshot = {
   jobId: string;
   pageUrl: string;
   kind: "current" | "history";

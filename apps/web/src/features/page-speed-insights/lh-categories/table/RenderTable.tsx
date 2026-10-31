@@ -232,20 +232,6 @@ const cell = (info: StockCellContext<DetailTableDataRow, unknown>) => {
 };
 
 /**
- * Simple cell renderer that doesn't handle complex array cases
- */
-export const simpleTableCell = (info: StockCellContext<DetailTableDataRow, unknown>) => {
-  const value = info.getValue();
-  const heading = info.column.columnDef.meta?.heading?.heading;
-  const _userLabel = getUserLabel(info);
-
-  if (!Array.isArray(value)) {
-    return <RenderTableValue value={value as ItemValue} heading={heading} device={_userLabel} />;
-  }
-  return value;
-};
-
-/**
  * Accessor function for main items in a table row
  */
 const accessorFnMainItems =
@@ -364,7 +350,7 @@ const getFilterFn = (
 /**
  * Creates column definitions for a table heading
  */
-export const makeColumnDef = (
+const makeColumnDef = (
   h: ColumnHeadingConfig,
   settings: { showUserLabel: boolean },
 ): StockColumnDef<DetailTableDataRow, unknown>[] => {

@@ -1,12 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PageSpeedInsights } from "@/lib/schema";
-import {
-  collectAuditData,
-  getWorstScore,
-  combineMetricSavings,
-  extractTableFromListItems,
-  combineAuditItems,
-} from "@/features/page-speed-insights/RecommendationsSection/auditProcessing";
+import { collectAuditData, getWorstScore, combineMetricSavings, combineAuditItems } from "@/features/page-speed-insights/RecommendationsSection/auditProcessing";
 
 function createItem(audits: Record<string, unknown> = {}): PageSpeedInsights {
   return {
@@ -100,35 +94,6 @@ describe("auditProcessing", () => {
         { audit: { metricSavings: { FCP: 0, LCP: 50 } }, label: "M", auditId: "a", item: {} },
       ];
       expect(combineMetricSavings(entries as any)).toEqual({ LCP: 50 });
-    });
-  });
-
-  describe("extractTableFromListItems", () => {
-    it("returns empty items when list has no table items", () => {
-      const list = { items: [{ type: "text", content: "hello" }] };
-      expect(extractTableFromListItems(list as any)).toEqual({
-        items: [],
-        headings: undefined,
-      });
-    });
-
-    it("extracts items and headings from table type in list", () => {
-      const list = {
-        items: [
-          {
-            type: "table",
-            items: [{ url: "https://a.com", wastedBytes: 100 }],
-            headings: [
-              { key: "url", label: "URL" },
-              { key: "wastedBytes", label: "Wasted" },
-            ],
-          },
-        ],
-      };
-      const result = extractTableFromListItems(list as any);
-      expect(result.items).toHaveLength(1);
-      expect(result.items[0]).toEqual({ url: "https://a.com", wastedBytes: 100 });
-      expect(result.headings).toHaveLength(2);
     });
   });
 

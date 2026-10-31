@@ -136,12 +136,3 @@ export function fetchPageSpeedInsightsByPublicId(
   }
   return cache.get(publicId)!;
 }
-
-/** Test helper / refresh: drop a cached Promise so the next fetch starts fresh. */
-export function clearPageSpeedInsightsByPublicIdCache(publicId?: string) {
-  if (publicId === undefined) {
-    cache.clear();
-    return;
-  }
-  cache.delete(publicId);
-}

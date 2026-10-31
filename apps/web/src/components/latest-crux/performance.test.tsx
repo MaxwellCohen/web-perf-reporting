@@ -4,7 +4,6 @@ import { suppressConsoleError } from "@/test-utils";
 
 const formatCruxReportMock = vi.fn();
 const groupByMock = vi.fn();
-const getCurrentCruxDataMock = vi.fn();
 const setDateRangeMock = vi.fn();
 
 vi.mock("recharts", () => ({
@@ -44,10 +43,6 @@ vi.mock("@/lib/utils", () => ({
   cn: (...values: Array<string | false | null | undefined>) => values.filter(Boolean).join(" "),
 }));
 
-vi.mock("@/lib/services", () => ({
-  getCurrentCruxData: (...args: unknown[]) => getCurrentCruxDataMock(...args),
-}));
-
 vi.mock("@/components/ui/popover", () => ({
   Popover: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   PopoverTrigger: ({ children }: { children: React.ReactNode }) => (
@@ -63,39 +58,6 @@ vi.mock("lucide-react", async (importOriginal) => {
     CalendarIcon: () => <span data-testid="calendar-icon" />,
   };
 });
-
-vi.mock("@/components/latest-crux/CurrentPerformanceSection", () => ({
-  CurrentPerformanceSection: async ({ url }: { url: string }) => {
-    const { getCurrentCruxData } = await import("@/lib/services");
-    const cruxData = await Promise.all([
-      getCurrentCruxData({ origin: url, formFactor: undefined }),
-      getCurrentCruxData({ origin: url, formFactor: "DESKTOP" }),
-      getCurrentCruxData({ origin: url, formFactor: "TABLET" }),
-      getCurrentCruxData({ origin: url, formFactor: "PHONE" }),
-      getCurrentCruxData({ url, formFactor: undefined }),
-      getCurrentCruxData({ url, formFactor: "DESKTOP" }),
-      getCurrentCruxData({ url, formFactor: "TABLET" }),
-      getCurrentCruxData({ url, formFactor: "PHONE" }),
-    ]);
-    const { CurrentPerformanceDashboard } =
-      await import("@/components/latest-crux/PerformanceDashboard");
-    const cruxReport = {
-      originAll: cruxData[0],
-      originDESKTOP: cruxData[1],
-      originTABLET: cruxData[2],
-      originPHONE: cruxData[3],
-      urlAll: cruxData[4],
-      urlDESKTOP: cruxData[5],
-      urlTABLET: cruxData[6],
-      urlPHONE: cruxData[7],
-    };
-    return (
-      <div className="flex flex-col mt-4">
-        <CurrentPerformanceDashboard reportMap={cruxReport} />
-      </div>
-    );
-  },
-}));
 
 vi.mock("@/components/latest-crux/PerformanceCard", () => ({
   CurrentPerformanceCard: ({ title, histogramData }: { title: string; histogramData: unknown }) => (
@@ -254,7 +216,6 @@ describe("latest crux performance components", () => {
     suppressConsoleError();
     formatCruxReportMock.mockReset();
     groupByMock.mockReset();
-    getCurrentCruxDataMock.mockReset();
     setDateRangeMock.mockReset();
   });
 
@@ -347,25 +308,5 @@ describe("latest crux performance components", () => {
       />,
     );
     expect(container.firstChild).toMatchSnapshot();
-  });
-
-  it("fetches all current crux variants before rendering the dashboard section", async () => {
-    getCurrentCruxDataMock.mockResolvedValue(report);
-    formatCruxReportMock.mockReturnValue([
-      { metric_name: "largest_contentful_paint", ...histogramData },
-    ]);
-    groupByMock.mockReturnValue({
-      largest_contentful_paint: [histogramData],
-      interaction_to_next_paint: [histogramData],
-      cumulative_layout_shift: [histogramData],
-      first_contentful_paint: [histogramData],
-      experimental_time_to_first_byte: [histogramData],
-      round_trip_time: [histogramData],
-    });
-
-    const { container } = render(await CurrentPerformanceSection({ url: "https://example.com" }));
-
-    expect(getCurrentCruxDataMock).toHaveBeenCalledTimes(8);
-    expect(container.textContent).toContain("Largest Contentful Paint (LCP)");
   });
 });

@@ -12,7 +12,7 @@ import {
 import { formatMs } from "@/features/page-speed-insights/shared/format";
 import { cn } from "@/lib/utils";
 
-export type FilmstripViewerPane = {
+type FilmstripViewerPane = {
   /** Shown above the image when several runs are compared side by side. */
   label?: string;
   /** Null before the run has painted anything. */

@@ -1,9 +1,6 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import {
-  AuditDetailsSummary,
-  SmallText,
-} from "@/features/page-speed-insights/lh-categories/AuditDetailsSummary";
+import { AuditDetailsSummary } from "@/features/page-speed-insights/lh-categories/AuditDetailsSummary";
 
 vi.mock("react-markdown", () => ({
   default: ({
@@ -120,18 +117,6 @@ describe("AuditDetailsSummary", () => {
     );
     getByRole("link", { name: "docs" }).click();
     expect(parentClick).not.toHaveBeenCalled();
-  });
-});
-
-describe("SmallText", () => {
-  it("returns null when text is null", () => {
-    const { container } = render(<SmallText text={null} />);
-    expect(container.firstChild).toBeNull();
-  });
-
-  it("renders text when provided", () => {
-    const { container } = render(<SmallText text="Hello" />);
-    expect(container.textContent).toContain("Hello");
   });
 });
 

@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  sortByMaxValue,
-  sortByMaxValueComposite,
-} from "@/features/page-speed-insights/shared/dataSortingHelpers";
+import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
 
 describe("sortByMaxValue", () => {
   it("returns data unchanged when numReports <= 1", () => {
@@ -50,30 +47,3 @@ describe("sortByMaxValue", () => {
   });
 });
 
-describe("sortByMaxValueComposite", () => {
-  it("returns data unchanged when numReports <= 1", () => {
-    const data = [{ url: "a", type: "x", val: 10 }];
-    const result = sortByMaxValueComposite(
-      data,
-      (d) => `${d.url}-${d.type}`,
-      (d) => d.val,
-      1,
-    );
-    expect(result).toBe(data);
-  });
-
-  it("sorts by max value per composite key", () => {
-    const data = [
-      { url: "a", type: "x", val: 10 },
-      { url: "a", type: "y", val: 50 },
-      { url: "b", type: "x", val: 30 },
-    ];
-    const result = sortByMaxValueComposite(
-      data,
-      (d) => `${d.url}-${d.type}`,
-      (d) => d.val,
-      2,
-    );
-    expect(result[0]?.val).toBe(50);
-  });
-});

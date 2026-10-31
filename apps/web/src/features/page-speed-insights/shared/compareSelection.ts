@@ -4,7 +4,7 @@ import {
 } from "@/features/page-speed-insights/shared/compareRuns";
 
 /** Reports a tab can show side by side (`report=` in the URL). */
-export const COMPARE_SELECTION_MAX = 2;
+const COMPARE_SELECTION_MAX = 2;
 
 /** URL labels that still exist; else the first A/B pair when two runs are loaded; else the first report. */
 export function resolveCompareSelection(urlReports: string[], labels: string[]): string[] {
