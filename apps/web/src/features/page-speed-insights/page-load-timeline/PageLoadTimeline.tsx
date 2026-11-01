@@ -517,12 +517,15 @@ function MomentCard({
   axisEnd,
   deviceLabel,
   showTime = false,
+  compact = false,
 }: {
   moment: TimelineEvent;
   axisEnd: number;
   deviceLabel: string;
   /** Show the event's own start / end inside the card (compare view). */
   showTime?: boolean;
+  /** Half-width card on small screens (side-by-side compare lanes). */
+  compact?: boolean;
 }) {
   const muted = moment.status === "not-recorded";
   const downloadBlocking = blockingStatuses(moment.waterfall);
@@ -533,6 +536,7 @@ function MomentCard({
     <div
       className={cn(
         "min-w-0 rounded-lg border px-3 py-3 sm:px-4",
+        compact && "px-2 py-2 sm:py-3",
         muted && "border-dashed opacity-80",
         moment.kind === "blocking" && !muted && "border-rose-500/30",
         moment.kind === "potentially-blocking" && !muted && "border-amber-500/30",
@@ -540,9 +544,21 @@ function MomentCard({
       )}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-        <div className="min-w-0 flex-1 space-y-2 overflow-x-clip">
+        <div
+          className={cn(
+            "min-w-0 flex-1 space-y-2 overflow-x-clip",
+            compact && "space-y-1.5 sm:space-y-2",
+          )}
+        >
           <div className="flex flex-wrap items-center gap-2">
-            <h4 className="text-sm font-semibold leading-snug sm:text-base">{moment.title}</h4>
+            <h4
+              className={cn(
+                "text-sm font-semibold leading-snug sm:text-base",
+                compact && "text-xs sm:text-base",
+              )}
+            >
+              {moment.title}
+            </h4>
             {showTime ? <MomentTime moment={moment} /> : null}
             {moment.rating ? (
               <span
@@ -564,7 +580,14 @@ function MomentCard({
             ) : null}
           </div>
 
-          <p className="text-sm text-muted-foreground">{textWithUnattributedHint(moment.detail)}</p>
+          <p
+            className={cn(
+              "text-sm text-muted-foreground",
+              compact && "line-clamp-3 text-xs sm:line-clamp-none sm:text-sm",
+            )}
+          >
+            {textWithUnattributedHint(moment.detail)}
+          </p>
 
           <MomentRequests
             bars={moment.waterfall}
@@ -845,7 +868,13 @@ function CompareColumn({
           key={`${keyPrefix}-${moment.phaseId}-${moment.id}`}
           id={momentAnchorId(moment.id, side.idPrefix)}
         >
-          <MomentCard moment={moment} axisEnd={axisEndMs} deviceLabel={side.label} showTime />
+          <MomentCard
+            moment={moment}
+            axisEnd={axisEndMs}
+            deviceLabel={side.label}
+            showTime
+            compact
+          />
         </div>
       ))}
     </div>
@@ -866,23 +895,27 @@ function AlignedCompareMoments({
   return (
     <div className="relative" data-testid="timeline-aligned-moments">
       <div
-        className="mb-2 grid grid-cols-[minmax(0,1fr)_4.5rem_minmax(0,1fr)] items-end gap-2 border-b border-border/70 pb-2 text-xs font-semibold text-muted-foreground"
+        className="mb-2 grid grid-cols-2 items-end sm:grid-cols-[minmax(0,1fr)_4.5rem_minmax(0,1fr)] gap-2 border-b border-border/70 pb-2 text-xs font-semibold text-muted-foreground"
         aria-hidden
       >
         <p className="truncate">{left.label}</p>
-        <p className="text-center tabular-nums">Time</p>
+        <p className="hidden text-center tabular-nums sm:block">Time</p>
         <p className="truncate text-right">{right.label}</p>
       </div>
       <ol className="relative m-0 list-none space-y-3 p-0">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 left-1/2 border-l border-border/60 sm:hidden"
+        />
         {rows.map((row, rowIndex) => (
           <li
             key={rowIndex}
-            className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_4.5rem_minmax(0,1fr)] sm:items-start sm:gap-2"
+            className="grid grid-cols-2 gap-x-2 gap-y-1.5 sm:grid-cols-[minmax(0,1fr)_4.5rem_minmax(0,1fr)] sm:items-start sm:gap-2"
             data-testid="timeline-aligned-row"
             data-time-ms={row.timeMs}
           >
             <CompareColumn moments={row.left} side={left} keyPrefix="l" axisEndMs={axisEndMs} />
-            <div className="flex items-center justify-center sm:pt-3">
+            <div className="relative z-10 order-first col-span-2 flex items-center justify-center sm:order-none sm:col-span-1 sm:pt-3">
               <CompareRowTime row={row} />
             </div>
             <CompareColumn moments={row.right} side={right} keyPrefix="r" axisEndMs={axisEndMs} />
