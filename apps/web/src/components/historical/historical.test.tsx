@@ -200,7 +200,7 @@ describe("historical components", () => {
     const { container } = render(<HistoricalChartsSection url="https://example.com" />);
 
     await vi.waitFor(() => {
-      expect(container.textContent).toContain("Largest Contentful Paint (LCP)");
+      expect(container.textContent).toContain("Dynamic chart");
     });
     expect(fetch).toHaveBeenCalledWith(
       "/api/crux/history",
