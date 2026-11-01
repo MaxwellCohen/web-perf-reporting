@@ -95,7 +95,12 @@ function PageSpeedInsightsDashboardContent({
         </div>
       </div>
       <div className="mb-4 flex flex-col gap-3 px-3">
-        <h2 className="min-w-0 text-lg font-bold wrap-break-word sm:text-2xl">{reportTitle}</h2>
+        <h2
+          className="min-w-0 line-clamp-3 text-lg font-bold wrap-anywhere sm:text-2xl"
+          title={reportTitle}
+        >
+          {reportTitle}
+        </h2>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <ViewModeToggle />
           <div className="shrink-0">
