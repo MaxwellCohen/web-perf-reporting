@@ -71,22 +71,6 @@ function PsiBookmarkletLink({ href }: { href: string }) {
   );
 }
 
-const PSI_QUERY_KEYS = ["psi", "psi2", "psiLabel", "psi2Label"] as const;
-
-function stripPsiQueryParams() {
-  const url = new URL(window.location.href);
-  let changed = false;
-  for (const key of PSI_QUERY_KEYS) {
-    if (url.searchParams.has(key)) {
-      url.searchParams.delete(key);
-      changed = true;
-    }
-  }
-  if (changed) {
-    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
-  }
-}
-
 function initialRunsFromPsiQuery(
   initialPsi: string,
   initialPsi2: string,
@@ -217,10 +201,7 @@ export default function ViewerPage({
         console.error("PSI share import error:", e);
         alert(e instanceof Error ? e.message : "Could not import PageSpeed report");
       } finally {
-        if (!cancelled) {
-          setLoading(false);
-          stripPsiQueryParams();
-        }
+        if (!cancelled) setLoading(false);
       }
     })();
     return () => {
