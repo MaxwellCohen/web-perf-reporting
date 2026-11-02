@@ -96,6 +96,89 @@ function linkWarning(request: CombinedRequest, throughputKbps: number | undefine
   return `${formatBytes(bytes)} would take about ${formatMs(fullMs)} on the throttled link; the bar shows ${formatMs(shownMs)} from the trace.`;
 }
 
+function onCriticalPath(request: CombinedRequest): boolean {
+  return request.renderBlocking === "blocking" || request.isCriticalChain;
+}
+
+function formatSavingMs(label: string, ms: number | undefined): string | null {
+  return ms != null && ms > 0 ? `${label} −${formatMs(ms)}` : null;
+}
+
+/** Splits requests into what gates the first paints and what merely shares bandwidth. */
+function criticalPathEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent[] {
+  const sized = load.requests.filter((r) => r.networkEndTime > r.networkRequestTime);
+  const critical = sized.filter(onCriticalPath);
+  const paintMs = load.lcp ?? load.fcp;
+  const rest = sized.filter((r) => !onCriticalPath(r));
+  if (!critical.length && !rest.length) return [];
+
+  const timeMs = load.fcp ?? load.dcl ?? 0;
+  const events: TimelineEvent[] = [];
+  const bytesOf = (rs: CombinedRequest[]) => rs.reduce((sum, r) => sum + (r.transferSize ?? 0), 0);
+
+  if (critical.length) {
+    const doneMs = Math.max(...critical.map((r) => r.networkEndTime));
+    const gains = (load.savings ?? [])
+      .filter((s) => (s.fcpMs ?? 0) > 0 || (s.lcpMs ?? 0) > 0)
+      .map((s) =>
+        [
+          s.title,
+          [formatSavingMs("FCP", s.fcpMs), formatSavingMs("LCP", s.lcpMs)]
+            .filter(Boolean)
+            .join(", "),
+        ].join(": "),
+      );
+    events.push(
+      event(
+        {
+          id: "critical-path",
+          title: "Critical path",
+          detail: `${critical.length} render-blocking or critical-chain requests (${formatBytes(bytesOf(critical))}) finish by ${formatMs(doneMs)}${paintMs != null && doneMs > paintMs ? `, some after the first paint at ${formatMs(paintMs)}` : ""}. Speeding up the blocking ones is what moves FCP and LCP.`,
+          timeMs,
+          phaseId: "subresources",
+          kind: "blocking",
+          hasTimestamp: false,
+          evidence: gains,
+          waterfall: critical.map((r, i) =>
+            requestWaterfallBar(r, `critical-${i}`, {
+              renderBlocking: r.renderBlocking,
+              criticalPath: true,
+              priority: r.priority,
+            }),
+          ),
+        },
+        bounds,
+      ),
+    );
+  }
+
+  if (rest.length) {
+    const afterPaint = paintMs != null ? rest.filter((r) => r.networkEndTime > paintMs) : rest;
+    const idle = (load.savings ?? [])
+      .filter((s) => (s.bytes ?? 0) > 0 && !(s.fcpMs ?? 0) && !(s.lcpMs ?? 0))
+      .map(
+        (s) =>
+          `${s.title}: ${formatBytes(s.bytes ?? 0)} to save, but 0 ms on FCP/LCP (not on the critical path)`,
+      );
+    events.push(
+      event(
+        {
+          id: "off-critical-path",
+          title: "Off the critical path",
+          detail: `${rest.length} other requests (${formatBytes(bytesOf(rest))}); ${afterPaint.length} finish after the page has painted. They don't delay FCP or LCP but compete for bandwidth with later work.`,
+          timeMs,
+          phaseId: "subresources",
+          kind: "fact",
+          hasTimestamp: false,
+          evidence: idle,
+        },
+        bounds,
+      ),
+    );
+  }
+  return events;
+}
+
 function transferWeightEvent(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent | null {
   const kbps = load.simulatedThroughputKbps;
   if (!kbps) return null;
@@ -409,6 +492,7 @@ function networkEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent[
               coverage: coverageLabel(r),
               priority: r.priority,
               renderBlocking: r.renderBlocking,
+              criticalPath: onCriticalPath(r) || undefined,
               linkWarning: linkWarning(r, load.simulatedThroughputKbps),
             }),
           ),
@@ -815,6 +899,8 @@ function milestoneEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEven
 
   mark(load.traceEnd, "after-trace-end", "Trace end", "Performance trace ends at", "afterLoad");
 
+  events.push(...criticalPathEvents(load, bounds));
+
   const weight = transferWeightEvent(load, bounds);
   if (weight) events.push(weight);
 
@@ -857,6 +943,9 @@ export function buildTimelineEvents(load: CombinedLoad): TimelineEvent[] {
 }
 
 export function axisEndMs(load: CombinedLoad, events: TimelineEvent[]): number {
+  // Under simulation a big download can run for minutes, which would squash the
+  // paint milestones into the first pixels. Its bar clips at the axis end instead.
+  const requestsShapeAxis = !load.simulationLabel;
   return Math.max(
     load.lcp ?? 0,
     load.load ?? 0,
@@ -864,13 +953,17 @@ export function axisEndMs(load: CombinedLoad, events: TimelineEvent[]): number {
     load.fcp ?? 0,
     load.interactive ?? 0,
     load.traceEnd ?? 0,
-    ...load.requests.map((r) => r.networkEndTime),
-    ...load.redirectHops.map((r) => r.networkEndTime),
+    ...(requestsShapeAxis ? load.requests.map((r) => r.networkEndTime) : []),
+    ...(requestsShapeAxis ? load.redirectHops.map((r) => r.networkEndTime) : []),
     ...load.longTasks.map((t) => t.startTime + t.duration),
     ...load.screenshots.map((shot) => shot.timing),
     ...load.userTimings.map((t) => t.startTime + (t.duration ?? 0)),
     ...load.layoutShifts.map((shift) => shift.startTime),
-    ...events.map((e) => e.endMs ?? e.timeMs),
+    ...events
+      .filter(
+        (e) => requestsShapeAxis || !/^(net|nav-redirects)/.test(e.id) || e.id === "net-weight",
+      )
+      .map((e) => e.endMs ?? e.timeMs),
     1,
   );
 }

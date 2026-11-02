@@ -93,7 +93,7 @@ describe("createTimelineClock", () => {
       },
     ]);
     expect(image!.networkRequestTime).toBeCloseTo(clock.mapTime(345), 5);
-    // Under 1 MiB, so it can't finish faster than the throttled link allows.
+    // Can't finish faster than the throttled link allows.
     expect(image!.networkEndTime!).toBeGreaterThan(clock.mapTime(371));
 
     const [large] = clock.adjustRequests([
@@ -105,7 +105,22 @@ describe("createTimelineClock", () => {
         protocol: "h2",
       },
     ]);
-    expect(large!.networkEndTime).toBeCloseTo(clock.mapTime(371), 5);
+    // 6 MB cannot cross 1.6 Mbps in seconds.
+    expect(large!.networkEndTime! - large!.networkRequestTime!).toBeGreaterThan(20_000);
+
+    const job = (url: string) => ({
+      url,
+      networkRequestTime: 345,
+      networkEndTime: 346,
+      transferSize: 200_000,
+      protocol: "h2",
+    });
+    const alone = clock.adjustRequests([job("https://cdn.example.com/a.js")])[0]!;
+    const shared = clock.adjustRequests([
+      job("https://cdn.example.com/a.js"),
+      job("https://cdn.example.com/b.js"),
+    ])[0]!;
+    expect(shared.networkEndTime!).toBeGreaterThan(alone.networkEndTime! + 500);
   });
 
   it("rebuilds LCP subparts from the simulated breakdown", () => {

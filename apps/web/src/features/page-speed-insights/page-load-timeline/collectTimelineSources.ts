@@ -104,6 +104,16 @@ export type CombinedRequest = {
   chain?: CriticalChainNode;
 };
 
+/** An audit's estimated payoff, as Lighthouse simulated it. */
+export type LighthouseSaving = {
+  id: string;
+  title: string;
+  bytes?: number;
+  /** Simulated FCP / LCP improvement from fixing it, ms. */
+  fcpMs?: number;
+  lcpMs?: number;
+};
+
 export type CombinedLongTask = {
   url?: string;
   startTime: number;
@@ -160,6 +170,7 @@ export type CombinedLoad = {
   lcpElement?: NodeValue;
   lcpSegments: LcpSegment[];
   lcpDiscoveryFailures: LcpDiscoveryCheck[];
+  savings?: LighthouseSaving[];
   layoutShifts: LayoutShiftEvent[];
   preconnectedText?: string;
   preconnectCandidates: PreconnectCandidate[];
@@ -577,6 +588,21 @@ function longTasks(
   const cpu = clock.throttling.cpuSlowdownMultiplier;
   const extras = clock.adjustTasks(unmatchedObservedTasks(observed, attributed, cpu));
   return mergeTasks(attributed, extras);
+}
+
+function lighthouseSavings(audits: AuditResultsRecord | undefined): LighthouseSaving[] {
+  if (!audits) return [];
+  const savings: LighthouseSaving[] = [];
+  for (const [id, audit] of Object.entries(audits)) {
+    if (!audit || audit.scoreDisplayMode === "notApplicable") continue;
+    const details = audit.details as { overallSavingsBytes?: unknown } | undefined;
+    const bytes = getNumber(details?.overallSavingsBytes);
+    const fcpMs = getNumber(audit.metricSavings?.FCP);
+    const lcpMs = getNumber(audit.metricSavings?.LCP);
+    if (!(bytes && bytes > 0) && !(fcpMs && fcpMs > 0) && !(lcpMs && lcpMs > 0)) continue;
+    savings.push({ id, title: audit.title ?? id, bytes, fcpMs, lcpMs });
+  }
+  return savings;
 }
 
 function lcpSubparts(audits: AuditResultsRecord | undefined): LcpSubpart[] {
@@ -1027,6 +1053,7 @@ export function collectTimelineSources(source: InsightsContextItem): CombinedLoa
     lcpElement: element,
     lcpSegments: lcpSegs,
     lcpDiscoveryFailures: discoveryFailures,
+    savings: lighthouseSavings(audits),
     layoutShifts: shifts,
     preconnectedText: depTree.preconnectedText,
     preconnectCandidates: depTree.preconnectCandidates,

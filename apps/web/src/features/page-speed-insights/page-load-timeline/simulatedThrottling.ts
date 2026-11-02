@@ -4,17 +4,14 @@
  * throughput, and CPU slowdown. This module moves timeline timestamps onto
  * that same clock.
  *
- * Paint milestones use Lighthouse's simulated values. Other times are
- * interpolated between those anchors. Network bars are at least as long as a
- * TCP slow-start estimate, and observed main-thread tasks are multiplied by
- * the CPU slowdown. A task that already finished before the next one started
- * on the trace stays in front of it, so slowed tasks queue instead of overlapping.
+ * Paint milestones use Lighthouse's simulated values. Every other time, including
+ * main-thread tasks, is interpolated between those anchors. Request durations are
+ * at least connection setup plus transfer on the throttled link, with the
+ * throughput split between downloads that overlap.
  */
 
 const TCP_SEGMENT_SIZE = 1460;
 const INITIAL_CONGESTION_WINDOW = 10;
-/** Requests at or above this stay interpolated instead of getting a Lantern duration floor. */
-const MAX_FLOORED_BYTES = 1024 * 1024;
 
 export type SimulatedThrottling = {
   rttMs: number;
@@ -50,6 +47,7 @@ type TimedRequest = {
   statusCode?: number;
   resourceType?: string;
   mimeType?: string;
+  priority?: string;
 };
 
 type TimedTask = {
@@ -319,6 +317,63 @@ export function isNavigationRedirect(statusCode: number | undefined): boolean {
   );
 }
 
+type TransferJob = { dataStartMs: number; bytes: number; weight: number };
+
+/** Rough HTTP/2 stream weights, so High-priority files aren't starved by Low ones. */
+const PRIORITY_WEIGHT: Record<string, number> = {
+  VeryHigh: 8,
+  High: 4,
+  Medium: 2,
+  Low: 1,
+  VeryLow: 0.5,
+};
+
+/**
+ * Finish times when downloads split the link: while N transfers overlap, each
+ * gets a share of the throughput by priority weight. Keeps big files from looking instant just because
+ * the fast trace network finished them quickly.
+ */
+function shareBandwidth(jobs: TransferJob[], bytesPerMs: number): number[] {
+  const ends = jobs.map((job) => job.dataStartMs);
+  if (bytesPerMs <= 0) return ends;
+
+  const pending = jobs
+    .map((job, index) => ({ index, ...job }))
+    .filter((job) => job.bytes > 0)
+    .sort((a, b) => a.dataStartMs - b.dataStartMs);
+  const active = new Map<number, number>();
+  let time = 0;
+  let next = 0;
+
+  while (next < pending.length || active.size > 0) {
+    if (active.size === 0) time = Math.max(time, pending[next]!.dataStartMs);
+    while (next < pending.length && pending[next]!.dataStartMs <= time) {
+      active.set(pending[next]!.index, pending[next]!.bytes);
+      next++;
+    }
+
+    let totalWeight = 0;
+    for (const index of active.keys()) totalWeight += jobs[index]!.weight;
+    const rateOf = (index: number) => (bytesPerMs * jobs[index]!.weight) / totalWeight;
+    let soonest = Infinity;
+    for (const [index, remaining] of active) soonest = Math.min(soonest, remaining / rateOf(index));
+    const nextArrival = next < pending.length ? pending[next]!.dataStartMs - time : Infinity;
+    const step = Math.min(soonest, nextArrival);
+
+    for (const [index, remaining] of [...active]) {
+      const left = remaining - step * rateOf(index);
+      if (left <= 1e-6) {
+        active.delete(index);
+        ends[index] = time + step;
+      } else {
+        active.set(index, left);
+      }
+    }
+    time += step;
+  }
+  return ends;
+}
+
 export function createTimelineClock(input: ClockInput): TimelineClock {
   // One clock for every observed time: interpolate between the simulated anchors
   // (TTFB, FCP, LCP, Speed Index) instead of scaling by CPU slowdown.
@@ -352,18 +407,16 @@ export function createTimelineClock(input: ClockInput): TimelineClock {
           !isNavigationRedirect(request.statusCode),
       );
 
-      return requests.map((request) => {
-        if (request.networkRequestTime == null || request.networkEndTime == null) return request;
+      const bytesPerMs = (throttling.throughputKbps * 1024) / 8 / 1000;
+      const timed = requests.map((request) => {
+        if (request.networkRequestTime == null || request.networkEndTime == null) return null;
         const start = mapTime(request.networkRequestTime);
-        const warpedEnd = mapTime(request.networkEndTime);
-        // Small requests can't be faster than latency plus transfer on the throttled
-        // link. Large ones stay interpolated: costed alone they'd run far past the
-        // page, because the trace's parallel downloads aren't modelled.
         const bytes = request.transferSize ?? 0;
-        const floor =
-          bytes > 0 && bytes < MAX_FLOORED_BYTES
+        // Connection setup and server wait, before any bytes flow.
+        const latency =
+          bytes > 0
             ? simulatedTransferMs({
-                bytes,
+                bytes: 1,
                 rttMs: throttling.rttMs,
                 throughputKbps: throttling.throughputKbps,
                 serverLatencyMs:
@@ -373,7 +426,23 @@ export function createTimelineClock(input: ClockInput): TimelineClock {
                 h2: isMultiplexed(request.protocol),
               })
             : 0;
-        let end = Math.max(warpedEnd, start + floor);
+        return {
+          start,
+          bytes,
+          dataStartMs: start + latency,
+          weight: PRIORITY_WEIGHT[request.priority ?? ""] ?? 2,
+        };
+      });
+      const sharedEnds = shareBandwidth(
+        timed.map((entry) => entry ?? { dataStartMs: 0, bytes: 0, weight: 1 }),
+        bytesPerMs,
+      );
+
+      return requests.map((request, i) => {
+        const entry = timed[i];
+        if (!entry) return request;
+        const warpedEnd = mapTime(request.networkEndTime!);
+        let end = Math.max(warpedEnd, entry.start, entry.bytes > 0 ? sharedEnds[i]! : 0);
         if (
           request === documentRequest &&
           input.simulatedTtfb != null &&
@@ -383,7 +452,7 @@ export function createTimelineClock(input: ClockInput): TimelineClock {
         }
         return {
           ...request,
-          networkRequestTime: start,
+          networkRequestTime: entry.start,
           networkEndTime: end,
           ...(request.rendererStartTime != null
             ? { rendererStartTime: mapTime(request.rendererStartTime) }
@@ -395,11 +464,18 @@ export function createTimelineClock(input: ClockInput): TimelineClock {
       return tasks.map((task) => {
         const startTime = mapTime(task.startTime);
         const endTime = mapTime(task.startTime + task.duration);
-        return { ...task, startTime, duration: Math.max(0, endTime - startTime) };
+        return {
+          ...task,
+          startTime,
+          duration: Math.max(0, endTime - startTime),
+        };
       });
     },
     adjustScreenshots(frames) {
-      return frames.map((frame) => ({ ...frame, timing: mapFrameTime(frame.timing) }));
+      return frames.map((frame) => ({
+        ...frame,
+        timing: mapFrameTime(frame.timing),
+      }));
     },
     adjustLcpSubparts(subparts, parts) {
       const { simulatedTtfb, simulatedLcp, loadDelay, loadDuration } = parts;
@@ -457,7 +533,10 @@ export function createTimelineClock(input: ClockInput): TimelineClock {
           ];
         }
         const scale = budget / restTotal;
-        const scaled = rest.map((part) => ({ ...part, duration: part.duration * scale }));
+        const scaled = rest.map((part) => ({
+          ...part,
+          duration: part.duration * scale,
+        }));
         return [firstByte, ...scaled];
       }
 

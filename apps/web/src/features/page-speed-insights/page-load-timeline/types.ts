@@ -58,6 +58,8 @@ export type TimelineWaterfallBar = {
   priority?: string;
   /** Set on downloaded resources. */
   renderBlocking?: RenderBlockingStatus;
+  /** Render-blocking or on the critical request chain. */
+  criticalPath?: boolean;
   /** Set when the interpolated duration is shorter than the throttled link could carry these bytes. */
   linkWarning?: string;
   /** Main-thread task bars: short vs long coloring in WaterfallBarTrack. */
