@@ -73,12 +73,16 @@ type ClockInput = {
   simulatedFcp?: number;
   observedLcp?: number;
   simulatedLcp?: number;
+  observedSpeedIndex?: number;
+  simulatedSpeedIndex?: number;
   documentServerLatencyMs?: number;
 };
 
 export type TimelineClock = {
   throttling: SimulatedThrottling;
   mapTime: (observedMs: number) => number;
+  /** Like `mapTime`, anchored on Speed Index; use for visual milestones so they match frames. */
+  mapVisualTime: (observedMs: number) => number;
   adjustRequests: <T extends TimedRequest>(requests: T[]) => T[];
   adjustTasks: <T extends TimedTask>(tasks: T[]) => T[];
   adjustScreenshots: <T extends TimedFrame>(frames: T[]) => T[];
@@ -164,7 +168,10 @@ function pushKnot(knots: Anchor[], observed: number | undefined, simulated: numb
   knots.push({ observed, simulated });
 }
 
-function buildMapTime(input: ClockInput): (observedMs: number) => number {
+function buildMapTime(
+  input: ClockInput,
+  options: { forFrames?: boolean } = {},
+): (observedMs: number) => number {
   const knots: Anchor[] = [{ observed: 0, simulated: 0 }];
   const fcpAndLcpSeparated =
     input.observedFcp != null &&
@@ -174,6 +181,18 @@ function buildMapTime(input: ClockInput): (observedMs: number) => number {
   pushKnot(knots, input.observedTtfb, input.simulatedTtfb);
   pushKnot(knots, input.observedFcp, input.simulatedFcp);
   if (fcpAndLcpSeparated) pushKnot(knots, input.observedLcp, input.simulatedLcp);
+  // Frames show visual progress, so Speed Index is the right anchor for them.
+  // Without it the tail is stretched by the full CPU slowdown, which pushes
+  // late frames far past when the page actually finished painting.
+  const frameSpeedIndex = options.forFrames ? input.simulatedSpeedIndex : undefined;
+  if (options.forFrames) pushKnot(knots, input.observedSpeedIndex, frameSpeedIndex);
+  const speedIndexScale =
+    frameSpeedIndex != null && input.observedSpeedIndex
+      ? Math.min(
+          Math.max(frameSpeedIndex / input.observedSpeedIndex, 1),
+          Math.max(input.throttling.cpuSlowdownMultiplier, 1),
+        )
+      : undefined;
 
   const last = knots[knots.length - 1]!;
   const lcpSharesPaintTime =
@@ -218,7 +237,7 @@ function buildMapTime(input: ClockInput): (observedMs: number) => number {
       return simulatedLcp + (elapsed - observedBudget) * cpu;
     }
 
-    const tailScale = knots.length > 1 ? cpu : 1;
+    const tailScale = speedIndexScale ?? (knots.length > 1 ? cpu : 1);
     return last.simulated + (observedMs - last.observed) * tailScale;
   };
 }
@@ -299,12 +318,16 @@ export function isNavigationRedirect(statusCode: number | undefined): boolean {
 }
 
 export function createTimelineClock(input: ClockInput): TimelineClock {
-  const mapTime = buildMapTime(input);
+  // One clock for every observed time: interpolate between the simulated anchors
+  // (TTFB, FCP, LCP, Speed Index) instead of scaling by CPU slowdown.
+  const mapTime = buildMapTime(input, { forFrames: true });
+  const mapFrameTime = mapTime;
   const { throttling } = input;
 
   return {
     throttling,
     mapTime,
+    mapVisualTime: mapFrameTime,
     adjustRequests(requests) {
       const ordered = [...requests].sort(
         (a, b) => (a.networkRequestTime ?? 0) - (b.networkRequestTime ?? 0),
@@ -331,22 +354,7 @@ export function createTimelineClock(input: ClockInput): TimelineClock {
         if (request.networkRequestTime == null || request.networkEndTime == null) return request;
         const start = mapTime(request.networkRequestTime);
         const warpedEnd = mapTime(request.networkEndTime);
-        const bytes = request.transferSize ?? 0;
-        const cold = firstOfOrigin.has(request);
-        const lantern =
-          bytes > 0
-            ? simulatedTransferMs({
-                bytes,
-                rttMs: throttling.rttMs,
-                throughputKbps: throttling.throughputKbps,
-                serverLatencyMs:
-                  request === documentRequest ? (input.documentServerLatencyMs ?? 0) : 0,
-                cold,
-                ssl: isSecure(request.url, request.protocol),
-                h2: isMultiplexed(request.protocol),
-              })
-            : 0;
-        let end = Math.max(warpedEnd, start + lantern);
+        let end = Math.max(warpedEnd, start);
         if (
           request === documentRequest &&
           input.simulatedTtfb != null &&
@@ -365,31 +373,14 @@ export function createTimelineClock(input: ClockInput): TimelineClock {
       });
     },
     adjustTasks(tasks) {
-      const cpu = throttling.cpuSlowdownMultiplier;
-      const ordered = tasks
-        .map((task, index) => ({ task, index }))
-        .sort((a, b) => a.task.startTime - b.task.startTime || b.task.duration - a.task.duration);
-
-      const placed = tasks.slice();
-      let cursor = 0;
-      let observedFrontier = -Infinity;
-
-      for (const { task, index } of ordered) {
-        const mappedStart = mapTime(task.startTime);
-        const serial = task.startTime >= observedFrontier - 1;
-        const startTime = serial ? Math.max(mappedStart, cursor) : mappedStart;
-        const duration = task.duration * cpu;
-        if (serial) {
-          cursor = startTime + duration;
-          observedFrontier = task.startTime + task.duration;
-        }
-        placed[index] = { ...task, startTime, duration };
-      }
-
-      return placed;
+      return tasks.map((task) => {
+        const startTime = mapTime(task.startTime);
+        const endTime = mapTime(task.startTime + task.duration);
+        return { ...task, startTime, duration: Math.max(0, endTime - startTime) };
+      });
     },
     adjustScreenshots(frames) {
-      return frames.map((frame) => ({ ...frame, timing: mapTime(frame.timing) }));
+      return frames.map((frame) => ({ ...frame, timing: mapFrameTime(frame.timing) }));
     },
     adjustLcpSubparts(subparts, parts) {
       const { simulatedTtfb, simulatedLcp, loadDelay, loadDuration } = parts;

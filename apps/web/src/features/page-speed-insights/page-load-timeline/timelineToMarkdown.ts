@@ -114,6 +114,7 @@ export function timelineToMarkdown(timeline: PageLoadTimeline): string {
   const header = [`# Page load timeline — ${label}`];
   if (timeline.simulationLabel) {
     header.push(`Times include simulated ${timeline.simulationLabel}`);
+    if (timeline.timesNote) header.push(timeline.timesNote);
   }
 
   if (timeline.events.length === 0) {

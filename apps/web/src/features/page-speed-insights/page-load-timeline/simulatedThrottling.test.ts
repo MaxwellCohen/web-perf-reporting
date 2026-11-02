@@ -67,7 +67,7 @@ describe("createTimelineClock", () => {
     expect(clock.mapTime(8000)).toBeGreaterThan(19463);
   });
 
-  it("multiplies main-thread tasks by the CPU slowdown and stretches large responses", () => {
+  it("interpolates main-thread tasks and requests between simulated anchors", () => {
     const clock = createTimelineClock({
       throttling,
       observedTtfb: 95,
@@ -80,8 +80,8 @@ describe("createTimelineClock", () => {
     });
 
     const [task] = clock.adjustTasks([{ startTime: 1300, duration: 100 }]);
-    expect(task?.duration).toBe(400);
-    expect(task!.startTime).toBeGreaterThan(1300);
+    expect(task!.startTime).toBeCloseTo(clock.mapTime(1300), 5);
+    expect(task!.startTime + task!.duration).toBeCloseTo(clock.mapTime(1400), 5);
 
     const [image] = clock.adjustRequests([
       {
@@ -92,7 +92,8 @@ describe("createTimelineClock", () => {
         protocol: "h2",
       },
     ]);
-    expect(image!.networkEndTime! - image!.networkRequestTime!).toBeGreaterThan(371 - 345);
+    expect(image!.networkRequestTime).toBeCloseTo(clock.mapTime(345), 5);
+    expect(image!.networkEndTime).toBeCloseTo(clock.mapTime(371), 5);
   });
 
   it("rebuilds LCP subparts from the simulated breakdown", () => {
@@ -156,7 +157,7 @@ describe("createTimelineClock", () => {
     expect(parts[1]?.duration).toBeCloseTo(6980 - 601, 5);
   });
 
-  it("does not slow CPU tasks on the desktop preset", () => {
+  it("maps desktop tasks onto the same clock as everything else", () => {
     const desktop = resolveSimulatedThrottling({ formFactor: "desktop" })!;
     const clock = createTimelineClock({
       throttling: desktop,
@@ -167,35 +168,8 @@ describe("createTimelineClock", () => {
       observedLcp: 661,
       simulatedLcp: 1743,
     });
-    expect(clock.adjustTasks([{ startTime: 400, duration: 80 }])[0]?.duration).toBe(80);
+    const [task] = clock.adjustTasks([{ startTime: 400, duration: 80 }]);
+    expect(task!.startTime + task!.duration).toBeCloseTo(clock.mapTime(480), 5);
     expect(clock.mapTime(661)).toBeCloseTo(614, 5);
-
-    const [first, second] = clock.adjustTasks([
-      { startTime: 400, duration: 80 },
-      { startTime: 480, duration: 80 },
-    ]);
-    expect(second!.startTime).toBeGreaterThanOrEqual(first!.startTime + first!.duration);
-  });
-
-  it("queues the next main-thread task when CPU slowdown outgrows the trace gap", () => {
-    const clock = createTimelineClock({
-      throttling,
-      observedTtfb: 26.423,
-      simulatedTtfb: 601,
-      observedFcp: 2429,
-      simulatedFcp: 2265,
-      observedLcp: 2429,
-      simulatedLcp: 6976,
-    });
-
-    const [first, second] = clock.adjustTasks([
-      { startTime: 900.034, duration: 98.597 },
-      { startTime: 1072.601, duration: 353.231 },
-    ]);
-
-    expect(first!.duration).toBeCloseTo(394.388, 3);
-    expect(second!.duration).toBeCloseTo(1412.924, 3);
-    expect(clock.mapTime(1072.601)).toBeLessThan(first!.startTime + first!.duration);
-    expect(second!.startTime).toBeGreaterThanOrEqual(first!.startTime + first!.duration);
   });
 });

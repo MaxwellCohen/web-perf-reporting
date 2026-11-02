@@ -303,6 +303,9 @@ function WaterfallRows({
                 {bar.coverage ? (
                   <p className="text-[11px] tabular-nums text-muted-foreground">{bar.coverage}</p>
                 ) : null}
+                {bar.linkWarning ? (
+                  <p className="text-[11px] text-amber-600 dark:text-amber-400">{bar.linkWarning}</p>
+                ) : null}
               </div>
               <span className="shrink-0 pt-0.5 text-right text-[11px] tabular-nums text-muted-foreground">
                 {barTimingLabel(bar, table?.rows[index])}
@@ -754,7 +757,13 @@ function TaskFilters({
   );
 }
 
-function TimelineLegend({ simulationLabel }: { simulationLabel?: string }) {
+function TimelineLegend({
+  simulationLabel,
+  timesNote,
+}: {
+  simulationLabel?: string;
+  timesNote?: string;
+}) {
   return (
     <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground sm:text-sm">
       <span className="inline-flex items-center gap-1">
@@ -770,6 +779,7 @@ function TimelineLegend({ simulationLabel }: { simulationLabel?: string }) {
       {simulationLabel ? (
         <span className="text-muted-foreground/80">Times include simulated {simulationLabel}</span>
       ) : null}
+      {timesNote ? <span className="basis-full text-muted-foreground/80">{timesNote}</span> : null}
     </div>
   );
 }
@@ -793,7 +803,7 @@ function VerticalTimeline({
 
   return (
     <div className="flex flex-col gap-4" data-axis-end-ms={axisEndMs}>
-      {showLegend ? <TimelineLegend simulationLabel={timeline.simulationLabel} /> : null}
+      {showLegend ? <TimelineLegend simulationLabel={timeline.simulationLabel} timesNote={timeline.timesNote} /> : null}
 
       <UnifiedWaterfall
         load={load}

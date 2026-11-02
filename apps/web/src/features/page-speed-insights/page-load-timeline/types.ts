@@ -58,6 +58,8 @@ export type TimelineWaterfallBar = {
   priority?: string;
   /** Set on downloaded resources. */
   renderBlocking?: RenderBlockingStatus;
+  /** Set when the interpolated duration is shorter than the throttled link could carry these bytes. */
+  linkWarning?: string;
   /** Main-thread task bars: short vs long coloring in WaterfallBarTrack. */
   taskKind?: "short" | "long";
   /** bootup-time CPU for this script URL. */
@@ -127,4 +129,6 @@ export type PageLoadTimeline = {
   axisEndMs: number;
   /** Set when times were moved onto Lighthouse's simulated CPU and network. */
   simulationLabel?: string;
+  /** Why request durations can't be read as throttled download times. Set with `simulationLabel`. */
+  timesNote?: string;
 };

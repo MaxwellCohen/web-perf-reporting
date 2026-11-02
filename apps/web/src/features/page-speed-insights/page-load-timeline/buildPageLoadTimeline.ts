@@ -8,6 +8,9 @@ export type PageLoadTimelineBundle = {
   timeline: PageLoadTimeline;
 };
 
+const TIMES_NOTE =
+  "Times are interpolated between Lighthouse's simulated FCP, LCP and Speed Index. Request durations come from the trace's fast network and are not limited by the throttled bandwidth.";
+
 export function buildPageLoadTimelineBundle(
   source: InsightsContextItem,
 ): PageLoadTimelineBundle | null {
@@ -22,6 +25,7 @@ export function buildPageLoadTimelineBundle(
       events,
       axisEndMs: axisEndMs(load, events),
       simulationLabel: load.simulationLabel,
+      timesNote: load.simulationLabel ? TIMES_NOTE : undefined,
     },
   };
 }

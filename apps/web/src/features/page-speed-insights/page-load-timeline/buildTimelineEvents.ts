@@ -81,6 +81,51 @@ function requestWaterfallBar(
   };
 }
 
+/** Seconds-of-transfer a request needs on the simulated link, ignoring latency and sharing. */
+function linkTransferMs(bytes: number, throughputKbps: number): number {
+  return ((bytes * 8) / (throughputKbps * 1024)) * 1000;
+}
+
+/** Flags bars whose interpolated duration is faster than the throttled link could deliver. */
+function linkWarning(request: CombinedRequest, throughputKbps: number | undefined) {
+  const bytes = request.transferSize ?? 0;
+  if (!throughputKbps || bytes < 50 * 1024) return undefined;
+  const fullMs = linkTransferMs(bytes, throughputKbps);
+  const shownMs = request.networkEndTime - request.networkRequestTime;
+  if (fullMs - shownMs < 500 || shownMs > fullMs * 0.8) return undefined;
+  return `${formatBytes(bytes)} would take about ${formatMs(fullMs)} on the throttled link; the bar shows ${formatMs(shownMs)} from the trace.`;
+}
+
+function transferWeightEvent(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent | null {
+  const kbps = load.simulatedThroughputKbps;
+  if (!kbps) return null;
+  const sized = load.requests.filter((r) => (r.transferSize ?? 0) > 0);
+  const totalBytes = sized.reduce((sum, r) => sum + (r.transferSize ?? 0), 0);
+  const fullMs = linkTransferMs(totalBytes, kbps);
+  const traceEnd = load.traceEnd ?? load.load ?? 0;
+  if (totalBytes === 0 || fullMs < Math.max(traceEnd * 1.5, 5000)) return null;
+
+  const largest = [...sized]
+    .sort((a, b) => (b.transferSize ?? 0) - (a.transferSize ?? 0))
+    .slice(0, 3);
+  const largestBytes = largest.reduce((sum, r) => sum + (r.transferSize ?? 0), 0);
+  const timeMs = load.fcp ?? load.dcl ?? 0;
+  return event(
+    {
+      id: "net-weight",
+      title: "Transfer weight",
+      detail: `${formatBytes(totalBytes)} transferred; about ${formatMs(fullMs)} of pure transfer at ${load.simulationLabel ?? "the throttled link"}, versus ${formatMs(traceEnd)} on this timeline. The ${largest.length} largest requests are ${formatBytes(largestBytes)}.`,
+      timeMs,
+      phaseId: "subresources",
+      kind: "fact",
+      hasTimestamp: false,
+      rating: "poor",
+      evidence: largest.map((r) => `${formatBytes(r.transferSize ?? 0)} ${r.url}`),
+    },
+    bounds,
+  );
+}
+
 function pluralResourceTitle(resourceType: string, count: number): string {
   const downloaded =
     resourceType === "Script" || resourceType === "Stylesheet" ? " downloaded" : "";
@@ -364,6 +409,7 @@ function networkEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEvent[
               coverage: coverageLabel(r),
               priority: r.priority,
               renderBlocking: r.renderBlocking,
+              linkWarning: linkWarning(r, load.simulatedThroughputKbps),
             }),
           ),
           table: {
@@ -757,9 +803,20 @@ function milestoneEvents(load: CombinedLoad, bounds: PhaseBound[]): TimelineEven
     "subresources",
   );
 
-  mark(load.interactive, "after-tti", "TTI (lab)", "Time to Interactive", "afterLoad");
+  mark(
+    load.interactive,
+    "after-tti",
+    load.simulationLabel ? "TTI (simulated)" : "TTI (lab)",
+    load.simulationLabel
+      ? "Lighthouse's simulated Time to Interactive, a conservative estimate not derived from this trace, at"
+      : "Time to Interactive",
+    "afterLoad",
+  );
 
   mark(load.traceEnd, "after-trace-end", "Trace end", "Performance trace ends at", "afterLoad");
+
+  const weight = transferWeightEvent(load, bounds);
+  if (weight) events.push(weight);
 
   const preconnect = preconnectEvent(load.preconnectedText, load.preconnectCandidates, bounds);
   if (preconnect) events.push(preconnect);
