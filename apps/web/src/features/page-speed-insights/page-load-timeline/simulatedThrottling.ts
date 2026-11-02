@@ -319,19 +319,20 @@ export function isNavigationRedirect(statusCode: number | undefined): boolean {
 
 type TransferJob = { dataStartMs: number; bytes: number; weight: number };
 
-/** Rough HTTP/2 stream weights, so High-priority files aren't starved by Low ones. */
+/** Chrome network priority → rank. Higher ranks are served first on a shared link. */
 const PRIORITY_WEIGHT: Record<string, number> = {
-  VeryHigh: 8,
-  High: 4,
+  VeryHigh: 4,
+  High: 3,
   Medium: 2,
   Low: 1,
-  VeryLow: 0.5,
+  VeryLow: 0,
 };
 
 /**
- * Finish times when downloads split the link: while N transfers overlap, each
- * gets a share of the throughput by priority weight. Keeps big files from looking instant just because
- * the fast trace network finished them quickly.
+ * Finish times on one shared link. Chrome over HTTP/2 serves higher-priority
+ * streams first, so only the highest-priority active tier receives bandwidth
+ * (split evenly); lower tiers wait. That is why a Low-priority 6 MB image
+ * does not slow a High-priority font, while the image itself finishes last.
  */
 function shareBandwidth(jobs: TransferJob[], bytesPerMs: number): number[] {
   const ends = jobs.map((job) => job.dataStartMs);
@@ -352,11 +353,16 @@ function shareBandwidth(jobs: TransferJob[], bytesPerMs: number): number[] {
       next++;
     }
 
-    let totalWeight = 0;
-    for (const index of active.keys()) totalWeight += jobs[index]!.weight;
-    const rateOf = (index: number) => (bytesPerMs * jobs[index]!.weight) / totalWeight;
+    let topRank = -Infinity;
+    for (const index of active.keys()) topRank = Math.max(topRank, jobs[index]!.weight);
+    let served = 0;
+    for (const index of active.keys()) if (jobs[index]!.weight === topRank) served++;
+    const rateOf = (index: number) => (jobs[index]!.weight === topRank ? bytesPerMs / served : 0);
     let soonest = Infinity;
-    for (const [index, remaining] of active) soonest = Math.min(soonest, remaining / rateOf(index));
+    for (const [index, remaining] of active) {
+      const rate = rateOf(index);
+      if (rate > 0) soonest = Math.min(soonest, remaining / rate);
+    }
     const nextArrival = next < pending.length ? pending[next]!.dataStartMs - time : Infinity;
     const step = Math.min(soonest, nextArrival);
 
