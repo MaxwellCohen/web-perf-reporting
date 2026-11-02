@@ -36,6 +36,8 @@ export type LanternGraphInput = {
   tasks: LanternInputTask[];
   /** Server think time for the main document. */
   documentServerResponseMs?: number;
+  /** URLs Lighthouse reported as render-blocking; replaces the priority guess when given. */
+  renderBlockingUrls?: Set<string>;
 };
 
 export type LanternGraph = {
@@ -62,14 +64,23 @@ function asPriority(priority: string): SimPriority {
     : "Medium";
 }
 
-/** Lantern's NetworkNode.hasRenderBlockingPriority() when the trace has no blocking flag. */
-function hasRenderBlockingPriority(node: SimNode): boolean {
-  const request = node.request!;
-  if (request.priority === "VeryHigh") return true;
-  return (
-    request.priority === "High" &&
-    (request.resourceType === "Script" || request.resourceType === "Document")
-  );
+const BLOCKING_TYPES = new Set(["Document", "Stylesheet", "Script"]);
+
+/**
+ * Lantern's NetworkNode.hasRenderBlockingPriority(). Reports don't keep the
+ * trace's blocking flag, so use Lighthouse's render-blocking list when we have
+ * it, and otherwise the priority rule limited to the types that can block paint
+ * (fonts are VeryHigh but never block first paint).
+ */
+function makeBlockingTest(renderBlockingUrls: Set<string> | undefined) {
+  return (node: SimNode): boolean => {
+    const request = node.request!;
+    if (request.isMainDocument) return true;
+    if (!BLOCKING_TYPES.has(request.resourceType)) return false;
+    if (renderBlockingUrls) return renderBlockingUrls.has(request.url);
+    if (request.priority === "VeryHigh") return true;
+    return request.priority === "High" && request.resourceType === "Script";
+  };
 }
 
 export function buildGraph(input: LanternGraphInput): LanternGraph {
@@ -125,8 +136,7 @@ export function buildGraph(input: LanternGraphInput): LanternGraph {
     if (!dependency.isDependentOn(node)) node.addDependency(dependency);
   });
 
-  cpuNodes.forEach((node, i) => {
-    if (i > 0) node.addDependency(cpuNodes[i - 1]!);
+  cpuNodes.forEach((node) => {
     if (node.startTime >= root.startTime && !root.isDependentOn(node)) node.addDependency(root);
   });
 
@@ -176,6 +186,8 @@ function isNotLowPriorityImage(node: SimNode): boolean {
 export type LanternObserved = {
   fcpMs: number;
   lcpMs?: number;
+  /** True when the LCP element is text, so LCP follows the FCP graphs. */
+  lcpIsText?: boolean;
 };
 
 export type LanternEstimate = {
@@ -213,11 +225,12 @@ export function estimateMetrics(
       options,
     );
 
+  const blocking = makeBlockingTest(input.renderBlockingUrls);
   const optimisticFcp = run(
     observed.fcpMs,
-    (n) => hasRenderBlockingPriority(n) && n.request?.resourceType !== "Script",
+    (n) => blocking(n) && n.request?.resourceType !== "Script",
   );
-  const pessimisticFcp = run(observed.fcpMs, hasRenderBlockingPriority);
+  const pessimisticFcp = run(observed.fcpMs, blocking);
   const fcp = {
     optimistic: optimisticFcp.timeInMs,
     pessimistic: pessimisticFcp.timeInMs,
@@ -225,7 +238,7 @@ export function estimateMetrics(
   };
 
   if (observed.lcpMs == null) return { fcp };
-  const textLcp = Math.abs(observed.lcpMs - observed.fcpMs) < 1;
+  const textLcp = Math.abs(observed.lcpMs - observed.fcpMs) < 1 && (observed.lcpIsText ?? true);
   if (textLcp) return { fcp, lcp: fcp };
 
   const lastNotOffscreen = (nodeTimings: Map<SimNode, { endTime: number }>) =>
