@@ -75,7 +75,7 @@ describe("usePageSpeedInsightsQueryByPublicId", () => {
     const { getLatest } = await renderHookProbe("public-2");
 
     expect(screen.getByTestId("hook-result")).toBeInTheDocument();
-    expect(getLatest()).toEqual({ status: "failed" });
+    expect(getLatest()).toEqual({ status: "failed", reason: "error" });
   });
 
   it("returns failed status with error message from JSON 500 body", async () => {
@@ -85,7 +85,8 @@ describe("usePageSpeedInsightsQueryByPublicId", () => {
       text: async () =>
         JSON.stringify({
           status: "failed",
-          error: "Lighthouse could not load the page.",
+          reason: "job",
+      error: "Lighthouse could not load the page.",
           url: "https://example.com/page",
         }),
     } as Response);
@@ -95,6 +96,7 @@ describe("usePageSpeedInsightsQueryByPublicId", () => {
     expect(screen.getByTestId("hook-result")).toBeInTheDocument();
     expect(getLatest()).toEqual({
       status: "failed",
+      reason: "job",
       error: "Lighthouse could not load the page.",
       url: "https://example.com/page",
     });
@@ -111,6 +113,7 @@ describe("usePageSpeedInsightsQueryByPublicId", () => {
     expect(screen.getByTestId("hook-result")).toBeInTheDocument();
     expect(getLatest()).toEqual({
       status: "failed",
+      reason: "error",
       error: "The PageSpeed Insights response could not be parsed.",
     });
   });

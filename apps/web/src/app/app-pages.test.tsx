@@ -36,10 +36,6 @@ vi.mock("@/lib/services/pageSpeedInsights.service", () => ({
   requestPageSpeedData: (value: string) => requestPageSpeedDataMock(value),
 }));
 
-vi.mock("@/components/lh/LhInputForm", () => ({
-  LhInputForm: () => <div>Mock LH input form</div>,
-}));
-
 vi.mock("@/components/viewer/ViewerPage", () => ({
   default: () => <div>Mock viewer page</div>,
 }));
@@ -64,7 +60,6 @@ vi.mock("@/app/page-speed/[publicId]/PageSpeedInsightsDashboardWrapper", () => (
 
 import HistoricalCruxPage from "@/app/historical-crux/page";
 import Home from "@/app/page";
-import LhPage from "@/app/lh/page";
 import LatestCruxPage from "@/app/latest-crux/page";
 import PageSpeedLayout from "@/app/page-speed/layout";
 import PageSpeedPage from "@/app/page-speed/page";
@@ -83,8 +78,7 @@ describe("app page coverage smoke tests", () => {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it("renders the lightweight lh and viewer pages", async () => {
-    render(await LhPage());
+  it("renders the viewer page", async () => {
     const { container } = render(await ViewerPage());
 
     expect(container.firstChild).toMatchSnapshot();
