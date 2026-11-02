@@ -11,6 +11,7 @@ import type {
   CriticalChainNode,
   ScriptCpu,
 } from "@/features/page-speed-insights/shared/scriptResourceFacts";
+import { pinFrameChangeTimes } from "./pinFrameTimes";
 import type { LcpSegment, Rating, RenderBlockingStatus, ScreenshotFrame } from "./types";
 
 type MetricsItem = Record<string, unknown>;
@@ -938,9 +939,11 @@ export function collectTimelineSources(source: InsightsContextItem): CombinedLoa
   const tracedTtfb = clock ? undefined : traceTimeToFirstByte(metrics, documentRaw, serverThink);
   const ttfb = clock ? (simulatedTtfb ?? mapMs(observedTtfb)) : tracedTtfb?.timeMs;
   const ttfbObserved = !clock && tracedTtfb?.observed === true;
-  const screenshots = clock
-    ? clock.adjustScreenshots(filmstripFrames(audits))
-    : filmstripFrames(audits);
+  const pinnedFrames = pinFrameChangeTimes(filmstripFrames(audits), {
+    first: getNumber(metrics.observedFirstVisualChange),
+    last: getNumber(metrics.observedLastVisualChange),
+  });
+  const screenshots = clock ? clock.adjustScreenshots(pinnedFrames) : pinnedFrames;
   const tasks = longTasks(audits, clock);
   const timings = userTimings(audits).map((timing) => {
     const startTime = mapMs(timing.startTime) ?? timing.startTime;

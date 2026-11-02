@@ -1,4 +1,6 @@
+import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
+import { openInLighthouseViewer } from "@/lib/viewer/openInLighthouseViewer";
 import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
 
 type PageSpeedInsightsCopyButtonsProps = {
@@ -28,6 +30,20 @@ export function PageSpeedInsightsCopyButtons({
           <span className="truncate">{item.label}</span>
         </CopyButton>
       ))}
+      {items.map((item) =>
+        item.item.lighthouseResult ? (
+          <Button
+            key={`lh-${item.label}`}
+            type="button"
+            variant="outline"
+            size="lg"
+            className="min-w-0 max-w-full"
+            onClick={() => openInLighthouseViewer(item.item.lighthouseResult)}
+          >
+            <span className="truncate">Open {item.label} in Lighthouse Viewer</span>
+          </Button>
+        ) : null,
+      )}
     </div>
   );
 }
