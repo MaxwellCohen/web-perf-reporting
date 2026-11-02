@@ -1,10 +1,16 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { LoadingMessage } from "@/components/common/LoadingMessage";
-import { HistoricalDashboard } from "@/components/historical/HistoricalDashboard";
 import type { DeviceType, Scope } from "@/components/latest-crux/types";
 import { useCruxJob } from "@/lib/crux/useCruxJob";
 import type { CruxReport } from "@/lib/schema";
+
+const HistoricalDashboard = dynamic(
+  () =>
+    import("@/components/historical/HistoricalDashboard").then((m) => m.HistoricalDashboard),
+  { ssr: false, loading: () => <LoadingMessage variant="crux" /> },
+);
 
 export function HistoricalChartsSection({ url }: { url: string }) {
   const { snapshot, error } = useCruxJob("history", url);

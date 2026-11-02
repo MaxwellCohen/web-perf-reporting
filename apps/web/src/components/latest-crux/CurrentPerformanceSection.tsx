@@ -1,7 +1,7 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { LoadingMessage } from "@/components/common/LoadingMessage";
-import { CurrentPerformanceDashboard } from "@/components/latest-crux/PerformanceDashboard";
 import type { CruxReportMap } from "@/components/latest-crux/types";
 import { useCruxJob } from "@/lib/crux/useCruxJob";
 import type { CruxReport } from "@/lib/schema";
@@ -13,6 +13,14 @@ function reportFromSlots(slots: { key: string; report?: unknown }[]): CruxReport
   }
   return map;
 }
+
+const CurrentPerformanceDashboard = dynamic(
+  () =>
+    import("@/components/latest-crux/PerformanceDashboard").then(
+      (m) => m.CurrentPerformanceDashboard,
+    ),
+  { ssr: false, loading: () => <LoadingMessage variant="crux" /> },
+);
 
 export function CurrentPerformanceSection({ url }: { url: string }) {
   const { snapshot, error } = useCruxJob("current", url);
