@@ -1,15 +1,17 @@
 "use client";
 
 import type { LhJsonFileEntry, LhJsonTextEntry } from "@/components/lh/types";
-import { LhFileInput } from "@/components/lh/inputs/LhFileInput";
-import { LhTextInput } from "@/components/lh/inputs/LhTextInput";
-import { PsiShareUrlInput } from "@/components/viewer/PsiShareUrlInput";
 import type { ViewerRunMethod } from "@/components/viewer/collectViewerReports";
+import {
+  detectRunInput,
+  validateRun,
+} from "@/components/viewer/viewerRunValidation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Code, FileJson, Globe, X } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import { Check, FileJson, X } from "lucide-react";
+import { useRef, useState, type ClipboardEvent, type DragEvent } from "react";
 
 export type ViewerRunState = {
   id: string;
@@ -21,7 +23,9 @@ export type ViewerRunState = {
 };
 
 /** Stable IDs for SSR; avoid module counters (they diverge across server/client). */
-export function createEmptyViewerRun(overrides: Partial<ViewerRunState> = {}): ViewerRunState {
+export function createEmptyViewerRun(
+  overrides: Partial<ViewerRunState> = {},
+): ViewerRunState {
   return {
     method: "psi",
     label: "",
@@ -34,10 +38,16 @@ export function createEmptyViewerRun(overrides: Partial<ViewerRunState> = {}): V
   };
 }
 
+function rawValue(run: ViewerRunState) {
+  return run.method === "psi" ? run.psiUrl : (run.jsonInputs[0]?.content ?? "");
+}
+
 type ViewerRunSlotProps = {
   run: ViewerRunState;
   onChange: (run: ViewerRunState) => void;
-  title: string;
+  /** Called with the updated run after a paste or drop, so the page can auto-submit. */
+  onAutoSubmit?: (run: ViewerRunState) => void;
+  title?: string;
   labelPlaceholder: string;
   idPrefix: string;
   onRemove?: () => void;
@@ -46,92 +56,191 @@ type ViewerRunSlotProps = {
 export function ViewerRunSlot({
   run,
   onChange,
+  onAutoSubmit,
   title,
   labelPlaceholder,
   idPrefix,
   onRemove,
 }: ViewerRunSlotProps) {
+  const [showLabel, setShowLabel] = useState(Boolean(run.label));
+  const [dragging, setDragging] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const validation = validateRun(run);
+
+  const withText = (raw: string): ViewerRunState => {
+    const kind = detectRunInput(raw);
+    if (kind === "text") {
+      return {
+        ...run,
+        method: "text",
+        psiUrl: "",
+        jsonInputs: [{ name: "", content: raw }],
+      };
+    }
+    return {
+      ...run,
+      method: "psi",
+      psiUrl: raw,
+      jsonInputs: [{ name: "", content: "" }],
+    };
+  };
+
+  const withFiles = (files: File[]): ViewerRunState => ({
+    ...run,
+    method: "file",
+    jsonFiles: files.map((file) => ({
+      name: file.name.replace(/\.[^/.]+$/, ""),
+      file,
+    })),
+  });
+
+  const handlePaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
+    const next = withText(event.clipboardData.getData("text"));
+    if (validateRun(next).status === "valid") onAutoSubmit?.(next);
+  };
+
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setDragging(false);
+    const files = Array.from(event.dataTransfer.files);
+    if (!files.length) return;
+    const next = withFiles(files);
+    onChange(next);
+    onAutoSubmit?.(next);
+  };
+
   const labelId = `${idPrefix}run-label`;
+  const inputId = `${idPrefix}run-input`;
 
   return (
-    <div className="space-y-4 rounded-lg border p-4">
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-sm font-medium">{title}</p>
+    <div className="space-y-2 rounded-lg border p-3">
+      <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+        <span className="flex items-center gap-2">
+          {title ? (
+            <b className="font-semibold text-foreground">{title}</b>
+          ) : null}
+          {!showLabel ? (
+            <button
+              type="button"
+              className="underline"
+              onClick={() => setShowLabel(true)}
+            >
+              + Add label
+            </button>
+          ) : null}
+        </span>
         {onRemove ? (
           <Button
             type="button"
             variant="ghost"
             size="icon"
-            className="h-8 w-8 shrink-0"
+            className="h-6 w-6"
             onClick={onRemove}
-            aria-label={`Remove ${title}`}
+            aria-label={`Remove ${title ?? "run"}`}
           >
             <X className="h-4 w-4" />
           </Button>
         ) : null}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor={labelId}>Run label (optional)</Label>
+      {showLabel ? (
         <Input
           id={labelId}
+          aria-label="Run label (optional)"
           type="text"
           placeholder={labelPlaceholder}
           value={run.label}
           onChange={(event) => onChange({ ...run, label: event.target.value })}
         />
+      ) : null}
+
+      <div
+        onDragOver={(event) => {
+          event.preventDefault();
+          setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={handleDrop}
+        className={cn(
+          "rounded-lg border-2 border-dashed p-3",
+          dragging && "border-primary",
+          validation.status === "valid" && "border-solid border-green-600",
+          validation.status === "invalid" && "border-solid border-destructive",
+        )}
+      >
+        {run.method === "file" && run.jsonFiles.length ? (
+          <div className="flex items-center justify-between gap-2 text-sm">
+            <span className="flex items-center gap-2 truncate">
+              <FileJson size={16} />
+              {run.jsonFiles.map((entry) => entry.file.name).join(", ")}
+            </span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              aria-label="Clear file"
+              onClick={() => onChange({ ...run, method: "psi", jsonFiles: [] })}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <>
+            <Textarea
+              id={inputId}
+              aria-label="PSI URL, JSON, or file"
+              rows={2}
+              className="resize-none border-0 p-0 font-mono text-sm shadow-none focus-visible:ring-0"
+              placeholder="Paste a PSI URL or JSON, or drop a .json file…"
+              value={rawValue(run)}
+              onChange={(event) => onChange(withText(event.target.value))}
+              onPaste={handlePaste}
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Type is detected automatically ·{" "}
+              <button
+                type="button"
+                className="underline"
+                onClick={() => fileRef.current?.click()}
+              >
+                Choose file
+              </button>
+            </p>
+          </>
+        )}
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".json,application/json"
+          multiple
+          hidden
+          aria-label="Upload JSON Files"
+          onChange={(event) => {
+            const files = Array.from(event.target.files ?? []);
+            if (files.length) onChange(withFiles(files));
+          }}
+        />
       </div>
 
-      <Tabs
-        value={run.method}
-        onValueChange={(method) => onChange({ ...run, method: method as ViewerRunMethod })}
-      >
-        <TabsList className="mb-4 grid grid-cols-3">
-          <TabsTrigger value="psi" className="flex items-center gap-2">
-            <Globe size={16} />
-            <span>PSI share URL</span>
-          </TabsTrigger>
-          <TabsTrigger value="file" className="flex items-center gap-2">
-            <FileJson size={16} />
-            <span>Upload JSON</span>
-          </TabsTrigger>
-          <TabsTrigger value="text" className="flex items-center gap-2">
-            <Code size={16} />
-            <span>Paste JSON</span>
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="psi">
-          <PsiShareUrlInput
-            idPrefix={idPrefix}
-            psiShareUrl={run.psiUrl}
-            setPsiShareUrl={(url) => onChange({ ...run, psiUrl: url })}
-          />
-        </TabsContent>
-        <TabsContent value="file">
-          <LhFileInput
-            idPrefix={idPrefix}
-            jsonFiles={run.jsonFiles}
-            setJsonFiles={(updater) =>
-              onChange({
-                ...run,
-                jsonFiles: typeof updater === "function" ? updater(run.jsonFiles) : updater,
-              })
-            }
-          />
-        </TabsContent>
-        <TabsContent value="text">
-          <LhTextInput
-            idPrefix={idPrefix}
-            jsonInputs={run.jsonInputs}
-            setJsonInputs={(updater) =>
-              onChange({
-                ...run,
-                jsonInputs: typeof updater === "function" ? updater(run.jsonInputs) : updater,
-              })
-            }
-          />
-        </TabsContent>
-      </Tabs>
+      {validation.status !== "empty" ? (
+        <p
+          role="status"
+          className={cn(
+            "flex items-center gap-1 text-xs",
+            validation.status === "valid"
+              ? "text-green-600"
+              : "text-destructive",
+          )}
+        >
+          {validation.status === "valid" ? (
+            <Check className="h-3 w-3" />
+          ) : (
+            <X className="h-3 w-3" />
+          )}
+          {validation.message}
+        </p>
+      ) : null}
     </div>
   );
 }
