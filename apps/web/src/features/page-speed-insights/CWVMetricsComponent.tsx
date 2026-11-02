@@ -18,6 +18,7 @@ import {
   FullWidthRow,
   SectionGrid,
 } from "@/features/page-speed-insights/shared/MetricsSectionLayout";
+import { FieldVsLabExplainer } from "@/features/page-speed-insights/FieldVsLabExplainer";
 import { FcpScreenshotCard } from "@/features/page-speed-insights/FcpScreenshotCard";
 import { LcpElementSummary } from "@/features/page-speed-insights/LcpElementSummary";
 import {
@@ -236,6 +237,7 @@ function CwvMetricsSummary({ sources }: { sources: MetricAuditSource[] }) {
       <AccordionSectionTitleTrigger>Core Web Vitals Summary</AccordionSectionTitleTrigger>
       {/* Cards subgrid these rows, so row gaps live on the cards (`mb-2`) to keep empty rows flat. */}
       <AccordionContent className="-mx-2 grid max-w-full grid-cols-1 gap-x-2 gap-y-0 min-[22rem]:grid-cols-[repeat(auto-fit,minmax(14rem,1fr))]">
+        <FieldVsLabExplainer />
         {metrics.map((metric) => (
           <MetricSummaryCard
             key={metric.auditId}
