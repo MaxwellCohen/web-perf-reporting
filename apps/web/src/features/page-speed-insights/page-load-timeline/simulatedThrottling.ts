@@ -4,11 +4,10 @@
  * throughput, and CPU slowdown. This module moves timeline timestamps onto
  * that same clock.
  *
- * Paint milestones use Lighthouse's simulated values. Other times are
- * interpolated between those anchors. Network bars are at least as long as a
- * TCP slow-start estimate, and observed main-thread tasks are multiplied by
- * the CPU slowdown. A task that already finished before the next one started
- * on the trace stays in front of it, so slowed tasks queue instead of overlapping.
+ * Paint milestones use Lighthouse's simulated values. Every other time, including
+ * main-thread tasks, is interpolated between those anchors. Request durations are
+ * at least connection setup plus transfer on the throttled link, with the
+ * throughput split between downloads that overlap.
  */
 
 const TCP_SEGMENT_SIZE = 1460;
@@ -48,6 +47,7 @@ type TimedRequest = {
   statusCode?: number;
   resourceType?: string;
   mimeType?: string;
+  priority?: string;
 };
 
 type TimedTask = {
@@ -73,12 +73,16 @@ type ClockInput = {
   simulatedFcp?: number;
   observedLcp?: number;
   simulatedLcp?: number;
+  observedSpeedIndex?: number;
+  simulatedSpeedIndex?: number;
   documentServerLatencyMs?: number;
 };
 
 export type TimelineClock = {
   throttling: SimulatedThrottling;
   mapTime: (observedMs: number) => number;
+  /** Like `mapTime`, anchored on Speed Index; use for visual milestones so they match frames. */
+  mapVisualTime: (observedMs: number) => number;
   adjustRequests: <T extends TimedRequest>(requests: T[]) => T[];
   adjustTasks: <T extends TimedTask>(tasks: T[]) => T[];
   adjustScreenshots: <T extends TimedFrame>(frames: T[]) => T[];
@@ -164,7 +168,10 @@ function pushKnot(knots: Anchor[], observed: number | undefined, simulated: numb
   knots.push({ observed, simulated });
 }
 
-function buildMapTime(input: ClockInput): (observedMs: number) => number {
+function buildMapTime(
+  input: ClockInput,
+  options: { forFrames?: boolean } = {},
+): (observedMs: number) => number {
   const knots: Anchor[] = [{ observed: 0, simulated: 0 }];
   const fcpAndLcpSeparated =
     input.observedFcp != null &&
@@ -174,6 +181,18 @@ function buildMapTime(input: ClockInput): (observedMs: number) => number {
   pushKnot(knots, input.observedTtfb, input.simulatedTtfb);
   pushKnot(knots, input.observedFcp, input.simulatedFcp);
   if (fcpAndLcpSeparated) pushKnot(knots, input.observedLcp, input.simulatedLcp);
+  // After the last paint anchor, content keeps appearing at the pace Speed Index
+  // slowed down (simulated ÷ observed) rather than the full CPU slowdown, which
+  // would push late frames far past when the page actually finished painting.
+  // Speed Index is an average, not an event time, so it is a slope here, not a knot.
+  const frameSpeedIndex = options.forFrames ? input.simulatedSpeedIndex : undefined;
+  const speedIndexScale =
+    frameSpeedIndex != null && input.observedSpeedIndex
+      ? Math.min(
+          Math.max(frameSpeedIndex / input.observedSpeedIndex, 1),
+          Math.max(input.throttling.cpuSlowdownMultiplier, 1),
+        )
+      : undefined;
 
   const last = knots[knots.length - 1]!;
   const lcpSharesPaintTime =
@@ -218,7 +237,7 @@ function buildMapTime(input: ClockInput): (observedMs: number) => number {
       return simulatedLcp + (elapsed - observedBudget) * cpu;
     }
 
-    const tailScale = knots.length > 1 ? cpu : 1;
+    const tailScale = speedIndexScale ?? (knots.length > 1 ? cpu : 1);
     return last.simulated + (observedMs - last.observed) * tailScale;
   };
 }
@@ -298,13 +317,80 @@ export function isNavigationRedirect(statusCode: number | undefined): boolean {
   );
 }
 
+type TransferJob = { dataStartMs: number; bytes: number; weight: number };
+
+/** Chrome network priority → rank. Higher ranks are served first on a shared link. */
+const PRIORITY_WEIGHT: Record<string, number> = {
+  VeryHigh: 4,
+  High: 3,
+  Medium: 2,
+  Low: 1,
+  VeryLow: 0,
+};
+
+/**
+ * Finish times on one shared link. Chrome over HTTP/2 serves higher-priority
+ * streams first, so only the highest-priority active tier receives bandwidth
+ * (split evenly); lower tiers wait. That is why a Low-priority 6 MB image
+ * does not slow a High-priority font, while the image itself finishes last.
+ */
+function shareBandwidth(jobs: TransferJob[], bytesPerMs: number): number[] {
+  const ends = jobs.map((job) => job.dataStartMs);
+  if (bytesPerMs <= 0) return ends;
+
+  const pending = jobs
+    .map((job, index) => ({ index, ...job }))
+    .filter((job) => job.bytes > 0)
+    .sort((a, b) => a.dataStartMs - b.dataStartMs);
+  const active = new Map<number, number>();
+  let time = 0;
+  let next = 0;
+
+  while (next < pending.length || active.size > 0) {
+    if (active.size === 0) time = Math.max(time, pending[next]!.dataStartMs);
+    while (next < pending.length && pending[next]!.dataStartMs <= time) {
+      active.set(pending[next]!.index, pending[next]!.bytes);
+      next++;
+    }
+
+    let topRank = -Infinity;
+    for (const index of active.keys()) topRank = Math.max(topRank, jobs[index]!.weight);
+    let served = 0;
+    for (const index of active.keys()) if (jobs[index]!.weight === topRank) served++;
+    const rateOf = (index: number) => (jobs[index]!.weight === topRank ? bytesPerMs / served : 0);
+    let soonest = Infinity;
+    for (const [index, remaining] of active) {
+      const rate = rateOf(index);
+      if (rate > 0) soonest = Math.min(soonest, remaining / rate);
+    }
+    const nextArrival = next < pending.length ? pending[next]!.dataStartMs - time : Infinity;
+    const step = Math.min(soonest, nextArrival);
+
+    for (const [index, remaining] of [...active]) {
+      const left = remaining - step * rateOf(index);
+      if (left <= 1e-6) {
+        active.delete(index);
+        ends[index] = time + step;
+      } else {
+        active.set(index, left);
+      }
+    }
+    time += step;
+  }
+  return ends;
+}
+
 export function createTimelineClock(input: ClockInput): TimelineClock {
-  const mapTime = buildMapTime(input);
+  // One clock for every observed time: interpolate between the simulated anchors
+  // (TTFB, FCP, LCP, Speed Index) instead of scaling by CPU slowdown.
+  const mapTime = buildMapTime(input, { forFrames: true });
+  const mapFrameTime = mapTime;
   const { throttling } = input;
 
   return {
     throttling,
     mapTime,
+    mapVisualTime: mapFrameTime,
     adjustRequests(requests) {
       const ordered = [...requests].sort(
         (a, b) => (a.networkRequestTime ?? 0) - (b.networkRequestTime ?? 0),
@@ -327,26 +413,42 @@ export function createTimelineClock(input: ClockInput): TimelineClock {
           !isNavigationRedirect(request.statusCode),
       );
 
-      return requests.map((request) => {
-        if (request.networkRequestTime == null || request.networkEndTime == null) return request;
+      const bytesPerMs = (throttling.throughputKbps * 1024) / 8 / 1000;
+      const timed = requests.map((request) => {
+        if (request.networkRequestTime == null || request.networkEndTime == null) return null;
         const start = mapTime(request.networkRequestTime);
-        const warpedEnd = mapTime(request.networkEndTime);
         const bytes = request.transferSize ?? 0;
-        const cold = firstOfOrigin.has(request);
-        const lantern =
+        // Connection setup and server wait, before any bytes flow.
+        const latency =
           bytes > 0
             ? simulatedTransferMs({
-                bytes,
+                bytes: 1,
                 rttMs: throttling.rttMs,
                 throughputKbps: throttling.throughputKbps,
                 serverLatencyMs:
                   request === documentRequest ? (input.documentServerLatencyMs ?? 0) : 0,
-                cold,
+                cold: firstOfOrigin.has(request),
                 ssl: isSecure(request.url, request.protocol),
                 h2: isMultiplexed(request.protocol),
               })
             : 0;
-        let end = Math.max(warpedEnd, start + lantern);
+        return {
+          start,
+          bytes,
+          dataStartMs: start + latency,
+          weight: PRIORITY_WEIGHT[request.priority ?? ""] ?? 2,
+        };
+      });
+      const sharedEnds = shareBandwidth(
+        timed.map((entry) => entry ?? { dataStartMs: 0, bytes: 0, weight: 1 }),
+        bytesPerMs,
+      );
+
+      return requests.map((request, i) => {
+        const entry = timed[i];
+        if (!entry) return request;
+        const warpedEnd = mapTime(request.networkEndTime!);
+        let end = Math.max(warpedEnd, entry.start, entry.bytes > 0 ? sharedEnds[i]! : 0);
         if (
           request === documentRequest &&
           input.simulatedTtfb != null &&
@@ -356,7 +458,7 @@ export function createTimelineClock(input: ClockInput): TimelineClock {
         }
         return {
           ...request,
-          networkRequestTime: start,
+          networkRequestTime: entry.start,
           networkEndTime: end,
           ...(request.rendererStartTime != null
             ? { rendererStartTime: mapTime(request.rendererStartTime) }
@@ -365,31 +467,21 @@ export function createTimelineClock(input: ClockInput): TimelineClock {
       });
     },
     adjustTasks(tasks) {
-      const cpu = throttling.cpuSlowdownMultiplier;
-      const ordered = tasks
-        .map((task, index) => ({ task, index }))
-        .sort((a, b) => a.task.startTime - b.task.startTime || b.task.duration - a.task.duration);
-
-      const placed = tasks.slice();
-      let cursor = 0;
-      let observedFrontier = -Infinity;
-
-      for (const { task, index } of ordered) {
-        const mappedStart = mapTime(task.startTime);
-        const serial = task.startTime >= observedFrontier - 1;
-        const startTime = serial ? Math.max(mappedStart, cursor) : mappedStart;
-        const duration = task.duration * cpu;
-        if (serial) {
-          cursor = startTime + duration;
-          observedFrontier = task.startTime + task.duration;
-        }
-        placed[index] = { ...task, startTime, duration };
-      }
-
-      return placed;
+      return tasks.map((task) => {
+        const startTime = mapTime(task.startTime);
+        const endTime = mapTime(task.startTime + task.duration);
+        return {
+          ...task,
+          startTime,
+          duration: Math.max(0, endTime - startTime),
+        };
+      });
     },
     adjustScreenshots(frames) {
-      return frames.map((frame) => ({ ...frame, timing: mapTime(frame.timing) }));
+      return frames.map((frame) => ({
+        ...frame,
+        timing: mapFrameTime(frame.timing),
+      }));
     },
     adjustLcpSubparts(subparts, parts) {
       const { simulatedTtfb, simulatedLcp, loadDelay, loadDuration } = parts;
@@ -447,7 +539,10 @@ export function createTimelineClock(input: ClockInput): TimelineClock {
           ];
         }
         const scale = budget / restTotal;
-        const scaled = rest.map((part) => ({ ...part, duration: part.duration * scale }));
+        const scaled = rest.map((part) => ({
+          ...part,
+          duration: part.duration * scale,
+        }));
         return [firstByte, ...scaled];
       }
 

@@ -57,6 +57,7 @@ import {
 import { timelineToMarkdown } from "./timelineToMarkdown";
 import type {
   MarkerKind,
+  ModelCheckMetric,
   PageLoadTimeline,
   Rating,
   RenderBlockingStatus,
@@ -284,6 +285,11 @@ function WaterfallRows({
                   {showBlockingBadge && bar.renderBlocking ? (
                     <RenderBlockingBadge status={bar.renderBlocking} />
                   ) : null}
+                  {bar.criticalPath ? (
+                    <span className="rounded bg-amber-500/15 px-1 text-[10px] font-medium text-amber-700 dark:text-amber-300">
+                      Critical path
+                    </span>
+                  ) : null}
                 </div>
                 <BarIdentity bar={bar} />
                 {bar.priority ? (
@@ -302,6 +308,11 @@ function WaterfallRows({
                 ) : null}
                 {bar.coverage ? (
                   <p className="text-[11px] tabular-nums text-muted-foreground">{bar.coverage}</p>
+                ) : null}
+                {bar.linkWarning ? (
+                  <p className="text-[11px] text-amber-600 dark:text-amber-400">
+                    {bar.linkWarning}
+                  </p>
                 ) : null}
               </div>
               <span className="shrink-0 pt-0.5 text-right text-[11px] tabular-nums text-muted-foreground">
@@ -754,7 +765,63 @@ function TaskFilters({
   );
 }
 
-function TimelineLegend({ simulationLabel }: { simulationLabel?: string }) {
+function errorTone(error: number): string {
+  const size = Math.abs(error);
+  if (size < 0.15) return "text-emerald-600 dark:text-emerald-400";
+  if (size < 0.35) return "text-amber-600 dark:text-amber-400";
+  return "text-rose-600 dark:text-rose-400";
+}
+
+function formatError(error: number): string {
+  const percent = Math.round(error * 100);
+  return `${percent > 0 ? "+" : ""}${percent}%`;
+}
+
+/** How close our replay of the load gets to Lighthouse's own simulated FCP and LCP. */
+function ModelCheck({ metrics }: { metrics: ModelCheckMetric[] }) {
+  return (
+    <details
+      className="rounded-md border border-border/70 bg-muted/20 px-2.5 py-1.5 text-xs text-muted-foreground"
+      data-testid="model-check"
+    >
+      <summary className="cursor-pointer list-none marker:content-none [&::-webkit-details-marker]:hidden">
+        <span className="font-medium text-foreground/80">Model check</span>
+        {metrics.map((metric) => (
+          <span key={metric.label} className="ml-3 tabular-nums">
+            {metric.label}{" "}
+            <span className={cn("font-medium", errorTone(metric.error))}>
+              {formatError(metric.error)}
+            </span>
+          </span>
+        ))}
+        <span className="ml-3 opacity-70">vs Lighthouse</span>
+      </summary>
+      <div className="mt-1.5 space-y-1">
+        <p>
+          We replay this page load the way Lighthouse does (connections, TCP slow start, shared
+          bandwidth, CPU slowdown) and compare to its simulated metrics. Positive means our replay
+          is slower. A large gap means request and CPU timings on this timeline are less reliable.
+        </p>
+        <ul className="grid gap-0.5 tabular-nums sm:grid-cols-2">
+          {metrics.map((metric) => (
+            <li key={metric.label}>
+              {metric.label}: Lighthouse {formatMs(metric.lighthouseMs)}, replay{" "}
+              {formatMs(metric.modelMs)}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </details>
+  );
+}
+
+function TimelineLegend({
+  simulationLabel,
+  timesNote,
+}: {
+  simulationLabel?: string;
+  timesNote?: string;
+}) {
   return (
     <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground sm:text-sm">
       <span className="inline-flex items-center gap-1">
@@ -770,6 +837,7 @@ function TimelineLegend({ simulationLabel }: { simulationLabel?: string }) {
       {simulationLabel ? (
         <span className="text-muted-foreground/80">Times include simulated {simulationLabel}</span>
       ) : null}
+      {timesNote ? <span className="basis-full text-muted-foreground/80">{timesNote}</span> : null}
     </div>
   );
 }
@@ -793,7 +861,10 @@ function VerticalTimeline({
 
   return (
     <div className="flex flex-col gap-4" data-axis-end-ms={axisEndMs}>
-      {showLegend ? <TimelineLegend simulationLabel={timeline.simulationLabel} /> : null}
+      {timeline.modelCheck?.length ? <ModelCheck metrics={timeline.modelCheck} /> : null}
+      {showLegend ? (
+        <TimelineLegend simulationLabel={timeline.simulationLabel} timesNote={timeline.timesNote} />
+      ) : null}
 
       <UnifiedWaterfall
         load={load}
