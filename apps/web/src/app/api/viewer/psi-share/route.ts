@@ -1,3 +1,9 @@
+import { parseViewerJsonString } from "@/components/viewer/parseViewerJson";
+import {
+  LighthouseViewerGistError,
+  fetchLighthouseViewerGist,
+  parseLighthouseViewerGistId,
+} from "@/lib/viewer/lighthouseViewerGist";
 import {
   extractLighthouseFromPsiShareHtml,
   labelForPsiLighthouse,
@@ -21,6 +27,14 @@ export async function POST(request: Request) {
   }
 
   try {
+    const gistId = parseLighthouseViewerGistId(url);
+    if (gistId) {
+      const reports = parseViewerJsonString(await fetchLighthouseViewerGist(gistId));
+      return Response.json({
+        data: reports,
+        labels: reports.map((_, index) => `Report ${index + 1}`),
+      });
+    }
     const shareUrl = parsePsiShareUrl(url);
     const html = await fetchPsiShareHtml(shareUrl);
     const reports = extractLighthouseFromPsiShareHtml(html);
@@ -29,7 +43,7 @@ export async function POST(request: Request) {
       labels: reports.map((report, index) => labelForPsiLighthouse(report, index)),
     });
   } catch (error) {
-    if (error instanceof PsiShareUrlError) {
+    if (error instanceof PsiShareUrlError || error instanceof LighthouseViewerGistError) {
       return Response.json({ error: error.message }, { status: 400 });
     }
     const message = error instanceof Error ? error.message : "Could not import PageSpeed report";
