@@ -41,13 +41,51 @@ describe("ViewerPage", () => {
     vi.restoreAllMocks();
   });
 
-  it("renders upload and paste tabs when no data", () => {
-    const { container } = render(<ViewerPage />);
-    expect(container.textContent).toContain("PSI share URL");
-    expect(container.textContent).toContain("Upload JSON");
-    expect(container.textContent).toContain("Paste JSON");
-    expect(container.textContent).toContain("Add run to compare");
-    expect(container.textContent).toContain("Show Report");
+  it("renders the smart input when no data", () => {
+    const { container, getByLabelText, getByText } = render(<ViewerPage />);
+    expect(getByLabelText("PSI URL, JSON, or file")).toBeTruthy();
+    expect(container.textContent).toContain("Compare with…");
+    expect(getByText("Show Report").closest("button")?.disabled).toBe(true);
+  });
+
+  it("shows inline validation and enables submit for valid input", () => {
+    const { getByLabelText, getByText } = render(<ViewerPage />);
+    const input = getByLabelText("PSI URL, JSON, or file");
+
+    fireEvent.change(input, { target: { value: "https://example.com/nope" } });
+    expect(getByText("Not a PageSpeed Insights share URL")).toBeTruthy();
+
+    fireEvent.change(input, { target: { value: '{\n  "a": ,\n}' } });
+    expect(getByText(/Invalid JSON/)).toBeTruthy();
+
+    fireEvent.change(input, {
+      target: {
+        value: "https://pagespeed.web.dev/analysis/https-example-com/abc",
+      },
+    });
+    expect(getByText("Valid PSI URL")).toBeTruthy();
+    expect(getByText("Show Report").closest("button")?.disabled).toBe(false);
+  });
+
+  it("auto-imports when a valid PSI URL is pasted", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async () =>
+      Response.json({
+        data: [{ lighthouseResult: { categories: {} } }],
+        labels: ["Mobile"],
+      }),
+    );
+    const { container, getByLabelText } = render(<ViewerPage />);
+
+    fireEvent.paste(getByLabelText("PSI URL, JSON, or file"), {
+      clipboardData: {
+        getData: () =>
+          "https://pagespeed.web.dev/analysis/https-example-com/abc",
+      },
+    });
+
+    await waitFor(() => {
+      expect(container.textContent).toContain("labels: Mobile");
+    });
   });
 
   it("shows dashboard when JSON files uploaded", async () => {
@@ -58,7 +96,6 @@ describe("ViewerPage", () => {
       { type: "application/json" },
     );
 
-    fireEvent.mouseDown(getByText("Upload JSON"));
     fireEvent.change(getByLabelText("Upload JSON Files"), {
       target: { files: [file] },
     });
@@ -72,23 +109,6 @@ describe("ViewerPage", () => {
       expect(container.querySelector('[data-testid="dashboard"]')).toBeTruthy();
       expect(container.textContent).toContain("labels: mobile");
     });
-  });
-
-  it("shows alert when submitting with no files", async () => {
-    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    const { getByText } = render(<ViewerPage />);
-
-    fireEvent.mouseDown(getByText("Upload JSON"));
-    fireEvent.click(getByText("Show Report"));
-
-    await act(async () => {
-      await new Promise((r) => setTimeout(r, 0));
-    });
-
-    await waitFor(() => {
-      expect(mockAlert).toHaveBeenCalledWith("Please upload at least one JSON file");
-    });
-    consoleErrorSpy.mockRestore();
   });
 
   it("shows dashboard from a local hash without contacting a server", async () => {
@@ -114,7 +134,6 @@ describe("ViewerPage", () => {
       { type: "application/json" },
     );
 
-    fireEvent.mouseDown(getByText("Upload JSON"));
     fireEvent.change(getByLabelText("Upload JSON Files"), {
       target: { files: [file] },
     });
@@ -135,7 +154,9 @@ describe("ViewerPage", () => {
     await waitFor(() => {
       expect(container.textContent).toContain("Show Report");
     });
-    expect(window.location.hash === "" || window.location.hash === "#").toBe(true);
+    expect(window.location.hash === "" || window.location.hash === "#").toBe(
+      true,
+    );
   });
 
   it("returns to the input form when the hash is cleared (browser back)", async () => {
@@ -169,8 +190,10 @@ describe("ViewerPage", () => {
     );
     const { container, getByText, getByLabelText } = render(<ViewerPage />);
 
-    fireEvent.change(getByLabelText("PageSpeed Insights URL"), {
-      target: { value: "https://pagespeed.web.dev/analysis/https-example-com/abc" },
+    fireEvent.change(getByLabelText("PSI URL, JSON, or file"), {
+      target: {
+        value: "https://pagespeed.web.dev/analysis/https-example-com/abc",
+      },
     });
     fireEvent.click(getByText("Show Report"));
 
@@ -181,25 +204,35 @@ describe("ViewerPage", () => {
   });
 
   it("imports two PSI share URLs with run labels into the dashboard", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async () =>
-      Response.json({
-        data: [{ lighthouseResult: { categories: {} } }],
-        labels: ["Mobile"],
-      }),
-    );
-    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockImplementation(async () =>
+        Response.json({
+          data: [{ lighthouseResult: { categories: {} } }],
+          labels: ["Mobile"],
+        }),
+      );
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     const { container, getByText, getAllByLabelText } = render(<ViewerPage />);
 
-    fireEvent.change(getAllByLabelText("PageSpeed Insights URL")[0]!, {
-      target: { value: "https://pagespeed.web.dev/analysis/https-example-com/a" },
+    fireEvent.change(getAllByLabelText("PSI URL, JSON, or file")[0]!, {
+      target: {
+        value: "https://pagespeed.web.dev/analysis/https-example-com/a",
+      },
     });
+    fireEvent.click(getByText("+ Add label"));
     fireEvent.change(getAllByLabelText("Run label (optional)")[0]!, {
       target: { value: "Before" },
     });
-    fireEvent.click(getByText("Add run to compare"));
-    fireEvent.change(getAllByLabelText("PageSpeed Insights URL")[1]!, {
-      target: { value: "https://pagespeed.web.dev/analysis/https-example-com/b" },
+    fireEvent.click(getByText("Compare with…"));
+    fireEvent.change(getAllByLabelText("PSI URL, JSON, or file")[1]!, {
+      target: {
+        value: "https://pagespeed.web.dev/analysis/https-example-com/b",
+      },
     });
+    fireEvent.click(getByText("+ Add label"));
     fireEvent.change(getAllByLabelText("Run label (optional)")[1]!, {
       target: { value: "After" },
     });
@@ -207,7 +240,9 @@ describe("ViewerPage", () => {
 
     await waitFor(() => {
       expect(container.querySelector('[data-testid="dashboard"]')).toBeTruthy();
-      expect(container.textContent).toContain("labels: Before · Mobile, After · Mobile");
+      expect(container.textContent).toContain(
+        "labels: Before · Mobile, After · Mobile",
+      );
     });
     expect(fetchMock).toHaveBeenCalledTimes(2);
     consoleErrorSpy.mockRestore();
@@ -240,15 +275,15 @@ describe("ViewerPage", () => {
     const psi = "https://pagespeed.web.dev/analysis/https-example-com/abc";
     const { container, getByText, getByLabelText } = render(<ViewerPage />);
 
-    fireEvent.change(getByLabelText("PageSpeed Insights URL"), {
+    fireEvent.change(getByLabelText("PSI URL, JSON, or file"), {
       target: { value: psi },
     });
     fireEvent.click(getByText("Show Report"));
 
     await waitFor(() => {
-      expect(container.querySelector('[data-testid="share-url"]')?.textContent).toBe(
-        `${window.location.origin}/viewer?psi=${encodeURIComponent(psi)}`,
-      );
+      expect(
+        container.querySelector('[data-testid="share-url"]')?.textContent,
+      ).toBe(`${window.location.origin}/viewer?psi=${encodeURIComponent(psi)}`);
     });
   });
 
@@ -260,7 +295,6 @@ describe("ViewerPage", () => {
       { type: "application/json" },
     );
 
-    fireEvent.mouseDown(getByText("Upload JSON"));
     fireEvent.change(getByLabelText("Upload JSON Files"), {
       target: { files: [file] },
     });

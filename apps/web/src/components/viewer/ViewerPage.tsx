@@ -11,16 +11,37 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Plus } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { validateRun } from "@/components/viewer/viewerRunValidation";
+import { Info, Loader2, Plus } from "lucide-react";
 import { collectViewerReports } from "@/components/viewer/collectViewerReports";
-import { decodeViewerHash, encodeViewerHash } from "@/components/viewer/viewerHash";
+import {
+  decodeViewerHash,
+  encodeViewerHash,
+} from "@/components/viewer/viewerHash";
 import {
   createEmptyViewerRun,
   ViewerRunSlot,
   type ViewerRunState,
 } from "@/components/viewer/ViewerRunSlot";
-import { buildPsiViewerBookmarklet, buildPsiViewerDeepLink } from "@/lib/viewer/psiBookmarklet";
-import { DEFAULT_PSI_RUN_LABEL_A, DEFAULT_PSI_RUN_LABEL_B } from "@/lib/viewer/psiCompareLabels";
+import {
+  buildPsiViewerBookmarklet,
+  buildPsiViewerDeepLink,
+} from "@/lib/viewer/psiBookmarklet";
+import {
+  DEFAULT_PSI_RUN_LABEL_A,
+  DEFAULT_PSI_RUN_LABEL_B,
+} from "@/lib/viewer/psiCompareLabels";
 
 // Dashboard pulls recharts + react-markdown + tanstack tables (~730kB
 // client per audit). Viewer input form needs none of it; load the dashboard
@@ -30,7 +51,11 @@ const PageSpeedInsightsDashboard = dynamic(
     import("@/features/page-speed-insights/pageSpeedInsightsDashboard").then(
       (mod) => mod.PageSpeedInsightsDashboard,
     ),
-  { loading: () => <div className="p-4 text-muted-foreground">Loading report…</div> },
+  {
+    loading: () => (
+      <div className="p-4 text-muted-foreground">Loading report…</div>
+    ),
+  },
 );
 
 function subscribeToHash(onChange: () => void) {
@@ -50,7 +75,11 @@ function setLocationHash(newHash: string) {
 }
 
 function useHash() {
-  const hash = useSyncExternalStore(subscribeToHash, getHashSnapshot, getServerHashSnapshot);
+  const hash = useSyncExternalStore(
+    subscribeToHash,
+    getHashSnapshot,
+    getServerHashSnapshot,
+  );
   return [hash, setLocationHash] as const;
 }
 
@@ -69,6 +98,35 @@ function PsiBookmarkletLink({ href }: { href: string }) {
       PSI viewer bookmarklet
     </a>
   );
+}
+
+const RECENT_KEY = "psi-viewer-recent";
+const RECENT_MAX = 5;
+
+function readRecent(): string[] {
+  try {
+    const parsed: unknown = JSON.parse(
+      window.localStorage.getItem(RECENT_KEY) ?? "[]",
+    );
+    return Array.isArray(parsed)
+      ? parsed.filter((u): u is string => typeof u === "string")
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function rememberPsiUrl(url: string): string[] {
+  const next = [url, ...readRecent().filter((u) => u !== url)].slice(
+    0,
+    RECENT_MAX,
+  );
+  try {
+    window.localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+  } catch {
+    // storage unavailable; recents are best-effort
+  }
+  return next;
 }
 
 function initialRunsFromPsiQuery(
@@ -154,12 +212,23 @@ export default function ViewerPage({
   const [data, setData] = useState<PageSpeedInsights[]>([]);
   const [labels, setLabels] = useState<string[]>([]);
   const [runs, setRuns] = useState<ViewerRunState[]>(() =>
-    initialRunsFromPsiQuery(initialPsi, initialPsi2, initialPsiLabel, initialPsi2Label),
+    initialRunsFromPsiQuery(
+      initialPsi,
+      initialPsi2,
+      initialPsiLabel,
+      initialPsi2Label,
+    ),
   );
   const [importedPsi, setImportedPsi] = useState<ImportedPsiShare | null>(null);
   const [hash, setHash] = useHash();
   const bookmarkletHref = buildPsiViewerBookmarklet();
   const comparing = runs.length > 1;
+  const [recent, setRecent] = useState<string[]>([]);
+  const canSubmit = runs.every((run) => validateRun(run).status === "valid");
+
+  useEffect(() => {
+    setRecent(readRecent());
+  }, []);
 
   // Sync from external system (URL hash) — intentional set-state-in-effect.
   // Decode stays async so gzip (pako) loads only when a hash is present.
@@ -192,14 +261,18 @@ export default function ViewerPage({
           initialPsiLabel,
           initialPsi2Label,
         );
-        const result = await collectViewerReports(queryRuns.map(toCollectInput));
+        const result = await collectViewerReports(
+          queryRuns.map(toCollectInput),
+        );
         if (cancelled) return;
         setImportedPsi(psiShareFromRuns(queryRuns));
         setHash(await encodeViewerHash(result));
       } catch (e) {
         if (cancelled) return;
         console.error("PSI share import error:", e);
-        alert(e instanceof Error ? e.message : "Could not import PageSpeed report");
+        alert(
+          e instanceof Error ? e.message : "Could not import PageSpeed report",
+        );
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -214,18 +287,26 @@ export default function ViewerPage({
   };
 
   const addCompareRun = () => {
-    setRuns((prev) => (prev.length >= 2 ? prev : [...prev, createEmptyViewerRun({ id: "run-2" })]));
+    setRuns((prev) =>
+      prev.length >= 2
+        ? prev
+        : [...prev, createEmptyViewerRun({ id: "run-2" })],
+    );
   };
 
   const removeCompareRun = () => {
     setRuns((prev) => prev.slice(0, 1));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (submitRuns: ViewerRunState[] = runs) => {
     setLoading(true);
     try {
-      const result = await collectViewerReports(runs.map(toCollectInput));
-      setImportedPsi(psiShareFromRuns(runs));
+      const result = await collectViewerReports(submitRuns.map(toCollectInput));
+      setImportedPsi(psiShareFromRuns(submitRuns));
+      for (const run of submitRuns) {
+        if (run.method === "psi" && run.psiUrl.trim())
+          setRecent(rememberPsiUrl(run.psiUrl.trim()));
+      }
       setHash(await encodeViewerHash(result));
     } catch (e) {
       console.error("JSON parsing error:", e);
@@ -267,40 +348,89 @@ export default function ViewerPage({
 
   return (
     <Card className="mx-auto w-full max-w-3xl">
-      <CardHeader>
-        <CardTitle>Lighthouse Report Viewer</CardTitle>
-        <CardDescription>
-          Upload JSON, paste JSON, or import a PageSpeed Insights share link. Add a second run to
-          compare side-by-side.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {runs.map((run, index) => (
-          <ViewerRunSlot
-            key={run.id}
-            run={run}
-            onChange={(next) => updateRun(index, next)}
-            title={comparing ? (index === 0 ? "Run A" : "Run B") : "Run"}
-            labelPlaceholder={index === 0 ? DEFAULT_PSI_RUN_LABEL_A : DEFAULT_PSI_RUN_LABEL_B}
-            idPrefix={`${run.id}-`}
-            onRemove={comparing && index === 1 ? removeCompareRun : undefined}
-          />
-        ))}
-        {!comparing ? (
-          <Button type="button" variant="outline" className="w-full" onClick={addCompareRun}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add run to compare
-          </Button>
+      <CardHeader className="flex-row items-start justify-between gap-2 space-y-0">
+        <div className="space-y-1.5">
+          <CardTitle>Lighthouse Report Viewer</CardTitle>
+          <CardDescription>
+            Drop a file, paste JSON, or paste a PageSpeed Insights link.
+          </CardDescription>
+        </div>
+        {recent.length ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button type="button" variant="outline" size="sm">
+                Recent ▾
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="max-w-sm">
+              {recent.map((url) => (
+                <DropdownMenuItem
+                  key={url}
+                  className="truncate"
+                  onSelect={() =>
+                    updateRun(0, { ...runs[0]!, method: "psi", psiUrl: url })
+                  }
+                >
+                  {url.replace(/^https?:\/\//, "")}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         ) : null}
+      </CardHeader>
+      <CardContent>
+        <div className={comparing ? "grid gap-3 md:grid-cols-2" : undefined}>
+          {runs.map((run, index) => (
+            <ViewerRunSlot
+              key={run.id}
+              run={run}
+              onChange={(next) => updateRun(index, next)}
+              onAutoSubmit={
+                comparing
+                  ? undefined
+                  : (next) => {
+                      updateRun(index, next);
+                      void handleSubmit([next]);
+                    }
+              }
+              title={comparing ? (index === 0 ? "A" : "B") : undefined}
+              labelPlaceholder={
+                index === 0 ? DEFAULT_PSI_RUN_LABEL_A : DEFAULT_PSI_RUN_LABEL_B
+              }
+              idPrefix={`${run.id}-`}
+              onRemove={comparing && index === 1 ? removeCompareRun : undefined}
+            />
+          ))}
+        </div>
       </CardContent>
       <CardFooter className="flex flex-col items-stretch gap-3">
-        <Button type="button" className="w-full" disabled={loading} onClick={handleSubmit}>
-          {loading ? "Loading..." : "Show Report"}
-        </Button>
-        <p className="text-sm text-muted-foreground">
-          Drag <PsiBookmarkletLink href={bookmarkletHref} /> to your bookmarks bar. On a PageSpeed
-          Insights report, click it to open the viewer.
-        </p>
+        <div className="flex gap-2">
+          {!comparing ? (
+            <Button type="button" variant="outline" onClick={addCompareRun}>
+              <Plus className="mr-2 h-4 w-4" />
+              Compare with…
+            </Button>
+          ) : null}
+          <Button
+            type="button"
+            className="flex-1"
+            disabled={loading || !canSubmit}
+            onClick={() => void handleSubmit()}
+          >
+            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {loading ? "Loading..." : "Show Report"}
+          </Button>
+        </div>
+        <Popover>
+          <PopoverTrigger className="flex w-fit items-center gap-1 text-xs text-muted-foreground underline">
+            <Info className="h-3 w-3" />
+            Bookmarklet help
+          </PopoverTrigger>
+          <PopoverContent className="w-80 text-xs" align="start">
+            Drag <PsiBookmarkletLink href={bookmarkletHref} /> to your bookmarks
+            bar. On a PageSpeed Insights report, click it to open the viewer.
+          </PopoverContent>
+        </Popover>
       </CardFooter>
     </Card>
   );
