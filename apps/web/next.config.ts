@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  async redirects() {
+    return [
+      // Query params are forwarded to the destination by default.
+      { source: "/lh", destination: "/viewer", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

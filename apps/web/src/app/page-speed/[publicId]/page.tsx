@@ -1,4 +1,4 @@
-import { LoadingMessage } from "@/components/common/LoadingMessage";
+import { ReportRunProgress } from "@/components/common/ReportRunProgress";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { Suspense, ViewTransition } from "react";
 import { toSearchString } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
@@ -17,7 +17,7 @@ export default async function PageSpeedPublicIdPage({
   return (
     <ViewTransition>
       <ErrorMessage>
-        <Suspense fallback={<LoadingMessage />}>
+        <Suspense fallback={<ReportRunProgress publicId={publicId} />}>
           <PageSpeedInsightsDashboardContent publicId={publicId} initialSearch={initialSearch} />
         </Suspense>
       </ErrorMessage>

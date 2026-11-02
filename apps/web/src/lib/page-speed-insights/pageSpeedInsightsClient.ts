@@ -1,11 +1,51 @@
 import type { PageSpeedInsights } from "@/lib/schema";
+import {
+  toWorkerJobState,
+  type WorkerJobState,
+} from "@/lib/page-speed-insights/resolveWorkerEnvelope";
 
 type PageSpeedInsightsArray = (PageSpeedInsights | null | undefined)[];
+
+/**
+ * - `timeout` / `error`: transient; Retry re-fetches the same report.
+ * - `job`: the worker job failed; "Run again" restarts it for the same URL.
+ * - `not_found`: the report does not exist.
+ */
+export type PageSpeedFailureReason = "timeout" | "error" | "job" | "not_found";
 
 /** Result of loading a saved report by `publicId` through the Next API route. */
 export type PageSpeedLoadResult =
   | { status: "ok"; data: PageSpeedInsightsArray }
-  | { status: "failed"; error?: string; url?: string };
+  | { status: "failed"; error?: string; url?: string; reason?: PageSpeedFailureReason };
+
+type PendingResult = { status: "pending"; state: WorkerJobState; url?: string };
+
+export type PageSpeedRunProgress = {
+  state: WorkerJobState;
+  url?: string;
+  /** Number of polls so far. */
+  polls: number;
+};
+
+const progressByPublicId = new Map<string, PageSpeedRunProgress>();
+const progressListeners = new Set<() => void>();
+
+function setProgress(publicId: string, progress: PageSpeedRunProgress | undefined) {
+  if (progress) progressByPublicId.set(publicId, progress);
+  else progressByPublicId.delete(publicId);
+  progressListeners.forEach((listener) => listener());
+}
+
+export function subscribePageSpeedProgress(listener: () => void) {
+  progressListeners.add(listener);
+  return () => {
+    progressListeners.delete(listener);
+  };
+}
+
+export function getPageSpeedProgress(publicId: string): PageSpeedRunProgress | undefined {
+  return progressByPublicId.get(publicId);
+}
 
 const PAGE_SPEED_GET_BY_PUBLIC_ID = (publicId: string) =>
   `/api/pagespeed/${encodeURIComponent(publicId)}`;
@@ -29,24 +69,47 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/** Fraction (0-0.95) of the polling budget used after `polls` polls. */
+export function pollProgressFraction(polls: number): number {
+  const max = PAGE_SPEED_POLL_TIMEOUT_MS / PAGE_SPEED_POLL_INTERVAL_MS;
+  return Math.min(polls / max, 0.95);
+}
+
 async function getPageSpeedInsightsByPublicId(publicId: string): Promise<PageSpeedLoadResult> {
   const deadline = Date.now() + PAGE_SPEED_POLL_TIMEOUT_MS;
+  let polls = 0;
 
-  while (Date.now() <= deadline) {
-    const result = await requestPageSpeedInsights(publicId);
-    if (result.status !== "pending") return result;
-    await sleep(PAGE_SPEED_POLL_INTERVAL_MS);
+  try {
+    while (Date.now() <= deadline) {
+      let result: PageSpeedLoadResult | PendingResult;
+      try {
+        result = await requestPageSpeedInsights(publicId);
+      } catch {
+        return {
+          status: "failed",
+          reason: "error",
+          error: "We couldn't reach the PageSpeed Insights service.",
+        };
+      }
+      if (result.status !== "pending") return result;
+      polls += 1;
+      setProgress(publicId, { state: result.state, url: result.url, polls });
+      await sleep(PAGE_SPEED_POLL_INTERVAL_MS);
+    }
+
+    return {
+      status: "failed",
+      reason: "timeout",
+      error: "The PageSpeed Insights report is still running. Retry to check again.",
+    };
+  } finally {
+    setProgress(publicId, undefined);
   }
-
-  return {
-    status: "failed",
-    error: "The PageSpeed Insights report is still running. Refresh to check again.",
-  };
 }
 
 async function requestPageSpeedInsights(
   publicId: string,
-): Promise<PageSpeedLoadResult | { status: "pending" }> {
+): Promise<PageSpeedLoadResult | PendingResult> {
   const res = await fetch(PAGE_SPEED_GET_BY_PUBLIC_ID(publicId), {
     method: "GET",
     headers: { "Content-Type": "application/json" },
@@ -55,14 +118,18 @@ async function requestPageSpeedInsights(
   if (res.status === 404) {
     const text = await res.text();
     try {
-      const body = JSON.parse(text) as { status?: string };
+      const body = JSON.parse(text) as { status?: string; url?: string };
       if (body.status === "pending" || body.status === "processing") {
-        return { status: "pending" };
+        return { status: "pending", state: toWorkerJobState(body.status), url: body.url };
       }
     } catch {
       // A non-JSON 404 is a missing report.
     }
-    return { status: "failed", error: "The PageSpeed Insights report could not be found." };
+    return {
+      status: "failed",
+      reason: "not_found",
+      error: "The PageSpeed Insights report could not be found.",
+    };
   }
 
   if (res.status === 500) {
@@ -70,12 +137,12 @@ async function requestPageSpeedInsights(
     try {
       const body = JSON.parse(text) as { status?: string; error?: string; url?: string };
       if (body.status === "failed") {
-        return { status: "failed", error: body.error, url: body.url };
+        return { status: "failed", reason: "job", error: body.error, url: body.url };
       }
     } catch {
       // Non-JSON 500 body — generic failed status.
     }
-    return { status: "failed" };
+    return { status: "failed", reason: "error" };
   }
 
   if (!res.ok) {
@@ -88,6 +155,7 @@ async function requestPageSpeedInsights(
   if (data === null) {
     return {
       status: "failed",
+      reason: "error",
       error: "The PageSpeed Insights response could not be parsed.",
     };
   }
@@ -137,4 +205,9 @@ export function fetchPageSpeedInsightsByPublicId(
     cache.set(publicId, promise);
   }
   return cache.get(publicId)!;
+}
+
+/** Drops the cached load so the next fetch re-polls the worker (used by Retry). */
+export function resetPageSpeedInsightsByPublicId(publicId: string) {
+  cache.delete(publicId);
 }
