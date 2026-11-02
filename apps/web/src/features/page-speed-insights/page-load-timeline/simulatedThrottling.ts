@@ -181,11 +181,11 @@ function buildMapTime(
   pushKnot(knots, input.observedTtfb, input.simulatedTtfb);
   pushKnot(knots, input.observedFcp, input.simulatedFcp);
   if (fcpAndLcpSeparated) pushKnot(knots, input.observedLcp, input.simulatedLcp);
-  // Frames show visual progress, so Speed Index is the right anchor for them.
-  // Without it the tail is stretched by the full CPU slowdown, which pushes
-  // late frames far past when the page actually finished painting.
+  // After the last paint anchor, content keeps appearing at the pace Speed Index
+  // slowed down (simulated ÷ observed) rather than the full CPU slowdown, which
+  // would push late frames far past when the page actually finished painting.
+  // Speed Index is an average, not an event time, so it is a slope here, not a knot.
   const frameSpeedIndex = options.forFrames ? input.simulatedSpeedIndex : undefined;
-  if (options.forFrames) pushKnot(knots, input.observedSpeedIndex, frameSpeedIndex);
   const speedIndexScale =
     frameSpeedIndex != null && input.observedSpeedIndex
       ? Math.min(
