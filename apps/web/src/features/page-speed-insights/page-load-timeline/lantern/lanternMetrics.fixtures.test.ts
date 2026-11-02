@@ -36,11 +36,11 @@ describe("Lantern-style FCP/LCP estimate vs Lighthouse", () => {
     expect(relativeError(lcp.timing, result.lighthouse.lcp)).toBeLessThan(0.6);
   });
 
-  it("is within 30% of Lighthouse on average", () => {
+  it("is within 20% of Lighthouse on average", () => {
     const errors = results.flatMap((r) => [
       relativeError(r.estimate.fcp.timing, r.lighthouse.fcp),
       relativeError((r.estimate.lcp ?? r.estimate.fcp).timing, r.lighthouse.lcp),
     ]);
-    expect(errors.reduce((sum, e) => sum + e, 0) / errors.length).toBeLessThan(0.3);
+    expect(errors.reduce((sum, e) => sum + e, 0) / errors.length).toBeLessThan(0.2);
   });
 });

@@ -8,7 +8,7 @@
 import { SimNode, type SimPriority } from "./graph";
 import { simulate, type SimulatorOptions } from "./simulator";
 
-const PARENT_TOLERANCE_MS = 20;
+const PARENT_TOLERANCE_MS = 0;
 const PARENT_TYPES = new Set(["Document", "Script", "Stylesheet"]);
 
 export type LanternInputRequest = {
@@ -72,7 +72,7 @@ const BLOCKING_TYPES = new Set(["Document", "Stylesheet", "Script"]);
  * it, and otherwise the priority rule limited to the types that can block paint
  * (fonts are VeryHigh but never block first paint).
  */
-function makeBlockingTest(renderBlockingUrls: Set<string> | undefined) {
+export function makeBlockingTest(renderBlockingUrls: Set<string> | undefined) {
   return (node: SimNode): boolean => {
     const request = node.request!;
     if (request.isMainDocument) return true;
