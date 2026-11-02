@@ -1334,7 +1334,7 @@ describe("buildPageLoadTimeline", () => {
     const shots = timeline!.events.filter((m) => m.id.startsWith("screenshot-"));
     expect(shots.map((m) => ({ timeMs: m.timeMs, data: m.screenshot?.data }))).toEqual([
       { timeMs: 1500, data: "late-frame" },
-      { timeMs: 2800, data: "later" },
+      { timeMs: 2150, data: "later" },
     ]);
     expect(timeline!.events.find((m) => m.id === "render-fcp")?.screenshot).toBeUndefined();
     expect(timeline!.events.filter((m) => m.id.startsWith("screenshot-"))).toHaveLength(2);
@@ -1371,7 +1371,8 @@ describe("buildPageLoadTimeline", () => {
 
     const shots = timeline!.events.filter((m) => m.id.startsWith("screenshot-"));
     expect(shots.map((m) => m.screenshot?.data)).toEqual(["img-early", "img-fcp", "img-lcp"]);
-    expect(shots.map((m) => m.timeMs)).toEqual([800, 1300, 2600]);
+    // Changed frames sit mid-window, since a slot's image was captured at or before the slot.
+    expect(shots.map((m) => m.timeMs)).toEqual([800, 1050, 1950]);
     expect(timeline!.events.find((m) => m.id === "render-fcp")).toBeDefined();
   });
 
