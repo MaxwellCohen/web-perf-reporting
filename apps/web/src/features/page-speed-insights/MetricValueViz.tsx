@@ -1,5 +1,6 @@
 "use client";
 
+import { reconcileLcpAudits } from "@/features/page-speed-insights/shared/reconcileLcpSubparts";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
 import {
   METRIC_AUDIT_TO_ACRONYM,
@@ -19,7 +20,10 @@ import { cn } from "@/lib/utils";
 export const SUMMARY_ROWS_PER_RUN = 4;
 
 /** Lighthouse lab thresholds: good ≤ good, poor > poor. */
-const LAB_BANDS: Record<MetricAuditId, { good: number; poor: number; unit: "ms" | "cls" }> = {
+const LAB_BANDS: Record<
+  MetricAuditId,
+  { good: number; poor: number; unit: "ms" | "cls" }
+> = {
   "first-contentful-paint": { good: 1800, poor: 3000, unit: "ms" },
   "largest-contentful-paint": { good: 2500, poor: 4000, unit: "ms" },
   "total-blocking-time": { good: 200, poor: 600, unit: "ms" },
@@ -57,7 +61,12 @@ function ratingColor(rating: Rating): string {
   return "hsl(var(--chart-3))";
 }
 
-function headroomCopy(value: number, good: number, poor: number, unit: "ms" | "cls"): string {
+function headroomCopy(
+  value: number,
+  good: number,
+  poor: number,
+  unit: "ms" | "cls",
+): string {
   const format = (n: number) => formatUnit(n, unit);
   if (value <= good) return `${format(good - value)} - Good`;
   if (value <= poor) return `${format(value - good)} - Average`;
@@ -69,19 +78,24 @@ function scaleMax(value: number, poor: number): number {
 }
 
 function lcpPhases(audits: MetricAuditSource["audits"] | undefined): Phase[] {
-  const details = audits?.["lcp-breakdown-insight"]?.details as { items?: unknown[] } | undefined;
+  const details = audits?.["lcp-breakdown-insight"]?.details as
+    { items?: unknown[] } | undefined;
   if (!details?.items) return [];
 
   for (const entry of details.items) {
     if (!entry || typeof entry !== "object") continue;
-    const table = entry as { type?: string; items?: Array<Record<string, unknown>> };
+    const table = entry as {
+      type?: string;
+      items?: Array<Record<string, unknown>>;
+    };
     if (table.type !== "table" || !Array.isArray(table.items)) continue;
 
     return table.items.flatMap((item) => {
       const id = typeof item.subpart === "string" ? item.subpart : "";
       const duration = typeof item.duration === "number" ? item.duration : 0;
       if (!id || !(duration > 0)) return [];
-      const label = typeof item.label === "string" && item.label ? item.label : id;
+      const label =
+        typeof item.label === "string" && item.label ? item.label : id;
       return [{ id, label, duration }];
     });
   }
@@ -138,11 +152,23 @@ function ThresholdTrack({
         aria-label={`Measured ${formatUnit(value, unit)}. Good at or under ${goodLabel}. Bad over ${poorLabel}.`}
       >
         <Band left={0} width={goodPct} color="hsl(var(--chart-1) / 0.28)" />
-        <Band left={goodPct} width={poorPct - goodPct} color="hsl(var(--chart-2) / 0.28)" />
-        <Band left={poorPct} width={100 - poorPct} color="hsl(var(--chart-3) / 0.28)" />
+        <Band
+          left={goodPct}
+          width={poorPct - goodPct}
+          color="hsl(var(--chart-2) / 0.28)"
+        />
+        <Band
+          left={poorPct}
+          width={100 - poorPct}
+          color="hsl(var(--chart-3) / 0.28)"
+        />
         <div
           className="absolute inset-y-0 left-0"
-          style={{ width: pct(value), backgroundColor: ratingColor(rating), opacity: 0.9 }}
+          style={{
+            width: pct(value),
+            backgroundColor: ratingColor(rating),
+            opacity: 0.9,
+          }}
         />
         <div
           className="absolute inset-y-0 z-10 w-0.5 bg-foreground"
@@ -154,7 +180,12 @@ function ThresholdTrack({
 }
 
 function Tick({ label, pct }: { label: string; pct: number }) {
-  const edge = pct < 8 ? "translateX(0)" : pct > 92 ? "translateX(-100%)" : "translateX(-50%)";
+  const edge =
+    pct < 8
+      ? "translateX(0)"
+      : pct > 92
+        ? "translateX(-100%)"
+        : "translateX(-50%)";
   return (
     <span
       className="absolute top-0 font-mono text-[10px] leading-none tabular-nums text-muted-foreground"
@@ -165,11 +196,23 @@ function Tick({ label, pct }: { label: string; pct: number }) {
   );
 }
 
-function Band({ left, width, color }: { left: number; width: number; color: string }) {
+function Band({
+  left,
+  width,
+  color,
+}: {
+  left: number;
+  width: number;
+  color: string;
+}) {
   return (
     <div
       className="absolute inset-y-0"
-      style={{ left: `${left}%`, width: `${Math.max(0, width)}%`, backgroundColor: color }}
+      style={{
+        left: `${left}%`,
+        width: `${Math.max(0, width)}%`,
+        backgroundColor: color,
+      }}
     />
   );
 }
@@ -178,11 +221,16 @@ function PhaseTrack({ phases, unit }: { phases: Phase[]; unit: "ms" | "cls" }) {
   const total = phases.reduce((sum, phase) => sum + phase.duration, 0);
   if (!(total > 0)) return null;
 
-  const placed = phases.reduce<Array<{ phase: Phase; left: number }>>((acc, phase) => {
-    const left =
-      acc.length === 0 ? 0 : acc[acc.length - 1].left + acc[acc.length - 1].phase.duration;
-    return [...acc, { phase, left }];
-  }, []);
+  const placed = phases.reduce<Array<{ phase: Phase; left: number }>>(
+    (acc, phase) => {
+      const left =
+        acc.length === 0
+          ? 0
+          : acc[acc.length - 1].left + acc[acc.length - 1].phase.duration;
+      return [...acc, { phase, left }];
+    },
+    [],
+  );
 
   const labels = phases
     .map((phase) => `${phase.label} ${formatUnit(phase.duration, unit)}`)
@@ -249,7 +297,12 @@ function MetricScale({
       className={subgrid ? "contents" : "min-w-0 space-y-1.5"}
       data-testid={`metric-scale-${auditId}`}
     >
-      <div className={cn("flex min-w-0 items-baseline justify-between gap-2", subgrid && "pt-3")}>
+      <div
+        className={cn(
+          "flex min-w-0 items-baseline justify-between gap-2",
+          subgrid && "pt-3",
+        )}
+      >
         <span className="flex min-w-0 items-center gap-2 text-xs font-medium">
           <span
             className="size-2 shrink-0 rounded-sm"
@@ -257,9 +310,13 @@ function MetricScale({
             aria-hidden
           />
           <span className="truncate">{showLabel ? label : rating}</span>
-          {showLabel ? <span className="truncate text-muted-foreground">{rating}</span> : null}
+          {showLabel ? (
+            <span className="truncate text-muted-foreground">{rating}</span>
+          ) : null}
         </span>
-        <span className="shrink-0 font-mono text-sm font-medium tabular-nums">{shown}</span>
+        <span className="shrink-0 font-mono text-sm font-medium tabular-nums">
+          {shown}
+        </span>
       </div>
       <div className={cn("min-w-0", subgrid && "pt-1.5")}>
         <ThresholdTrack
@@ -271,35 +328,62 @@ function MetricScale({
           unit={band.unit}
         />
       </div>
-      <p className={cn("text-xs leading-snug text-muted-foreground", subgrid && "pt-1.5")}>
+      <p
+        className={cn(
+          "text-xs leading-snug text-muted-foreground",
+          subgrid && "pt-1.5",
+        )}
+      >
         {headroomCopy(value, band.good, band.poor, band.unit)}
       </p>
       {hasSavingsNote ? (
-        <p className={cn("text-xs leading-snug text-muted-foreground", subgrid && "pt-1")}>
+        <p
+          className={cn(
+            "text-xs leading-snug text-muted-foreground",
+            subgrid && "pt-1",
+          )}
+        >
           Up to {formatUnit(savingsNote, band.unit)} in estimated savings
         </p>
       ) : subgrid ? (
         // Keeps the row filled so the next run's parts land on their own tracks.
         <span aria-hidden />
       ) : null}
-      {phases.length > 0 ? <PhaseTrack phases={phases} unit={band.unit} /> : null}
-      {savings.length > 0 ? <SavingsBars savings={savings} value={value} unit={band.unit} /> : null}
+      {phases.length > 0 ? (
+        <PhaseTrack phases={phases} unit={band.unit} />
+      ) : null}
+      {savings.length > 0 ? (
+        <SavingsBars savings={savings} value={value} unit={band.unit} />
+      ) : null}
     </div>
   );
 }
 
-function PhaseLegend({ phases, unit }: { phases: Phase[]; unit: "ms" | "cls" }) {
+function PhaseLegend({
+  phases,
+  unit,
+}: {
+  phases: Phase[];
+  unit: "ms" | "cls";
+}) {
   return (
     <ul className="flex flex-wrap gap-x-4 gap-y-1">
       {phases.map((phase) => (
-        <li key={phase.id} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <li
+          key={phase.id}
+          className="flex items-center gap-1.5 text-xs text-muted-foreground"
+        >
           <span
             className="size-2 shrink-0 rounded-sm"
-            style={{ backgroundColor: PHASE_COLOR[phase.id] ?? "hsl(var(--chart-4))" }}
+            style={{
+              backgroundColor: PHASE_COLOR[phase.id] ?? "hsl(var(--chart-4))",
+            }}
             aria-hidden
           />
           <span>{phase.label}</span>
-          <span className="font-mono tabular-nums">{formatUnit(phase.duration, unit)}</span>
+          <span className="font-mono tabular-nums">
+            {formatUnit(phase.duration, unit)}
+          </span>
         </li>
       ))}
     </ul>
@@ -315,14 +399,23 @@ function SavingsBars({
   value: number;
   unit: "ms" | "cls";
 }) {
-  const basis = Math.max(value, ...savings.map((slice) => slice.savings), Number.EPSILON);
+  const basis = Math.max(
+    value,
+    ...savings.map((slice) => slice.savings),
+    Number.EPSILON,
+  );
 
   return (
     <div className="space-y-1.5 pt-1">
-      <p className="text-xs font-medium text-muted-foreground">Estimated savings</p>
+      <p className="text-xs font-medium text-muted-foreground">
+        Estimated savings
+      </p>
       <ul className="space-y-1.5">
         {savings.map((slice) => (
-          <li key={slice.title} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+          <li
+            key={slice.title}
+            className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2"
+          >
             <span className="truncate text-xs">{slice.title}</span>
             <span className="font-mono text-xs tabular-nums text-muted-foreground">
               {formatUnit(slice.savings, unit)}
@@ -330,7 +423,9 @@ function SavingsBars({
             <span className="col-span-2 h-1.5 overflow-hidden rounded-sm bg-muted">
               <span
                 className="block h-full bg-foreground/70"
-                style={{ width: `${Math.min(100, (slice.savings / basis) * 100)}%` }}
+                style={{
+                  width: `${Math.min(100, (slice.savings / basis) * 100)}%`,
+                }}
               />
             </span>
           </li>
@@ -373,7 +468,12 @@ function CompareMetricDeltas({
   const deltas = pairs.flatMap((pair) => {
     const from = pair.a?.audit.numericValue;
     const to = pair.b?.audit.numericValue;
-    if (from == null || to == null || !Number.isFinite(from) || !Number.isFinite(to)) {
+    if (
+      from == null ||
+      to == null ||
+      !Number.isFinite(from) ||
+      !Number.isFinite(to)
+    ) {
       return [];
     }
     return [
@@ -388,9 +488,15 @@ function CompareMetricDeltas({
   if (!deltas.length) return null;
 
   return (
-    <ul className={cn("space-y-0.5", className)} data-testid="metric-compare-delta">
+    <ul
+      className={cn("space-y-0.5", className)}
+      data-testid="metric-compare-delta"
+    >
       {deltas.map((delta) => (
-        <li key={delta.key} className="text-xs tabular-nums text-muted-foreground">
+        <li
+          key={delta.key}
+          className="text-xs tabular-nums text-muted-foreground"
+        >
           {pairs.length > 1 ? `${delta.formFactor}: ` : null}
           {delta.text}
         </li>
@@ -423,7 +529,9 @@ export function MetricValueViz({
   const acronym: CwvMetricAcronym = METRIC_AUDIT_TO_ACRONYM[auditId];
 
   const rows = auditItems.filter(
-    (item) => item.audit.numericValue != null && Number.isFinite(item.audit.numericValue),
+    (item) =>
+      item.audit.numericValue != null &&
+      Number.isFinite(item.audit.numericValue),
   );
   if (!rows.length) return null;
 
@@ -436,7 +544,10 @@ export function MetricValueViz({
       : "flex flex-col gap-3";
 
   return (
-    <div className={flatten ? "contents" : "space-y-2"} data-testid="metric-value-viz">
+    <div
+      className={flatten ? "contents" : "space-y-2"}
+      data-testid="metric-value-viz"
+    >
       <div className={layoutClass}>
         {rows.map(({ audit, label }) => {
           const source = sources.find((item) => item.label === label);
@@ -452,7 +563,9 @@ export function MetricValueViz({
               showLabel={rows.length > 1}
               auditId={auditId}
               phases={
-                detail && auditId === "largest-contentful-paint" ? lcpPhases(source?.audits) : []
+                detail && auditId === "largest-contentful-paint"
+                  ? lcpPhases(reconcileLcpAudits(source?.audits))
+                  : []
               }
               savings={detail ? savings : []}
               savingsNote={savingsNote}
