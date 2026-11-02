@@ -62,3 +62,11 @@ export function resolveWorkerEnvelope(
 
   return { kind: "ready_envelope", envelope: data };
 }
+
+export type WorkerJobState = "queued" | "running";
+
+/** Maps a non-terminal worker status string to a user-facing job state. */
+export function toWorkerJobState(status: string | undefined): WorkerJobState {
+  const normalized = (status ?? "").toLowerCase();
+  return normalized === "pending" || normalized === "queued" ? "queued" : "running";
+}

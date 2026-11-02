@@ -199,16 +199,6 @@ exports[`app page coverage smoke tests > renders the home page cards and destina
 </div>
 `;
 
-exports[`app page coverage smoke tests > renders the lightweight lh and viewer pages 1`] = `
-<div
-  class="max-w-screen-2xl mx-auto"
->
-  <div>
-    Mock viewer page
-  </div>
-</div>
-`;
-
 exports[`app page coverage smoke tests > renders the page speed layout shell and nested content 1`] = `
 <div
   class="mx-auto w-full min-w-0 max-w-screen-2xl"
@@ -227,5 +217,15 @@ exports[`app page coverage smoke tests > renders the page speed layout shell and
 exports[`app page coverage smoke tests > renders the page speed lookup form when no URL is present 1`] = `
 <div>
   Mock URL lookup form
+</div>
+`;
+
+exports[`app page coverage smoke tests > renders the viewer page 1`] = `
+<div
+  class="max-w-screen-2xl mx-auto"
+>
+  <div>
+    Mock viewer page
+  </div>
 </div>
 `;

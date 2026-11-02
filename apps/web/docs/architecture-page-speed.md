@@ -11,7 +11,7 @@ How the saved-report flow is wired.
 
 ## Other ingress
 
-- **`/viewer` and `/lh`** — Paste Lighthouse JSON straight into `PageSpeedInsightsDashboard` (no worker envelope). See ADR 0001.
+- **`/viewer`** (`/lh` redirects here) — Paste Lighthouse JSON straight into `PageSpeedInsightsDashboard` (no worker envelope). See ADR 0002.
 
 ## Domain types
 
