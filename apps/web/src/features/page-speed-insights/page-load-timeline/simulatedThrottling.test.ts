@@ -93,7 +93,19 @@ describe("createTimelineClock", () => {
       },
     ]);
     expect(image!.networkRequestTime).toBeCloseTo(clock.mapTime(345), 5);
-    expect(image!.networkEndTime).toBeCloseTo(clock.mapTime(371), 5);
+    // Under 1 MiB, so it can't finish faster than the throttled link allows.
+    expect(image!.networkEndTime!).toBeGreaterThan(clock.mapTime(371));
+
+    const [large] = clock.adjustRequests([
+      {
+        url: "https://cdn.example.com/huge.jpg",
+        networkRequestTime: 345,
+        networkEndTime: 371,
+        transferSize: 6_000_000,
+        protocol: "h2",
+      },
+    ]);
+    expect(large!.networkEndTime).toBeCloseTo(clock.mapTime(371), 5);
   });
 
   it("rebuilds LCP subparts from the simulated breakdown", () => {

@@ -13,6 +13,8 @@
 
 const TCP_SEGMENT_SIZE = 1460;
 const INITIAL_CONGESTION_WINDOW = 10;
+/** Requests at or above this stay interpolated instead of getting a Lantern duration floor. */
+const MAX_FLOORED_BYTES = 1024 * 1024;
 
 export type SimulatedThrottling = {
   rttMs: number;
@@ -354,7 +356,24 @@ export function createTimelineClock(input: ClockInput): TimelineClock {
         if (request.networkRequestTime == null || request.networkEndTime == null) return request;
         const start = mapTime(request.networkRequestTime);
         const warpedEnd = mapTime(request.networkEndTime);
-        let end = Math.max(warpedEnd, start);
+        // Small requests can't be faster than latency plus transfer on the throttled
+        // link. Large ones stay interpolated: costed alone they'd run far past the
+        // page, because the trace's parallel downloads aren't modelled.
+        const bytes = request.transferSize ?? 0;
+        const floor =
+          bytes > 0 && bytes < MAX_FLOORED_BYTES
+            ? simulatedTransferMs({
+                bytes,
+                rttMs: throttling.rttMs,
+                throughputKbps: throttling.throughputKbps,
+                serverLatencyMs:
+                  request === documentRequest ? (input.documentServerLatencyMs ?? 0) : 0,
+                cold: firstOfOrigin.has(request),
+                ssl: isSecure(request.url, request.protocol),
+                h2: isMultiplexed(request.protocol),
+              })
+            : 0;
+        let end = Math.max(warpedEnd, start + floor);
         if (
           request === documentRequest &&
           input.simulatedTtfb != null &&
