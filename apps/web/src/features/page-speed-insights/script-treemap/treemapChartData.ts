@@ -17,8 +17,11 @@ const GREEN_COLOR = "hsl(142 45% 62%)";
 const YELLOW_COLOR = "hsl(43 85% 62%)";
 const RED_COLOR = "hsl(0 70% 68%)";
 
-export function getTreemapNodeColor(resourceBytes: number, unusedBytes?: number): string {
-  if (!unusedBytes) {
+export function getTreemapNodeColor(
+  resourceBytes: number,
+  unusedBytes?: number,
+): string {
+  if (!unusedBytes || !resourceBytes) {
     return GRAY_COLOR;
   }
 
@@ -63,7 +66,10 @@ function truncateMiddle(value: string, maxLength: number): string {
   return `…${suffix}`;
 }
 
-function truncatePathPreservingFilename(path: string, maxLength: number): string {
+function truncatePathPreservingFilename(
+  path: string,
+  maxLength: number,
+): string {
   if (path.length <= maxLength) {
     return path;
   }
@@ -93,12 +99,17 @@ function truncatePathPreservingFilename(path: string, maxLength: number): string
   }
 
   const truncatedDirectory =
-    directory.length > prefixBudget ? `…/${directory.slice(-(prefixBudget - 1))}` : `/${directory}`;
+    directory.length > prefixBudget
+      ? `…/${directory.slice(-(prefixBudget - 1))}`
+      : `/${directory}`;
 
   return `${truncatedDirectory}/${fileWithQuery}`;
 }
 
-function formatInlineLabel(name: string, maxLength: number): TreemapDisplayLabel {
+function formatInlineLabel(
+  name: string,
+  maxLength: number,
+): TreemapDisplayLabel {
   const prefix = "(inline)";
   if (name.length <= maxLength) {
     return { primary: name };
@@ -129,7 +140,8 @@ function buildUrlPrimary(url: URL, maxLength: number): string {
 
   const idParam = url.searchParams.get("id");
   const fileName = segments.at(-1) ?? segments[0];
-  const twoSegmentPath = segments.length > 1 ? `/${segments.slice(-2).join("/")}` : `/${fileName}`;
+  const twoSegmentPath =
+    segments.length > 1 ? `/${segments.slice(-2).join("/")}` : `/${fileName}`;
   const filePath = `/${fileName}`;
 
   const withId = (path: string) => {
@@ -141,12 +153,17 @@ function buildUrlPrimary(url: URL, maxLength: number): string {
   };
 
   const preferred =
-    withId(twoSegmentPath).length <= maxLength ? withId(twoSegmentPath) : withId(filePath);
+    withId(twoSegmentPath).length <= maxLength
+      ? withId(twoSegmentPath)
+      : withId(filePath);
 
   return truncatePathPreservingFilename(preferred, maxLength);
 }
 
-export function getTreemapDisplayLabel(name: string, maxLength = 28): TreemapDisplayLabel {
+export function getTreemapDisplayLabel(
+  name: string,
+  maxLength = 28,
+): TreemapDisplayLabel {
   if (!name) {
     return { primary: "" };
   }
@@ -196,7 +213,9 @@ export function buildTreemapChartNodes(
 ): TreemapChartNode[] {
   return nodes.map((node, index) => {
     const id = `${parentId}-${index}`;
-    const children = node.children?.length ? buildTreemapChartNodes(node.children, id) : undefined;
+    const children = node.children?.length
+      ? buildTreemapChartNodes(node.children, id)
+      : undefined;
 
     return {
       id,

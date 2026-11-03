@@ -5,12 +5,19 @@ vi.mock("recharts", () => ({
   PieChart: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="pie-chart">{children}</div>
   ),
-  Pie: ({ children }: { children: React.ReactNode }) => <div data-testid="pie">{children}</div>,
+  Pie: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="pie">{children}</div>
+  ),
   Label: ({
     content,
   }: {
     content: (props: {
-      viewBox?: { cx: number; cy: number; innerRadius?: number; outerRadius?: number };
+      viewBox?: {
+        cx: number;
+        cy: number;
+        innerRadius?: number;
+        outerRadius?: number;
+      };
     }) => React.ReactNode;
   }) => {
     const result = content({
@@ -66,9 +73,14 @@ describe("GaugeChart", () => {
   it("renders chart with valid data and metric", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     const { container } = render(
-      <GaugeChart metric="First Contentful Paint" data={validMetricData as any} />,
+      <GaugeChart
+        metric="First Contentful Paint"
+        data={validMetricData as any}
+      />,
     );
-    expect(container.querySelector('[data-testid="chart-container"]')).toBeTruthy();
+    expect(
+      container.querySelector('[data-testid="chart-container"]'),
+    ).toBeTruthy();
     expect(container.querySelector('[data-testid="pie-chart"]')).toBeTruthy();
     expect(container.textContent).toContain("1,200");
     expect(container.textContent).toContain("First Contentful Paint");
@@ -77,7 +89,9 @@ describe("GaugeChart", () => {
 
   it("renders chart without metric label when metric is empty", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
-    const { container } = render(<GaugeChart metric="" data={validMetricData as any} />);
+    const { container } = render(
+      <GaugeChart metric="" data={validMetricData as any} />,
+    );
     expect(container.textContent).toContain("1,200");
     expect(container.textContent).toContain("FAST");
     vi.restoreAllMocks();
@@ -108,13 +122,19 @@ describe("HorizontalGaugeChart", () => {
     const { container } = render(
       <HorizontalGaugeChart metric="LCP" data={validMetricData as any} />,
     );
-    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
+    expect(
+      container.querySelector('[data-testid="gauge-value-marker"]'),
+    ).toBeTruthy();
     expect(container.textContent).toContain("LCP");
   });
 
   it("renders without metric when metric is undefined", () => {
-    const { container } = render(<HorizontalGaugeChart data={validMetricData as any} />);
-    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
+    const { container } = render(
+      <HorizontalGaugeChart data={validMetricData as any} />,
+    );
+    expect(
+      container.querySelector('[data-testid="gauge-value-marker"]'),
+    ).toBeTruthy();
   });
 
   it("handles distributions with optional max/min", () => {
@@ -130,28 +150,67 @@ describe("HorizontalGaugeChart", () => {
     const { container } = render(
       <HorizontalGaugeChart metric="Test" data={dataWithOptional as any} />,
     );
-    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
+    expect(
+      container.querySelector('[data-testid="gauge-value-marker"]'),
+    ).toBeTruthy();
+  });
+});
+
+describe("HorizontalGaugeChart scaling", () => {
+  it("shows CLS boundaries on a 0-1 scale", () => {
+    const cls = {
+      percentile: 5,
+      category: "FAST",
+      distributions: [
+        { min: 0, max: 10, proportion: 0.8 },
+        { min: 10, max: 25, proportion: 0.1 },
+        { min: 25, proportion: 0.1 },
+      ],
+    };
+    const { container } = render(
+      <HorizontalGaugeChart data={cls as any} scale={100} />,
+    );
+    expect(container.textContent).toContain("0.1");
+    expect(container.textContent).toContain("0.25");
+  });
+
+  it("shows ms units on boundaries", () => {
+    const { container } = render(
+      <HorizontalGaugeChart data={validMetricData as any} unit="ms" />,
+    );
+    expect(container.textContent).toContain("1 s");
+    expect(container.textContent).toContain("2 s");
   });
 });
 
 describe("HorizontalScoreChart", () => {
   it("renders with score", () => {
     const { container } = render(<HorizontalScoreChart score={0.75} />);
-    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
+    expect(
+      container.querySelector('[data-testid="gauge-value-marker"]'),
+    ).toBeTruthy();
   });
 
   it("renders with className prop", () => {
-    const { container } = render(<HorizontalScoreChart score={0.5} className="custom-class" />);
-    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
+    const { container } = render(
+      <HorizontalScoreChart score={0.5} className="custom-class" />,
+    );
+    expect(
+      container.querySelector('[data-testid="gauge-value-marker"]'),
+    ).toBeTruthy();
   });
 
   it("renders when score is 0", () => {
     const { container } = render(<HorizontalScoreChart score={0} />);
-    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
+    expect(
+      container.querySelector('[data-testid="gauge-value-marker"]'),
+    ).toBeTruthy();
   });
 
   it("renders when score is 1", () => {
     const { container } = render(<HorizontalScoreChart score={1} />);
-    expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
+    expect(
+      container.querySelector('[data-testid="gauge-value-marker"]'),
+    ).toBeTruthy();
   });
 });

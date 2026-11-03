@@ -16,7 +16,7 @@ function sortDataByKeyMaxValue<T>(
     keyMaxMap.set(key, Math.max(currentMax, value));
   });
 
-  return data.sort((a, b) => {
+  return [...data].sort((a, b) => {
     const aMax = keyMaxMap.get(getKey(a)) || 0;
     const bMax = keyMaxMap.get(getKey(b)) || 0;
     return bMax - aMax;

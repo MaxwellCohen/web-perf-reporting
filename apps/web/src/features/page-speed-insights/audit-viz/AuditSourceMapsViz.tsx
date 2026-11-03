@@ -12,7 +12,7 @@ type SourceMapIssue = {
   reportLabels: string[];
 };
 
-const MISSING_COUNT_RE = /missing\s+(\d+)\s+items/i;
+const MISSING_COUNT_RE = /missing\s+(\d+)\s+items?\b/i;
 
 function missingCountFromError(error: string): number {
   const match = error.match(MISSING_COUNT_RE);
@@ -31,9 +31,13 @@ function extractIssues(rows: DetailTableItem[]): SourceMapIssue[] {
       const errors = (item.subItems?.items || [])
         .map((sub) => (typeof sub.error === "string" ? sub.error.trim() : ""))
         .filter(Boolean);
-      if (!errors.length && !sourceMapUrl) return;
+      // Lighthouse also lists scripts whose source map is valid (no errors); skip those.
+      if (!errors.length) return;
 
-      const missingCount = errors.reduce((sum, error) => sum + missingCountFromError(error), 0);
+      const missingCount = errors.reduce(
+        (sum, error) => sum + missingCountFromError(error),
+        0,
+      );
       const error = errors[0] || "Source map issue";
       const existing = byScript.get(scriptUrl);
       if (!existing) {
@@ -47,7 +51,8 @@ function extractIssues(rows: DetailTableItem[]): SourceMapIssue[] {
         return;
       }
 
-      if (!existing.sourceMapUrl && sourceMapUrl) existing.sourceMapUrl = sourceMapUrl;
+      if (!existing.sourceMapUrl && sourceMapUrl)
+        existing.sourceMapUrl = sourceMapUrl;
       existing.missingCount = Math.max(existing.missingCount, missingCount);
       if (!existing.reportLabels.includes(reportLabel)) {
         existing.reportLabels.push(reportLabel);
@@ -56,7 +61,8 @@ function extractIssues(rows: DetailTableItem[]): SourceMapIssue[] {
   });
 
   return [...byScript.values()].sort(
-    (a, b) => b.missingCount - a.missingCount || a.scriptUrl.localeCompare(b.scriptUrl),
+    (a, b) =>
+      b.missingCount - a.missingCount || a.scriptUrl.localeCompare(b.scriptUrl),
   );
 }
 
@@ -67,7 +73,8 @@ export function AuditSourceMapsViz({ rows }: { rows: DetailTableItem[] }) {
   return (
     <div className="w-full min-w-0 space-y-1.5">
       <p className="text-xs text-muted-foreground">
-        {issues.length} script{issues.length === 1 ? "" : "s"} with source map issues
+        {issues.length} script{issues.length === 1 ? "" : "s"} with source map
+        issues
       </p>
       <ul className="divide-y overflow-hidden rounded-md border text-sm">
         {issues.map((issue) => (
@@ -91,9 +98,14 @@ export function AuditSourceMapsViz({ rows }: { rows: DetailTableItem[] }) {
             ) : (
               <span className="text-xs text-muted-foreground">issue</span>
             )}
-            <p className="col-span-2 truncate text-xs text-muted-foreground" title={issue.error}>
+            <p
+              className="col-span-2 truncate text-xs text-muted-foreground"
+              title={issue.error}
+            >
               {issue.error}
-              {issue.reportLabels.length > 1 ? ` · ${issue.reportLabels.join(", ")}` : ""}
+              {issue.reportLabels.length > 1
+                ? ` · ${issue.reportLabels.join(", ")}`
+                : ""}
             </p>
           </li>
         ))}

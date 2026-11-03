@@ -4,13 +4,16 @@ import type { AuditResult, TableItem } from "@/lib/schema";
 export const LONG_TASK_THRESHOLD_MS = 50;
 
 /** How many longest tasks to list before summarizing the rest. */
-const LONG_TASKS_SHOWN = 8;
+export const LONG_TASKS_SHOWN = 8;
 
 type MainThreadTaskRow = {
   startTime: number;
   duration: number;
   blockingTime: number;
 };
+
+/** Lighthouse counts blocking time only between FCP and TTI (ms from navigation start). */
+export type BlockingWindow = { startMs: number; endMs: number };
 
 /** Blocking time rolled up by the script Lighthouse attributed to each long task. */
 export type ScriptBlockingRow = {
@@ -25,6 +28,8 @@ export type MainThreadTaskSummary = {
   longestDurationMs: number;
   longTaskCount: number;
   blockingTimeMs: number;
+  /** "fcp-tti" matches Lighthouse TBT; "unbounded" counts every task in the trace. */
+  blockingScope: "fcp-tti" | "unbounded";
   longestTasks: MainThreadTaskRow[];
   omittedLongTaskCount: number;
 };
@@ -41,13 +46,42 @@ export function taskItemsFromAudit(audit: AuditResult): TableItem[] {
   return details.items;
 }
 
+/** Read FCP and TTI from the Lighthouse `metrics` audit; undefined when either is missing. */
+export function blockingWindowFromMetricsAudit(
+  audit: AuditResult | undefined,
+): BlockingWindow | undefined {
+  const item = audit ? taskItemsFromAudit(audit)[0] : undefined;
+  const startMs = asNumber(item?.firstContentfulPaint);
+  const endMs = asNumber(item?.interactive);
+  if (startMs === null || endMs === null || endMs <= startMs) return undefined;
+  return { startMs, endMs };
+}
+
+/** Same math as Lighthouse TBTUtils: clip the task to the window, then subtract 50 ms. */
+function blockingTimeInWindow(
+  startTime: number,
+  duration: number,
+  window: BlockingWindow | undefined,
+): number {
+  if (!window) return Math.max(0, duration - LONG_TASK_THRESHOLD_MS);
+  if (duration < LONG_TASK_THRESHOLD_MS) return 0;
+  const clipped =
+    Math.min(startTime + duration, window.endMs) -
+    Math.max(startTime, window.startMs);
+  return clipped < LONG_TASK_THRESHOLD_MS
+    ? 0
+    : clipped - LONG_TASK_THRESHOLD_MS;
+}
+
 /**
  * Summarize toplevel main-thread tasks.
- * Blocking time is duration past 50 ms, the portion that can add to Total Blocking Time.
+ * Blocking time is duration past 50 ms. With a FCP-to-TTI window it matches Lighthouse TBT;
+ * without one it is unbounded and can exceed the reported TBT.
  */
 export function summarizeMainThreadTasks(
   items: readonly TableItem[],
   limit = LONG_TASKS_SHOWN,
+  window?: BlockingWindow,
 ): MainThreadTaskSummary {
   const tasks: MainThreadTaskRow[] = [];
   let totalTimeMs = 0;
@@ -60,7 +94,7 @@ export function summarizeMainThreadTasks(
     tasks.push({
       startTime,
       duration,
-      blockingTime: Math.max(0, duration - LONG_TASK_THRESHOLD_MS),
+      blockingTime: blockingTimeInWindow(startTime, duration, window),
     });
   }
 
@@ -73,9 +107,13 @@ export function summarizeMainThreadTasks(
   return {
     totalTasks: tasks.length,
     totalTimeMs,
-    longestDurationMs: tasks.reduce((max, task) => Math.max(max, task.duration), 0),
+    longestDurationMs: tasks.reduce(
+      (max, task) => Math.max(max, task.duration),
+      0,
+    ),
     longTaskCount: longTasks.length,
     blockingTimeMs: longTasks.reduce((sum, task) => sum + task.blockingTime, 0),
+    blockingScope: window ? "fcp-tti" : "unbounded",
     longestTasks: shown,
     omittedLongTaskCount: Math.max(0, longTasks.length - shown.length),
   };
@@ -86,7 +124,8 @@ function scriptUrlFromDebugTask(
   urls: readonly unknown[],
 ): string | undefined {
   const urlIndex = asNumber(task.urlIndex);
-  if (urlIndex === null || urlIndex < 0 || urlIndex >= urls.length) return undefined;
+  if (urlIndex === null || urlIndex < 0 || urlIndex >= urls.length)
+    return undefined;
   const url = urls[urlIndex];
   return typeof url === "string" && url ? url : undefined;
 }
@@ -95,7 +134,9 @@ function scriptUrlFromDebugTask(
  * Long-task rows with a script URL.
  * Prefers table items. Falls back to debugData urlIndex entries when items have no URL.
  */
-export function longTaskItemsFromAudit(audit: AuditResult | undefined): TableItem[] {
+export function longTaskItemsFromAudit(
+  audit: AuditResult | undefined,
+): TableItem[] {
   if (!audit) return [];
 
   const items = taskItemsFromAudit(audit);
@@ -128,7 +169,9 @@ export function longTaskItemsFromAudit(audit: AuditResult | undefined): TableIte
  * Group long tasks by script URL.
  * Lighthouse attributes a task to the script that was running, or "Unattributable".
  */
-export function summarizeLongTaskScripts(items: readonly TableItem[]): ScriptBlockingRow[] {
+export function summarizeLongTaskScripts(
+  items: readonly TableItem[],
+): ScriptBlockingRow[] {
   const byUrl = new Map<string, ScriptBlockingRow>();
 
   for (const item of items) {

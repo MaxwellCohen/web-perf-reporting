@@ -28,8 +28,26 @@ const LAB_BANDS: Record<
   "largest-contentful-paint": { good: 2500, poor: 4000, unit: "ms" },
   "total-blocking-time": { good: 200, poor: 600, unit: "ms" },
   "cumulative-layout-shift": { good: 0.1, poor: 0.25, unit: "cls" },
-  "speed-index": { good: 3400, poor: 5800, unit: "ms" },
+  "speed-index": { good: 3387, poor: 5800, unit: "ms" },
 };
+
+/** Lighthouse desktop score curves (p10 / median); other metrics share the mobile bands. */
+const DESKTOP_LAB_BANDS: Partial<
+  Record<MetricAuditId, { good: number; poor: number }>
+> = {
+  "first-contentful-paint": { good: 934, poor: 1600 },
+  "largest-contentful-paint": { good: 1200, poor: 2400 },
+  "total-blocking-time": { good: 150, poor: 350 },
+  "speed-index": { good: 1311, poor: 2300 },
+};
+
+function labBandFor(auditId: MetricAuditId, label: string) {
+  const band = LAB_BANDS[auditId];
+  const desktop = /desktop/i.test(label)
+    ? DESKTOP_LAB_BANDS[auditId]
+    : undefined;
+  return desktop ? { ...band, ...desktop } : band;
+}
 
 const PHASE_COLOR: Record<string, string> = {
   timeToFirstByte: "hsl(var(--chart-5))",
@@ -283,7 +301,7 @@ function MetricScale({
   /** Render each part as a direct item of the parent's row subgrid (see `SUMMARY_ROWS_PER_RUN`). */
   subgrid?: boolean;
 }) {
-  const band = LAB_BANDS[auditId];
+  const band = labBandFor(auditId, label);
   const value = audit.numericValue;
   if (value == null || !Number.isFinite(value)) return null;
 

@@ -23,7 +23,11 @@ export function AuditViewportViz({ rows }: { rows: DetailTableItem[] }) {
         const items = rowItems(row);
         const node = items[0]?.node as { snippet?: string } | undefined;
         const content = viewportContentFromSnippet(node?.snippet);
-        const pass = items.length > 0 && !!content;
+        const score = (row.auditResult as { score?: number | null } | undefined)
+          ?.score;
+        // Lighthouse also fails the insight for tags that are not mobile optimized.
+        const pass =
+          items.length > 0 && !!content && (score == null || score >= 0.9);
         return (
           <div
             key={`${label}-${index}`}
@@ -31,7 +35,9 @@ export function AuditViewportViz({ rows }: { rows: DetailTableItem[] }) {
             data-testid="viewport-row"
           >
             {multi ? (
-              <span className="text-xs font-medium uppercase text-muted-foreground">{label}</span>
+              <span className="text-xs font-medium uppercase text-muted-foreground">
+                {label}
+              </span>
             ) : null}
             <span
               className={cn(
@@ -41,7 +47,11 @@ export function AuditViewportViz({ rows }: { rows: DetailTableItem[] }) {
                   : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300",
               )}
             >
-              {pass ? "✓ Viewport meta tag" : "✗ No viewport meta tag"}
+              {pass
+                ? "✓ Viewport meta tag"
+                : content
+                  ? "✗ Viewport not optimized for mobile"
+                  : "✗ No viewport meta tag"}
             </span>
             {content ? (
               <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
