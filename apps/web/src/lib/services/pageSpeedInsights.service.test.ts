@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const captureExceptionMock = vi.fn();
-const executeMock = vi.fn();
-const whereMock = vi.fn(() => ({ execute: executeMock }));
-const deleteMock = vi.fn((_arg: unknown) => ({ where: whereMock }));
-const findFirstMock = vi.fn();
+const captureExceptionMock = vi.fn<(error: unknown) => void>();
+const executeMock = vi.fn<() => Promise<unknown>>();
+const whereMock = vi.fn<() => { execute: typeof executeMock }>(() => ({ execute: executeMock }));
+const deleteMock = vi.fn<(arg: unknown) => { where: typeof whereMock }>(() => ({
+  where: whereMock,
+}));
+const findFirstMock = vi.fn<(opts: unknown) => unknown>();
 
 vi.mock("@sentry/nextjs", () => ({
   captureException: (error: unknown) => captureExceptionMock(error),

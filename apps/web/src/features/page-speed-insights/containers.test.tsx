@@ -122,8 +122,8 @@ vi.mock("@/components/ui/accordion", () => {
 });
 
 let pageSpeedItems: any[] = [];
-const analyzeAuditsMock = vi.fn();
-const extractJSMetricsMock = vi.fn();
+const analyzeAuditsMock = vi.fn<(items: unknown[]) => unknown>();
+const extractJSMetricsMock = vi.fn<(item: { label: string }) => unknown>();
 
 vi.mock("@/features/page-speed-insights/PageSpeedContext", () => ({
   usePageSpeedItems: () => pageSpeedItems,
@@ -318,7 +318,7 @@ vi.mock("@/features/page-speed-insights/lh-categories/table/EntitiesTable", () =
 }));
 
 vi.mock("@/features/page-speed-insights/javascript-metrics/extractJSMetrics", () => ({
-  extractJSMetrics: (item: unknown) => extractJSMetricsMock(item),
+  extractJSMetrics: (item: { label: string }) => extractJSMetricsMock(item),
 }));
 
 vi.mock("@/features/page-speed-insights/JSUsage/JSUsageSection", () => ({

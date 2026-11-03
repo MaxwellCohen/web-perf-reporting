@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const captureMock = vi.fn();
+const captureMock = vi.fn<(...args: unknown[]) => void>();
 let pathnameValue: string | null = "/reports";
 let searchParamsValue = new URLSearchParams("device=mobile");
 

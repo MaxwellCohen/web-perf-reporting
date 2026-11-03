@@ -33,7 +33,7 @@ vi.mock("lucide-react", () => ({
 
 describe("LhFileInput", () => {
   it("renders file upload input when no files", () => {
-    const setJsonFiles = vi.fn();
+    const setJsonFiles = vi.fn<() => void>();
     const { container } = render(<LhFileInput jsonFiles={[]} setJsonFiles={setJsonFiles} />);
     expect(container.textContent).toContain("Upload JSON Files");
     expect(container.querySelector("#json-file")).toHaveAttribute("type", "file");
@@ -41,7 +41,7 @@ describe("LhFileInput", () => {
   });
 
   it("renders uploaded files when present", () => {
-    const setJsonFiles = vi.fn();
+    const setJsonFiles = vi.fn<() => void>();
     const file = new File(["{}"], "report.json", { type: "application/json" });
     const { container } = render(
       <LhFileInput jsonFiles={[{ name: "Report", file }]} setJsonFiles={setJsonFiles} />,
@@ -54,7 +54,7 @@ describe("LhFileInput", () => {
   });
 
   it("calls setJsonFiles when file selected", () => {
-    const setJsonFiles = vi.fn();
+    const setJsonFiles = vi.fn<() => void>();
     const { container } = render(<LhFileInput jsonFiles={[]} setJsonFiles={setJsonFiles} />);
     const file = new File(["{}"], "a.json", { type: "application/json" });
     fireEvent.change(container.querySelector("#json-file")!, { target: { files: [file] } });
@@ -62,7 +62,7 @@ describe("LhFileInput", () => {
   });
 
   it("calls setJsonFiles when file name changed", () => {
-    const setJsonFiles = vi.fn();
+    const setJsonFiles = vi.fn<() => void>();
     const file = new File(["{}"], "a.json", { type: "application/json" });
     const { container } = render(
       <LhFileInput jsonFiles={[{ name: "A", file }]} setJsonFiles={setJsonFiles} />,
@@ -74,7 +74,7 @@ describe("LhFileInput", () => {
   });
 
   it("calls setJsonFiles when remove clicked", () => {
-    const setJsonFiles = vi.fn();
+    const setJsonFiles = vi.fn<() => void>();
     const file = new File(["{}"], "a.json", { type: "application/json" });
     const { container } = render(
       <LhFileInput jsonFiles={[{ name: "A", file }]} setJsonFiles={setJsonFiles} />,

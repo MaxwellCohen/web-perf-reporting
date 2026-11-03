@@ -8,7 +8,7 @@ import { LhInputForm } from "@/components/lh/LhInputForm";
 const lhFormMocksPromise = vi.hoisted(() => import("./input-form-test-mocks"));
 
 vi.mock("@/components/lh/input-form-action", () => ({
-  executeSubmit: vi.fn().mockResolvedValue({ error: null, success: false }),
+  executeSubmit: vi.fn<() => Promise<unknown>>().mockResolvedValue({ error: null, success: false }),
 }));
 
 vi.mock("@/components/ui/tabs", async () => (await lhFormMocksPromise).tabsMock);

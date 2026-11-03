@@ -6,7 +6,7 @@ import {
 } from "@/features/page-speed-insights/lh-categories/table/RenderNode";
 
 vi.mock("@/features/page-speed-insights/PageSpeedContext", () => ({
-  useFullPageScreenshots: vi.fn(() => ({})),
+  useFullPageScreenshots: vi.fn<() => object>(() => ({})),
 }));
 
 vi.mock("@/features/page-speed-insights/RenderJSONDetails", () => ({

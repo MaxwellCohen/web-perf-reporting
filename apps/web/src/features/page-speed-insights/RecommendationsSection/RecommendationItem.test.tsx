@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { RecommendationItem } from "@/features/page-speed-insights/RecommendationsSection/RecommendationItem";
 
 vi.mock("@/features/page-speed-insights/PageSpeedContext", () => ({
-  usePageSpeedItems: vi.fn(() => []),
+  usePageSpeedItems: vi.fn<() => unknown[]>(() => []),
 }));
 
 vi.mock("react-markdown", () => ({

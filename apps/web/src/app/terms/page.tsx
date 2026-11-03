@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { PRIVACY_ISSUES_URL, LegalPage } from "@/components/legal/LegalPage";
 
@@ -56,7 +57,7 @@ export default function TermsPage() {
 
       <h2>Privacy</h2>
       <p>
-        See our <a href="/privacy">Privacy Policy</a> for how data is handled.
+        See our <Link href="/privacy">Privacy Policy</Link> for how data is handled.
       </p>
 
       <h2>Contact</h2>

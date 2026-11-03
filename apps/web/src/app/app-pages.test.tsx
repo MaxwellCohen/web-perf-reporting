@@ -1,9 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const updateUrlMock = vi.fn();
-const requestPageSpeedDataMock = vi.fn();
-const redirectMock = vi.fn();
+const updateUrlMock = vi.fn<(value: string | undefined) => string | undefined>();
+const requestPageSpeedDataMock = vi.fn<(value: string) => Promise<string>>();
+const redirectMock = vi.fn<(path: string) => void>();
 
 vi.mock("next/link", () => ({
   default: ({

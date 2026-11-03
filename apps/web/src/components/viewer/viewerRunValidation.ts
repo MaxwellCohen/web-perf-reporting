@@ -33,10 +33,7 @@ export function validateRun(run: ViewerRunState): RunValidation {
     if (!value) return { status: "empty" };
     try {
       const url = new URL(value);
-      if (
-        url.hostname === "pagespeed.web.dev" &&
-        url.pathname.startsWith("/analysis/")
-      ) {
+      if (url.hostname === "pagespeed.web.dev" && url.pathname.startsWith("/analysis/")) {
         return { status: "valid", message: "Valid PSI URL" };
       }
     } catch {

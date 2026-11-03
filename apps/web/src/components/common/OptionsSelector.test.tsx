@@ -3,7 +3,10 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { OptionsSelector } from "@/components/common/OptionsSelector";
 
-const chartSelectorSpy = vi.fn();
+const chartSelectorSpy =
+  vi.fn<
+    (props: { id: string; options: unknown[]; onValueChange: (value: string) => void }) => void
+  >();
 
 vi.mock("@/components/common/ChartSelector", () => ({
   ChartSelector: ({

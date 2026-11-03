@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import type { StockCellContext } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
@@ -24,8 +23,8 @@ const columnHelper = createColumnHelper<TreeMapNode>();
 
 const expanderColumn = columnHelper.display({
   id: "expander",
-  header: ExpandAll as never,
-  cell: ExpandRow as never,
+  header: ExpandAll,
+  cell: ExpandRow,
   size: 40,
   meta: {
     className: "",

@@ -44,24 +44,21 @@ function extractValueLabelPairs<T, TData extends RowData = RowData>(
   labelColumnId: string = "label",
 ): ValueLabelPair<T>[] {
   const leafRows = row.getLeafRows();
-  return (
-    leafRows
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((r) => {
-        const label =
-          (r.original as { label?: string }).label ?? (r.getValue(labelColumnId) as string);
-        return {
-          value: r.getValue(columnId) as T,
-          label,
-        };
-      })
-      .filter((v): v is ValueLabelPair<T> => {
-        // Filter out undefined, null, and NaN values
-        if (v.value === undefined || v.value === null) return false;
-        if (typeof v.value === "number" && (isNaN(v.value) || !isFinite(v.value))) return false;
-        return true;
-      })
-  );
+  return leafRows
+    .map((r) => {
+      const label =
+        (r.original as { label?: string }).label ?? (r.getValue(labelColumnId) as string);
+      return {
+        value: r.getValue(columnId) as T,
+        label,
+      };
+    })
+    .filter((v): v is ValueLabelPair<T> => {
+      // Filter out undefined, null, and NaN values
+      if (v.value === undefined || v.value === null) return false;
+      if (typeof v.value === "number" && (isNaN(v.value) || !isFinite(v.value))) return false;
+      return true;
+    });
 }
 
 function valueLabelUniquesOrNull<T, TData extends RowData = RowData>(
@@ -110,14 +107,14 @@ function singleUniqueValueAggregatedBranch<T>(
   return renderSolo(only);
 }
 
-function getAggregatedValueLabelContext<T>(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  info: any,
+/** Minimal slice of TanStack's cell context that aggregated renderers read. */
+type AggregatedCellInfo<TData extends RowData> = { row: StockRow<TData> };
+
+function getAggregatedValueLabelContext<T, TData extends RowData>(
+  info: AggregatedCellInfo<TData>,
   columnId: string,
 ) {
-  const uniques = valueLabelUniquesOrNull<T, RowData>(info.row as StockRow<RowData>, columnId);
-  if (!uniques) return null;
-  return uniques;
+  return valueLabelUniquesOrNull<T, TData>(info.row, columnId);
 }
 
 function groupValueLabelPairs<T>(pairs: ValueLabelPair<T>[]): Map<T, string[]> {
@@ -161,10 +158,10 @@ export function createNumericAggregatedCell(
   columnId: string,
   renderValue: (value: number) => React.ReactNode = (value) => <RenderMSValue value={value} />,
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, react/display-name
-  return (info: any): React.ReactNode => {
+  // eslint-disable-next-line react/display-name
+  return <TData extends RowData>(info: AggregatedCellInfo<TData>): React.ReactNode => {
     const row = info.row;
-    const valueLabelPairs = extractValueLabelPairs<number>(row, columnId);
+    const valueLabelPairs = extractValueLabelPairs<number, TData>(row, columnId);
 
     if (valueLabelPairs.length === 0) return "N/A";
 
@@ -220,9 +217,9 @@ export function createStringAggregatedCell(
   transformValue?: (value: string) => string,
   showAllDevicesLabel: boolean = true,
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, react/display-name
-  return (info: any): React.ReactNode => {
-    const uniques = getAggregatedValueLabelContext<string>(info, columnId);
+  // eslint-disable-next-line react/display-name
+  return <TData extends RowData>(info: AggregatedCellInfo<TData>): React.ReactNode => {
+    const uniques = getAggregatedValueLabelContext<string, TData>(info, columnId);
     if (!uniques) return "N/A";
 
     const { valueLabelPairs, uniqueValues, uniqueLabels } = uniques;
@@ -256,9 +253,9 @@ export function createStringAggregatedCell(
  * Creates an aggregated cell renderer for percentage values
  */
 export function createPercentageAggregatedCell(columnId: string, precision: number = 2) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, react/display-name
-  return (info: any): React.ReactNode => {
-    const uniques = getAggregatedValueLabelContext<number>(info, columnId);
+  // eslint-disable-next-line react/display-name
+  return <TData extends RowData>(info: AggregatedCellInfo<TData>): React.ReactNode => {
+    const uniques = getAggregatedValueLabelContext<number, TData>(info, columnId);
     if (!uniques) return "N/A";
 
     const { valueLabelPairs, uniqueValues, uniqueLabels } = uniques;
@@ -286,14 +283,13 @@ export function createPercentageAggregatedCell(columnId: string, precision: numb
  * Creates an aggregated cell renderer for report labels
  */
 export function createReportLabelAggregatedCell(labelColumnId: string = "label") {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, react/display-name
-  return (info: any): React.ReactNode => {
+  // eslint-disable-next-line react/display-name
+  return <TData extends RowData>(info: AggregatedCellInfo<TData>): React.ReactNode => {
     const row = info.row;
     const leafRows = row.getLeafRows();
     const values: string[] = leafRows
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((r: StockRow<RowData>) => r.getValue(labelColumnId))
-      .filter((v: unknown): v is string => typeof v === "string");
+      .map((r) => r.getValue(labelColumnId))
+      .filter((v): v is string => typeof v === "string");
 
     if (values.length === 0) return "N/A";
 
@@ -319,9 +315,9 @@ export function createBooleanAggregatedCell<TData extends RowData>(
   columnId: string,
   renderBoolean: (value: boolean) => React.ReactNode,
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, react/display-name
-  return (info: any): React.ReactNode => {
-    const row = info.row as StockRow<TData>;
+  // eslint-disable-next-line react/display-name
+  return (info: AggregatedCellInfo<TData>): React.ReactNode => {
+    const row = info.row;
     const uniques = valueLabelUniquesOrNull<boolean, TData>(row, columnId);
     if (!uniques) return "N/A";
 
@@ -366,9 +362,9 @@ export function createBooleanAggregatedCell<TData extends RowData>(
 export function createOriginsArrayAggregatedCell<TData extends RowData>(
   originsColumnId: string = "origins",
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, react/display-name
-  return (info: any): React.ReactNode => {
-    const row = info.row as StockRow<TData>;
+  // eslint-disable-next-line react/display-name
+  return (info: AggregatedCellInfo<TData>): React.ReactNode => {
+    const row = info.row;
     const leafRows = row.getLeafRows();
     const allOrigins: string[] = [];
 

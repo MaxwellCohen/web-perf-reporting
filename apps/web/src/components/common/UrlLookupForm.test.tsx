@@ -5,7 +5,7 @@ import { UrlLookupForm } from "@/components/common/UrlLookupForm";
 
 vi.mock("posthog-js", () => ({
   default: {
-    capture: vi.fn(),
+    capture: vi.fn<() => void>(),
   },
 }));
 

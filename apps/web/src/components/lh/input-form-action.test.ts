@@ -151,7 +151,7 @@ describe("executeSubmit", () => {
 
   describe("url tab", () => {
     it("returns success when URL returns valid JSON", async () => {
-      const mockFetch = vi.fn().mockResolvedValue({
+      const mockFetch = vi.fn<() => Promise<unknown>>().mockResolvedValue({
         ok: true,
         text: () => Promise.resolve('{"lighthouse": true}'),
       });
@@ -185,7 +185,7 @@ describe("executeSubmit", () => {
     });
 
     it("returns error when fetch fails", async () => {
-      const mockFetch = vi.fn().mockResolvedValue({
+      const mockFetch = vi.fn<() => Promise<unknown>>().mockResolvedValue({
         ok: false,
         statusText: "Not Found",
       });
@@ -207,7 +207,7 @@ describe("executeSubmit", () => {
     });
 
     it("returns error when URL returns invalid JSON", async () => {
-      const mockFetch = vi.fn().mockResolvedValue({
+      const mockFetch = vi.fn<() => Promise<unknown>>().mockResolvedValue({
         ok: true,
         text: () => Promise.resolve("not json"),
       });
@@ -231,7 +231,7 @@ describe("executeSubmit", () => {
 
   describe("non-Error throws", () => {
     it("returns unknown error for string throws", async () => {
-      const mockFetch = vi.fn().mockRejectedValue("string error");
+      const mockFetch = vi.fn<() => Promise<unknown>>().mockRejectedValue("string error");
       const formInputs: FormInputs = {
         jsonInputs: [],
         jsonFiles: [],

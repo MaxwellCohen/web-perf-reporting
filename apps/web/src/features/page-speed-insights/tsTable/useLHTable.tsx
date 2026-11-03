@@ -1,7 +1,4 @@
-import type {
-  StockColumnDef,
-  StockRow,
-} from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import type { StockRow } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { PageSpeedInsights } from "@/lib/schema";
 import { flexRender, useTable } from "@tanstack/react-table";
 import { Fragment } from "react";
@@ -24,7 +21,7 @@ import {
 import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
 import { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataItem";
 import { LH_AUDIT_TABLE_COLUMNS } from "@/features/page-speed-insights/tsTable/lhAuditTableColumns";
-import { lhTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
+import { standardTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 
 export function useLHTable(items: { item: PageSpeedInsights; label: string }[]) {
   const tableDataArr = (
@@ -49,9 +46,9 @@ export function useLHTable(items: { item: PageSpeedInsights; label: string }[]) 
       .flat(2) as TableDataItem[]
   ).filter((v) => v.auditRef.group !== "metrics");
   return useTable({
-    features: lhTableFeatures,
+    features: standardTableFeatures,
     data: tableDataArr,
-    columns: LH_AUDIT_TABLE_COLUMNS as StockColumnDef<TableDataItem>[],
+    columns: LH_AUDIT_TABLE_COLUMNS,
     manualPagination: true,
     manualExpanding: true,
     enableColumnFilters: true,

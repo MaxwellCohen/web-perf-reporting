@@ -174,7 +174,7 @@ describe("PageLoadTimeline", () => {
   });
 
   it("copies the filtered timeline as markdown", async () => {
-    const writeText = vi.fn().mockResolvedValue(undefined);
+    const writeText = vi.fn<(text: string) => Promise<void>>().mockResolvedValue(undefined);
     Object.defineProperty(navigator, "clipboard", {
       value: { writeText },
       writable: true,
@@ -188,7 +188,7 @@ describe("PageLoadTimeline", () => {
     await vi.waitFor(() => {
       expect(writeText).toHaveBeenCalledOnce();
     });
-    const markdown = writeText.mock.calls[0]?.[0] as string;
+    const markdown = writeText.mock.calls[0]?.[0];
     expect(markdown).toContain("# Page load timeline — Mobile");
     expect(markdown).toContain("### LCP");
     expect(markdown).not.toContain("data:image");

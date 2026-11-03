@@ -43,9 +43,9 @@ describe("PerformanceOptions", () => {
   it("renders options selectors", () => {
     const { container } = render(
       <PerformanceOptions
-        setChartType={vi.fn()}
-        setReportScope={vi.fn()}
-        setDeviceType={vi.fn()}
+        setChartType={vi.fn<() => void>()}
+        setReportScope={vi.fn<() => void>()}
+        setDeviceType={vi.fn<() => void>()}
         chartKeys={["bar", "line"]}
       />,
     );
@@ -55,29 +55,28 @@ describe("PerformanceOptions", () => {
   });
 
   it("calls setChartType when chart type changes", () => {
-    const setChartType = vi.fn();
+    const setChartType = vi.fn<() => void>();
     const { container } = render(
       <PerformanceOptions
         setChartType={setChartType}
-        setReportScope={vi.fn()}
-        setDeviceType={vi.fn()}
+        setReportScope={vi.fn<() => void>()}
+        setDeviceType={vi.fn<() => void>()}
         chartKeys={["bar", "line"]}
       />,
     );
     const chartOptions = container.querySelector('[data-testid="options-Chart-type"]');
     const barButton = chartOptions?.querySelector("button");
-    if (barButton) {
-      fireEvent.click(barButton);
-      expect(setChartType).toHaveBeenCalled();
-    }
+    if (!barButton) throw new Error("Chart type button not found");
+    fireEvent.click(barButton);
+    expect(setChartType).toHaveBeenCalled();
   });
 
   it("renders children when provided", () => {
     const { container } = render(
       <PerformanceOptions
-        setChartType={vi.fn()}
-        setReportScope={vi.fn()}
-        setDeviceType={vi.fn()}
+        setChartType={vi.fn<() => void>()}
+        setReportScope={vi.fn<() => void>()}
+        setDeviceType={vi.fn<() => void>()}
         chartKeys={[]}
       >
         <div data-testid="child">Child content</div>
@@ -88,12 +87,12 @@ describe("PerformanceOptions", () => {
   });
 
   it("renders date range section when setDateRange is provided", () => {
-    const setDateRange = vi.fn();
+    const setDateRange = vi.fn<() => void>();
     const { container } = render(
       <PerformanceOptions
-        setChartType={vi.fn()}
-        setReportScope={vi.fn()}
-        setDeviceType={vi.fn()}
+        setChartType={vi.fn<() => void>()}
+        setReportScope={vi.fn<() => void>()}
+        setDeviceType={vi.fn<() => void>()}
         chartKeys={[]}
         dateRange={{ startDate: null, endDate: null }}
         setDateRange={setDateRange}
@@ -106,15 +105,15 @@ describe("PerformanceOptions", () => {
   it("displays formatted date range when both dates provided", () => {
     const { container } = render(
       <PerformanceOptions
-        setChartType={vi.fn()}
-        setReportScope={vi.fn()}
-        setDeviceType={vi.fn()}
+        setChartType={vi.fn<() => void>()}
+        setReportScope={vi.fn<() => void>()}
+        setDeviceType={vi.fn<() => void>()}
         chartKeys={[]}
         dateRange={{
           startDate: "2024-01-15",
           endDate: "2024-01-31",
         }}
-        setDateRange={vi.fn()}
+        setDateRange={vi.fn<() => void>()}
       />,
     );
     expect(container.textContent).toContain("Jan");
@@ -122,12 +121,12 @@ describe("PerformanceOptions", () => {
   });
 
   it("calls setDateRange when start date changes", () => {
-    const setDateRange = vi.fn();
+    const setDateRange = vi.fn<() => void>();
     const { container } = render(
       <PerformanceOptions
-        setChartType={vi.fn()}
-        setReportScope={vi.fn()}
-        setDeviceType={vi.fn()}
+        setChartType={vi.fn<() => void>()}
+        setReportScope={vi.fn<() => void>()}
+        setDeviceType={vi.fn<() => void>()}
         chartKeys={[]}
         dateRange={{
           startDate: "2024-01-01",
@@ -145,12 +144,12 @@ describe("PerformanceOptions", () => {
   });
 
   it("calls setDateRange when end date changes", () => {
-    const setDateRange = vi.fn();
+    const setDateRange = vi.fn<() => void>();
     const { container } = render(
       <PerformanceOptions
-        setChartType={vi.fn()}
-        setReportScope={vi.fn()}
-        setDeviceType={vi.fn()}
+        setChartType={vi.fn<() => void>()}
+        setReportScope={vi.fn<() => void>()}
+        setDeviceType={vi.fn<() => void>()}
         chartKeys={[]}
         dateRange={{
           startDate: "2024-01-01",
@@ -170,15 +169,15 @@ describe("PerformanceOptions", () => {
   it("displays From date when only startDate provided", () => {
     const { container } = render(
       <PerformanceOptions
-        setChartType={vi.fn()}
-        setReportScope={vi.fn()}
-        setDeviceType={vi.fn()}
+        setChartType={vi.fn<() => void>()}
+        setReportScope={vi.fn<() => void>()}
+        setDeviceType={vi.fn<() => void>()}
         chartKeys={[]}
         dateRange={{
           startDate: "2024-06-15",
           endDate: null,
         }}
-        setDateRange={vi.fn()}
+        setDateRange={vi.fn<() => void>()}
       />,
     );
     expect(container.textContent).toContain("From");
@@ -187,15 +186,15 @@ describe("PerformanceOptions", () => {
   it("displays Until date when only endDate provided", () => {
     const { container } = render(
       <PerformanceOptions
-        setChartType={vi.fn()}
-        setReportScope={vi.fn()}
-        setDeviceType={vi.fn()}
+        setChartType={vi.fn<() => void>()}
+        setReportScope={vi.fn<() => void>()}
+        setDeviceType={vi.fn<() => void>()}
         chartKeys={[]}
         dateRange={{
           startDate: null,
           endDate: "2024-12-31",
         }}
-        setDateRange={vi.fn()}
+        setDateRange={vi.fn<() => void>()}
       />,
     );
     expect(container.textContent).toContain("Until");

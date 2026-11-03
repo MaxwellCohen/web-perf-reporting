@@ -30,21 +30,26 @@ function DebouncedInput({
   debounce?: number;
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange">) {
   const [value, setValue] = React.useState(initialValue);
+  const [syncedValue, setSyncedValue] = React.useState(initialValue);
+  const timeoutRef = React.useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  React.useEffect(() => {
+  // Reset local state when the controlled value changes (render-time reset).
+  if (initialValue !== syncedValue) {
+    setSyncedValue(initialValue);
     setValue(initialValue);
-  }, [initialValue]);
+  }
 
-  React.useEffect(() => {
-    const timeout = setTimeout(() => {
-      onChange(value);
-    }, debounce);
+  // Cancel any pending emit on unmount.
+  React.useEffect(() => () => clearTimeout(timeoutRef.current), []);
 
-    return () => clearTimeout(timeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const next = e.target.value;
+    setValue(next);
+    clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => onChange(next), debounce);
+  }
 
-  return <Input {...props} value={value} onChange={(e) => setValue(e.target.value)} />;
+  return <Input {...props} value={value} onChange={handleChange} />;
 }
 
 DebouncedInput.displayName = "DebouncedInput";

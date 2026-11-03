@@ -31,7 +31,7 @@ import { LhUrlInput } from "@/components/lh/inputs/LhUrlInput";
 
 describe("LhUrlInput", () => {
   it("renders URL input", () => {
-    const setJsonUrl = vi.fn();
+    const setJsonUrl = vi.fn<() => void>();
     const { container } = render(<LhUrlInput jsonUrl="" setJsonUrl={setJsonUrl} />);
     expect(container.textContent).toContain("JSON URL");
     const input = container.querySelector("#json-url");
@@ -41,7 +41,7 @@ describe("LhUrlInput", () => {
   });
 
   it("displays current value", () => {
-    const setJsonUrl = vi.fn();
+    const setJsonUrl = vi.fn<() => void>();
     const { container } = render(
       <LhUrlInput jsonUrl="https://api.example.com/data.json" setJsonUrl={setJsonUrl} />,
     );
@@ -49,7 +49,7 @@ describe("LhUrlInput", () => {
   });
 
   it("calls setJsonUrl when input changed", async () => {
-    const setJsonUrl = vi.fn();
+    const setJsonUrl = vi.fn<() => void>();
     const { container } = render(<LhUrlInput jsonUrl="" setJsonUrl={setJsonUrl} />);
     await act(async () => {
       fireEvent.change(container.querySelector("#json-url")!, {

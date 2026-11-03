@@ -42,7 +42,7 @@ function getButton(container: HTMLElement, name: string | RegExp) {
 
 describe("LhTextInput", () => {
   it("renders default state with one entry", () => {
-    const setJsonInputs = vi.fn();
+    const setJsonInputs = vi.fn<() => void>();
     const { container } = render(
       <LhTextInput jsonInputs={[{ name: "", content: "" }]} setJsonInputs={setJsonInputs} />,
     );
@@ -52,7 +52,7 @@ describe("LhTextInput", () => {
   });
 
   it("renders Add Another JSON Entry button", () => {
-    const setJsonInputs = vi.fn();
+    const setJsonInputs = vi.fn<() => void>();
     const { container } = render(
       <LhTextInput jsonInputs={[{ name: "", content: "" }]} setJsonInputs={setJsonInputs} />,
     );
@@ -60,7 +60,7 @@ describe("LhTextInput", () => {
   });
 
   it("calls setJsonInputs when add button clicked", () => {
-    const setJsonInputs = vi.fn();
+    const setJsonInputs = vi.fn<() => void>();
     const { container } = render(
       <LhTextInput jsonInputs={[{ name: "", content: "" }]} setJsonInputs={setJsonInputs} />,
     );
@@ -69,7 +69,7 @@ describe("LhTextInput", () => {
   });
 
   it("calls setJsonInputs when remove clicked", () => {
-    const setJsonInputs = vi.fn();
+    const setJsonInputs = vi.fn<() => void>();
     const { container } = render(
       <LhTextInput jsonInputs={[{ name: "A", content: "{}" }]} setJsonInputs={setJsonInputs} />,
     );
@@ -79,7 +79,7 @@ describe("LhTextInput", () => {
   });
 
   it("calls setJsonInputs when name or content changed", () => {
-    const setJsonInputs = vi.fn();
+    const setJsonInputs = vi.fn<() => void>();
     const { container } = render(
       <LhTextInput jsonInputs={[{ name: "", content: "" }]} setJsonInputs={setJsonInputs} />,
     );

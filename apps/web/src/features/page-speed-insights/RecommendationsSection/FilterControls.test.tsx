@@ -32,11 +32,11 @@ const defaultProps = {
   priorities: ["high", "medium", "low"],
   selectedCategories: [] as string[],
   selectedPriorities: [] as string[],
-  onCategoriesChange: vi.fn(),
-  onPrioritiesChange: vi.fn(),
+  onCategoriesChange: vi.fn<() => void>(),
+  onPrioritiesChange: vi.fn<() => void>(),
   filteredCount: 5,
   totalCount: 10,
-  onToggleAll: vi.fn(),
+  onToggleAll: vi.fn<() => void>(),
   expandedCount: 0,
   totalFiltered: 5,
 };
@@ -62,7 +62,7 @@ describe("FilterControls", () => {
   });
 
   it("calls onToggleAll when toggle button is clicked", () => {
-    const onToggleAll = vi.fn();
+    const onToggleAll = vi.fn<() => void>();
     const { container } = render(<FilterControls {...defaultProps} onToggleAll={onToggleAll} />);
     const expandButton = container.querySelector("button");
     fireEvent.click(expandButton!);
@@ -70,8 +70,8 @@ describe("FilterControls", () => {
   });
 
   it("calls onCategoriesChange and onPrioritiesChange when Reset Filters clicked", () => {
-    const onCategoriesChange = vi.fn();
-    const onPrioritiesChange = vi.fn();
+    const onCategoriesChange = vi.fn<() => void>();
+    const onPrioritiesChange = vi.fn<() => void>();
     const { container } = render(
       <FilterControls
         {...defaultProps}
@@ -89,7 +89,7 @@ describe("FilterControls", () => {
   });
 
   it("calls onCategoriesChange when category dropdown Clear clicked", () => {
-    const onCategoriesChange = vi.fn();
+    const onCategoriesChange = vi.fn<() => void>();
     const { container } = render(
       <FilterControls
         {...defaultProps}
@@ -109,7 +109,7 @@ describe("FilterControls", () => {
   });
 
   it("calls onPrioritiesChange when priority dropdown Clear clicked", () => {
-    const onPrioritiesChange = vi.fn();
+    const onPrioritiesChange = vi.fn<() => void>();
     const { container } = render(
       <FilterControls
         {...defaultProps}
@@ -129,7 +129,7 @@ describe("FilterControls", () => {
   });
 
   it("removes category when unchecked", () => {
-    const onCategoriesChange = vi.fn();
+    const onCategoriesChange = vi.fn<() => void>();
     const { container } = render(
       <FilterControls
         {...defaultProps}

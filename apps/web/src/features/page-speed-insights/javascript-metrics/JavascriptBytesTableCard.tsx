@@ -98,5 +98,10 @@ export function JavascriptBytesTableCard({
     return null;
   }
 
-  return <TableCard title={title} table={table} showPagination />;
+  return (
+    <TableCard title={title} className="md:col-span-2 lg:col-span-3">
+      <TableCard.Table table={table} />
+      <TableCard.Pagination table={table} />
+    </TableCard>
+  );
 }

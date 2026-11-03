@@ -164,7 +164,7 @@ describe("copyTreemapNodeName", () => {
   });
 
   it("writes the node name to the clipboard", async () => {
-    const writeText = vi.fn().mockResolvedValue(undefined);
+    const writeText = vi.fn<() => void>().mockResolvedValue(undefined);
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
       value: { writeText },
@@ -178,7 +178,7 @@ describe("copyTreemapNodeName", () => {
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
       value: {
-        writeText: vi.fn().mockRejectedValue(new Error("denied")),
+        writeText: vi.fn<() => void>().mockRejectedValue(new Error("denied")),
       },
     });
 

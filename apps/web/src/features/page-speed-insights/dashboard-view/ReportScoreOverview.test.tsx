@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const usePageSpeedItemsMock = vi.fn();
+const usePageSpeedItemsMock = vi.fn<() => unknown>();
 
 vi.mock("@/features/page-speed-insights/PageSpeedContext", () => ({
   usePageSpeedItems: () => usePageSpeedItemsMock(),

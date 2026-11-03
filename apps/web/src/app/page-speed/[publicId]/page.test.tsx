@@ -24,7 +24,7 @@ vi.mock("next/dynamic", () => ({
   },
 }));
 
-const usePageSpeedInsightsQueryMock = vi.fn();
+const usePageSpeedInsightsQueryMock = vi.fn<(publicId: string) => unknown>();
 
 vi.mock("@/features/page-speed-insights/data/usePageSpeedInsightsQuery", () => ({
   usePageSpeedInsightsQueryByPublicId: (publicId: string) =>

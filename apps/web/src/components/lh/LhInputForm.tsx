@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useState } from "react";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { executeSubmit, type FormInputs, type FormState } from "@/components/lh/input-form-action";
+import { executeSubmit, type FormState } from "@/components/lh/input-form-action";
 import type { LhJsonFileEntry, LhJsonTextEntry } from "@/components/lh/types";
 import { InputFormAlert } from "@/components/lh/inputs/InputFormAlert";
 import { LhFileInput } from "@/components/lh/inputs/LhFileInput";
@@ -27,21 +27,8 @@ export function LhInputForm() {
   const [jsonUrl, setJsonUrl] = useState("");
   const [activeTab, setActiveTab] = useState("text");
 
-  const formStateRef = useRef<FormInputs>({
-    jsonInputs,
-    jsonFiles,
-    jsonUrl,
-    activeTab,
-  });
-
-  useEffect(() => {
-    formStateRef.current = { jsonInputs, jsonFiles, jsonUrl, activeTab };
-  }, [jsonInputs, jsonFiles, jsonUrl, activeTab]);
-
-  const submitAction = async (prevState: FormState, formData: FormData) => {
-    void formData;
-    return executeSubmit(prevState, formStateRef.current, fetch);
-  };
+  const submitAction = async (prevState: FormState) =>
+    executeSubmit(prevState, { jsonInputs, jsonFiles, jsonUrl, activeTab }, fetch);
 
   const [state, formAction, isPending] = useActionState(submitAction, {
     error: null,

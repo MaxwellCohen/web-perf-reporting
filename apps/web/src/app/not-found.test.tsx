@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import NotFound from "@/app/not-found";
 
-const redirect = vi.fn();
+const redirect = vi.fn<(path: string) => void>();
 
 vi.mock("next/navigation", () => ({
   redirect: (path: string) => redirect(path),

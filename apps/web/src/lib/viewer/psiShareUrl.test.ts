@@ -46,7 +46,9 @@ describe("parsePsiShareUrl", () => {
 
 describe("fetchPsiShareHtml", () => {
   it("returns HTML from an allowed share URL", async () => {
-    const fetchFn = vi.fn().mockResolvedValue(new Response("<html>ok</html>", { status: 200 }));
+    const fetchFn = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(new Response("<html>ok</html>", { status: 200 }));
     await expect(fetchPsiShareHtml(parsePsiShareUrl(SHARE), fetchFn)).resolves.toBe(
       "<html>ok</html>",
     );
@@ -59,7 +61,7 @@ describe("fetchPsiShareHtml", () => {
   it("follows redirects that stay on pagespeed.web.dev", async () => {
     const next = "https://pagespeed.web.dev/analysis/https-example-com/next";
     const fetchFn = vi
-      .fn()
+      .fn<typeof fetch>()
       .mockResolvedValueOnce(new Response(null, { status: 302, headers: { location: next } }))
       .mockResolvedValueOnce(new Response("<html>next</html>", { status: 200 }));
 
@@ -72,7 +74,7 @@ describe("fetchPsiShareHtml", () => {
   it("upgrades http redirect locations on pagespeed.web.dev", async () => {
     const next = "http://pagespeed.web.dev/analysis/https-example-com/next";
     const fetchFn = vi
-      .fn()
+      .fn<typeof fetch>()
       .mockResolvedValueOnce(new Response(null, { status: 302, headers: { location: next } }))
       .mockResolvedValueOnce(new Response("<html>next</html>", { status: 200 }));
 
@@ -85,7 +87,7 @@ describe("fetchPsiShareHtml", () => {
   });
 
   it("rejects redirects off the allowlist", async () => {
-    const fetchFn = vi.fn().mockResolvedValue(
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(
       new Response(null, {
         status: 302,
         headers: { location: "https://evil.example/analysis/abc" },

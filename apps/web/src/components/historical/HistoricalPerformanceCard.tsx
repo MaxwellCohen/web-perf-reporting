@@ -1,7 +1,7 @@
 "use client";
 import { Card } from "@/components/ui/card";
 import { CruxHistoryItem } from "@/lib/schema";
-import { useContext, useMemo } from "react";
+import { useContext } from "react";
 import { HistoricalPerformanceChartData } from "@/components/common/ChartSettings";
 import dynamic from "next/dynamic";
 import { ChartFallback } from "@/components/common/ChartFallback";
@@ -35,23 +35,17 @@ export function HistoricalPerformanceCard({
 }) {
   const ChartType = useContext(CurrentPerformanceChartContext);
 
-  const chartData: HistoricalPerformanceChartData[] = useMemo(() => {
-    if (!histogramData?.length) {
-      return [];
-    }
-
-    return histogramData
-      .map((period) => {
-        return {
-          date: period.end_date,
-          good: period.good_density ?? 0,
-          ni: period.ni_density ?? 0,
-          poor: period.poor_density ?? 0,
-          ...period,
-        };
-      })
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [histogramData]);
+  const chartData: HistoricalPerformanceChartData[] = (histogramData ?? [])
+    .map((period) => {
+      return {
+        date: period.end_date,
+        good: period.good_density ?? 0,
+        ni: period.ni_density ?? 0,
+        poor: period.poor_density ?? 0,
+        ...period,
+      };
+    })
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   const Chart = ChartMap[ChartType] ?? HistoricalPerformanceAreaChart;
   if (!chartData.length) {
     return null;

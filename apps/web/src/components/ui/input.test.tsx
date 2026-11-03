@@ -25,7 +25,7 @@ describe("DebouncedInput", () => {
   });
 
   it("emits changes after the debounce interval", () => {
-    const onChange = vi.fn();
+    const onChange = vi.fn<() => void>();
 
     const { container } = render(
       <DebouncedInput aria-label="Search" value="" onChange={onChange} debounce={10} />,
@@ -43,7 +43,7 @@ describe("DebouncedInput", () => {
   });
 
   it("syncs its local value when the controlled prop changes", () => {
-    const onChange = vi.fn();
+    const onChange = vi.fn<() => void>();
     const { container, rerender } = render(
       <DebouncedInput aria-label="Search" value="first" onChange={onChange} />,
     );

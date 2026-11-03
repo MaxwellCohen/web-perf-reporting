@@ -55,5 +55,9 @@ export function TaskSummaryCard({ metrics }: TaskSummaryCardProps) {
     return null;
   }
 
-  return <TableCard title="Task Summary" table={table} className="md:col-span-2 lg:col-span-3" />;
+  return (
+    <TableCard title="Task Summary" className="md:col-span-2 lg:col-span-3">
+      <TableCard.Table table={table} />
+    </TableCard>
+  );
 }

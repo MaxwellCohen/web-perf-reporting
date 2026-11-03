@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`LoadingMessage > increments elapsed time and advances analysis stages over time 1`] = `
+exports[`LoadingMessage > increments elapsed time and advances analysis stages over time > after 1s 1`] = `
 <div
   aria-busy="true"
   aria-label="Generating PageSpeed Insights report"
@@ -176,7 +176,7 @@ exports[`LoadingMessage > increments elapsed time and advances analysis stages o
 </div>
 `;
 
-exports[`LoadingMessage > increments elapsed time and advances analysis stages over time 2`] = `
+exports[`LoadingMessage > increments elapsed time and advances analysis stages over time > after 6s 1`] = `
 <div
   aria-busy="true"
   aria-label="Generating PageSpeed Insights report"
@@ -366,7 +366,7 @@ exports[`LoadingMessage > increments elapsed time and advances analysis stages o
 </div>
 `;
 
-exports[`LoadingMessage > increments elapsed time and advances analysis stages over time 3`] = `
+exports[`LoadingMessage > increments elapsed time and advances analysis stages over time > after 11s 1`] = `
 <div
   aria-busy="true"
   aria-label="Generating PageSpeed Insights report"

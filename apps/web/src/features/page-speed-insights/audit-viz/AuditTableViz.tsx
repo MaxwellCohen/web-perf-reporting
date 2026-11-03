@@ -3,7 +3,6 @@
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import { getAuditId } from "@/features/page-speed-insights/lh-categories/table/detailTableData";
 import { ImageDeliveryCause } from "@/features/page-speed-insights/ImageDeliveryCause";
-import type { AuditResult } from "@/lib/schema";
 import { getNumber } from "@/lib/utils";
 import { formatBytes } from "@/features/page-speed-insights/shared/format";
 import { AuditBarChart } from "./AuditBarChart";
@@ -80,7 +79,7 @@ export function AuditTableViz({ rows }: { rows: DetailTableItem[] }) {
   // total-byte-weight keeps only the page-size card; the table lists the largest transfers.
   if (auditId === "total-byte-weight") {
     const pageTotal = rows.map((row) => {
-      const numericValue = getNumber((row.auditResult as AuditResult | undefined)?.numericValue);
+      const numericValue = getNumber(row.auditResult?.numericValue);
       const fallback = (row.auditResult?.details?.items || []).reduce(
         (sum, item) => sum + (itemNumeric(item, ["totalBytes"]) ?? 0),
         0,
@@ -153,7 +152,7 @@ export function AuditTableViz({ rows }: { rows: DetailTableItem[] }) {
     const entries = rows
       .filter((row) => row.auditResult)
       .map((row) => ({
-        audit: row.auditResult as unknown as AuditResult,
+        audit: row.auditResult,
         label: row._userLabel || "Report",
       }));
     if (!entries.length) return null;

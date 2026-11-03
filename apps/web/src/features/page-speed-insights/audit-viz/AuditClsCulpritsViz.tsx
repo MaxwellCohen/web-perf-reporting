@@ -44,12 +44,20 @@ function formatCls(value: number): string {
   return value.toFixed(3);
 }
 
+function isNodeValue(value: unknown): value is NodeValue {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "type" in value &&
+    (value.type === "node" || value.type === "text")
+  );
+}
+
 function isTotalRow(item: TableItem): boolean {
   const node = item.node;
-  if (!node || typeof node !== "object") return false;
-  const value = (node as NodeValue).value;
-  const nodeLabel = (node as NodeValue).nodeLabel;
-  if ((node as NodeValue).type === "text" && typeof value === "string") {
+  if (!isNodeValue(node)) return false;
+  const { value, nodeLabel } = node;
+  if (node.type === "text" && typeof value === "string") {
     return value.trim().toLowerCase() === "total";
   }
   return typeof nodeLabel === "string" && nodeLabel.trim().toLowerCase() === "total";
@@ -96,8 +104,8 @@ function extraFromSubItem(raw: unknown): CulpritExtra | undefined {
     if (url) return { kind: "url", url };
   }
 
-  if (type === "node" || type === "text") {
-    const node = value as unknown as NodeValue;
+  if (isNodeValue(value)) {
+    const node = value;
     const label =
       (typeof node.nodeLabel === "string" && node.nodeLabel.trim()) ||
       (typeof node.selector === "string" && node.selector.trim()) ||
@@ -125,12 +133,11 @@ function nodeMeta(item: TableItem): {
   snippet?: string;
 } {
   const node = item.node;
-  if (node && typeof node === "object") {
-    const n = node as NodeValue;
+  if (isNodeValue(node)) {
     return {
       label: itemLabel(item, ["node"]),
-      selector: typeof n.selector === "string" ? n.selector : undefined,
-      snippet: typeof n.snippet === "string" ? n.snippet : undefined,
+      selector: node.selector,
+      snippet: node.snippet,
     };
   }
   return { label: itemLabel(item, ["node", "url"]) };
@@ -397,34 +404,19 @@ function ShiftList({ shifts, showCount }: { shifts: ShiftFinding[]; showCount?: 
   );
 }
 
-function ReportSection({
+function ReportSummary({
   reportLabel,
   summary,
-  shifts,
-  showHeader,
 }: {
   reportLabel: string;
   summary?: ClusterSummary;
-  shifts: ShiftFinding[];
-  showHeader: boolean;
 }) {
+  if (!summary) return null;
   return (
-    <section
-      className={cn(
-        "space-y-3",
-        showHeader && "rounded-lg border border-border/80 bg-muted/10 p-3",
-      )}
-      aria-label={showHeader ? `${reportLabel} layout shift culprits` : undefined}
-    >
-      {showHeader ? (
-        <h3 className="text-sm font-semibold tracking-wide text-foreground">{reportLabel}</h3>
-      ) : null}
-      {summary ? (
-        <AuditKpiStrip groups={[{ reportLabel, metrics: kpiMetricsFor(summary) }]} />
-      ) : null}
-      {summary ? <CauseMix breakdown={summary.causeBreakdown} /> : null}
-      <ShiftList shifts={shifts} showCount={!showHeader} />
-    </section>
+    <>
+      <AuditKpiStrip groups={[{ reportLabel, metrics: kpiMetricsFor(summary) }]} />
+      <CauseMix breakdown={summary.causeBreakdown} />
+    </>
   );
 }
 
@@ -462,22 +454,22 @@ export function AuditClsCulpritsViz({ rows }: { rows: DetailTableItem[] }) {
       {multiReport ? (
         <div className="grid gap-3 lg:grid-cols-2">
           {reportLabels.map((reportLabel) => (
-            <ReportSection
+            <section
               key={reportLabel}
-              reportLabel={reportLabel}
-              summary={summaryByLabel.get(reportLabel)}
-              shifts={shiftsByLabel.get(reportLabel) ?? []}
-              showHeader
-            />
+              className="space-y-3 rounded-lg border border-border/80 bg-muted/10 p-3"
+              aria-label={`${reportLabel} layout shift culprits`}
+            >
+              <h3 className="text-sm font-semibold tracking-wide text-foreground">{reportLabel}</h3>
+              <ReportSummary reportLabel={reportLabel} summary={summaryByLabel.get(reportLabel)} />
+              <ShiftList shifts={shiftsByLabel.get(reportLabel) ?? []} />
+            </section>
           ))}
         </div>
       ) : (
-        <ReportSection
-          reportLabel={reportLabels[0] || "Report"}
-          summary={summaries[0]}
-          shifts={shifts}
-          showHeader={false}
-        />
+        <section className="space-y-3">
+          <ReportSummary reportLabel={reportLabels[0] || "Report"} summary={summaries[0]} />
+          <ShiftList shifts={shifts} showCount />
+        </section>
       )}
     </div>
   );

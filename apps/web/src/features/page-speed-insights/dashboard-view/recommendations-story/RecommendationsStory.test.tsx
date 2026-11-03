@@ -10,7 +10,7 @@ let searchState = {
   priorities: [] as string[],
   expanded: [] as string[],
 };
-const patchDashboardSearch = vi.fn();
+const patchDashboardSearch = vi.fn<(patch: Record<string, unknown>) => void>();
 
 vi.mock("@/features/page-speed-insights/PageSpeedContext", () => ({
   usePageSpeedItems: () => items,

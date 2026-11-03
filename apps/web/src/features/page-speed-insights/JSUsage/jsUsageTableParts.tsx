@@ -3,13 +3,13 @@
 import { Button } from "@/components/ui/button";
 import { ChevronRightIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { RowData } from "@tanstack/react-table";
+import type { RowData, Table } from "@tanstack/react-table";
 import type { TreeMapNode } from "@/lib/schema";
 import { RenderBytesValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import type {
   StockCellContext,
+  StockFeatures,
   StockRow,
-  StockTable,
 } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 
 function ExpandToggleButton({
@@ -93,7 +93,11 @@ export function RenderBytesCell(info: StockCellContext<TreeMapNode, unknown>) {
   return <RenderBytesValue value={value} className="w-full text-right" />;
 }
 
-export function ExpandAll<TData extends RowData>({ table }: { table: StockTable<TData> }) {
+export function ExpandAll<TData extends RowData>({
+  table,
+}: {
+  table: Table<StockFeatures, TData>;
+}) {
   return (
     <ExpandToggleButton
       isExpanded={table.getIsAllRowsExpanded()}

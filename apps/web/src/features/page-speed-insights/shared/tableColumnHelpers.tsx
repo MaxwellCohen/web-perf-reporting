@@ -1,6 +1,9 @@
 import React, { type ComponentType } from "react";
 import type { RowData } from "@tanstack/react-table";
-import type { StockColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import type {
+  StockAnyColumnDef,
+  StockColumnDef,
+} from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import type { StockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import {
   RenderBytesValue,
@@ -16,6 +19,7 @@ import {
 import { ResourceUrlCell } from "@/features/page-speed-insights/shared/ResourceUrlCell";
 
 type ColumnDef<T extends RowData, TValue = unknown> = StockColumnDef<T, TValue>;
+type AnyColumnDef<T extends RowData> = StockAnyColumnDef<T>;
 type ColumnHelper<T extends RowData> = StockColumnHelper<T>;
 
 /** Placeholder for missing numeric / metric values in grouped metric tables */
@@ -47,17 +51,16 @@ export type NumericColumnOptions = {
   maxSize?: number;
 };
 
-function createBaseNumericColumn<T extends RowData, TValue = unknown>(
+function createBaseNumericColumn<T extends RowData>(
   columnHelper: ColumnHelper<T>,
   accessor: keyof T,
   header: string,
-  cell: ColumnDef<T, TValue>["cell"],
-  aggregatedCell: ColumnDef<T, TValue>["aggregatedCell"],
+  cell: ColumnDef<T, T[keyof T]>["cell"],
+  aggregatedCell: ColumnDef<T, T[keyof T]>["aggregatedCell"],
   sizeOptions?: Pick<NumericColumnOptions, "size" | "minSize" | "maxSize">,
-): ColumnDef<T, TValue> {
+): AnyColumnDef<T> {
   const id = String(accessor);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return columnHelper.accessor(accessor as any, {
+  return columnHelper.accessor((row) => row[accessor], {
     id,
     header,
     enableSorting: true,
@@ -86,11 +89,10 @@ export type TruncatedTextColumnOptions<T> = {
 export function createTruncatedTextColumn<T extends RowData>(
   columnHelper: ColumnHelper<T>,
   options: TruncatedTextColumnOptions<T>,
-): ColumnDef<T, unknown> {
+): AnyColumnDef<T> {
   const { accessor, id, header, maxWidthClass = "max-w-75", enableGrouping = true } = options;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return columnHelper.accessor(accessor as any, {
+  return columnHelper.accessor((row) => row[accessor], {
     id,
     header,
     enableSorting: true,
@@ -128,7 +130,7 @@ export type URLColumnOptions = {
 export function createURLColumn<T extends { url: string } & RowData>(
   columnHelper: ColumnHelper<T>,
   maxWidthClassOrOptions: string | URLColumnOptions = "max-w-75",
-): ColumnDef<T, unknown> {
+): AnyColumnDef<T> {
   const options: URLColumnOptions =
     typeof maxWidthClassOrOptions === "string"
       ? { maxWidthClass: maxWidthClassOrOptions }
@@ -144,8 +146,7 @@ export function createURLColumn<T extends { url: string } & RowData>(
     emptyLabel,
   } = options;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return columnHelper.accessor("url" as any, {
+  return columnHelper.accessor((row) => row.url, {
     id: "url",
     header,
     enableSorting: true,
@@ -185,7 +186,7 @@ export function createMSColumn<T extends RowData>(
   accessor: keyof T,
   header: string,
   options: NumericColumnOptions = {},
-): ColumnDef<T, unknown> {
+): AnyColumnDef<T> {
   const id = String(accessor);
   const cellFn = options.requirePositive
     ? createOptionalPositiveNumericCell
@@ -216,7 +217,7 @@ function createOptionalNumericColumn<T extends RowData>(
     minSize?: number;
     maxSize?: number;
   },
-): ColumnDef<T, unknown> {
+): AnyColumnDef<T> {
   const {
     accessor,
     header,
@@ -249,7 +250,7 @@ export function createBytesColumn<T extends RowData>(
   accessor: keyof T,
   header: string,
   options: NumericColumnOptions = {},
-): ColumnDef<T, unknown> {
+): AnyColumnDef<T> {
   return createOptionalNumericColumn(columnHelper, {
     accessor,
     header,
@@ -268,7 +269,7 @@ export function createPercentageColumn<T extends RowData>(
   accessor: keyof T,
   header: string,
   precisionOrOptions: number | (NumericColumnOptions & { precision?: number }) = 1,
-): ColumnDef<T, unknown> {
+): AnyColumnDef<T> {
   const options: NumericColumnOptions & { precision?: number } =
     typeof precisionOrOptions === "number" ? { precision: precisionOrOptions } : precisionOrOptions;
   const precision = options.precision ?? 1;
@@ -296,9 +297,8 @@ export function createPercentageColumn<T extends RowData>(
  */
 export function createReportColumn<T extends { label: string } & RowData>(
   columnHelper: ColumnHelper<T>,
-): ColumnDef<T, unknown> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return columnHelper.accessor("label" as any, {
+): AnyColumnDef<T> {
+  return columnHelper.accessor((row) => row.label, {
     id: "label",
     header: "Report",
     enableSorting: true,

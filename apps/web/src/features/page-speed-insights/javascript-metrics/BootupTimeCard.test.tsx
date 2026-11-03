@@ -2,7 +2,10 @@ import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/features/page-speed-insights/shared/TableCard", () => ({
-  TableCard: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  TableCard: Object.assign(({ children }: { children: React.ReactNode }) => <div>{children}</div>, {
+    Table: () => null,
+    Pagination: () => null,
+  }),
 }));
 
 vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", () => ({

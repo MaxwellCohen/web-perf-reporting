@@ -2,7 +2,7 @@
 import { CruxReport } from "@/lib/schema";
 import { formatCruxReport, formatDate, groupBy } from "@/lib/utils";
 import { CurrentPerformanceChartContext } from "@/components/latest-crux/PerformanceCard";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { LoadingMessage } from "@/components/common/LoadingMessage";
 
 import {
@@ -61,41 +61,29 @@ export function HistoricalDashboard({
 
   const slotKey = `${reportScope}${deviceType}` as `${Scope}${DeviceType}`;
   const slotPending = pendingKeys.includes(slotKey);
-  const allReports = useMemo(() => {
-    return reportMap[slotKey] || [];
-  }, [reportMap, slotKey]);
+  const allReports = reportMap[slotKey] || [];
 
   // Calculate available date range from reports
-  const dateRange = useMemo(() => {
-    if (allReports.length === 0) {
-      return { startDate: null, endDate: null };
-    }
-    const firstDate = allReports[0]?.record?.collectionPeriod.lastDate;
-    const lastDate = allReports.at(-1)?.record?.collectionPeriod.lastDate;
-
-    if (firstDate && lastDate) {
-      return {
-        startDate: cruxDateToDateString(firstDate),
-        endDate: cruxDateToDateString(lastDate),
-      };
-    }
-    return { startDate: null, endDate: null };
-  }, [allReports]);
+  const firstAvailableDate = allReports[0]?.record?.collectionPeriod.lastDate;
+  const lastAvailableDate = allReports.at(-1)?.record?.collectionPeriod.lastDate;
+  const dateRange =
+    firstAvailableDate && lastAvailableDate
+      ? {
+          startDate: cruxDateToDateString(firstAvailableDate),
+          endDate: cruxDateToDateString(lastAvailableDate),
+        }
+      : { startDate: null, endDate: null };
 
   // Use selected date range if set, otherwise use available date range
   const activeDateRange = selectedDateRange || dateRange;
 
-  // Filter reports based on date range
-  const reports = useMemo(
-    () => filterCruxReportsByDateRange(allReports, activeDateRange),
-    [allReports, activeDateRange],
-  );
+  const reports = filterCruxReportsByDateRange(allReports, activeDateRange);
 
   // Get filtered reports for "All" device type to calculate form factors
-  const allDeviceReports = useMemo(() => {
-    const allDeviceAllReports = reportMap[`${reportScope}All`] || [];
-    return filterCruxReportsByDateRange(allDeviceAllReports, activeDateRange);
-  }, [reportMap, reportScope, activeDateRange]);
+  const allDeviceReports = filterCruxReportsByDateRange(
+    reportMap[`${reportScope}All`] || [],
+    activeDateRange,
+  );
 
   const data = reports
     .map((report) => formatCruxReport(report))

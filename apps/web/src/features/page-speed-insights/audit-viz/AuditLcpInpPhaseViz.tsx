@@ -46,7 +46,7 @@ export function AuditLcpPhaseViz({ rows }: { rows: DetailTableItem[] }) {
     return row;
   });
 
-  const breakdown = buildLcpBreakdownTableFromDetailRows(tableRows as never);
+  const breakdown = buildLcpBreakdownTableFromDetailRows(tableRows);
   if (!breakdown) return null;
 
   const chartData = breakdown.reportLabels.map((report) => {
