@@ -1,8 +1,24 @@
 name: ci
 on:
   pull_request:
+    paths:
+      - "apps/**"
+      - "packages/**"
+      - "!**/*.md"
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - .github/workflows/ci.yml
   push:
     branches: [main]
+    paths:
+      - "apps/**"
+      - "packages/**"
+      - "!**/*.md"
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - .github/workflows/ci.yml
 permissions:
   contents: read
 concurrency:
