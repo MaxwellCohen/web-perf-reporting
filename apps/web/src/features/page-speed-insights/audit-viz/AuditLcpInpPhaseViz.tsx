@@ -4,6 +4,7 @@ import { LCPBreakdownChart } from "@/features/page-speed-insights/network-metric
 import { buildLcpBreakdownTableFromDetailRows } from "@/features/page-speed-insights/network-metrics/lcpBreakdownSelectors";
 import { horizontalBarChartHeight } from "@/features/page-speed-insights/shared/horizontalBarChart";
 import { itemLabel, itemNumeric } from "./auditItemValues";
+import type { TableItem } from "@/lib/schema";
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import {
   ChartContainer,
@@ -28,8 +29,7 @@ export function AuditLcpPhaseViz({ rows }: { rows: DetailTableItem[] }) {
   // or the original list may still be present — DetailTable special-cases list→table.
   const tableRows = rows.map((row) => {
     const details = row.auditResult?.details as
-      | { type?: string; items?: Array<Record<string, unknown>> }
-      | undefined;
+      { type?: string; items?: Array<Record<string, unknown>> } | undefined;
     // When still a list, pull the embedded table's items
     if (details?.type === "list") {
       const table = (details.items || []).find(
@@ -85,14 +85,30 @@ export function AuditLcpPhaseViz({ rows }: { rows: DetailTableItem[] }) {
   );
 }
 
-const INP_PHASE_ORDER = ["inputDelay", "processingDuration", "presentationDelay"];
+const INP_PHASE_ORDER = [
+  "inputDelay",
+  "processingDuration",
+  "presentationDelay",
+];
 
 export function AuditInpPhaseViz({ rows }: { rows: DetailTableItem[] }) {
-  const phaseMap = new Map<string, { label: string; values: Record<string, number> }>();
+  const phaseMap = new Map<
+    string,
+    { label: string; values: Record<string, number> }
+  >();
 
   for (const row of rows) {
     const report = row._userLabel || "Report";
-    const items = row.auditResult?.details?.items || [];
+    const details = row.auditResult?.details as
+      { type?: string; items?: TableItem[] } | undefined;
+    // Lighthouse emits a list [subparts table, node]; read the embedded table's items.
+    const items =
+      details?.type === "list"
+        ? ((
+            (details.items || []).find((entry) => entry?.type === "table") as
+              { items?: TableItem[] } | undefined
+          )?.items ?? [])
+        : details?.items || [];
     for (const item of items) {
       const subpart =
         typeof item.subpart === "string"
@@ -105,7 +121,9 @@ export function AuditInpPhaseViz({ rows }: { rows: DetailTableItem[] }) {
       if (!phaseMap.has(subpart)) {
         phaseMap.set(subpart, {
           label:
-            typeof item.label === "string" ? item.label : itemLabel(item, ["label", "subpart"]),
+            typeof item.label === "string"
+              ? item.label
+              : itemLabel(item, ["label", "subpart"]),
           values: {},
         });
       }
@@ -133,11 +151,19 @@ export function AuditInpPhaseViz({ rows }: { rows: DetailTableItem[] }) {
     return data;
   });
   const allSubparts = phases.map(([subpart]) => subpart);
-  const labels = Object.fromEntries(phases.map(([subpart, entry]) => [subpart, entry.label]));
-  const config = buildKeyedChartConfig(
-    allSubparts.map((subpart) => ({ key: subpart, label: labels[subpart] ?? subpart })),
+  const labels = Object.fromEntries(
+    phases.map(([subpart, entry]) => [subpart, entry.label]),
   );
-  const chartHeight = horizontalBarChartHeight(chartData.length, { legend: true, rowPx: 48 });
+  const config = buildKeyedChartConfig(
+    allSubparts.map((subpart) => ({
+      key: subpart,
+      label: labels[subpart] ?? subpart,
+    })),
+  );
+  const chartHeight = horizontalBarChartHeight(chartData.length, {
+    legend: true,
+    rowPx: 48,
+  });
   const yAxisWidth = yAxisWidthForLabels(
     chartData.map((row) => String(row.report)),
     { min: 72, max: 140 },
@@ -157,8 +183,17 @@ export function AuditInpPhaseViz({ rows }: { rows: DetailTableItem[] }) {
           margin={{ left: 8, right: 48, top: 4, bottom: 4 }}
           barCategoryGap="28%"
         >
-          <CartesianGrid horizontal={false} strokeDasharray="3 3" className="stroke-border/40" />
-          <XAxis type="number" tickLine={false} axisLine={false} tickFormatter={formatAxisMs} />
+          <CartesianGrid
+            horizontal={false}
+            strokeDasharray="3 3"
+            className="stroke-border/40"
+          />
+          <XAxis
+            type="number"
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={formatAxisMs}
+          />
           <YAxis
             type="category"
             dataKey="report"
@@ -179,7 +214,11 @@ export function AuditInpPhaseViz({ rows }: { rows: DetailTableItem[] }) {
               />
             }
           />
-          <ChartLegend content={<ChartLegendContent className="flex-wrap gap-x-4 gap-y-2" />} />
+          <ChartLegend
+            content={
+              <ChartLegendContent className="flex-wrap gap-x-4 gap-y-2" />
+            }
+          />
           {allSubparts.map((subpart, index) => (
             <Bar
               key={subpart}

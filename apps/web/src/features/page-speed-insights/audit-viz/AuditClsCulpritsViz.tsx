@@ -40,7 +40,6 @@ type ClusterSummary = {
 function formatCls(value: number): string {
   if (!Number.isFinite(value)) return "—";
   if (value === 0) return "0";
-  if (value < 0.001) return value.toFixed(6).replace(/0+$/, "").replace(/\.$/, "");
   return value.toFixed(3);
 }
 
@@ -52,7 +51,9 @@ function isTotalRow(item: TableItem): boolean {
   if ((node as NodeValue).type === "text" && typeof value === "string") {
     return value.trim().toLowerCase() === "total";
   }
-  return typeof nodeLabel === "string" && nodeLabel.trim().toLowerCase() === "total";
+  return (
+    typeof nodeLabel === "string" && nodeLabel.trim().toLowerCase() === "total"
+  );
 }
 
 function tableItemsFromDetails(details: unknown): TableItem[] {
@@ -156,7 +157,8 @@ function extractClsCulpritData(rows: DetailTableItem[]): {
 } {
   const summaries: ClusterSummary[] = [];
   const shifts: ShiftFinding[] = [];
-  const barPoints: Array<{ label: string; category: string; value: number }> = [];
+  const barPoints: Array<{ label: string; category: string; value: number }> =
+    [];
 
   rows.forEach((row, rowIndex) => {
     const reportLabel = row._userLabel || "Report";
@@ -168,14 +170,15 @@ function extractClsCulpritData(rows: DetailTableItem[]): {
     items.forEach((item, itemIndex) => {
       const score = itemNumeric(item, ["score"]) ?? getNumber(item.score) ?? 0;
 
+      // Each cluster is its own table with a Total row; the reported CLS is the worst cluster.
       if (isTotalRow(item)) {
-        totalScore = score;
+        totalScore = totalScore == null ? score : Math.max(totalScore, score);
         return;
       }
 
       const meta = nodeMeta(item);
       if (meta.label === "Total") {
-        totalScore = score;
+        totalScore = totalScore == null ? score : Math.max(totalScore, score);
         return;
       }
 
@@ -211,10 +214,15 @@ function extractClsCulpritData(rows: DetailTableItem[]): {
     }
 
     const savings = getNumber(
-      (row.auditResult as { metricSavings?: { CLS?: unknown } } | undefined)?.metricSavings?.CLS,
+      (row.auditResult as { metricSavings?: { CLS?: unknown } } | undefined)
+        ?.metricSavings?.CLS,
     );
 
-    if (shiftCount > 0 || totalScore != null || (savings != null && savings > 0)) {
+    if (
+      shiftCount > 0 ||
+      totalScore != null ||
+      (savings != null && savings > 0)
+    ) {
       summaries.push({
         reportLabel,
         totalScore: totalScore ?? savings ?? null,
@@ -227,7 +235,9 @@ function extractClsCulpritData(rows: DetailTableItem[]): {
     }
   });
 
-  shifts.sort((a, b) => b.score - a.score || a.elementLabel.localeCompare(b.elementLabel));
+  shifts.sort(
+    (a, b) => b.score - a.score || a.elementLabel.localeCompare(b.elementLabel),
+  );
 
   return { summaries, shifts, barPoints };
 }
@@ -277,7 +287,10 @@ function CulpritExtraView({ extra }: { extra: CulpritExtra }) {
           </p>
         ) : null}
         {extra.snippet ? (
-          <p className="truncate font-mono text-[11px] text-sky-300" title={extra.snippet}>
+          <p
+            className="truncate font-mono text-[11px] text-sky-300"
+            title={extra.snippet}
+          >
             {extra.snippet}
           </p>
         ) : null}
@@ -288,12 +301,24 @@ function CulpritExtraView({ extra }: { extra: CulpritExtra }) {
 }
 
 function kpiMetricsFor(summary: ClusterSummary) {
-  const metrics: Array<{ label: string; value: number; format: "cls" | "count" }> = [];
+  const metrics: Array<{
+    label: string;
+    value: number;
+    format: "cls" | "count";
+  }> = [];
   if (summary.totalScore != null) {
-    metrics.push({ label: "Cluster CLS", value: summary.totalScore, format: "cls" });
+    metrics.push({
+      label: "Cluster CLS",
+      value: summary.totalScore,
+      format: "cls",
+    });
   }
   metrics.push({ label: "Shifts", value: summary.shiftCount, format: "count" });
-  metrics.push({ label: "Root causes", value: summary.causeCount, format: "count" });
+  metrics.push({
+    label: "Root causes",
+    value: summary.causeCount,
+    format: "count",
+  });
   return metrics;
 }
 
@@ -310,7 +335,9 @@ function CauseMix({
       <p className="text-sm font-medium text-muted-foreground">
         Root cause mix
         {reportLabel ? (
-          <span className="ml-1 font-normal text-muted-foreground/80">· {reportLabel}</span>
+          <span className="ml-1 font-normal text-muted-foreground/80">
+            · {reportLabel}
+          </span>
         ) : null}
       </p>
       <div className="flex flex-wrap gap-2">
@@ -323,7 +350,9 @@ function CauseMix({
             )}
           >
             {entry.cause}
-            <span className="font-mono tabular-nums opacity-80">×{entry.count}</span>
+            <span className="font-mono tabular-nums opacity-80">
+              ×{entry.count}
+            </span>
           </span>
         ))}
       </div>
@@ -331,19 +360,30 @@ function CauseMix({
   );
 }
 
-function ShiftList({ shifts, showCount }: { shifts: ShiftFinding[]; showCount?: boolean }) {
+function ShiftList({
+  shifts,
+  showCount,
+}: {
+  shifts: ShiftFinding[];
+  showCount?: boolean;
+}) {
   if (!shifts.length) return null;
   return (
     <div className="space-y-2">
       <p className="text-sm font-medium text-muted-foreground">
         Shift culprits
         {showCount ? (
-          <span className="ml-1 font-normal text-muted-foreground/80">({shifts.length})</span>
+          <span className="ml-1 font-normal text-muted-foreground/80">
+            ({shifts.length})
+          </span>
         ) : null}
       </p>
       <ul className="space-y-2">
         {shifts.map((shift) => (
-          <li key={shift.id} className="rounded-lg border bg-card/40 px-3 py-2.5">
+          <li
+            key={shift.id}
+            className="rounded-lg border bg-card/40 px-3 py-2.5"
+          >
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="min-w-0 flex-1 space-y-1">
                 <p className="text-sm font-medium">{shift.elementLabel}</p>
@@ -356,7 +396,10 @@ function ShiftList({ shifts, showCount }: { shifts: ShiftFinding[]; showCount?: 
                   </p>
                 ) : null}
                 {shift.snippet ? (
-                  <p className="truncate font-mono text-[11px] text-sky-300" title={shift.snippet}>
+                  <p
+                    className="truncate font-mono text-[11px] text-sky-300"
+                    title={shift.snippet}
+                  >
                     {shift.snippet}
                   </p>
                 ) : null}
@@ -381,7 +424,9 @@ function ShiftList({ shifts, showCount }: { shifts: ShiftFinding[]; showCount?: 
                     >
                       {cause.cause}
                     </span>
-                    {cause.extra ? <CulpritExtraView extra={cause.extra} /> : null}
+                    {cause.extra ? (
+                      <CulpritExtraView extra={cause.extra} />
+                    ) : null}
                   </li>
                 ))}
               </ul>
@@ -414,13 +459,19 @@ function ReportSection({
         "space-y-3",
         showHeader && "rounded-lg border border-border/80 bg-muted/10 p-3",
       )}
-      aria-label={showHeader ? `${reportLabel} layout shift culprits` : undefined}
+      aria-label={
+        showHeader ? `${reportLabel} layout shift culprits` : undefined
+      }
     >
       {showHeader ? (
-        <h3 className="text-sm font-semibold tracking-wide text-foreground">{reportLabel}</h3>
+        <h3 className="text-sm font-semibold tracking-wide text-foreground">
+          {reportLabel}
+        </h3>
       ) : null}
       {summary ? (
-        <AuditKpiStrip groups={[{ reportLabel, metrics: kpiMetricsFor(summary) }]} />
+        <AuditKpiStrip
+          groups={[{ reportLabel, metrics: kpiMetricsFor(summary) }]}
+        />
       ) : null}
       {summary ? <CauseMix breakdown={summary.causeBreakdown} /> : null}
       <ShiftList shifts={shifts} showCount={!showHeader} />
@@ -437,7 +488,9 @@ export function AuditClsCulpritsViz({ rows }: { rows: DetailTableItem[] }) {
   ].sort(compareReportLabels);
   const multiReport = reportLabels.length > 1;
 
-  const summaryByLabel = new Map(summaries.map((summary) => [summary.reportLabel, summary]));
+  const summaryByLabel = new Map(
+    summaries.map((summary) => [summary.reportLabel, summary]),
+  );
   const shiftsByLabel = new Map<string, ShiftFinding[]>();
   for (const shift of shifts) {
     const list = shiftsByLabel.get(shift.reportLabel) ?? [];

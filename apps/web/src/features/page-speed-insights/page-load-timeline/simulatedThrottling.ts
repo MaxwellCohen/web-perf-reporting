@@ -95,13 +95,16 @@ export function adjustLcpSubparts(
     subparts.find((part) => part.subpart === subpart)?.label ?? fallback;
 
   // Text LCP has no resource, so the insight only has an observed first byte.
-  // When a resource exists, simulated lcpLoadDelay / lcpLoadDuration are
-  // absolute times (resource start and finish), not phase lengths.
+  // When a resource exists, Lighthouse's lcpLoadDelay / lcpLoadDuration are
+  // phase lengths (ttfb + delay + duration + render delay = LCP).
   if (simulatedLcp != null && simulatedTtfb != null) {
     const ttfb = Math.min(Math.max(0, simulatedTtfb), simulatedLcp);
     if (loadDelay != null && loadDuration != null) {
-      const loadStart = Math.min(simulatedLcp, Math.max(ttfb, loadDelay));
-      const loadEnd = Math.min(simulatedLcp, Math.max(loadStart, loadDuration));
+      const loadStart = Math.min(simulatedLcp, ttfb + Math.max(0, loadDelay));
+      const loadEnd = Math.min(
+        simulatedLcp,
+        loadStart + Math.max(0, loadDuration),
+      );
       return [
         {
           subpart: "timeToFirstByte",

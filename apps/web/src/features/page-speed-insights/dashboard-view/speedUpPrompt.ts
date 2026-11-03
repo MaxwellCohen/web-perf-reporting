@@ -213,7 +213,7 @@ function lcpArea(reports: Report[]): SpeedUpFocusArea | null {
         const subparts = rows
           .map(
             (row) =>
-              `${str(row.label) ?? str(row.subpart)} ${formatMs(num(row.duration))}`,
+              `${str(row.label) ?? str(row.subpart) ?? "Unknown subpart"} ${formatMs(num(row.duration))}`,
           )
           .join(", ");
         if (subparts)

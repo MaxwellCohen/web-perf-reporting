@@ -13,7 +13,11 @@ import { getHostnameFromUrl } from "@/lib/urlDisplay";
 
 declare module "@tanstack/table-core" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface ColumnMeta<TFeatures extends TableFeatures, TData extends RowData, TValue> {
+  interface ColumnMeta<
+    TFeatures extends TableFeatures,
+    TData extends RowData,
+    TValue,
+  > {
     className?: string;
   }
 }
@@ -69,7 +73,10 @@ const makeSortableStringColumn = (column: string) => {
         }
       }
       return (
-        <div className="min-w-0 max-w-full overflow-hidden" title={String(value)}>
+        <div
+          className="min-w-0 max-w-full overflow-hidden"
+          title={String(value)}
+        >
           <div className="truncate">{value as string}</div>
         </div>
       );
@@ -141,7 +148,11 @@ export const columns = [
 
   columnHelper.accessor(
     ({ resourceBytes, unusedBytes }) => {
-      if (typeof resourceBytes !== "number" || typeof unusedBytes !== "number") {
+      if (
+        typeof resourceBytes !== "number" ||
+        typeof unusedBytes !== "number" ||
+        resourceBytes <= 0
+      ) {
         return undefined;
       }
       const percent = (unusedBytes / resourceBytes) * 100;
@@ -153,7 +164,11 @@ export const columns = [
         const value = info.getValue();
         return (
           <div className="w-full whitespace-nowrap text-right">
-            {typeof value === "number" ? `${value.toFixed(2)} %` : value === "" ? "" : "N/A"}
+            {typeof value === "number"
+              ? `${value.toFixed(2)} %`
+              : value === ""
+                ? ""
+                : "N/A"}
           </div>
         );
       },

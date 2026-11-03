@@ -3,7 +3,10 @@ import { render } from "@testing-library/react";
 import { AuditSeverityFindingsViz } from "./AuditSeverityFindingsViz";
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 
-function row(items: Array<Record<string, unknown>>, label = "Mobile"): DetailTableItem {
+function row(
+  items: Array<Record<string, unknown>>,
+  label = "Mobile",
+): DetailTableItem {
   return {
     _userLabel: label,
     auditResult: {
@@ -39,5 +42,29 @@ describe("AuditSeverityFindingsViz", () => {
   it("returns null when there are no findings", () => {
     const { container } = render(<AuditSeverityFindingsViz rows={[row([])]} />);
     expect(container.firstChild).toBeNull();
+  });
+
+  it("flattens CSP syntax findings from subItems", () => {
+    const { container } = render(
+      <AuditSeverityFindingsViz
+        rows={[
+          row([
+            {
+              severity: "Syntax",
+              description: { type: "code", value: "script-src 'self'" },
+              subItems: {
+                type: "subitems",
+                items: [
+                  { description: "Unknown directive", directive: "foo-src" },
+                ],
+              },
+            },
+          ]),
+        ]}
+      />,
+    );
+    expect(container.textContent).toContain("Unknown directive");
+    expect(container.textContent).toContain("foo-src");
+    expect(container.textContent).toContain("Syntax");
   });
 });

@@ -17,7 +17,17 @@ const metrics = [
   { metric: "Interaction to Next Paint", key: "INTERACTION_TO_NEXT_PAINT" },
 ] as const;
 
-export function LoadingExperience({ title, experienceKey }: LoadingExperienceProps) {
+/** PSI reports CLS percentiles scaled by 100 (e.g. 5 means 0.05). */
+export function formatFieldPercentile(key: string, percentile: number): string {
+  return key === "CUMULATIVE_LAYOUT_SHIFT_SCORE"
+    ? (percentile / 100).toFixed(2)
+    : String(percentile);
+}
+
+export function LoadingExperience({
+  title,
+  experienceKey,
+}: LoadingExperienceProps) {
   const items = usePageSpeedItems();
   if (!items.length) {
     return null;
@@ -40,7 +50,10 @@ export function LoadingExperience({ title, experienceKey }: LoadingExperiencePro
         text: `${experience.label ? `${experience.label} - ` : ""}${category}`,
       };
     })
-    .filter((summary): summary is { label: string; category: string; text: string } => !!summary);
+    .filter(
+      (summary): summary is { label: string; category: string; text: string } =>
+        !!summary,
+    );
 
   if (!experienceSummaries.length) return null;
 
@@ -51,7 +64,10 @@ export function LoadingExperience({ title, experienceKey }: LoadingExperiencePro
           <span>{title}:</span>
           <span className="flex flex-wrap gap-x-2 gap-y-1 text-sm font-semibold sm:text-lg">
             {experienceSummaries.map((summary) => (
-              <span key={`${summary.label}-${summary.category}`} className="whitespace-nowrap">
+              <span
+                key={`${summary.label}-${summary.category}`}
+                className="whitespace-nowrap"
+              >
                 {summary.text}
               </span>
             ))}
@@ -74,8 +90,16 @@ export function LoadingExperience({ title, experienceKey }: LoadingExperiencePro
                     return (
                       <div key={`${key}_${idx}`} className="min-w-0">
                         <HorizontalGaugeChart
-                          metric={`${metricValue.percentile} - ${metricValue.category} ${experience.label ? `(${experience.label})` : ""}`}
+                          metric={`${formatFieldPercentile(key, metricValue.percentile)} - ${metricValue.category} ${experience.label ? `(${experience.label})` : ""}`}
                           data={metricValue}
+                          scale={
+                            key === "CUMULATIVE_LAYOUT_SHIFT_SCORE" ? 100 : 1
+                          }
+                          unit={
+                            key === "CUMULATIVE_LAYOUT_SHIFT_SCORE"
+                              ? undefined
+                              : "ms"
+                          }
                         />
                       </div>
                     );

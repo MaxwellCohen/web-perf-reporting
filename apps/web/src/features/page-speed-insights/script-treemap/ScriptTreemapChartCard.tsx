@@ -3,7 +3,13 @@
 import { useState } from "react";
 import { Treemap } from "recharts";
 import { ClientOnly } from "@/components/common/ClientOnly";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { chartConfig } from "@/components/common/ChartSettings";
 import { formatBytes } from "@/features/page-speed-insights/shared/format";
@@ -65,7 +71,9 @@ function TreemapTile({
 
   const showLabel = width > 72 && height > 30;
   const maxChars = Math.max(8, Math.floor((width - 16) / 7.2));
-  const label = showLabel ? getTreemapDisplayLabel(scriptName, maxChars).primary : "";
+  const label = showLabel
+    ? getTreemapDisplayLabel(scriptName, maxChars).primary
+    : "";
 
   return (
     <g>
@@ -93,7 +101,9 @@ function TreemapTile({
             : undefined
         }
       >
-        {canCopy ? <title>{`${scriptName}\nDouble-click to copy`}</title> : null}
+        {canCopy ? (
+          <title>{`${scriptName}\nDouble-click to copy`}</title>
+        ) : null}
       </rect>
       {showLabel ? (
         <g clipPath={`url(#${clipId})`} pointerEvents="none">
@@ -130,17 +140,22 @@ function TreemapTooltipContent({
   }
 
   const unusedPercent =
-    node.unusedBytes !== undefined
+    node.unusedBytes !== undefined && node.resourceBytes > 0
       ? `${((node.unusedBytes / node.resourceBytes) * 100).toFixed(1)}%`
       : null;
 
   return (
     <div className="rounded-lg border bg-background px-3 py-2 text-sm shadow-md">
-      <div className="max-w-xs break-all font-medium">{node.fullName ?? node.name}</div>
-      <div className="text-muted-foreground">Size: {formatBytes(node.resourceBytes)}</div>
+      <div className="max-w-xs break-all font-medium">
+        {node.fullName ?? node.name}
+      </div>
+      <div className="text-muted-foreground">
+        Size: {formatBytes(node.resourceBytes)}
+      </div>
       {node.unusedBytes !== undefined ? (
         <div className="text-muted-foreground">
-          Unused: {formatBytes(node.unusedBytes)} ({unusedPercent})
+          Unused: {formatBytes(node.unusedBytes)}
+          {unusedPercent ? ` (${unusedPercent})` : ""}
         </div>
       ) : null}
       <div className="text-muted-foreground">Double-click to copy URL</div>
@@ -181,9 +196,15 @@ export function ScriptTreemapChartCard({
     <Card className="w-full">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
-        <CardDescription>Double-click a tile to copy its URL or script name.</CardDescription>
+        <CardDescription>
+          Double-click a tile to copy its URL or script name.
+        </CardDescription>
         {copiedName ? (
-          <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
+          <p
+            className="text-sm text-muted-foreground"
+            role="status"
+            aria-live="polite"
+          >
             Copied: {getTreemapLabel(copiedName, 80)}
           </p>
         ) : null}

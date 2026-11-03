@@ -21,7 +21,10 @@ const SEVERITY_ORDER: Record<Severity, number> = {
   unknown: 3,
 };
 
-function normalizeSeverity(raw: unknown): { severity: Severity; label: string } {
+function normalizeSeverity(raw: unknown): {
+  severity: Severity;
+  label: string;
+} {
   const label = typeof raw === "string" && raw.trim() ? raw.trim() : "Unknown";
   const lower = label.toLowerCase();
   if (lower.startsWith("high")) return { severity: "high", label };
@@ -38,23 +41,36 @@ function extractFindings(rows: DetailTableItem[]): Finding[] {
   rows.forEach((row, rowIndex) => {
     const reportLabel = row._userLabel || "Report";
     (row.auditResult?.details?.items || []).forEach((item, itemIndex) => {
-      const description =
-        typeof item.description === "string" && item.description.trim()
-          ? item.description.trim()
-          : "";
-      if (!description) return;
-      const directive =
-        typeof item.directive === "string" && item.directive.trim()
-          ? item.directive.trim()
-          : undefined;
-      const { severity, label } = normalizeSeverity(item.severity);
-      findings.push({
-        id: `${rowIndex}-${itemIndex}-${description}`,
-        description,
-        directive,
-        severity,
-        severityLabel: label,
-        reportLabel,
+      // CSP syntax results keep the raw policy (a code object) on the row and the
+      // actual findings in subItems; flatten those so they are not dropped.
+      const entries: Array<Record<string, unknown>> = [
+        item,
+        ...((item.subItems?.items || []) as Array<Record<string, unknown>>).map(
+          (sub) => ({
+            ...sub,
+            severity: sub.severity ?? item.severity,
+          }),
+        ),
+      ];
+      entries.forEach((entry, entryIndex) => {
+        const description =
+          typeof entry.description === "string" && entry.description.trim()
+            ? entry.description.trim()
+            : "";
+        if (!description) return;
+        const directive =
+          typeof entry.directive === "string" && entry.directive.trim()
+            ? entry.directive.trim()
+            : undefined;
+        const { severity, label } = normalizeSeverity(entry.severity);
+        findings.push({
+          id: `${rowIndex}-${itemIndex}-${entryIndex}-${description}`,
+          description,
+          directive,
+          severity,
+          severityLabel: label,
+          reportLabel,
+        });
       });
     });
   });
@@ -68,7 +84,8 @@ function extractFindings(rows: DetailTableItem[]): Finding[] {
 
 const severityStyles: Record<Severity, string> = {
   high: "border-destructive/50 bg-destructive/10 text-destructive",
-  medium: "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+  medium:
+    "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300",
   low: "border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300",
   unknown: "border-border bg-muted/40 text-muted-foreground",
 };
@@ -80,15 +97,22 @@ const severityBar: Record<Severity, string> = {
   unknown: "bg-muted-foreground",
 };
 
-export function AuditSeverityFindingsViz({ rows }: { rows: DetailTableItem[] }) {
+export function AuditSeverityFindingsViz({
+  rows,
+}: {
+  rows: DetailTableItem[];
+}) {
   const findings = extractFindings(rows);
   if (!findings.length) return null;
 
-  const multiReport = new Set(findings.map((finding) => finding.reportLabel)).size > 1;
+  const multiReport =
+    new Set(findings.map((finding) => finding.reportLabel)).size > 1;
 
   return (
     <div className="w-full min-w-0 space-y-2">
-      <p className="text-sm font-medium text-muted-foreground">Findings by severity</p>
+      <p className="text-sm font-medium text-muted-foreground">
+        Findings by severity
+      </p>
       <ul className="space-y-2">
         {findings.map((finding) => (
           <li
@@ -96,7 +120,10 @@ export function AuditSeverityFindingsViz({ rows }: { rows: DetailTableItem[] }) 
             className="relative overflow-hidden rounded-lg border bg-card/40 pl-3"
           >
             <span
-              className={cn("absolute inset-y-0 left-0 w-1", severityBar[finding.severity])}
+              className={cn(
+                "absolute inset-y-0 left-0 w-1",
+                severityBar[finding.severity],
+              )}
               aria-hidden
             />
             <div className="flex flex-wrap items-start justify-between gap-3 px-3 py-3">
@@ -108,7 +135,9 @@ export function AuditSeverityFindingsViz({ rows }: { rows: DetailTableItem[] }) 
                   </code>
                 ) : null}
                 {multiReport ? (
-                  <p className="text-xs text-muted-foreground">{finding.reportLabel}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {finding.reportLabel}
+                  </p>
                 ) : null}
               </div>
               <span

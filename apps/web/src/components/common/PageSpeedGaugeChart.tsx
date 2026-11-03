@@ -9,7 +9,26 @@ import { cn } from "@/lib/utils";
 
 const RADIAN = Math.PI / 180;
 
-function formatSegmentBoundary(value: number, format: "integer" | "decimal") {
+export type GaugeUnit = "ms";
+
+/** Shared display options: `scale` divides raw values (PSI CLS is x100), `unit` suffixes ms. */
+type GaugeScaling = { scale?: number; unit?: GaugeUnit };
+
+function formatGaugeValue(value: number, unit?: GaugeUnit) {
+  if (unit === "ms") {
+    if (Math.abs(value) >= 1000)
+      return `${Number((value / 1000).toFixed(2))} s`;
+    return `${Math.round(value)} ms`;
+  }
+  return value.toLocaleString();
+}
+
+function formatSegmentBoundary(
+  value: number,
+  format: "integer" | "decimal",
+  unit?: GaugeUnit,
+) {
+  if (unit === "ms") return formatGaugeValue(value, unit);
   if (value > 1) return value.toFixed(0);
   if (format === "integer") return String(value);
   return value.toFixed(2);
@@ -40,7 +59,12 @@ function triBandChartInputs(data?: UserPageLoadMetricV5): {
   };
 }
 
-export function GaugeChart({ metric, data }: { metric: string; data?: UserPageLoadMetricV5 }) {
+export function GaugeChart({
+  metric,
+  data,
+  scale = 1,
+  unit,
+}: { metric: string; data?: UserPageLoadMetricV5 } & GaugeScaling) {
   const band = triBandChartInputs(data);
   if (!band) {
     return null;
@@ -85,7 +109,10 @@ export function GaugeChart({ metric, data }: { metric: string; data?: UserPageLo
           <Label
             content={({ viewBox }) => {
               if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                const sum = chartData.reduce((acc, entry) => acc + (entry.value || 0), 0);
+                const sum = chartData.reduce(
+                  (acc, entry) => acc + (entry.value || 0),
+                  0,
+                );
                 const ang = 180.0 * (1 - value / sum);
                 const length =
                   ((((viewBox.innerRadius || 0) as number) +
@@ -127,7 +154,7 @@ export function GaugeChart({ metric, data }: { metric: string; data?: UserPageLo
                         y={(viewBox.cy as number) + 24}
                         className="fill-foreground text-lg font-bold"
                       >
-                        {value.toLocaleString()} {category}
+                        {formatGaugeValue(value / scale, unit)} {category}
                       </tspan>
                       {metric ? (
                         <tspan
@@ -153,29 +180,32 @@ export function GaugeChart({ metric, data }: { metric: string; data?: UserPageLo
 export function HorizontalGaugeChart({
   metric,
   data,
+  scale = 1,
+  unit,
 }: {
   metric?: string;
   data?: UserPageLoadMetricV5;
-}) {
+} & GaugeScaling) {
   const band = triBandChartInputs(data);
   if (!band) {
     return null;
   }
-  const { value, distributions } = band;
+  const value = band.value / scale;
+  const { distributions } = band;
   const chartData: ChartData = [
     {
       name: chartConfig["good_density"].label,
-      value: distributions[0].max || 0,
+      value: (distributions[0].max || 0) / scale,
       fill: "hsl(var(--chart-1))",
     },
     {
       name: chartConfig["ni_density"].label,
-      value: distributions[1].max || 0,
+      value: (distributions[1].max || 0) / scale,
       fill: "hsl(var(--chart-2))",
     },
     {
       name: chartConfig["poor_density"].label,
-      value: Math.max(distributions[2].min || 0, value) * 1.1,
+      value: Math.max((distributions[2].min || 0) / scale, value) * 1.1,
       fill: "hsl(var(--chart-3))",
     },
   ];
@@ -187,13 +217,25 @@ export function HorizontalGaugeChart({
           {metric}
         </div>
       ) : null}
-      <LineChart chartData={chartData} value={value} />
+      <LineChart chartData={chartData} value={value} unit={unit} />
     </div>
   );
 }
 
-function LineChart({ chartData, value }: { chartData: ChartData; value: number }) {
-  const maxValue = Math.max(...chartData.map((dist) => dist.value), value, Number.EPSILON);
+function LineChart({
+  chartData,
+  value,
+  unit,
+}: {
+  chartData: ChartData;
+  value: number;
+  unit?: GaugeUnit;
+}) {
+  const maxValue = Math.max(
+    ...chartData.map((dist) => dist.value),
+    value,
+    Number.EPSILON,
+  );
   const toPct = (v: number) => clampPercent((v / maxValue) * 100);
 
   const boundary1 = toPct(chartData[0].value);
@@ -215,8 +257,14 @@ function LineChart({ chartData, value }: { chartData: ChartData; value: number }
   ] as const;
 
   const boundaries = [
-    { pct: boundary1, label: formatSegmentBoundary(chartData[0].value, "integer") },
-    { pct: boundary2, label: formatSegmentBoundary(chartData[1].value, "decimal") },
+    {
+      pct: boundary1,
+      label: formatSegmentBoundary(chartData[0].value, "integer", unit),
+    },
+    {
+      pct: boundary2,
+      label: formatSegmentBoundary(chartData[1].value, "decimal", unit),
+    },
   ] as const;
 
   return (
@@ -279,7 +327,12 @@ function LineChart({ chartData, value }: { chartData: ChartData; value: number }
   );
 }
 
-export function HorizontalScoreChart({ score }: { score: number; className?: string }) {
+export function HorizontalScoreChart({
+  score,
+}: {
+  score: number;
+  className?: string;
+}) {
   const chartData: ChartData = [
     {
       name: chartConfig["poor_density"].label,
