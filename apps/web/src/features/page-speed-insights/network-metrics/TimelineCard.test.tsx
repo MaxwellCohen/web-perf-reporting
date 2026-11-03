@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockUseNetworkMetricSeries = vi.hoisted(() => vi.fn());
+const mockUseNetworkMetricSeries = vi.hoisted(() => vi.fn<() => unknown>());
 
 vi.mock("@/features/page-speed-insights/network-metrics/useNetworkMetricsStore", () => ({
   useNetworkMetricSeries: () => mockUseNetworkMetricSeries(),

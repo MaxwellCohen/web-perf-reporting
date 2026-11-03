@@ -7,6 +7,7 @@ import {
 export type DetailTableItem = {
   auditResult: {
     id?: string;
+    numericValue?: number;
     details: AuditDetailTable | AuditDetailOpportunity;
   };
   _userLabel: string;

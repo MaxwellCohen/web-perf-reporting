@@ -43,17 +43,23 @@ function formatCls(value: number): string {
   return value.toFixed(3);
 }
 
+function isNodeValue(value: unknown): value is NodeValue {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "type" in value &&
+    (value.type === "node" || value.type === "text")
+  );
+}
+
 function isTotalRow(item: TableItem): boolean {
   const node = item.node;
-  if (!node || typeof node !== "object") return false;
-  const value = (node as NodeValue).value;
-  const nodeLabel = (node as NodeValue).nodeLabel;
-  if ((node as NodeValue).type === "text" && typeof value === "string") {
+  if (!isNodeValue(node)) return false;
+  const { value, nodeLabel } = node;
+  if (node.type === "text" && typeof value === "string") {
     return value.trim().toLowerCase() === "total";
   }
-  return (
-    typeof nodeLabel === "string" && nodeLabel.trim().toLowerCase() === "total"
-  );
+  return typeof nodeLabel === "string" && nodeLabel.trim().toLowerCase() === "total";
 }
 
 function tableItemsFromDetails(details: unknown): TableItem[] {
@@ -97,8 +103,8 @@ function extraFromSubItem(raw: unknown): CulpritExtra | undefined {
     if (url) return { kind: "url", url };
   }
 
-  if (type === "node" || type === "text") {
-    const node = value as unknown as NodeValue;
+  if (isNodeValue(value)) {
+    const node = value;
     const label =
       (typeof node.nodeLabel === "string" && node.nodeLabel.trim()) ||
       (typeof node.selector === "string" && node.selector.trim()) ||
@@ -126,12 +132,11 @@ function nodeMeta(item: TableItem): {
   snippet?: string;
 } {
   const node = item.node;
-  if (node && typeof node === "object") {
-    const n = node as NodeValue;
+  if (isNodeValue(node)) {
     return {
       label: itemLabel(item, ["node"]),
-      selector: typeof n.selector === "string" ? n.selector : undefined,
-      snippet: typeof n.snippet === "string" ? n.snippet : undefined,
+      selector: node.selector,
+      snippet: node.snippet,
     };
   }
   return { label: itemLabel(item, ["node", "url"]) };
@@ -157,8 +162,7 @@ function extractClsCulpritData(rows: DetailTableItem[]): {
 } {
   const summaries: ClusterSummary[] = [];
   const shifts: ShiftFinding[] = [];
-  const barPoints: Array<{ label: string; category: string; value: number }> =
-    [];
+  const barPoints: Array<{ label: string; category: string; value: number }> = [];
 
   rows.forEach((row, rowIndex) => {
     const reportLabel = row._userLabel || "Report";
@@ -214,15 +218,10 @@ function extractClsCulpritData(rows: DetailTableItem[]): {
     }
 
     const savings = getNumber(
-      (row.auditResult as { metricSavings?: { CLS?: unknown } } | undefined)
-        ?.metricSavings?.CLS,
+      (row.auditResult as { metricSavings?: { CLS?: unknown } } | undefined)?.metricSavings?.CLS,
     );
 
-    if (
-      shiftCount > 0 ||
-      totalScore != null ||
-      (savings != null && savings > 0)
-    ) {
+    if (shiftCount > 0 || totalScore != null || (savings != null && savings > 0)) {
       summaries.push({
         reportLabel,
         totalScore: totalScore ?? savings ?? null,
@@ -235,9 +234,7 @@ function extractClsCulpritData(rows: DetailTableItem[]): {
     }
   });
 
-  shifts.sort(
-    (a, b) => b.score - a.score || a.elementLabel.localeCompare(b.elementLabel),
-  );
+  shifts.sort((a, b) => b.score - a.score || a.elementLabel.localeCompare(b.elementLabel));
 
   return { summaries, shifts, barPoints };
 }
@@ -287,10 +284,7 @@ function CulpritExtraView({ extra }: { extra: CulpritExtra }) {
           </p>
         ) : null}
         {extra.snippet ? (
-          <p
-            className="truncate font-mono text-[11px] text-sky-300"
-            title={extra.snippet}
-          >
+          <p className="truncate font-mono text-[11px] text-sky-300" title={extra.snippet}>
             {extra.snippet}
           </p>
         ) : null}
@@ -335,9 +329,7 @@ function CauseMix({
       <p className="text-sm font-medium text-muted-foreground">
         Root cause mix
         {reportLabel ? (
-          <span className="ml-1 font-normal text-muted-foreground/80">
-            · {reportLabel}
-          </span>
+          <span className="ml-1 font-normal text-muted-foreground/80">· {reportLabel}</span>
         ) : null}
       </p>
       <div className="flex flex-wrap gap-2">
@@ -350,9 +342,7 @@ function CauseMix({
             )}
           >
             {entry.cause}
-            <span className="font-mono tabular-nums opacity-80">
-              ×{entry.count}
-            </span>
+            <span className="font-mono tabular-nums opacity-80">×{entry.count}</span>
           </span>
         ))}
       </div>
@@ -360,30 +350,19 @@ function CauseMix({
   );
 }
 
-function ShiftList({
-  shifts,
-  showCount,
-}: {
-  shifts: ShiftFinding[];
-  showCount?: boolean;
-}) {
+function ShiftList({ shifts, showCount }: { shifts: ShiftFinding[]; showCount?: boolean }) {
   if (!shifts.length) return null;
   return (
     <div className="space-y-2">
       <p className="text-sm font-medium text-muted-foreground">
         Shift culprits
         {showCount ? (
-          <span className="ml-1 font-normal text-muted-foreground/80">
-            ({shifts.length})
-          </span>
+          <span className="ml-1 font-normal text-muted-foreground/80">({shifts.length})</span>
         ) : null}
       </p>
       <ul className="space-y-2">
         {shifts.map((shift) => (
-          <li
-            key={shift.id}
-            className="rounded-lg border bg-card/40 px-3 py-2.5"
-          >
+          <li key={shift.id} className="rounded-lg border bg-card/40 px-3 py-2.5">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="min-w-0 flex-1 space-y-1">
                 <p className="text-sm font-medium">{shift.elementLabel}</p>
@@ -396,10 +375,7 @@ function ShiftList({
                   </p>
                 ) : null}
                 {shift.snippet ? (
-                  <p
-                    className="truncate font-mono text-[11px] text-sky-300"
-                    title={shift.snippet}
-                  >
+                  <p className="truncate font-mono text-[11px] text-sky-300" title={shift.snippet}>
                     {shift.snippet}
                   </p>
                 ) : null}
@@ -424,9 +400,7 @@ function ShiftList({
                     >
                       {cause.cause}
                     </span>
-                    {cause.extra ? (
-                      <CulpritExtraView extra={cause.extra} />
-                    ) : null}
+                    {cause.extra ? <CulpritExtraView extra={cause.extra} /> : null}
                   </li>
                 ))}
               </ul>
@@ -442,40 +416,19 @@ function ShiftList({
   );
 }
 
-function ReportSection({
+function ReportSummary({
   reportLabel,
   summary,
-  shifts,
-  showHeader,
 }: {
   reportLabel: string;
   summary?: ClusterSummary;
-  shifts: ShiftFinding[];
-  showHeader: boolean;
 }) {
+  if (!summary) return null;
   return (
-    <section
-      className={cn(
-        "space-y-3",
-        showHeader && "rounded-lg border border-border/80 bg-muted/10 p-3",
-      )}
-      aria-label={
-        showHeader ? `${reportLabel} layout shift culprits` : undefined
-      }
-    >
-      {showHeader ? (
-        <h3 className="text-sm font-semibold tracking-wide text-foreground">
-          {reportLabel}
-        </h3>
-      ) : null}
-      {summary ? (
-        <AuditKpiStrip
-          groups={[{ reportLabel, metrics: kpiMetricsFor(summary) }]}
-        />
-      ) : null}
-      {summary ? <CauseMix breakdown={summary.causeBreakdown} /> : null}
-      <ShiftList shifts={shifts} showCount={!showHeader} />
-    </section>
+    <>
+      <AuditKpiStrip groups={[{ reportLabel, metrics: kpiMetricsFor(summary) }]} />
+      <CauseMix breakdown={summary.causeBreakdown} />
+    </>
   );
 }
 
@@ -488,9 +441,7 @@ export function AuditClsCulpritsViz({ rows }: { rows: DetailTableItem[] }) {
   ].sort(compareReportLabels);
   const multiReport = reportLabels.length > 1;
 
-  const summaryByLabel = new Map(
-    summaries.map((summary) => [summary.reportLabel, summary]),
-  );
+  const summaryByLabel = new Map(summaries.map((summary) => [summary.reportLabel, summary]));
   const shiftsByLabel = new Map<string, ShiftFinding[]>();
   for (const shift of shifts) {
     const list = shiftsByLabel.get(shift.reportLabel) ?? [];
@@ -515,22 +466,22 @@ export function AuditClsCulpritsViz({ rows }: { rows: DetailTableItem[] }) {
       {multiReport ? (
         <div className="grid gap-3 lg:grid-cols-2">
           {reportLabels.map((reportLabel) => (
-            <ReportSection
+            <section
               key={reportLabel}
-              reportLabel={reportLabel}
-              summary={summaryByLabel.get(reportLabel)}
-              shifts={shiftsByLabel.get(reportLabel) ?? []}
-              showHeader
-            />
+              className="space-y-3 rounded-lg border border-border/80 bg-muted/10 p-3"
+              aria-label={`${reportLabel} layout shift culprits`}
+            >
+              <h3 className="text-sm font-semibold tracking-wide text-foreground">{reportLabel}</h3>
+              <ReportSummary reportLabel={reportLabel} summary={summaryByLabel.get(reportLabel)} />
+              <ShiftList shifts={shiftsByLabel.get(reportLabel) ?? []} />
+            </section>
           ))}
         </div>
       ) : (
-        <ReportSection
-          reportLabel={reportLabels[0] || "Report"}
-          summary={summaries[0]}
-          shifts={shifts}
-          showHeader={false}
-        />
+        <section className="space-y-3">
+          <ReportSummary reportLabel={reportLabels[0] || "Report"} summary={summaries[0]} />
+          <ShiftList shifts={shifts} showCount />
+        </section>
       )}
     </div>
   );

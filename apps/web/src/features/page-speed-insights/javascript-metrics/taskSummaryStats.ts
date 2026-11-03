@@ -28,9 +28,7 @@ const num = (value: unknown): number | undefined =>
  * from the task list when present, and the totals (task count, time, average) come from
  * diagnostics when present, so the average always equals total time / total tasks.
  */
-export function computeTaskSummaryStats(
-  metrics: TaskSummaryData[],
-): TaskSummaryStats[] {
+export function computeTaskSummaryStats(metrics: TaskSummaryData[]): TaskSummaryStats[] {
   return metrics.map(({ label, diagnostics, mainThreadTasks }) => {
     const diag = diagnostics[0] || {};
     const durations = mainThreadTasks

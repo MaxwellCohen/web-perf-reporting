@@ -1,3 +1,5 @@
+"use client";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
 import { openInLighthouseViewer } from "@/lib/viewer/openInLighthouseViewer";
@@ -13,6 +15,14 @@ export function PageSpeedInsightsCopyButtons({
   items,
   shareUrl,
 }: PageSpeedInsightsCopyButtonsProps) {
+  const [viewerError, setViewerError] = useState<string>();
+  const openViewer = (lighthouseResult: unknown) => {
+    setViewerError(undefined);
+    openInLighthouseViewer(lighthouseResult).catch((error: unknown) =>
+      setViewerError(error instanceof Error ? error.message : "Could not open the viewer."),
+    );
+  };
+
   return (
     <div className="flex flex-wrap justify-end gap-2 sm:gap-4">
       {shareUrl ? (
@@ -38,12 +48,17 @@ export function PageSpeedInsightsCopyButtons({
             variant="outline"
             size="lg"
             className="min-w-0 max-w-full"
-            onClick={() => openInLighthouseViewer(item.item.lighthouseResult)}
+            onClick={() => openViewer(item.item.lighthouseResult)}
           >
             <span className="truncate">Open {item.label} in Lighthouse Viewer</span>
           </Button>
         ) : null,
       )}
+      {viewerError ? (
+        <p role="alert" className="basis-full text-right text-sm text-destructive">
+          {viewerError}
+        </p>
+      ) : null}
     </div>
   );
 }

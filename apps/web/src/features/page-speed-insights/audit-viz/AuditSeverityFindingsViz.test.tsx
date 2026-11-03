@@ -3,10 +3,7 @@ import { render } from "@testing-library/react";
 import { AuditSeverityFindingsViz } from "./AuditSeverityFindingsViz";
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 
-function row(
-  items: Array<Record<string, unknown>>,
-  label = "Mobile",
-): DetailTableItem {
+function row(items: Array<Record<string, unknown>>, label = "Mobile"): DetailTableItem {
   return {
     _userLabel: label,
     auditResult: {
@@ -54,9 +51,7 @@ describe("AuditSeverityFindingsViz", () => {
               description: { type: "code", value: "script-src 'self'" },
               subItems: {
                 type: "subitems",
-                items: [
-                  { description: "Unknown directive", directive: "foo-src" },
-                ],
+                items: [{ description: "Unknown directive", directive: "foo-src" }],
               },
             },
           ]),

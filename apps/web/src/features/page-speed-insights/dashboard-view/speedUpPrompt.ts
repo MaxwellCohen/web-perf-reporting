@@ -10,8 +10,7 @@ import {
 import type { PageSpeedDashboardItem } from "@/lib/page-speed-insights/types";
 import type { AuditResult, AuditResultsRecord, TableItem } from "@/lib/schema";
 
-export const SPEED_UP_PROMPT_SOURCE =
-  "https://sarthakmishra.com/blog/optimizing-tanstack-start";
+export const SPEED_UP_PROMPT_SOURCE = "https://sarthakmishra.com/blog/optimizing-tanstack-start";
 
 const EVIDENCE_LIMIT = 5;
 
@@ -48,9 +47,7 @@ const LOCK_IN = [
 
 function isApplicable(audit: AuditResult | undefined): audit is AuditResult {
   const mode = audit?.scoreDisplayMode?.toLowerCase();
-  return (
-    !!audit && mode !== "notapplicable" && mode !== "manual" && mode !== "error"
-  );
+  return !!audit && mode !== "notapplicable" && mode !== "manual" && mode !== "error";
 }
 
 function isFailing(audit: AuditResult | undefined): audit is AuditResult {
@@ -152,20 +149,14 @@ function metricPoor(reports: Report[], auditId: string): boolean {
 
 // ---------------------------------------------------------------- focus areas
 
-function serverArea(
-  reports: Report[],
-  fieldTtfbSlow: boolean,
-): SpeedUpFocusArea | null {
+function serverArea(reports: Report[], fieldTtfbSlow: boolean): SpeedUpFocusArea | null {
   const evidence = auditSummaries(reports, [
     "document-latency-insight",
     "server-response-time",
     "uses-text-compression",
     "redirects",
   ]);
-  if (fieldTtfbSlow)
-    evidence.push(
-      "Real-user (CrUX) Time to First Byte is not in the fast range.",
-    );
+  if (fieldTtfbSlow) evidence.push("Real-user (CrUX) Time to First Byte is not in the fast range.");
   if (evidence.length === 0) return null;
   return {
     id: "server",
@@ -187,16 +178,11 @@ function lcpArea(reports: Report[]): SpeedUpFocusArea | null {
   let isImage = false;
 
   for (const { label, audits } of reports) {
-    for (const entry of items(
-      reconcileLcpAudits(audits)["lcp-breakdown-insight"],
-    )) {
+    for (const entry of items(reconcileLcpAudits(audits)["lcp-breakdown-insight"])) {
       const entryRecord = entry as Record<string, unknown>;
       if (entryRecord.type === "node") {
         const snippet = str(entryRecord.snippet) ?? "";
-        const name =
-          str(entryRecord.nodeLabel) ??
-          str(entryRecord.selector) ??
-          "unknown element";
+        const name = str(entryRecord.nodeLabel) ?? str(entryRecord.selector) ?? "unknown element";
         if (/^<(img|picture|video|svg|image)\b/i.test(snippet)) isImage = true;
         evidence.push(
           withLabel(
@@ -207,17 +193,14 @@ function lcpArea(reports: Report[]): SpeedUpFocusArea | null {
         );
       }
       if (entryRecord.type === "table") {
-        const rows = Array.isArray(entryRecord.items)
-          ? (entryRecord.items as TableItem[])
-          : [];
+        const rows = Array.isArray(entryRecord.items) ? (entryRecord.items as TableItem[]) : [];
         const subparts = rows
           .map(
             (row) =>
               `${str(row.label) ?? str(row.subpart) ?? "Unknown subpart"} ${formatMs(num(row.duration))}`,
           )
           .join(", ");
-        if (subparts)
-          evidence.push(withLabel(`LCP breakdown: ${subparts}`, label, multi));
+        if (subparts) evidence.push(withLabel(`LCP breakdown: ${subparts}`, label, multi));
       }
     }
   }
@@ -250,8 +233,7 @@ function renderBlockingArea(reports: Report[]): SpeedUpFocusArea | null {
     reports,
     "unused-css-rules",
     (item) => num(item.wastedBytes),
-    (url, item) =>
-      `Unused CSS: ${url} (${formatBytes(num(item.wastedBytes))} unused)`,
+    (url, item) => `Unused CSS: ${url} (${formatBytes(num(item.wastedBytes))} unused)`,
   );
   if (evidence.length === 0 && cssRows.length === 0) return null;
   return {
@@ -272,8 +254,7 @@ function javascriptArea(reports: Report[]): SpeedUpFocusArea | null {
     reports,
     "unused-javascript",
     (item) => num(item.wastedBytes),
-    (url, item) =>
-      `Unused JS: ${url} (${formatBytes(num(item.wastedBytes))} unused)`,
+    (url, item) => `Unused JS: ${url} (${formatBytes(num(item.wastedBytes))} unused)`,
   );
   const bootup = urlRows(
     reports,
@@ -285,8 +266,7 @@ function javascriptArea(reports: Report[]): SpeedUpFocusArea | null {
     reports,
     "legacy-javascript-insight",
     (item) => num(item.wastedBytes),
-    (url, item) =>
-      `Legacy polyfills: ${url} (${formatBytes(num(item.wastedBytes))})`,
+    (url, item) => `Legacy polyfills: ${url} (${formatBytes(num(item.wastedBytes))})`,
   );
   const evidence = [
     ...(tbtPoor ? auditSummaries(reports, ["total-blocking-time"]) : []),
@@ -330,8 +310,7 @@ function thirdPartyArea(reports: Report[]): SpeedUpFocusArea | null {
           ? str((item.entity as { text?: unknown }).text)
           : null);
       const time = num(item.mainThreadTime);
-      if (entity && time >= 50)
-        best.set(entity, Math.max(best.get(entity) ?? 0, time));
+      if (entity && time >= 50) best.set(entity, Math.max(best.get(entity) ?? 0, time));
     }
   }
   const evidence = [...best.entries()]
@@ -376,13 +355,9 @@ function imageArea(reports: Report[]): SpeedUpFocusArea | null {
     reports,
     "image-delivery-insight",
     (item) => num(item.wastedBytes),
-    (url, item) =>
-      `${url} (${formatBytes(num(item.wastedBytes))} could be saved)`,
+    (url, item) => `${url} (${formatBytes(num(item.wastedBytes))} could be saved)`,
   );
-  const unsized = auditSummaries(reports, [
-    "unsized-images",
-    "offscreen-images",
-  ]);
+  const unsized = auditSummaries(reports, ["unsized-images", "offscreen-images"]);
   const evidence = [...delivery, ...unsized];
   if (evidence.length === 0) return null;
   return {
@@ -397,19 +372,11 @@ function imageArea(reports: Report[]): SpeedUpFocusArea | null {
   };
 }
 
-function clsArea(
-  reports: Report[],
-  fieldClsSlow: boolean,
-): SpeedUpFocusArea | null {
+function clsArea(reports: Report[], fieldClsSlow: boolean): SpeedUpFocusArea | null {
   const evidence = metricPoor(reports, "cumulative-layout-shift")
-    ? auditSummaries(reports, [
-        "cumulative-layout-shift",
-        "cls-culprits-insight",
-        "unsized-images",
-      ])
+    ? auditSummaries(reports, ["cumulative-layout-shift", "cls-culprits-insight", "unsized-images"])
     : [];
-  if (fieldClsSlow)
-    evidence.push("Real-user (CrUX) CLS is not in the good range.");
+  if (fieldClsSlow) evidence.push("Real-user (CrUX) CLS is not in the good range.");
   if (evidence.length === 0) return null;
   return {
     id: "cls",
@@ -444,10 +411,7 @@ function cachingArea(reports: Report[]): SpeedUpFocusArea | null {
 }
 
 function pageWeightArea(reports: Report[]): SpeedUpFocusArea | null {
-  const evidence = auditSummaries(reports, [
-    "total-byte-weight",
-    "dom-size-insight",
-  ]);
+  const evidence = auditSummaries(reports, ["total-byte-weight", "dom-size-insight"]);
   if (evidence.length === 0) return null;
   return {
     id: "page-weight",
@@ -472,19 +436,14 @@ const FIELD_METRICS: Record<string, string> = {
 
 type FieldMetric = { percentile?: number; category?: string };
 
-function fieldMetrics(
-  item: PageSpeedDashboardItem["item"],
-): Record<string, FieldMetric> {
-  const metrics = (
-    item.loadingExperience as
-      { metrics?: Record<string, FieldMetric> } | undefined
-  )?.metrics;
+function fieldMetrics(item: PageSpeedDashboardItem["item"]): Record<string, FieldMetric> {
+  const metrics = (item.loadingExperience as { metrics?: Record<string, FieldMetric> } | undefined)
+    ?.metrics;
   return metrics ?? {};
 }
 
 function formatFieldValue(key: string, percentile: number): string {
-  if (key === "CUMULATIVE_LAYOUT_SHIFT_SCORE")
-    return (percentile / 100).toFixed(2);
+  if (key === "CUMULATIVE_LAYOUT_SHIFT_SCORE") return (percentile / 100).toFixed(2);
   return formatMs(percentile);
 }
 
@@ -499,10 +458,7 @@ const LAB_METRICS = [
 function reportContext(dashboardItem: PageSpeedDashboardItem): string[] {
   const lighthouse = dashboardItem.item.lighthouseResult;
   const audits = lighthouse?.audits ?? {};
-  const url =
-    lighthouse?.finalDisplayedUrl ??
-    lighthouse?.finalUrl ??
-    lighthouse?.requestedUrl;
+  const url = lighthouse?.finalDisplayedUrl ?? lighthouse?.finalUrl ?? lighthouse?.requestedUrl;
   const formFactor = lighthouse?.configSettings?.formFactor;
   const score = lighthouse?.categories?.performance?.score;
 
@@ -510,9 +466,7 @@ function reportContext(dashboardItem: PageSpeedDashboardItem): string[] {
     dashboardItem.label,
     url ? `URL ${url}` : null,
     formFactor ? `${formFactor}` : null,
-    typeof score === "number"
-      ? `performance score ${Math.round(score * 100)}`
-      : null,
+    typeof score === "number" ? `performance score ${Math.round(score * 100)}` : null,
   ]
     .filter(Boolean)
     .join(" · ");
@@ -527,9 +481,7 @@ function reportContext(dashboardItem: PageSpeedDashboardItem): string[] {
   const field = Object.entries(FIELD_METRICS).flatMap(([key, name]) => {
     const metric = fieldMetrics(dashboardItem.item)[key];
     if (typeof metric?.percentile !== "number") return [];
-    const category = metric.category
-      ? ` (${metric.category.toLowerCase()})`
-      : "";
+    const category = metric.category ? ` (${metric.category.toLowerCase()})` : "";
     return [`${name} ${formatFieldValue(key, metric.percentile)}${category}`];
   });
 
@@ -558,29 +510,21 @@ function bullets(lines: string[]): string {
   return lines.map((line) => `- ${line}`).join("\n");
 }
 
-export function buildSpeedUpPrompt(
-  dashboardItems: PageSpeedDashboardItem[],
-): SpeedUpPrompt {
+export function buildSpeedUpPrompt(dashboardItems: PageSpeedDashboardItem[]): SpeedUpPrompt {
   const reports: Report[] = dashboardItems.flatMap((item) => {
     const audits = item.item.lighthouseResult?.audits;
     return audits ? [{ label: item.label, audits }] : [];
   });
 
   const focusAreas = [
-    serverArea(
-      reports,
-      fieldNotGood(dashboardItems, "EXPERIMENTAL_TIME_TO_FIRST_BYTE"),
-    ),
+    serverArea(reports, fieldNotGood(dashboardItems, "EXPERIMENTAL_TIME_TO_FIRST_BYTE")),
     lcpArea(reports),
     renderBlockingArea(reports),
     javascriptArea(reports),
     thirdPartyArea(reports),
     fontArea(reports),
     imageArea(reports),
-    clsArea(
-      reports,
-      fieldNotGood(dashboardItems, "CUMULATIVE_LAYOUT_SHIFT_SCORE"),
-    ),
+    clsArea(reports, fieldNotGood(dashboardItems, "CUMULATIVE_LAYOUT_SHIFT_SCORE")),
     cachingArea(reports),
     pageWeightArea(reports),
   ].filter((area): area is SpeedUpFocusArea => area !== null);
@@ -602,9 +546,7 @@ export function buildSpeedUpPrompt(
   ];
 
   return {
-    text: sections
-      .filter((section): section is string => section !== null)
-      .join("\n\n"),
+    text: sections.filter((section): section is string => section !== null).join("\n\n"),
     focusAreas,
   };
 }

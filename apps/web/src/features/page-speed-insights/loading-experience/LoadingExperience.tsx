@@ -24,10 +24,7 @@ export function formatFieldPercentile(key: string, percentile: number): string {
     : String(percentile);
 }
 
-export function LoadingExperience({
-  title,
-  experienceKey,
-}: LoadingExperienceProps) {
+export function LoadingExperience({ title, experienceKey }: LoadingExperienceProps) {
   const items = usePageSpeedItems();
   if (!items.length) {
     return null;
@@ -50,10 +47,7 @@ export function LoadingExperience({
         text: `${experience.label ? `${experience.label} - ` : ""}${category}`,
       };
     })
-    .filter(
-      (summary): summary is { label: string; category: string; text: string } =>
-        !!summary,
-    );
+    .filter((summary): summary is { label: string; category: string; text: string } => !!summary);
 
   if (!experienceSummaries.length) return null;
 
@@ -64,10 +58,7 @@ export function LoadingExperience({
           <span>{title}:</span>
           <span className="flex flex-wrap gap-x-2 gap-y-1 text-sm font-semibold sm:text-lg">
             {experienceSummaries.map((summary) => (
-              <span
-                key={`${summary.label}-${summary.category}`}
-                className="whitespace-nowrap"
-              >
+              <span key={`${summary.label}-${summary.category}`} className="whitespace-nowrap">
                 {summary.text}
               </span>
             ))}
@@ -92,14 +83,8 @@ export function LoadingExperience({
                         <HorizontalGaugeChart
                           metric={`${formatFieldPercentile(key, metricValue.percentile)} - ${metricValue.category} ${experience.label ? `(${experience.label})` : ""}`}
                           data={metricValue}
-                          scale={
-                            key === "CUMULATIVE_LAYOUT_SHIFT_SCORE" ? 100 : 1
-                          }
-                          unit={
-                            key === "CUMULATIVE_LAYOUT_SHIFT_SCORE"
-                              ? undefined
-                              : "ms"
-                          }
+                          scale={key === "CUMULATIVE_LAYOUT_SHIFT_SCORE" ? 100 : 1}
+                          unit={key === "CUMULATIVE_LAYOUT_SHIFT_SCORE" ? undefined : "ms"}
                         />
                       </div>
                     );

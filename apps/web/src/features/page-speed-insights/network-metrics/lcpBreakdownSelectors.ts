@@ -2,7 +2,6 @@ import { reconcileLcpAudits } from "@/features/page-speed-insights/shared/reconc
 import type { PageSpeedInsightsSnapshot } from "@/features/page-speed-insights/PageSpeedContext";
 import { sortReportLabels } from "@/features/page-speed-insights/shared/reportLabels";
 import { getNumber } from "@/lib/utils";
-import type { TableItem } from "@/lib/schema";
 
 type LCPSubpart = {
   subpart: string;
@@ -56,7 +55,7 @@ export function buildLcpBreakdownTableFromDetailRows(
     _userLabel: string;
     auditResult?: {
       details?: {
-        items?: TableItem[];
+        items?: Array<Record<string, unknown>>;
       };
     };
   }>,
@@ -98,9 +97,9 @@ function computeLcpBreakdownComputed(
 ): LCPBreakdownComputed | null {
   const breakdownData = metrics
     .map(({ item, label }) => {
-      const lcpBreakdownAudit = reconcileLcpAudits(
-        item?.lighthouseResult?.audits,
-      )?.["lcp-breakdown-insight"];
+      const lcpBreakdownAudit = reconcileLcpAudits(item?.lighthouseResult?.audits)?.[
+        "lcp-breakdown-insight"
+      ];
       const details = lcpBreakdownAudit?.details as
         | {
             items?: Array<{
@@ -147,9 +146,9 @@ function computeLcpBreakdownComputed(
     });
   });
 
-  const allSubparts = sortSubparts(
-    Array.from(subpartSet).map((subpart) => ({ subpart })),
-  ).map((row) => row.subpart);
+  const allSubparts = sortSubparts(Array.from(subpartSet).map((subpart) => ({ subpart }))).map(
+    (row) => row.subpart,
+  );
 
   // Create chart data - one bar per report, with subparts as stacked segments
   // Subparts must be added in the correct order for stacking

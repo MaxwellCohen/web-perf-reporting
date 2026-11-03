@@ -68,4 +68,23 @@ describe("POST /api/viewer/psi-share", () => {
     const body = await response.json();
     expect(body.error).toMatch(/embedded Lighthouse/i);
   });
+
+  it("labels gist reports by form factor and maps invalid JSON to 400", async () => {
+    const gist = (content: string) =>
+      new Response(JSON.stringify({ files: { "r.json": { filename: "r.json", content } } }), {
+        status: 200,
+      });
+    const url = "https://googlechrome.github.io/lighthouse/viewer/?gist=abcdef1234";
+    const spy = vi.spyOn(globalThis, "fetch");
+
+    spy.mockResolvedValueOnce(gist(JSON.stringify({ lighthouseResult: lighthouse("desktop") })));
+    const ok = await post({ url });
+    expect(ok.status).toBe(200);
+    expect((await ok.json()).labels).toEqual(["Desktop"]);
+
+    spy.mockResolvedValueOnce(gist("not json"));
+    const bad = await post({ url });
+    expect(bad.status).toBe(400);
+    expect((await bad.json()).error).toMatch(/valid Lighthouse report/i);
+  });
 });

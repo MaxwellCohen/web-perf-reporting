@@ -1,5 +1,6 @@
 import type { PageSpeedInsights } from "@/lib/schema";
 import {
+  isInProgressWorkerStatus,
   toWorkerJobState,
   type WorkerJobState,
 } from "@/lib/page-speed-insights/resolveWorkerEnvelope";
@@ -11,7 +12,7 @@ type PageSpeedInsightsArray = (PageSpeedInsights | null | undefined)[];
  * - `job`: the worker job failed; "Run again" restarts it for the same URL.
  * - `not_found`: the report does not exist.
  */
-export type PageSpeedFailureReason = "timeout" | "error" | "job" | "not_found";
+type PageSpeedFailureReason = "timeout" | "error" | "job" | "not_found";
 
 /** Result of loading a saved report by `publicId` through the Next API route. */
 export type PageSpeedLoadResult =
@@ -64,6 +65,7 @@ function parsePageSpeedInsightsArrayFromText(text: string): PageSpeedInsightsArr
 
 const PAGE_SPEED_POLL_INTERVAL_MS = 2000;
 const PAGE_SPEED_POLL_TIMEOUT_MS = 180_000;
+const PAGE_SPEED_MAX_CONSECUTIVE_FETCH_ERRORS = 3;
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -78,18 +80,26 @@ export function pollProgressFraction(polls: number): number {
 async function getPageSpeedInsightsByPublicId(publicId: string): Promise<PageSpeedLoadResult> {
   const deadline = Date.now() + PAGE_SPEED_POLL_TIMEOUT_MS;
   let polls = 0;
+  let fetchErrors = 0;
 
   try {
     while (Date.now() <= deadline) {
       let result: PageSpeedLoadResult | PendingResult;
       try {
         result = await requestPageSpeedInsights(publicId);
+        fetchErrors = 0;
       } catch {
-        return {
-          status: "failed",
-          reason: "error",
-          error: "We couldn't reach the PageSpeed Insights service.",
-        };
+        // Tolerate brief network blips; only fail after several in a row.
+        fetchErrors += 1;
+        if (fetchErrors >= PAGE_SPEED_MAX_CONSECUTIVE_FETCH_ERRORS) {
+          return {
+            status: "failed",
+            reason: "error",
+            error: "We couldn't reach the PageSpeed Insights service.",
+          };
+        }
+        await sleep(PAGE_SPEED_POLL_INTERVAL_MS);
+        continue;
       }
       if (result.status !== "pending") return result;
       polls += 1;
@@ -119,7 +129,7 @@ async function requestPageSpeedInsights(
     const text = await res.text();
     try {
       const body = JSON.parse(text) as { status?: string; url?: string };
-      if (body.status === "pending" || body.status === "processing") {
+      if (isInProgressWorkerStatus(body.status)) {
         return { status: "pending", state: toWorkerJobState(body.status), url: body.url };
       }
     } catch {

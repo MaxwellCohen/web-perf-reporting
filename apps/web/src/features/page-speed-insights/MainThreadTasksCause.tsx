@@ -43,11 +43,7 @@ function TaskSummaryStats({ summary }: { summary: MainThreadTaskSummary }) {
       <Stat label="Longest" value={formatMs(summary.longestDurationMs)} />
       <Stat label="Long tasks" value={String(summary.longTaskCount)} />
       <Stat
-        label={
-          summary.blockingScope === "fcp-tti"
-            ? "Blocking time (FCP–TTI)"
-            : "Blocking time"
-        }
+        label={summary.blockingScope === "fcp-tti" ? "Blocking time (FCP–TTI)" : "Blocking time"}
         value={formatMs(summary.blockingTimeMs)}
       />
     </dl>
@@ -85,9 +81,7 @@ function ScriptBlockingTable({ rows }: { rows: ScriptBlockingRow[] }) {
               <TableCell className="max-w-112">
                 <ScriptLabel url={row.url} />
               </TableCell>
-              <TableCell className="font-mono tabular-nums">
-                {row.taskCount}
-              </TableCell>
+              <TableCell className="font-mono tabular-nums">{row.taskCount}</TableCell>
               <TableCell className="font-mono tabular-nums">
                 {formatMs(row.blockingTimeMs)}
               </TableCell>
@@ -103,8 +97,8 @@ function LongTaskTable({ summary }: { summary: MainThreadTaskSummary }) {
   if (summary.longTaskCount === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        No tasks longer than {LONG_TASK_THRESHOLD_MS} ms, so this trace adds no
-        Total Blocking Time from main-thread tasks.
+        No tasks longer than {LONG_TASK_THRESHOLD_MS} ms, so this trace adds no Total Blocking Time
+        from main-thread tasks.
       </p>
     );
   }
@@ -122,12 +116,8 @@ function LongTaskTable({ summary }: { summary: MainThreadTaskSummary }) {
         <TableBody>
           {summary.longestTasks.map((task, index) => (
             <TableRow key={`${index}-${task.startTime}-${task.duration}`}>
-              <TableCell className="font-mono tabular-nums">
-                {formatMs(task.startTime)}
-              </TableCell>
-              <TableCell className="font-mono tabular-nums">
-                {formatMs(task.duration)}
-              </TableCell>
+              <TableCell className="font-mono tabular-nums">{formatMs(task.startTime)}</TableCell>
+              <TableCell className="font-mono tabular-nums">{formatMs(task.duration)}</TableCell>
               <TableCell className="font-mono tabular-nums">
                 {formatMs(task.blockingTime)}
               </TableCell>
@@ -138,8 +128,8 @@ function LongTaskTable({ summary }: { summary: MainThreadTaskSummary }) {
       {summary.omittedLongTaskCount > 0 ? (
         <p className="text-xs text-muted-foreground">
           {summary.omittedLongTaskCount} more long{" "}
-          {summary.omittedLongTaskCount === 1 ? "task" : "tasks"} not shown.
-          Blocking time above includes them.
+          {summary.omittedLongTaskCount === 1 ? "task" : "tasks"} not shown. Blocking time above
+          includes them.
         </p>
       ) : null}
     </div>
@@ -171,19 +161,15 @@ export function MainThreadTasksCause({
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Blocking time is how long each task runs past {LONG_TASK_THRESHOLD_MS}{" "}
-        ms. That excess is what can add to Total Blocking Time, which Lighthouse
-        only counts between first paint and interactive, so this total can be
-        higher than the TBT score. Lighthouse ties its longest tasks to the
-        script that was running. That is the script URL, not the original source
-        file.
+        Blocking time is how long each task runs past {LONG_TASK_THRESHOLD_MS} ms. That excess is
+        what can add to Total Blocking Time, which Lighthouse only counts between first paint and
+        interactive, so this total can be higher than the TBT score. Lighthouse ties its longest
+        tasks to the script that was running. That is the script URL, not the original source file.
       </p>
       {reports.map(({ label, summary, scripts }) => (
         <section key={label} className="space-y-3">
           {showLabels ? (
-            <h5 className="text-sm font-semibold text-muted-foreground">
-              {label}
-            </h5>
+            <h5 className="text-sm font-semibold text-muted-foreground">{label}</h5>
           ) : null}
           <TaskSummaryStats summary={summary} />
           <ScriptBlockingTable rows={scripts} />

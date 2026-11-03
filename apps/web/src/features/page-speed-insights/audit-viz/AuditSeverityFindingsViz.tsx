@@ -45,12 +45,10 @@ function extractFindings(rows: DetailTableItem[]): Finding[] {
       // actual findings in subItems; flatten those so they are not dropped.
       const entries: Array<Record<string, unknown>> = [
         item,
-        ...((item.subItems?.items || []) as Array<Record<string, unknown>>).map(
-          (sub) => ({
-            ...sub,
-            severity: sub.severity ?? item.severity,
-          }),
-        ),
+        ...((item.subItems?.items || []) as Array<Record<string, unknown>>).map((sub) => ({
+          ...sub,
+          severity: sub.severity ?? item.severity,
+        })),
       ];
       entries.forEach((entry, entryIndex) => {
         const description =
@@ -84,8 +82,7 @@ function extractFindings(rows: DetailTableItem[]): Finding[] {
 
 const severityStyles: Record<Severity, string> = {
   high: "border-destructive/50 bg-destructive/10 text-destructive",
-  medium:
-    "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+  medium: "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300",
   low: "border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300",
   unknown: "border-border bg-muted/40 text-muted-foreground",
 };
@@ -97,22 +94,15 @@ const severityBar: Record<Severity, string> = {
   unknown: "bg-muted-foreground",
 };
 
-export function AuditSeverityFindingsViz({
-  rows,
-}: {
-  rows: DetailTableItem[];
-}) {
+export function AuditSeverityFindingsViz({ rows }: { rows: DetailTableItem[] }) {
   const findings = extractFindings(rows);
   if (!findings.length) return null;
 
-  const multiReport =
-    new Set(findings.map((finding) => finding.reportLabel)).size > 1;
+  const multiReport = new Set(findings.map((finding) => finding.reportLabel)).size > 1;
 
   return (
     <div className="w-full min-w-0 space-y-2">
-      <p className="text-sm font-medium text-muted-foreground">
-        Findings by severity
-      </p>
+      <p className="text-sm font-medium text-muted-foreground">Findings by severity</p>
       <ul className="space-y-2">
         {findings.map((finding) => (
           <li
@@ -120,10 +110,7 @@ export function AuditSeverityFindingsViz({
             className="relative overflow-hidden rounded-lg border bg-card/40 pl-3"
           >
             <span
-              className={cn(
-                "absolute inset-y-0 left-0 w-1",
-                severityBar[finding.severity],
-              )}
+              className={cn("absolute inset-y-0 left-0 w-1", severityBar[finding.severity])}
               aria-hidden
             />
             <div className="flex flex-wrap items-start justify-between gap-3 px-3 py-3">
@@ -135,9 +122,7 @@ export function AuditSeverityFindingsViz({
                   </code>
                 ) : null}
                 {multiReport ? (
-                  <p className="text-xs text-muted-foreground">
-                    {finding.reportLabel}
-                  </p>
+                  <p className="text-xs text-muted-foreground">{finding.reportLabel}</p>
                 ) : null}
               </div>
               <span

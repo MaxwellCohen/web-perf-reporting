@@ -1,9 +1,9 @@
 import { render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const formatCruxReportMock = vi.fn();
-const groupByMock = vi.fn();
-const getHistoricalCruxDataMock = vi.fn();
+const formatCruxReportMock = vi.fn<(...args: unknown[]) => unknown>();
+const groupByMock = vi.fn<(...args: unknown[]) => unknown>();
+const getHistoricalCruxDataMock = vi.fn<(...args: unknown[]) => unknown>();
 
 vi.mock("next/dynamic", () => ({
   default: () => (props: { chartData?: unknown[] }) => (

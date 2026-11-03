@@ -42,9 +42,7 @@ function buildColumnDefs(
     cols.push(createBytesColumn(columnHelper, "totalBytes", "Total Bytes"));
   }
   if (includeWastedPercent) {
-    cols.push(
-      createPercentageColumn(columnHelper, "wastedPercent", "Wasted %", 1),
-    );
+    cols.push(createPercentageColumn(columnHelper, "wastedPercent", "Wasted %", 1));
   }
   return cols;
 }
@@ -93,11 +91,7 @@ export function JavascriptBytesTableCard({
     allRows.some((row) => row.totalBytes !== undefined),
   );
 
-  const columns = useTableColumns<JavascriptBytesTableRow>(
-    cols,
-    columnHelper,
-    showReportColumn,
-  );
+  const columns = useTableColumns<JavascriptBytesTableRow>(cols, columnHelper, showReportColumn);
 
   const table = useStandardTable({
     data,
@@ -111,5 +105,10 @@ export function JavascriptBytesTableCard({
     return null;
   }
 
-  return <TableCard title={title} table={table} showPagination />;
+  return (
+    <TableCard title={title} className="md:col-span-2 lg:col-span-3">
+      <TableCard.Table table={table} />
+      <TableCard.Pagination table={table} />
+    </TableCard>
+  );
 }

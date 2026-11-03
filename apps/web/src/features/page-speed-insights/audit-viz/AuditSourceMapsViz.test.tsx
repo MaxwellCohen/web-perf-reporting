@@ -3,10 +3,7 @@ import { render } from "@testing-library/react";
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import { AuditSourceMapsViz } from "./AuditSourceMapsViz";
 
-function row(
-  items: Array<Record<string, unknown>>,
-  label = "Mobile",
-): DetailTableItem {
+function row(items: Array<Record<string, unknown>>, label = "Mobile"): DetailTableItem {
   return {
     _userLabel: label,
     auditResult: {
@@ -39,9 +36,7 @@ describe("AuditSourceMapsViz", () => {
                 sourceMapUrl: "https://example.com/vendor.js.map",
                 subItems: {
                   type: "subitems",
-                  items: [
-                    { error: "Warning: missing 3 items in `.sourcesContent`" },
-                  ],
+                  items: [{ error: "Warning: missing 3 items in `.sourcesContent`" }],
                 },
               },
             ],
@@ -78,9 +73,7 @@ describe("AuditSourceMapsViz", () => {
               sourceMapUrl: "https://example.com/one.js.map",
               subItems: {
                 type: "subitems",
-                items: [
-                  { error: "Warning: missing 1 item in `.sourcesContent`" },
-                ],
+                items: [{ error: "Warning: missing 1 item in `.sourcesContent`" }],
               },
             },
           ]),

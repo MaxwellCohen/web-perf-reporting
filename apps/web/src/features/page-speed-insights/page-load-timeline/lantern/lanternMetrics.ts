@@ -11,7 +11,7 @@ import { simulate, type SimulatorOptions } from "./simulator";
 const PARENT_TOLERANCE_MS = 0;
 const PARENT_TYPES = new Set(["Document", "Script", "Stylesheet"]);
 
-export type LanternInputRequest = {
+type LanternInputRequest = {
   url: string;
   startMs: number;
   rendererStartMs?: number;
@@ -23,7 +23,7 @@ export type LanternInputRequest = {
   priority: string;
 };
 
-export type LanternInputTask = { startMs: number; durationMs: number };
+type LanternInputTask = { startMs: number; durationMs: number };
 
 export type LanternThrottlingInput = {
   rttMs: number;
@@ -40,7 +40,7 @@ export type LanternGraphInput = {
   renderBlockingUrls?: Set<string>;
 };
 
-export type LanternGraph = {
+type LanternGraph = {
   root: SimNode;
   requestNodes: SimNode[];
   cpuNodes: SimNode[];
@@ -72,7 +72,7 @@ const BLOCKING_TYPES = new Set(["Document", "Stylesheet", "Script"]);
  * it, and otherwise the priority rule limited to the types that can block paint
  * (fonts are VeryHigh but never block first paint).
  */
-export function makeBlockingTest(renderBlockingUrls: Set<string> | undefined) {
+function makeBlockingTest(renderBlockingUrls: Set<string> | undefined) {
   return (node: SimNode): boolean => {
     const request = node.request!;
     if (request.isMainDocument) return true;
@@ -83,7 +83,7 @@ export function makeBlockingTest(renderBlockingUrls: Set<string> | undefined) {
   };
 }
 
-export function buildGraph(input: LanternGraphInput): LanternGraph {
+function buildGraph(input: LanternGraphInput): LanternGraph {
   const { requests, tasks } = input;
   const documentIndex = Math.max(
     0,
@@ -130,13 +130,8 @@ export function buildGraph(input: LanternGraphInput): LanternGraph {
     let parentEnd = -Infinity;
     requests.forEach((candidate, j) => {
       if (j === i || !PARENT_TYPES.has(candidate.resourceType)) return;
-      if (
-        candidate.startMs >= r.startMs ||
-        candidate.endMs > askedAt + PARENT_TOLERANCE_MS
-      )
-        return;
-      if (r.resourceType === "Font" && candidate.resourceType !== "Stylesheet")
-        return;
+      if (candidate.startMs >= r.startMs || candidate.endMs > askedAt + PARENT_TOLERANCE_MS) return;
+      if (r.resourceType === "Font" && candidate.resourceType !== "Stylesheet") return;
       if (candidate.endMs > parentEnd) {
         parent = requestNodes[j];
         parentEnd = candidate.endMs;
@@ -147,8 +142,7 @@ export function buildGraph(input: LanternGraphInput): LanternGraph {
   });
 
   cpuNodes.forEach((node) => {
-    if (node.startTime >= root.startTime && !root.isDependentOn(node))
-      node.addDependency(root);
+    if (node.startTime >= root.startTime && !root.isDependentOn(node)) node.addDependency(root);
   });
 
   return { root, requestNodes, cpuNodes };
@@ -162,30 +156,22 @@ type PruneOptions = {
   keepLayoutNodes?: boolean;
 };
 
-function renderBlockingCpuIds(
-  cpuNodes: SimNode[],
-  cutoffMs: number,
-): Set<string> {
+function renderBlockingCpuIds(cpuNodes: SimNode[], cutoffMs: number): Set<string> {
   const ids = new Set<string>();
   const early = cpuNodes.filter((n) => n.startTime <= cutoffMs);
   const first = early[0];
   if (first) ids.add(first.id);
   const painter =
-    early.find((n) => n.startTime <= cutoffMs && n.endTime >= cutoffMs) ??
-    early[early.length - 1];
+    early.find((n) => n.startTime <= cutoffMs && n.endTime >= cutoffMs) ?? early[early.length - 1];
   if (painter) ids.add(painter.id);
   return ids;
 }
 
-export function pruneGraph(
-  graph: LanternGraph,
-  options: PruneOptions,
-): SimNode {
+function pruneGraph(graph: LanternGraph, options: PruneOptions): SimNode {
   const cpuIds = renderBlockingCpuIds(options.cpuNodes, options.cutoffMs);
   return graph.root.cloneWithRelationships((node) => {
     if (node.type === "network") {
-      const endedAfter =
-        node.endTime > options.cutoffMs || node.startTime > options.cutoffMs;
+      const endedAfter = node.endTime > options.cutoffMs || node.startTime > options.cutoffMs;
       if (endedAfter && !node.isMainDocument()) return false;
       return options.treatNodeAsRenderBlocking(node);
     }
@@ -221,10 +207,7 @@ function simulatorOptions(
 ): SimulatorOptions {
   const serverResponseTimeByOrigin = new Map<string, number>();
   if (documentServerResponseMs != null) {
-    serverResponseTimeByOrigin.set(
-      graph.root.request!.origin,
-      documentServerResponseMs,
-    );
+    serverResponseTimeByOrigin.set(graph.root.request!.origin, documentServerResponseMs);
   }
   return {
     rtt: throttling.rttMs,
@@ -240,11 +223,7 @@ export function estimateMetrics(
   observed: LanternObserved,
 ): LanternEstimate {
   const graph = buildGraph(input);
-  const options = simulatorOptions(
-    throttling,
-    graph,
-    input.documentServerResponseMs,
-  );
+  const options = simulatorOptions(throttling, graph, input.documentServerResponseMs);
   const run = (cutoffMs: number, block: (node: SimNode) => boolean) =>
     simulate(
       pruneGraph(graph, {
@@ -268,16 +247,12 @@ export function estimateMetrics(
   };
 
   if (observed.lcpMs == null) return { fcp };
-  const textLcp =
-    Math.abs(observed.lcpMs - observed.fcpMs) < 1 &&
-    (observed.lcpIsText ?? true);
+  const textLcp = Math.abs(observed.lcpMs - observed.fcpMs) < 1 && (observed.lcpIsText ?? true);
   if (textLcp) return { fcp, lcp: fcp };
 
   const lastNotOffscreen = (nodeTimings: Map<SimNode, { endTime: number }>) =>
     Math.max(
-      ...[...nodeTimings]
-        .filter(([n]) => isNotLowPriorityImage(n))
-        .map(([, t]) => t.endTime),
+      ...[...nodeTimings].filter(([n]) => isNotLowPriorityImage(n)).map(([, t]) => t.endTime),
     );
   const optimisticLcp = run(observed.lcpMs, isNotLowPriorityImage);
   const pessimisticLcp = run(observed.lcpMs, () => true);

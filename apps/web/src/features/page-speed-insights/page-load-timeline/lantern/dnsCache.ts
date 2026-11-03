@@ -4,7 +4,7 @@ import type { SimRequest } from "./graph";
 
 const DNS_RESOLUTION_RTT_MULTIPLIER = 2;
 
-export function hostOf(request: SimRequest): string {
+function hostOf(request: SimRequest): string {
   try {
     return new URL(request.url).host;
   } catch {

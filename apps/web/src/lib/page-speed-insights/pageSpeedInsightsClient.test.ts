@@ -75,19 +75,40 @@ describe("fetchPageSpeedInsightsByPublicId", () => {
   });
 
   it("returns an error reason when the request throws", async () => {
-    vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("offline"));
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("offline"));
 
-    await expect(fetchPageSpeedInsightsByPublicId("err-1")).resolves.toMatchObject({
-      status: "failed",
-      reason: "error",
-    });
+    const promise = fetchPageSpeedInsightsByPublicId("err-1");
+    await vi.advanceTimersByTimeAsync(10_000);
+    await expect(promise).resolves.toMatchObject({ status: "failed", reason: "error" });
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it("tolerates transient fetch errors while polling", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockRejectedValueOnce(new Error("blip"))
+      .mockRejectedValueOnce(new Error("blip"))
+      .mockResolvedValueOnce(json(200, []));
+
+    const promise = fetchPageSpeedInsightsByPublicId("err-3");
+    await vi.advanceTimersByTimeAsync(10_000);
+    await expect(promise).resolves.toEqual({ status: "ok", data: [] });
+  });
+
+  it("treats a queued 404 as still running", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(json(404, { status: "queued" }))
+      .mockResolvedValueOnce(json(200, []));
+
+    const promise = fetchPageSpeedInsightsByPublicId("queued-1");
+    await vi.advanceTimersByTimeAsync(2000);
+    await expect(promise).resolves.toEqual({ status: "ok", data: [] });
   });
 
   it("returns an error reason for non-ok, non-404/500 responses", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(json(502, "bad gateway"));
 
-    await expect(fetchPageSpeedInsightsByPublicId("err-2")).resolves.toMatchObject({
-      reason: "error",
-    });
+    const promise = fetchPageSpeedInsightsByPublicId("err-2");
+    await vi.advanceTimersByTimeAsync(10_000);
+    await expect(promise).resolves.toMatchObject({ reason: "error" });
   });
 });

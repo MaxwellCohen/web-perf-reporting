@@ -48,15 +48,10 @@ function networkBars(timeline: PageLoadTimeline) {
       if (!bar.href && event.id !== "nav-redirects") return;
       const url = bar.href ?? "";
       let statusCode: number | undefined;
-      const statusCell = rows[index]?.find((cell) =>
-        /^status \d+/.test(cell.text),
-      );
+      const statusCell = rows[index]?.find((cell) => /^status \d+/.test(cell.text));
       if (statusCell) {
         statusCode = Number(statusCell.text.replace(/^status\s+/, ""));
-      } else if (
-        event.detail.includes("status ") &&
-        (event.waterfall?.length ?? 0) === 1
-      ) {
+      } else if (event.detail.includes("status ") && (event.waterfall?.length ?? 0) === 1) {
         const match = event.detail.match(/status (\d+)/);
         if (match) statusCode = Number(match[1]);
       }
@@ -655,9 +650,7 @@ describe("buildPageLoadTimeline", () => {
     expect(steps.some((s) => s.id === "nav-beforeunload")).toBe(false);
     expect(steps.some((s) => s.id === "req-preload-scanner")).toBe(false);
     expect(steps.some((s) => s.id === "head-css")).toBe(false);
-    expect(timeline!.events.some((e) => e.phaseId === "connection")).toBe(
-      false,
-    );
+    expect(timeline!.events.some((e) => e.phaseId === "connection")).toBe(false);
   });
 
   it("creates one moment per network request with start and end", () => {
@@ -718,12 +711,8 @@ describe("buildPageLoadTimeline", () => {
     const css = netMoments.find((m) => m.title === "Stylesheet downloaded");
     expect(css?.kind).toBe("blocking");
 
-    expect(
-      doc?.notes?.some((note) => note.title === "Server think time"),
-    ).toBeFalsy();
-    const server = timeline!.events.find(
-      (moment) => moment.id === "req-server",
-    );
+    expect(doc?.notes?.some((note) => note.title === "Server think time")).toBeFalsy();
+    const server = timeline!.events.find((moment) => moment.id === "req-server");
     expect(server).toMatchObject({
       title: "Server think time",
       kind: "marker",
@@ -738,8 +727,7 @@ describe("buildPageLoadTimeline", () => {
     expect(ttfb?.title).toBe("TTFB");
     expect(css?.waterfall?.[0]?.renderBlocking).toBe("blocking");
     expect(
-      netMoments.find((m) => m.title === "Script downloaded")?.waterfall?.[0]
-        ?.renderBlocking,
+      netMoments.find((m) => m.title === "Script downloaded")?.waterfall?.[0]?.renderBlocking,
     ).toBe("non-blocking");
   });
 
@@ -819,12 +807,8 @@ describe("buildPageLoadTimeline", () => {
       }),
     );
 
-    const css = timeline!.events.find(
-      (m) => m.title === "Stylesheet downloaded",
-    );
-    expect(css?.detail).toMatch(
-      /25% used · 2\.0 KiB used of 7\.8 KiB · 5\.9 KiB unused/,
-    );
+    const css = timeline!.events.find((m) => m.title === "Stylesheet downloaded");
+    expect(css?.detail).toMatch(/25% used · 2\.0 KiB used of 7\.8 KiB · 5\.9 KiB unused/);
     expect(css?.waterfall?.[0]?.coverage).toBe(
       "25% used · 2.0 KiB used of 7.8 KiB · 5.9 KiB unused",
     );
@@ -832,9 +816,7 @@ describe("buildPageLoadTimeline", () => {
     const partial = timeline!.events.find(
       (m) => m.title === "Script downloaded" && m.detail.includes("tag.js"),
     );
-    expect(partial?.detail).toMatch(
-      /50% used · 24\.4 KiB used of 48\.8 KiB · 24\.4 KiB unused/,
-    );
+    expect(partial?.detail).toMatch(/50% used · 24\.4 KiB used of 48\.8 KiB · 24\.4 KiB unused/);
     expect(partial?.waterfall?.[0]?.coverage).toBe(
       "50% used · 24.4 KiB used of 48.8 KiB · 24.4 KiB unused",
     );
@@ -890,9 +872,7 @@ describe("buildPageLoadTimeline", () => {
       }),
     );
 
-    const burst = timeline!.events.find(
-      (m) => m.title === "2 Scripts downloaded",
-    );
+    const burst = timeline!.events.find((m) => m.title === "2 Scripts downloaded");
     expect(burst?.waterfall?.map((bar) => bar.coverage)).toEqual([
       "50% used · 500 B used of 1000 B · 500 B unused",
       "100% used · 2.0 KiB",
@@ -1031,9 +1011,7 @@ describe("buildPageLoadTimeline", () => {
     expect(images?.endMs).toBe(2390);
     expect(images?.detail).toMatch(/6 image requests/);
     expect(images?.detail).not.toMatch(/within 10 ms/);
-    expect(
-      images?.waterfall?.every((bar) => bar.renderBlocking === "non-blocking"),
-    ).toBe(true);
+    expect(images?.waterfall?.every((bar) => bar.renderBlocking === "non-blocking")).toBe(true);
 
     const earlyScript = netMoments.find(
       (m) => m.title === "Script downloaded" && m.startMs === 200,
@@ -1049,9 +1027,7 @@ describe("buildPageLoadTimeline", () => {
     const timeline = buildPageLoadTimeline(
       makeItem({
         renderBlocking: [{ url: "https://example.com/app.css", wastedMs: 120 }],
-        fontDisplayItems: [
-          { url: "https://example.com/font.woff2", wastedMs: 40 },
-        ],
+        fontDisplayItems: [{ url: "https://example.com/font.woff2", wastedMs: 40 }],
         networkRequests: [
           {
             url: "https://example.com/app.css",
@@ -1099,33 +1075,26 @@ describe("buildPageLoadTimeline", () => {
       }),
     );
 
-    const styles = timeline!.events.find(
-      (m) => m.title === "2 Stylesheets downloaded",
-    );
+    const styles = timeline!.events.find((m) => m.title === "2 Stylesheets downloaded");
     expect(styles?.waterfall?.map((bar) => bar.renderBlocking)).toEqual([
       "blocking",
       "potentially-blocking",
     ]);
     expect(styles?.kind).toBe("blocking");
+    expect(timeline!.events.find((m) => m.title === "Font")?.waterfall?.[0]?.renderBlocking).toBe(
+      "potentially-blocking",
+    );
+    expect(timeline!.events.find((m) => m.title === "Image")?.waterfall?.[0]?.renderBlocking).toBe(
+      "non-blocking",
+    );
     expect(
-      timeline!.events.find((m) => m.title === "Font")?.waterfall?.[0]
-        ?.renderBlocking,
+      timeline!.events.find((m) => m.title === "Script downloaded")?.waterfall?.[0]?.renderBlocking,
     ).toBe("potentially-blocking");
     expect(
-      timeline!.events.find((m) => m.title === "Image")?.waterfall?.[0]
-        ?.renderBlocking,
-    ).toBe("non-blocking");
-    expect(
-      timeline!.events.find((m) => m.title === "Script downloaded")
-        ?.waterfall?.[0]?.renderBlocking,
-    ).toBe("potentially-blocking");
-    expect(
-      networkBars(timeline!).find((bar) => bar.url.endsWith("app.css"))
-        ?.isRenderBlocking,
+      networkBars(timeline!).find((bar) => bar.url.endsWith("app.css"))?.isRenderBlocking,
     ).toBe(true);
     expect(
-      networkBars(timeline!).find((bar) => bar.url.endsWith("print.css"))
-        ?.isRenderBlocking,
+      networkBars(timeline!).find((bar) => bar.url.endsWith("print.css"))?.isRenderBlocking,
     ).toBe(false);
   });
 
@@ -1152,8 +1121,7 @@ describe("buildPageLoadTimeline", () => {
     );
 
     const attributed = timeline!.events.find(
-      (moment) =>
-        moment.detail.includes("tag.js") && moment.id.startsWith("long-task-"),
+      (moment) => moment.detail.includes("tag.js") && moment.id.startsWith("long-task-"),
     );
     expect(attributed?.waterfall?.[0]).toMatchObject({
       scriptSize: "48.8 KiB",
@@ -1207,23 +1175,18 @@ describe("buildPageLoadTimeline", () => {
       }),
     );
 
-    const script = timeline!.events.find(
-      (moment) => moment.title === "Script downloaded",
-    );
+    const script = timeline!.events.find((moment) => moment.title === "Script downloaded");
     expect(script?.waterfall?.[0]).toMatchObject({
       scriptCpu: { totalMs: 1177.7, scriptingMs: 258.07, parseMs: 892 },
       chain: { endMs: 595, extendsMs: 345, isLongest: true },
     });
 
-    const document = timeline!.events.find(
-      (moment) => moment.title === "Document",
-    );
+    const document = timeline!.events.find((moment) => moment.title === "Document");
     expect(document?.waterfall?.[0]?.chain).toEqual({ endMs: 250 });
     expect(document?.waterfall?.[0]?.scriptCpu).toBeUndefined();
 
     const attributed = timeline!.events.find(
-      (moment) =>
-        moment.detail.includes("tag.js") && moment.id.startsWith("long-task-"),
+      (moment) => moment.detail.includes("tag.js") && moment.id.startsWith("long-task-"),
     );
     expect(attributed?.waterfall?.[0]?.scriptCpu).toEqual({
       totalMs: 1177.7,
@@ -1254,28 +1217,16 @@ describe("buildPageLoadTimeline", () => {
       }),
     );
 
-    const longTasks = timeline!.events.filter((m) =>
-      m.id.startsWith("long-task-"),
-    );
-    expect(longTasks.map((m) => m.title)).toEqual([
-      "Long task",
-      "Long task",
-      "Long task",
-    ]);
-    expect(longTasks.map((m) => m.kind)).toEqual([
-      "blocking",
-      "blocking",
-      "blocking",
-    ]);
+    const longTasks = timeline!.events.filter((m) => m.id.startsWith("long-task-"));
+    expect(longTasks.map((m) => m.title)).toEqual(["Long task", "Long task", "Long task"]);
+    expect(longTasks.map((m) => m.kind)).toEqual(["blocking", "blocking", "blocking"]);
     expect(longTasks[0]?.table?.rows).toHaveLength(1);
   });
 
   it("groups adjacent short tasks and leaves long tasks alone", () => {
     const timeline = buildPageLoadTimeline(
       makeItem({
-        longTasks: [
-          { url: "https://example.com/long.js", startTime: 1200, duration: 90 },
-        ],
+        longTasks: [{ url: "https://example.com/long.js", startTime: 1200, duration: 90 }],
         mainThreadTasks: [
           { startTime: 1000, duration: 20 },
           { startTime: 1020, duration: 15 },
@@ -1287,20 +1238,14 @@ describe("buildPageLoadTimeline", () => {
       }),
     );
 
-    const shorts = timeline!.events.filter((m) =>
-      m.id.startsWith("short-task-"),
-    );
+    const shorts = timeline!.events.filter((m) => m.id.startsWith("short-task-"));
     const longs = timeline!.events.filter((m) => m.id.startsWith("long-task-"));
 
     expect(longs).toHaveLength(1);
     expect(longs[0]?.title).toBe("Long task");
     expect(longs[0]?.kind).toBe("blocking");
 
-    expect(shorts.map((m) => m.title)).toEqual([
-      "3 Short tasks",
-      "Short task",
-      "2 Short tasks",
-    ]);
+    expect(shorts.map((m) => m.title)).toEqual(["3 Short tasks", "Short task", "2 Short tasks"]);
     expect(shorts.map((m) => m.kind)).toEqual([
       "potentially-blocking",
       "potentially-blocking",
@@ -1363,34 +1308,24 @@ describe("buildPageLoadTimeline", () => {
     );
 
     const redirects = timeline!.events.find((s) => s.id === "nav-redirects");
-    const redirectBar = networkBars(timeline!).find(
-      (bar) => bar.statusCode === 307,
-    );
-    const documentBar = networkBars(timeline!).find(
-      (bar) => bar.statusCode === 200,
-    );
+    const redirectBar = networkBars(timeline!).find((bar) => bar.statusCode === 307);
+    const documentBar = networkBars(timeline!).find((bar) => bar.statusCode === 200);
 
     expect(redirects?.startMs).toBe(redirectBar?.startMs);
     expect(redirects?.timeMs).toBe(redirectBar?.endMs);
     expect(redirects?.endMs).toBe(redirectBar?.endMs);
     expect(redirects!.endMs! - redirects!.startMs!).toBeLessThan(1000);
     expect(redirects?.detail).not.toMatch(/2\.39 s/);
-    expect(redirects?.waterfall?.map((bar) => bar.href)).toEqual([
-      "https://www.nextjs.org/",
-    ]);
-    expect(redirects?.table?.rows[0]?.map((cell) => cell.text)).toContain(
-      "status 307",
-    );
+    expect(redirects?.waterfall?.map((bar) => bar.href)).toEqual(["https://www.nextjs.org/"]);
+    expect(redirects?.table?.rows[0]?.map((cell) => cell.text)).toContain("status 307");
     expect(
       timeline!.events.some(
-        (moment) =>
-          moment.id.startsWith("net-") && moment.detail.includes("307"),
+        (moment) => moment.id.startsWith("net-") && moment.detail.includes("307"),
       ),
     ).toBe(false);
     expect(
       timeline!.events.some(
-        (moment) =>
-          moment.id.startsWith("net-") && moment.detail.includes("nextjs.org/"),
+        (moment) => moment.id.startsWith("net-") && moment.detail.includes("nextjs.org/"),
       ),
     ).toBe(true);
     expect(redirectBar!.endMs).toBeLessThan(601);
@@ -1440,9 +1375,7 @@ describe("buildPageLoadTimeline", () => {
       }),
     );
 
-    const redirects = timeline!.events.find(
-      (moment) => moment.id === "nav-redirects",
-    );
+    const redirects = timeline!.events.find((moment) => moment.id === "nav-redirects");
     expect(redirects?.waterfall?.map((bar) => bar.href)).toEqual([
       "http://example.com/",
       "https://example.com/",
@@ -1450,9 +1383,7 @@ describe("buildPageLoadTimeline", () => {
     expect(redirects?.startMs).toBe(1);
     expect(redirects?.timeMs).toBe(120);
     expect(redirects?.endMs).toBe(120);
-    expect(
-      timeline!.events.filter((moment) => moment.id === "nav-redirects"),
-    ).toHaveLength(1);
+    expect(timeline!.events.filter((moment) => moment.id === "nav-redirects")).toHaveLength(1);
     expect(
       timeline!.events
         .filter((moment) => moment.id.startsWith("net-"))
@@ -1477,25 +1408,15 @@ describe("buildPageLoadTimeline", () => {
 
     const fcpStep = timeline!.events.find((s) => s.id === "render-fcp");
     expect(fcpStep?.detail).toBe("First Contentful Paint at 1.60 s.");
-    expect(timeline!.events.find((s) => s.id === "render-fp")?.timeMs).toBe(
-      200,
-    );
+    expect(timeline!.events.find((s) => s.id === "render-fp")?.timeMs).toBe(200);
 
-    const shots = timeline!.events.filter((m) =>
-      m.id.startsWith("screenshot-"),
-    );
-    expect(
-      shots.map((m) => ({ timeMs: m.timeMs, data: m.screenshot?.data })),
-    ).toEqual([
+    const shots = timeline!.events.filter((m) => m.id.startsWith("screenshot-"));
+    expect(shots.map((m) => ({ timeMs: m.timeMs, data: m.screenshot?.data }))).toEqual([
       { timeMs: 1500, data: "late-frame" },
       { timeMs: 2150, data: "later" },
     ]);
-    expect(
-      timeline!.events.find((m) => m.id === "render-fcp")?.screenshot,
-    ).toBeUndefined();
-    expect(
-      timeline!.events.filter((m) => m.id.startsWith("screenshot-")),
-    ).toHaveLength(2);
+    expect(timeline!.events.find((m) => m.id === "render-fcp")?.screenshot).toBeUndefined();
+    expect(timeline!.events.filter((m) => m.id.startsWith("screenshot-"))).toHaveLength(2);
   });
 
   it("keeps LCP subpart breakdown without findings", () => {
@@ -1532,19 +1453,11 @@ describe("buildPageLoadTimeline", () => {
     expect(timeline!.events[0]?.title).toBe("Navigation start");
 
     for (let i = 1; i < timeline!.events.length; i++) {
-      expect(timeline!.events[i]!.timeMs).toBeGreaterThanOrEqual(
-        timeline!.events[i - 1]!.timeMs,
-      );
+      expect(timeline!.events[i]!.timeMs).toBeGreaterThanOrEqual(timeline!.events[i - 1]!.timeMs);
     }
 
-    const shots = timeline!.events.filter((m) =>
-      m.id.startsWith("screenshot-"),
-    );
-    expect(shots.map((m) => m.screenshot?.data)).toEqual([
-      "img-early",
-      "img-fcp",
-      "img-lcp",
-    ]);
+    const shots = timeline!.events.filter((m) => m.id.startsWith("screenshot-"));
+    expect(shots.map((m) => m.screenshot?.data)).toEqual(["img-early", "img-fcp", "img-lcp"]);
     // Changed frames sit mid-window, since a slot's image was captured at or before the slot.
     expect(shots.map((m) => m.timeMs)).toEqual([800, 1050, 1950]);
     expect(timeline!.events.find((m) => m.id === "render-fcp")).toBeDefined();
@@ -1578,21 +1491,16 @@ describe("buildPageLoadTimeline", () => {
       }),
     );
 
-    const firstByte = lcpSegments(timeline!).find(
-      (seg) => seg.subpart === "timeToFirstByte",
-    );
-    const render = lcpSegments(timeline!).find(
-      (seg) => seg.subpart === "elementRenderDelay",
-    );
+    const firstByte = lcpSegments(timeline!).find((seg) => seg.subpart === "timeToFirstByte");
+    const render = lcpSegments(timeline!).find((seg) => seg.subpart === "elementRenderDelay");
     expect(milestone(timeline!, "m-ttfb")?.timeMs).toBe(601);
-    expect(findMarked(timeline!, "req-ttfb")?.detail).toMatch(
-      /First byte at 601 ms/,
-    );
+    expect(findMarked(timeline!, "req-ttfb")?.detail).toMatch(/First byte at 601 ms/);
     expect(firstByte?.durationMs).toBe(601);
     expect(render?.durationMs).toBeCloseTo(6980 - 601, 5);
-    expect(
-      lcpSegments(timeline!).reduce((sum, seg) => sum + seg.durationMs, 0),
-    ).toBeCloseTo(6980, 5);
+    expect(lcpSegments(timeline!).reduce((sum, seg) => sum + seg.durationMs, 0)).toBeCloseTo(
+      6980,
+      5,
+    );
   });
 
   it("places long-task rows between FCP and LCP under simulation", () => {
@@ -1639,21 +1547,13 @@ describe("buildPageLoadTimeline", () => {
     expect(lcpIdx).toBeGreaterThan(fcpIdx);
 
     const between = moments.slice(fcpIdx + 1, lcpIdx);
-    expect(moments.some((m) => m.id === "lcp-seg-elementRenderDelay")).toBe(
-      false,
-    );
-    const tasks = moments.filter((moment) =>
-      moment.id.startsWith("long-task-"),
-    );
+    expect(moments.some((m) => m.id === "lcp-seg-elementRenderDelay")).toBe(false);
+    const tasks = moments.filter((moment) => moment.id.startsWith("long-task-"));
     expect(tasks.map((moment) => moment.startMs)).toEqual([2600, 9000]);
     expect(tasks.map((moment) => moment.timeMs)).toEqual([2800, 9100]);
-    expect(between.some((moment) => moment.id.startsWith("long-task-"))).toBe(
-      true,
-    );
+    expect(between.some((moment) => moment.id.startsWith("long-task-"))).toBe(true);
     expect(
-      moments.some(
-        (moment) => moment.id.startsWith("long-task-") && moment.timeMs > 6980,
-      ),
+      moments.some((moment) => moment.id.startsWith("long-task-") && moment.timeMs > 6980),
     ).toBe(true);
   });
 
@@ -1710,9 +1610,7 @@ describe("buildPageLoadTimeline", () => {
     const step = findMarked(timeline!, "req-ttfb");
     expect(step?.timeMs).toBe(180);
     expect(step?.detail).toBe("First byte at 180 ms.");
-    expect(timeline!.events.some((moment) => moment.id === "req-server")).toBe(
-      false,
-    );
+    expect(timeline!.events.some((moment) => moment.id === "req-server")).toBe(false);
   });
 
   it("drops a simulated TTFB that lands after the HTML response", () => {
@@ -1756,9 +1654,7 @@ describe("buildPageLoadTimeline", () => {
       }),
     );
 
-    const firstVisual = timeline!.events.find(
-      (m) => m.id === "render-first-visual",
-    );
+    const firstVisual = timeline!.events.find((m) => m.id === "render-first-visual");
     expect(firstVisual).toMatchObject({
       title: "First visual change",
       timeMs: 1050,
@@ -1812,12 +1708,8 @@ describe("buildPageLoadTimeline", () => {
       }),
     );
 
-    const shifts = timeline!.events.filter((m) =>
-      m.id.startsWith("layout-shift-"),
-    );
-    expect(
-      shifts.map((m) => ({ id: m.id, timeMs: m.timeMs, title: m.title })),
-    ).toEqual([
+    const shifts = timeline!.events.filter((m) => m.id.startsWith("layout-shift-"));
+    expect(shifts.map((m) => ({ id: m.id, timeMs: m.timeMs, title: m.title }))).toEqual([
       { id: "layout-shift-0", timeMs: 900, title: "Layout shift" },
       { id: "layout-shift-1", timeMs: 1800, title: "Layout shift" },
     ]);
@@ -1840,9 +1732,7 @@ describe("buildPageLoadTimeline", () => {
       }),
     );
 
-    expect(timeline!.events.some((m) => m.id.startsWith("layout-shift-"))).toBe(
-      false,
-    );
+    expect(timeline!.events.some((m) => m.id.startsWith("layout-shift-"))).toBe(false);
   });
 
   it("moves timeline numbers onto simulated CPU and network throttling", () => {
@@ -1927,14 +1817,10 @@ describe("buildPageLoadTimeline", () => {
     expect(ttfb?.detail).toMatch(/601 ms/);
     expect(ttfb?.detail).toMatch(/Slow 4G, 4× CPU/);
 
-    const css = networkBars(timeline!).find((bar) =>
-      bar.url.includes("app.css"),
-    );
+    const css = networkBars(timeline!).find((bar) => bar.url.includes("app.css"));
     expect(css!.endMs - css!.startMs).toBeGreaterThan(0);
 
-    const attributed = mainThreadBlocks(timeline!).find((block) =>
-      block.url?.includes("app.js"),
-    );
+    const attributed = mainThreadBlocks(timeline!).find((block) => block.url?.includes("app.js"));
     expect(attributed).toMatchObject({ startMs: 8000, durationMs: 180 });
 
     const observed = mainThreadBlocks(timeline!).find((block) => !block.url);
@@ -2007,14 +1893,9 @@ describe("buildPageLoadTimeline", () => {
       }),
     );
 
-    const script =
-      "https://nextjs.org/_next/static/immutable/chunks/1k7fgn7k76n8n.js";
-    const attributed = mainThreadBlocks(timeline!).filter(
-      (block) => block.url === script,
-    );
-    expect(
-      attributed.map((block) => [block.startMs, block.durationMs]),
-    ).toEqual([
+    const script = "https://nextjs.org/_next/static/immutable/chunks/1k7fgn7k76n8n.js";
+    const attributed = mainThreadBlocks(timeline!).filter((block) => block.url === script);
+    expect(attributed.map((block) => [block.startMs, block.durationMs])).toEqual([
       [3645, 61],
       [5733, 170],
     ]);
@@ -2029,18 +1910,14 @@ describe("buildPageLoadTimeline", () => {
     const observed = mainThreadBlocks(timeline!).filter((block) => !block.url);
     expect(observed).toHaveLength(1);
     expect(observed[0]?.durationMs).toBeCloseTo(202.4, 5);
-    expect(timeline!.events.some((moment) => moment.timeMs > 20000)).toBe(
-      false,
-    );
+    expect(timeline!.events.some((moment) => moment.timeMs > 20000)).toBe(false);
   });
 
   it("drops an observed main-thread task that repeats a Lantern long task", () => {
     const timeline = buildPageLoadTimeline(
       makeItem({
         formFactor: "desktop",
-        longTasks: [
-          { url: "https://example.com/app.js", startTime: 900, duration: 105 },
-        ],
+        longTasks: [{ url: "https://example.com/app.js", startTime: 900, duration: 105 }],
         mainThreadTasks: [
           { startTime: 832.6, duration: 105.1 },
           { startTime: 1094, duration: 325.6 },
@@ -2048,9 +1925,7 @@ describe("buildPageLoadTimeline", () => {
       }),
     );
 
-    expect(
-      mainThreadBlocks(timeline!).map((block) => block.durationMs),
-    ).toEqual([105, 325.6]);
+    expect(mainThreadBlocks(timeline!).map((block) => block.durationMs)).toEqual([105, 325.6]);
     expect(mainThreadBlocks(timeline!)[0]).toMatchObject({
       startMs: 900,
       url: "https://example.com/app.js",
@@ -2076,24 +1951,12 @@ describe("buildPageLoadTimeline", () => {
       }),
     );
 
-    const moments = timeline!.events.filter((item) =>
-      item.id.startsWith("long-task-"),
-    );
-    expect(moments.map((moment) => moment.startMs)).toEqual([
-      4200, 9880, 17100,
-    ]);
-    expect(moments.map((moment) => moment.timeMs)).toEqual([
-      4290, 10460, 17948,
-    ]);
+    const moments = timeline!.events.filter((item) => item.id.startsWith("long-task-"));
+    expect(moments.map((moment) => moment.startMs)).toEqual([4200, 9880, 17100]);
+    expect(moments.map((moment) => moment.timeMs)).toEqual([4290, 10460, 17948]);
     expect(moments.map((moment) => moment.endMs)).toEqual([4290, 10460, 17948]);
-    expect(moments.map((moment) => moment.title)).toEqual([
-      "Long task",
-      "Long task",
-      "Long task",
-    ]);
-    expect(
-      timeline!.events.some((item) => item.id === "after-long-tasks"),
-    ).toBe(false);
+    expect(moments.map((moment) => moment.title)).toEqual(["Long task", "Long task", "Long task"]);
+    expect(timeline!.events.some((item) => item.id === "after-long-tasks")).toBe(false);
 
     const first = moments[0];
     expect(first?.detail).toBe(
@@ -2112,9 +1975,7 @@ describe("buildPageLoadTimeline", () => {
     expect(first?.waterfall).toHaveLength(1);
 
     const unattributed = moments[1];
-    expect(unattributed?.detail).toBe(
-      "Unattributed script blocked the main thread for 580 ms.",
-    );
+    expect(unattributed?.detail).toBe("Unattributed script blocked the main thread for 580 ms.");
     expect(unattributed?.table?.rows).toEqual([
       [
         { text: "Unattributed", href: undefined },
@@ -2167,9 +2028,7 @@ describe("buildPageLoadTimeline", () => {
       "sentry-tracing-init",
     ]);
 
-    const beforeHydration = userSteps.find(
-      (s) => s.title === "Next.js-before-hydration",
-    );
+    const beforeHydration = userSteps.find((s) => s.title === "Next.js-before-hydration");
     // Measures sit at their end time so a 0→1.14s span isn't pinned at navigation start.
     expect(beforeHydration?.startMs).toBe(0);
     expect(beforeHydration?.timeMs).toBe(1144);
@@ -2222,9 +2081,7 @@ describe("buildPageLoadTimeline", () => {
     expect(hero?.waterfall?.[0]?.priority).toBe("Low");
     expect(hero?.table?.headers.map((h) => h.text)).toContain("Priority");
     expect(hero?.table?.rows[0]?.[3]).toEqual({ text: "Low", align: "end" });
-    expect(
-      networkBars(timeline!).find((b) => b.url.includes("hero"))?.priority,
-    ).toBe("Low");
+    expect(networkBars(timeline!).find((b) => b.url.includes("hero"))?.priority).toBe("Low");
   });
 
   it("attaches LCP discovery failures as notes on the LCP row", () => {
@@ -2291,12 +2148,8 @@ describe("buildPageLoadTimeline", () => {
       }),
     );
 
-    expect(timeline!.events.some((m) => /speed index/i.test(m.title))).toBe(
-      false,
-    );
-    expect(timeline!.events.some((m) => /speed index/i.test(m.title))).toBe(
-      false,
-    );
+    expect(timeline!.events.some((m) => /speed index/i.test(m.title))).toBe(false);
+    expect(timeline!.events.some((m) => /speed index/i.test(m.title))).toBe(false);
     const steps = timeline!.events;
     expect(steps.some((step) => step.id === "render-speed-index")).toBe(false);
   });
@@ -2329,9 +2182,7 @@ describe("buildPageLoadTimeline", () => {
       }),
     );
 
-    const script = timeline!.events.find(
-      (m) => m.title === "Script downloaded",
-    );
+    const script = timeline!.events.find((m) => m.title === "Script downloaded");
     expect(script?.detail).toMatch(/critical chain \(800 ms\)/);
     expect(script?.notes).toEqual(
       expect.arrayContaining([
@@ -2345,8 +2196,6 @@ describe("buildPageLoadTimeline", () => {
     );
 
     const document = timeline!.events.find((m) => m.title === "Document");
-    expect(
-      document?.notes?.some((n) => n.id === "critical-chain-js"),
-    ).toBeFalsy();
+    expect(document?.notes?.some((n) => n.id === "critical-chain-js")).toBeFalsy();
   });
 });

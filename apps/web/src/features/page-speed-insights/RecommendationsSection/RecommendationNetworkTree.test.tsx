@@ -14,7 +14,9 @@ vi.mock("@/components/ui/accordion", () => ({
 }));
 
 vi.mock("@/features/page-speed-insights/RecommendationsSection/recommendationHelpers", () => ({
-  isNetworkDependencyTreeRecommendation: vi.fn((id: string) => id === "network-dependency-tree"),
+  isNetworkDependencyTreeRecommendation: vi.fn<(id: string) => boolean>(
+    (id) => id === "network-dependency-tree",
+  ),
 }));
 
 const baseRec: Recommendation = {

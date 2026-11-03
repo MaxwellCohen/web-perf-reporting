@@ -3,7 +3,7 @@
 import type { SimRequest } from "./graph";
 import { TCPConnection } from "./tcpConnection";
 
-export const DEFAULT_SERVER_RESPONSE_TIME = 30;
+const DEFAULT_SERVER_RESPONSE_TIME = 30;
 const TLS_SCHEMES = ["https:", "wss:"];
 const CONNECTIONS_PER_ORIGIN = 6;
 
@@ -19,7 +19,7 @@ export interface PoolRecord {
   startTime: number;
 }
 
-export function isMultiplexedProtocol(protocol: string): boolean {
+function isMultiplexedProtocol(protocol: string): boolean {
   return protocol === "h2" || protocol === "h3" || protocol.startsWith("h3-");
 }
 

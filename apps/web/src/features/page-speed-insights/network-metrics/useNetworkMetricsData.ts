@@ -49,20 +49,14 @@ function metricNumber(value: unknown): number | undefined {
   return getNumber(value);
 }
 
-function orMetric(
-  adjusted: number | undefined,
-  fallback: number | undefined,
-): number | undefined {
+function orMetric(adjusted: number | undefined, fallback: number | undefined): number | undefined {
   return adjusted != null && Number.isFinite(adjusted) ? adjusted : fallback;
 }
 
-export function mapItemsToNetworkMetrics(
-  items: InsightsContextItem[],
-): NetworkMetricSeries[] {
+export function mapItemsToNetworkMetrics(items: InsightsContextItem[]): NetworkMetricSeries[] {
   return items.map((entry) => {
     const { item, label } = entry;
-    const metricsAudit = item?.lighthouseResult?.audits?.metrics as
-      MetricsAuditDetails | undefined;
+    const metricsAudit = item?.lighthouseResult?.audits?.metrics as MetricsAuditDetails | undefined;
     const metricsDetails = metricsAudit?.details?.items?.[0];
     const load = collectTimelineSources(entry);
 
@@ -77,44 +71,27 @@ export function mapItemsToNetworkMetrics(
       domContentLoaded: metricNumber(metricsDetails?.observedDomContentLoaded),
       loadTime: metricNumber(metricsDetails?.observedLoad),
       interactive: metricNumber(metricsDetails?.interactive),
-      observedNavigationStart: metricNumber(
-        metricsDetails?.observedNavigationStart,
-      ),
+      observedNavigationStart: metricNumber(metricsDetails?.observedNavigationStart),
       observedFirstPaint: metricNumber(metricsDetails?.observedFirstPaint),
-      observedFirstContentfulPaint: metricNumber(
-        metricsDetails?.observedFirstContentfulPaint,
-      ),
-      observedLargestContentfulPaint: metricNumber(
-        metricsDetails?.observedLargestContentfulPaint,
-      ),
+      observedFirstContentfulPaint: metricNumber(metricsDetails?.observedFirstContentfulPaint),
+      observedLargestContentfulPaint: metricNumber(metricsDetails?.observedLargestContentfulPaint),
       observedFirstContentfulPaintAllFrames: metricNumber(
         metricsDetails?.observedFirstContentfulPaintAllFrames,
       ),
-      observedFirstVisualChange: metricNumber(
-        metricsDetails?.observedFirstVisualChange,
-      ),
+      observedFirstVisualChange: metricNumber(metricsDetails?.observedFirstVisualChange),
       observedLargestContentfulPaintAllFrames: metricNumber(
         metricsDetails?.observedLargestContentfulPaintAllFrames,
       ),
-      observedLastVisualChange: metricNumber(
-        metricsDetails?.observedLastVisualChange,
-      ),
+      observedLastVisualChange: metricNumber(metricsDetails?.observedLastVisualChange),
       observedTraceEnd: metricNumber(metricsDetails?.observedTraceEnd),
       networkRequests:
-        (
-          item?.lighthouseResult?.audits?.["network-requests"]
-            ?.details as AuditDetailTable
-        )?.items || [],
+        (item?.lighthouseResult?.audits?.["network-requests"]?.details as AuditDetailTable)
+          ?.items || [],
       networkRTT:
-        (
-          item?.lighthouseResult?.audits?.["network-rtt"]
-            ?.details as AuditDetailTable
-        )?.items || [],
+        (item?.lighthouseResult?.audits?.["network-rtt"]?.details as AuditDetailTable)?.items || [],
       serverLatency:
-        (
-          item?.lighthouseResult?.audits?.["network-server-latency"]
-            ?.details as AuditDetailTable
-        )?.items || [],
+        (item?.lighthouseResult?.audits?.["network-server-latency"]?.details as AuditDetailTable)
+          ?.items || [],
     };
 
     if (!load) return series;
@@ -126,14 +103,8 @@ export function mapItemsToNetworkMetrics(
       domContentLoaded: orMetric(load.dcl, series.domContentLoaded),
       loadTime: orMetric(load.load, series.loadTime),
       observedFirstPaint: orMetric(load.firstPaint, series.observedFirstPaint),
-      observedFirstVisualChange: orMetric(
-        load.firstVisual,
-        series.observedFirstVisualChange,
-      ),
-      observedFirstContentfulPaint: orMetric(
-        load.observedFcp,
-        series.observedFirstContentfulPaint,
-      ),
+      observedFirstVisualChange: orMetric(load.firstVisual, series.observedFirstVisualChange),
+      observedFirstContentfulPaint: orMetric(load.observedFcp, series.observedFirstContentfulPaint),
       observedLargestContentfulPaint: orMetric(
         load.observedLcp,
         series.observedLargestContentfulPaint,
@@ -146,10 +117,7 @@ export function mapItemsToNetworkMetrics(
         load.observedLcpAllFrames,
         series.observedLargestContentfulPaintAllFrames,
       ),
-      observedLastVisualChange: orMetric(
-        load.lastVisual,
-        series.observedLastVisualChange,
-      ),
+      observedLastVisualChange: orMetric(load.lastVisual, series.observedLastVisualChange),
       observedTraceEnd: orMetric(load.traceEnd, series.observedTraceEnd),
     };
 
@@ -195,13 +163,11 @@ export function mapNetworkMetricsToStats(
       return typeof resourceType === "string" ? resourceType : "Unknown";
     });
 
-    const topResources = [...networkRequests].sort(
-      (a: TableItem, b: TableItem) => {
-        const aSize = typeof a?.transferSize === "number" ? a.transferSize : 0;
-        const bSize = typeof b?.transferSize === "number" ? b.transferSize : 0;
-        return bSize - aSize;
-      },
-    );
+    const topResources = [...networkRequests].sort((a: TableItem, b: TableItem) => {
+      const aSize = typeof a?.transferSize === "number" ? a.transferSize : 0;
+      const bSize = typeof b?.transferSize === "number" ? b.transferSize : 0;
+      return bSize - aSize;
+    });
 
     return {
       label,

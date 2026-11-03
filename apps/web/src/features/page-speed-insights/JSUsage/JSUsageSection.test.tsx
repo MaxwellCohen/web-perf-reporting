@@ -15,7 +15,7 @@ const mockTreeData = {
 };
 
 vi.mock("@/features/page-speed-insights/script-treemap/useScriptTreemapItems", () => ({
-  useScriptTreemapItems: vi.fn(() => []),
+  useScriptTreemapItems: vi.fn<() => unknown[]>(() => []),
 }));
 
 vi.mock("@/features/page-speed-insights/JSUsage/JSUsageTable", () => ({

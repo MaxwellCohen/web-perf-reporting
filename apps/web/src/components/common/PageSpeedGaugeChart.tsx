@@ -16,18 +16,13 @@ type GaugeScaling = { scale?: number; unit?: GaugeUnit };
 
 function formatGaugeValue(value: number, unit?: GaugeUnit) {
   if (unit === "ms") {
-    if (Math.abs(value) >= 1000)
-      return `${Number((value / 1000).toFixed(2))} s`;
+    if (Math.abs(value) >= 1000) return `${Number((value / 1000).toFixed(2))} s`;
     return `${Math.round(value)} ms`;
   }
   return value.toLocaleString();
 }
 
-function formatSegmentBoundary(
-  value: number,
-  format: "integer" | "decimal",
-  unit?: GaugeUnit,
-) {
+function formatSegmentBoundary(value: number, format: "integer" | "decimal", unit?: GaugeUnit) {
   if (unit === "ms") return formatGaugeValue(value, unit);
   if (value > 1) return value.toFixed(0);
   if (format === "integer") return String(value);
@@ -109,10 +104,7 @@ export function GaugeChart({
           <Label
             content={({ viewBox }) => {
               if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                const sum = chartData.reduce(
-                  (acc, entry) => acc + (entry.value || 0),
-                  0,
-                );
+                const sum = chartData.reduce((acc, entry) => acc + (entry.value || 0), 0);
                 const ang = 180.0 * (1 - value / sum);
                 const length =
                   ((((viewBox.innerRadius || 0) as number) +
@@ -231,11 +223,7 @@ function LineChart({
   value: number;
   unit?: GaugeUnit;
 }) {
-  const maxValue = Math.max(
-    ...chartData.map((dist) => dist.value),
-    value,
-    Number.EPSILON,
-  );
+  const maxValue = Math.max(...chartData.map((dist) => dist.value), value, Number.EPSILON);
   const toPct = (v: number) => clampPercent((v / maxValue) * 100);
 
   const boundary1 = toPct(chartData[0].value);
@@ -327,12 +315,7 @@ function LineChart({
   );
 }
 
-export function HorizontalScoreChart({
-  score,
-}: {
-  score: number;
-  className?: string;
-}) {
+export function HorizontalScoreChart({ score }: { score: number; className?: string }) {
   const chartData: ChartData = [
     {
       name: chartConfig["poor_density"].label,

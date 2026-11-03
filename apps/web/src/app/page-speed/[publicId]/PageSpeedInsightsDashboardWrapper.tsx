@@ -1,5 +1,5 @@
 "use client";
-import { useReducer, useTransition } from "react";
+import { useReducer, useState, useTransition } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { LoadingMessage } from "@/components/common/LoadingMessage";
@@ -31,21 +31,28 @@ function FailedReport({
 }) {
   const router = useRouter();
   const [isStarting, startTransition] = useTransition();
+  const [runAgainError, setRunAgainError] = useState<string>();
   const canRetry = result.reason === "timeout" || result.reason === "error";
   const runAgainUrl = result.reason === "job" ? result.url : undefined;
 
   const runAgain = () => {
     if (!runAgainUrl) return;
+    setRunAgainError(undefined);
     startTransition(async () => {
-      const publicId = await requestPageSpeedData(runAgainUrl);
-      if (publicId) router.push(`/page-speed/${publicId}`);
+      try {
+        const publicId = await requestPageSpeedData(runAgainUrl);
+        if (publicId) router.push(`/page-speed/${publicId}`);
+        else setRunAgainError("We couldn't start a new run. Please try again.");
+      } catch {
+        setRunAgainError("We couldn't start a new run. Please try again.");
+      }
     });
   };
 
   return (
     <ReportErrorCard
       testUrl={result.url}
-      description={result.error}
+      description={runAgainError ?? result.error}
       onRetry={canRetry ? onRetry : undefined}
       onRunAgain={runAgainUrl ? runAgain : undefined}
       runAgainPending={isStarting}

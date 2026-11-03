@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  createTimelineClock,
-  resolveSimulatedThrottling,
-} from "./simulatedThrottling";
+import { createTimelineClock, resolveSimulatedThrottling } from "./simulatedThrottling";
 
 describe("resolveSimulatedThrottling", () => {
   it("uses PSI mobile and desktop presets when the report omits throttling settings", () => {
@@ -11,9 +8,7 @@ describe("resolveSimulatedThrottling", () => {
       cpuSlowdownMultiplier: 4,
       label: "Slow 4G, 4× CPU",
     });
-    expect(
-      resolveSimulatedThrottling({ emulatedFormFactor: "desktop" }),
-    ).toMatchObject({
+    expect(resolveSimulatedThrottling({ emulatedFormFactor: "desktop" })).toMatchObject({
       rttMs: 40,
       cpuSlowdownMultiplier: 1,
       label: "desktop network, 1× CPU",
@@ -97,10 +92,7 @@ describe("createTimelineClock", () => {
 
     const [task] = clock.adjustTasks([{ startTime: 1300, duration: 100 }]);
     expect(task!.startTime).toBeCloseTo(clock.mapTime(1300), 5);
-    expect(task!.startTime + task!.duration).toBeCloseTo(
-      clock.mapTime(1400),
-      5,
-    );
+    expect(task!.startTime + task!.duration).toBeCloseTo(clock.mapTime(1400), 5);
 
     const [image] = clock.adjustRequests([
       {
@@ -125,9 +117,7 @@ describe("createTimelineClock", () => {
       },
     ]);
     // 6 MB cannot cross 1.6 Mbps in seconds.
-    expect(large!.networkEndTime! - large!.networkRequestTime!).toBeGreaterThan(
-      20_000,
-    );
+    expect(large!.networkEndTime! - large!.networkRequestTime!).toBeGreaterThan(20_000);
 
     const job = (url: string) => ({
       url,
@@ -136,9 +126,7 @@ describe("createTimelineClock", () => {
       transferSize: 200_000,
       protocol: "h2",
     });
-    const alone = clock.adjustRequests([
-      job("https://cdn.example.com/a.js"),
-    ])[0]!;
+    const alone = clock.adjustRequests([job("https://cdn.example.com/a.js")])[0]!;
     const shared = clock.adjustRequests([
       job("https://cdn.example.com/a.js"),
       job("https://cdn.example.com/b.js"),
@@ -227,12 +215,7 @@ describe("createTimelineClock", () => {
         loadDuration: 196,
       },
     );
-    expect(parts.map((part) => part.duration)).toEqual([
-      601,
-      8588 - 601,
-      8784 - 8588,
-      9901 - 8784,
-    ]);
+    expect(parts.map((part) => part.duration)).toEqual([601, 8588 - 601, 8784 - 8588, 9901 - 8784]);
     expect(parts.reduce((sum, part) => sum + part.duration, 0)).toBe(9901);
   });
 
@@ -257,10 +240,7 @@ describe("createTimelineClock", () => {
       ],
       { simulatedTtfb: 601, simulatedLcp: 6980 },
     );
-    expect(parts.map((part) => part.subpart)).toEqual([
-      "timeToFirstByte",
-      "elementRenderDelay",
-    ]);
+    expect(parts.map((part) => part.subpart)).toEqual(["timeToFirstByte", "elementRenderDelay"]);
     expect(parts[0]?.duration).toBe(601);
     expect(parts[1]?.duration).toBeCloseTo(6980 - 601, 5);
   });

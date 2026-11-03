@@ -66,11 +66,8 @@ function blockingTimeInWindow(
   if (!window) return Math.max(0, duration - LONG_TASK_THRESHOLD_MS);
   if (duration < LONG_TASK_THRESHOLD_MS) return 0;
   const clipped =
-    Math.min(startTime + duration, window.endMs) -
-    Math.max(startTime, window.startMs);
-  return clipped < LONG_TASK_THRESHOLD_MS
-    ? 0
-    : clipped - LONG_TASK_THRESHOLD_MS;
+    Math.min(startTime + duration, window.endMs) - Math.max(startTime, window.startMs);
+  return clipped < LONG_TASK_THRESHOLD_MS ? 0 : clipped - LONG_TASK_THRESHOLD_MS;
 }
 
 /**
@@ -107,10 +104,7 @@ export function summarizeMainThreadTasks(
   return {
     totalTasks: tasks.length,
     totalTimeMs,
-    longestDurationMs: tasks.reduce(
-      (max, task) => Math.max(max, task.duration),
-      0,
-    ),
+    longestDurationMs: tasks.reduce((max, task) => Math.max(max, task.duration), 0),
     longTaskCount: longTasks.length,
     blockingTimeMs: longTasks.reduce((sum, task) => sum + task.blockingTime, 0),
     blockingScope: window ? "fcp-tti" : "unbounded",
@@ -124,8 +118,7 @@ function scriptUrlFromDebugTask(
   urls: readonly unknown[],
 ): string | undefined {
   const urlIndex = asNumber(task.urlIndex);
-  if (urlIndex === null || urlIndex < 0 || urlIndex >= urls.length)
-    return undefined;
+  if (urlIndex === null || urlIndex < 0 || urlIndex >= urls.length) return undefined;
   const url = urls[urlIndex];
   return typeof url === "string" && url ? url : undefined;
 }
@@ -134,9 +127,7 @@ function scriptUrlFromDebugTask(
  * Long-task rows with a script URL.
  * Prefers table items. Falls back to debugData urlIndex entries when items have no URL.
  */
-export function longTaskItemsFromAudit(
-  audit: AuditResult | undefined,
-): TableItem[] {
+export function longTaskItemsFromAudit(audit: AuditResult | undefined): TableItem[] {
   if (!audit) return [];
 
   const items = taskItemsFromAudit(audit);
@@ -169,9 +160,7 @@ export function longTaskItemsFromAudit(
  * Group long tasks by script URL.
  * Lighthouse attributes a task to the script that was running, or "Unattributable".
  */
-export function summarizeLongTaskScripts(
-  items: readonly TableItem[],
-): ScriptBlockingRow[] {
+export function summarizeLongTaskScripts(items: readonly TableItem[]): ScriptBlockingRow[] {
   const byUrl = new Map<string, ScriptBlockingRow>();
 
   for (const item of items) {

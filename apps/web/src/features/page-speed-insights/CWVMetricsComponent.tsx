@@ -38,10 +38,7 @@ import {
 import type { AuditResultsRecord } from "@/lib/schema";
 
 const MetricCauseCard = dynamic(
-  () =>
-    import("@/features/page-speed-insights/MetricCauseCard").then(
-      (mod) => mod.MetricCauseCard,
-    ),
+  () => import("@/features/page-speed-insights/MetricCauseCard").then((mod) => mod.MetricCauseCard),
   { loading: () => <DashboardPanelFallback label="audit details" /> },
 );
 
@@ -68,34 +65,22 @@ type MetricAuditInsight = InsightsContextItem & {
   };
 };
 
-function hasMetricAudits(
-  insight: InsightsContextItem,
-): insight is MetricAuditInsight {
-  return (
-    !!insight.item.lighthouseResult?.audits &&
-    !!insight.item.lighthouseResult?.categoryGroups
-  );
+function hasMetricAudits(insight: InsightsContextItem): insight is MetricAuditInsight {
+  return !!insight.item.lighthouseResult?.audits && !!insight.item.lighthouseResult?.categoryGroups;
 }
 
-function collectMetricSources(
-  items: InsightsContextItem[],
-): MetricAuditSource[] {
+function collectMetricSources(items: InsightsContextItem[]): MetricAuditSource[] {
   return items.filter(hasMetricAudits).map(({ item, label }) => ({
     audits: item.lighthouseResult.audits,
     label,
   }));
 }
 
-function readMetricSnapshot(
-  auditId: MetricAuditId,
-  sources: MetricAuditSource[],
-): MetricSnapshot {
-  const auditItems: MetricAuditEntry[] = sources.flatMap(
-    ({ audits, label }) => {
-      const audit = audits[auditId];
-      return audit ? [{ audit, label }] : [];
-    },
-  );
+function readMetricSnapshot(auditId: MetricAuditId, sources: MetricAuditSource[]): MetricSnapshot {
+  const auditItems: MetricAuditEntry[] = sources.flatMap(({ audits, label }) => {
+    const audit = audits[auditId];
+    return audit ? [{ audit, label }] : [];
+  });
 
   const primary = auditItems[0]?.audit;
 
@@ -117,9 +102,7 @@ function MetricSectionTriggerLabel({
   const displayParts = auditItems
     .filter((item) => item.audit.displayValue)
     .map(({ audit, label }) =>
-      auditItems.length > 1
-        ? `${label}: ${audit.displayValue}`
-        : audit.displayValue,
+      auditItems.length > 1 ? `${label}: ${audit.displayValue}` : audit.displayValue,
     );
 
   return (
@@ -239,14 +222,11 @@ function MetricSummaryCard({
 }
 
 function CwvMetricsSummary({ sources }: { sources: MetricAuditSource[] }) {
-  const metrics = METRIC_AUDIT_IDS.map((auditId) =>
-    readMetricSnapshot(auditId, sources),
-  );
+  const metrics = METRIC_AUDIT_IDS.map((auditId) => readMetricSnapshot(auditId, sources));
   const maxRuns = Math.max(
     0,
     ...metrics.map(
-      (metric) =>
-        metric.auditItems.filter((item) => hasNumericValue(item.audit)).length,
+      (metric) => metric.auditItems.filter((item) => hasNumericValue(item.audit)).length,
     ),
   );
   // Title, each run's parts, compare deltas, unscored audits, description.
@@ -254,9 +234,7 @@ function CwvMetricsSummary({ sources }: { sources: MetricAuditSource[] }) {
 
   return (
     <AccordionItem value="cwv" className="print:border-0">
-      <AccordionSectionTitleTrigger>
-        Core Web Vitals Summary
-      </AccordionSectionTitleTrigger>
+      <AccordionSectionTitleTrigger>Core Web Vitals Summary</AccordionSectionTitleTrigger>
       {/* Cards subgrid these rows, so row gaps live on the cards (`mb-2`) to keep empty rows flat. */}
       <AccordionContent className="-mx-2 grid max-w-full grid-cols-1 gap-x-2 gap-y-0 min-[22rem]:grid-cols-[repeat(auto-fit,minmax(14rem,1fr))]">
         <FieldVsLabExplainer />
@@ -334,10 +312,7 @@ function CauseAuditPanel({
 }) {
   if (!causes.length) return null;
 
-  const peakSavings = causes.reduce(
-    (max, cause) => Math.max(max, cause.maxSavings),
-    0,
-  );
+  const peakSavings = causes.reduce((max, cause) => Math.max(max, cause.maxSavings), 0);
   const ordered = [...causes].sort((a, b) => b.maxSavings - a.maxSavings);
 
   return (
@@ -390,22 +365,14 @@ function MetricCauseSection({
             sources={sources}
           />
           {children}
-          <CauseAuditPanel
-            causes={causes}
-            acronym={acronym}
-            sources={sources}
-          />
+          <CauseAuditPanel causes={causes} acronym={acronym} sources={sources} />
         </SectionGrid>
       </AccordionContent>
     </AccordionItem>
   );
 }
 
-function FirstContentfulPaintSection({
-  sources,
-}: {
-  sources: MetricAuditSource[];
-}) {
+function FirstContentfulPaintSection({ sources }: { sources: MetricAuditSource[] }) {
   const screenshots = collectFcpScreenshots(sources);
 
   return (
@@ -419,11 +386,7 @@ function FirstContentfulPaintSection({
   );
 }
 
-function LargestContentfulPaintSection({
-  sources,
-}: {
-  sources: MetricAuditSource[];
-}) {
+function LargestContentfulPaintSection({ sources }: { sources: MetricAuditSource[] }) {
   const elements = collectLcpElements(sources);
 
   return (
@@ -437,22 +400,12 @@ function LargestContentfulPaintSection({
   );
 }
 
-function TotalBlockingTimeSection({
-  sources,
-}: {
-  sources: MetricAuditSource[];
-}) {
+function TotalBlockingTimeSection({ sources }: { sources: MetricAuditSource[] }) {
   return <MetricCauseSection auditId="total-blocking-time" sources={sources} />;
 }
 
-function CumulativeLayoutShiftSection({
-  sources,
-}: {
-  sources: MetricAuditSource[];
-}) {
-  return (
-    <MetricCauseSection auditId="cumulative-layout-shift" sources={sources} />
-  );
+function CumulativeLayoutShiftSection({ sources }: { sources: MetricAuditSource[] }) {
+  return <MetricCauseSection auditId="cumulative-layout-shift" sources={sources} />;
 }
 
 function SpeedIndexSection({ sources }: { sources: MetricAuditSource[] }) {

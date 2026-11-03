@@ -15,12 +15,12 @@ import {
 } from "@tanstack/react-table";
 import {
   arrIncludesSomeFilter,
-  booleanFilterFn,
   standardFilterFns,
 } from "@/features/page-speed-insights/shared/filterFns";
 
 /**
- * Grouped/paginated tables: sorting, filtering, faceting, grouping, expansion, pagination.
+ * Shared by every PSI table (standard, LH audit accordion, debug data): sorting, filtering,
+ * faceting, grouping, expansion, pagination. Row models only run when the table opts in via state.
  */
 export const standardTableFeatures = tableFeatures({
   ...stockFeatures,
@@ -35,34 +35,8 @@ export const standardTableFeatures = tableFeatures({
   filterFns: {
     ...filterFns,
     ...standardFilterFns,
-  },
-  sortFns,
-  aggregationFns,
-});
-
-/**
- * LH audit accordion tables: filtering, grouping, expansion, faceting (no client sort model).
- */
-export const lhTableFeatures = tableFeatures({
-  ...stockFeatures,
-  filteredRowModel: createFilteredRowModel(),
-  groupedRowModel: createGroupedRowModel(),
-  expandedRowModel: createExpandedRowModel(),
-  facetedUniqueValues: createFacetedUniqueValues(),
-  filterFns: {
-    ...filterFns,
-    booleanFilterFn,
     arrIncludesSome: arrIncludesSomeFilter,
   },
-  aggregationFns,
-});
-
-/**
- * Debug data table: grouping + expansion only.
- */
-export const debugDataTableFeatures = tableFeatures({
-  ...stockFeatures,
-  groupedRowModel: createGroupedRowModel(),
-  expandedRowModel: createExpandedRowModel(),
+  sortFns,
   aggregationFns,
 });

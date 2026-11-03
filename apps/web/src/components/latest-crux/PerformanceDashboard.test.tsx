@@ -1,8 +1,8 @@
 import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const formatCruxReportMock = vi.fn();
-const groupByMock = vi.fn();
+const formatCruxReportMock = vi.fn<(...args: unknown[]) => unknown>();
+const groupByMock = vi.fn<(...args: unknown[]) => unknown>();
 
 vi.mock("@/lib/utils", () => ({
   formatCruxReport: (...args: unknown[]) => formatCruxReportMock(...args),

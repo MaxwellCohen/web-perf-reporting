@@ -1,10 +1,10 @@
 "use client";
-import { useTable, type ColumnDef, type RowData } from "@tanstack/react-table";
+import { useTable, type RowData } from "@tanstack/react-table";
+import type { StockAnyColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { standardTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 import { ExpandAll, ExpandRow } from "@/features/page-speed-insights/JSUsage/jsUsageTableParts";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- mixed accessor TValue per column
-export type StandardColumnDef<TData extends RowData, TValue = any> = ColumnDef<any, TData, TValue>;
+export type StandardColumnDef<TData extends RowData> = StockAnyColumnDef<TData>;
 
 export type TableConfigOptions<TData extends RowData> = {
   data: TData[];
@@ -33,23 +33,19 @@ export function useStandardTable<TData extends RowData>({
   enableExpander = grouping.length > 0,
   initialSorting,
 }: TableConfigOptions<TData>) {
-  const tableColumns = enableExpander
-    ? [
-        {
-          id: "expander",
-          header: (props: { table: unknown }) => <ExpandAll table={props.table as never} />,
-          cell: ExpandRow as unknown as StandardColumnDef<TData>["cell"],
-          aggregatedCell: ExpandRow as unknown as StandardColumnDef<TData>["aggregatedCell"],
-          size: 40,
-          enableHiding: true,
-          enableGrouping: false,
-          enablePinning: true,
-          enableSorting: false,
-          enableResizing: true,
-        },
-        ...columns,
-      ]
-    : columns;
+  const expanderColumn: StandardColumnDef<TData> = {
+    id: "expander",
+    header: ({ table }) => <ExpandAll table={table} />,
+    cell: ExpandRow,
+    aggregatedCell: ExpandRow,
+    size: 40,
+    enableHiding: true,
+    enableGrouping: false,
+    enablePinning: true,
+    enableSorting: false,
+    enableResizing: true,
+  };
+  const tableColumns = enableExpander ? [expanderColumn, ...columns] : columns;
 
   const table = useTable({
     features: standardTableFeatures,

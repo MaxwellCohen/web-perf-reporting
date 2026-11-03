@@ -29,7 +29,7 @@ export interface SimNodeInit {
 
 const NON_NETWORK_SCHEMES = ["blob", "data", "intent", "file", "filesystem", "chrome-extension"];
 
-export function isNonNetworkProtocol(protocol: string): boolean {
+function isNonNetworkProtocol(protocol: string): boolean {
   const scheme = protocol.includes(":") ? protocol.slice(0, protocol.indexOf(":")) : protocol;
   return NON_NETWORK_SCHEMES.includes(scheme);
 }
@@ -89,11 +89,8 @@ export class SimNode {
   }
 
   getRootNode(): SimNode {
-    let rootNode: SimNode = this;
-    while (rootNode.dependencies.length) {
-      rootNode = rootNode.dependencies[0];
-    }
-    return rootNode;
+    const [first] = this.dependencies;
+    return first ? first.getRootNode() : this;
   }
 
   addDependent(node: SimNode): void {

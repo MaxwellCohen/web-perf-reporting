@@ -1,8 +1,4 @@
-import type {
-  StockCell,
-  StockColumnDef,
-  StockRow,
-} from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import type { StockCell, StockRow } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import {
   Table,
   TableBody,
@@ -18,7 +14,7 @@ import { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataI
 import { AuditDebugViz } from "@/features/page-speed-insights/audit-viz/AuditDebugViz";
 import { flexRender, useTable } from "@tanstack/react-table";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
-import { debugDataTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
+import { standardTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 import {
   RenderBytesValue,
   RenderCountNumber,
@@ -47,13 +43,12 @@ function DebugDataTableCell({
   cell,
   row,
   rowSpan,
-  fillWidth,
 }: {
   cell: StockCell<DebugDataTableItem, unknown>;
   row: StockRow<DebugDataTableItem>;
   rowSpan?: number;
-  fillWidth: boolean;
 }) {
+  const fillWidth = useFullWidthTables();
   const size = cell.column.getSize();
   return (
     <TableCell
@@ -114,7 +109,7 @@ function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
     return [...acc, ...d];
   }, []);
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor("key", {
       id: "key",
       enableGrouping: true,
@@ -149,11 +144,11 @@ function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
       size: 140,
       minSize: 80,
     }),
-  ];
+  ]);
   const table = useTable({
-    features: debugDataTableFeatures,
+    features: standardTableFeatures,
     data,
-    columns: columns as StockColumnDef<DebugDataTableItem>[],
+    columns,
     manualPagination: true,
     enableColumnPinning: true,
     enableColumnResizing: true,
@@ -229,18 +224,11 @@ function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
                               cell={cell}
                               row={sr}
                               rowSpan={row.subRows.length}
-                              fillWidth={fillWidth}
                             />
                           );
                         }
                         return (
-                          <DebugDataTableCell
-                            key={cell.id}
-                            cell={cell}
-                            row={sr}
-                            rowSpan={1}
-                            fillWidth={fillWidth}
-                          />
+                          <DebugDataTableCell key={cell.id} cell={cell} row={sr} rowSpan={1} />
                         );
                       })}
                     </TableRow>
@@ -251,7 +239,7 @@ function RenderDebugDataTable({ items }: { items: TableDataItem[] }) {
             return (
               <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell) => (
-                  <DebugDataTableCell key={cell.id} cell={cell} row={row} fillWidth={fillWidth} />
+                  <DebugDataTableCell key={cell.id} cell={cell} row={row} />
                 ))}
               </TableRow>
             );

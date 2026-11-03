@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import type { StockCellContext } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
@@ -13,11 +12,7 @@ import { getHostnameFromUrl } from "@/lib/urlDisplay";
 
 declare module "@tanstack/table-core" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface ColumnMeta<
-    TFeatures extends TableFeatures,
-    TData extends RowData,
-    TValue,
-  > {
+  interface ColumnMeta<TFeatures extends TableFeatures, TData extends RowData, TValue> {
     className?: string;
   }
 }
@@ -28,8 +23,8 @@ const columnHelper = createColumnHelper<TreeMapNode>();
 
 const expanderColumn = columnHelper.display({
   id: "expander",
-  header: ExpandAll as never,
-  cell: ExpandRow as never,
+  header: ExpandAll,
+  cell: ExpandRow,
   size: 40,
   meta: {
     className: "",
@@ -73,10 +68,7 @@ const makeSortableStringColumn = (column: string) => {
         }
       }
       return (
-        <div
-          className="min-w-0 max-w-full overflow-hidden"
-          title={String(value)}
-        >
+        <div className="min-w-0 max-w-full overflow-hidden" title={String(value)}>
           <div className="truncate">{value as string}</div>
         </div>
       );
@@ -164,11 +156,7 @@ export const columns = [
         const value = info.getValue();
         return (
           <div className="w-full whitespace-nowrap text-right">
-            {typeof value === "number"
-              ? `${value.toFixed(2)} %`
-              : value === ""
-                ? ""
-                : "N/A"}
+            {typeof value === "number" ? `${value.toFixed(2)} %` : value === "" ? "" : "N/A"}
           </div>
         );
       },

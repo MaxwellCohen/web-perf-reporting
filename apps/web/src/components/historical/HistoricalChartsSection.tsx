@@ -7,8 +7,7 @@ import { useCruxJob } from "@/lib/crux/useCruxJob";
 import type { CruxReport } from "@/lib/schema";
 
 const HistoricalDashboard = dynamic(
-  () =>
-    import("@/components/historical/HistoricalDashboard").then((m) => m.HistoricalDashboard),
+  () => import("@/components/historical/HistoricalDashboard").then((m) => m.HistoricalDashboard),
   { ssr: false, loading: () => <LoadingMessage variant="crux" /> },
 );
 

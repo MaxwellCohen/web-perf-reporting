@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, type ReactNode } from "react";
-import { TableCardShell } from "@/features/page-speed-insights/shared/TableCard";
+import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 import {
   getCompareRuns,
   pairByFormFactor,
@@ -33,7 +33,7 @@ export function CompareRunsCard<T extends { label: string }>({
     const pairs = pairByFormFactor(items, compare.runs);
     return (
       <div data-testid={testId} className="md:col-span-2 lg:col-span-3">
-        <TableCardShell title={title}>
+        <TableCard title={title}>
           <div className="flex flex-col gap-4" data-testid={`${testId}-compare`}>
             {pairs.map((pair) => {
               const runItems = [pair.a, pair.b].filter(Boolean) as T[];
@@ -50,20 +50,20 @@ export function CompareRunsCard<T extends { label: string }>({
               );
             })}
           </div>
-        </TableCardShell>
+        </TableCard>
       </div>
     );
   }
 
   return (
     <div data-testid={testId} className="md:col-span-2 lg:col-span-3">
-      <TableCardShell title={title}>
+      <TableCard title={title}>
         <div className={singleClassName}>
           {items.map((item) => (
             <Fragment key={singleKey(item)}>{renderItem(item, items.length > 1)}</Fragment>
           ))}
         </div>
-      </TableCardShell>
+      </TableCard>
     </div>
   );
 }

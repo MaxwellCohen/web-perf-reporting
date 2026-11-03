@@ -11,10 +11,7 @@ import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortin
 import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
 import { createBytesColumn } from "@/features/page-speed-insights/shared/tableColumnHelpers";
 import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
-import {
-  LabeledStockTable,
-  MultiReportTableCard,
-} from "@/features/page-speed-insights/shared/TableCard";
+import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 import { useNetworkRequestStats } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
 
 type ResourceTypeTableRow = {
@@ -62,7 +59,11 @@ const cols: StandardColumnDef<ResourceTypeTableRow>[] = [
 function ResourceTypeTable({ label, data }: { label: string; data: ResourceTypeTableRow[] }) {
   const columns = useTableColumns<ResourceTypeTableRow>(cols, columnHelper, false);
   const table = useStandardTable({ data, columns });
-  return <LabeledStockTable label={label} table={table} />;
+  return (
+    <TableCard.Section label={label}>
+      <TableCard.Table table={table} />
+    </TableCard.Section>
+  );
 }
 
 export function ResourceTypeBreakdownCard() {
@@ -99,10 +100,12 @@ export function ResourceTypeBreakdownCard() {
   }
 
   return (
-    <MultiReportTableCard title="Resource Type Breakdown" className="md:col-span-2 lg:col-span-3">
-      {dataByReport.map(({ label, data }) => (
-        <ResourceTypeTable key={label} label={label} data={data} />
-      ))}
-    </MultiReportTableCard>
+    <TableCard title="Resource Type Breakdown" className="md:col-span-2 lg:col-span-3">
+      <div className="space-y-6">
+        {dataByReport.map(({ label, data }) => (
+          <ResourceTypeTable key={label} label={label} data={data} />
+        ))}
+      </div>
+    </TableCard>
   );
 }

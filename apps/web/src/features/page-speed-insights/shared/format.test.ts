@@ -82,9 +82,7 @@ describe("formatNetworkPriority", () => {
 
 describe("shortUrl", () => {
   it("shows host and truncated path", () => {
-    expect(shortUrl("https://cdn.example.com/a.js")).toBe(
-      "cdn.example.com/a.js",
-    );
+    expect(shortUrl("https://cdn.example.com/a.js")).toBe("cdn.example.com/a.js");
   });
 
   it("truncates long invalid urls", () => {

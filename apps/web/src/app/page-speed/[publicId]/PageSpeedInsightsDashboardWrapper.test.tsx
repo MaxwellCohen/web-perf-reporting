@@ -25,10 +25,10 @@ vi.mock("next/dynamic", () => ({
   },
 }));
 
-const usePageSpeedInsightsQueryMock = vi.fn();
-const pushMock = vi.fn();
-const requestPageSpeedDataMock = vi.fn();
-const resetMock = vi.fn();
+const usePageSpeedInsightsQueryMock = vi.fn<(publicId: string) => unknown>();
+const pushMock = vi.fn<(path: string) => void>();
+const requestPageSpeedDataMock = vi.fn<(url: string) => Promise<string>>();
+const resetMock = vi.fn<(id: string) => void>();
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: pushMock }) }));
 

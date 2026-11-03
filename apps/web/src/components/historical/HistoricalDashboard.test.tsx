@@ -1,11 +1,15 @@
 import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const formatCruxReportMock = vi.fn();
-const groupByMock = vi.fn();
+type CruxReportInput = {
+  record: { collectionPeriod: { lastDate: { year: number; month: number; day: number } } };
+};
+
+const formatCruxReportMock = vi.fn<(report: CruxReportInput) => unknown>();
+const groupByMock = vi.fn<(...args: unknown[]) => unknown>();
 
 vi.mock("@/lib/utils", () => ({
-  formatCruxReport: (...args: unknown[]) => formatCruxReportMock(...args),
+  formatCruxReport: (report: CruxReportInput) => formatCruxReportMock(report),
   formatDate: (d: { year: number; month: number; day: number }) => `${d.year}-${d.month}-${d.day}`,
   groupBy: (...args: unknown[]) => groupByMock(...args),
 }));
@@ -154,16 +158,12 @@ describe("HistoricalDashboard", () => {
     const report2 = makeReport({ year: 2024, month: 1, day: 31 });
     const report3 = makeReport({ year: 2024, month: 2, day: 15 });
 
-    formatCruxReportMock.mockImplementation(
-      (r: {
-        record: { collectionPeriod: { lastDate: { year: number; month: number; day: number } } };
-      }) => [
-        {
-          ...historyItem,
-          end_date: `${r.record.collectionPeriod.lastDate.year}-${String(r.record.collectionPeriod.lastDate.month).padStart(2, "0")}-${String(r.record.collectionPeriod.lastDate.day).padStart(2, "0")}`,
-        },
-      ],
-    );
+    formatCruxReportMock.mockImplementation((r) => [
+      {
+        ...historyItem,
+        end_date: `${r.record.collectionPeriod.lastDate.year}-${String(r.record.collectionPeriod.lastDate.month).padStart(2, "0")}-${String(r.record.collectionPeriod.lastDate.day).padStart(2, "0")}`,
+      },
+    ]);
     groupByMock.mockReturnValue({
       largest_contentful_paint: [historyItem],
       interaction_to_next_paint: [historyItem],

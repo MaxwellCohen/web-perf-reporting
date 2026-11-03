@@ -11,9 +11,7 @@ const cache = new WeakMap<object, AuditsLike>();
  * simulated. Returns audits whose breakdown table sums to the reported LCP; every consumer
  * of LCP subparts should read through this.
  */
-export function reconcileLcpAudits<T extends AuditsLike | undefined>(
-  audits: T,
-): T {
+export function reconcileLcpAudits<T extends AuditsLike | undefined>(audits: T): T {
   if (!audits) return audits;
   const cached = cache.get(audits);
   if (cached) return cached as T;
@@ -27,14 +25,12 @@ function reconcile(audits: AuditsLike): AuditsLike {
   const audit = audits["lcp-breakdown-insight"] as
     | { details?: { items?: Array<{ type?: string; items?: Row[] }> } }
     | undefined;
-  const tableIndex =
-    audit?.details?.items?.findIndex((item) => item?.type === "table") ?? -1;
+  const tableIndex = audit?.details?.items?.findIndex((item) => item?.type === "table") ?? -1;
   const table = audit?.details?.items?.[tableIndex];
   if (!audit?.details?.items || !table?.items?.length) return audits;
 
   const metrics = (
-    audits.metrics as
-      { details?: { items?: Array<Record<string, unknown>> } } | undefined
+    audits.metrics as { details?: { items?: Array<Record<string, unknown>> } } | undefined
   )?.details?.items?.[0];
   const simulatedLcp = getNumber(metrics?.largestContentfulPaint);
   if (!metrics || !(simulatedLcp && simulatedLcp > 0)) return audits;

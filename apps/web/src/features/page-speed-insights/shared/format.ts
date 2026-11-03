@@ -48,8 +48,7 @@ export function formatNetworkPriority(priority: string): string {
 export function shortUrl(url: string): string {
   try {
     const u = new URL(url);
-    const path =
-      u.pathname.length > 40 ? `${u.pathname.slice(0, 37)}…` : u.pathname;
+    const path = u.pathname.length > 40 ? `${u.pathname.slice(0, 37)}…` : u.pathname;
     return `${u.host}${path}`;
   } catch {
     return url.length > 60 ? `${url.slice(0, 57)}…` : url;
@@ -62,10 +61,8 @@ export function formatCoverage(coverage: CoverageAmounts): string {
   const wastedBytes = Math.max(0, coverage.wastedBytes);
   const totalBytes = Math.max(coverage.totalBytes, wastedBytes);
   const usedBytes = totalBytes - wastedBytes;
-  const usedPercent =
-    totalBytes > 0 ? Math.round((usedBytes / totalBytes) * 100) : 0;
-  if (wastedBytes <= 0)
-    return `${usedPercent}% used · ${formatBytes(totalBytes)}`;
+  const usedPercent = totalBytes > 0 ? Math.round((usedBytes / totalBytes) * 100) : 0;
+  if (wastedBytes <= 0) return `${usedPercent}% used · ${formatBytes(totalBytes)}`;
   return `${usedPercent}% used · ${formatBytes(usedBytes)} used of ${formatBytes(totalBytes)} · ${formatBytes(wastedBytes)} unused`;
 }
 

@@ -58,7 +58,7 @@ function createColumnMock(
     setFilterValue: (v: string) => void;
   }> = {},
 ) {
-  const setFilterValue = vi.fn();
+  const setFilterValue = vi.fn<() => void>();
   return {
     id: "name",
     getFacetedUniqueValues: () =>

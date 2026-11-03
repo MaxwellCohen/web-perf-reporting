@@ -86,7 +86,7 @@ describe("usePageSpeedInsightsQueryByPublicId", () => {
         JSON.stringify({
           status: "failed",
           reason: "job",
-      error: "Lighthouse could not load the page.",
+          error: "Lighthouse could not load the page.",
           url: "https://example.com/page",
         }),
     } as Response);

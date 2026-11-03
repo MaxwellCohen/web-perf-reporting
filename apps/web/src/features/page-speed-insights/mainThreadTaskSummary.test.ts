@@ -21,9 +21,7 @@ describe("summarizeMainThreadTasks", () => {
     expect(summary.longestDurationMs).toBe(120);
     expect(summary.longTaskCount).toBe(2);
     expect(summary.blockingTimeMs).toBe(100);
-    expect(summary.longestTasks.map((task) => task.duration)).toEqual([
-      120, 80,
-    ]);
+    expect(summary.longestTasks.map((task) => task.duration)).toEqual([120, 80]);
     expect(summary.omittedLongTaskCount).toBe(0);
   });
 
@@ -85,9 +83,7 @@ describe("longTaskItemsFromAudit", () => {
       details: {
         type: "table",
         headings: [],
-        items: [
-          { url: "https://cdn.example/app.js", duration: 90, startTime: 10 },
-        ],
+        items: [{ url: "https://cdn.example/app.js", duration: 90, startTime: 10 }],
       },
     } as unknown as AuditResult;
 

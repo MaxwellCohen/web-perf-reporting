@@ -2,6 +2,7 @@
 
 import ReactMarkdown from "react-markdown";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { EmbeddedDetails } from "@/features/page-speed-insights/lh-categories/EmbeddedDetails";
 import { RenderDetails } from "@/features/page-speed-insights/lh-categories/RenderDetails";
 import type {
   CauseAuditEntry,
@@ -53,7 +54,9 @@ function CauseBody({ cause, sources }: { cause: CauseAuditEntry; sources: Metric
       ) : isImageDelivery ? (
         <ImageDeliveryCause entries={cause.entries} />
       ) : (
-        <RenderDetails items={items} embedded />
+        <EmbeddedDetails>
+          <RenderDetails items={items} />
+        </EmbeddedDetails>
       )}
       <RenderJSONDetails
         className="text-right"

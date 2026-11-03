@@ -1,8 +1,5 @@
 import { reconcileLcpAudits } from "@/features/page-speed-insights/shared/reconcileLcpSubparts";
-import type {
-  StockColumnDef,
-  StockRow,
-} from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import type { StockRow } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { PageSpeedInsights } from "@/lib/schema";
 import { flexRender, useTable } from "@tanstack/react-table";
 import { Fragment } from "react";
@@ -25,40 +22,34 @@ import {
 import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
 import { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataItem";
 import { LH_AUDIT_TABLE_COLUMNS } from "@/features/page-speed-insights/tsTable/lhAuditTableColumns";
-import { lhTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
+import { standardTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 
-export function useLHTable(
-  items: { item: PageSpeedInsights; label: string }[],
-) {
+export function useLHTable(items: { item: PageSpeedInsights; label: string }[]) {
   const tableDataArr = (
     items
       .map(({ item, label }) => {
-        return Object.values(item.lighthouseResult?.categories || {}).map(
-          (category) => {
-            if (!category?.auditRefs?.length) {
-              return [] as TableDataItem[];
-            }
-            const { auditRefs = [], ..._category } = category;
-            return auditRefs.map((ar) => {
-              if (!ar.id) return [] as TableDataItem[];
-              return {
-                _category,
-                _userLabel: label,
-                auditRef: ar,
-                auditResult: reconcileLcpAudits(
-                  item.lighthouseResult?.audits,
-                )?.[ar.id],
-              };
-            });
-          },
-        );
+        return Object.values(item.lighthouseResult?.categories || {}).map((category) => {
+          if (!category?.auditRefs?.length) {
+            return [] as TableDataItem[];
+          }
+          const { auditRefs = [], ..._category } = category;
+          return auditRefs.map((ar) => {
+            if (!ar.id) return [] as TableDataItem[];
+            return {
+              _category,
+              _userLabel: label,
+              auditRef: ar,
+              auditResult: reconcileLcpAudits(item.lighthouseResult?.audits)?.[ar.id],
+            };
+          });
+        });
       })
       .flat(2) as TableDataItem[]
   ).filter((v) => v.auditRef.group !== "metrics");
   return useTable({
-    features: lhTableFeatures,
+    features: standardTableFeatures,
     data: tableDataArr,
-    columns: LH_AUDIT_TABLE_COLUMNS as StockColumnDef<TableDataItem>[],
+    columns: LH_AUDIT_TABLE_COLUMNS,
     manualPagination: true,
     manualExpanding: true,
     enableColumnFilters: true,
@@ -117,9 +108,7 @@ function StatusSections({
           <Accordion
             key={String(expandAll)}
             type="multiple"
-            defaultValue={
-              expandAll ? section.items.map((subRow) => subRow.id) : []
-            }
+            defaultValue={expandAll ? section.items.map((subRow) => subRow.id) : []}
             className="w-full"
           >
             {section.items.map((subRow) => (
@@ -148,9 +137,7 @@ export function CategoryRow({
         <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           {row
             .getAllCells()
-            .filter((cell) =>
-              ["category_title", "category_score"].includes(cell.column.id),
-            )
+            .filter((cell) => ["category_title", "category_score"].includes(cell.column.id))
             .map((cell) => {
               return (
                 <Fragment key={cell.id}>
@@ -182,9 +169,7 @@ function AuditSummaryRow({ row }: { row: StockRow<TableDataItem> }) {
   return (
     <AccordionItem
       value={row.id}
-      className={clsx(
-        "items-center gap-4 border border-x-4 border-border py-2",
-      )}
+      className={clsx("items-center gap-4 border border-x-4 border-border py-2")}
     >
       <AccordionTrigger>
         <AuditDetailsSummary

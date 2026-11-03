@@ -7,6 +7,7 @@ import {
 import {
   extractLighthouseFromPsiShareHtml,
   labelForPsiLighthouse,
+  type PsiEmbeddedLighthouse,
 } from "@/lib/viewer/extractLighthouseFromPsiShareHtml";
 import { PsiShareUrlError, fetchPsiShareHtml, parsePsiShareUrl } from "@/lib/viewer/psiShareUrl";
 
@@ -29,10 +30,26 @@ export async function POST(request: Request) {
   try {
     const gistId = parseLighthouseViewerGistId(url);
     if (gistId) {
-      const reports = parseViewerJsonString(await fetchLighthouseViewerGist(gistId));
+      let reports: ReturnType<typeof parseViewerJsonString>;
+      try {
+        reports = parseViewerJsonString(await fetchLighthouseViewerGist(gistId));
+      } catch (error) {
+        if (error instanceof SyntaxError) {
+          return Response.json(
+            { error: "Gist does not contain a valid Lighthouse report" },
+            { status: 400 },
+          );
+        }
+        throw error;
+      }
       return Response.json({
         data: reports,
-        labels: reports.map((_, index) => `Report ${index + 1}`),
+        labels: reports.map((report, index) =>
+          labelForPsiLighthouse(
+            (report.lighthouseResult ?? {}) as unknown as PsiEmbeddedLighthouse,
+            index,
+          ),
+        ),
       });
     }
     const shareUrl = parsePsiShareUrl(url);

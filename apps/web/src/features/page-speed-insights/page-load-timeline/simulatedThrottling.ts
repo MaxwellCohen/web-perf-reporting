@@ -101,10 +101,7 @@ export function adjustLcpSubparts(
     const ttfb = Math.min(Math.max(0, simulatedTtfb), simulatedLcp);
     if (loadDelay != null && loadDuration != null) {
       const loadStart = Math.min(simulatedLcp, ttfb + Math.max(0, loadDelay));
-      const loadEnd = Math.min(
-        simulatedLcp,
-        loadStart + Math.max(0, loadDuration),
-      );
+      const loadEnd = Math.min(simulatedLcp, loadStart + Math.max(0, loadDuration));
       return [
         {
           subpart: "timeToFirstByte",
@@ -181,31 +178,22 @@ export type TimelineClock = {
 };
 
 function finite(value: unknown): number | undefined {
-  const n =
-    typeof value === "number"
-      ? value
-      : typeof value === "string"
-        ? Number(value)
-        : NaN;
+  const n = typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;
   return Number.isFinite(n) ? n : undefined;
 }
 
-function withLabel(
-  settings: Omit<SimulatedThrottling, "label">,
-): SimulatedThrottling {
+function withLabel(settings: Omit<SimulatedThrottling, "label">): SimulatedThrottling {
   const cpu = `${trimNumber(settings.cpuSlowdownMultiplier)}× CPU`;
   const mobile =
     settings.rttMs === MOBILE_SLOW_4G.rttMs &&
     settings.cpuSlowdownMultiplier === MOBILE_SLOW_4G.cpuSlowdownMultiplier &&
-    Math.round(settings.throughputKbps) ===
-      Math.round(MOBILE_SLOW_4G.throughputKbps);
+    Math.round(settings.throughputKbps) === Math.round(MOBILE_SLOW_4G.throughputKbps);
   if (mobile) return { ...settings, label: `Slow 4G, ${cpu}` };
 
   const desktop =
     settings.rttMs === DESKTOP_DENSE_4G.rttMs &&
     settings.cpuSlowdownMultiplier === DESKTOP_DENSE_4G.cpuSlowdownMultiplier &&
-    Math.round(settings.throughputKbps) ===
-      Math.round(DESKTOP_DENSE_4G.throughputKbps);
+    Math.round(settings.throughputKbps) === Math.round(DESKTOP_DENSE_4G.throughputKbps);
   if (desktop) return { ...settings, label: `desktop network, ${cpu}` };
 
   const mbps = settings.throughputKbps / 1024;
@@ -223,15 +211,10 @@ function trimNumber(value: number): string {
  * PSI responses often omit `throttlingMethod` and still mean Lantern simulation.
  * `provided` and `devtools` already baked throttling into the trace.
  */
-export function resolveSimulatedThrottling(
-  configSettings: unknown,
-): SimulatedThrottling | null {
+export function resolveSimulatedThrottling(configSettings: unknown): SimulatedThrottling | null {
   if (!configSettings || typeof configSettings !== "object") return null;
   const config = configSettings as Record<string, unknown>;
-  const method =
-    typeof config.throttlingMethod === "string"
-      ? config.throttlingMethod
-      : undefined;
+  const method = typeof config.throttlingMethod === "string" ? config.throttlingMethod : undefined;
   if (method === "provided" || method === "devtools") return null;
 
   const raw = config.throttling;
@@ -252,23 +235,16 @@ export function resolveSimulatedThrottling(
     }
   }
 
-  const formFactor = String(
-    config.formFactor ?? config.emulatedFormFactor ?? "",
-  ).toLowerCase();
+  const formFactor = String(config.formFactor ?? config.emulatedFormFactor ?? "").toLowerCase();
   if (formFactor === "mobile") return withLabel(MOBILE_SLOW_4G);
   if (formFactor === "desktop") return withLabel(DESKTOP_DENSE_4G);
   return null;
 }
 
-function pushKnot(
-  knots: Anchor[],
-  observed: number | undefined,
-  simulated: number | undefined,
-) {
+function pushKnot(knots: Anchor[], observed: number | undefined, simulated: number | undefined) {
   if (observed == null || simulated == null || observed <= 0) return;
   const last = knots[knots.length - 1];
-  if (!last || observed <= last.observed + 1 || simulated < last.simulated)
-    return;
+  if (!last || observed <= last.observed + 1 || simulated < last.simulated) return;
   knots.push({ observed, simulated });
 }
 
@@ -284,15 +260,12 @@ function buildMapTime(
 
   pushKnot(knots, input.observedTtfb, input.simulatedTtfb);
   pushKnot(knots, input.observedFcp, input.simulatedFcp);
-  if (fcpAndLcpSeparated)
-    pushKnot(knots, input.observedLcp, input.simulatedLcp);
+  if (fcpAndLcpSeparated) pushKnot(knots, input.observedLcp, input.simulatedLcp);
   // After the last paint anchor, content keeps appearing at the pace Speed Index
   // slowed down (simulated ÷ observed) rather than the full CPU slowdown, which
   // would push late frames far past when the page actually finished painting.
   // Speed Index is an average, not an event time, so it is a slope here, not a knot.
-  const frameSpeedIndex = options.forFrames
-    ? input.simulatedSpeedIndex
-    : undefined;
+  const frameSpeedIndex = options.forFrames ? input.simulatedSpeedIndex : undefined;
   const speedIndexScale =
     frameSpeedIndex != null && input.observedSpeedIndex
       ? Math.min(
@@ -362,8 +335,7 @@ function simulatedTransferMs(options: {
   ssl: boolean;
   h2: boolean;
 }): number {
-  const { bytes, rttMs, throughputKbps, serverLatencyMs, cold, ssl, h2 } =
-    options;
+  const { bytes, rttMs, throughputKbps, serverLatencyMs, cold, ssl, h2 } = options;
   if (bytes <= 0 || throughputKbps <= 0) return 0;
 
   const bytesPerSecond = (throughputKbps * 1024) / 8;
@@ -373,10 +345,7 @@ function simulatedTransferMs(options: {
 
   const oneWay = rttMs / 2;
   const twoWay = rttMs;
-  const maxCwnd = Math.max(
-    1,
-    Math.floor((bytesPerSecond * (rttMs / 1000)) / TCP_SEGMENT_SIZE),
-  );
+  const maxCwnd = Math.max(1, Math.floor((bytesPerSecond * (rttMs / 1000)) / TCP_SEGMENT_SIZE));
 
   let handshake = oneWay;
   if (!cold && h2) handshake = 0;
@@ -465,20 +434,16 @@ function shareBandwidth(jobs: TransferJob[], bytesPerMs: number): number[] {
     }
 
     let topRank = -Infinity;
-    for (const index of active.keys())
-      topRank = Math.max(topRank, jobs[index]!.weight);
+    for (const index of active.keys()) topRank = Math.max(topRank, jobs[index]!.weight);
     let served = 0;
-    for (const index of active.keys())
-      if (jobs[index]!.weight === topRank) served++;
-    const rateOf = (index: number) =>
-      jobs[index]!.weight === topRank ? bytesPerMs / served : 0;
+    for (const index of active.keys()) if (jobs[index]!.weight === topRank) served++;
+    const rateOf = (index: number) => (jobs[index]!.weight === topRank ? bytesPerMs / served : 0);
     let soonest = Infinity;
     for (const [index, remaining] of active) {
       const rate = rateOf(index);
       if (rate > 0) soonest = Math.min(soonest, remaining / rate);
     }
-    const nextArrival =
-      next < pending.length ? pending[next]!.dataStartMs - time : Infinity;
+    const nextArrival = next < pending.length ? pending[next]!.dataStartMs - time : Infinity;
     const step = Math.min(soonest, nextArrival);
 
     for (const [index, remaining] of [...active]) {
@@ -530,11 +495,7 @@ export function createTimelineClock(input: ClockInput): TimelineClock {
 
       const bytesPerMs = (throttling.throughputKbps * 1024) / 8 / 1000;
       const timed = requests.map((request) => {
-        if (
-          request.networkRequestTime == null ||
-          request.networkEndTime == null
-        )
-          return null;
+        if (request.networkRequestTime == null || request.networkEndTime == null) return null;
         const start = mapTime(request.networkRequestTime);
         const bytes = request.transferSize ?? 0;
         // Connection setup and server wait, before any bytes flow.
@@ -545,9 +506,7 @@ export function createTimelineClock(input: ClockInput): TimelineClock {
                 rttMs: throttling.rttMs,
                 throughputKbps: throttling.throughputKbps,
                 serverLatencyMs:
-                  request === documentRequest
-                    ? (input.documentServerLatencyMs ?? 0)
-                    : 0,
+                  request === documentRequest ? (input.documentServerLatencyMs ?? 0) : 0,
                 cold: firstOfOrigin.has(request),
                 ssl: isSecure(request.url, request.protocol),
                 h2: isMultiplexed(request.protocol),
@@ -569,11 +528,7 @@ export function createTimelineClock(input: ClockInput): TimelineClock {
         const entry = timed[i];
         if (!entry) return request;
         const warpedEnd = mapTime(request.networkEndTime!);
-        let end = Math.max(
-          warpedEnd,
-          entry.start,
-          entry.bytes > 0 ? sharedEnds[i]! : 0,
-        );
+        let end = Math.max(warpedEnd, entry.start, entry.bytes > 0 ? sharedEnds[i]! : 0);
         if (
           request === documentRequest &&
           input.simulatedTtfb != null &&

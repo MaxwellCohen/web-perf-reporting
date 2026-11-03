@@ -33,23 +33,18 @@ describe("getTreemapDisplayLabel", () => {
   });
 
   it("keeps the (inline) prefix when truncating", () => {
-    expect(
-      getTreemapDisplayLabel("(inline) self.__next_f.push([1, null])", 18),
-    ).toEqual({
+    expect(getTreemapDisplayLabel("(inline) self.__next_f.push([1, null])", 18)).toEqual({
       primary: "(inline) self.__n…",
     });
   });
 
   it("prioritizes path segments for URLs", () => {
-    expect(
-      getTreemapDisplayLabel(
-        "https://www.example.com/static/chunks/app-page.js",
-        40,
-      ),
-    ).toEqual({
-      primary: "/chunks/app-page.js",
-      secondary: "www.example.com",
-    });
+    expect(getTreemapDisplayLabel("https://www.example.com/static/chunks/app-page.js", 40)).toEqual(
+      {
+        primary: "/chunks/app-page.js",
+        secondary: "www.example.com",
+      },
+    );
   });
 
   it("uses the hostname when the URL path is only /", () => {
@@ -88,10 +83,7 @@ describe("getTreemapLabel", () => {
   });
 
   it("returns path-first label for URLs", () => {
-    const label = getTreemapLabel(
-      "https://www.example.com/very/long/path/to/a/script/file.js",
-      40,
-    );
+    const label = getTreemapLabel("https://www.example.com/very/long/path/to/a/script/file.js", 40);
     expect(label.startsWith("/")).toBe(true);
     expect(label.includes("file.js")).toBe(true);
   });
@@ -174,15 +166,13 @@ describe("copyTreemapNodeName", () => {
   });
 
   it("writes the node name to the clipboard", async () => {
-    const writeText = vi.fn().mockResolvedValue(undefined);
+    const writeText = vi.fn<() => void>().mockResolvedValue(undefined);
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
       value: { writeText },
     });
 
-    await expect(
-      copyTreemapNodeName("https://example.com/script.js"),
-    ).resolves.toBe(true);
+    await expect(copyTreemapNodeName("https://example.com/script.js")).resolves.toBe(true);
     expect(writeText).toHaveBeenCalledWith("https://example.com/script.js");
   });
 
@@ -190,13 +180,11 @@ describe("copyTreemapNodeName", () => {
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
       value: {
-        writeText: vi.fn().mockRejectedValue(new Error("denied")),
+        writeText: vi.fn<() => void>().mockRejectedValue(new Error("denied")),
       },
     });
 
-    await expect(
-      copyTreemapNodeName("https://example.com/script.js"),
-    ).resolves.toBe(false);
+    await expect(copyTreemapNodeName("https://example.com/script.js")).resolves.toBe(false);
   });
 });
 

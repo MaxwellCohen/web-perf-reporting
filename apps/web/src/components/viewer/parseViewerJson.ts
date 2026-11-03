@@ -1,8 +1,21 @@
-import { PageSpeedInsights } from "@/lib/schema";
+import type { PageSpeedInsights } from "@/lib/schema";
 
+type LighthouseOnlyReport = Pick<PageSpeedInsights, "lighthouseResult">;
+
+function hasLighthouseResult(raw: unknown): raw is LighthouseOnlyReport {
+  return (
+    typeof raw === "object" &&
+    raw !== null &&
+    "lighthouseResult" in raw &&
+    Boolean(raw.lighthouseResult)
+  );
+}
+
+// JSON input is untrusted; consumers only read `lighthouseResult`, so a
+// lighthouse-only payload is accepted as a report (single boundary assertion).
 function normalizePageSpeedInsights(raw: unknown): PageSpeedInsights {
-  if ((raw as PageSpeedInsights).lighthouseResult) {
-    return { lighthouseResult: (raw as PageSpeedInsights).lighthouseResult } as any;
+  if (hasLighthouseResult(raw)) {
+    return { lighthouseResult: raw.lighthouseResult } as PageSpeedInsights;
   }
   return raw as PageSpeedInsights;
 }

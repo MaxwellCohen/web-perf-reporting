@@ -1,8 +1,4 @@
-import {
-  AuditDetailOpportunity,
-  TableColumnHeading,
-  TableItem,
-} from "@/lib/schema";
+import { AuditDetailOpportunity, TableColumnHeading, TableItem } from "@/lib/schema";
 import type { AuditEntry } from "@/features/page-speed-insights/RecommendationsSection/auditTypes";
 import type {
   Recommendation,
@@ -44,10 +40,7 @@ function collectSpecificRecommendations(
   auditId: string,
   auditEntries: AuditEntry[],
 ): ActionableStep[] {
-  const stepsMap = new Map<
-    string,
-    { reports: Set<string>; url?: string; host?: string }
-  >();
+  const stepsMap = new Map<string, { reports: Set<string>; url?: string; host?: string }>();
 
   auditEntries.forEach(({ audit, label }) => {
     const details = audit.details;
@@ -55,9 +48,7 @@ function collectSpecificRecommendations(
     if (details && (details as { type?: string }).type === "opportunity") {
       const opportunityDetails = details as AuditDetailOpportunity;
       if (opportunityDetails.items) {
-        reportItems.push(
-          ...(opportunityDetails.items as Array<Record<string, unknown>>),
-        );
+        reportItems.push(...(opportunityDetails.items as Array<Record<string, unknown>>));
       }
     }
 
@@ -73,37 +64,30 @@ function collectSpecificRecommendations(
     });
   });
 
-  return Array.from(stepsMap.entries()).map(
-    ([step, { reports, url, host }]) => ({
-      step,
-      reports: Array.from(reports),
-      url,
-      host,
-    }),
-  );
+  return Array.from(stepsMap.entries()).map(([step, { reports, url, host }]) => ({
+    step,
+    reports: Array.from(reports),
+    url,
+    host,
+  }));
 }
 
 function combineAndDeduplicateSteps(
   specificRecs: ActionableStep[],
   genericSteps: ActionableStep[],
 ): ActionableStep[] {
-  const allStepsMap = new Map<
-    string,
-    { reports: Set<string>; url?: string; host?: string }
-  >();
+  const allStepsMap = new Map<string, { reports: Set<string>; url?: string; host?: string }>();
 
   [...specificRecs, ...genericSteps].forEach(({ step, reports, url, host }) => {
     mergeActionableStepIntoMap(allStepsMap, step, reports, url, host);
   });
 
-  return Array.from(allStepsMap.entries()).map(
-    ([step, { reports, url, host }]) => ({
-      step,
-      reports: Array.from(reports),
-      url,
-      host,
-    }),
-  );
+  return Array.from(allStepsMap.entries()).map(([step, { reports, url, host }]) => ({
+    step,
+    reports: Array.from(reports),
+    url,
+    host,
+  }));
 }
 
 export function processMetricSavingsAudit(
@@ -119,14 +103,8 @@ export function processMetricSavingsAudit(
   const priority = getRecommendationPriority(worstScore, savings);
 
   const specificRecs = collectSpecificRecommendations(auditId, auditEntries);
-  const { category, genericSteps } = getCategoryAndGenericSteps(
-    auditId,
-    specificRecs,
-  );
-  const actionableSteps = combineAndDeduplicateSteps(
-    specificRecs,
-    genericSteps,
-  );
+  const { category, genericSteps } = getCategoryAndGenericSteps(auditId, specificRecs);
+  const actionableSteps = combineAndDeduplicateSteps(specificRecs, genericSteps);
 
   // Deduplicate resources by URL and keep all
   const deduplicatedItems = deduplicateResourcesByUrl(allItems);
@@ -156,31 +134,19 @@ function addDescriptionBasedSteps(
 
   const desc = audit.description.toLowerCase();
   if (desc.includes("meta description")) {
-    stepsMap.set(
-      "Add a unique meta description to this page",
-      new Set(allReportsLabel),
-    );
+    stepsMap.set("Add a unique meta description to this page", new Set(allReportsLabel));
   }
   if (desc.includes("viewport")) {
-    stepsMap.set(
-      "Add a viewport meta tag for mobile responsiveness",
-      new Set(allReportsLabel),
-    );
+    stepsMap.set("Add a viewport meta tag for mobile responsiveness", new Set(allReportsLabel));
   }
   if (desc.includes("document does not have a valid")) {
     stepsMap.set("Fix HTML validation errors", new Set(allReportsLabel));
   }
   if (desc.includes("tap targets")) {
-    stepsMap.set(
-      "Increase tap target sizes to at least 48x48px",
-      new Set(allReportsLabel),
-    );
+    stepsMap.set("Increase tap target sizes to at least 48x48px", new Set(allReportsLabel));
   }
   if (desc.includes("contrast")) {
-    stepsMap.set(
-      "Improve color contrast ratios to meet WCAG standards",
-      new Set(allReportsLabel),
-    );
+    stepsMap.set("Improve color contrast ratios to meet WCAG standards", new Set(allReportsLabel));
   }
 }
 
@@ -190,19 +156,10 @@ function addCategorySpecificSteps(
   allReportsLabel: string[],
 ): string {
   if (auditId.includes("layout-shift") || auditId.includes("cls")) {
-    stepsMap.set(
-      "Set explicit dimensions for images and videos",
-      new Set(allReportsLabel),
-    );
-    stepsMap.set(
-      "Avoid inserting content above existing content",
-      new Set(allReportsLabel),
-    );
+    stepsMap.set("Set explicit dimensions for images and videos", new Set(allReportsLabel));
+    stepsMap.set("Avoid inserting content above existing content", new Set(allReportsLabel));
     stepsMap.set("Reserve space for ads and embeds", new Set(allReportsLabel));
-    stepsMap.set(
-      "Use CSS aspect-ratio for responsive images",
-      new Set(allReportsLabel),
-    );
+    stepsMap.set("Use CSS aspect-ratio for responsive images", new Set(allReportsLabel));
     return "Layout Stability";
   }
   if (
@@ -219,36 +176,21 @@ function addCategorySpecificSteps(
         "Ensure headings follow a logical order (h1 → h2 → h3, etc.)",
         new Set(allReportsLabel),
       );
-      stepsMap.set(
-        "Do not skip heading levels (e.g., h1 to h3)",
-        new Set(allReportsLabel),
-      );
-      stepsMap.set(
-        "Use headings to structure content semantically",
-        new Set(allReportsLabel),
-      );
+      stepsMap.set("Do not skip heading levels (e.g., h1 to h3)", new Set(allReportsLabel));
+      stepsMap.set("Use headings to structure content semantically", new Set(allReportsLabel));
     } else {
-      stepsMap.set(
-        "Fix identified accessibility issues",
-        new Set(allReportsLabel),
-      );
+      stepsMap.set("Fix identified accessibility issues", new Set(allReportsLabel));
       stepsMap.set("Test with screen readers", new Set(allReportsLabel));
     }
     return "Accessibility";
   }
   if (auditId.includes("seo")) {
     stepsMap.set("Fix identified SEO issues", new Set(allReportsLabel));
-    stepsMap.set(
-      "Improve meta tags and structured data",
-      new Set(allReportsLabel),
-    );
+    stepsMap.set("Improve meta tags and structured data", new Set(allReportsLabel));
     return "SEO";
   }
   if (auditId.includes("best-practices")) {
-    stepsMap.set(
-      "Address security and performance concerns",
-      new Set(allReportsLabel),
-    );
+    stepsMap.set("Address security and performance concerns", new Set(allReportsLabel));
     stepsMap.set("Follow modern web standards", new Set(allReportsLabel));
     return "Best Practices";
   }
@@ -292,9 +234,7 @@ function addFailedAuditSteps(
   return category;
 }
 
-function buildActionableStepsFromMap(
-  stepsMap: Map<string, Set<string>>,
-): ActionableStep[] {
+function buildActionableStepsFromMap(stepsMap: Map<string, Set<string>>): ActionableStep[] {
   return Array.from(stepsMap.entries()).map(([step, reports]) => ({
     step,
     reports: Array.from(reports),
@@ -310,9 +250,7 @@ function getDefaultActionableSteps(
     return [{ step: explanation, reports: allReportsLabel }];
   }
   if (audit.description) {
-    return [
-      { step: audit.description.split(".")[0] + ".", reports: allReportsLabel },
-    ];
+    return [{ step: audit.description.split(".")[0] + ".", reports: allReportsLabel }];
   }
   return [
     {
@@ -330,9 +268,7 @@ function collectFailedAuditSteps(
   const allReportLabels = auditEntries.map((e) => e.label);
   const allReportsLabel =
     allReportLabels.length === auditEntries.length &&
-    allReportLabels.every((label) =>
-      auditEntries.some((e) => e.label === label),
-    )
+    allReportLabels.every((label) => auditEntries.some((e) => e.label === label))
       ? allReportLabels
       : [];
 
@@ -368,18 +304,8 @@ export function processFailedAudit(
       : undefined;
 
   const stepsMap = new Map<string, Set<string>>();
-  const allReportsLabel = collectFailedAuditSteps(
-    auditId,
-    auditEntries,
-    stepsMap,
-  );
-  const category = addFailedAuditSteps(
-    auditId,
-    audit,
-    explanation,
-    stepsMap,
-    allReportsLabel,
-  );
+  const allReportsLabel = collectFailedAuditSteps(auditId, auditEntries, stepsMap);
+  const category = addFailedAuditSteps(auditId, audit, explanation, stepsMap, allReportsLabel);
   const actionableSteps = buildActionableStepsFromMap(stepsMap);
 
   if (actionableSteps.length > 0 || audit.description || tableData) {

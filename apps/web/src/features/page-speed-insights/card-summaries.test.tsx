@@ -2,26 +2,32 @@ import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { NetworkRequestStatsRow } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsData";
 
-const mockUseNetworkRequestStats = vi.hoisted(() => vi.fn());
+const mockUseNetworkRequestStats = vi.hoisted(() => vi.fn<() => unknown>());
 
 vi.mock("@/features/page-speed-insights/network-metrics/useNetworkMetricsStore", () => ({
   useNetworkRequestStats: () => mockUseNetworkRequestStats(),
 }));
 
 vi.mock("@/features/page-speed-insights/shared/TableCard", () => ({
-  TableCard: ({
-    title,
-    table,
-  }: {
-    title: string;
-    table: { getHeaderGroups: () => unknown[]; getRowModel: () => { rows: unknown[] } };
-  }) => (
-    <div>
-      <h3>{title}</h3>
-      <div data-testid="stock-table">
-        headers:{table.getHeaderGroups().length} rows:{table.getRowModel().rows.length}
+  TableCard: Object.assign(
+    ({ title, children }: { title: string; children: React.ReactNode }) => (
+      <div>
+        <h3>{title}</h3>
+        {children}
       </div>
-    </div>
+    ),
+    {
+      Table: ({
+        table,
+      }: {
+        table: { getHeaderGroups: () => unknown[]; getRowModel: () => { rows: unknown[] } };
+      }) => (
+        <div data-testid="stock-table">
+          headers:{table.getHeaderGroups().length} rows:{table.getRowModel().rows.length}
+        </div>
+      ),
+      Pagination: () => null,
+    },
   ),
 }));
 

@@ -1,13 +1,12 @@
 // Port of Lighthouse Lantern Simulator (all times in ms, including CPU node durations).
 
-import { ConnectionPool, DEFAULT_SERVER_RESPONSE_TIME } from "./connectionPool";
+import { ConnectionPool } from "./connectionPool";
 import { DNSCache } from "./dnsCache";
 import { SimNode, type SimPriority, type SimRequest } from "./graph";
 import { SimulatorTimingMap, type NodeTimingState } from "./timingMap";
 import { TCPConnection, type ConnectionTiming } from "./tcpConnection";
 
 export const mobileSlow4G = { rttMs: 150, throughputKbps: 1.6 * 1024, cpuSlowdownMultiplier: 4 };
-export const desktopDense4G = { rttMs: 40, throughputKbps: 10 * 1024, cpuSlowdownMultiplier: 1 };
 
 export interface SimulatorOptions {
   rtt?: number;
@@ -19,7 +18,7 @@ export interface SimulatorOptions {
   serverResponseTimeByOrigin?: Map<string, number>;
 }
 
-export interface NodeTiming {
+interface NodeTiming {
   startTime: number;
   endTime: number;
   duration: number;
@@ -56,7 +55,7 @@ function requestOf(node: SimNode): SimRequest {
   return node.request;
 }
 
-export class Simulator {
+class Simulator {
   options: ResolvedOptions;
   rtt: number;
   throughput: number;
@@ -397,4 +396,3 @@ export function simulate(
   return new Simulator(options).simulate(root, simOpts);
 }
 
-export { DEFAULT_SERVER_RESPONSE_TIME };

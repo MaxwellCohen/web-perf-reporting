@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useFullWidthTables } from "@/features/page-speed-insights/tanstack-table-v9/fullWidthTables";
 import { cn } from "@/lib/utils";
+import type { StockFeatures } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 
 const columnSizeSelector = (state: {
   columnSizing: unknown;
@@ -38,7 +39,7 @@ const DEFAULT_COMPACT_COLUMN_IDS = new Set(["expander"]);
 export function DataTableHeader<TData extends RowData>({
   table,
 }: {
-  table: ReactTable<any, TData, any>;
+  table: ReactTable<StockFeatures, TData>;
 }) {
   return (
     <table.Subscribe selector={columnSizeSelector}>
@@ -60,14 +61,16 @@ export function DataTableHeader<TData extends RowData>({
 }
 
 export type DataTableHeadProps<TData extends RowData> = {
-  header: Header<any, TData, unknown>;
+  header: Header<StockFeatures, TData, unknown>;
   className?: string;
   style?: CSSProperties;
   /** Column ids that render centered content without sort/filter/resizer chrome. */
   compactColumnIds?: ReadonlySet<string>;
 };
 
-function defaultHeaderCellStyle(header: Header<any, any, unknown>): CSSProperties {
+function defaultHeaderCellStyle<TData extends RowData>(
+  header: Header<StockFeatures, TData, unknown>,
+): CSSProperties {
   const size = header.getSize();
   return {
     width: `${size}px`,
@@ -98,7 +101,7 @@ export function DataTableHead<TData extends RowData>({
             maxWidth: `${header.getSize()}px`,
           }
         : { minWidth: `${header.getSize()}px` }
-      : defaultHeaderCellStyle(header as Header<any, any, unknown>));
+      : defaultHeaderCellStyle(header));
 
   return (
     <TableHead className={cn("relative overflow-hidden", className)} style={columnSizeStyle}>
@@ -128,7 +131,11 @@ export function DataTableHead<TData extends RowData>({
   );
 }
 
-function FilterPopover<TData extends RowData>({ header }: { header: Header<any, TData, unknown> }) {
+function FilterPopover<TData extends RowData>({
+  header,
+}: {
+  header: Header<StockFeatures, TData, unknown>;
+}) {
   if (!header.column.getCanFilter()) {
     return null;
   }
@@ -162,7 +169,7 @@ function FilterPopover<TData extends RowData>({ header }: { header: Header<any, 
 function CheckBoxFilter<TData extends RowData>({
   header,
 }: {
-  header: Header<any, TData, unknown>;
+  header: Header<StockFeatures, TData, unknown>;
 }) {
   const col = header.column;
   const table = header.getContext().table;

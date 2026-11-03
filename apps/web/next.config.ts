@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       // Query params are forwarded to the destination by default.
-      { source: "/lh", destination: "/viewer", permanent: true },
+      { source: "/lh", destination: "/viewer", permanent: false },
     ];
   },
   async headers() {
