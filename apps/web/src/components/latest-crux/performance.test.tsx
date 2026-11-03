@@ -2,9 +2,9 @@ import { fireEvent, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { suppressConsoleError } from "@/test-utils";
 
-const formatCruxReportMock = vi.fn();
-const groupByMock = vi.fn();
-const setDateRangeMock = vi.fn();
+const formatCruxReportMock = vi.fn<(...args: unknown[]) => unknown>();
+const groupByMock = vi.fn<(...args: unknown[]) => unknown>();
+const setDateRangeMock = vi.fn<() => void>();
 
 vi.mock("recharts", () => ({
   BarChart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -257,7 +257,7 @@ describe("latest crux performance components", () => {
         />
       </CurrentPerformanceChartContext.Provider>,
     );
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot("histogram");
 
     rerender(
       <CurrentPerformanceChartContext.Provider value="Gauge Chart">
@@ -267,7 +267,7 @@ describe("latest crux performance components", () => {
         />
       </CurrentPerformanceChartContext.Provider>,
     );
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot("gauge");
   });
 
   it("renders the radial and stacked chart helpers", () => {

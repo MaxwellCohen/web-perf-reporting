@@ -98,7 +98,7 @@ const columns: StandardColumnDef<ResourceTableRow>[] = [
     header: "Chain",
     enableSorting: true,
     enableResizing: true,
-    filterFn: "booleanFilterFn" as never,
+    filterFn: "booleanFilterFn",
     size: 90,
     cell: (info) => renderBoolean(!!info.getValue()),
   }),
@@ -136,16 +136,15 @@ export function ResourcesTable({
   if (!rows.length) return null;
 
   return (
-    <TableCard
-      title="Downloaded resources"
-      className="border bg-card shadow-none"
-      table={table}
-      showPagination
-      pageSize={PAGE_SIZE}
-      tableAriaLabel="Downloaded resources"
-      onRowClick={onSelectSuspect ? (row) => onSelectSuspect(row.url) : undefined}
-      isRowSelected={selectedUrl ? (row) => urlsMatch(row.url, selectedUrl) : undefined}
-      showColumnLayout
-    />
+    <TableCard title="Downloaded resources" className="border bg-card shadow-none">
+      <TableCard.Table
+        table={table}
+        aria-label="Downloaded resources"
+        onRowClick={onSelectSuspect ? (row) => onSelectSuspect(row.url) : undefined}
+        isRowSelected={selectedUrl ? (row) => urlsMatch(row.url, selectedUrl) : undefined}
+        showColumnLayout
+      />
+      <TableCard.Pagination table={table} pageSize={PAGE_SIZE} />
+    </TableCard>
   );
 }

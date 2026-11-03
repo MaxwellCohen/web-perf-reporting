@@ -63,7 +63,11 @@ describe("summarizeLongTaskScripts", () => {
     ]);
 
     expect(rows).toEqual([
-      { url: "https://cdn.example/vendor.js", taskCount: 1, blockingTimeMs: 150 },
+      {
+        url: "https://cdn.example/vendor.js",
+        taskCount: 1,
+        blockingTimeMs: 150,
+      },
       { url: "https://cdn.example/app.js", taskCount: 2, blockingTimeMs: 100 },
       { url: "Unattributable", taskCount: 1, blockingTimeMs: 10 },
       { url: "https://cdn.example/short.js", taskCount: 1, blockingTimeMs: 0 },
@@ -120,7 +124,34 @@ describe("taskItemsFromAudit", () => {
 
     expect(taskItemsFromAudit(withItems)).toEqual([{ duration: 10 }]);
     expect(
-      taskItemsFromAudit({ id: "main-thread-tasks", title: "Tasks" } as unknown as AuditResult),
+      taskItemsFromAudit({
+        id: "main-thread-tasks",
+        title: "Tasks",
+      } as unknown as AuditResult),
     ).toEqual([]);
+  });
+});
+
+describe("summarizeMainThreadTasks blocking window", () => {
+  const items = [
+    { startTime: 0, duration: 200 },
+    { startTime: 500, duration: 100 },
+    { startTime: 1000, duration: 120 },
+  ];
+
+  it("is unbounded without a window", () => {
+    const summary = summarizeMainThreadTasks(items);
+    expect(summary.blockingTimeMs).toBe(150 + 50 + 70);
+    expect(summary.blockingScope).toBe("unbounded");
+  });
+
+  it("clips tasks to FCP-TTI like Lighthouse TBT", () => {
+    const summary = summarizeMainThreadTasks(items, 8, {
+      startMs: 100,
+      endMs: 1050,
+    });
+    // [100,200]=100 -> 50, [500,600]=100 -> 50, [1000,1050]=50 -> 0
+    expect(summary.blockingTimeMs).toBe(100);
+    expect(summary.blockingScope).toBe("fcp-tti");
   });
 });

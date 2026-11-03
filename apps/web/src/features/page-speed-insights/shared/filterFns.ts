@@ -1,7 +1,6 @@
-import type { FilterFn } from "@tanstack/react-table";
+import type { FilterFn, RowData, TableFeatures } from "@tanstack/react-table";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AppFilterFn = FilterFn<any, any>;
+type AppFilterFn = FilterFn<TableFeatures, RowData>;
 
 export const booleanFilterFn: AppFilterFn = (row, columnId, filterValue, _addMeta) => {
   if (!filterValue || !filterValue.length) {
@@ -26,7 +25,7 @@ const includesStringFilter: AppFilterFn = (row, columnId, filterValue, _addMeta)
  */
 const inNumberRangeFilter: AppFilterFn = (row, columnId, filterValue, _addMeta) => {
   const cellValue = Number(row.getValue(columnId)) || 0;
-  const [min, max] = (filterValue as [number, number]) || [0, Infinity];
+  const [min, max]: [number, number] = filterValue || [0, Infinity];
   return cellValue >= min && cellValue <= max;
 };
 
@@ -34,7 +33,7 @@ const inNumberRangeFilter: AppFilterFn = (row, columnId, filterValue, _addMeta) 
  * Multi-select style filter: row value is included in the selected filter values (or array overlap).
  */
 export const arrIncludesSomeFilter: AppFilterFn = (row, columnId, filterValue, _addMeta) => {
-  const selected = filterValue as unknown[] | undefined;
+  const selected: unknown[] | undefined = filterValue;
   if (!selected?.length) {
     return true;
   }

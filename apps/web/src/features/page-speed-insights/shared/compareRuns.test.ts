@@ -13,18 +13,12 @@ describe("getCompareRuns", () => {
       { label: "B · Mobile" },
       { label: "B · Desktop" },
     ]);
-    expect(compare.mode).toBe("compare");
-    if (compare.mode === "compare") {
-      expect(compare.runs).toEqual(["A", "B"]);
-    }
+    expect(compare).toMatchObject({ mode: "compare", runs: ["A", "B"] });
   });
 
   it("detects custom run names", () => {
     const compare = getCompareRuns([{ label: "Before · Mobile" }, { label: "After · Mobile" }]);
-    expect(compare.mode).toBe("compare");
-    if (compare.mode === "compare") {
-      expect(compare.runs).toEqual(["Before", "After"]);
-    }
+    expect(compare).toMatchObject({ mode: "compare", runs: ["Before", "After"] });
   });
 
   it("stays single when only one run prefix exists", () => {

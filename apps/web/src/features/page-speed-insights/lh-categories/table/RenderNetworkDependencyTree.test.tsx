@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { RenderNetworkDependencyTree } from "@/features/page-speed-insights/lh-categories/table/RenderNetworkDependencyTree";
 
 vi.mock("@/features/page-speed-insights/PageSpeedContext", () => ({
-  usePageSpeedItems: vi.fn(() => []),
+  usePageSpeedItems: vi.fn<() => unknown[]>(() => []),
 }));
 
 vi.mock("@/components/ui/accordion", () => ({

@@ -9,11 +9,9 @@ import type { OpportunityItem, TableItem } from "@/lib/schema";
 export function DetailTableWith1ReportAndNoSubitem({
   rows,
   title,
-  embedded = false,
 }: {
   rows: DetailTableItem[];
   title: string;
-  embedded?: boolean;
 }) {
   const data = flattenDetailItems(rows);
   const columns = createDetailItemColumns({ rows, deviceLabel: rows[0]?._userLabel || "" });
@@ -26,7 +24,6 @@ export function DetailTableWith1ReportAndNoSubitem({
       data={data}
       columns={columns as FlatColumnDef<TableItem | OpportunityItem>[]}
       title={title}
-      embedded={embedded}
     />
   );
 }

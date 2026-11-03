@@ -130,7 +130,7 @@ function TreemapTooltipContent({
   }
 
   const unusedPercent =
-    node.unusedBytes !== undefined
+    node.unusedBytes !== undefined && node.resourceBytes > 0
       ? `${((node.unusedBytes / node.resourceBytes) * 100).toFixed(1)}%`
       : null;
 
@@ -140,7 +140,8 @@ function TreemapTooltipContent({
       <div className="text-muted-foreground">Size: {formatBytes(node.resourceBytes)}</div>
       {node.unusedBytes !== undefined ? (
         <div className="text-muted-foreground">
-          Unused: {formatBytes(node.unusedBytes)} ({unusedPercent})
+          Unused: {formatBytes(node.unusedBytes)}
+          {unusedPercent ? ` (${unusedPercent})` : ""}
         </div>
       ) : null}
       <div className="text-muted-foreground">Double-click to copy URL</div>

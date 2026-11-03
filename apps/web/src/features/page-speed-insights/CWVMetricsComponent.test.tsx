@@ -575,7 +575,7 @@ describe("CWVMetricsComponent", () => {
       "Good",
     );
     expect(section?.textContent).toContain("1.80 s");
-    expect(section?.textContent).toContain("600 ms - Good");
+    expect(section?.textContent).toContain("1.20 s - Good");
     expect(section?.textContent).not.toContain("Related audits");
     expect(container.querySelector('[data-value="cwv-cause-total-blocking-time"]')).toBeNull();
   });

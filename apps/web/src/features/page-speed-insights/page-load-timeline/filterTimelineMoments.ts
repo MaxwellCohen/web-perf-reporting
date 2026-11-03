@@ -1,4 +1,5 @@
 import type { TimelineEvent, TimelineWaterfallBar } from "./types";
+import { withPhaseStarts } from "./withPhaseStarts";
 
 /** Categories a user can show or hide. Milestones, screenshots, and the document stay visible. */
 export const TASK_FILTERS = [
@@ -113,16 +114,6 @@ function filterMoment(moment: TimelineEvent, enabled: TaskFilterSelection): Time
     return enabled.has("potentially-blocking") ? moment : null;
   }
   return filterDownloadMoment(moment, enabled);
-}
-
-function withPhaseStarts(events: TimelineEvent[]): TimelineEvent[] {
-  const seen = new Set<string>();
-  return events.map((moment) => {
-    const isPhaseStart = !seen.has(moment.phaseId);
-    seen.add(moment.phaseId);
-    if (moment.isPhaseStart === isPhaseStart) return moment;
-    return { ...moment, isPhaseStart };
-  });
 }
 
 export function filterTimelineMoments(

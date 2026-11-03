@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Subscribe, type Header, type RowData } from "@tanstack/react-table";
+import type { StockFeatures } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 
 const IconMap: Record<string, string> = {
   asc: "↑",
@@ -9,8 +10,7 @@ const IconMap: Record<string, string> = {
 export function SortingButton<TData extends RowData>({
   header,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  header: Header<any, TData, unknown>;
+  header: Header<StockFeatures, TData, unknown>;
 }) {
   if (!header.column.getCanSort()) {
     return null;

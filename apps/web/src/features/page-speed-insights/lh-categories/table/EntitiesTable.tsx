@@ -3,7 +3,7 @@ import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedConte
 import { renderBoolean } from "@/features/page-speed-insights/lh-categories/renderBoolean";
 import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
-import type { StockColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import type { StockAnyColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { useTableColumns } from "@/features/page-speed-insights/shared/useTableColumns";
 import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 import {
@@ -21,7 +21,7 @@ type EntityTableRow = {
 };
 
 const columnHelper = createStockColumnHelper<EntityTableRow>();
-const cols: StockColumnDef<EntityTableRow, any>[] = [
+const cols: StockAnyColumnDef<EntityTableRow>[] = [
   columnHelper.accessor("name", {
     id: "name",
     header: "Name",
@@ -37,7 +37,7 @@ const cols: StockColumnDef<EntityTableRow, any>[] = [
     header: "Is First Party",
     enableSorting: true,
     enableResizing: true,
-    filterFn: "booleanFilterFn" as never,
+    filterFn: "booleanFilterFn",
     aggregationFn: "unique",
     cell: (info) => renderBoolean(!!info.getValue()),
     aggregatedCell: createBooleanAggregatedCell("isFirstParty", renderBoolean),
@@ -47,7 +47,7 @@ const cols: StockColumnDef<EntityTableRow, any>[] = [
     header: "Is Unrecognized",
     enableSorting: true,
     enableResizing: true,
-    filterFn: "booleanFilterFn" as never,
+    filterFn: "booleanFilterFn",
     aggregationFn: "unique",
     cell: (info) => renderBoolean(!!info.getValue()),
     aggregatedCell: createBooleanAggregatedCell("isUnrecognized", renderBoolean),
@@ -80,7 +80,7 @@ export function EntitiesTableCard({
   columns,
 }: {
   data: EntityTableRow[];
-  columns: StockColumnDef<EntityTableRow, any>[];
+  columns: StockAnyColumnDef<EntityTableRow>[];
 }) {
   const table = useStandardTable({
     data,
@@ -90,7 +90,9 @@ export function EntitiesTableCard({
     enablePagination: true,
   });
   return (
-    <TableCard title="Third-Party Entities" table={table} className="md:col-span-2 lg:col-span-3" />
+    <TableCard title="Third-Party Entities" className="md:col-span-2 lg:col-span-3">
+      <TableCard.Table table={table} />
+    </TableCard>
   );
 }
 

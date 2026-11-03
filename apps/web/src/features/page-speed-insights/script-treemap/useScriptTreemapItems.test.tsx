@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { useScriptTreemapItems } from "@/features/page-speed-insights/script-treemap/useScriptTreemapItems";
 
 vi.mock("@/features/page-speed-insights/PageSpeedContext", () => ({
-  usePageSpeedItems: vi.fn(() => []),
+  usePageSpeedItems: vi.fn<() => unknown[]>(() => []),
 }));
 
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";

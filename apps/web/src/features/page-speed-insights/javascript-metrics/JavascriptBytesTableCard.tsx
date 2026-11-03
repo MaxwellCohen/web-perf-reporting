@@ -31,12 +31,16 @@ const columnHelper = createStockColumnHelper<JavascriptBytesTableRow>();
 
 function buildColumnDefs(
   includeWastedPercent: boolean,
+  includeTotalBytes: boolean,
 ): StockColumnDef<JavascriptBytesTableRow, unknown>[] {
   const cols: StockColumnDef<JavascriptBytesTableRow, unknown>[] = [
     createURLColumn(columnHelper),
     createBytesColumn(columnHelper, "wastedBytes", "Wasted Bytes"),
-    createBytesColumn(columnHelper, "totalBytes", "Total Bytes"),
   ];
+  // The legacy-javascript-insight audit only reports wastedBytes.
+  if (includeTotalBytes) {
+    cols.push(createBytesColumn(columnHelper, "totalBytes", "Total Bytes"));
+  }
   if (includeWastedPercent) {
     cols.push(createPercentageColumn(columnHelper, "wastedPercent", "Wasted %", 1));
   }
@@ -82,7 +86,10 @@ export function JavascriptBytesTableCard({
     validMetrics.length,
   );
 
-  const cols = buildColumnDefs(includeWastedPercent);
+  const cols = buildColumnDefs(
+    includeWastedPercent,
+    allRows.some((row) => row.totalBytes !== undefined),
+  );
 
   const columns = useTableColumns<JavascriptBytesTableRow>(cols, columnHelper, showReportColumn);
 
@@ -98,5 +105,10 @@ export function JavascriptBytesTableCard({
     return null;
   }
 
-  return <TableCard title={title} table={table} showPagination />;
+  return (
+    <TableCard title={title} className="md:col-span-2 lg:col-span-3">
+      <TableCard.Table table={table} />
+      <TableCard.Pagination table={table} />
+    </TableCard>
+  );
 }

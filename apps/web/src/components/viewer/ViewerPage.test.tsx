@@ -29,7 +29,7 @@ vi.mock("@/components/viewer/textEncoding", () => ({
   },
 }));
 
-const mockAlert = vi.fn();
+const mockAlert = vi.fn<() => void>();
 
 import ViewerPage from "@/components/viewer/ViewerPage";
 
@@ -78,8 +78,7 @@ describe("ViewerPage", () => {
 
     fireEvent.paste(getByLabelText("PSI URL, JSON, or file"), {
       clipboardData: {
-        getData: () =>
-          "https://pagespeed.web.dev/analysis/https-example-com/abc",
+        getData: () => "https://pagespeed.web.dev/analysis/https-example-com/abc",
       },
     });
 
@@ -154,9 +153,7 @@ describe("ViewerPage", () => {
     await waitFor(() => {
       expect(container.textContent).toContain("Show Report");
     });
-    expect(window.location.hash === "" || window.location.hash === "#").toBe(
-      true,
-    );
+    expect(window.location.hash === "" || window.location.hash === "#").toBe(true);
   });
 
   it("returns to the input form when the hash is cleared (browser back)", async () => {
@@ -204,17 +201,13 @@ describe("ViewerPage", () => {
   });
 
   it("imports two PSI share URLs with run labels into the dashboard", async () => {
-    const fetchMock = vi
-      .spyOn(globalThis, "fetch")
-      .mockImplementation(async () =>
-        Response.json({
-          data: [{ lighthouseResult: { categories: {} } }],
-          labels: ["Mobile"],
-        }),
-      );
-    const consoleErrorSpy = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async () =>
+      Response.json({
+        data: [{ lighthouseResult: { categories: {} } }],
+        labels: ["Mobile"],
+      }),
+    );
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { container, getByText, getAllByLabelText } = render(<ViewerPage />);
 
     fireEvent.change(getAllByLabelText("PSI URL, JSON, or file")[0]!, {
@@ -240,9 +233,7 @@ describe("ViewerPage", () => {
 
     await waitFor(() => {
       expect(container.querySelector('[data-testid="dashboard"]')).toBeTruthy();
-      expect(container.textContent).toContain(
-        "labels: Before · Mobile, After · Mobile",
-      );
+      expect(container.textContent).toContain("labels: Before · Mobile, After · Mobile");
     });
     expect(fetchMock).toHaveBeenCalledTimes(2);
     consoleErrorSpy.mockRestore();
@@ -281,9 +272,9 @@ describe("ViewerPage", () => {
     fireEvent.click(getByText("Show Report"));
 
     await waitFor(() => {
-      expect(
-        container.querySelector('[data-testid="share-url"]')?.textContent,
-      ).toBe(`${window.location.origin}/viewer?psi=${encodeURIComponent(psi)}`);
+      expect(container.querySelector('[data-testid="share-url"]')?.textContent).toBe(
+        `${window.location.origin}/viewer?psi=${encodeURIComponent(psi)}`,
+      );
     });
   });
 

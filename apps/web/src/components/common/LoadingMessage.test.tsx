@@ -23,17 +23,17 @@ describe("LoadingMessage", () => {
     act(() => {
       vi.advanceTimersByTime(1000);
     });
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot("after 1s");
 
     act(() => {
       vi.advanceTimersByTime(5000);
     });
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot("after 6s");
 
     act(() => {
       vi.advanceTimersByTime(5000);
     });
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot("after 11s");
   });
 
   it("renders the CrUX lookup variant", () => {

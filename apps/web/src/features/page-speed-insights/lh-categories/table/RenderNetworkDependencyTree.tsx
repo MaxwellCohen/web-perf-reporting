@@ -1,3 +1,4 @@
+import { useIsEmbeddedDetails } from "@/features/page-speed-insights/lh-categories/EmbeddedDetails";
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
 import { AccordionItem, AccordionContent } from "@/components/ui/accordion";
 import { AccordionSectionTitleTrigger } from "@/components/ui/accordion-section-title-trigger";
@@ -10,7 +11,8 @@ import {
   type NetworkTreeValue,
 } from "@/features/page-speed-insights/shared/networkDependencyTree";
 
-export function RenderNetworkDependencyTree({ embedded = false }: { embedded?: boolean } = {}) {
+export function RenderNetworkDependencyTree() {
+  const embedded = useIsEmbeddedDetails();
   const items = usePageSpeedItems();
 
   const networkTrees = items.map(extractNetworkTreeFromAudit).filter(({ tree }) => tree !== null);
@@ -21,9 +23,7 @@ export function RenderNetworkDependencyTree({ embedded = false }: { embedded?: b
 
   const sections = networkTrees.map(({ tree, label }) => {
     if (!tree) return null;
-    return (
-      <NetworkDependencyTreeSection key={label} tree={tree} label={label} embedded={embedded} />
-    );
+    return <NetworkDependencyTreeSection key={label} tree={tree} label={label} />;
   });
 
   if (embedded) return <div className="space-y-4">{sections}</div>;
@@ -36,15 +36,8 @@ export function RenderNetworkDependencyTree({ embedded = false }: { embedded?: b
   );
 }
 
-function NetworkDependencyTreeSection({
-  tree,
-  label,
-  embedded,
-}: {
-  tree: NetworkTreeValue;
-  label: string;
-  embedded: boolean;
-}) {
+function NetworkDependencyTreeSection({ tree, label }: { tree: NetworkTreeValue; label: string }) {
+  const embedded = useIsEmbeddedDetails();
   if (!tree.chains || Object.keys(tree.chains).length === 0) {
     return null;
   }

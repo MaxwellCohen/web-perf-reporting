@@ -4,6 +4,7 @@ import { flexRender, type ReactTable, type RowData } from "@tanstack/react-table
 import { useFullWidthTables } from "@/features/page-speed-insights/tanstack-table-v9/fullWidthTables";
 import { cn } from "@/lib/utils";
 import { tanstackTableCellDataProps } from "@/features/page-speed-insights/shared/tanstackTableCellDataProps";
+import type { StockFeatures } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 
 const rowModelStateSelector = (state: {
   columnFilters: unknown;
@@ -38,7 +39,7 @@ export function DataTableBody<TData extends RowData>({
   onRowClick,
   isRowSelected,
 }: {
-  table: ReactTable<any, TData, any>;
+  table: ReactTable<StockFeatures, TData>;
   onRowClick?: (row: TData) => void;
   isRowSelected?: (row: TData) => boolean;
 }) {

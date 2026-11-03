@@ -21,6 +21,7 @@ export default defineConfig({
     isolate: true,
     environment: "happy-dom",
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    exclude: ["e2e/**", "node_modules/**"],
     setupFiles: ["./vitest.setup.ts"],
     server: {
       deps: {

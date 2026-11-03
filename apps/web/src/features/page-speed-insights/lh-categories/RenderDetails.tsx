@@ -13,14 +13,7 @@ import { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataI
 import { JSUsageAccordion } from "@/features/page-speed-insights/JSUsage/JSUsageSection";
 import { RenderNetworkDependencyTree } from "@/features/page-speed-insights/lh-categories/table/RenderNetworkDependencyTree";
 
-export function RenderDetails({
-  items,
-  embedded = false,
-}: {
-  items: TableDataItem[];
-  /** Skip accordion chrome. Used inside a cause row that already has a title. */
-  embedded?: boolean;
-}) {
+export function RenderDetails({ items }: { items: TableDataItem[] }) {
   const details = items.map((a) => a?.auditResult.details);
   const types = [...new Set(details.map((a) => a?.type).filter(Boolean))];
   const detailType = types[0];
@@ -45,13 +38,13 @@ export function RenderDetails({
         </>
       );
     case "list":
-      return <RenderList rows={items} embedded={embedded} />;
+      return <RenderList rows={items} />;
     case "checklist":
       return <RenderChecklist items={items} />;
     case "table":
     case "opportunity":
       // @ts-expect-error need better type narrowing
-      return <DetailTable rows={items} title={title} embedded={embedded} />;
+      return <DetailTable rows={items} title={title} />;
     case "criticalrequestchain":
       return (
         <div>
@@ -82,7 +75,16 @@ export function RenderDetails({
   }
 }
 
-function RenderList({ rows, embedded }: { rows: TableDataItem[]; embedded: boolean }) {
+/** Lighthouse "list-section" entries carry their payload in `value`; the schema doesn't model it. */
+function isNetworkTreeSection(item: unknown): boolean {
+  if (typeof item !== "object" || item === null || !("value" in item)) return false;
+  const { value } = item;
+  return (
+    typeof value === "object" && value !== null && "type" in value && value.type === "network-tree"
+  );
+}
+
+function RenderList({ rows }: { rows: TableDataItem[] }) {
   // const auditData = rows.map((a) => a?.auditResult);
   if (!rows.every((r) => r?.auditResult?.details?.type === "list")) {
     return null;
@@ -91,18 +93,11 @@ function RenderList({ rows, embedded }: { rows: TableDataItem[]; embedded: boole
   const hasNetworkTree = rows.some((row) => {
     const details = row?.auditResult?.details as AuditDetailList;
     const listItems = details?.items;
-    return listItems?.some(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (item: any) =>
-        item?.value &&
-        typeof item.value === "object" &&
-        "type" in item.value &&
-        item.value.type === "network-tree",
-    );
+    return listItems?.some(isNetworkTreeSection);
   });
 
   if (hasNetworkTree) {
-    return <RenderNetworkDependencyTree embedded={embedded} />;
+    return <RenderNetworkDependencyTree />;
   }
 
   const groupedItems: TableDataItem[][] = [];
@@ -130,7 +125,7 @@ function RenderList({ rows, embedded }: { rows: TableDataItem[]; embedded: boole
   return (
     <div>
       {groupedItems.map((item, index: number) => (
-        <RenderDetails key={index} items={item} embedded={embedded} />
+        <RenderDetails key={index} items={item} />
       ))}
     </div>
   );

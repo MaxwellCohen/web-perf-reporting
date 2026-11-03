@@ -13,7 +13,7 @@ const columnHelper = createColumnHelper<TableDataItem>();
  * Lighthouse audit accordion table columns. Grouping is driven by useLHTable state
  * (e.g. category_title + id); sorting row models are not enabled on that hook.
  */
-export const LH_AUDIT_TABLE_COLUMNS = [
+export const LH_AUDIT_TABLE_COLUMNS = columnHelper.columns([
   columnHelper.accessor((row) => row._category?.title || "", {
     id: "category_title",
     header: "Category",
@@ -73,4 +73,4 @@ export const LH_AUDIT_TABLE_COLUMNS = [
     header: "Details",
     enableGrouping: false,
   }),
-];
+]);

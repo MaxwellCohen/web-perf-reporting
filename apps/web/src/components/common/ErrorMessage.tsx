@@ -19,11 +19,20 @@ export function ReportErrorCard({
   title = "Failed to Load Report",
   description = DEFAULT_REPORT_ERROR_DESCRIPTION,
   testUrl,
+  onRetry,
+  onRunAgain,
+  runAgainPending = false,
 }: {
   title?: string;
   description?: string;
   testUrl?: string;
+  /** Re-fetches the same report (timeouts / transient errors). */
+  onRetry?: () => void;
+  /** Restarts the run for the same URL (failed jobs). */
+  onRunAgain?: () => void;
+  runAgainPending?: boolean;
 }) {
+  const hasActions = Boolean(onRetry || onRunAgain);
   return (
     <div className="flex flex-col items-center justify-center min-h-100 p-4">
       <Card className="w-full max-w-md">
@@ -50,8 +59,18 @@ export function ReportErrorCard({
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
-          <Button asChild className="w-full">
-            <Link href="/page-speed">Try Again</Link>
+          {onRetry ? (
+            <Button className="w-full" onClick={onRetry}>
+              Retry
+            </Button>
+          ) : null}
+          {onRunAgain ? (
+            <Button className="w-full" onClick={onRunAgain} disabled={runAgainPending}>
+              {runAgainPending ? "Starting…" : "Run again"}
+            </Button>
+          ) : null}
+          <Button asChild variant={hasActions ? "outline" : "default"} className="w-full">
+            <Link href="/page-speed">{hasActions ? "Start a new report" : "Try Again"}</Link>
           </Button>
           <Button variant="outline" asChild className="w-full">
             <Link href="/">Go to Homepage</Link>

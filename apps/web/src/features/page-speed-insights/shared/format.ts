@@ -1,7 +1,7 @@
 export function formatMs(ms: number): string {
   if (!Number.isFinite(ms)) return "—";
   const abs = Math.abs(ms);
-  if (abs < 1000) return `${Math.round(ms)} ms`;
+  if (Math.round(abs) < 1000) return `${Math.round(ms)} ms`;
   if (abs >= 10000) return `${(ms / 1000).toFixed(1)} s`;
   return `${(ms / 1000).toFixed(2)} s`;
 }

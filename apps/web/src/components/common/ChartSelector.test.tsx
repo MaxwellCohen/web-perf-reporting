@@ -37,7 +37,7 @@ describe("ChartSelector", () => {
   afterEach(() => vi.useRealTimers());
 
   it("normalizes string options and uses the first option as the placeholder", () => {
-    const onValueChange = vi.fn();
+    const onValueChange = vi.fn<() => void>();
     const { container } = render(
       <ChartSelector id="chart-selector" options={["LCP", "CLS"]} onValueChange={onValueChange} />,
     );
@@ -52,7 +52,7 @@ describe("ChartSelector", () => {
   });
 
   it("supports labeled option objects", () => {
-    const onValueChange = vi.fn();
+    const onValueChange = vi.fn<() => void>();
     const { container } = render(
       <ChartSelector
         options={[

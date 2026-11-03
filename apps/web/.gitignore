@@ -45,3 +45,7 @@ next-env.d.ts
 .env.sentry-build-plugin
 .fallow/
 .wimb/
+
+# playwright
+/test-results/
+/playwright-report/

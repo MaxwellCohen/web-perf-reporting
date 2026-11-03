@@ -62,3 +62,18 @@ export function resolveWorkerEnvelope(
 
   return { kind: "ready_envelope", envelope: data };
 }
+
+export type WorkerJobState = "queued" | "running";
+
+const QUEUED_STATUSES = new Set(["pending", "queued"]);
+const IN_PROGRESS_STATUSES = new Set([...QUEUED_STATUSES, "processing"]);
+
+/** True for non-terminal worker statuses (queued or running). */
+export function isInProgressWorkerStatus(status: string | undefined): boolean {
+  return IN_PROGRESS_STATUSES.has((status ?? "").toLowerCase());
+}
+
+/** Maps a non-terminal worker status string to a user-facing job state. */
+export function toWorkerJobState(status: string | undefined): WorkerJobState {
+  return QUEUED_STATUSES.has((status ?? "").toLowerCase()) ? "queued" : "running";
+}

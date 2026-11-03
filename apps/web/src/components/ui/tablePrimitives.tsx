@@ -27,13 +27,3 @@ export function tableElementProps<R, P extends object>(
     suppressHydrationWarning: true;
   };
 }
-
-function forwardTableDiv(displayName: string, role: React.AriaRole, defaultClass: string) {
-  const Comp = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-    ({ className, ...props }, ref) => (
-      <div ref={ref} className={cn(defaultClass, className)} role={role} {...props} />
-    ),
-  );
-  Comp.displayName = displayName;
-  return Comp;
-}

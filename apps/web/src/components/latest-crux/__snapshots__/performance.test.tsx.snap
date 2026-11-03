@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`latest crux performance components > renders the current performance card and chart variants 1`] = `
+exports[`latest crux performance components > renders the current performance card and chart variants > gauge 1`] = `
 <div
   class="rounded-xl border bg-card text-card-foreground shadow grid h-full grid-cols-1 grid-rows-[2.75rem,auto,1rem,auto] gap-1 p-2"
 >
@@ -53,7 +53,7 @@ exports[`latest crux performance components > renders the current performance ca
 </div>
 `;
 
-exports[`latest crux performance components > renders the current performance card and chart variants 2`] = `
+exports[`latest crux performance components > renders the current performance card and chart variants > histogram 1`] = `
 <div
   class="rounded-xl border bg-card text-card-foreground shadow grid h-full grid-cols-1 grid-rows-[2.75rem,auto,1rem,auto] gap-1 p-2"
 >

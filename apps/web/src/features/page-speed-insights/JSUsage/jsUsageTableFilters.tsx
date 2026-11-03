@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import {
   RenderBytesValue,
   RenderMSValue,
@@ -11,38 +10,37 @@ import { Button } from "@/components/ui/button";
 import type { TableColumnHeading } from "@/lib/schema";
 import type { ReactNode } from "react";
 
-function useDebouncedCallback(callback: (...arg: any[]) => any, delay = 100) {
+function useDebouncedCallback<Args extends unknown[]>(
+  callback: (...args: Args) => void,
+  delay = 100,
+) {
   const timerIdRef = useRef<null | ReturnType<typeof setTimeout>>(null);
   const latestCallback = useRef(callback);
-  latestCallback.current = callback;
 
-  function debouncedCallback(...args: any[]) {
-    if (timerIdRef.current) {
-      clearTimeout(timerIdRef.current);
-    }
+  useEffect(() => {
+    latestCallback.current = callback;
+  });
 
-    timerIdRef.current = setTimeout(() => {
-      latestCallback.current(...args);
-    }, delay);
-  }
-
-  function cancel() {
+  const cancel = useCallback(() => {
     if (timerIdRef.current) {
       clearTimeout(timerIdRef.current);
       timerIdRef.current = null;
     }
-  }
-
-  useEffect(() => {
-    return () => {
-      if (timerIdRef.current) {
-        clearTimeout(timerIdRef.current);
-        timerIdRef.current = null;
-      }
-    };
   }, []);
 
-  return Object.assign(debouncedCallback, { cancel });
+  const schedule = useCallback(
+    (...args: Args) => {
+      cancel();
+      timerIdRef.current = setTimeout(() => {
+        latestCallback.current(...args);
+      }, delay);
+    },
+    [cancel, delay],
+  );
+
+  useEffect(() => cancel, [cancel]);
+
+  return { schedule, cancel };
 }
 
 const BYTES_KEYWORDS = ["size", "bytes"];
@@ -144,17 +142,20 @@ export function RangeFilterInputs({ column }: { column: RangeFilterColumn }) {
   const displayMax = inputConfig.toInputValue(fMax);
   const [localMin, setLocalMin] = useState<string | number>(() => displayMin);
   const [localMax, setLocalMax] = useState<string | number>(() => displayMax);
-  const rangeRef = useRef({ min: fMin, max: fMax });
-  rangeRef.current = { min: fMin, max: fMax };
 
-  useEffect(() => {
+  const [syncedRange, setSyncedRange] = useState({ displayMin, displayMax });
+  if (syncedRange.displayMin !== displayMin || syncedRange.displayMax !== displayMax) {
+    setSyncedRange({ displayMin, displayMax });
     setLocalMin(displayMin);
     setLocalMax(displayMax);
-  }, [displayMin, displayMax]);
+  }
 
-  const updateFilter = useDebouncedCallback((nextMin: number, nextMax: number) => {
-    column.setFilterValue(clampRange(nextMin, nextMax, minValue, maxValue));
-  }, 300);
+  const { schedule: updateFilter, cancel: cancelUpdate } = useDebouncedCallback(
+    (nextMin: number, nextMax: number) => {
+      column.setFilterValue(clampRange(nextMin, nextMax, minValue, maxValue));
+    },
+    300,
+  );
 
   const handleMinChange = (value: string) => {
     setLocalMin(value);
@@ -162,7 +163,7 @@ export function RangeFilterInputs({ column }: { column: RangeFilterColumn }) {
     if (Number.isNaN(parsed)) {
       return;
     }
-    updateFilter(inputConfig.fromInputValue(parsed), rangeRef.current.max);
+    updateFilter(inputConfig.fromInputValue(parsed), fMax);
   };
 
   const handleMaxChange = (value: string) => {
@@ -171,13 +172,13 @@ export function RangeFilterInputs({ column }: { column: RangeFilterColumn }) {
     if (Number.isNaN(parsed)) {
       return;
     }
-    updateFilter(rangeRef.current.min, inputConfig.fromInputValue(parsed));
+    updateFilter(fMin, inputConfig.fromInputValue(parsed));
   };
 
   const hasActiveFilter = column.getIsFiltered?.() ?? column.getFilterValue() !== undefined;
 
   const handleReset = () => {
-    updateFilter.cancel();
+    cancelUpdate();
     column.setFilterValue(undefined);
   };
 
