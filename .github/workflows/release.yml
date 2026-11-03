@@ -1,0 +1,63 @@
+name: release
+on:
+  push:
+    branches: [main]
+    paths: ["packages/cli/package.json"]
+  workflow_dispatch:
+permissions: {}
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      publish: ${{ steps.check.outputs.publish }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: pnpm, registry-url: "https://registry.npmjs.org" }
+      - name: Skip if version already published
+        id: check
+        run: |
+          v=$(node -p "require('./packages/cli/package.json').version")
+          if npm view "@maxwellcohen/web-perf-report@$v" version >/dev/null 2>&1; then echo "publish=false" >> "$GITHUB_OUTPUT"; else echo "publish=true" >> "$GITHUB_OUTPUT"; fi
+      - if: steps.check.outputs.publish == 'true'
+        run: pnpm install --frozen-lockfile
+      - if: steps.check.outputs.publish == 'true'
+        run: pnpm --filter @maxwellcohen/web-perf-report build
+      - if: steps.check.outputs.publish == 'true'
+        run: pnpm --filter @maxwellcohen/web-perf-report test
+      - if: steps.check.outputs.publish == 'true'
+        run: pnpm --filter @maxwellcohen/web-perf-report lint:pkg
+      - name: Pack release candidate
+        if: steps.check.outputs.publish == 'true'
+        run: |
+          mkdir dist
+          pnpm --filter @maxwellcohen/web-perf-report pack --pack-destination "$PWD/dist"
+          cd dist && sha256sum *.tgz > SHA256SUMS
+      - if: steps.check.outputs.publish == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-release-candidates
+          path: dist/
+          if-no-files-found: error
+
+  publish:
+    needs: pack
+    if: needs.pack.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing + provenance
+    steps:
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, registry-url: "https://registry.npmjs.org" }
+      - uses: actions/download-artifact@v4
+        with: { name: npm-release-candidates, path: dist }
+      - run: cd dist && sha256sum --check --strict SHA256SUMS
+      - run: |
+          npm install -g npm@^11.15.0
+          npm publish dist/*.tgz --access public --provenance

@@ -1,12 +1,14 @@
 {
   "name": "web-perf-reporting",
   "private": true,
+  "packageManager": "pnpm@10.33.0",
   "scripts": {
     "dev:web": "pnpm --filter web dev",
     "dev:api": "pnpm --filter api dev",
     "build:web": "pnpm --filter web build",
     "build:api": "pnpm --filter api build",
-    "test": "pnpm --filter web test && pnpm --filter api test",
+    "test": "pnpm --filter web test && pnpm --filter api test && pnpm --filter @maxwellcohen/web-perf-report test",
+    "build:cli": "pnpm --filter @maxwellcohen/web-perf-report build",
     "typecheck": "pnpm --filter web typecheck"
   },
   "pnpm": {
