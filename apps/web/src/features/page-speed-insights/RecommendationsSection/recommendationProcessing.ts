@@ -10,7 +10,11 @@ import { extractSpecificRecommendations } from "@/features/page-speed-insights/R
 import { getCategoryAndGenericSteps } from "@/features/page-speed-insights/RecommendationsSection/categorySteps";
 import { deduplicateResourcesByUrl } from "@/features/page-speed-insights/RecommendationsSection/deduplicateResources";
 
-type ActionableStepAccumulator = { reports: Set<string>; url?: string; host?: string };
+type ActionableStepAccumulator = {
+  reports: Set<string>;
+  url?: string;
+  host?: string;
+};
 
 function mergeActionableStepIntoMap(
   map: Map<string, ActionableStepAccumulator>,
@@ -114,7 +118,7 @@ export function processMetricSavingsAudit(
     impact: {
       metric: metricName,
       savings: savings,
-      unit: metric === "TBT" || metric === "LCP" || metric === "FCP" ? "ms" : undefined,
+      unit: ["TBT", "LCP", "FCP", "INP"].includes(metric) ? "ms" : undefined,
     },
     items: deduplicatedItems,
     actionableSteps,
@@ -249,7 +253,10 @@ function getDefaultActionableSteps(
     return [{ step: audit.description.split(".")[0] + ".", reports: allReportsLabel }];
   }
   return [
-    { step: "Review the audit details for specific recommendations", reports: allReportsLabel },
+    {
+      step: "Review the audit details for specific recommendations",
+      reports: allReportsLabel,
+    },
   ];
 }
 

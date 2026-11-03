@@ -1,5 +1,6 @@
 "use client";
 
+import { reconcileLcpAudits } from "@/features/page-speed-insights/shared/reconcileLcpSubparts";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
 import {
   METRIC_AUDIT_TO_ACRONYM,
@@ -24,8 +25,22 @@ const LAB_BANDS: Record<MetricAuditId, { good: number; poor: number; unit: "ms" 
   "largest-contentful-paint": { good: 2500, poor: 4000, unit: "ms" },
   "total-blocking-time": { good: 200, poor: 600, unit: "ms" },
   "cumulative-layout-shift": { good: 0.1, poor: 0.25, unit: "cls" },
-  "speed-index": { good: 3400, poor: 5800, unit: "ms" },
+  "speed-index": { good: 3387, poor: 5800, unit: "ms" },
 };
+
+/** Lighthouse desktop score curves (p10 / median); other metrics share the mobile bands. */
+const DESKTOP_LAB_BANDS: Partial<Record<MetricAuditId, { good: number; poor: number }>> = {
+  "first-contentful-paint": { good: 934, poor: 1600 },
+  "largest-contentful-paint": { good: 1200, poor: 2400 },
+  "total-blocking-time": { good: 150, poor: 350 },
+  "speed-index": { good: 1311, poor: 2300 },
+};
+
+function labBandFor(auditId: MetricAuditId, label: string) {
+  const band = LAB_BANDS[auditId];
+  const desktop = /desktop/i.test(label) ? DESKTOP_LAB_BANDS[auditId] : undefined;
+  return desktop ? { ...band, ...desktop } : band;
+}
 
 const PHASE_COLOR: Record<string, string> = {
   timeToFirstByte: "hsl(var(--chart-5))",
@@ -57,11 +72,8 @@ function ratingColor(rating: Rating): string {
   return "hsl(var(--chart-3))";
 }
 
-function headroomCopy(value: number, good: number, poor: number, unit: "ms" | "cls"): string {
-  const format = (n: number) => formatUnit(n, unit);
-  if (value <= good) return `${format(good - value)} - Good`;
-  if (value <= poor) return `${format(value - good)} - Average`;
-  return `${format(value - poor)} - Bad`;
+function headroomCopy(value: number, rating: Rating, unit: "ms" | "cls"): string {
+  return `${formatUnit(value, unit)} - ${rating}`;
 }
 
 function scaleMax(value: number, poor: number): number {
@@ -74,7 +86,10 @@ function lcpPhases(audits: MetricAuditSource["audits"] | undefined): Phase[] {
 
   for (const entry of details.items) {
     if (!entry || typeof entry !== "object") continue;
-    const table = entry as { type?: string; items?: Array<Record<string, unknown>> };
+    const table = entry as {
+      type?: string;
+      items?: Array<Record<string, unknown>>;
+    };
     if (table.type !== "table" || !Array.isArray(table.items)) continue;
 
     return table.items.flatMap((item) => {
@@ -142,7 +157,11 @@ function ThresholdTrack({
         <Band left={poorPct} width={100 - poorPct} color="hsl(var(--chart-3) / 0.28)" />
         <div
           className="absolute inset-y-0 left-0"
-          style={{ width: pct(value), backgroundColor: ratingColor(rating), opacity: 0.9 }}
+          style={{
+            width: pct(value),
+            backgroundColor: ratingColor(rating),
+            opacity: 0.9,
+          }}
         />
         <div
           className="absolute inset-y-0 z-10 w-0.5 bg-foreground"
@@ -169,7 +188,11 @@ function Band({ left, width, color }: { left: number; width: number; color: stri
   return (
     <div
       className="absolute inset-y-0"
-      style={{ left: `${left}%`, width: `${Math.max(0, width)}%`, backgroundColor: color }}
+      style={{
+        left: `${left}%`,
+        width: `${Math.max(0, width)}%`,
+        backgroundColor: color,
+      }}
     />
   );
 }
@@ -235,7 +258,7 @@ function MetricScale({
   /** Render each part as a direct item of the parent's row subgrid (see `SUMMARY_ROWS_PER_RUN`). */
   subgrid?: boolean;
 }) {
-  const band = LAB_BANDS[auditId];
+  const band = labBandFor(auditId, label);
   const value = audit.numericValue;
   if (value == null || !Number.isFinite(value)) return null;
 
@@ -272,7 +295,7 @@ function MetricScale({
         />
       </div>
       <p className={cn("text-xs leading-snug text-muted-foreground", subgrid && "pt-1.5")}>
-        {headroomCopy(value, band.good, band.poor, band.unit)}
+        {headroomCopy(value, rating, band.unit)}
       </p>
       {hasSavingsNote ? (
         <p className={cn("text-xs leading-snug text-muted-foreground", subgrid && "pt-1")}>
@@ -295,7 +318,9 @@ function PhaseLegend({ phases, unit }: { phases: Phase[]; unit: "ms" | "cls" }) 
         <li key={phase.id} className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <span
             className="size-2 shrink-0 rounded-sm"
-            style={{ backgroundColor: PHASE_COLOR[phase.id] ?? "hsl(var(--chart-4))" }}
+            style={{
+              backgroundColor: PHASE_COLOR[phase.id] ?? "hsl(var(--chart-4))",
+            }}
             aria-hidden
           />
           <span>{phase.label}</span>
@@ -330,7 +355,9 @@ function SavingsBars({
             <span className="col-span-2 h-1.5 overflow-hidden rounded-sm bg-muted">
               <span
                 className="block h-full bg-foreground/70"
-                style={{ width: `${Math.min(100, (slice.savings / basis) * 100)}%` }}
+                style={{
+                  width: `${Math.min(100, (slice.savings / basis) * 100)}%`,
+                }}
               />
             </span>
           </li>
@@ -452,7 +479,9 @@ export function MetricValueViz({
               showLabel={rows.length > 1}
               auditId={auditId}
               phases={
-                detail && auditId === "largest-contentful-paint" ? lcpPhases(source?.audits) : []
+                detail && auditId === "largest-contentful-paint"
+                  ? lcpPhases(reconcileLcpAudits(source?.audits))
+                  : []
               }
               savings={detail ? savings : []}
               savingsNote={savingsNote}

@@ -40,6 +40,25 @@ export function requestWaterfallBar(
   };
 }
 
+/** Seconds-of-transfer a request needs on the simulated link, ignoring latency and sharing. */
+export function linkTransferMs(bytes: number, throughputKbps: number): number {
+  return ((bytes * 8) / (throughputKbps * 1024)) * 1000;
+}
+
+/** Flags bars whose interpolated duration is faster than the throttled link could deliver. */
+function linkWarning(request: CombinedRequest, throughputKbps: number | undefined) {
+  const bytes = request.transferSize ?? 0;
+  if (!throughputKbps || bytes < 50 * 1024) return undefined;
+  const fullMs = linkTransferMs(bytes, throughputKbps);
+  const shownMs = request.networkEndTime - request.networkRequestTime;
+  if (fullMs - shownMs < 500 || shownMs > fullMs * 0.8) return undefined;
+  return `${formatBytes(bytes)} would take about ${formatMs(fullMs)} on the throttled link; the bar shows ${formatMs(shownMs)} from the trace.`;
+}
+
+export function onCriticalPath(request: CombinedRequest): boolean {
+  return request.renderBlocking === "blocking" || request.isCriticalChain;
+}
+
 function pluralResourceTitle(resourceType: string, count: number): string {
   const downloaded =
     resourceType === "Script" || resourceType === "Stylesheet" ? " downloaded" : "";
@@ -147,6 +166,8 @@ export function networkEvents(load: CombinedLoad, bounds: PhaseBound[]): Timelin
               coverage: coverageLabel(r),
               priority: r.priority,
               renderBlocking: r.renderBlocking,
+              criticalPath: onCriticalPath(r) || undefined,
+              linkWarning: linkWarning(r, load.simulatedThroughputKbps),
             }),
           ),
           table: {

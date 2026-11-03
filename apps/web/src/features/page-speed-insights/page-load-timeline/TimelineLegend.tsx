@@ -1,4 +1,10 @@
-export function TimelineLegend({ simulationLabel }: { simulationLabel?: string }) {
+export function TimelineLegend({
+  simulationLabel,
+  timesNote,
+}: {
+  simulationLabel?: string;
+  timesNote?: string;
+}) {
   return (
     <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground sm:text-sm">
       <span className="inline-flex items-center gap-1">
@@ -14,6 +20,7 @@ export function TimelineLegend({ simulationLabel }: { simulationLabel?: string }
       {simulationLabel ? (
         <span className="text-muted-foreground/80">Times include simulated {simulationLabel}</span>
       ) : null}
+      {timesNote ? <span className="basis-full text-muted-foreground/80">{timesNote}</span> : null}
     </div>
   );
 }

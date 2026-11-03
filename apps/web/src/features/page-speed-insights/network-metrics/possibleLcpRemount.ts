@@ -1,4 +1,5 @@
 import type { PageSpeedInsightsSnapshot } from "@/features/page-speed-insights/PageSpeedContext";
+import { reconcileLcpAudits } from "@/features/page-speed-insights/shared/reconcileLcpSubparts";
 import { getNumber } from "@/lib/utils";
 
 /** Share of LCP breakdown duration that must be element render delay. */
@@ -27,7 +28,11 @@ function isTextLcp(audits: Record<string, unknown> | undefined): boolean {
 
 function elementRenderDelayShare(audits: Record<string, unknown> | undefined): number | null {
   const breakdown = audits?.["lcp-breakdown-insight"] as
-    | { details?: { items?: Array<{ type?: string; items?: BreakdownSubpart[] }> } }
+    | {
+        details?: {
+          items?: Array<{ type?: string; items?: BreakdownSubpart[] }>;
+        };
+      }
     | undefined;
   const tableItem = breakdown?.details?.items?.find((item) => item.type === "table");
   const subparts = tableItem?.items ?? [];
@@ -75,7 +80,7 @@ function detectPossibleLcpRemount(
     const audits = item?.lighthouseResult?.audits as Record<string, unknown> | undefined;
     if (!isTextLcp(audits)) continue;
 
-    const share = elementRenderDelayShare(audits);
+    const share = elementRenderDelayShare(reconcileLcpAudits(audits));
     if (share === null || share < ELEMENT_RENDER_DELAY_SHARE_THRESHOLD) continue;
 
     const paints = observedPaintGapMs(audits);

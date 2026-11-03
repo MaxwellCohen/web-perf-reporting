@@ -93,6 +93,11 @@ function WaterfallRows({
                   {showBlockingBadge && bar.renderBlocking ? (
                     <RenderBlockingBadge status={bar.renderBlocking} />
                   ) : null}
+                  {bar.criticalPath ? (
+                    <span className="rounded bg-amber-500/15 px-1 text-[10px] font-medium text-amber-700 dark:text-amber-300">
+                      Critical path
+                    </span>
+                  ) : null}
                 </div>
                 <BarIdentity bar={bar} />
                 {bar.priority ? (
@@ -111,6 +116,11 @@ function WaterfallRows({
                 ) : null}
                 {bar.coverage ? (
                   <p className="text-[11px] tabular-nums text-muted-foreground">{bar.coverage}</p>
+                ) : null}
+                {bar.linkWarning ? (
+                  <p className="text-[11px] text-amber-600 dark:text-amber-400">
+                    {bar.linkWarning}
+                  </p>
                 ) : null}
               </div>
               <span className="shrink-0 pt-0.5 text-right text-[11px] tabular-nums text-muted-foreground">

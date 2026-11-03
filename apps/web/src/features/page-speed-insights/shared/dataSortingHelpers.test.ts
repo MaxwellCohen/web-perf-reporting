@@ -46,3 +46,20 @@ describe("sortByMaxValue", () => {
     expect(result[0]?.id).toBe("y");
   });
 });
+
+describe("sortByMaxValue immutability", () => {
+  it("does not mutate the input array", () => {
+    const data = [
+      { k: "a", v: 1 },
+      { k: "b", v: 5 },
+    ];
+    const out = sortByMaxValue(
+      data,
+      (d) => d.k,
+      (d) => d.v,
+      2,
+    );
+    expect(out[0].k).toBe("b");
+    expect(data[0].k).toBe("a");
+  });
+});

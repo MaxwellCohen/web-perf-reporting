@@ -17,6 +17,13 @@ const metrics = [
   { metric: "Interaction to Next Paint", key: "INTERACTION_TO_NEXT_PAINT" },
 ] as const;
 
+/** PSI reports CLS percentiles scaled by 100 (e.g. 5 means 0.05). */
+export function formatFieldPercentile(key: string, percentile: number): string {
+  return key === "CUMULATIVE_LAYOUT_SHIFT_SCORE"
+    ? (percentile / 100).toFixed(2)
+    : String(percentile);
+}
+
 export function LoadingExperience({ title, experienceKey }: LoadingExperienceProps) {
   const items = usePageSpeedItems();
   if (!items.length) {
@@ -74,8 +81,10 @@ export function LoadingExperience({ title, experienceKey }: LoadingExperiencePro
                     return (
                       <div key={`${key}_${idx}`} className="min-w-0">
                         <HorizontalGaugeChart
-                          metric={`${metricValue.percentile} - ${metricValue.category} ${experience.label ? `(${experience.label})` : ""}`}
+                          metric={`${formatFieldPercentile(key, metricValue.percentile)} - ${metricValue.category} ${experience.label ? `(${experience.label})` : ""}`}
                           data={metricValue}
+                          scale={key === "CUMULATIVE_LAYOUT_SHIFT_SCORE" ? 100 : 1}
+                          unit={key === "CUMULATIVE_LAYOUT_SHIFT_SCORE" ? undefined : "ms"}
                         />
                       </div>
                     );

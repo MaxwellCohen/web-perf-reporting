@@ -14,8 +14,20 @@ type SnapshotWithItems = {
   context: { items: InsightsContextItem[] };
 };
 
+// Same schemes as Lighthouse UrlUtils.NON_NETWORK_SCHEMES; resource-summary skips these requests.
+const NON_NETWORK_SCHEMES = ["blob", "data", "intent", "file", "filesystem", "chrome-extension"];
+
+function isNonNetworkRequest(item: Record<string, unknown>): boolean {
+  const scheme = (value: unknown) => (typeof value === "string" ? value.split(":")[0] : "");
+  return (
+    NON_NETWORK_SCHEMES.includes(scheme(item.protocol)) ||
+    NON_NETWORK_SCHEMES.includes(scheme(item.url))
+  );
+}
+
 function computeJsStats(jsMetrics: JSMetrics[]): JSStats[] {
-  return jsMetrics.map(({ jsResources, label }) => {
+  return jsMetrics.map(({ jsResources: allJsResources, label }) => {
+    const jsResources = allJsResources.filter((item) => !isNonNetworkRequest(item));
     if (!jsResources.length) {
       return {
         label,

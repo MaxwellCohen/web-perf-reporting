@@ -27,7 +27,9 @@ describe("getTreemapNodeColor", () => {
 
 describe("getTreemapDisplayLabel", () => {
   it("returns short inline names unchanged", () => {
-    expect(getTreemapDisplayLabel("(inline) foo")).toEqual({ primary: "(inline) foo" });
+    expect(getTreemapDisplayLabel("(inline) foo")).toEqual({
+      primary: "(inline) foo",
+    });
   });
 
   it("keeps the (inline) prefix when truncating", () => {
@@ -183,5 +185,11 @@ describe("copyTreemapNodeName", () => {
     });
 
     await expect(copyTreemapNodeName("https://example.com/script.js")).resolves.toBe(false);
+  });
+});
+
+describe("getTreemapNodeColor zero size", () => {
+  it("returns gray when resourceBytes is 0", () => {
+    expect(getTreemapNodeColor(0, 5)).toBe(getTreemapNodeColor(100));
   });
 });

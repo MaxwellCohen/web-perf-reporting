@@ -31,6 +31,9 @@ export function buildTimelineEvents(load: CombinedLoad): TimelineEvent[] {
 }
 
 export function axisEndMs(load: CombinedLoad, events: TimelineEvent[]): number {
+  // Under simulation a big download can run for minutes, which would squash the
+  // paint milestones into the first pixels. Its bar clips at the axis end instead.
+  const requestsShapeAxis = !load.simulationLabel;
   return Math.max(
     load.lcp ?? 0,
     load.load ?? 0,
@@ -38,13 +41,17 @@ export function axisEndMs(load: CombinedLoad, events: TimelineEvent[]): number {
     load.fcp ?? 0,
     load.interactive ?? 0,
     load.traceEnd ?? 0,
-    ...load.requests.map((r) => r.networkEndTime),
-    ...load.redirectHops.map((r) => r.networkEndTime),
+    ...(requestsShapeAxis ? load.requests.map((r) => r.networkEndTime) : []),
+    ...(requestsShapeAxis ? load.redirectHops.map((r) => r.networkEndTime) : []),
     ...load.longTasks.map((t) => t.startTime + t.duration),
     ...load.screenshots.map((shot) => shot.timing),
     ...load.userTimings.map((t) => t.startTime + (t.duration ?? 0)),
     ...load.layoutShifts.map((shift) => shift.startTime),
-    ...events.map((e) => e.endMs ?? e.timeMs),
+    ...events
+      .filter(
+        (e) => requestsShapeAxis || !/^(net|nav-redirects)/.test(e.id) || e.id === "net-weight",
+      )
+      .map((e) => e.endMs ?? e.timeMs),
     1,
   );
 }

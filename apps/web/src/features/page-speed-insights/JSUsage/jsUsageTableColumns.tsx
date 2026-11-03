@@ -140,7 +140,11 @@ export const columns = [
 
   columnHelper.accessor(
     ({ resourceBytes, unusedBytes }) => {
-      if (typeof resourceBytes !== "number" || typeof unusedBytes !== "number") {
+      if (
+        typeof resourceBytes !== "number" ||
+        typeof unusedBytes !== "number" ||
+        resourceBytes <= 0
+      ) {
         return undefined;
       }
       const percent = (unusedBytes / resourceBytes) * 100;

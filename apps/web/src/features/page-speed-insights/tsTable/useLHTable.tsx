@@ -1,3 +1,4 @@
+import { reconcileLcpAudits } from "@/features/page-speed-insights/shared/reconcileLcpSubparts";
 import type { StockRow } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { PageSpeedInsights } from "@/lib/schema";
 import { flexRender, useTable } from "@tanstack/react-table";
@@ -38,7 +39,7 @@ export function useLHTable(items: { item: PageSpeedInsights; label: string }[]) 
               _category,
               _userLabel: label,
               auditRef: ar,
-              auditResult: item.lighthouseResult?.audits?.[ar.id],
+              auditResult: reconcileLcpAudits(item.lighthouseResult?.audits)?.[ar.id],
             };
           });
         });

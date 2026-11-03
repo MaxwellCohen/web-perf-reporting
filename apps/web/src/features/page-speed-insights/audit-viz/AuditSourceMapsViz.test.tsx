@@ -57,4 +57,30 @@ describe("AuditSourceMapsViz", () => {
     const { container } = render(<AuditSourceMapsViz rows={[row([])]} />);
     expect(container.firstChild).toBeNull();
   });
+
+  it("skips valid source maps and counts a single missing item", () => {
+    const { container } = render(
+      <AuditSourceMapsViz
+        rows={[
+          row([
+            {
+              scriptUrl: "https://example.com/ok.js",
+              sourceMapUrl: "https://example.com/ok.js.map",
+              subItems: { type: "subitems", items: [] },
+            },
+            {
+              scriptUrl: "https://example.com/one.js",
+              sourceMapUrl: "https://example.com/one.js.map",
+              subItems: {
+                type: "subitems",
+                items: [{ error: "Warning: missing 1 item in `.sourcesContent`" }],
+              },
+            },
+          ]),
+        ]}
+      />,
+    );
+    expect(container.textContent).not.toContain("ok.js");
+    expect(container.textContent).toContain("1 missing");
+  });
 });

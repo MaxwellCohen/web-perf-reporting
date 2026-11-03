@@ -4,6 +4,7 @@ import { LCPBreakdownChart } from "@/features/page-speed-insights/network-metric
 import { buildLcpBreakdownTableFromDetailRows } from "@/features/page-speed-insights/network-metrics/lcpBreakdownSelectors";
 import { horizontalBarChartHeight } from "@/features/page-speed-insights/shared/horizontalBarChart";
 import { itemLabel, itemNumeric } from "./auditItemValues";
+import type { TableItem } from "@/lib/schema";
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import {
   ChartContainer,
@@ -92,7 +93,16 @@ export function AuditInpPhaseViz({ rows }: { rows: DetailTableItem[] }) {
 
   for (const row of rows) {
     const report = row._userLabel || "Report";
-    const items = row.auditResult?.details?.items || [];
+    const details = row.auditResult?.details as { type?: string; items?: TableItem[] } | undefined;
+    // Lighthouse emits a list [subparts table, node]; read the embedded table's items.
+    const items =
+      details?.type === "list"
+        ? ((
+            (details.items || []).find((entry) => entry?.type === "table") as
+              | { items?: TableItem[] }
+              | undefined
+          )?.items ?? [])
+        : details?.items || [];
     for (const item of items) {
       const subpart =
         typeof item.subpart === "string"
@@ -135,9 +145,15 @@ export function AuditInpPhaseViz({ rows }: { rows: DetailTableItem[] }) {
   const allSubparts = phases.map(([subpart]) => subpart);
   const labels = Object.fromEntries(phases.map(([subpart, entry]) => [subpart, entry.label]));
   const config = buildKeyedChartConfig(
-    allSubparts.map((subpart) => ({ key: subpart, label: labels[subpart] ?? subpart })),
+    allSubparts.map((subpart) => ({
+      key: subpart,
+      label: labels[subpart] ?? subpart,
+    })),
   );
-  const chartHeight = horizontalBarChartHeight(chartData.length, { legend: true, rowPx: 48 });
+  const chartHeight = horizontalBarChartHeight(chartData.length, {
+    legend: true,
+    rowPx: 48,
+  });
   const yAxisWidth = yAxisWidthForLabels(
     chartData.map((row) => String(row.report)),
     { min: 72, max: 140 },

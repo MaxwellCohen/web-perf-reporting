@@ -96,6 +96,16 @@ export type CombinedRequest = {
   chain?: CriticalChainNode;
 };
 
+/** An audit's estimated payoff, as Lighthouse simulated it. */
+export type LighthouseSaving = {
+  id: string;
+  title: string;
+  bytes?: number;
+  /** Simulated FCP / LCP improvement from fixing it, ms. */
+  fcpMs?: number;
+  lcpMs?: number;
+};
+
 export type CombinedLongTask = {
   url?: string;
   startTime: number;
@@ -111,6 +121,8 @@ export type CombinedLongTask = {
 export type CombinedLoad = {
   label: string;
   simulationLabel?: string;
+  /** Simulated link speed, used to sanity-check interpolated request durations. */
+  simulatedThroughputKbps?: number;
   fcp?: number;
   lcp?: number;
   /** Observed FCP on the lab clock (mapped when simulated throttling applies). */
@@ -150,6 +162,7 @@ export type CombinedLoad = {
   lcpElement?: NodeValue;
   lcpSegments: LcpSegment[];
   lcpDiscoveryFailures: LcpDiscoveryCheck[];
+  savings?: LighthouseSaving[];
   layoutShifts: LayoutShiftEvent[];
   preconnectedText?: string;
   preconnectCandidates: PreconnectCandidate[];

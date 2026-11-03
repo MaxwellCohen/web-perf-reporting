@@ -18,6 +18,8 @@ import {
   LONG_TASK_THRESHOLD_MS,
   summarizeLongTaskScripts,
   summarizeMainThreadTasks,
+  blockingWindowFromMetricsAudit,
+  LONG_TASKS_SHOWN,
   taskItemsFromAudit,
   type MainThreadTaskSummary,
   type ScriptBlockingRow,
@@ -40,7 +42,10 @@ function TaskSummaryStats({ summary }: { summary: MainThreadTaskSummary }) {
       <Stat label="Total time" value={formatMs(summary.totalTimeMs)} />
       <Stat label="Longest" value={formatMs(summary.longestDurationMs)} />
       <Stat label="Long tasks" value={String(summary.longTaskCount)} />
-      <Stat label="Blocking time" value={formatMs(summary.blockingTimeMs)} />
+      <Stat
+        label={summary.blockingScope === "fcp-tti" ? "Blocking time (FCP–TTI)" : "Blocking time"}
+        value={formatMs(summary.blockingTimeMs)}
+      />
     </dl>
   );
 }
@@ -139,10 +144,15 @@ export function MainThreadTasksCause({
   sources?: MetricAuditSource[];
 }) {
   const reports = entries.map(({ audit, label }) => {
-    const longTasksAudit = sources.find((source) => source.label === label)?.audits["long-tasks"];
+    const source = sources.find((candidate) => candidate.label === label);
+    const longTasksAudit = source?.audits["long-tasks"];
     return {
       label,
-      summary: summarizeMainThreadTasks(taskItemsFromAudit(audit)),
+      summary: summarizeMainThreadTasks(
+        taskItemsFromAudit(audit),
+        LONG_TASKS_SHOWN,
+        blockingWindowFromMetricsAudit(source?.audits.metrics),
+      ),
       scripts: summarizeLongTaskScripts(longTaskItemsFromAudit(longTasksAudit)),
     };
   });

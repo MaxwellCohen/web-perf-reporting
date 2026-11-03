@@ -40,7 +40,6 @@ type ClusterSummary = {
 function formatCls(value: number): string {
   if (!Number.isFinite(value)) return "—";
   if (value === 0) return "0";
-  if (value < 0.001) return value.toFixed(6).replace(/0+$/, "").replace(/\.$/, "");
   return value.toFixed(3);
 }
 
@@ -175,14 +174,15 @@ function extractClsCulpritData(rows: DetailTableItem[]): {
     items.forEach((item, itemIndex) => {
       const score = itemNumeric(item, ["score"]) ?? getNumber(item.score) ?? 0;
 
+      // Each cluster is its own table with a Total row; the reported CLS is the worst cluster.
       if (isTotalRow(item)) {
-        totalScore = score;
+        totalScore = totalScore == null ? score : Math.max(totalScore, score);
         return;
       }
 
       const meta = nodeMeta(item);
       if (meta.label === "Total") {
-        totalScore = score;
+        totalScore = totalScore == null ? score : Math.max(totalScore, score);
         return;
       }
 
@@ -295,12 +295,24 @@ function CulpritExtraView({ extra }: { extra: CulpritExtra }) {
 }
 
 function kpiMetricsFor(summary: ClusterSummary) {
-  const metrics: Array<{ label: string; value: number; format: "cls" | "count" }> = [];
+  const metrics: Array<{
+    label: string;
+    value: number;
+    format: "cls" | "count";
+  }> = [];
   if (summary.totalScore != null) {
-    metrics.push({ label: "Cluster CLS", value: summary.totalScore, format: "cls" });
+    metrics.push({
+      label: "Cluster CLS",
+      value: summary.totalScore,
+      format: "cls",
+    });
   }
   metrics.push({ label: "Shifts", value: summary.shiftCount, format: "count" });
-  metrics.push({ label: "Root causes", value: summary.causeCount, format: "count" });
+  metrics.push({
+    label: "Root causes",
+    value: summary.causeCount,
+    format: "count",
+  });
   return metrics;
 }
 

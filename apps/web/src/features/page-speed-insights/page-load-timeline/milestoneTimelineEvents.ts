@@ -10,6 +10,7 @@ import type {
 import type { PhaseBound } from "./timelinePhases";
 import { requestWaterfallBar } from "./networkTimelineEvents";
 import { atIntervalEnd, timedEvent } from "./timelineEventFactory";
+import { criticalPathEvents, transferWeightEvent } from "./criticalPathTimelineEvents";
 import { preconnectEvent } from "./markerTimelineEvents";
 
 function ttfbStepDetail(
@@ -250,9 +251,22 @@ export function milestoneEvents(load: CombinedLoad, bounds: PhaseBound[]): Timel
     "subresources",
   );
 
-  mark(load.interactive, "after-tti", "TTI (lab)", "Time to Interactive", "afterLoad");
+  mark(
+    load.interactive,
+    "after-tti",
+    load.simulationLabel ? "TTI (simulated)" : "TTI (lab)",
+    load.simulationLabel
+      ? "Lighthouse's simulated Time to Interactive, a conservative estimate not derived from this trace, at"
+      : "Time to Interactive",
+    "afterLoad",
+  );
 
   mark(load.traceEnd, "after-trace-end", "Trace end", "Performance trace ends at", "afterLoad");
+
+  events.push(...criticalPathEvents(load, bounds));
+
+  const weight = transferWeightEvent(load, bounds);
+  if (weight) events.push(weight);
 
   const preconnect = preconnectEvent(load.preconnectedText, load.preconnectCandidates, bounds);
   if (preconnect) events.push(preconnect);

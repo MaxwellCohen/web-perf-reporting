@@ -41,7 +41,7 @@ describe("MetricValueViz", () => {
     expect(text).toContain("1.2 s");
     expect(text).toContain("1.80 s");
     expect(text).toContain("3.00 s");
-    expect(text).toContain("600 ms - Good");
+    expect(text).toContain("1.20 s - Good");
   });
 
   it("draws LCP phases on a separate subparts track", () => {
@@ -107,7 +107,7 @@ describe("MetricValueViz", () => {
     expect(text).toContain("Time to first byte");
     expect(text).toContain("Element render delay");
     expect(text).toContain("1.80 s");
-    expect(text).toContain("1.30 s - Average");
+    expect(text).toContain("3.80 s - Average");
     expect(container.querySelector('[data-testid="lcp-phase-track"]')).toBeTruthy();
   });
 
@@ -153,7 +153,7 @@ describe("MetricValueViz", () => {
     expect(text).toContain("Estimated savings");
     expect(text).toContain("JavaScript execution time");
     expect(text).toContain("350 ms");
-    expect(text).toContain("280 ms - Average");
+    expect(text).toContain("480 ms - Average");
   });
 
   it("rates CLS against 0.10 and 0.25", () => {
@@ -180,7 +180,7 @@ describe("MetricValueViz", () => {
     expect(text).toContain("Bad");
     expect(text).toContain("0.10");
     expect(text).toContain("0.25");
-    expect(text).toContain("0.17 - Bad");
+    expect(text).toContain("0.42 - Bad");
   });
 
   it("stacks devices in summary and places them side-by-side in detail", () => {

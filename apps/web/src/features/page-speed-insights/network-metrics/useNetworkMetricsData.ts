@@ -13,23 +13,23 @@ export type NetworkMetricSeries = {
   label: string;
   /** Present when times were warped onto Lighthouse simulated throttling. */
   simulationLabel?: string;
-  ttfb: number;
-  fcp: number;
-  lcp: number;
-  speedIndex: number;
-  totalBlockingTime: number;
-  domContentLoaded: number;
-  loadTime: number;
-  interactive: number;
-  observedNavigationStart: number;
-  observedFirstPaint: number;
-  observedFirstContentfulPaint: number;
-  observedLargestContentfulPaint: number;
-  observedFirstContentfulPaintAllFrames: number;
-  observedFirstVisualChange: number;
-  observedLargestContentfulPaintAllFrames: number;
-  observedLastVisualChange: number;
-  observedTraceEnd: number;
+  ttfb?: number;
+  fcp?: number;
+  lcp?: number;
+  speedIndex?: number;
+  totalBlockingTime?: number;
+  domContentLoaded?: number;
+  loadTime?: number;
+  interactive?: number;
+  observedNavigationStart?: number;
+  observedFirstPaint?: number;
+  observedFirstContentfulPaint?: number;
+  observedLargestContentfulPaint?: number;
+  observedFirstContentfulPaintAllFrames?: number;
+  observedFirstVisualChange?: number;
+  observedLargestContentfulPaintAllFrames?: number;
+  observedLastVisualChange?: number;
+  observedTraceEnd?: number;
   networkRequests: TableItem[];
   networkRTT: TableItem[];
   serverLatency: TableItem[];
@@ -44,12 +44,12 @@ export type NetworkRequestStatsRow = {
   topResources: TableItem[];
 };
 
-/** `getNumber` can be undefined; metrics rows use 0 when Lighthouse omits a value. */
-function metricNumber(value: unknown): number {
-  return getNumber(value) ?? 0;
+/** Omitted Lighthouse metrics stay undefined so charts skip them instead of plotting 0. */
+function metricNumber(value: unknown): number | undefined {
+  return getNumber(value);
 }
 
-function orMetric(adjusted: number | undefined, fallback: number): number {
+function orMetric(adjusted: number | undefined, fallback: number | undefined): number | undefined {
   return adjusted != null && Number.isFinite(adjusted) ? adjusted : fallback;
 }
 

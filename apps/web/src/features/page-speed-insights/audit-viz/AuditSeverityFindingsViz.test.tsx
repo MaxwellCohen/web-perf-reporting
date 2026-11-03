@@ -40,4 +40,26 @@ describe("AuditSeverityFindingsViz", () => {
     const { container } = render(<AuditSeverityFindingsViz rows={[row([])]} />);
     expect(container.firstChild).toBeNull();
   });
+
+  it("flattens CSP syntax findings from subItems", () => {
+    const { container } = render(
+      <AuditSeverityFindingsViz
+        rows={[
+          row([
+            {
+              severity: "Syntax",
+              description: { type: "code", value: "script-src 'self'" },
+              subItems: {
+                type: "subitems",
+                items: [{ description: "Unknown directive", directive: "foo-src" }],
+              },
+            },
+          ]),
+        ]}
+      />,
+    );
+    expect(container.textContent).toContain("Unknown directive");
+    expect(container.textContent).toContain("foo-src");
+    expect(container.textContent).toContain("Syntax");
+  });
 });

@@ -42,6 +42,8 @@ import {
 import { longTasks } from "./longTaskSources";
 import { buildLcpSegments, lcpDiscoveryFailures, lcpElementNode, lcpSubparts } from "./lcpSources";
 import { layoutShifts, userTimings } from "./userExperienceSources";
+import { lighthouseSavings } from "./savingsSources";
+import { pinFrameChangeTimes } from "./pinFrameTimes";
 import { observedTraceTtfb, traceTimeToFirstByte } from "./ttfbSources";
 
 export type {
@@ -176,6 +178,8 @@ export function collectTimelineSources(source: InsightsContextItem): CombinedLoa
         simulatedFcp: getNumber(metrics.firstContentfulPaint),
         observedLcp: getNumber(metrics.observedLargestContentfulPaint),
         simulatedLcp: getNumber(metrics.largestContentfulPaint),
+        observedSpeedIndex: getNumber(metrics.observedSpeedIndex),
+        simulatedSpeedIndex: getNumber(metrics.speedIndex),
         documentServerLatencyMs: serverThink,
       })
     : null;
@@ -197,10 +201,14 @@ export function collectTimelineSources(source: InsightsContextItem): CombinedLoa
   const observedFcpAllFrames = mapMs(getNumber(metrics.observedFirstContentfulPaintAllFrames));
   const observedLcpAllFrames = mapMs(getNumber(metrics.observedLargestContentfulPaintAllFrames));
   const firstPaint = mapMs(getNumber(metrics.observedFirstPaint));
-  const firstVisual = mapMs(getNumber(metrics.observedFirstVisualChange));
+  const mapVisualMs = (value: number | undefined): number | undefined => {
+    if (value == null) return undefined;
+    return clock ? clock.mapVisualTime(value) : value;
+  };
+  const firstVisual = mapVisualMs(getNumber(metrics.observedFirstVisualChange));
   const dcl = mapMs(getNumber(metrics.observedDomContentLoaded));
   const load = mapMs(getNumber(metrics.observedLoad));
-  const lastVisual = mapMs(getNumber(metrics.observedLastVisualChange));
+  const lastVisual = mapVisualMs(getNumber(metrics.observedLastVisualChange));
   const interactive = getNumber(metrics.interactive);
   const traceEnd = mapMs(getNumber(metrics.observedTraceEnd));
 
@@ -209,9 +217,11 @@ export function collectTimelineSources(source: InsightsContextItem): CombinedLoa
   const tracedTtfb = clock ? undefined : traceTimeToFirstByte(metrics, documentRaw, serverThink);
   const ttfb = clock ? (simulatedTtfb ?? mapMs(observedTtfb)) : tracedTtfb?.timeMs;
   const ttfbObserved = !clock && tracedTtfb?.observed === true;
-  const screenshots = clock
-    ? clock.adjustScreenshots(filmstripFrames(audits))
-    : filmstripFrames(audits);
+  const pinnedFrames = pinFrameChangeTimes(filmstripFrames(audits), {
+    first: getNumber(metrics.observedFirstVisualChange),
+    last: getNumber(metrics.observedLastVisualChange),
+  });
+  const screenshots = clock ? clock.adjustScreenshots(pinnedFrames) : pinnedFrames;
   const tasks = longTasks(audits, clock);
   const timings = userTimings(audits).map((timing) => {
     const startTime = mapMs(timing.startTime) ?? timing.startTime;
@@ -286,6 +296,7 @@ export function collectTimelineSources(source: InsightsContextItem): CombinedLoa
   return {
     label: source.label,
     simulationLabel: clock?.throttling.label,
+    simulatedThroughputKbps: clock?.throttling.throughputKbps,
     fcp,
     lcp,
     observedFcp,
@@ -323,6 +334,7 @@ export function collectTimelineSources(source: InsightsContextItem): CombinedLoa
     lcpElement: element,
     lcpSegments: lcpSegs,
     lcpDiscoveryFailures: discoveryFailures,
+    savings: lighthouseSavings(audits),
     layoutShifts: shifts,
     preconnectedText: depTree.preconnectedText,
     preconnectCandidates: depTree.preconnectCandidates,

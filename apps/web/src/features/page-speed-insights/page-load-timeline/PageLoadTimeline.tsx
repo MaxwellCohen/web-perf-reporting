@@ -16,6 +16,7 @@ import {
   type TaskFilterId,
 } from "./filterTimelineMoments";
 import { momentIdPrefixFromLabel } from "./MomentRow";
+import { ModelCheck } from "./ModelCheck";
 import { TaskFilters } from "./TaskFilters";
 import { TimelineLegend } from "./TimelineLegend";
 import { TimelinePane, TimelinePaneLabel, timelineDisplayName } from "./TimelinePane";
@@ -160,6 +161,7 @@ export function PageLoadTimeline() {
             simulationLabel={
               panes.find((entry) => entry.timeline.simulationLabel)?.timeline.simulationLabel
             }
+            timesNote={panes.find((entry) => entry.timeline.timesNote)?.timeline.timesNote}
           />
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {panes.map((entry) => {
@@ -168,6 +170,9 @@ export function PageLoadTimeline() {
                 <TimelinePane key={entry.label} name={name}>
                   <TimelinePaneLabel>{name}</TimelinePaneLabel>
                   <VerticalTimeline key={name} axisEndMs={entry.timeline.axisEndMs}>
+                    {entry.timeline.modelCheck?.length ? (
+                      <ModelCheck metrics={entry.timeline.modelCheck} />
+                    ) : null}
                     <CollapsibleUnifiedWaterfall
                       load={entry.bundle.load}
                       events={entry.timeline.events}
@@ -200,7 +205,13 @@ export function PageLoadTimeline() {
             key={timelineDisplayName(panes[0].timeline)}
             axisEndMs={panes[0].timeline.axisEndMs}
           >
-            <TimelineLegend simulationLabel={panes[0].timeline.simulationLabel} />
+            {panes[0].timeline.modelCheck?.length ? (
+              <ModelCheck metrics={panes[0].timeline.modelCheck} />
+            ) : null}
+            <TimelineLegend
+              simulationLabel={panes[0].timeline.simulationLabel}
+              timesNote={panes[0].timeline.timesNote}
+            />
             <CollapsibleUnifiedWaterfall
               load={panes[0].bundle.load}
               events={panes[0].timeline.events}

@@ -1,3 +1,4 @@
+import { reconcileLcpAudits } from "@/features/page-speed-insights/shared/reconcileLcpSubparts";
 import type { PageSpeedInsightsSnapshot } from "@/features/page-speed-insights/PageSpeedContext";
 import { sortReportLabels } from "@/features/page-speed-insights/shared/reportLabels";
 import { getNumber } from "@/lib/utils";
@@ -96,9 +97,16 @@ function computeLcpBreakdownComputed(
 ): LCPBreakdownComputed | null {
   const breakdownData = metrics
     .map(({ item, label }) => {
-      const lcpBreakdownAudit = item?.lighthouseResult?.audits?.["lcp-breakdown-insight"];
+      const lcpBreakdownAudit = reconcileLcpAudits(item?.lighthouseResult?.audits)?.[
+        "lcp-breakdown-insight"
+      ];
       const details = lcpBreakdownAudit?.details as
-        | { items?: Array<{ type?: string; items?: Array<Record<string, unknown>> }> }
+        | {
+            items?: Array<{
+              type?: string;
+              items?: Array<Record<string, unknown>>;
+            }>;
+          }
         | undefined;
 
       // Find the table item in details

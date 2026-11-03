@@ -18,6 +18,7 @@ import {
   FullWidthRow,
   SectionGrid,
 } from "@/features/page-speed-insights/shared/MetricsSectionLayout";
+import { FieldVsLabExplainer } from "@/features/page-speed-insights/FieldVsLabExplainer";
 import { FcpScreenshotCard } from "@/features/page-speed-insights/FcpScreenshotCard";
 import { LcpElementSummary } from "@/features/page-speed-insights/LcpElementSummary";
 import {
@@ -127,8 +128,8 @@ function MetricAuditRow({
   index: number;
   showSwatch: boolean;
 }) {
-  const score = audit.score ?? 0;
-  const isNumeric = audit.scoreDisplayMode === "numeric" && audit.score !== null;
+  const score = audit.score;
+  const isNumeric = audit.scoreDisplayMode === "numeric" && score != null;
   const swatch = CHART_SERIES_COLORS[index % CHART_SERIES_COLORS.length];
 
   return (
@@ -159,7 +160,7 @@ function MetricAuditRow({
       ) : (
         <ScoreDisplay audit={audit} device={label} />
       )}
-      <HorizontalScoreChart score={score} />
+      {score != null ? <HorizontalScoreChart score={score} /> : null}
     </div>
   );
 }
@@ -236,6 +237,7 @@ function CwvMetricsSummary({ sources }: { sources: MetricAuditSource[] }) {
       <AccordionSectionTitleTrigger>Core Web Vitals Summary</AccordionSectionTitleTrigger>
       {/* Cards subgrid these rows, so row gaps live on the cards (`mb-2`) to keep empty rows flat. */}
       <AccordionContent className="-mx-2 grid max-w-full grid-cols-1 gap-x-2 gap-y-0 min-[22rem]:grid-cols-[repeat(auto-fit,minmax(14rem,1fr))]">
+        <FieldVsLabExplainer />
         {metrics.map((metric) => (
           <MetricSummaryCard
             key={metric.auditId}
