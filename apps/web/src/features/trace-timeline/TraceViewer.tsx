@@ -6,7 +6,8 @@ import { analyzeLoad } from "./analyzeLoad";
 import { loadTrace } from "./loadTrace";
 import { TraceTimeline } from "./TraceTimeline";
 import { TraceLoadTimeline } from "./TraceLoadTimeline";
-import { KeyEventsPanel } from "./KeyEventsPanel";
+import { KeyEventsPanel, FixPrompt } from "./KeyEventsPanel";
+import { buildFixPrompt } from "./fixPrompt";
 
 function fullSummary(t: ParsedTrace) {
   const { ttfb, fcp, lcp, cls, blockingMs } = analyzeLoad(t);
@@ -104,6 +105,7 @@ export function TraceViewer() {
   }, [load]);
 
   const summaryJson = useMemo(() => (trace ? JSON.stringify(fullSummary(trace)) : ""), [trace]);
+  const fixPrompt = useMemo(() => (trace ? buildFixPrompt(analyzeLoad(trace)) : ""), [trace]);
 
   return (
     <main className="mx-auto max-w-screen-2xl p-4">
@@ -112,7 +114,7 @@ export function TraceViewer() {
         Drop a Chrome DevTools performance profile (.json or .json.gz). Parsed locally in your browser.
         Scroll to zoom, drag to pan, click a lane label to collapse it.
       </p>
-      <AgentPrompt />
+      {!trace && <AgentPrompt />}
       <label
         className="mb-4 flex cursor-pointer items-center justify-center rounded border border-dashed p-6 text-sm"
         onDragOver={(e) => e.preventDefault()}
@@ -128,6 +130,7 @@ export function TraceViewer() {
           <KeyEventsPanel trace={trace} />
           <TraceLoadTimeline trace={trace} />
           <TraceTimeline trace={trace} />
+          <FixPrompt text={fixPrompt} />
         </>
       )}
     </main>

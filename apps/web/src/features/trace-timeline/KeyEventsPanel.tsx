@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { buildFixPrompt } from "./fixPrompt";
 import { analyzeLoad, fnLabel, shortUrl, type KeyEvent, type Tone } from "./analyzeLoad";
 import type { ParsedTrace } from "./parseTrace";
 
@@ -45,7 +44,7 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: Ton
   );
 }
 
-function FixPrompt({ text }: { text: string }) {
+export function FixPrompt({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <div>
@@ -65,7 +64,6 @@ function FixPrompt({ text }: { text: string }) {
 
 export function KeyEventsPanel({ trace }: { trace: ParsedTrace }) {
   const a = useMemo(() => analyzeLoad(trace), [trace]);
-  const fixPrompt = useMemo(() => buildFixPrompt(a), [a]);
   const total = a.phases.at(-1)?.end ?? 1;
   const rating = (v: number | undefined, g: number, b: number): Tone | undefined =>
     v == null ? undefined : v <= g ? "good" : v <= b ? "warn" : "bad";
@@ -165,7 +163,6 @@ export function KeyEventsPanel({ trace }: { trace: ParsedTrace }) {
           )}
         </div>
       </div>
-      <FixPrompt text={fixPrompt} />
     </section>
   );
 }
