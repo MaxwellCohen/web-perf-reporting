@@ -81,14 +81,10 @@ function ratingColor(rating: Rating): string {
 
 function headroomCopy(
   value: number,
-  good: number,
-  poor: number,
+  rating: Rating,
   unit: "ms" | "cls",
 ): string {
-  const format = (n: number) => formatUnit(n, unit);
-  if (value <= good) return `${format(good - value)} - Good`;
-  if (value <= poor) return `${format(value - good)} - Average`;
-  return `${format(value - poor)} - Bad`;
+  return `${formatUnit(value, unit)} - ${rating}`;
 }
 
 function scaleMax(value: number, poor: number): number {
@@ -352,7 +348,7 @@ function MetricScale({
           subgrid && "pt-1.5",
         )}
       >
-        {headroomCopy(value, band.good, band.poor, band.unit)}
+        {headroomCopy(value, rating, band.unit)}
       </p>
       {hasSavingsNote ? (
         <p
