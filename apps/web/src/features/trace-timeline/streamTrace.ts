@@ -76,12 +76,35 @@ export class TraceEventScanner {
   }
 }
 
+/** Hard cap on decoded trace bytes, so a gzip bomb cannot exhaust memory. */
+export const MAX_DECODED_TRACE_BYTES = 1024 * 1024 * 1024;
+
+/** Peek the first chunk: gzip is detected by magic bytes, not by file name or URL. */
+async function sniffGzip(body: ReadableStream<Uint8Array>) {
+  const reader = body.getReader();
+  const first = await reader.read();
+  const isGzip = !first.done && first.value.length > 1 && first.value[0] === 0x1f && first.value[1] === 0x8b;
+  const stream = new ReadableStream<Uint8Array>({
+    start(c) {
+      if (!first.done) c.enqueue(first.value);
+    },
+    async pull(c) {
+      const next = await reader.read();
+      if (next.done) c.close();
+      else c.enqueue(next.value);
+    },
+    cancel: (reason) => reader.cancel(reason),
+  });
+  return { isGzip, stream };
+}
+
 export async function parseTraceStream(
-  body: ReadableStream<Uint8Array>,
-  gzip: boolean,
+  rawBody: ReadableStream<Uint8Array>,
+  _gzipHint: boolean,
   total: number,
   onProgress?: (fraction: number) => void,
 ): Promise<ParsedTrace> {
+  const { isGzip: gzip, stream: body } = await sniffGzip(rawBody);
   let read = 0;
   const counted = body.pipeThrough(
     new TransformStream<Uint8Array, Uint8Array>({
@@ -97,9 +120,15 @@ export async function parseTraceStream(
   const builder = new TraceBuilder();
   const scanner = new TraceEventScanner((e) => builder.add(e));
   let lastReport = 0;
+  let decoded = 0;
   for (;;) {
     const { done, value } = await reader.read();
     if (done) break;
+    decoded += value.byteLength;
+    if (decoded > MAX_DECODED_TRACE_BYTES) {
+      await reader.cancel();
+      throw new Error("Trace is too large (over 1 GB once decompressed).");
+    }
     scanner.feed(decoder.decode(value, { stream: true }));
     const now = performance.now();
     if (total && onProgress && now - lastReport > 100) {

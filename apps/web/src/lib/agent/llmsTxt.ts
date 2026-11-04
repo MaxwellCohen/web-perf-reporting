@@ -11,6 +11,8 @@ export function buildLlmsTxt(siteUrl: string): string {
 
    npx -y @maxwellcohen/web-perf-report https://example.com
 
+   If npx cannot find the package, use the manual flow in step 2.
+
    Options: \`--device mobile|desktop|both\`, \`--format md|json\`, \`--file report.json\` (analyze an existing Lighthouse/PSI JSON). Lighthouse runs locally, so localhost and dev/preview servers work. Audit a production build (e.g. \`next build && next start\`), not a dev server.
 
    MCP: to give your agent \`audit_site\` and \`analyze_report\` tools, add this stdio server config: \`{"command":"npx","args":["-y","@maxwellcohen/web-perf-report","mcp"]}\`
@@ -48,7 +50,7 @@ export function buildLlmsTxt(siteUrl: string): string {
 
 - Work on a new branch; don't push or deploy.
 - Only POST pages you may share.
-- Run each audit 3 times and compare medians. Revert changes that fail tests or don't help.
+- Run each audit 3 times (re-run the command) and compare medians. Revert changes that fail tests or don't help.
 - End with a before/after table.
 
 ## API

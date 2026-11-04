@@ -38,8 +38,11 @@ type GistFile = {
 
 function checkGitHubStatus(response: Response) {
   if (response.status === 404) throw new LighthouseViewerGistError("Gist not found");
-  if (response.status === 403 || response.status === 429) {
-    throw new LighthouseViewerGistError(RATE_LIMITED);
+  if (response.status === 429) throw new LighthouseViewerGistError(RATE_LIMITED);
+  if (response.status === 403) {
+    const limited =
+      response.headers.get("x-ratelimit-remaining") === "0" || response.headers.has("retry-after");
+    throw new LighthouseViewerGistError(limited ? RATE_LIMITED : "GitHub denied access to this gist");
   }
   if (!response.ok) throw new LighthouseViewerGistError(`GitHub returned ${response.status}`);
 }
@@ -79,10 +82,32 @@ export async function fetchLighthouseViewerGist(
     checkGitHubStatus(rawResponse);
     const length = Number(rawResponse.headers.get("content-length"));
     if (length > MAX_GIST_FILE_BYTES) throw new LighthouseViewerGistError(FILE_TOO_LARGE);
-    const text = await rawResponse.text();
-    if (text.length > MAX_GIST_FILE_BYTES) throw new LighthouseViewerGistError(FILE_TOO_LARGE);
-    return text;
+    return readTextWithCap(rawResponse, MAX_GIST_FILE_BYTES);
   }
   if (typeof file.content !== "string") throw new LighthouseViewerGistError("Gist file is empty");
   return file.content;
+}
+
+/** Read a response body as text, aborting as soon as it exceeds `maxBytes` (bytes, not characters). */
+async function readTextWithCap(response: Response, maxBytes: number): Promise<string> {
+  if (!response.body) {
+    const text = await response.text();
+    if (new TextEncoder().encode(text).length > maxBytes) throw new LighthouseViewerGistError(FILE_TOO_LARGE);
+    return text;
+  }
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let bytes = 0;
+  let text = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    bytes += value.byteLength;
+    if (bytes > maxBytes) {
+      await reader.cancel();
+      throw new LighthouseViewerGistError(FILE_TOO_LARGE);
+    }
+    text += decoder.decode(value, { stream: true });
+  }
+  return text + decoder.decode();
 }

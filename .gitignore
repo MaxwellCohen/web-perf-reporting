@@ -19,3 +19,9 @@ coverage/
 next-env.d.ts
 worker-configuration.d.ts
 .wimb/
+
+# CLI build output (built at publish time)
+packages/cli/dist/
+
+# Local-only large trace fixtures
+apps/web/public/*-trace.json

@@ -34,7 +34,10 @@ export function traceToCombinedLoad(trace: ParsedTrace, label = "Trace"): Combin
     load: t("loadEventEnd"),
     traceEnd: trace.duration,
     ttfbObserved: false,
-    document: requests[0],
+    document:
+      requests.find((r) => r.url === trace.navigation?.url) ??
+      requests.find((r) => r.resourceType === "Document") ??
+      requests[0],
     requests,
     redirectHops: [],
     redirectAuditUrls: [],
