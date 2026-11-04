@@ -1,0 +1,63 @@
+name: ci
+on:
+  pull_request:
+    paths:
+      - "apps/**"
+      - "packages/**"
+      - "!**/*.md"
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - .github/workflows/ci.yml
+  push:
+    branches: [main]
+    paths:
+      - "apps/**"
+      - "packages/**"
+      - "!**/*.md"
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - .github/workflows/ci.yml
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions: { contents: read, pull-requests: read }
+    outputs:
+      web: ${{ steps.f.outputs.web }}
+      api: ${{ steps.f.outputs.api }}
+      cli: ${{ steps.f.outputs.cli }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: f
+        with:
+          filters: |
+            shared: &shared ["package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", ".github/workflows/ci.yml"]
+            web: [*shared, "apps/web/**"]
+            api: [*shared, "apps/api/**"]
+            cli: [*shared, "packages/cli/**"]
+  test:
+    needs: changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - if: needs.changes.outputs.web == 'true'
+        run: pnpm typecheck
+      - if: needs.changes.outputs.cli == 'true'
+        run: pnpm build:cli
+      - if: needs.changes.outputs.web == 'true'
+        run: pnpm --filter web test
+      - if: needs.changes.outputs.api == 'true'
+        run: pnpm --filter api test
+      - if: needs.changes.outputs.cli == 'true'
+        run: pnpm --filter @maxwellcohen/web-perf-report test && pnpm --filter @maxwellcohen/web-perf-report lint:pkg
