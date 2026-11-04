@@ -100,7 +100,7 @@ const main = defineCommand({
 	meta: {
 		name: "web-perf-report",
 		version: "0.1.0",
-		description: "Run Lighthouse on a URL and print a ranked performance report"
+		description: "Run Lighthouse on a URL and print a ranked performance report. Run `web-perf-report mcp` to start the MCP server (stdio)."
 	},
 	args: {
 		url: {
@@ -127,9 +127,7 @@ const main = defineCommand({
 			description: "API base URL (env WEB_PERF_REPORT_API)"
 		}
 	},
-	subCommands: { mcp },
-	async run({ args, rawArgs }) {
-		if (rawArgs[0] === "mcp") return;
+	async run({ args }) {
 		const fail = (msg) => {
 			console.error(`Error: ${msg}`);
 			process.exit(1);
@@ -157,5 +155,5 @@ const main = defineCommand({
 		}
 	}
 });
-runMain(main);
+runMain(process.argv[2] === "mcp" ? mcp : main);
 export { runAudit as n, postReport as t };
