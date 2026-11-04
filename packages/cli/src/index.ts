@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { readFile } from "node:fs/promises";
 import { defineCommand, runMain } from "citty";
+import { firstPositional } from "./argv.js";
 import { runAudit, type Device, type Format } from "./core.js";
 
 const mcp = defineCommand({
@@ -50,4 +51,4 @@ const main = defineCommand({
 });
 
 // citty rejects a positional URL when subCommands exist, so route `mcp` by hand.
-void runMain(process.argv[2] === "mcp" ? mcp : main);
+void runMain(firstPositional(process.argv.slice(2)) === "mcp" ? mcp : main);

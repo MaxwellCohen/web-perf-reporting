@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { TraceBuilder, parseTrace, type TraceEvent } from "./parseTrace";
-import { TraceEventScanner } from "./streamTrace";
+import { TraceEventScanner, parseTraceStream } from "./streamTrace";
 
 const events = [
   { name: "thread_name", ph: "M", pid: 1, tid: 2, ts: 0, args: { name: "CrRendererMain" } },
@@ -30,5 +30,26 @@ describe("TraceEventScanner", () => {
   }
   it("rejects non-traces", () => {
     expect(() => scan('{"a":1}', 3)).toThrow();
+  });
+});
+
+describe("parseTraceStream gzip sniffing", () => {
+  const text = JSON.stringify({ traceEvents: events });
+  const toStream = (bytes: Uint8Array) =>
+    new ReadableStream<Uint8Array>({
+      start(c) {
+        c.enqueue(bytes);
+        c.close();
+      },
+    });
+  it("detects gzip by magic bytes even without a .gz hint", async () => {
+    const gz = toStream(new TextEncoder().encode(text)).pipeThrough(new CompressionStream("gzip") as unknown as TransformStream<Uint8Array, Uint8Array>);
+    const bytes = new Uint8Array(await new Response(gz).arrayBuffer());
+    const parsed = await parseTraceStream(toStream(bytes), false, 0);
+    expect(parsed).toEqual(parseTrace({ traceEvents: events }));
+  });
+  it("parses plain text even when the hint says gzip", async () => {
+    const parsed = await parseTraceStream(toStream(new TextEncoder().encode(text)), true, 0);
+    expect(parsed).toEqual(parseTrace({ traceEvents: events }));
   });
 });
