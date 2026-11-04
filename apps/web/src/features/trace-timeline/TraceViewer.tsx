@@ -7,6 +7,10 @@ import { loadTrace } from "./loadTrace";
 import { TraceTimeline } from "./TraceTimeline";
 import { TraceLoadTimeline } from "./TraceLoadTimeline";
 import { KeyEventsPanel, FixPrompt } from "./KeyEventsPanel";
+import { UploadCloud } from "lucide-react";
+import { cn } from "@/lib/cn";
+import { buttonVariants } from "@/components/ui/button";
+import { CopyButton } from "@/components/ui/copy-button";
 import { buildFixPrompt } from "./fixPrompt";
 
 function fullSummary(t: ParsedTrace) {
@@ -15,7 +19,6 @@ function fullSummary(t: ParsedTrace) {
 }
 
 function AgentPrompt() {
-  const [copied, setCopied] = useState(false);
   const [origin, setOrigin] = useState("");
   useEffect(() => setOrigin(window.location.origin), []);
   const prompt = `Analyze a Chrome performance trace with the timeline viewer at ${origin}/trace.
@@ -38,22 +41,9 @@ Report
 - Which navigation the summary covers, if the trace holds several
 - A screenshot of the full timeline`;
   return (
-    <div className="mb-4">
-      <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
-        <span>Agent prompt</span>
-        <button
-          className="rounded border px-2 py-0.5"
-          onClick={() => {
-            void navigator.clipboard.writeText(prompt).then(() => {
-              setCopied(true);
-              setTimeout(() => setCopied(false), 1500);
-            });
-          }}
-        >
-          {copied ? "Copied" : "Copy"}
-        </button>
-      </div>
-      <textarea readOnly rows={14} value={prompt} className="w-full rounded border bg-transparent p-2 font-mono text-xs" />
+    <div className="mx-auto flex max-w-3xl items-start gap-2 rounded-lg border bg-muted/50 p-3 text-left">
+      <pre className="max-h-[350px] flex-1 overflow-y-auto whitespace-pre-wrap font-mono text-sm">{prompt}</pre>
+      <CopyButton text={prompt} aria-label="Copy agent prompt" />
     </div>
   );
 }
@@ -62,6 +52,7 @@ export function TraceViewer() {
   const [trace, setTrace] = useState<ParsedTrace | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const [progress, setProgress] = useState(0);
 
   const traceRef = useRef<ParsedTrace | null>(null);
@@ -108,19 +99,30 @@ export function TraceViewer() {
   const fixPrompt = useMemo(() => (trace ? buildFixPrompt(analyzeLoad(trace)) : ""), [trace]);
 
   return (
-    <main className="mx-auto max-w-screen-2xl p-4">
-      <h1 className="mb-1 text-xl font-semibold">Trace timeline</h1>
-      <p className="mb-4 text-sm text-muted-foreground">
-        Drop a Chrome DevTools performance profile (.json or .json.gz). Parsed locally in your browser.
-        Scroll to zoom, drag to pan, click a lane label to collapse it.
-      </p>
-      {!trace && <AgentPrompt />}
+    <main className="container mx-auto px-4 py-12">
+      <section className="mb-8 text-center">
+        <h1 className="mb-4 text-4xl font-extrabold tracking-tight md:text-5xl">Trace timeline</h1>
+        <p className="mx-auto mb-8 max-w-2xl text-xl text-muted-foreground">
+          Drop a Chrome DevTools performance profile (.json or .json.gz). Parsed locally in your
+          browser. Scroll to zoom, drag to pan, click a lane label to collapse it.
+        </p>
+        {!trace && <AgentPrompt />}
+      </section>
       <label
-        className="mb-4 flex cursor-pointer items-center justify-center rounded border border-dashed p-6 text-sm"
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => { e.preventDefault(); void load(e.dataTransfer.files[0]); }}
+        className={cn(
+          "mx-auto mb-4 flex max-w-3xl cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed bg-muted/30 p-10 text-center transition-colors hover:border-primary hover:bg-muted/50",
+          dragging && "border-primary bg-muted/50",
+        )}
+        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(e) => { e.preventDefault(); setDragging(false); void load(e.dataTransfer.files[0]); }}
       >
-        {busy ? `Parsing… ${Math.round(progress * 100)}%` : "Choose or drop a trace file"}
+        <UploadCloud className="size-8 text-muted-foreground" aria-hidden />
+        <span className="text-lg font-semibold">
+          {busy ? `Parsing… ${Math.round(progress * 100)}%` : "Drop a trace file here"}
+        </span>
+        <span className="text-sm text-muted-foreground">.json or .json.gz from Chrome DevTools · stays in your browser</span>
+        {!busy && <span className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-2")}>Choose file</span>}
         <input type="file" accept=".json,.gz" className="hidden" onChange={(e) => void load(e.target.files?.[0])} />
       </label>
       {error && <p role="alert" className="mb-4 text-sm text-red-600">{error}</p>}
