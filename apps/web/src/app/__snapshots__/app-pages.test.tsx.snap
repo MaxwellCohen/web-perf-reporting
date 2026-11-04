@@ -128,7 +128,7 @@ exports[`app page coverage smoke tests > renders the home page cards and destina
       Or explore the data yourself
     </h2>
     <div
-      class="grid md:grid-cols-2 lg:grid-cols-4 gap-4"
+      class="grid md:grid-cols-2 lg:grid-cols-5 gap-4"
     >
       <a
         class="inline-flex justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-auto flex-col items-start gap-1 whitespace-normal p-4 text-left no-underline"
@@ -192,6 +192,22 @@ exports[`app page coverage smoke tests > renders the home page cards and destina
           class="text-sm font-normal text-muted-foreground"
         >
           Inspect reports from your experiments
+        </span>
+      </a>
+      <a
+        class="inline-flex justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-auto flex-col items-start gap-1 whitespace-normal p-4 text-left no-underline"
+        href="/trace"
+      >
+        <span
+          class="font-semibold"
+        >
+          Trace timeline
+           →
+        </span>
+        <span
+          class="text-sm font-normal text-muted-foreground"
+        >
+          Analyze a Chrome performance trace
         </span>
       </a>
     </div>
