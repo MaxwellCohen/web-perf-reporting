@@ -98,33 +98,54 @@ export function TraceViewer() {
   const summaryJson = useMemo(() => (trace ? JSON.stringify(fullSummary(trace)) : ""), [trace]);
   const fixPrompt = useMemo(() => (trace ? buildFixPrompt(analyzeLoad(trace)) : ""), [trace]);
 
+  const fileInput = (
+    <input type="file" accept=".json,.gz" className="hidden" onChange={(e) => void load(e.target.files?.[0])} />
+  );
+  const parsing = busy ? `Parsing… ${Math.round(progress * 100)}%` : null;
+
   return (
-    <main className="container mx-auto px-4 py-12">
-      <section className="mb-8 text-center">
-        <h1 className="mb-4 text-4xl font-extrabold tracking-tight md:text-5xl">Trace timeline</h1>
-        <p className="mx-auto mb-8 max-w-2xl text-xl text-muted-foreground">
-          Drop a Chrome DevTools performance profile (.json or .json.gz). Parsed locally in your
-          browser. Scroll to zoom, drag to pan, click a lane label to collapse it.
-        </p>
-        {!trace && <AgentPrompt />}
-      </section>
-      <label
-        className={cn(
-          "mx-auto mb-4 flex max-w-3xl cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed bg-muted/30 p-10 text-center transition-colors hover:border-primary hover:bg-muted/50",
-          dragging && "border-primary bg-muted/50",
-        )}
-        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={(e) => { e.preventDefault(); setDragging(false); void load(e.dataTransfer.files[0]); }}
-      >
-        <UploadCloud className="size-8 text-muted-foreground" aria-hidden />
-        <span className="text-lg font-semibold">
-          {busy ? `Parsing… ${Math.round(progress * 100)}%` : "Drop a trace file here"}
-        </span>
-        <span className="text-sm text-muted-foreground">.json or .json.gz from Chrome DevTools · stays in your browser</span>
-        {!busy && <span className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-2")}>Choose file</span>}
-        <input type="file" accept=".json,.gz" className="hidden" onChange={(e) => void load(e.target.files?.[0])} />
-      </label>
+    <main
+      className={cn("container mx-auto px-4", trace ? "py-6" : "py-12")}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => { e.preventDefault(); setDragging(false); void load(e.dataTransfer.files[0]); }}
+    >
+      {trace ? (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed px-4 py-3">
+          <h1 className="text-2xl font-bold tracking-tight">Trace timeline</h1>
+          <label className={cn(buttonVariants({ variant: "outline", size: "sm" }), "cursor-pointer")}>
+            <UploadCloud className="size-4" aria-hidden />
+            {parsing ?? "Load another trace"}
+            {fileInput}
+          </label>
+        </div>
+      ) : (
+        <>
+          <section className="mb-8 text-center">
+            <h1 className="mb-4 text-4xl font-extrabold tracking-tight md:text-5xl">Trace timeline</h1>
+            <p className="mx-auto mb-8 max-w-2xl text-xl text-muted-foreground">
+              Drop a Chrome DevTools performance profile (.json or .json.gz). Parsed locally in your
+              browser. Scroll to zoom, drag to pan, click a lane label to collapse it.
+            </p>
+            <AgentPrompt />
+          </section>
+          <label
+            className={cn(
+              "mx-auto mb-4 flex max-w-3xl cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed bg-muted/30 p-10 text-center transition-colors hover:border-primary hover:bg-muted/50",
+              dragging && "border-primary bg-muted/50",
+            )}
+            onDragEnter={() => setDragging(true)}
+            onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragging(false); }}
+          >
+            <UploadCloud className="size-8 text-muted-foreground" aria-hidden />
+            <span className="text-lg font-semibold">
+              {parsing ?? "Drop a trace file here"}
+            </span>
+            <span className="text-sm text-muted-foreground">.json or .json.gz from Chrome DevTools · stays in your browser</span>
+            {!busy && <span className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-2")}>Choose file</span>}
+            {fileInput}
+          </label>
+        </>
+      )}
       {error && <p role="alert" className="mb-4 text-sm text-red-600">{error}</p>}
       {trace && (
         <>
