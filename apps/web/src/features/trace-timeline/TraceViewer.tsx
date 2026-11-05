@@ -28,23 +28,13 @@ function AgentPrompt() {
   useEffect(() => setOrigin(window.location.origin), []);
   const prompt = `Analyze a Chrome performance trace with the timeline viewer at ${origin}/trace.
 
-Load
-1. Get the trace to a URL the browser can fetch: same-origin (e.g. copy it into apps/web/public/ and serve it) or CORS-enabled. .json and .json.gz both work; local file paths do not.
-2. Open ${origin}/trace?src=<encoded-trace-url>. (On an already-open /trace page: await window.__trace.load(url).)
-3. Poll window.__trace.summary() with preview_evaluate until it is non-null (max 30s; the same JSON is in #trace-summary). If still null, read the on-page error, report it, and stop. Never guess numbers.
+1. Serve the trace at a URL the browser can fetch: same-origin (e.g. copy it into apps/web/public/) or CORS-enabled. .json and .json.gz work; local file paths do not.
+2. Open ${origin}/trace?src=<encoded-trace-url>, or run await window.__trace.load(url) if /trace is already open.
+3. Wait for window.__trace.summary() to be non-null (max 30s). If it stays null, report the on-page error and stop. Never guess numbers.
 
-Read (times are ms since navigation start)
-- summary.metrics: ttfb, fcp, lcp, cls, blockingMs (undefined = not in the trace; report "n/a")
-- longTasks[] (>=50ms: startMs, durMs): give the count and total
-- lcpCandidates[]: the last one is the LCP element (node, size)
-- topSlices[] (name, startMs, durMs) and mainThreadMsByCategory
-- layoutShifts[], markers[], navigation.url (the page analysed); hasCpuProfile says whether function-level attribution exists
-
-Report
-- A table: TTFB / FCP / LCP / CLS / long-task count + total, with the page URL
-- The 3 biggest problems, each tied to evidence (a long task, slice or the LCP node) and a likely cause
-- Which navigation the summary covers, if the trace holds several
-- A screenshot of the full timeline`;
+Then report, from the summary (times are ms since navigation start; undefined = "n/a"):
+- A table: page URL, TTFB, FCP, LCP, CLS, long-task count and total
+- The 3 biggest problems, each tied to evidence (a long task, slice or the LCP element) and a likely cause`;
   return (
     <div className="mx-auto flex max-w-3xl items-start gap-2 rounded-lg border bg-muted/50 p-3 text-left">
       <pre className="max-h-[350px] flex-1 overflow-y-auto whitespace-pre-wrap font-mono text-sm">{prompt}</pre>
