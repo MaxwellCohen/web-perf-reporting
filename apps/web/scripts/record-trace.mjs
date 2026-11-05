@@ -35,6 +35,7 @@ try {
       "loading",
       "blink.user_timing",
       "latencyInfo",
+      "disabled-by-default-v8.cpu_profiler",
     ],
   });
   await page.goto(url, { waitUntil: "load", timeout: 60000 });
