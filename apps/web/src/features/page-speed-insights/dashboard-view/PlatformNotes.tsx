@@ -1,5 +1,3 @@
-"use client";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { collectPlatformNotes } from "@/features/page-speed-insights/dashboard-view/collectPlatformNotes";
 import type {

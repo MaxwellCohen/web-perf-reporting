@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { parseTrace, summarizeTrace, type ParsedTrace } from "./parseTrace";
 import { analyzeLoad } from "./analyzeLoad";
 import { loadTrace } from "./loadTrace";
@@ -23,9 +23,23 @@ function fullSummary(t: ParsedTrace) {
   return { ...summarizeTrace(t), metrics: { ttfb, fcp, lcp, cls, blockingMs } };
 }
 
+declare global {
+  interface Window {
+    __trace?: { load: (input: string | object) => Promise<unknown>; summary: () => unknown };
+  }
+}
+
+const subscribeNever = () => () => {};
+const getOrigin = () => window.location.origin;
+const getServerOrigin = () => "";
+
+/** Escape characters that could close the <script> tag or break JS parsers. */
+function safeJsonForScript(json: string): string {
+  return json.replace(/</g, "\\u003c").replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
+}
+
 function AgentPrompt() {
-  const [origin, setOrigin] = useState("");
-  useEffect(() => setOrigin(window.location.origin), []);
+  const origin = useSyncExternalStore(subscribeNever, getOrigin, getServerOrigin);
   const prompt = `Analyze a Chrome performance trace with the timeline viewer at ${origin}/trace.
 
 1. Serve the trace at a URL the browser can fetch: same-origin (e.g. copy it into apps/web/public/) or CORS-enabled. .json and .json.gz work; local file paths do not.
@@ -56,7 +70,14 @@ export function TraceViewer() {
 
   useEffect(() => {
     const hash = window.location.hash;
-    if (hasShareHash(hash)) void decodeSnapshot(hash).then(setShared);
+    if (!hasShareHash(hash)) return;
+    let cancelled = false;
+    void decodeSnapshot(hash).then((snapshot) => {
+      if (!cancelled) setShared(snapshot);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const loadCompare = useCallback(async (file?: File) => {
@@ -103,17 +124,25 @@ export function TraceViewer() {
       load: (input: string | object) => load(input),
       summary: () => (traceRef.current ? fullSummary(traceRef.current) : null),
     };
-    (window as unknown as { __trace: typeof api }).__trace = api;
-    const src = new URLSearchParams(window.location.search).get("src");
-    if (src) void load(src).catch(() => {});
+    window.__trace = api;
     return () => {
-      delete (window as unknown as { __trace?: unknown }).__trace;
+      delete window.__trace;
     };
   }, [load]);
 
+  // Auto-load ?src=… on mount; `load` reports failures through the error state.
+  // Scheduled (and cancelled on cleanup) so StrictMode's re-run doesn't fetch twice.
+  useEffect(() => {
+    const src = new URLSearchParams(window.location.search).get("src");
+    if (!src) return;
+    const timer = setTimeout(() => void load(src).catch(() => {}), 0);
+    return () => clearTimeout(timer);
+  }, [load]);
+
   const summaryJson = useMemo(() => (trace ? JSON.stringify(fullSummary(trace)) : ""), [trace]);
-  const snapshot = useMemo(() => (trace ? buildSnapshot(trace, analyzeLoad(trace)) : null), [trace]);
-  const fixPrompt = useMemo(() => (trace ? buildFixPrompt(analyzeLoad(trace)) : ""), [trace]);
+  const analysis = useMemo(() => (trace ? analyzeLoad(trace) : null), [trace]);
+  const snapshot = useMemo(() => (trace && analysis ? buildSnapshot(trace, analysis) : null), [trace, analysis]);
+  const fixPrompt = useMemo(() => (analysis ? buildFixPrompt(analysis) : ""), [analysis]);
 
   const fileInput = (
     <input type="file" accept=".json,.gz" className="hidden" onChange={(e) => void load(e.target.files?.[0])} />
@@ -179,7 +208,7 @@ export function TraceViewer() {
       {error && <p role="alert" className="mb-4 text-sm text-red-600">{error}</p>}
       {trace && (
         <>
-          <script type="application/json" id="trace-summary" dangerouslySetInnerHTML={{ __html: summaryJson }} />
+          <script type="application/json" id="trace-summary" dangerouslySetInnerHTML={{ __html: safeJsonForScript(summaryJson) }} />
           <KeyEventsPanel trace={trace} />
           {snapshot && <FindingsPanel snapshot={snapshot} />}
           {snapshot && compare && <ComparePanel before={snapshot} after={compare} onClose={() => setCompare(null)} />}

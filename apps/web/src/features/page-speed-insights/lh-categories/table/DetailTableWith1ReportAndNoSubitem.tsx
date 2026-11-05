@@ -1,4 +1,3 @@
-"use client";
 import { DataTableNoGrouping } from "@/features/page-speed-insights/lh-categories/table/DataTableNoGrouping";
 import { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import { flattenDetailItems } from "@/features/page-speed-insights/lh-categories/table/detailTableData";

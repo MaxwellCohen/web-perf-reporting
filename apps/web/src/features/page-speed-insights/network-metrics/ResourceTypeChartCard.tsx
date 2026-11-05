@@ -1,5 +1,3 @@
-"use client";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatBytes } from "@/features/page-speed-insights/shared/format";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";

@@ -1,4 +1,3 @@
-"use client";
 import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import {
   useStandardTable,

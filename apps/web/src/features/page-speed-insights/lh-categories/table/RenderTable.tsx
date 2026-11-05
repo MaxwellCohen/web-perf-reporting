@@ -1,4 +1,3 @@
-"use client";
 import type { ReactElement } from "react";
 import { AuditTableViz } from "@/features/page-speed-insights/audit-viz/AuditTableViz";
 import { shouldShowSeparateTablesPerReport } from "@/features/page-speed-insights/auditTableConfig";

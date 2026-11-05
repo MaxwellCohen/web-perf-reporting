@@ -2,7 +2,9 @@ import { fnLabel, shortUrl, type LoadAnalysis } from "./analyzeLoad";
 
 /** Trace-derived text is untrusted: flatten to one short line and strip fence/markup characters. */
 export const clean = (v: string | undefined, max = 200) =>
-  (v ?? "").replace(/[\u0000-\u001f\u007f`<>]/g, " ").replace(/\s+/g, " ").trim().slice(0, max);
+  Array.from(v ?? "", (c) => (c.charCodeAt(0) < 32 || c === "\u007f" || "`<>".includes(c) ? " " : c))
+    .join("")
+    .replace(/\s+/g, " ").trim().slice(0, max);
 
 const ms = (v?: number) => (v == null ? "n/a" : `${Math.round(v)} ms`);
 

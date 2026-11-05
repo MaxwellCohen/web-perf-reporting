@@ -1,5 +1,3 @@
-"use client";
-
 import { TableItem } from "@/lib/schema";
 import {
   JavascriptBytesTableCard,

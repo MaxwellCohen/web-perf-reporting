@@ -1,4 +1,3 @@
-"use client";
 import {
   BytesCountSummaryCard,
   type BytesCountSummaryRow,

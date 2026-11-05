@@ -1,5 +1,3 @@
-"use client";
-
 import ReactMarkdown from "react-markdown";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { EmbeddedDetails } from "@/features/page-speed-insights/lh-categories/EmbeddedDetails";

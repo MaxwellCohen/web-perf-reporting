@@ -20,6 +20,6 @@ describe("parseTrace", () => {
     expect(t.longTasks).toHaveLength(1);
   });
   it("rejects non-traces", () => {
-    expect(() => parseTrace({})).toThrow();
+    expect(() => parseTrace({})).toThrow(/missing traceEvents/);
   });
 });

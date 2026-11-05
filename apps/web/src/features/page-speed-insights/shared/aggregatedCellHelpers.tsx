@@ -158,8 +158,7 @@ export function createNumericAggregatedCell(
   columnId: string,
   renderValue: (value: number) => React.ReactNode = (value) => <RenderMSValue value={value} />,
 ) {
-  // eslint-disable-next-line react/display-name
-  return <TData extends RowData>(info: AggregatedCellInfo<TData>): React.ReactNode => {
+  return function aggregatedCell1<TData extends RowData>(info: AggregatedCellInfo<TData>): React.ReactNode {
     const row = info.row;
     const valueLabelPairs = extractValueLabelPairs<number, TData>(row, columnId);
 
@@ -217,8 +216,7 @@ export function createStringAggregatedCell(
   transformValue?: (value: string) => string,
   showAllDevicesLabel: boolean = true,
 ) {
-  // eslint-disable-next-line react/display-name
-  return <TData extends RowData>(info: AggregatedCellInfo<TData>): React.ReactNode => {
+  return function aggregatedCell2<TData extends RowData>(info: AggregatedCellInfo<TData>): React.ReactNode {
     const uniques = getAggregatedValueLabelContext<string, TData>(info, columnId);
     if (!uniques) return "N/A";
 
@@ -253,8 +251,7 @@ export function createStringAggregatedCell(
  * Creates an aggregated cell renderer for percentage values
  */
 export function createPercentageAggregatedCell(columnId: string, precision: number = 2) {
-  // eslint-disable-next-line react/display-name
-  return <TData extends RowData>(info: AggregatedCellInfo<TData>): React.ReactNode => {
+  return function aggregatedCell3<TData extends RowData>(info: AggregatedCellInfo<TData>): React.ReactNode {
     const uniques = getAggregatedValueLabelContext<number, TData>(info, columnId);
     if (!uniques) return "N/A";
 
@@ -283,8 +280,7 @@ export function createPercentageAggregatedCell(columnId: string, precision: numb
  * Creates an aggregated cell renderer for report labels
  */
 export function createReportLabelAggregatedCell(labelColumnId: string = "label") {
-  // eslint-disable-next-line react/display-name
-  return <TData extends RowData>(info: AggregatedCellInfo<TData>): React.ReactNode => {
+  return function aggregatedCell4<TData extends RowData>(info: AggregatedCellInfo<TData>): React.ReactNode {
     const row = info.row;
     const leafRows = row.getLeafRows();
     const values: string[] = leafRows

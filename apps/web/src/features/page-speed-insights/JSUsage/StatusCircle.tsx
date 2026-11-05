@@ -1,5 +1,3 @@
-"use client";
-
 import { TreeMapNode } from "@/lib/schema";
 
 export function StatusCircle({ node }: { node: TreeMapNode }) {

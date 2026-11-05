@@ -11,7 +11,13 @@ import { RenderDebugData } from "@/features/page-speed-insights/lh-categories/Re
 import { RenderCriticalChainData } from "@/features/page-speed-insights/lh-categories/table/RenderCriticalChain";
 import { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataItem";
 import { JSUsageAccordion } from "@/features/page-speed-insights/JSUsage/JSUsageSection";
+import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import { RenderNetworkDependencyTree } from "@/features/page-speed-insights/lh-categories/table/RenderNetworkDependencyTree";
+
+function isDetailTableItem(item: TableDataItem): item is TableDataItem & DetailTableItem {
+  const type = item?.auditResult?.details?.type;
+  return type === "table" || type === "opportunity";
+}
 
 export function RenderDetails({ items }: { items: TableDataItem[] }) {
   const details = items.map((a) => a?.auditResult.details);
@@ -43,8 +49,7 @@ export function RenderDetails({ items }: { items: TableDataItem[] }) {
       return <RenderChecklist items={items} />;
     case "table":
     case "opportunity":
-      // @ts-expect-error need better type narrowing
-      return <DetailTable rows={items} title={title} />;
+      return <DetailTable rows={items.filter(isDetailTableItem)} title={title} />;
     case "criticalrequestchain":
       return (
         <div>

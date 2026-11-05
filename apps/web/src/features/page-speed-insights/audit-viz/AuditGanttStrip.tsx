@@ -1,5 +1,3 @@
-"use client";
-
 import { formatMs, shortUrl } from "@/features/page-speed-insights/shared/format";
 import { itemLabel, itemNumeric } from "./auditItemValues";
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";

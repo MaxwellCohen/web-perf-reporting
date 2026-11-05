@@ -1,5 +1,3 @@
-"use client";
-
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
 import { cn } from "@/lib/utils";

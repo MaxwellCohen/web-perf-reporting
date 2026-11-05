@@ -1,5 +1,3 @@
-"use client";
-
 import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 import { MainThreadWorkBreakdownTable } from "@/features/page-speed-insights/javascript-metrics/MainThreadWorkBreakdownTable";
 import {

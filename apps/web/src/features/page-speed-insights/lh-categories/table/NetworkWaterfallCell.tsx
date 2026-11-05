@@ -1,5 +1,3 @@
-"use client";
-
 import { getNetworkBarColor } from "@/features/page-speed-insights/shared/networkResourceColors";
 
 type NetworkWaterfallCellProps = {

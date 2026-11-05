@@ -1,5 +1,3 @@
-"use client";
-
 import { formatMs } from "@/features/page-speed-insights/shared/format";
 import { cn } from "@/lib/cn";
 import { Moment } from "./Moment";

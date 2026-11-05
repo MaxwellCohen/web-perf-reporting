@@ -1,5 +1,3 @@
-"use client";
-
 import { ResourceUrlCell } from "@/features/page-speed-insights/shared/ResourceUrlCell";
 import {
   Table,

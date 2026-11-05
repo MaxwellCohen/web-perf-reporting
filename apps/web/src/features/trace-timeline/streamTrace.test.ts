@@ -29,7 +29,7 @@ describe("TraceEventScanner", () => {
     });
   }
   it("rejects non-traces", () => {
-    expect(() => scan('{"a":1}', 3)).toThrow();
+    expect(() => scan('{"a":1}', 3)).toThrow(/missing traceEvents/);
   });
 });
 

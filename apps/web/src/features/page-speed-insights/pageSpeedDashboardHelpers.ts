@@ -1,3 +1,4 @@
+import { wrapLighthouseResult } from "@/lib/page-speed-insights/wrapLighthouseResult";
 import type {
   FullPageScreenshot,
   NullablePageSpeedInsights,
@@ -19,7 +20,7 @@ function normalizePageSpeedItem(item: NullablePageSpeedInsights): PageSpeedInsig
   }
 
   if ((item as PageSpeedInsights["lighthouseResult"])?.lighthouseVersion) {
-    return { lighthouseResult: item } as unknown as PageSpeedInsights;
+    return wrapLighthouseResult(item);
   }
 
   return null;
