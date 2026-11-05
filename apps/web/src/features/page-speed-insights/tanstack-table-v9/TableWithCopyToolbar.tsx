@@ -1,5 +1,3 @@
-"use client";
-
 import type { ReactNode, RefObject } from "react";
 import { CopyHtmlTableButton } from "@/features/page-speed-insights/tanstack-table-v9/CopyHtmlTableButton";
 import { WithCopyToolbar } from "@/features/page-speed-insights/tanstack-table-v9/WithCopyToolbar";

@@ -1,4 +1,4 @@
-class PsiShareExtractError extends Error {
+export class PsiShareExtractError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "PsiShareExtractError";

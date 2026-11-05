@@ -1,4 +1,3 @@
-"use client";
 import type { StockColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import { RenderTableValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";

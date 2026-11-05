@@ -33,7 +33,12 @@ export function TraceTimeline({ trace }: { trace: ParsedTrace }) {
   const [selected, setSelected] = useState<{ slice: Slice; track: string } | null>(null);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
-  useEffect(() => setView({ start: 0, end: trace.duration }), [trace]);
+  // Reset the view when a new trace arrives (adjust state during render, no effect).
+  const [viewTrace, setViewTrace] = useState(trace);
+  if (viewTrace !== trace) {
+    setViewTrace(trace);
+    setView({ start: 0, end: trace.duration });
+  }
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
@@ -45,14 +50,19 @@ export function TraceTimeline({ trace }: { trace: ParsedTrace }) {
 
   // Layout: y offsets for each track.
   const layout = useMemo(() => {
-    let y = RULER_H + SHOT_H + OVERVIEW_H + 8;
-    const rows = trace.tracks.map((t) => {
-      const h = collapsed[t.id] ? ROW_H : (t.maxDepth + 1) * ROW_H;
-      const r = { track: t, y, h };
-      y += h + 6;
-      return r;
-    });
-    return { rows, height: y };
+    const top = RULER_H + SHOT_H + OVERVIEW_H + 8;
+    const rows = trace.tracks.reduce<{ track: (typeof trace.tracks)[number]; y: number; h: number }[]>(
+      (acc, t) => {
+        const prev = acc[acc.length - 1];
+        const y = prev ? prev.y + prev.h + 6 : top;
+        const h = collapsed[t.id] ? ROW_H : (t.maxDepth + 1) * ROW_H;
+        acc.push({ track: t, y, h });
+        return acc;
+      },
+      [],
+    );
+    const last = rows[rows.length - 1];
+    return { rows, height: last ? last.y + last.h + 6 : top };
   }, [trace, collapsed]);
 
   const chartW = Math.max(100, width - LABEL_W);
@@ -74,12 +84,15 @@ export function TraceTimeline({ trace }: { trace: ParsedTrace }) {
     }
     return m;
   }, [trace]);
-  const firstVisible = (trackId: string, t: number) => {
-    const a = prefixEnds.get(trackId)!;
-    let lo = 0, hi = a.length;
-    while (lo < hi) { const m = (lo + hi) >> 1; if (a[m] < t) lo = m + 1; else hi = m; }
-    return lo;
-  };
+  const firstVisible = useCallback(
+    (trackId: string, t: number) => {
+      const a = prefixEnds.get(trackId)!;
+      let lo = 0, hi = a.length;
+      while (lo < hi) { const m = (lo + hi) >> 1; if (a[m] < t) lo = m + 1; else hi = m; }
+      return lo;
+    },
+    [prefixEnds],
+  );
 
   // Overview histogram (main thread busy fraction per bucket).
   const overview = useMemo(() => {
@@ -99,6 +112,7 @@ export function TraceTimeline({ trace }: { trace: ParsedTrace }) {
     return out;
   }, [trace]);
 
+  const drawRef = useRef<() => void>(() => {});
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -145,7 +159,7 @@ export function TraceTimeline({ trace }: { trace: ParsedTrace }) {
       let img = imgCache.current.get(idx);
       if (!img) {
         img = new Image();
-        img.onload = () => draw();
+        img.onload = () => drawRef.current();
         img.src = `data:image/jpeg;base64,${s.data}`;
         imgCache.current.set(idx, img);
       }
@@ -219,9 +233,12 @@ export function TraceTimeline({ trace }: { trace: ParsedTrace }) {
       ctx.fillStyle = "#fff"; ctx.fillText(label, x + 3, RULER_H + SHOT_H - 7);
     });
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-  }, [width, layout, view, trace, chartW, xOf, overview, selected, collapsed]);
+  }, [width, layout, view, trace, chartW, xOf, overview, selected, collapsed, firstVisible]);
 
-  useEffect(() => { draw(); }, [draw]);
+  useEffect(() => {
+    drawRef.current = draw;
+    draw();
+  }, [draw]);
 
   const hitTest = (x: number, y: number) => {
     for (const { track, y: ty, h } of layout.rows) {
@@ -266,6 +283,7 @@ export function TraceTimeline({ trace }: { trace: ParsedTrace }) {
     return () => c.removeEventListener("wheel", onWheel);
   });
 
+  const [grabbing, setGrabbing] = useState(false);
   const drag = useRef<{ x: number; start: number; end: number; mode: "pan" | "overview" } | null>(null);
   const onDown = (e: React.PointerEvent) => {
     const rect = canvasRef.current!.getBoundingClientRect();
@@ -277,10 +295,12 @@ export function TraceTimeline({ trace }: { trace: ParsedTrace }) {
       const start = Math.max(0, Math.min(trace.duration - span, t - span / 2));
       setView({ start, end: start + span });
       drag.current = { x: e.clientX, start, end: start + span, mode: "overview" };
+      setGrabbing(true);
     } else {
       const row = layout.rows.find((r) => y >= r.y && y <= r.y + ROW_H && x < LABEL_W);
       if (row) { setCollapsed((c) => ({ ...c, [row.track.id]: !c[row.track.id] })); return; }
       drag.current = { x: e.clientX, start: view.start, end: view.end, mode: "pan" };
+      setGrabbing(true);
     }
     (e.target as Element).setPointerCapture(e.pointerId);
   };
@@ -302,6 +322,7 @@ export function TraceTimeline({ trace }: { trace: ParsedTrace }) {
   };
   const onUp = () => {
     drag.current = null;
+    setGrabbing(false);
   };
   const onClick = (e: React.MouseEvent) => {
     const rect = canvasRef.current!.getBoundingClientRect();
@@ -329,7 +350,7 @@ export function TraceTimeline({ trace }: { trace: ParsedTrace }) {
       </div>
       <canvas
         ref={canvasRef}
-        style={{ width: "100%", cursor: drag.current ? "grabbing" : "grab", touchAction: "none" }}
+        style={{ width: "100%", cursor: grabbing ? "grabbing" : "grab", touchAction: "none" }}
         onPointerDown={onDown}
         onPointerMove={onMove}
         onPointerUp={onUp}

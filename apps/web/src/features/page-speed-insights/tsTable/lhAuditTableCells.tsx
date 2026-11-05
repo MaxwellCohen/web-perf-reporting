@@ -1,4 +1,3 @@
-"use client";
 import type { StockCellContext } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import ReactMarkdown from "react-markdown";
 import { HorizontalScoreChart } from "@/components/common/PageSpeedGaugeChart";

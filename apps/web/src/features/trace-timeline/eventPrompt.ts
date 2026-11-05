@@ -59,17 +59,6 @@ function flatten(nodes: Node[], out: Node[] = []): Node[] {
   return out;
 }
 
-/** Layout/style self time that ran nested inside script (a forced synchronous layout signal). */
-function nestedLayoutMs(nodes: Node[], inScript = false): number {
-  let total = 0;
-  for (const n of nodes) {
-    const cat = categorize(n.s.name);
-    if (inScript && cat === "layout") total += Math.max(0, n.self);
-    total += nestedLayoutMs(n.kids, inScript || cat === "script");
-  }
-  return total;
-}
-
 function heaviestPath(roots: Node[]): string[] {
   const lines: string[] = [];
   let level = roots;

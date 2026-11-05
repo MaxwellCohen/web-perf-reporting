@@ -1,6 +1,9 @@
 import { analyzeLoad } from "@/features/trace-timeline/analyzeLoad";
 import { buildFixPrompt } from "@/features/trace-timeline/fixPrompt";
+import { readJsonLimited } from "@/lib/agent/readJsonLimited";
 import { parseTrace, summarizeTrace } from "@/features/trace-timeline/parseTrace";
+
+const MAX_BODY_BYTES = 4 * 1024 * 1024;
 
 const USAGE =
   "POST a Chrome performance trace (.json from DevTools, Lighthouse --save-assets, or scripts/record-trace.mjs) to this URL. Body must be under 4 MB; analyze larger traces in the /trace UI. See /llms.txt.";
@@ -27,8 +30,12 @@ export function GET(request: Request) {
 
 export async function POST(request: Request) {
   const md = wantsMarkdown(request);
-  const body = await request.json().catch(() => undefined);
-  if (body === undefined) return fail(md, 400, `Body is not valid JSON. ${USAGE}`);
+  const read = await readJsonLimited(request, MAX_BODY_BYTES);
+  if (!read.ok) {
+    const message = read.reason === "too-large" ? "Body exceeds 4 MB." : "Body is not valid JSON.";
+    return fail(md, read.status, `${message} ${USAGE}`);
+  }
+  const body = read.body;
 
   let analysis;
   let summary;

@@ -1,5 +1,3 @@
-"use client";
-
 import type { ReactNode } from "react";
 import { MomentRow } from "./MomentRow";
 import type { PageLoadTimeline } from "./types";

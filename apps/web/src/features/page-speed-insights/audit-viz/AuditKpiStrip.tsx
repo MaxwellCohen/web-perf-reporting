@@ -1,5 +1,3 @@
-"use client";
-
 import { formatBytes, formatMs } from "@/features/page-speed-insights/shared/format";
 import { cn } from "@/lib/utils";
 

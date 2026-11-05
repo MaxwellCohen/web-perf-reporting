@@ -1,5 +1,3 @@
-"use client";
-
 import { GaugeChart } from "@/components/common/PageSpeedGaugeChart";
 import type { CruxHistoryItem, UserPageLoadMetricV5 } from "@/lib/schema";
 

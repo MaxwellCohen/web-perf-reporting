@@ -2,7 +2,7 @@
 // Record a Chrome performance trace of a URL and (optionally) send it to the analyzer API.
 // Usage: node scripts/record-trace.mjs <url> [--out trace.json] [--cpu 4] [--api https://host] [--format md|json]
 import { chromium } from "@playwright/test";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 
 const args = process.argv.slice(2);
 const flag = (name, fallback) => {

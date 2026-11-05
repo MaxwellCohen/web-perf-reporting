@@ -1,9 +1,13 @@
+import { wrapLighthouseResult } from "@/lib/page-speed-insights/wrapLighthouseResult";
+import { readJsonLimited } from "@/lib/agent/readJsonLimited";
 import { buildAgentReport, renderAgentReportMarkdown } from "@/lib/agent/agentReport";
 import type { PageSpeedDashboardItem } from "@/lib/page-speed-insights/types";
 import type { PageSpeedInsights } from "@/lib/schema";
 
 const USAGE =
   "POST a Lighthouse JSON report (lighthouse CLI --output=json) or a PageSpeed Insights API response, or an array of them, to this URL. See /llms.txt.";
+
+const MAX_BODY_BYTES = 10 * 1024 * 1024;
 
 type Format = "json" | "markdown";
 
@@ -23,7 +27,7 @@ function toPsi(entry: unknown): PageSpeedInsights | null {
   if (!isRecord(entry)) return null;
   if (isRecord(entry.lighthouseResult)) return entry as PageSpeedInsights;
   if (isRecord(entry.audits) && isRecord(entry.categories)) {
-    return { lighthouseResult: entry } as unknown as PageSpeedInsights;
+    return wrapLighthouseResult(entry);
   }
   if (isRecord(entry.item)) return toPsi(entry.item);
   return null;
@@ -60,8 +64,12 @@ export function handleAgentReportUsage(request: Request): Response {
 
 export async function handleAgentReportRequest(request: Request): Promise<Response> {
   const format = pickFormat(request);
-  const body = await request.json().catch(() => undefined);
-  if (body === undefined) return error(format, 400, `Body is not valid JSON. ${USAGE}`);
+  const read = await readJsonLimited(request, MAX_BODY_BYTES);
+  if (!read.ok) {
+    const message = read.reason === "too-large" ? "Body exceeds 10 MB." : "Body is not valid JSON.";
+    return error(format, read.status, `${message} ${USAGE}`);
+  }
+  const body = read.body;
 
   const items = toDashboardItems(body);
   if (items.length === 0) return error(format, 400, `No Lighthouse result found in body. ${USAGE}`);

@@ -68,7 +68,7 @@ export function JSUsageTableWithControls({
         <TableHeader className="" suppressHydrationWarning>
           {table.getHeaderGroups().map((headerGroup, i) => (
             <JSUsageTableHeader
-              key={`${headerGroup.id}_${i}_${depth}`}
+              key={headerGroup.id}
               headerGroup={headerGroup}
               depth={depth}
               i={i}
@@ -77,8 +77,8 @@ export function JSUsageTableWithControls({
         </TableHeader>
         <TableBody className="flex flex-col border-0" suppressHydrationWarning>
           {rows?.length ? (
-            rows.map((row, i) => (
-              <JSUsageTableRow key={`${row.id}_${i}_${depth}`} row={row} i={i} />
+            rows.map((row) => (
+              <JSUsageTableRow key={row.id} row={row} />
             ))
           ) : (
             <NoResultsRow />

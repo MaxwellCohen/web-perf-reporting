@@ -1,5 +1,3 @@
-"use client";
-
 import { formatBytes } from "@/features/page-speed-insights/shared/format";
 import { ResourceUrlCell } from "@/features/page-speed-insights/shared/ResourceUrlCell";
 import {

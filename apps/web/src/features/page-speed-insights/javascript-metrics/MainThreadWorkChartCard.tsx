@@ -1,5 +1,3 @@
-"use client";
-
 import type { TableItem } from "@/lib/schema";
 import { getNumber } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

@@ -5,11 +5,12 @@ import {
   parseLighthouseViewerGistId,
 } from "@/lib/viewer/lighthouseViewerGist";
 import {
+  PsiShareExtractError,
   extractLighthouseFromPsiShareHtml,
   labelForPsiLighthouse,
   type PsiEmbeddedLighthouse,
 } from "@/lib/viewer/extractLighthouseFromPsiShareHtml";
-import { PsiShareUrlError, fetchPsiShareHtml, parsePsiShareUrl } from "@/lib/viewer/psiShareUrl";
+import { PsiShareFetchError, PsiShareUrlError, fetchPsiShareHtml, parsePsiShareUrl } from "@/lib/viewer/psiShareUrl";
 
 export const maxDuration = 60;
 
@@ -63,7 +64,11 @@ export async function POST(request: Request) {
     if (error instanceof PsiShareUrlError || error instanceof LighthouseViewerGistError) {
       return Response.json({ error: error.message }, { status: 400 });
     }
-    const message = error instanceof Error ? error.message : "Could not import PageSpeed report";
-    return Response.json({ error: message }, { status: 502 });
+    if (error instanceof PsiShareFetchError || error instanceof PsiShareExtractError) {
+      return Response.json({ error: error.message }, { status: 502 });
+    }
+    // Unexpected failure: keep internals out of the response.
+    console.error("PSI share import failed:", error);
+    return Response.json({ error: "Could not import PageSpeed report" }, { status: 502 });
   }
 }

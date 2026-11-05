@@ -1,5 +1,3 @@
-"use client";
-
 import { p75ThresholdSegments } from "@/lib/crux/latest-crux-display/p75ThresholdSegments";
 import { CruxThreeSegmentMarkerBar } from "@/components/latest-crux/charts/CruxThreeSegmentMarkerBar";
 import type { CruxHistoryItem } from "@/lib/schema";

@@ -45,8 +45,7 @@ const makeStatusColumn = (
     },
   });
 
-const makeSortableStringColumn = (column: string) => {
-  // @ts-expect-error: Im lazy to do full inference
+const makeSortableStringColumn = (column: keyof TreeMapNode & string) => {
   return columnHelper.accessor(column, {
     getGroupingValue: (row) => getHostName(row),
     meta: {
@@ -59,25 +58,24 @@ const makeSortableStringColumn = (column: string) => {
     enableSorting: true,
     filterFn: "includesString",
     cell: (info) => {
-      let value = info.getValue();
+      let value: unknown = info.getValue();
       if (Array.isArray(value)) {
         try {
-          value = new URL(value[0] as string).host;
+          value = new URL(String(value[0])).host;
         } catch {
           value = "Unknown";
         }
       }
       return (
         <div className="min-w-0 max-w-full overflow-hidden" title={String(value)}>
-          <div className="truncate">{value as string}</div>
+          <div className="truncate">{String(value)}</div>
         </div>
       );
     },
   });
 };
 
-const makeBooleanColumn = (column: string, extra = {}) => {
-  // @ts-expect-error: Im lazy to do full inference
+const makeBooleanColumn = (column: keyof TreeMapNode & string, extra = {}) => {
   return columnHelper.accessor(column, {
     size: 120,
     minSize: 100,
@@ -91,8 +89,7 @@ const makeBooleanColumn = (column: string, extra = {}) => {
   });
 };
 
-const makeBytesColumn = (column: string, title: string, extra = {}) => {
-  // @ts-expect-error: Im lazy to do full inference
+const makeBytesColumn = (column: keyof TreeMapNode & string, title: string, extra = {}) => {
   return columnHelper.accessor(column, {
     cell: RenderBytesCell,
     sortFn: "basic",

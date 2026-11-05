@@ -68,7 +68,7 @@ function TableWithRow({ data }: { data: TreeMapNode[] }) {
   return (
     <table>
       <tbody>
-        <JSUsageTableRow row={row} i={0} />
+        <JSUsageTableRow row={row} />
       </tbody>
     </table>
   );

@@ -1,5 +1,3 @@
-"use client";
-
 import { reconcileLcpAudits } from "@/features/page-speed-insights/shared/reconcileLcpSubparts";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
 import {

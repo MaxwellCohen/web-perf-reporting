@@ -1,3 +1,11 @@
+/** `args.data` of a Chrome trace event: an untyped, per-event-name bag read defensively below. */
+type TraceData = { [key: string]: any };
+type CpuProfileNode = {
+  id: number;
+  parent?: number;
+  callFrame?: { functionName?: string; url?: string; lineNumber?: number };
+};
+
 export type TraceEvent = {
   name: string;
   ph: string;
@@ -135,7 +143,7 @@ export class TraceBuilder {
   private shots: { ts: number; data: string }[] = [];
   private shotGap = 0;
   private prof = { start: 0, ts: 0, nodes: new Map<number, ProfileNode>(), times: [] as number[], ids: [] as number[], live: false };
-  private resourceEvents: { name: string; pid: number; ts: number; data: Record<string, any> }[] = [];
+  private resourceEvents: { name: string; pid: number; ts: number; data: TraceData }[] = [];
   private interned = new Map<string, string>();
 
   private intern(s: string) {
@@ -161,7 +169,7 @@ export class TraceBuilder {
       this.prof.ts = this.prof.start;
       this.prof.live = true;
     } else if (e.name === "ProfileChunk" && this.prof.live) {
-      const data = (e.args?.data ?? {}) as { cpuProfile?: { nodes?: any[]; samples?: number[] }; timeDeltas?: number[] };
+      const data = (e.args?.data ?? {}) as { cpuProfile?: { nodes?: CpuProfileNode[]; samples?: number[] }; timeDeltas?: number[] };
       for (const n of data.cpuProfile?.nodes ?? []) {
         const cf = n.callFrame ?? {};
         this.prof.nodes.set(n.id, { id: n.id, parent: n.parent, fn: this.intern(cf.functionName || "(anonymous)"), url: this.intern(cf.url ?? ""), line: cf.lineNumber ?? 0 });
@@ -176,7 +184,7 @@ export class TraceBuilder {
       return;
     }
     if (e.name === "ResourceSendRequest" || e.name === "ResourceReceiveResponse" || e.name === "ResourceFinish") {
-      const d = (e.args?.data ?? {}) as Record<string, any>;
+      const d = (e.args?.data ?? {}) as TraceData;
       this.resourceEvents.push({
         name: e.name,
         pid: e.pid,
@@ -206,17 +214,17 @@ export class TraceBuilder {
       }
     }
     if (e.name === "navigationStart") {
-      const d = (e.args?.data ?? {}) as Record<string, any>;
+      const d = (e.args?.data ?? {}) as TraceData;
       if (d.isOutermostMainFrame && d.documentLoaderURL) this.navs.push({ ts: e.ts, url: d.documentLoaderURL, frame: String(e.args?.frame ?? "") });
     } else if (e.name === "LayoutShift") {
-      const d = (e.args?.data ?? {}) as Record<string, any>;
+      const d = (e.args?.data ?? {}) as TraceData;
       if (d.is_main_frame !== false) {
-        this.shifts.push({ ts: e.ts, pid: e.pid, score: Number(d.score) || 0, hadInput: !!d.had_recent_input, nodes: ((d.impacted_nodes ?? []) as any[]).map((n) => String(n.debug_name ?? "")).slice(0, 4) });
+        this.shifts.push({ ts: e.ts, pid: e.pid, score: Number(d.score) || 0, hadInput: !!d.had_recent_input, nodes: ((d.impacted_nodes ?? []) as { debug_name?: unknown }[]).map((n) => String(n.debug_name ?? "")).slice(0, 4) });
       }
     }
     if (e.name in MARKERS && (e.ph === "R" || e.ph === "I" || e.ph === "i" || e.ph === "O")) {
       {
-        const d = (e.args?.data ?? {}) as Record<string, any>;
+        const d = (e.args?.data ?? {}) as TraceData;
         this.markers.push({ name: e.name, pid: e.pid, ts: e.ts, frame: e.args?.frame as string | undefined, detail: d.nodeName ? `${d.nodeName}${d.type ? ` (${d.type})` : ""}` : undefined, size: d.size });
       }
     } else if (e.name === "Screenshot" && typeof e.args?.snapshot === "string") {

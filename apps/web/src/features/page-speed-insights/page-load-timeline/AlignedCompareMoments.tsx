@@ -1,5 +1,3 @@
-"use client";
-
 import { formatMs } from "@/features/page-speed-insights/shared/format";
 import { buildAlignedCompareRows, type AlignedCompareRow } from "./buildAlignedCompareRows";
 import { Moment } from "./Moment";

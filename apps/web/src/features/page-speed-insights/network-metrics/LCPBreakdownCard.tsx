@@ -1,4 +1,3 @@
-"use client";
 import { TriangleAlert } from "lucide-react";
 import { usePageSpeedSelector } from "@/features/page-speed-insights/PageSpeedContext";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";

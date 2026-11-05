@@ -27,6 +27,7 @@ concurrency:
 jobs:
   changes:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions: { contents: read, pull-requests: read }
     outputs:
       web: ${{ steps.f.outputs.web }}
@@ -45,6 +46,7 @@ jobs:
   test:
     needs: changes
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

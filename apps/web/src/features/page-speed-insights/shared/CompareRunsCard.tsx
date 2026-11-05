@@ -1,5 +1,3 @@
-"use client";
-
 import { Fragment, type ReactNode } from "react";
 import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 import {
