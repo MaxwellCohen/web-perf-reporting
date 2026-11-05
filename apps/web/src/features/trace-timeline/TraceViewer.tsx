@@ -7,11 +7,16 @@ import { loadTrace } from "./loadTrace";
 import { TraceTimeline } from "./TraceTimeline";
 import { TraceLoadTimeline } from "./TraceLoadTimeline";
 import { KeyEventsPanel, FixPrompt } from "./KeyEventsPanel";
-import { UploadCloud } from "lucide-react";
+import { GitCompare, UploadCloud } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { buttonVariants } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
 import { buildFixPrompt } from "./fixPrompt";
+import { buildSnapshot, type TraceSnapshot } from "./findings";
+import { FindingsPanel } from "./FindingsPanel";
+import { ComparePanel } from "./ComparePanel";
+import { SharedSummary } from "./SharedSummary";
+import { decodeSnapshot, hasShareHash } from "./shareFindings";
 
 function fullSummary(t: ParsedTrace) {
   const { ttfb, fcp, lcp, cls, blockingMs } = analyzeLoad(t);
@@ -56,6 +61,27 @@ export function TraceViewer() {
   const [progress, setProgress] = useState(0);
 
   const traceRef = useRef<ParsedTrace | null>(null);
+  const [compare, setCompare] = useState<TraceSnapshot | null>(null);
+  const [shared, setShared] = useState<TraceSnapshot | null>(null);
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hasShareHash(hash)) void decodeSnapshot(hash).then(setShared);
+  }, []);
+
+  const loadCompare = useCallback(async (file?: File) => {
+    if (!file) return;
+    setBusy(true);
+    setError("");
+    try {
+      const parsed = await loadTrace(file, setProgress);
+      setCompare(buildSnapshot(parsed, analyzeLoad(parsed)));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to read trace");
+    } finally {
+      setBusy(false);
+    }
+  }, []);
 
   const load = useCallback(async (input?: File | string | object) => {
     if (!input) return;
@@ -96,6 +122,7 @@ export function TraceViewer() {
   }, [load]);
 
   const summaryJson = useMemo(() => (trace ? JSON.stringify(fullSummary(trace)) : ""), [trace]);
+  const snapshot = useMemo(() => (trace ? buildSnapshot(trace, analyzeLoad(trace)) : null), [trace]);
   const fixPrompt = useMemo(() => (trace ? buildFixPrompt(analyzeLoad(trace)) : ""), [trace]);
 
   const fileInput = (
@@ -112,11 +139,23 @@ export function TraceViewer() {
       {trace ? (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed px-4 py-3">
           <h1 className="text-2xl font-bold tracking-tight">Trace timeline</h1>
-          <label className={cn(buttonVariants({ variant: "outline", size: "sm" }), "cursor-pointer")}>
-            <UploadCloud className="size-4" aria-hidden />
-            {parsing ?? "Load another trace"}
-            {fileInput}
-          </label>
+          <div className="flex flex-wrap gap-2">
+            <label className={cn(buttonVariants({ variant: "outline", size: "sm" }), "cursor-pointer")}>
+              <GitCompare className="size-4" aria-hidden />
+              Compare with another trace
+              <input
+                type="file"
+                accept=".json,.gz"
+                className="hidden"
+                onChange={(e) => { void loadCompare(e.target.files?.[0]); e.target.value = ""; }}
+              />
+            </label>
+            <label className={cn(buttonVariants({ variant: "outline", size: "sm" }), "cursor-pointer")}>
+              <UploadCloud className="size-4" aria-hidden />
+              {parsing ?? "Load another trace"}
+              {fileInput}
+            </label>
+          </div>
         </div>
       ) : (
         <>
@@ -146,11 +185,14 @@ export function TraceViewer() {
           </label>
         </>
       )}
+      {!trace && shared && <SharedSummary snapshot={shared} />}
       {error && <p role="alert" className="mb-4 text-sm text-red-600">{error}</p>}
       {trace && (
         <>
           <script type="application/json" id="trace-summary" dangerouslySetInnerHTML={{ __html: summaryJson }} />
           <KeyEventsPanel trace={trace} />
+          {snapshot && <FindingsPanel snapshot={snapshot} />}
+          {snapshot && compare && <ComparePanel before={snapshot} after={compare} onClose={() => setCompare(null)} />}
           <TraceLoadTimeline trace={trace} />
           <TraceTimeline trace={trace} />
           <FixPrompt text={fixPrompt} />
