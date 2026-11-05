@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { analyzeLoad, fnLabel, shortUrl, type KeyEvent, type Tone } from "./analyzeLoad";
+import { buildEventPrompt } from "./eventPrompt";
 import type { ParsedTrace } from "./parseTrace";
 
 const TONE: Record<Tone, string> = {
@@ -65,6 +66,13 @@ export function FixPrompt({ text }: { text: string }) {
 export function KeyEventsPanel({ trace }: { trace: ParsedTrace }) {
   const a = useMemo(() => analyzeLoad(trace), [trace]);
   const total = a.phases.at(-1)?.end ?? 1;
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
+  const copyEvent = (e: KeyEvent, i: number) => {
+    void navigator.clipboard.writeText(buildEventPrompt(trace, a, e)).then(() => {
+      setCopiedIdx(i);
+      setTimeout(() => setCopiedIdx((cur) => (cur === i ? null : cur)), 1500);
+    });
+  };
   const rating = (v: number | undefined, g: number, b: number): Tone | undefined =>
     v == null ? undefined : v <= g ? "good" : v <= b ? "warn" : "bad";
 
@@ -122,14 +130,27 @@ export function KeyEventsPanel({ trace }: { trace: ParsedTrace }) {
       <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
         <ol className="relative max-h-[28rem] overflow-auto rounded-md border p-3" aria-label="Key events">
           {a.events.map((e, i) => (
-            <li key={i} className="flex gap-3 py-1.5 text-sm">
-              <span className="w-16 shrink-0 text-right font-mono text-xs tabular-nums text-muted-foreground">{ms(e.time)}</span>
-              <i className={`mt-1.5 size-2.5 shrink-0 rounded-full ${TONE[e.tone]}`} />
-              <span className="min-w-0">
-                <span className="mr-2 rounded bg-muted px-1 text-[10px] font-medium text-muted-foreground">{KIND_LABEL[e.kind]}</span>
-                {e.title}
-                {e.detail && <span className="block truncate text-xs text-muted-foreground">{e.detail}</span>}
-              </span>
+            <li key={i} className="group">
+              <button
+                type="button"
+                onClick={() => copyEvent(e, i)}
+                title="Click to copy an agent prompt that investigates this event"
+                aria-label={`Copy agent prompt for: ${e.title}`}
+                className="flex w-full gap-3 rounded py-1.5 pr-2 text-left text-sm hover:bg-muted/60 focus-visible:bg-muted/60"
+              >
+                <span className="w-16 shrink-0 text-right font-mono text-xs tabular-nums text-muted-foreground">{ms(e.time)}</span>
+                <i className={`mt-1.5 size-2.5 shrink-0 rounded-full ${TONE[e.tone]}`} />
+                <span className="min-w-0 flex-1">
+                  <span className="mr-2 rounded bg-muted px-1 text-[10px] font-medium text-muted-foreground">{KIND_LABEL[e.kind]}</span>
+                  {e.title}
+                  {e.detail && <span className="block truncate text-xs text-muted-foreground">{e.detail}</span>}
+                </span>
+                <span
+                  className={`shrink-0 self-center text-[11px] ${copiedIdx === i ? "text-green-500" : "text-muted-foreground opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"}`}
+                >
+                  {copiedIdx === i ? "Copied prompt" : "Copy prompt"}
+                </span>
+              </button>
             </li>
           ))}
         </ol>

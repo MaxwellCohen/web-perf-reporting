@@ -8,6 +8,8 @@ export type KeyEvent = {
   title: string;
   detail?: string;
   tone: Tone;
+  /** [start, end] in ms since navigation start, for events that span time (tasks, scripts, handlers). */
+  window?: [number, number];
 };
 export type Phase = {
   label: string;
@@ -132,7 +134,7 @@ export function analyzeLoad(trace: ParsedTrace): LoadAnalysis {
     if (s.start < origin || s.name !== "EvaluateScript" || s.dur < 40) continue;
     const url = sliceUrl(s);
     if (!url || url.startsWith("chrome-extension://")) continue;
-    events.push({ time: rel(s.start), kind: "script", title: `Script runs · ${Math.round(s.dur)} ms`, detail: shortUrl(url, 70), tone: toneFor(s.dur, 50, 200) });
+    events.push({ time: rel(s.start), kind: "script", title: `Script runs · ${Math.round(s.dur)} ms`, detail: shortUrl(url, 70), tone: toneFor(s.dur, 50, 200), window: [rel(s.start), rel(s.start + s.dur)] });
   }
 
   // Paints
@@ -179,6 +181,7 @@ export function analyzeLoad(trace: ParsedTrace): LoadAnalysis {
       title: `Long task · ${Math.round(t.dur)} ms`,
       detail: [top ? `${top.name}${url ? ` · ${shortUrl(url, 60)}` : ""}` : "", hot.length ? `hot: ${hot.map((h) => `${fnLabel(h)} ${Math.round(h.ms)} ms`).join("; ")}` : ""].filter(Boolean).join(" — ") || undefined,
       tone: t.dur > 200 ? "bad" : "warn",
+      window: [rel(t.start), rel(t.start + t.dur)],
     });
   }
 
@@ -187,7 +190,7 @@ export function analyzeLoad(trace: ParsedTrace): LoadAnalysis {
     if (s.start < origin || s.name !== "EventDispatch" || s.dur < 16) continue;
     const type = String(((s.args?.data ?? {}) as { type?: string }).type ?? "");
     if (!/^(click|keydown|keyup|pointerdown|pointerup|mousedown|mouseup|input|touchstart)$/.test(type)) continue;
-    events.push({ time: rel(s.start), kind: "task", title: `Input handler "${type}" · ${Math.round(s.dur)} ms`, tone: toneFor(s.dur, 50, 200) });
+    events.push({ time: rel(s.start), kind: "task", title: `Input handler "${type}" · ${Math.round(s.dur)} ms`, tone: toneFor(s.dur, 50, 200), window: [rel(s.start), rel(s.start + s.dur)] });
   }
 
   // Ignore lifecycle events from the initial blank document (before the server replied).

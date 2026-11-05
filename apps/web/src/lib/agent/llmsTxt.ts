@@ -69,6 +69,14 @@ Responses:
 - 200 — JSON fields: \`url\`, \`speedUpPrompt\` (the personalized prompt, markdown), \`reports[]\` (\`label\`, \`finalUrl\`, \`scores\`, \`lab\`, \`field\`, \`platformNotes\`), \`issues[]\` (\`id\`, \`category\`, \`title\`, \`description\`, \`score\`, \`displayValue\`, \`metricSavings\`, \`savingsBytes\`, \`reports\`, \`examples\`), \`focusAreas[]\` (\`id\`, \`title\`, \`evidence\`, \`advice\`).
 - 400 — body is not JSON or contains no Lighthouse result.
 
+## Trace analysis (POST /api/agent/trace)
+
+Record a Chrome trace of any URL and get findings back:
+
+\`node scripts/record-trace.mjs <url> --cpu 4 --api ${siteUrl} --format md\`
+
+Or POST an existing trace (.json, under 4 MB) to \`${siteUrl}/api/agent/trace\`. \`?format=md\` returns the fix prompt; the default JSON has \`summary\`, \`metrics\` (ttfb, fcp, lcp, cls, blockingMs), \`analysis\` (key events, phases, scripts, hot functions) and \`brief\`. 400 means the body was not a usable trace. For the interactive timeline, open \`${siteUrl}/trace\`.
+
 ## Human UI
 
 - [Viewer](${siteUrl}/viewer): upload the same JSON to explore it with charts, film strip, and full tables.

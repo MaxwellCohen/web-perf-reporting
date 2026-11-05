@@ -14,6 +14,7 @@ import {
   mutedBarCursor,
   yAxisWidthForLabels,
 } from "@/features/page-speed-insights/shared/horizontalBarChart";
+import { FixPlanByMetric } from "@/features/page-speed-insights/RecommendationsSection/FixPlanByMetric";
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
 
 type RecommendationsSummaryProps = {
@@ -91,6 +92,8 @@ export function RecommendationsSummary({ recommendations }: RecommendationsSumma
           }
         />
       </div>
+
+      <FixPlanByMetric recommendations={recommendations} />
 
       {categoryChartData.length > 0 ? (
         <Card>
