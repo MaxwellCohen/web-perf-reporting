@@ -10,9 +10,10 @@ npx -y @maxwellcohen/web-perf-report --file report.json             # analyze an
 
 ```sh
 npx -y @maxwellcohen/web-perf-report stream http://localhost:3000   # when does the streamed HTML actually finish?
+npx -y @maxwellcohen/web-perf-report stream http://localhost:3000 http://localhost:3001   # compare two (A vs B)
 ```
 
-`stream` records when each chunk of the page's HTML arrives (works for localhost), then prints TTFB, last byte, the idle gaps where the server is waiting, and a shareable `/stream` link. Options: `--format md|json`, `--api <url>`.
+`stream` records when each chunk of the page's HTML arrives (works for localhost), then prints TTFB, last byte, the idle gaps where the server is waiting, and a shareable `/stream` link. Pass a second URL to compare A and B (before/after, two builds); the report shows the delta table and a shareable `/stream#r=…&b=…` link. Options: `--format md|json`, `--api <url>`.
 
 Options: `--device mobile|desktop|both`, `--format md|json`, `--file <path>`, `--api <url>` (or env `WEB_PERF_REPORT_API`, default `https://web-perf-report.vercel.app`).
 

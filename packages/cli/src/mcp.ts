@@ -64,11 +64,16 @@ export function createServer(): McpServer {
         "Measure when each chunk of a page's streamed HTML arrives (TTFB, last byte, idle waiting gaps, late Suspense boundaries) from this machine, so localhost/preview servers work. Returns a markdown report plus a shareable link. Use it when a streaming framework (Next.js etc.) takes long to finish the document and you need to know what it is waiting on. Audit a production build, not a dev server. Takes a few seconds.",
       inputSchema: {
         url: z.string().url().describe("Page URL, e.g. https://example.com or http://localhost:3000"),
+        compareUrl: z
+          .string()
+          .url()
+          .optional()
+          .describe("Optional second URL (e.g. a before/after build) to compare against; A = url, B = compareUrl"),
       },
     },
-    async ({ url }) => {
+    async ({ url, compareUrl }) => {
       try {
-        return text(await runStream({ url, format: "md", onProgress: (m) => console.error(m) }));
+        return text(await runStream({ url, compareUrl, format: "md", onProgress: (m) => console.error(m) }));
       } catch (e) {
         return fail(e);
       }

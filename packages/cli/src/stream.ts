@@ -129,7 +129,7 @@ export async function measureStream(rawUrl: string): Promise<StreamMeasurement> 
 }
 
 export async function postStreamMeasurement(
-  measurement: StreamMeasurement,
+  measurements: StreamMeasurement | [StreamMeasurement, StreamMeasurement],
   opts: { apiBase?: string; format?: Format } = {},
 ): Promise<string> {
   const base = (opts.apiBase || process.env.WEB_PERF_REPORT_API || DEFAULT_API).replace(/\/+$/, "");
@@ -139,7 +139,7 @@ export async function postStreamMeasurement(
     res = await fetch(`${base}/api/agent/stream?format=${opts.format ?? "md"}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ measurement }),
+      body: JSON.stringify(Array.isArray(measurements) ? { measurements } : { measurement: measurements }),
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
     text = await res.text();
@@ -154,12 +154,20 @@ export async function postStreamMeasurement(
 /** Measure chunk arrival times locally, then have the API analyze them and return a report with a share link. */
 export async function runStream(opts: {
   url: string;
+  /** Second URL: measure both and print a side-by-side comparison (A = url, B = compareUrl). */
+  compareUrl?: string;
   apiBase?: string;
   format?: Format;
   onProgress?: (message: string) => void;
 }): Promise<string> {
   opts.onProgress?.(`Measuring ${opts.url}...`);
-  const measurement = await measureStream(opts.url);
+  const first = await measureStream(opts.url);
+  let measurements: StreamMeasurement | [StreamMeasurement, StreamMeasurement] = first;
+  if (opts.compareUrl) {
+    // Sequential, so the two runs don't compete for the same CPU/network and skew each other.
+    opts.onProgress?.(`Measuring ${opts.compareUrl}...`);
+    measurements = [first, await measureStream(opts.compareUrl)];
+  }
   opts.onProgress?.("Analyzing timings...");
-  return postStreamMeasurement(measurement, { apiBase: opts.apiBase, format: opts.format });
+  return postStreamMeasurement(measurements, { apiBase: opts.apiBase, format: opts.format });
 }

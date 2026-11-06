@@ -6,6 +6,8 @@ import { StreamUrlError, assertPublicHttpUrl, isPrivateIp } from "./urlGuard";
 import { parseMeasurement } from "./validate";
 import { isLateChunk, renderStreamMarkdown, sanitizeText } from "./analyze";
 import { clientKey } from "./rateLimit";
+import { compareAnalyses, compareVerdict, renderCompareMarkdown } from "./compare";
+import { shareCompareUrlFor } from "./share";
 import { buildLocalScript } from "./localScript";
 
 const base: StreamMeasurement = {
@@ -173,5 +175,21 @@ describe("stream timing", () => {
     expect(decodeMeasurement(encodeMeasurement(m))?.chunks).toHaveLength(m.chunks.length);
     const md = renderStreamMarkdown({ ...m, truncated: true }, analyze(m));
     expect(md).toContain("cut off");
+  });
+
+  it("compares two measurements with B - A deltas and a verdict", () => {
+    const fast = normalizeMeasurement({ ...base, totalMs: 700, chunks: [{ t: 50, bytes: 100, preview: "<html>" }, { t: 650, bytes: 10, late: true, preview: "$RC(" }] });
+    const slow = normalizeMeasurement(base);
+    const [a, b] = [analyze(slow), analyze(fast)];
+    const last = compareAnalyses(a, b).find((r) => r.label === "Last byte")!;
+    expect(last.delta).toBeLessThan(-1000);
+    expect(compareVerdict(a, b)).toMatch(/B finishes \d+ms faster/);
+    const md = renderCompareMarkdown(slow, fast, "https://s.test/stream#r=x&b=y");
+    expect(md).toContain("| Last byte |");
+    expect(md).toContain("Shareable comparison");
+    const url = shareCompareUrlFor("https://s.test", slow, fast);
+    const m = /#r=([^&]+)&b=(.+)$/.exec(url)!;
+    expect(decodeMeasurement(m[1])?.chunks).toHaveLength(slow.chunks.length);
+    expect(decodeMeasurement(m[2])?.chunks).toHaveLength(fast.chunks.length);
   });
 });

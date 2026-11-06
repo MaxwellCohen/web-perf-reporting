@@ -8,11 +8,14 @@ const PAD = 8;
 export function StreamTimeline({
   measurement,
   analysis,
+  axisEnd,
 }: {
   measurement: StreamMeasurement;
   analysis: StreamAnalysis;
+  /** Shared axis length (ms) so two timelines can be compared at the same scale. */
+  axisEnd?: number;
 }) {
-  const end = Math.max(measurement.totalMs, analysis.lastByteMs, 1);
+  const end = Math.max(measurement.totalMs, analysis.lastByteMs, axisEnd ?? 0, 1);
   const x = (t: number) => PAD + (t / end) * (W - PAD * 2);
   const maxBytes = measurement.chunks.reduce((mx, c) => Math.max(mx, c.bytes), 1);
   return (

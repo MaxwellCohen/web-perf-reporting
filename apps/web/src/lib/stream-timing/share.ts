@@ -35,11 +35,11 @@ function compact(m: StreamMeasurement, previews: "all" | "late" | "none"): Compa
 }
 
 /** Stateless share: a compact form of the measurement lives in the URL fragment, dropping previews if it grows past ~12KB (chunks are already capped near 300). */
-export function encodeMeasurement(m: StreamMeasurement): string {
+export function encodeMeasurement(m: StreamMeasurement, maxChars = MAX_ENCODED_CHARS): string {
   let out = "";
   for (const level of ["all", "late", "none"] as const) {
     out = toBase64Url(new TextEncoder().encode(JSON.stringify(compact(m, level))));
-    if (out.length <= MAX_ENCODED_CHARS) break;
+    if (out.length <= maxChars) break;
   }
   return out;
 }
@@ -62,4 +62,9 @@ export function decodeMeasurement(encoded: string): StreamMeasurement | null {
 
 export function shareUrlFor(siteUrl: string, m: StreamMeasurement): string {
   return `${siteUrl}/stream#r=${encodeMeasurement(m)}`;
+}
+
+/** Comparison link: A in `r`, B in `b`, each trimmed harder so the whole URL stays near 12KB. */
+export function shareCompareUrlFor(siteUrl: string, a: StreamMeasurement, b: StreamMeasurement): string {
+  return `${siteUrl}/stream#r=${encodeMeasurement(a, MAX_ENCODED_CHARS / 2)}&b=${encodeMeasurement(b, MAX_ENCODED_CHARS / 2)}`;
 }

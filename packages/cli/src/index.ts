@@ -17,10 +17,11 @@ const stream = defineCommand({
   meta: {
     name: "web-perf-report stream",
     description:
-      "Measure when each chunk of a page's streamed HTML arrives (works for localhost) and print where the server is waiting, with a shareable link.",
+      "Measure when each chunk of a page's streamed HTML arrives (works for localhost) and print where the server is waiting, with a shareable link. Pass a second URL to compare.",
   },
   args: {
     url: { type: "positional", required: true, description: "Page URL, e.g. http://localhost:3000" },
+    compare: { type: "positional", required: false, description: "Second URL to compare against (A = url, B = compare)" },
     format: { type: "string", default: "md", description: "md | json" },
     api: { type: "string", description: "API base URL (env WEB_PERF_REPORT_API)" },
   },
@@ -30,7 +31,7 @@ const stream = defineCommand({
       process.exit(1);
     }
     try {
-      const out = await runStream({ url: args.url, format: args.format as Format, apiBase: args.api, onProgress: (m) => console.error(m) });
+      const out = await runStream({ url: args.url, compareUrl: args.compare, format: args.format as Format, apiBase: args.api, onProgress: (m) => console.error(m) });
       process.stdout.write(out.endsWith("\n") ? out : `${out}\n`);
     } catch (e) {
       console.error(`Error: ${e instanceof Error ? e.message : String(e)}`);
