@@ -34,6 +34,18 @@ export function buildLlmsTxt(siteUrl: string): string {
 
 4. Work through the speed-up prompt one focus area at a time, rebuild, re-run Lighthouse, and POST again to compare. Lab scores vary a few points between runs; compare more than one run before concluding a change helped.
 
+## Streaming timing (when does the HTML actually finish?)
+
+Streaming frameworks (Next.js, etc.) send the shell fast, then stream Suspense content as slow data resolves, so total document time can be dominated by one late chunk. This records when each chunk of the HTML arrives and reports the idle "waiting" gaps.
+
+- Public site (measured from the server):
+  curl -s "${siteUrl}/api/agent/stream?url=https://example.com&format=md"
+- localhost / dev / preview (measured on this machine, needs Node 18+; use a production build):
+  curl -s ${siteUrl}/measure-stream.mjs | node - http://localhost:3000
+  Add \`--json\` for JSON. The script only fetches the given URL and POSTs the chunk timings to this site; read it first if you prefer (curl the URL without the pipe).
+
+Output (markdown): TTFB, first chunk, last byte, idle waiting (gaps >= 100ms) and its share of the body span, each gap with the chunk that arrived after it (Suspense completions show as \`$RC(\` scripts or \`<div hidden id="S:\` segments, marked "Suspense" on the page), and a shareable link to ${siteUrl}/stream. A long gap means a server-side await inside a Suspense boundary: find that boundary's data fetch and speed up or cache it.
+
 ## API
 
 POST ${api}
