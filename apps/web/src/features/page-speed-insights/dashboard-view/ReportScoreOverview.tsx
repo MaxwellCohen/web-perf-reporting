@@ -1,5 +1,3 @@
-"use client";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
 import { cn } from "@/lib/utils";

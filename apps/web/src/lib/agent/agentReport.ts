@@ -1,3 +1,4 @@
+import { reconcileLcpAudits } from "@/features/page-speed-insights/shared/reconcileLcpSubparts";
 // Compact, agent-facing view of a PageSpeed run: scores, metrics, field data, and ranked issues.
 // The full Lighthouse JSON is several MB; this keeps only what an agent needs to pick fixes.
 import {
@@ -239,7 +240,7 @@ function collectIssues(items: PageSpeedDashboardItem[]): AgentIssue[] {
 
   for (const { item, label } of items) {
     const lighthouse = item.lighthouseResult;
-    const audits = lighthouse?.audits ?? {};
+    const audits = reconcileLcpAudits(lighthouse?.audits ?? {});
     for (const categoryId of CATEGORY_IDS) {
       for (const ref of lighthouse?.categories?.[categoryId]?.auditRefs ?? []) {
         // Lab metrics are reported separately; "hidden" refs duplicate them.

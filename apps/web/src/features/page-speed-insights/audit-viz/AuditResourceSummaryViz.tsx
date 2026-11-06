@@ -1,5 +1,3 @@
-"use client";
-
 import { AuditBarChart } from "./AuditBarChart";
 import { extractBarPoints } from "./extractAuditBarPoints";
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";

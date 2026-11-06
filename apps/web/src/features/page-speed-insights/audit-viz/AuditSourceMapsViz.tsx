@@ -1,5 +1,3 @@
-"use client";
-
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import { shortUrl } from "@/features/page-speed-insights/shared/format";
 import { getUrlString } from "@/lib/utils";
@@ -12,7 +10,7 @@ type SourceMapIssue = {
   reportLabels: string[];
 };
 
-const MISSING_COUNT_RE = /missing\s+(\d+)\s+items/i;
+const MISSING_COUNT_RE = /missing\s+(\d+)\s+items?\b/i;
 
 function missingCountFromError(error: string): number {
   const match = error.match(MISSING_COUNT_RE);
@@ -31,7 +29,8 @@ function extractIssues(rows: DetailTableItem[]): SourceMapIssue[] {
       const errors = (item.subItems?.items || [])
         .map((sub) => (typeof sub.error === "string" ? sub.error.trim() : ""))
         .filter(Boolean);
-      if (!errors.length && !sourceMapUrl) return;
+      // Lighthouse also lists scripts whose source map is valid (no errors); skip those.
+      if (!errors.length) return;
 
       const missingCount = errors.reduce((sum, error) => sum + missingCountFromError(error), 0);
       const error = errors[0] || "Source map issue";

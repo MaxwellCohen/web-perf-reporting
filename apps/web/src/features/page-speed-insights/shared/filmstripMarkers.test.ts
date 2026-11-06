@@ -122,6 +122,6 @@ describe("filmstripTimelineFromItem", () => {
 
     const view = filmstripTimelineFromItem(item);
     expect(view!.simulationLabel).toBeUndefined();
-    expect(view!.timeline.items.map((frame) => frame.timing)).toEqual([800, 1200, 2500]);
+    expect(view!.timeline.items.map((frame) => frame.timing)).toEqual([800, 1000, 1850]);
   });
 });

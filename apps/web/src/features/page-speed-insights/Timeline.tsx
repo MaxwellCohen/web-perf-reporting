@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 import { AuditDetailFilmstrip } from "@/lib/schema";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   labelsByFrameIndex,
   type FilmstripMarker,
@@ -28,19 +28,12 @@ function FrameLabels({ labels }: { labels: string[] }) {
 
 export function Timeline({ timeline, device, markers = [] }: TimelineProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const frameLabels = useMemo(
-    () => labelsByFrameIndex(timeline?.items ?? [], markers),
-    [timeline?.items, markers],
-  );
-  const viewerFrames = useMemo<FilmstripViewerFrame[]>(
-    () =>
-      (timeline?.items ?? []).map((item, i) => ({
-        timeMs: item.timing,
-        labels: frameLabels[i] ?? [],
-        panes: [{ label: device, src: item.data }],
-      })),
-    [timeline?.items, frameLabels, device],
-  );
+  const frameLabels = labelsByFrameIndex(timeline?.items ?? [], markers);
+  const viewerFrames: FilmstripViewerFrame[] = (timeline?.items ?? []).map((item, i) => ({
+    timeMs: item.timing,
+    labels: frameLabels[i] ?? [],
+    panes: [{ label: device, src: item.data }],
+  }));
 
   if (!timeline?.items?.length) return null;
 

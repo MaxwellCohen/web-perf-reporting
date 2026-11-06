@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { suppressConsoleError } from "@/test-utils";
 import GlobalError from "@/app/global-error";
 
-const captureException = vi.fn();
+const captureException = vi.fn<(error: Error) => void>();
 
 vi.mock("@sentry/nextjs", () => ({
   captureException: (error: Error) => captureException(error),

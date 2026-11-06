@@ -1,6 +1,6 @@
 "use client";
 import type { PageSpeedInsights } from "@/lib/schema";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,31 +17,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { validateRun } from "@/components/viewer/viewerRunValidation";
 import { Info, Loader2, Plus } from "lucide-react";
 import { collectViewerReports } from "@/components/viewer/collectViewerReports";
-import {
-  decodeViewerHash,
-  encodeViewerHash,
-} from "@/components/viewer/viewerHash";
+import { decodeViewerHash, encodeViewerHash } from "@/components/viewer/viewerHash";
 import {
   createEmptyViewerRun,
   ViewerRunSlot,
   type ViewerRunState,
 } from "@/components/viewer/ViewerRunSlot";
-import {
-  buildPsiViewerBookmarklet,
-  buildPsiViewerDeepLink,
-} from "@/lib/viewer/psiBookmarklet";
-import {
-  DEFAULT_PSI_RUN_LABEL_A,
-  DEFAULT_PSI_RUN_LABEL_B,
-} from "@/lib/viewer/psiCompareLabels";
+import { buildPsiViewerBookmarklet, buildPsiViewerDeepLink } from "@/lib/viewer/psiBookmarklet";
+import { DEFAULT_PSI_RUN_LABEL_A, DEFAULT_PSI_RUN_LABEL_B } from "@/lib/viewer/psiCompareLabels";
 
 // Dashboard pulls recharts + react-markdown + tanstack tables (~730kB
 // client per audit). Viewer input form needs none of it; load the dashboard
@@ -52,9 +39,7 @@ const PageSpeedInsightsDashboard = dynamic(
       (mod) => mod.PageSpeedInsightsDashboard,
     ),
   {
-    loading: () => (
-      <div className="p-4 text-muted-foreground">Loading report…</div>
-    ),
+    loading: () => <div className="p-4 text-muted-foreground">Loading report…</div>,
   },
 );
 
@@ -75,11 +60,7 @@ function setLocationHash(newHash: string) {
 }
 
 function useHash() {
-  const hash = useSyncExternalStore(
-    subscribeToHash,
-    getHashSnapshot,
-    getServerHashSnapshot,
-  );
+  const hash = useSyncExternalStore(subscribeToHash, getHashSnapshot, getServerHashSnapshot);
   return [hash, setLocationHash] as const;
 }
 
@@ -103,21 +84,44 @@ function PsiBookmarkletLink({ href }: { href: string }) {
 const RECENT_KEY = "psi-viewer-recent";
 const RECENT_MAX = 5;
 
-function readRecent(): string[] {
+const recentListeners = new Set<() => void>();
+
+function subscribeToRecent(onChange: () => void) {
+  recentListeners.add(onChange);
+  window.addEventListener("storage", onChange);
+  return () => {
+    recentListeners.delete(onChange);
+    window.removeEventListener("storage", onChange);
+  };
+}
+
+// Raw string snapshot keeps getSnapshot referentially stable between reads.
+function getRecentSnapshot(): string {
   try {
-    const parsed: unknown = JSON.parse(
-      window.localStorage.getItem(RECENT_KEY) ?? "[]",
-    );
-    return Array.isArray(parsed)
-      ? parsed.filter((u): u is string => typeof u === "string")
-      : [];
+    return window.localStorage.getItem(RECENT_KEY) ?? "[]";
+  } catch {
+    return "[]";
+  }
+}
+
+const getServerRecentSnapshot = () => "[]";
+
+function parseRecent(raw: string): string[] {
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((u): u is string => typeof u === "string") : [];
   } catch {
     return [];
   }
 }
 
-function rememberPsiUrl(url: string): string[] {
-  const next = [url, ...readRecent().filter((u) => u !== url)].slice(
+function useRecent(): string[] {
+  const raw = useSyncExternalStore(subscribeToRecent, getRecentSnapshot, getServerRecentSnapshot);
+  return useMemo(() => parseRecent(raw), [raw]);
+}
+
+function rememberPsiUrl(url: string) {
+  const next = [url, ...parseRecent(getRecentSnapshot()).filter((u) => u !== url)].slice(
     0,
     RECENT_MAX,
   );
@@ -126,7 +130,7 @@ function rememberPsiUrl(url: string): string[] {
   } catch {
     // storage unavailable; recents are best-effort
   }
-  return next;
+  recentListeners.forEach((listener) => listener());
 }
 
 function initialRunsFromPsiQuery(
@@ -209,45 +213,41 @@ export default function ViewerPage({
   initialPsi2Label?: string;
 }) {
   const [loading, setLoading] = useState(Boolean(initialPsi));
-  const [data, setData] = useState<PageSpeedInsights[]>([]);
-  const [labels, setLabels] = useState<string[]>([]);
+  const [decoded, setDecoded] = useState<{
+    hash: string;
+    data: PageSpeedInsights[];
+    labels: string[];
+  } | null>(null);
   const [runs, setRuns] = useState<ViewerRunState[]>(() =>
-    initialRunsFromPsiQuery(
-      initialPsi,
-      initialPsi2,
-      initialPsiLabel,
-      initialPsi2Label,
-    ),
+    initialRunsFromPsiQuery(initialPsi, initialPsi2, initialPsiLabel, initialPsi2Label),
   );
   const [importedPsi, setImportedPsi] = useState<ImportedPsiShare | null>(null);
   const [hash, setHash] = useHash();
   const bookmarkletHref = buildPsiViewerBookmarklet();
   const comparing = runs.length > 1;
-  const [recent, setRecent] = useState<string[]>([]);
+  const recent = useRecent();
   const canSubmit = runs.every((run) => validateRun(run).status === "valid");
 
-  useEffect(() => {
-    setRecent(readRecent());
-  }, []);
-
-  // Sync from external system (URL hash) — intentional set-state-in-effect.
   // Decode stays async so gzip (pako) loads only when a hash is present.
   useEffect(() => {
     let cancelled = false;
-    void decodeViewerHash(hash).then((decoded) => {
+    void decodeViewerHash(hash).then((result) => {
       if (cancelled) return;
-      if (!decoded) {
-        setData([]);
-        setLabels([]);
-        return;
-      }
-      setData(decoded.data);
-      setLabels(decoded.labels);
+      setDecoded({
+        hash,
+        data: result?.data ?? [],
+        labels: result?.labels ?? [],
+      });
     });
     return () => {
       cancelled = true;
     };
   }, [hash]);
+
+  // Ignore results decoded for a stale hash (e.g. after "Back to input").
+  const current = decoded?.hash === hash ? decoded : null;
+  const data = current?.data ?? [];
+  const labels = current?.labels ?? [];
 
   useEffect(() => {
     if (!initialPsi) return;
@@ -261,18 +261,14 @@ export default function ViewerPage({
           initialPsiLabel,
           initialPsi2Label,
         );
-        const result = await collectViewerReports(
-          queryRuns.map(toCollectInput),
-        );
+        const result = await collectViewerReports(queryRuns.map(toCollectInput));
         if (cancelled) return;
         setImportedPsi(psiShareFromRuns(queryRuns));
         setHash(await encodeViewerHash(result));
       } catch (e) {
         if (cancelled) return;
         console.error("PSI share import error:", e);
-        alert(
-          e instanceof Error ? e.message : "Could not import PageSpeed report",
-        );
+        alert(e instanceof Error ? e.message : "Could not import PageSpeed report");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -287,11 +283,7 @@ export default function ViewerPage({
   };
 
   const addCompareRun = () => {
-    setRuns((prev) =>
-      prev.length >= 2
-        ? prev
-        : [...prev, createEmptyViewerRun({ id: "run-2" })],
-    );
+    setRuns((prev) => (prev.length >= 2 ? prev : [...prev, createEmptyViewerRun({ id: "run-2" })]));
   };
 
   const removeCompareRun = () => {
@@ -304,8 +296,7 @@ export default function ViewerPage({
       const result = await collectViewerReports(submitRuns.map(toCollectInput));
       setImportedPsi(psiShareFromRuns(submitRuns));
       for (const run of submitRuns) {
-        if (run.method === "psi" && run.psiUrl.trim())
-          setRecent(rememberPsiUrl(run.psiUrl.trim()));
+        if (run.method === "psi" && run.psiUrl.trim()) rememberPsiUrl(run.psiUrl.trim());
       }
       setHash(await encodeViewerHash(result));
     } catch (e) {
@@ -367,9 +358,7 @@ export default function ViewerPage({
                 <DropdownMenuItem
                   key={url}
                   className="truncate"
-                  onSelect={() =>
-                    updateRun(0, { ...runs[0]!, method: "psi", psiUrl: url })
-                  }
+                  onSelect={() => updateRun(0, { ...runs[0]!, method: "psi", psiUrl: url })}
                 >
                   {url.replace(/^https?:\/\//, "")}
                 </DropdownMenuItem>
@@ -394,9 +383,7 @@ export default function ViewerPage({
                     }
               }
               title={comparing ? (index === 0 ? "A" : "B") : undefined}
-              labelPlaceholder={
-                index === 0 ? DEFAULT_PSI_RUN_LABEL_A : DEFAULT_PSI_RUN_LABEL_B
-              }
+              labelPlaceholder={index === 0 ? DEFAULT_PSI_RUN_LABEL_A : DEFAULT_PSI_RUN_LABEL_B}
               idPrefix={`${run.id}-`}
               onRemove={comparing && index === 1 ? removeCompareRun : undefined}
             />
@@ -427,8 +414,8 @@ export default function ViewerPage({
             Bookmarklet help
           </PopoverTrigger>
           <PopoverContent className="w-80 text-xs" align="start">
-            Drag <PsiBookmarkletLink href={bookmarkletHref} /> to your bookmarks
-            bar. On a PageSpeed Insights report, click it to open the viewer.
+            Drag <PsiBookmarkletLink href={bookmarkletHref} /> to your bookmarks bar. On a PageSpeed
+            Insights report, click it to open the viewer.
           </PopoverContent>
         </Popover>
       </CardFooter>

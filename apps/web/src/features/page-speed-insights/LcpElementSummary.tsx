@@ -1,5 +1,3 @@
-"use client";
-
 import { NodeComponent } from "@/features/page-speed-insights/lh-categories/table/RenderNode";
 import { CompareRunsCard } from "@/features/page-speed-insights/shared/CompareRunsCard";
 import type { LcpElement } from "@/features/page-speed-insights/lcpElement";

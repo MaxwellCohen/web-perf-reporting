@@ -15,8 +15,8 @@ const {
   selectPageSpeedUserLabelFilterToken: Symbol("selectPageSpeedUserLabelFilter"),
 }));
 
-const resetColumnFiltersMock = vi.fn();
-const resetUserLabelFilterMock = vi.fn();
+const resetColumnFiltersMock = vi.fn<() => void>();
+const resetUserLabelFilterMock = vi.fn<() => void>();
 
 let dashboardState = {
   isLoading: false,
@@ -37,14 +37,14 @@ vi.mock("@/features/page-speed-insights/PageSpeedContext", () => ({
     id: "store",
     trigger: {
       resetUserLabelFilter: resetUserLabelFilterMock,
-      setUserLabelFilter: vi.fn(),
+      setUserLabelFilter: vi.fn<() => void>(),
     },
   }),
   useRequiredPageSpeedInsightsStore: () => ({
     id: "store",
     trigger: {
       resetUserLabelFilter: resetUserLabelFilterMock,
-      setUserLabelFilter: vi.fn(),
+      setUserLabelFilter: vi.fn<() => void>(),
     },
   }),
   usePageSpeedItems: () => dashboardState.items,
@@ -158,7 +158,7 @@ vi.mock("@/features/page-speed-insights/tsTable/useLHTable", () => ({
   useLHTable: () => ({
     getColumn: () => ({
       getFilterValue: () => "",
-      setFilterValue: vi.fn(),
+      setFilterValue: vi.fn<() => void>(),
     }),
     resetColumnFilters: () => resetColumnFiltersMock(),
     getRowModel: () => ({ rows: tableRows }),

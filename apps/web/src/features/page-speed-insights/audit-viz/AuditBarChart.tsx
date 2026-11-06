@@ -1,5 +1,3 @@
-"use client";
-
 import { buildGroupedComparison } from "@/features/page-speed-insights/shared/comparisonChartData";
 import { formatBytes, formatMs } from "@/features/page-speed-insights/shared/format";
 import { ReportComparisonBarChart } from "@/features/page-speed-insights/shared/ReportComparisonBarChart";

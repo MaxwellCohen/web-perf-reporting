@@ -1,5 +1,3 @@
-"use client";
-
 import { InteractiveWaterfall } from "@/features/page-speed-insights/waterfall/InteractiveWaterfall";
 import {
   buildWaterfallRows,

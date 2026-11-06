@@ -1,3 +1,4 @@
+import { reconcileLcpAudits } from "@/features/page-speed-insights/shared/reconcileLcpSubparts";
 // Framework-agnostic optimization prompt, built from the report data that is available.
 // Playbook adapted from https://sarthakmishra.com/blog/optimizing-tanstack-start
 import { isEmptyResult } from "@/features/page-speed-insights/ScoreDisplay";
@@ -177,7 +178,7 @@ function lcpArea(reports: Report[]): SpeedUpFocusArea | null {
   let isImage = false;
 
   for (const { label, audits } of reports) {
-    for (const entry of items(audits["lcp-breakdown-insight"])) {
+    for (const entry of items(reconcileLcpAudits(audits)["lcp-breakdown-insight"])) {
       const entryRecord = entry as Record<string, unknown>;
       if (entryRecord.type === "node") {
         const snippet = str(entryRecord.snippet) ?? "";
@@ -194,7 +195,10 @@ function lcpArea(reports: Report[]): SpeedUpFocusArea | null {
       if (entryRecord.type === "table") {
         const rows = Array.isArray(entryRecord.items) ? (entryRecord.items as TableItem[]) : [];
         const subparts = rows
-          .map((row) => `${str(row.label) ?? str(row.subpart)} ${formatMs(num(row.duration))}`)
+          .map(
+            (row) =>
+              `${str(row.label) ?? str(row.subpart) ?? "Unknown subpart"} ${formatMs(num(row.duration))}`,
+          )
           .join(", ");
         if (subparts) evidence.push(withLabel(`LCP breakdown: ${subparts}`, label, multi));
       }

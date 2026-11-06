@@ -1,27 +1,21 @@
 "use client";
-import { useEffect, useState, type ComponentType, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 // Defer posthog-js (311kB client on every route per next-bundle-optimizer
 // audit 'audit-before-1') out of the initial bundle. No static posthog
 // imports here: the library is loaded via async import() after mount, so the
 // initial render only contains this tiny wrapper. Analytics returns no UI,
 // so rendering children immediately preserves behavior.
+// Children are never re-parented: swapping in a context provider after load remounted the
+// whole page and wiped client state (e.g. a file chosen right after page load). Nothing in
+// the app reads the PostHog React context, so we only initialise the client.
 export function PostHogProvider({ children }: { children: ReactNode }) {
-  const [Provider, setProvider] = useState<ComponentType<{
-    client: unknown;
-    children: ReactNode;
-  }> | null>(null);
-  const [client, setClient] = useState<unknown>(null);
-
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const [{ default: posthog }, { PostHogProvider: PHProvider }] = await Promise.all([
-        import("posthog-js"),
-        import("posthog-js/react"),
-      ]);
+      const { default: posthog } = await import("posthog-js");
       const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
-      if (key) {
+      if (key && !cancelled) {
         posthog.init(key, {
           api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
           person_profiles: "identified_only",
@@ -32,16 +26,11 @@ export function PostHogProvider({ children }: { children: ReactNode }) {
           disable_session_recording: true,
         });
       }
-      if (!cancelled) {
-        setClient(posthog);
-        setProvider(() => PHProvider as ComponentType<{ client: unknown; children: ReactNode }>);
-      }
     })();
     return () => {
       cancelled = true;
     };
   }, []);
 
-  if (!Provider || !client) return <>{children}</>;
-  return <Provider client={client}>{children}</Provider>;
+  return <>{children}</>;
 }

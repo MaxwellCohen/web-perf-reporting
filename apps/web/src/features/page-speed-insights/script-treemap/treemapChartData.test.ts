@@ -27,7 +27,9 @@ describe("getTreemapNodeColor", () => {
 
 describe("getTreemapDisplayLabel", () => {
   it("returns short inline names unchanged", () => {
-    expect(getTreemapDisplayLabel("(inline) foo")).toEqual({ primary: "(inline) foo" });
+    expect(getTreemapDisplayLabel("(inline) foo")).toEqual({
+      primary: "(inline) foo",
+    });
   });
 
   it("keeps the (inline) prefix when truncating", () => {
@@ -164,7 +166,7 @@ describe("copyTreemapNodeName", () => {
   });
 
   it("writes the node name to the clipboard", async () => {
-    const writeText = vi.fn().mockResolvedValue(undefined);
+    const writeText = vi.fn<() => void>().mockResolvedValue(undefined);
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
       value: { writeText },
@@ -178,10 +180,16 @@ describe("copyTreemapNodeName", () => {
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
       value: {
-        writeText: vi.fn().mockRejectedValue(new Error("denied")),
+        writeText: vi.fn<() => void>().mockRejectedValue(new Error("denied")),
       },
     });
 
     await expect(copyTreemapNodeName("https://example.com/script.js")).resolves.toBe(false);
+  });
+});
+
+describe("getTreemapNodeColor zero size", () => {
+  it("returns gray when resourceBytes is 0", () => {
+    expect(getTreemapNodeColor(0, 5)).toBe(getTreemapNodeColor(100));
   });
 });

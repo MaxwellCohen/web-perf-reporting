@@ -32,12 +32,10 @@ function TableCardWithTable({
   const data = Array.from({ length: rowCount }, (_, i) => ({ id: `row-${i}` }));
   const table = useSimpleTable({ data, columns: columns as never });
   return (
-    <TableCard
-      title="Test Table"
-      table={table as never}
-      showPagination={showPagination}
-      pageSize={pageSize}
-    />
+    <TableCard title="Test Table">
+      <TableCard.Table table={table as never} />
+      {showPagination ? <TableCard.Pagination table={table as never} pageSize={pageSize} /> : null}
+    </TableCard>
   );
 }
 

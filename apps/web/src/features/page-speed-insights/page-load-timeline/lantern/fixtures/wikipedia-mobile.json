@@ -1,0 +1,334 @@
+{
+  "finalDisplayedUrl": "https://www.wikipedia.org/",
+  "fetchTime": "2026-11-02T17:53:02.960Z",
+  "lighthouseVersion": "13.6.0",
+  "formFactor": "mobile",
+  "audits": {
+    "metrics": {
+      "id": "metrics",
+      "title": "Metrics",
+      "description": "Collects all available metrics.",
+      "score": 1,
+      "scoreDisplayMode": "informative",
+      "details": {
+        "type": "debugdata",
+        "items": [
+          {
+            "observedTimeOrigin": 0,
+            "observedLargestContentfulPaint": 1348,
+            "observedLargestContentfulPaintTs": 1498523580290,
+            "timeToFirstByte": 602,
+            "observedFirstContentfulPaint": 1329,
+            "observedLargestContentfulPaintAllFramesTs": 1498523580290,
+            "observedCumulativeLayoutShift": 0.0005049244901665216,
+            "observedLargestContentfulPaintAllFrames": 1348,
+            "observedFirstVisualChangeTs": 1498523549028,
+            "observedSpeedIndexTs": 1498523679091,
+            "observedFirstPaintTs": 1498523548676,
+            "observedTraceEndTs": 1498525903651,
+            "observedLoadTs": 1498522645690,
+            "interactive": 1219,
+            "observedDomContentLoaded": 407,
+            "observedTraceEnd": 3672,
+            "observedLastVisualChangeTs": 1498525588028,
+            "cumulativeLayoutShift": 0.0005049244901665216,
+            "observedFirstContentfulPaintAllFrames": 1329,
+            "observedDomContentLoadedTs": 1498522639446,
+            "observedFirstContentfulPaintTs": 1498523561325,
+            "observedFirstContentfulPaintAllFramesTs": 1498523561325,
+            "totalBlockingTime": 0,
+            "observedTimeOriginTs": 1498522232028,
+            "observedSpeedIndex": 1447,
+            "observedFirstVisualChange": 1317,
+            "observedFirstPaint": 1317,
+            "observedCumulativeLayoutShiftMainFrame": 0.0005049244901665216,
+            "observedNavigationStartTs": 1498522232028,
+            "speedIndex": 2479,
+            "observedLoad": 414,
+            "maxPotentialFID": 166,
+            "cumulativeLayoutShiftMainFrame": 0.0005049244901665216,
+            "observedLastVisualChange": 3356,
+            "largestContentfulPaint": 1219,
+            "observedNavigationStart": 0,
+            "firstContentfulPaint": 1080
+          },
+          { "lcpInvalidated": false }
+        ]
+      },
+      "numericValue": 1219,
+      "numericUnit": "millisecond"
+    },
+    "network-requests": {
+      "id": "network-requests",
+      "title": "Network Requests",
+      "description": "Lists the network requests that were made during page load.",
+      "score": 1,
+      "scoreDisplayMode": "informative",
+      "details": {
+        "debugData": {
+          "initiators": [
+            {
+              "url": "https://www.wikipedia.org/",
+              "type": "parser",
+              "lineNumber": 30,
+              "columnNumber": 193
+            },
+            {
+              "columnNumber": 65,
+              "url": "https://www.wikipedia.org/",
+              "lineNumber": 1006,
+              "type": "parser"
+            },
+            {
+              "type": "parser",
+              "lineNumber": 1007,
+              "url": "https://www.wikipedia.org/",
+              "columnNumber": 66
+            },
+            {
+              "url": "https://www.wikipedia.org/",
+              "columnNumber": 74,
+              "lineNumber": 1006,
+              "type": "parser"
+            }
+          ],
+          "networkStartTimeTs": 1498522232236,
+          "type": "debugdata"
+        },
+        "items": [
+          {
+            "mimeType": "text/html",
+            "priority": "VeryHigh",
+            "statusCode": 200,
+            "sessionTargetType": "page",
+            "cache": "none",
+            "rendererStartTime": 0,
+            "transferSize": 30411,
+            "experimentalFromMainFrame": true,
+            "url": "https://www.wikipedia.org/",
+            "finished": true,
+            "protocol": "h2",
+            "resourceType": "Document",
+            "networkRequestTime": 1.1130001544952393,
+            "resourceSize": 122421,
+            "entity": "wikipedia.org",
+            "networkEndTime": 55.164000034332275
+          },
+          {
+            "finished": true,
+            "resourceSize": 37479,
+            "statusCode": 200,
+            "priority": "High",
+            "mimeType": "image/png",
+            "networkRequestTime": 73.9449999332428,
+            "url": "https://www.wikipedia.org/portal/wikipedia.org/assets/img/Wikipedia-logo-v2@2x.png",
+            "resourceType": "Image",
+            "entity": "wikipedia.org",
+            "networkEndTime": 109.4760000705719,
+            "sessionTargetType": "page",
+            "cache": "none",
+            "rendererStartTime": 70.71599984169006,
+            "experimentalFromMainFrame": true,
+            "transferSize": 38642,
+            "protocol": "h2"
+          },
+          {
+            "networkEndTime": 99.48299980163574,
+            "entity": "wikipedia.org",
+            "resourceSize": 27735,
+            "protocol": "h2",
+            "resourceType": "Script",
+            "cache": "none",
+            "url": "https://www.wikipedia.org/portal/wikipedia.org/assets/js/index-8dfbdb3a7a.js",
+            "sessionTargetType": "page",
+            "rendererStartTime": 71.12899994850159,
+            "experimentalFromMainFrame": true,
+            "networkRequestTime": 74.45499992370605,
+            "finished": true,
+            "statusCode": 200,
+            "transferSize": 10459,
+            "priority": "Medium",
+            "mimeType": "text/javascript"
+          },
+          {
+            "url": "https://www.wikipedia.org/portal/wikipedia.org/assets/js/gt-ie9-507b16b6be.js",
+            "experimentalFromMainFrame": true,
+            "statusCode": 200,
+            "entity": "wikipedia.org",
+            "sessionTargetType": "page",
+            "transferSize": 1747,
+            "rendererStartTime": 71.23399996757507,
+            "protocol": "h2",
+            "finished": true,
+            "resourceSize": 580,
+            "networkEndTime": 109.19700002670288,
+            "resourceType": "Script",
+            "priority": "Medium",
+            "mimeType": "text/javascript",
+            "networkRequestTime": 77.1729998588562,
+            "cache": "none"
+          },
+          {
+            "resourceSize": 51190,
+            "mimeType": "image/svg+xml",
+            "priority": "High",
+            "url": "https://www.wikipedia.org/portal/wikipedia.org/assets/img/sprite-e49fbf32.svg",
+            "statusCode": 200,
+            "networkEndTime": 103.92899990081787,
+            "networkRequestTime": 84.11099982261658,
+            "finished": true,
+            "resourceType": "Image",
+            "cache": "none",
+            "sessionTargetType": "page",
+            "protocol": "h2",
+            "rendererStartTime": 83.48200011253357,
+            "entity": "wikipedia.org",
+            "experimentalFromMainFrame": true,
+            "transferSize": 19472
+          }
+        ],
+        "type": "table",
+        "headings": [
+          { "valueType": "url", "label": "URL", "key": "url" },
+          { "valueType": "text", "label": "Protocol", "key": "protocol" },
+          {
+            "label": "Network Request Time",
+            "valueType": "ms",
+            "key": "networkRequestTime",
+            "granularity": 1
+          },
+          {
+            "label": "Network End Time",
+            "key": "networkEndTime",
+            "granularity": 1,
+            "valueType": "ms"
+          },
+          {
+            "label": "Transfer Size",
+            "displayUnit": "kb",
+            "key": "transferSize",
+            "granularity": 1,
+            "valueType": "bytes"
+          },
+          {
+            "valueType": "bytes",
+            "displayUnit": "kb",
+            "key": "resourceSize",
+            "label": "Resource Size",
+            "granularity": 1
+          },
+          { "label": "Status Code", "key": "statusCode", "valueType": "text" },
+          { "key": "mimeType", "label": "MIME Type", "valueType": "text" },
+          { "key": "resourceType", "label": "Resource Type", "valueType": "text" }
+        ]
+      }
+    },
+    "main-thread-tasks": {
+      "id": "main-thread-tasks",
+      "title": "Tasks",
+      "description": "Lists the toplevel main thread tasks that executed during page load.",
+      "score": 1,
+      "scoreDisplayMode": "informative",
+      "details": {
+        "items": [
+          { "duration": 12.558, "startTime": 59.351 },
+          { "startTime": 72.395, "duration": 10.008 },
+          { "duration": 276.137, "startTime": 82.41 },
+          { "startTime": 358.561, "duration": 10.794 },
+          { "startTime": 372.623, "duration": 28.493 },
+          { "duration": 8.537, "startTime": 405.653 },
+          { "duration": 6.535, "startTime": 1308.618 },
+          { "duration": 5.507, "startTime": 1325.02 }
+        ],
+        "headings": [
+          { "valueType": "ms", "granularity": 1, "key": "startTime", "label": "Start Time" },
+          { "granularity": 1, "label": "End Time", "valueType": "ms", "key": "duration" }
+        ],
+        "type": "table"
+      }
+    },
+    "server-response-time": {
+      "id": "server-response-time",
+      "title": "Initial server response time was short",
+      "description": "Keep the server response time for the main document short because all other requests depend on it. [Learn more about the Time to First Byte metric](https://developer.chrome.com/docs/lighthouse/performance/time-to-first-byte/).",
+      "score": 1,
+      "scoreDisplayMode": "metricSavings",
+      "displayValue": "Root document took 10\u00a0ms",
+      "metricSavings": { "LCP": 0, "FCP": 0 },
+      "details": {
+        "headings": [
+          { "key": "url", "valueType": "url", "label": "URL" },
+          { "label": "Time Spent", "valueType": "timespanMs", "key": "responseTime" }
+        ],
+        "items": [{ "responseTime": 11, "url": "https://www.wikipedia.org/" }],
+        "type": "opportunity",
+        "overallSavingsMs": 0
+      },
+      "numericValue": 11,
+      "numericUnit": "millisecond"
+    },
+    "render-blocking-insight": {
+      "id": "render-blocking-insight",
+      "title": "Render-blocking requests",
+      "description": "Requests are blocking the page\u2019s initial render, which may delay LCP. [Deferring or inlining](https://developer.chrome.com/docs/performance/insights/render-blocking) can move these network requests out of the critical path.",
+      "score": 1,
+      "scoreDisplayMode": "metricSavings",
+      "metricSavings": { "LCP": 0, "FCP": 0 },
+      "details": {
+        "type": "table",
+        "headings": [
+          { "label": "URL", "key": "url", "valueType": "url" },
+          { "key": "totalBytes", "valueType": "bytes", "label": "Transfer Size" },
+          { "label": "Duration", "key": "wastedMs", "valueType": "timespanMs" }
+        ],
+        "items": []
+      },
+      "numericValue": 0,
+      "numericUnit": "millisecond"
+    },
+    "lcp-breakdown-insight": {
+      "id": "lcp-breakdown-insight",
+      "title": "LCP breakdown",
+      "description": "Each [subpart has specific improvement strategies](https://developer.chrome.com/docs/performance/insights/lcp-breakdown). Ideally, most of the LCP time should be spent on loading the resources, not within delays.",
+      "score": 1,
+      "scoreDisplayMode": "informative",
+      "metricSavings": { "LCP": 0 },
+      "details": {
+        "items": [
+          {
+            "items": [
+              { "label": "Time to first byte", "subpart": "timeToFirstByte", "duration": 11.208 },
+              {
+                "duration": 1337.054,
+                "label": "Element render delay",
+                "subpart": "elementRenderDelay"
+              }
+            ],
+            "headings": [
+              { "key": "label", "valueType": "text", "label": "Subpart" },
+              { "key": "duration", "valueType": "ms", "label": "Duration" }
+            ],
+            "type": "table"
+          },
+          {
+            "selector": "div.overlay-banner-main > div.overlay-banner-main-scroll > div.overlay-banner-main-message > p",
+            "boundingRect": {
+              "top": 306,
+              "width": 344,
+              "left": 34,
+              "right": 378,
+              "height": 192,
+              "bottom": 498
+            },
+            "path": "1,HTML,1,BODY,0,MAIN,5,DIV,0,DIV,0,DIV,2,DIV,0,DIV,2,P",
+            "nodeLabel": "You deserve an explanation, so please don't skip this 1-minute read. This year,\u2026",
+            "type": "node",
+            "snippet": "<p>",
+            "lhId": "page-1-P"
+          }
+        ],
+        "type": "list"
+      }
+    }
+  }
+}

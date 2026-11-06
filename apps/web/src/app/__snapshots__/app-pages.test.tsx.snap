@@ -82,7 +82,7 @@ exports[`app page coverage smoke tests > renders the home page cards and destina
       <pre
         class="flex-1 whitespace-pre-wrap font-mono text-sm"
       >
-        Read https://web-perf-report.vercel.app/llms.txt and follow it to find performance improvements for this project. First ask me what to test: a local production build of this repo, the staging environment, or live production. Then run Lighthouse against that target (never the dev server), POST the results for analysis, then work through the speed-up prompt it returns, fixing one focus area at a time and re-measuring after each change.
+        Read https://web-perf-report.vercel.app/llms.txt and use it to speed up this project. Audit a production build, fix one issue at a time on a new branch, and re-measure after each change.
       </pre>
       <button
         aria-label="Copy agent prompt"
@@ -128,7 +128,7 @@ exports[`app page coverage smoke tests > renders the home page cards and destina
       Or explore the data yourself
     </h2>
     <div
-      class="grid md:grid-cols-2 lg:grid-cols-4 gap-4"
+      class="grid md:grid-cols-2 lg:grid-cols-5 gap-4"
     >
       <a
         class="inline-flex justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-auto flex-col items-start gap-1 whitespace-normal p-4 text-left no-underline"
@@ -194,18 +194,24 @@ exports[`app page coverage smoke tests > renders the home page cards and destina
           Inspect reports from your experiments
         </span>
       </a>
+      <a
+        class="inline-flex justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-auto flex-col items-start gap-1 whitespace-normal p-4 text-left no-underline"
+        href="/trace"
+      >
+        <span
+          class="font-semibold"
+        >
+          Trace timeline
+           →
+        </span>
+        <span
+          class="text-sm font-normal text-muted-foreground"
+        >
+          Analyze a Chrome performance trace
+        </span>
+      </a>
     </div>
   </section>
-</div>
-`;
-
-exports[`app page coverage smoke tests > renders the lightweight lh and viewer pages 1`] = `
-<div
-  class="max-w-screen-2xl mx-auto"
->
-  <div>
-    Mock viewer page
-  </div>
 </div>
 `;
 
@@ -227,5 +233,15 @@ exports[`app page coverage smoke tests > renders the page speed layout shell and
 exports[`app page coverage smoke tests > renders the page speed lookup form when no URL is present 1`] = `
 <div>
   Mock URL lookup form
+</div>
+`;
+
+exports[`app page coverage smoke tests > renders the viewer page 1`] = `
+<div
+  class="max-w-screen-2xl mx-auto"
+>
+  <div>
+    Mock viewer page
+  </div>
 </div>
 `;

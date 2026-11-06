@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import type { TableItem } from "@/lib/schema";
 import { getNumber, getUrlString } from "@/lib/utils";
 import { sortByMaxValue } from "@/features/page-speed-insights/shared/dataSortingHelpers";
-import type { StockColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import type { StockAnyColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 import {
   createMSColumn,
@@ -33,7 +32,7 @@ type BootupTimeCardProps = {
 
 const columnHelper = createStockColumnHelper<BootupTimeTableRow>();
 
-const cols: StockColumnDef<BootupTimeTableRow, unknown>[] = [
+const cols: StockAnyColumnDef<BootupTimeTableRow>[] = [
   createURLColumn(columnHelper),
   createMSColumn(columnHelper, "scriptParseCompile", "Parse & Compile"),
   createMSColumn(columnHelper, "scripting", "Scripting"),
@@ -76,7 +75,7 @@ function BootupTimeTable({
   columns,
 }: {
   data: BootupTimeTableRow[];
-  columns: StockColumnDef<BootupTimeTableRow, any>[];
+  columns: StockAnyColumnDef<BootupTimeTableRow>[];
 }) {
   const table = useStandardTable({
     data,
@@ -86,5 +85,10 @@ function BootupTimeTable({
     defaultPageSize: 10,
   });
 
-  return <TableCard title="JavaScript Bootup Time" table={table} showPagination />;
+  return (
+    <TableCard title="JavaScript Bootup Time" className="md:col-span-2 lg:col-span-3">
+      <TableCard.Table table={table} />
+      <TableCard.Pagination table={table} />
+    </TableCard>
+  );
 }

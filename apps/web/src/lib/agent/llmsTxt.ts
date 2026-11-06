@@ -7,7 +7,19 @@ export function buildLlmsTxt(siteUrl: string): string {
 
 ## How to find performance improvements for a site
 
-1. Run Lighthouse yourself (needs Node and Chrome). Mobile:
+1. Run one command (needs Node and Chrome). It runs Lighthouse for mobile and desktop and prints the report:
+
+   npx -y @maxwellcohen/web-perf-report https://example.com
+
+   If npx cannot find the package, use the manual flow in step 2.
+
+   Options: \`--device mobile|desktop|both\`, \`--format md|json\`, \`--file report.json\` (analyze an existing Lighthouse/PSI JSON). Lighthouse runs locally, so localhost and dev/preview servers work. Audit a production build (e.g. \`next build && next start\`), not a dev server.
+
+   MCP: to give your agent \`audit_site\` and \`analyze_report\` tools, add this stdio server config: \`{"command":"npx","args":["-y","@maxwellcohen/web-perf-report","mcp"]}\`
+
+2. Alternative / manual: run Lighthouse yourself and POST the JSON.
+
+   Mobile:
 
    npx -y lighthouse https://example.com --output=json --output-path=mobile.json --only-categories=performance,accessibility,best-practices,seo --disable-full-page-screenshot --skip-audits=screenshot-thumbnails,final-screenshot --chrome-flags="--headless=new" --quiet
 
@@ -18,7 +30,7 @@ export function buildLlmsTxt(siteUrl: string): string {
    curl -o mobile.json "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=https://example.com&strategy=mobile&category=PERFORMANCE&category=ACCESSIBILITY&category=AGENTIC_BROWSING&category=BEST_PRACTICES&category=SEO&key=$PAGESPEED_API_KEY"
    This only works for publicly reachable URLs.
 
-2. POST the result for analysis (markdown is the most token-efficient):
+   POST the result for analysis (markdown is the most token-efficient):
 
    curl -s -X POST "${api}?format=md" -H "content-type: application/json" --data-binary @mobile.json
 
@@ -33,6 +45,13 @@ export function buildLlmsTxt(siteUrl: string): string {
    - **Platform notes**: Baseline browser-support status of web features the page uses, and Content Security Policy findings.
 
 4. Work through the speed-up prompt one focus area at a time, rebuild, re-run Lighthouse, and POST again to compare. Lab scores vary a few points between runs; compare more than one run before concluding a change helped.
+
+## Rules
+
+- Work on a new branch; don't push or deploy.
+- Only POST pages you may share.
+- Run each audit 3 times (re-run the command) and compare medians. Revert changes that fail tests or don't help.
+- End with a before/after table.
 
 ## Streaming timing (when does the HTML actually finish?)
 
@@ -61,6 +80,14 @@ Query parameters:
 Responses:
 - 200 — JSON fields: \`url\`, \`speedUpPrompt\` (the personalized prompt, markdown), \`reports[]\` (\`label\`, \`finalUrl\`, \`scores\`, \`lab\`, \`field\`, \`platformNotes\`), \`issues[]\` (\`id\`, \`category\`, \`title\`, \`description\`, \`score\`, \`displayValue\`, \`metricSavings\`, \`savingsBytes\`, \`reports\`, \`examples\`), \`focusAreas[]\` (\`id\`, \`title\`, \`evidence\`, \`advice\`).
 - 400 — body is not JSON or contains no Lighthouse result.
+
+## Trace analysis (POST /api/agent/trace)
+
+Record a Chrome trace of any URL and get findings back:
+
+\`node scripts/record-trace.mjs <url> --cpu 4 --api ${siteUrl} --format md\`
+
+Or POST an existing trace (.json, under 4 MB) to \`${siteUrl}/api/agent/trace\`. \`?format=md\` returns the fix prompt; the default JSON has \`summary\`, \`metrics\` (ttfb, fcp, lcp, cls, blockingMs), \`analysis\` (key events, phases, scripts, hot functions) and \`brief\`. 400 means the body was not a usable trace. For the interactive timeline, open \`${siteUrl}/trace\`.
 
 ## Human UI
 

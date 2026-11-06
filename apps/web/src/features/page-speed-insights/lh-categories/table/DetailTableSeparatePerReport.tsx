@@ -7,7 +7,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
+import { useIsEmbeddedDetails } from "@/features/page-speed-insights/lh-categories/EmbeddedDetails";
+import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 import {
   compareReportLabels,
   formatReportTableTitle,
@@ -93,12 +94,11 @@ function LabelChip({ name, value }: { name: string; value: string }) {
 export function DetailTableSeparatePerReport({
   rows,
   title,
-  embedded = false,
 }: {
   rows: DetailTableItem[];
   title: string;
-  embedded?: boolean;
 }) {
+  const embedded = useIsEmbeddedDetails();
   const rowsByReport = groupRowsByReportLabel(rows);
 
   const sortedReports = getSortedReports(rowsByReport);
@@ -176,9 +176,5 @@ function ReportTable({
     columns: reportColumns as FlatColumnDef<TableItem | OpportunityItem>[],
   });
 
-  return (
-    <div className="w-full overflow-x-auto">
-      <StockDataTable table={table} />
-    </div>
-  );
+  return <TableCard.Table table={table} />;
 }

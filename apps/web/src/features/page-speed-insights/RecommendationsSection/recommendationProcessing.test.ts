@@ -41,6 +41,19 @@ describe("recommendationProcessing", () => {
       expect(result.impact.metric).toBe("First Contentful Paint");
       expect(result.impact.savings).toBe(100);
     });
+
+    it("treats INP savings as milliseconds", () => {
+      const result = processMetricSavingsAudit(
+        "unused-css-rules",
+        baseAudit as any,
+        [] as any,
+        "INP",
+        100,
+        0.5,
+        [],
+      );
+      expect(result.impact.unit).toBe("ms");
+    });
   });
 
   describe("processFailedAudit", () => {

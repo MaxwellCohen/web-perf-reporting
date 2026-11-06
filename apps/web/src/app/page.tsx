@@ -25,10 +25,15 @@ const tools: { title: string; description: string; url: Route }[] = [
     description: "Inspect reports from your experiments",
     url: "/viewer",
   },
+  {
+    title: "Trace timeline",
+    description: "Analyze a Chrome performance trace",
+    url: "/trace",
+  },
 ];
 
 export default function Home() {
-  const agentPrompt = `Read ${getSiteUrl()}/llms.txt and follow it to find performance improvements for this project. First ask me what to test: a local production build of this repo, the staging environment, or live production. Then run Lighthouse against that target (never the dev server), POST the results for analysis, then work through the speed-up prompt it returns, fixing one focus area at a time and re-measuring after each change.`;
+  const agentPrompt = `Read ${getSiteUrl()}/llms.txt and use it to speed up this project. Audit a production build, fix one issue at a time on a new branch, and re-measure after each change.`;
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -53,7 +58,7 @@ export default function Home() {
         <h2 className="text-center text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-4">
           Or explore the data yourself
         </h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
           {tools.map((tool) => (
             <Button
               key={tool.url}

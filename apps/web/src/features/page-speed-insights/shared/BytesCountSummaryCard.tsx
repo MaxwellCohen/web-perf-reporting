@@ -47,5 +47,9 @@ export function BytesCountSummaryCard({
     return null;
   }
 
-  return <TableCard title={title} table={table} className="" />;
+  return (
+    <TableCard title={title}>
+      <TableCard.Table table={table} />
+    </TableCard>
+  );
 }

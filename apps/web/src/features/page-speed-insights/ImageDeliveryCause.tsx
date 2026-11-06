@@ -1,10 +1,8 @@
-"use client";
-
-import type { CauseAuditEntry } from "@/features/page-speed-insights/metricCauseAudits";
 import { formatBytes } from "@/features/page-speed-insights/shared/format";
 import { ResourceUrlCell } from "@/features/page-speed-insights/shared/ResourceUrlCell";
 import {
   imageSizeLines,
+  type ImageDeliveryEntry,
   summarizeImageDelivery,
   type ImageDeliveryImage,
   type ImageDeliveryOptimization,
@@ -67,7 +65,7 @@ function ImageRow({ image }: { image: ImageDeliveryImage }) {
   );
 }
 
-export function ImageDeliveryCause({ entries }: { entries: CauseAuditEntry["entries"] }) {
+export function ImageDeliveryCause({ entries }: { entries: ImageDeliveryEntry[] }) {
   const { images } = summarizeImageDelivery(entries);
 
   if (!images.length) {

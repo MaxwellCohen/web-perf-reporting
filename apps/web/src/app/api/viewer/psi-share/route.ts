@@ -1,8 +1,16 @@
+import { parseViewerJsonString } from "@/components/viewer/parseViewerJson";
 import {
+  LighthouseViewerGistError,
+  fetchLighthouseViewerGist,
+  parseLighthouseViewerGistId,
+} from "@/lib/viewer/lighthouseViewerGist";
+import {
+  PsiShareExtractError,
   extractLighthouseFromPsiShareHtml,
   labelForPsiLighthouse,
+  type PsiEmbeddedLighthouse,
 } from "@/lib/viewer/extractLighthouseFromPsiShareHtml";
-import { PsiShareUrlError, fetchPsiShareHtml, parsePsiShareUrl } from "@/lib/viewer/psiShareUrl";
+import { PsiShareFetchError, PsiShareUrlError, fetchPsiShareHtml, parsePsiShareUrl } from "@/lib/viewer/psiShareUrl";
 
 export const maxDuration = 60;
 
@@ -21,6 +29,30 @@ export async function POST(request: Request) {
   }
 
   try {
+    const gistId = parseLighthouseViewerGistId(url);
+    if (gistId) {
+      let reports: ReturnType<typeof parseViewerJsonString>;
+      try {
+        reports = parseViewerJsonString(await fetchLighthouseViewerGist(gistId));
+      } catch (error) {
+        if (error instanceof SyntaxError) {
+          return Response.json(
+            { error: "Gist does not contain a valid Lighthouse report" },
+            { status: 400 },
+          );
+        }
+        throw error;
+      }
+      return Response.json({
+        data: reports,
+        labels: reports.map((report, index) =>
+          labelForPsiLighthouse(
+            (report.lighthouseResult ?? {}) as unknown as PsiEmbeddedLighthouse,
+            index,
+          ),
+        ),
+      });
+    }
     const shareUrl = parsePsiShareUrl(url);
     const html = await fetchPsiShareHtml(shareUrl);
     const reports = extractLighthouseFromPsiShareHtml(html);
@@ -29,10 +61,14 @@ export async function POST(request: Request) {
       labels: reports.map((report, index) => labelForPsiLighthouse(report, index)),
     });
   } catch (error) {
-    if (error instanceof PsiShareUrlError) {
+    if (error instanceof PsiShareUrlError || error instanceof LighthouseViewerGistError) {
       return Response.json({ error: error.message }, { status: 400 });
     }
-    const message = error instanceof Error ? error.message : "Could not import PageSpeed report";
-    return Response.json({ error: message }, { status: 502 });
+    if (error instanceof PsiShareFetchError || error instanceof PsiShareExtractError) {
+      return Response.json({ error: error.message }, { status: 502 });
+    }
+    // Unexpected failure: keep internals out of the response.
+    console.error("PSI share import failed:", error);
+    return Response.json({ error: "Could not import PageSpeed report" }, { status: 502 });
   }
 }

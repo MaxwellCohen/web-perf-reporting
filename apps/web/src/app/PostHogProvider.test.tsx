@@ -1,19 +1,13 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-const posthogInitMock = vi.fn();
+const posthogInitMock = vi.fn<(...args: unknown[]) => void>();
 
 vi.mock("posthog-js", () => ({
   default: {
     init: (...args: unknown[]) => posthogInitMock(...args),
-    capture: vi.fn(),
+    capture: vi.fn<() => void>(),
   },
-}));
-
-vi.mock("posthog-js/react", () => ({
-  PostHogProvider: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="posthog-provider">{children}</div>
-  ),
 }));
 
 import { PostHogProvider } from "@/app/PostHogProvider";
@@ -27,8 +21,8 @@ describe("app/PostHogProvider", () => {
       </PostHogProvider>,
     );
 
-    // Children render immediately; provider initializes async after mount.
-    expect(screen.getByText("Provider child")).toBeInTheDocument();
+    // Children render immediately; posthog initializes async after mount.
+    const child = screen.getByText("Provider child");
 
     await waitFor(() => {
       expect(posthogInitMock).toHaveBeenCalledWith("test-key", {
@@ -40,8 +34,7 @@ describe("app/PostHogProvider", () => {
         disable_session_recording: true,
       });
     });
-    await waitFor(() => {
-      expect(screen.getByTestId("posthog-provider")).toBeInTheDocument();
-    });
+    // Children must not be remounted/re-parented after init.
+    expect(screen.getByText("Provider child")).toBe(child);
   });
 });

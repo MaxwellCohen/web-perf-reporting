@@ -1,5 +1,3 @@
-"use client";
-
 import { createOptionalNumericCell } from "@/features/page-speed-insights/shared/tableColumnHelpers";
 import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";

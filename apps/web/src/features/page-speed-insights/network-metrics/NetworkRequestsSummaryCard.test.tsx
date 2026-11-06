@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NetworkRequestsSummaryCard } from "@/features/page-speed-insights/network-metrics/NetworkRequestsSummaryCard";
 import type { NetworkRequestStatsRow } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsData";
 
-const mockUseNetworkRequestStats = vi.hoisted(() => vi.fn());
+const mockUseNetworkRequestStats = vi.hoisted(() => vi.fn<() => unknown>());
 
 vi.mock("@/features/page-speed-insights/network-metrics/useNetworkMetricsStore", () => ({
   useNetworkRequestStats: () => mockUseNetworkRequestStats(),

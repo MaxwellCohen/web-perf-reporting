@@ -8,12 +8,12 @@ vi.mock("react", async (importOriginal) => {
   const actual = await importOriginal<typeof import("react")>();
   return {
     ...actual,
-    useId: vi.fn(),
+    useId: vi.fn<() => string>(),
   };
 });
 
 // Mock @radix-ui/react-id so Radix primitives get stable IDs (they may use a different React instance)
-const radixUseId = vi.fn();
+const radixUseId = vi.fn<() => string>();
 vi.mock("@radix-ui/react-id", () => ({
   useId: radixUseId.mockReturnValue("_r_"),
 }));

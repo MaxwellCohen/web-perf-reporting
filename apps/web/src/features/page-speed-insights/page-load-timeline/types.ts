@@ -58,6 +58,10 @@ export type TimelineWaterfallBar = {
   priority?: string;
   /** Set on downloaded resources. */
   renderBlocking?: RenderBlockingStatus;
+  /** Render-blocking or on the critical request chain. */
+  criticalPath?: boolean;
+  /** Set when the interpolated duration is shorter than the throttled link could carry these bytes. */
+  linkWarning?: string;
   /** Main-thread task bars: short vs long coloring in WaterfallBarTrack. */
   taskKind?: "short" | "long";
   /** bootup-time CPU for this script URL. */
@@ -119,6 +123,15 @@ export type TimelineEvent = {
   isPhaseStart?: boolean;
 };
 
+/** How far our replay of the page load lands from Lighthouse's own simulated metric. */
+export type ModelCheckMetric = {
+  label: "FCP" | "LCP";
+  lighthouseMs: number;
+  modelMs: number;
+  /** (model − Lighthouse) / Lighthouse. */
+  error: number;
+};
+
 export type PageLoadTimeline = {
   label: string;
   /** Chronological rows for the vertical scroll UI (0ms first). */
@@ -127,4 +140,8 @@ export type PageLoadTimeline = {
   axisEndMs: number;
   /** Set when times were moved onto Lighthouse's simulated CPU and network. */
   simulationLabel?: string;
+  /** Why request durations can't be read as throttled download times. Set with `simulationLabel`. */
+  timesNote?: string;
+  /** Set when the replay could be run; shows how well the model matches Lighthouse. */
+  modelCheck?: ModelCheckMetric[];
 };

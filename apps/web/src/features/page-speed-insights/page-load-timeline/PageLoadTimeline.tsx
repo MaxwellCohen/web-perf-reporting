@@ -1,1043 +1,49 @@
 "use client";
-/* eslint-disable @next/next/no-img-element */
 
-import { Fragment, useEffect, useId, useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
-import { RenderNodeImage } from "@/features/page-speed-insights/lh-categories/table/RenderNode";
 import { patchDashboardSearch } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
-import {
-  getCompareRuns,
-  pairByFormFactor,
-} from "@/features/page-speed-insights/shared/compareRuns";
-import { formatMs, formatNetworkPriority } from "@/features/page-speed-insights/shared/format";
-import {
-  chainLabel,
-  scriptCpuLabel,
-} from "@/features/page-speed-insights/shared/scriptResourceFacts";
-import { ResourceUrlCell } from "@/features/page-speed-insights/shared/ResourceUrlCell";
-import { RenderBlockingBadge } from "@/features/page-speed-insights/waterfall/renderBlockingBadge";
-import { UnifiedWaterfall } from "@/features/page-speed-insights/waterfall/UnifiedWaterfall";
-import { WaterfallBarTrack } from "@/features/page-speed-insights/waterfall/WaterfallBarTrack";
-import {
-  waterfallRowFromLcpSegments,
-  waterfallRowFromTimelineBar,
-  type WaterfallRowKind,
-} from "@/features/page-speed-insights/waterfall/waterfallData";
-import { cn } from "@/lib/cn";
-import { buildAlignedCompareRows, type AlignedCompareRow } from "./buildAlignedCompareRows";
+import { CollapsibleUnifiedWaterfall } from "@/features/page-speed-insights/waterfall/UnifiedWaterfall";
+import { AlignedCompareMoments } from "./AlignedCompareMoments";
 import { buildPageLoadTimelineBundles } from "./buildPageLoadTimeline";
 import {
   TASK_FILTERS,
   availableTaskFilters,
-  filterTimelineMoments,
   resolveTaskFilterSelection,
-  TASK_FILTER_LABEL,
   type TaskFilterId,
-  type TaskFilterSelection,
 } from "./filterTimelineMoments";
+import { momentIdPrefixFromLabel } from "./MomentRow";
+import { ModelCheck } from "./ModelCheck";
+import { TaskFilters } from "./TaskFilters";
+import { TimelineLegend } from "./TimelineLegend";
+import { TimelinePane, TimelinePaneLabel, timelineDisplayName } from "./TimelinePane";
+import {
+  TIMELINE_COMPARE_MAX,
+  filterBundleTimeline,
+  resolveSelectedLabels,
+  toggleSelectedLabel,
+} from "./timelineSelection";
 import { timelineToMarkdown } from "./timelineToMarkdown";
-import type {
-  MarkerKind,
-  PageLoadTimeline,
-  Rating,
-  RenderBlockingStatus,
-  TimelineEvent,
-  TimelineNote,
-  TimelineTable,
-  TimelineWaterfallBar,
-} from "./types";
-import type { CombinedLoad } from "./collectTimelineSources";
-
-const UNATTRIBUTED_LABEL = "Unattributed";
-
-const UNATTRIBUTED_HINT =
-  "Lighthouse recorded this long task on the main thread but did not attribute it to a script URL. The work is often browser parsing, style, or layout, an inline script, or a task the trace could not tie to a file.";
-
-function UnattributedLabel() {
-  const descriptionId = `unattributed-hint-${useId()}`;
-  const [open, setOpen] = useState(false);
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className="inline cursor-help border-0 bg-transparent p-0 font-[inherit] text-[length:inherit] leading-[inherit] text-inherit underline decoration-dotted decoration-current/60 underline-offset-2"
-          aria-describedby={descriptionId}
-          onMouseEnter={() => setOpen(true)}
-          onMouseLeave={() => setOpen(false)}
-          onFocus={() => setOpen(true)}
-          onBlur={() => setOpen(false)}
-        >
-          {UNATTRIBUTED_LABEL}
-        </button>
-      </PopoverTrigger>
-      <span id={descriptionId} className="sr-only">
-        {UNATTRIBUTED_HINT}
-      </span>
-      <PopoverContent
-        side="top"
-        align="start"
-        role="tooltip"
-        className="w-64 p-3 text-xs font-normal leading-relaxed"
-        onOpenAutoFocus={(event) => event.preventDefault()}
-        onCloseAutoFocus={(event) => event.preventDefault()}
-      >
-        {UNATTRIBUTED_HINT}
-      </PopoverContent>
-    </Popover>
-  );
-}
-
-function textWithUnattributedHint(text: string) {
-  if (!text.includes(UNATTRIBUTED_LABEL)) return text;
-  const parts = text.split(UNATTRIBUTED_LABEL);
-  return parts.map((part, index) => (
-    <Fragment key={index}>
-      {part}
-      {index < parts.length - 1 ? <UnattributedLabel /> : null}
-    </Fragment>
-  ));
-}
-
-function ratingClass(rating?: Rating): string {
-  if (rating === "good") return "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300";
-  if (rating === "needs-improvement") return "bg-amber-500/15 text-amber-800 dark:text-amber-300";
-  if (rating === "poor") return "bg-rose-500/15 text-rose-700 dark:text-rose-300";
-  return "bg-muted text-muted-foreground";
-}
-
-const RENDER_BLOCKING_ORDER: RenderBlockingStatus[] = [
-  "blocking",
-  "potentially-blocking",
-  "non-blocking",
-];
-
-function blockingStatuses(bars?: TimelineWaterfallBar[]): RenderBlockingStatus[] {
-  const present = new Set<RenderBlockingStatus>();
-  for (const bar of bars ?? []) {
-    if (bar.renderBlocking) present.add(bar.renderBlocking);
-  }
-  return RENDER_BLOCKING_ORDER.filter((status) => present.has(status));
-}
-
-function markerDotClass(kind: MarkerKind, rating?: Rating): string {
-  if (kind === "blocking") return "bg-rose-500";
-  if (kind === "potentially-blocking") return "bg-amber-500";
-  if (kind === "cwv") {
-    if (rating === "good") return "bg-emerald-500";
-    if (rating === "poor") return "bg-rose-500";
-    return "bg-amber-500";
-  }
-  if (kind === "fact") return "bg-muted-foreground/50";
-  return "bg-sky-500";
-}
-
-function MomentScreenshot({ timing, data }: { timing: number; data: string }) {
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <button
-          type="button"
-          className="shrink-0 overflow-hidden rounded-md border bg-background shadow-sm transition hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <img
-            src={data}
-            alt={`Page at ${formatMs(timing)}`}
-            className="h-28 w-auto max-w-[7rem] object-cover sm:h-32 sm:max-w-[9rem]"
-            loading="lazy"
-            decoding="async"
-          />
-          <span className="block border-t px-1.5 py-0.5 text-center text-[10px] tabular-nums text-muted-foreground">
-            {formatMs(timing)}
-          </span>
-        </button>
-      </DialogTrigger>
-      <DialogContent className="max-w-3xl">
-        <DialogTitle>Screenshot at {formatMs(timing)}</DialogTitle>
-        <img
-          src={data}
-          alt={`Page at ${formatMs(timing)}`}
-          className="max-h-[70vh] w-full object-contain"
-        />
-        <DialogClose asChild>
-          <Button type="button">Close</Button>
-        </DialogClose>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function LcpBreakdown({
-  segments,
-  axisEnd,
-}: {
-  segments: NonNullable<TimelineEvent["lcpSegments"]>;
-  axisEnd: number;
-}) {
-  const row = waterfallRowFromLcpSegments(segments);
-  if (!row) return null;
-  const scale = axisEnd > 0 ? axisEnd : Math.max(row.networkEnd, 1);
-  return (
-    <div className="mt-2 space-y-1" data-testid="moment-lcp-breakdown">
-      <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-        LCP breakdown
-      </div>
-      <WaterfallBarTrack row={row} minStart={0} maxEnd={scale} height={8} />
-      <ul className="grid gap-0.5 text-[11px] text-muted-foreground sm:grid-cols-2">
-        {segments.map((seg) => (
-          <li key={seg.subpart}>
-            {seg.label}:{" "}
-            <span className="tabular-nums text-foreground">{formatMs(seg.durationMs)}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function barTimingLabel(bar: TimelineWaterfallBar, row: TimelineTable["rows"][number] | undefined) {
-  const range = `${formatMs(bar.startMs)}–${formatMs(bar.endMs)}`;
-  const startLabel = formatMs(bar.startMs);
-  const extras = (row ?? [])
-    .slice(1)
-    .map((cell) => cell.text)
-    .filter((text) => text.length > 0 && text !== startLabel);
-  return extras.length ? `${range} · ${extras.join(" · ")}` : range;
-}
-
-function scriptDownloadLabel(bar: TimelineWaterfallBar): string | null {
-  const window =
-    bar.downloadStartMs != null && bar.downloadEndMs != null
-      ? `${formatMs(bar.downloadStartMs)}–${formatMs(bar.downloadEndMs)}`
-      : null;
-  const download = window
-    ? `downloaded ${window}${bar.downloadDuration ? ` (${bar.downloadDuration})` : ""}`
-    : bar.downloadDuration
-      ? `downloaded in ${bar.downloadDuration}`
-      : null;
-  const parts = [bar.scriptSize, download].filter((part): part is string => Boolean(part));
-  return parts.length > 0 ? parts.join(" · ") : null;
-}
-
-function BarIdentity({ bar }: { bar: TimelineWaterfallBar }) {
-  if (bar.href) return <ResourceUrlCell url={bar.href} />;
-  if (bar.label === UNATTRIBUTED_LABEL) return <UnattributedLabel />;
-  return (
-    <p className="truncate text-[11px] text-muted-foreground" title={bar.label}>
-      {bar.label}
-    </p>
-  );
-}
-
-function WaterfallRows({
-  bars,
-  table,
-  axisEnd,
-  showBlockingBadge,
-  rowKind = "request",
-}: {
-  bars: TimelineWaterfallBar[];
-  table?: TimelineTable;
-  axisEnd: number;
-  showBlockingBadge: boolean;
-  rowKind?: WaterfallRowKind;
-}) {
-  const scale = axisEnd > 0 ? axisEnd : Math.max(...bars.map((b) => b.endMs), 1);
-
-  return (
-    <div className="space-y-2" data-testid="moment-waterfall">
-      {bars.map((bar, index) => {
-        const downloadLabel = scriptDownloadLabel(bar);
-        const cpuLabel = scriptCpuLabel(bar.scriptCpu);
-        const chainText = chainLabel(bar.chain);
-        const kind: WaterfallRowKind =
-          rowKind === "task" || bar.taskKind != null || bar.resourceType === "Task"
-            ? "task"
-            : "request";
-        const row = waterfallRowFromTimelineBar(bar, kind);
-        return (
-          <div key={bar.id} className="space-y-1">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-medium">
-                  <span>{bar.resourceType ?? (kind === "task" ? "Task" : "Request")}</span>
-                  {showBlockingBadge && bar.renderBlocking ? (
-                    <RenderBlockingBadge status={bar.renderBlocking} />
-                  ) : null}
-                </div>
-                <BarIdentity bar={bar} />
-                {bar.priority ? (
-                  <p className="text-[11px] text-muted-foreground">
-                    Priority {formatNetworkPriority(bar.priority)}
-                  </p>
-                ) : null}
-                {downloadLabel ? (
-                  <p className="text-[11px] tabular-nums text-muted-foreground">{downloadLabel}</p>
-                ) : null}
-                {cpuLabel ? (
-                  <p className="text-[11px] tabular-nums text-muted-foreground">{cpuLabel}</p>
-                ) : null}
-                {chainText ? (
-                  <p className="text-[11px] tabular-nums text-muted-foreground">{chainText}</p>
-                ) : null}
-                {bar.coverage ? (
-                  <p className="text-[11px] tabular-nums text-muted-foreground">{bar.coverage}</p>
-                ) : null}
-              </div>
-              <span className="shrink-0 pt-0.5 text-right text-[11px] tabular-nums text-muted-foreground">
-                {barTimingLabel(bar, table?.rows[index])}
-              </span>
-            </div>
-            <WaterfallBarTrack row={row} minStart={0} maxEnd={scale} height={8} />
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function CollapsedUrlTable({ table, count }: { table: TimelineTable; count: number }) {
-  return (
-    <details className="group mt-2 rounded-md border border-border/70 bg-muted/20">
-      <summary className="cursor-pointer list-none px-2.5 py-1.5 text-xs font-medium text-muted-foreground marker:content-none [&::-webkit-details-marker]:hidden">
-        <span className="inline-flex items-center gap-1.5">
-          <span className="text-foreground/80">URLs</span>
-          <span className="tabular-nums text-muted-foreground">({count})</span>
-          <span className="text-[10px] font-normal opacity-70 group-open:hidden">show</span>
-          <span className="hidden text-[10px] font-normal opacity-70 group-open:inline">hide</span>
-        </span>
-      </summary>
-      <div className="border-t border-border/60 px-1 pb-1">
-        <Table className="text-xs" wrapperClassName="mt-0">
-          <TableHeader>
-            <TableRow>
-              {table.headers.map((header) => (
-                <TableHead
-                  key={header.text}
-                  className={cn(
-                    "h-8 px-2 py-1 text-[11px]",
-                    header.align === "end" && "text-right",
-                  )}
-                >
-                  {header.text}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {table.rows.map((row, rowIndex) => (
-              <TableRow key={rowIndex}>
-                {row.map((cell, cellIndex) => (
-                  <TableCell
-                    key={`${rowIndex}-${cellIndex}`}
-                    className={cn(
-                      "px-2 py-1.5",
-                      cell.align === "end" && "whitespace-nowrap text-right font-mono tabular-nums",
-                      cellIndex === 0 && "w-[52%] max-w-0",
-                    )}
-                  >
-                    {cell.href ? (
-                      <ResourceUrlCell url={cell.href} />
-                    ) : cell.text === UNATTRIBUTED_LABEL ? (
-                      <UnattributedLabel />
-                    ) : (
-                      cell.text
-                    )}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </details>
-  );
-}
-
-function MomentRequests({
-  bars,
-  table,
-  axisEnd,
-  showBlockingBadge,
-  summaryLabel = "Requests",
-  rowKind = "request",
-}: {
-  bars?: TimelineWaterfallBar[];
-  table?: TimelineTable;
-  axisEnd: number;
-  showBlockingBadge: boolean;
-  summaryLabel?: string;
-  rowKind?: WaterfallRowKind;
-}) {
-  const waterfall = bars ?? [];
-  const rowCount = table?.rows.length ?? 0;
-
-  if (waterfall.length > 1) {
-    return (
-      <details className="group mt-2 rounded-md border border-border/70 bg-muted/20">
-        <summary className="cursor-pointer list-none px-2.5 py-1.5 text-xs font-medium text-muted-foreground marker:content-none [&::-webkit-details-marker]:hidden">
-          <span className="inline-flex items-center gap-1.5">
-            <span className="text-foreground/80">{summaryLabel}</span>
-            <span className="tabular-nums text-muted-foreground">({waterfall.length})</span>
-            <span className="text-[10px] font-normal opacity-70 group-open:hidden">show</span>
-            <span className="hidden text-[10px] font-normal opacity-70 group-open:inline">
-              hide
-            </span>
-          </span>
-        </summary>
-        <div className="border-t border-border/60 px-2.5 py-2.5">
-          <WaterfallRows
-            bars={waterfall}
-            table={table}
-            axisEnd={axisEnd}
-            showBlockingBadge={showBlockingBadge}
-            rowKind={rowKind}
-          />
-        </div>
-      </details>
-    );
-  }
-
-  if (waterfall.length === 1) {
-    return (
-      <div className="mt-2">
-        <WaterfallRows
-          bars={waterfall}
-          table={table}
-          axisEnd={axisEnd}
-          showBlockingBadge={showBlockingBadge}
-          rowKind={rowKind}
-        />
-      </div>
-    );
-  }
-
-  if (table && rowCount > 1) {
-    return <CollapsedUrlTable table={table} count={rowCount} />;
-  }
-
-  return null;
-}
-
-function noteTimeLabel(note: TimelineNote): string | null {
-  if (note.timeMs == null) return null;
-  if (note.endMs != null && note.endMs !== note.timeMs) {
-    return `${formatMs(note.timeMs)}–${formatMs(note.endMs)}`;
-  }
-  return formatMs(note.timeMs);
-}
-
-function MomentNotes({ notes }: { notes: TimelineNote[] }) {
-  return (
-    <div className="space-y-3 border-t border-border/70 pt-3">
-      {notes.map((note) => {
-        const statusLabel =
-          note.status === "measured" && note.timeMs == null ? null : note.status.replace("-", " ");
-        const timeLabel = noteTimeLabel(note);
-        return (
-          <div key={note.id} className="space-y-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="text-sm font-semibold leading-snug">{note.title}</p>
-              {note.rating ? (
-                <span
-                  className={cn(
-                    "rounded px-1.5 py-0.5 text-[10px] font-medium uppercase",
-                    ratingClass(note.rating),
-                  )}
-                >
-                  {note.rating.replace("-", " ")}
-                </span>
-              ) : null}
-              {statusLabel ? (
-                <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                  {statusLabel}
-                </span>
-              ) : null}
-              {timeLabel ? (
-                <span className="ml-auto text-[11px] tabular-nums text-muted-foreground">
-                  {timeLabel}
-                </span>
-              ) : null}
-            </div>
-            <p className="text-sm text-muted-foreground">{note.detail}</p>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function PhaseHeader({ title }: { title: string }) {
-  return (
-    <div className="sticky top-0 z-20 mb-3 border-b border-border/80 bg-background/95 px-1 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
-    </div>
-  );
-}
-
-function MomentTime({ moment }: { moment: TimelineEvent }) {
-  if (!moment.hasTimestamp || !Number.isFinite(moment.timeMs)) return null;
-  const start = moment.startMs;
-  const end = moment.endMs ?? moment.timeMs;
-  const isInterval = start != null && Number.isFinite(start) && end > start;
-  return (
-    <span
-      className="rounded bg-muted px-1.5 py-0.5 text-[11px] font-medium tabular-nums text-muted-foreground"
-      data-testid="moment-time"
-    >
-      {isInterval
-        ? `${formatMs(start)} – ${formatMs(end)} · ${formatMs(end - start)}`
-        : formatMs(moment.timeMs)}
-    </span>
-  );
-}
-
-function MomentCard({
-  moment,
-  axisEnd,
-  deviceLabel,
-  showTime = false,
-  compact = false,
-}: {
-  moment: TimelineEvent;
-  axisEnd: number;
-  deviceLabel: string;
-  /** Show the event's own start / end inside the card (compare view). */
-  showTime?: boolean;
-  /** Half-width card on small screens (side-by-side compare lanes). */
-  compact?: boolean;
-}) {
-  const muted = moment.status === "not-recorded";
-  const downloadBlocking = blockingStatuses(moment.waterfall);
-  const statusLabel =
-    moment.status === "measured" && !moment.hasTimestamp ? null : moment.status.replace("-", " ");
-
-  return (
-    <div
-      className={cn(
-        "min-w-0 rounded-lg border px-3 py-3 sm:px-4",
-        compact && "px-2 py-2 sm:py-3",
-        muted && "border-dashed opacity-80",
-        moment.kind === "blocking" && !muted && "border-rose-500/30",
-        moment.kind === "potentially-blocking" && !muted && "border-amber-500/30",
-        moment.kind === "cwv" && !muted && "border-amber-500/30",
-      )}
-    >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-        <div
-          className={cn(
-            "min-w-0 flex-1 space-y-2 overflow-x-clip",
-            compact && "space-y-1.5 sm:space-y-2",
-          )}
-        >
-          <div className="flex flex-wrap items-center gap-2">
-            <h4
-              className={cn(
-                "text-sm font-semibold leading-snug sm:text-base",
-                compact && "text-xs sm:text-base",
-              )}
-            >
-              {moment.title}
-            </h4>
-            {showTime ? <MomentTime moment={moment} /> : null}
-            {moment.rating ? (
-              <span
-                className={cn(
-                  "rounded px-1.5 py-0.5 text-[10px] font-medium uppercase",
-                  ratingClass(moment.rating),
-                )}
-              >
-                {moment.rating.replace("-", " ")}
-              </span>
-            ) : null}
-            {downloadBlocking.map((status) => (
-              <RenderBlockingBadge key={status} status={status} showNonBlocking />
-            ))}
-            {statusLabel ? (
-              <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                {statusLabel}
-              </span>
-            ) : null}
-          </div>
-
-          <p
-            className={cn(
-              "text-sm text-muted-foreground",
-              compact && "line-clamp-3 text-xs sm:line-clamp-none sm:text-sm",
-            )}
-          >
-            {textWithUnattributedHint(moment.detail)}
-          </p>
-
-          <MomentRequests
-            bars={moment.waterfall}
-            table={moment.table}
-            axisEnd={axisEnd}
-            showBlockingBadge={downloadBlocking.length > 1}
-            summaryLabel={
-              moment.id.startsWith("long-task-") || moment.id.startsWith("short-task-")
-                ? "Tasks"
-                : "Requests"
-            }
-            rowKind={
-              moment.id.startsWith("long-task-") || moment.id.startsWith("short-task-")
-                ? "task"
-                : "request"
-            }
-          />
-
-          {moment.notes?.length ? <MomentNotes notes={moment.notes} /> : null}
-
-          {moment.lcpSegments ? (
-            <LcpBreakdown segments={moment.lcpSegments} axisEnd={axisEnd} />
-          ) : null}
-        </div>
-
-        {moment.lcpElement ? (
-          <div className="shrink-0" data-testid="lcp-element-screenshot">
-            <RenderNodeImage item={moment.lcpElement} device={deviceLabel} imageSize={140} />
-          </div>
-        ) : null}
-
-        {moment.screenshot ? (
-          <MomentScreenshot timing={moment.screenshot.timing} data={moment.screenshot.data} />
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
-function MomentRail({ moment }: { moment: TimelineEvent }) {
-  const muted = moment.status === "not-recorded";
-  return (
-    <div className="relative z-10 flex flex-col items-center pt-0.5">
-      {moment.startMs != null && moment.startMs !== moment.timeMs ? (
-        <span className="max-w-full truncate px-0.5 text-center text-xs tabular-nums text-muted-foreground">
-          {formatMs(moment.startMs)} →
-        </span>
-      ) : null}
-      <span
-        className={cn(
-          "max-w-full px-0.5 text-center text-xs font-semibold leading-tight tabular-nums sm:text-sm",
-          muted ? "text-muted-foreground/70" : "text-foreground",
-        )}
-      >
-        {formatMs(moment.timeMs)}
-      </span>
-      {moment.endMs != null && moment.endMs !== moment.timeMs ? (
-        <span className="max-w-full truncate px-0.5 text-center text-xs tabular-nums text-muted-foreground">
-          → {formatMs(moment.endMs)}
-        </span>
-      ) : null}
-      <span
-        className={cn(
-          "mt-1 size-2.5 shrink-0 rounded-full ring-2 ring-background",
-          markerDotClass(moment.kind, moment.rating),
-        )}
-        aria-hidden
-      />
-    </div>
-  );
-}
-
-/** Slug for namespacing moment anchors when dual timelines mount. */
-function momentIdPrefixFromLabel(label: string): string {
-  return label
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
-function momentAnchorId(id: string, idPrefix?: string): string {
-  return idPrefix ? `timeline-moment-${idPrefix}-${id}` : `timeline-moment-${id}`;
-}
-
-function MomentRow({
-  moment,
-  axisEnd,
-  deviceLabel,
-  showPhaseHeader,
-  idPrefix,
-}: {
-  moment: TimelineEvent;
-  axisEnd: number;
-  deviceLabel: string;
-  showPhaseHeader: boolean;
-  idPrefix?: string;
-}) {
-  return (
-    <li className="relative scroll-mt-28" id={momentAnchorId(moment.id, idPrefix)}>
-      {showPhaseHeader ? <PhaseHeader title={moment.phaseTitle} /> : null}
-
-      <div className="grid grid-cols-[4.75rem_minmax(0,1fr)] gap-3 sm:grid-cols-[5.75rem_minmax(0,1fr)]">
-        <MomentRail moment={moment} />
-        <div className="mb-4 min-w-0">
-          <MomentCard moment={moment} axisEnd={axisEnd} deviceLabel={deviceLabel} />
-        </div>
-      </div>
-    </li>
-  );
-}
-
-function TaskFilters({
-  options,
-  enabled,
-  shown,
-  total,
-  onToggle,
-}: {
-  options: TaskFilterId[];
-  enabled: TaskFilterSelection;
-  shown: number;
-  total: number;
-  onToggle: (id: TaskFilterId) => void;
-}) {
-  if (!options.length) return null;
-  const filtering = shown !== total;
-
-  return (
-    <div
-      role="group"
-      aria-label="Filter timeline tasks"
-      data-testid="timeline-task-filters"
-      className="flex flex-wrap items-center gap-1.5"
-    >
-      <span className="mr-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-        Tasks
-      </span>
-      {options.map((id) => {
-        const pressed = enabled.has(id);
-        return (
-          <button
-            key={id}
-            type="button"
-            aria-pressed={pressed}
-            onClick={() => onToggle(id)}
-            className={cn(
-              "rounded-md border px-2 py-0.5 text-[11px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              pressed
-                ? "border-transparent bg-white text-black"
-                : "border-white/20 bg-black text-white",
-            )}
-          >
-            {TASK_FILTER_LABEL[id]}
-          </button>
-        );
-      })}
-      {filtering ? (
-        <span className="text-[11px] tabular-nums text-muted-foreground">
-          {shown} of {total}
-        </span>
-      ) : null}
-    </div>
-  );
-}
-
-function TimelineLegend({ simulationLabel }: { simulationLabel?: string }) {
-  return (
-    <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground sm:text-sm">
-      <span className="inline-flex items-center gap-1">
-        <span className="size-2 rounded-full bg-rose-500" /> Blocking
-      </span>
-      <span className="inline-flex items-center gap-1">
-        <span className="size-2 rounded-full bg-amber-500" /> Core Web Vital
-      </span>
-      <span className="inline-flex items-center gap-1">
-        <span className="size-2 rounded-full bg-sky-500" /> Marker
-      </span>
-      <span className="text-muted-foreground/80">Scroll down from 0 ms</span>
-      {simulationLabel ? (
-        <span className="text-muted-foreground/80">Times include simulated {simulationLabel}</span>
-      ) : null}
-    </div>
-  );
-}
-
-function VerticalTimeline({
-  load,
-  timeline,
-  stickyTopPx = 0,
-  idPrefix,
-  showMoments = true,
-  showLegend = true,
-}: {
-  load: CombinedLoad;
-  timeline: PageLoadTimeline;
-  stickyTopPx?: number;
-  idPrefix?: string;
-  showMoments?: boolean;
-  showLegend?: boolean;
-}) {
-  const { events, axisEndMs } = timeline;
-
-  return (
-    <div className="flex flex-col gap-4" data-axis-end-ms={axisEndMs}>
-      {showLegend ? <TimelineLegend simulationLabel={timeline.simulationLabel} /> : null}
-
-      <UnifiedWaterfall
-        load={load}
-        events={events}
-        axisEndMs={axisEndMs}
-        stickyTopPx={stickyTopPx}
-        momentIdPrefix={idPrefix}
-      />
-
-      {showMoments ? (
-        <div className="relative">
-          <div
-            aria-hidden
-            className="absolute bottom-4 left-[2.375rem] top-2 w-px -translate-x-1/2 bg-border sm:left-[2.875rem]"
-          />
-
-          <ol className="relative m-0 list-none p-0">
-            {events.map((moment) => (
-              <MomentRow
-                key={`${moment.phaseId}-${moment.id}`}
-                moment={moment}
-                axisEnd={axisEndMs}
-                deviceLabel={load.label}
-                showPhaseHeader={!!moment.isPhaseStart}
-                idPrefix={idPrefix}
-              />
-            ))}
-          </ol>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function CompareRowTime({ row }: { row: AlignedCompareRow }) {
-  const { leftTimeMs, rightTimeMs } = row;
-  if (leftTimeMs == null || rightTimeMs == null || leftTimeMs === rightTimeMs) {
-    return (
-      <span className="rounded-md bg-muted px-2 py-1 text-center text-xs font-semibold tabular-nums text-foreground">
-        {formatMs(row.timeMs)}
-      </span>
-    );
-  }
-  const delta = rightTimeMs - leftTimeMs;
-  return (
-    <span className="flex flex-col items-center gap-0.5 rounded-md bg-muted px-2 py-1 text-center text-xs font-semibold tabular-nums text-foreground">
-      <span>← {formatMs(leftTimeMs)}</span>
-      <span>{formatMs(rightTimeMs)} →</span>
-      <span className="text-[10px] font-medium text-muted-foreground">
-        {delta > 0 ? "+" : "−"}
-        {formatMs(Math.abs(delta))}
-      </span>
-    </span>
-  );
-}
-
-function CompareColumn({
-  moments,
-  side,
-  keyPrefix,
-  axisEndMs,
-}: {
-  moments: TimelineEvent[];
-  side: { label: string; idPrefix: string };
-  keyPrefix: string;
-  axisEndMs: number;
-}) {
-  return (
-    <div className="min-w-0 space-y-2">
-      {moments.map((moment) => (
-        <div
-          key={`${keyPrefix}-${moment.phaseId}-${moment.id}`}
-          id={momentAnchorId(moment.id, side.idPrefix)}
-        >
-          <MomentCard
-            moment={moment}
-            axisEnd={axisEndMs}
-            deviceLabel={side.label}
-            showTime
-            compact
-          />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function AlignedCompareMoments({
-  left,
-  right,
-  axisEndMs,
-}: {
-  left: { label: string; events: TimelineEvent[]; idPrefix: string };
-  right: { label: string; events: TimelineEvent[]; idPrefix: string };
-  axisEndMs: number;
-}) {
-  const rows = buildAlignedCompareRows(left.events, right.events);
-
-  return (
-    <div className="relative" data-testid="timeline-aligned-moments">
-      <div
-        className="mb-2 grid grid-cols-2 items-end sm:grid-cols-[minmax(0,1fr)_4.5rem_minmax(0,1fr)] gap-2 border-b border-border/70 pb-2 text-xs font-semibold text-muted-foreground"
-        aria-hidden
-      >
-        <p className="truncate">{left.label}</p>
-        <p className="hidden text-center tabular-nums sm:block">Time</p>
-        <p className="truncate text-right">{right.label}</p>
-      </div>
-      <ol className="relative m-0 list-none space-y-3 p-0">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-y-0 left-1/2 border-l border-border/60 sm:hidden"
-        />
-        {rows.map((row, rowIndex) => (
-          <li
-            key={rowIndex}
-            className="grid grid-cols-2 gap-x-2 gap-y-1.5 sm:grid-cols-[minmax(0,1fr)_4.5rem_minmax(0,1fr)] sm:items-start sm:gap-2"
-            data-testid="timeline-aligned-row"
-            data-time-ms={row.timeMs}
-          >
-            <CompareColumn moments={row.left} side={left} keyPrefix="l" axisEndMs={axisEndMs} />
-            <div className="relative z-10 order-first col-span-2 flex items-center justify-center sm:order-none sm:col-span-1 sm:pt-3">
-              <CompareRowTime row={row} />
-            </div>
-            <CompareColumn moments={row.right} side={right} keyPrefix="r" axisEndMs={axisEndMs} />
-          </li>
-        ))}
-      </ol>
-    </div>
-  );
-}
-
-type TimelineBundle = NonNullable<ReturnType<typeof buildPageLoadTimelineBundles>[number]>;
-
-function filterBundleTimeline(
-  bundle: TimelineBundle,
-  enabledTasks: TaskFilterSelection,
-): PageLoadTimeline {
-  const events = filterTimelineMoments(bundle.timeline.events, enabledTasks);
-  return events === bundle.timeline.events ? bundle.timeline : { ...bundle.timeline, events };
-}
-
-function TimelinePane({
-  bundle,
-  timeline,
-  stickyTopPx,
-  showLabel,
-  idPrefix,
-  showMoments = true,
-  showLegend = true,
-}: {
-  bundle: TimelineBundle;
-  timeline: PageLoadTimeline;
-  stickyTopPx: number;
-  showLabel: boolean;
-  idPrefix?: string;
-  showMoments?: boolean;
-  showLegend?: boolean;
-}) {
-  const name = timeline.label?.trim() || "Report";
-  return (
-    <div className="min-w-0" data-testid="timeline-pane" data-timeline-label={name}>
-      {showLabel ? (
-        <p className="mb-2 truncate text-sm font-semibold text-muted-foreground">{name}</p>
-      ) : null}
-      <VerticalTimeline
-        key={name}
-        load={bundle.load}
-        timeline={timeline}
-        stickyTopPx={stickyTopPx}
-        idPrefix={idPrefix}
-        showMoments={showMoments}
-        showLegend={showLegend}
-      />
-    </div>
-  );
-}
-
-const TIMELINE_COMPARE_MAX = 2;
-
-function defaultSelectedLabels(
-  bundles: TimelineBundle[],
-  labeledBundles: Array<{ label: string; bundle: TimelineBundle }>,
-): string[] {
-  const compare = getCompareRuns(labeledBundles);
-  if (compare.mode === "compare") {
-    const pair = pairByFormFactor(labeledBundles, compare.runs)[0];
-    if (pair) {
-      const labels = [pair.a?.label, pair.b?.label].filter((label): label is string => !!label);
-      if (labels.length) return labels.slice(0, TIMELINE_COMPARE_MAX);
-    }
-  }
-  return bundles[0] ? [bundles[0].timeline.label] : [];
-}
-
-function resolveSelectedLabels(
-  urlReports: string[],
-  bundles: TimelineBundle[],
-  labeledBundles: Array<{ label: string; bundle: TimelineBundle }>,
-): string[] {
-  const known = urlReports.filter((label) =>
-    bundles.some((bundle) => bundle.timeline.label === label),
-  );
-  if (known.length) return known.slice(0, TIMELINE_COMPARE_MAX);
-  return defaultSelectedLabels(bundles, labeledBundles);
-}
-
-function toggleSelectedLabel(selected: string[], label: string): string[] {
-  if (selected.includes(label)) {
-    if (selected.length <= 1) return selected;
-    return selected.filter((value) => value !== label);
-  }
-  if (selected.length < TIMELINE_COMPARE_MAX) return [...selected, label];
-  return [...selected.slice(1), label];
-}
+import { useElementHeight } from "./useElementHeight";
+import { TimelineMoments, VerticalTimeline } from "./VerticalTimeline";
 
 export function PageLoadTimeline() {
   const items = usePageSpeedItems();
   const bundles = useMemo(() => buildPageLoadTimelineBundles(items), [items]);
   const { report, tasks } = useDashboardSearchState();
-  const stickyHeaderRef = useRef<HTMLDivElement>(null);
-  const [stickyTopPx, setStickyTopPx] = useState(0);
-  const enabledTasks = useMemo<TaskFilterSelection>(
-    () => resolveTaskFilterSelection(tasks),
-    [tasks],
-  );
+  const { ref: stickyHeaderRef, height: stickyTopPx } = useElementHeight<HTMLDivElement>();
+  const enabledTasks = resolveTaskFilterSelection(tasks);
 
-  const labeledBundles = useMemo(
-    () => bundles.map((bundle) => ({ label: bundle.timeline.label, bundle })),
-    [bundles],
-  );
+  const labeledBundles = bundles.map((bundle) => ({ label: bundle.timeline.label, bundle }));
 
-  const selectedLabels = useMemo(
-    () => resolveSelectedLabels(report, bundles, labeledBundles),
-    [report, bundles, labeledBundles],
-  );
+  const selectedLabels = resolveSelectedLabels(report, bundles, labeledBundles);
 
-  const selectedEntries = useMemo(
-    () =>
-      selectedLabels
-        .map((label) => labeledBundles.find((entry) => entry.label === label))
-        .filter((entry): entry is (typeof labeledBundles)[number] => entry != null),
-    [selectedLabels, labeledBundles],
-  );
+  const selectedEntries = selectedLabels
+    .map((label) => labeledBundles.find((entry) => entry.label === label))
+    .filter((entry): entry is (typeof labeledBundles)[number] => entry != null);
 
   const comparing = selectedEntries.length === TIMELINE_COMPARE_MAX;
   const primary = selectedEntries[0] ?? null;
@@ -1046,18 +52,6 @@ export function PageLoadTimeline() {
     ? selectedEntries.flatMap((entry) => entry.bundle.timeline.events)
     : (primary?.bundle.timeline.events ?? []);
   const taskOptions = availableTaskFilters(taskSourceEvents);
-
-  const stickyKey = selectedLabels.join("|");
-
-  useEffect(() => {
-    const el = stickyHeaderRef.current;
-    if (!el || typeof ResizeObserver === "undefined") return;
-    const update = () => setStickyTopPx(el.getBoundingClientRect().height);
-    update();
-    const observer = new ResizeObserver(update);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [stickyKey, taskOptions.length, bundles.length]);
 
   if (!bundles.length || !primary) {
     return (
@@ -1167,20 +161,29 @@ export function PageLoadTimeline() {
             simulationLabel={
               panes.find((entry) => entry.timeline.simulationLabel)?.timeline.simulationLabel
             }
+            timesNote={panes.find((entry) => entry.timeline.timesNote)?.timeline.timesNote}
           />
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {panes.map((entry) => (
-              <TimelinePane
-                key={entry.label}
-                bundle={entry.bundle}
-                timeline={entry.timeline}
-                stickyTopPx={stickyTopPx}
-                showLabel
-                idPrefix={momentIdPrefixFromLabel(entry.label)}
-                showMoments={false}
-                showLegend={false}
-              />
-            ))}
+            {panes.map((entry) => {
+              const name = timelineDisplayName(entry.timeline);
+              return (
+                <TimelinePane key={entry.label} name={name}>
+                  <TimelinePaneLabel>{name}</TimelinePaneLabel>
+                  <VerticalTimeline key={name} axisEndMs={entry.timeline.axisEndMs}>
+                    {entry.timeline.modelCheck?.length ? (
+                      <ModelCheck metrics={entry.timeline.modelCheck} />
+                    ) : null}
+                    <CollapsibleUnifiedWaterfall
+                      load={entry.bundle.load}
+                      events={entry.timeline.events}
+                      axisEndMs={entry.timeline.axisEndMs}
+                      stickyTopPx={stickyTopPx}
+                      momentIdPrefix={momentIdPrefixFromLabel(entry.label)}
+                    />
+                  </VerticalTimeline>
+                </TimelinePane>
+              );
+            })}
           </div>
           <AlignedCompareMoments
             left={{
@@ -1197,12 +200,30 @@ export function PageLoadTimeline() {
           />
         </div>
       ) : (
-        <TimelinePane
-          bundle={panes[0].bundle}
-          timeline={panes[0].timeline}
-          stickyTopPx={stickyTopPx}
-          showLabel={false}
-        />
+        <TimelinePane name={timelineDisplayName(panes[0].timeline)}>
+          <VerticalTimeline
+            key={timelineDisplayName(panes[0].timeline)}
+            axisEndMs={panes[0].timeline.axisEndMs}
+          >
+            {panes[0].timeline.modelCheck?.length ? (
+              <ModelCheck metrics={panes[0].timeline.modelCheck} />
+            ) : null}
+            <TimelineLegend
+              simulationLabel={panes[0].timeline.simulationLabel}
+              timesNote={panes[0].timeline.timesNote}
+            />
+            <CollapsibleUnifiedWaterfall
+              load={panes[0].bundle.load}
+              events={panes[0].timeline.events}
+              axisEndMs={panes[0].timeline.axisEndMs}
+              stickyTopPx={stickyTopPx}
+            />
+            <TimelineMoments
+              timeline={panes[0].timeline}
+              deviceLabel={panes[0].bundle.load.label}
+            />
+          </VerticalTimeline>
+        </TimelinePane>
       )}
     </div>
   );

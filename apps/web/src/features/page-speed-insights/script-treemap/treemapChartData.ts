@@ -18,7 +18,7 @@ const YELLOW_COLOR = "hsl(43 85% 62%)";
 const RED_COLOR = "hsl(0 70% 68%)";
 
 export function getTreemapNodeColor(resourceBytes: number, unusedBytes?: number): string {
-  if (!unusedBytes) {
+  if (!unusedBytes || !resourceBytes) {
     return GRAY_COLOR;
   }
 

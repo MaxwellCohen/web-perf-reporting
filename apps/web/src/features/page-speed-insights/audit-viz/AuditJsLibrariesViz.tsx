@@ -1,5 +1,3 @@
-"use client";
-
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import { Chip, groupAcross, hasAnyItems, plural, reportsOf, textOf } from "./qualityVizShared";
 

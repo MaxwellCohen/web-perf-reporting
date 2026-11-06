@@ -45,3 +45,20 @@ describe("getQuickWinRecommendations", () => {
     expect(quickWins.map((r) => r.id)).toEqual(["1", "4"]);
   });
 });
+
+describe("computeTaskSummaryStats consistency", () => {
+  it("derives thresholds from the task list and totals from diagnostics", () => {
+    const [s] = computeTaskSummaryStats([
+      {
+        label: "x",
+        diagnostics: [{ numTasks: 20, totalTaskTime: 400 }],
+        mainThreadTasks: [{ duration: 60 }, { duration: 12 }, { duration: 6 }],
+      },
+    ]);
+    expect(s.totalTasks).toBe(20);
+    expect(s.averageTaskDuration).toBe(20);
+    expect(s.numTasksOver10ms).toBe(2);
+    expect(s.numTasksOver50ms).toBe(1);
+    expect(s.longestTaskDuration).toBe(60);
+  });
+});

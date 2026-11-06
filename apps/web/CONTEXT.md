@@ -23,9 +23,7 @@ One element of the dashboard’s `PageSpeedInsights` array (Zod schema in `src/l
 
 Pure transforms for histograms, p75 bars, and date range copy live in `src/lib/crux/latest-crux-display/` (shared by components under `src/components/latest-crux/`).
 
-## Lighthouse viewers
+## Lighthouse viewer
 
-- `/lh` — paste Lighthouse JSON via `LhInputForm`.
-- `/viewer` — alternate viewer via `ViewerPage`.
-
-Both use `LighthouseViewerAppShell` for layout; product behavior may diverge intentionally.
+- `/viewer` — single Lighthouse viewer (`ViewerPage`): smart input, compare, share links. Layout via `LighthouseViewerAppShell`.
+- `/lh` — permanent redirect to `/viewer` (query params preserved). See ADR 0002.

@@ -1,30 +1,63 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type {
   Cell,
   CellContext,
   ColumnDef,
+  ColumnHelper,
   Header,
-  HeaderContext,
   HeaderGroup,
   ReactTable,
   Row,
   RowData,
+  TableFeatures,
 } from "@tanstack/react-table";
+import type { standardTableFeatures } from "@/features/page-speed-insights/tanstack-table-v9/features";
 
 /**
- * Shared PSI table aliases. Column defs use `any` features so string
- * filter/sort/aggregation keys typecheck; table/row use `any` features too.
- * Concrete `useTable()` instances may need `as StockTable<T>` where invariant
- * feature generics block assignability.
+ * Default feature bundle for PSI tables. Tables with a different bundle (LH accordion, debug data)
+ * pass their own `typeof ...Features` as the trailing `TFeatures` argument.
  */
-export type StockColumnDef<TData extends RowData, TValue = unknown> = ColumnDef<any, TData, TValue>;
-export type StockRow<TData extends RowData> = Row<any, TData>;
-export type StockCell<TData extends RowData, TValue = unknown> = Cell<any, TData, TValue>;
-export type StockTable<TData extends RowData> = ReactTable<any, TData, any>;
-export type StockHeader<TData extends RowData, TValue = unknown> = Header<any, TData, TValue>;
-export type StockHeaderGroup<TData extends RowData> = HeaderGroup<any, TData>;
-export type StockCellContext<TData extends RowData, TValue = unknown> = CellContext<
-  any,
-  TData,
-  TValue
+export type StockFeatures = typeof standardTableFeatures;
+
+/** Shared PSI table aliases built on {@link StockFeatures}. */
+export type StockColumnDef<
+  TData extends RowData,
+  TValue = unknown,
+  TFeatures extends TableFeatures = StockFeatures,
+> = ColumnDef<TFeatures, TData, TValue>;
+export type StockRow<TData extends RowData, TFeatures extends TableFeatures = StockFeatures> = Row<
+  TFeatures,
+  TData
 >;
+export type StockCell<
+  TData extends RowData,
+  TValue = unknown,
+  TFeatures extends TableFeatures = StockFeatures,
+> = Cell<TFeatures, TData, TValue>;
+export type StockTable<
+  TData extends RowData,
+  TFeatures extends TableFeatures = StockFeatures,
+> = ReactTable<TFeatures, TData>;
+export type StockHeader<
+  TData extends RowData,
+  TValue = unknown,
+  TFeatures extends TableFeatures = StockFeatures,
+> = Header<TFeatures, TData, TValue>;
+export type StockHeaderGroup<
+  TData extends RowData,
+  TFeatures extends TableFeatures = StockFeatures,
+> = HeaderGroup<TFeatures, TData>;
+export type StockCellContext<
+  TData extends RowData,
+  TValue = unknown,
+  TFeatures extends TableFeatures = StockFeatures,
+> = CellContext<TFeatures, TData, TValue>;
+
+/**
+ * TanStack's own heterogeneous column-array type (`ColumnHelper.columns`): column defs are invariant
+ * in TValue, so a list mixing string / number / boolean accessors only type-checks against the
+ * helper's value-erased element type. Any single typed accessor column is assignable to it.
+ */
+type StockColumnDefs<TData extends RowData> = ReturnType<
+  ColumnHelper<StockFeatures, TData>["columns"]
+>;
+export type StockAnyColumnDef<TData extends RowData> = StockColumnDefs<TData>[number];

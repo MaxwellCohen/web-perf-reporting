@@ -1,25 +1,31 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useId } from "react";
-import type { HeaderContext, RowData } from "@tanstack/react-table";
 import { Label } from "@/components/ui/label";
 import { DebouncedInput } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 const MAX_DATALIST_OPTIONS = 5000;
 
-export function StringFilterHeader<TData extends RowData>({
+type FilterColumn = {
+  id: string;
+  getFacetedUniqueValues: () => Map<unknown, number>;
+  getFilterValue: () => unknown;
+  setFilterValue: (value: unknown) => void;
+};
+
+export function StringFilterHeader({
   column,
   name,
   onValueChange,
-}: Partial<Pick<HeaderContext<any, TData, unknown>, "column">> & {
+}: {
+  column?: FilterColumn;
   name: string;
   onValueChange?: (value: string) => void;
 }) {
   const id = useId();
   const uniqueValues = column?.getFacetedUniqueValues();
   const sortedUniqueValues = uniqueValues
-    ? Array.from(uniqueValues.keys()).sort().slice(0, MAX_DATALIST_OPTIONS)
+    ? Array.from(uniqueValues.keys(), String).sort().slice(0, MAX_DATALIST_OPTIONS)
     : [];
 
   if (!column) {
@@ -41,7 +47,7 @@ export function StringFilterHeader<TData extends RowData>({
         {name} Filter
       </Label>
       <datalist id={datalistId}>
-        {sortedUniqueValues.map((value: any) => (
+        {sortedUniqueValues.map((value) => (
           <option value={value} key={value} />
         ))}
       </datalist>
@@ -49,7 +55,7 @@ export function StringFilterHeader<TData extends RowData>({
         <DebouncedInput
           id={`filter_${id}`}
           type="text"
-          value={(columnFilterValue ?? "") as string}
+          value={String(columnFilterValue ?? "")}
           onChange={(value) => commit(String(value))}
           placeholder={`Search... (${uniqueCount})`}
           className="min-w-0 flex-1 rounded border shadow"

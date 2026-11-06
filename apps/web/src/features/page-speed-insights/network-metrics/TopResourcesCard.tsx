@@ -1,4 +1,3 @@
-"use client";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { TableItem } from "@/lib/schema";
 import { getUrlString, getNumber } from "@/lib/utils";
@@ -13,10 +12,7 @@ import {
   createMSColumn,
   createURLColumn,
 } from "@/features/page-speed-insights/shared/tableColumnHelpers";
-import {
-  LabeledStockTable,
-  MultiReportTableCard,
-} from "@/features/page-speed-insights/shared/TableCard";
+import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 import { useNetworkRequestStats } from "@/features/page-speed-insights/network-metrics/useNetworkMetricsStore";
 
 type TopResourceTableRow = {
@@ -67,7 +63,12 @@ function TopResourcesTable({ label, data }: { label: string; data: TopResourceTa
     defaultPageSize: 10,
   });
 
-  return <LabeledStockTable label={label} table={table} showPagination />;
+  return (
+    <TableCard.Section label={label}>
+      <TableCard.Table table={table} />
+      <TableCard.Pagination table={table} />
+    </TableCard.Section>
+  );
 }
 
 export function TopResourcesCard() {
@@ -84,13 +85,12 @@ export function TopResourcesCard() {
   }
 
   return (
-    <MultiReportTableCard
-      title="Resources by Transfer Size"
-      className="md:col-span-2 lg:col-span-3"
-    >
-      {dataByReport.map(({ label, data }) => (
-        <TopResourcesTable key={label} label={label} data={data} />
-      ))}
-    </MultiReportTableCard>
+    <TableCard title="Resources by Transfer Size" className="md:col-span-2 lg:col-span-3">
+      <div className="space-y-6">
+        {dataByReport.map(({ label, data }) => (
+          <TopResourcesTable key={label} label={label} data={data} />
+        ))}
+      </div>
+    </TableCard>
   );
 }

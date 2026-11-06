@@ -1,0 +1,23 @@
+name: preview
+on:
+  pull_request:
+    paths: ["packages/cli/**", ".github/workflows/preview.yml"]
+  push:
+    branches: [main]
+    paths: ["packages/cli/**"]
+permissions:
+  contents: read
+concurrency:
+  group: preview-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @maxwellcohen/web-perf-report build
+      - run: pnpm dlx pkg-pr-new publish --pnpm ./packages/cli

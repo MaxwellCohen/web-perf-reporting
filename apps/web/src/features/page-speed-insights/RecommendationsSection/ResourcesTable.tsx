@@ -1,4 +1,3 @@
-"use client";
 import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 import {
   useSimpleTable,

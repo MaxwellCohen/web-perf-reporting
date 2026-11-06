@@ -1,6 +1,4 @@
-"use client";
-
-import { TableCardShell } from "@/features/page-speed-insights/shared/TableCard";
+import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 import { MainThreadWorkBreakdownTable } from "@/features/page-speed-insights/javascript-metrics/MainThreadWorkBreakdownTable";
 import {
   buildMainThreadWorkTable,
@@ -19,10 +17,10 @@ export function MainThreadWorkCard({ metrics }: MainThreadWorkCardProps) {
   }
 
   return (
-    <TableCardShell title="Main Thread Work Breakdown" className="md:col-span-2 lg:col-span-3">
+    <TableCard title="Main Thread Work Breakdown" className="md:col-span-2 lg:col-span-3">
       <div className="w-full overflow-x-auto">
         <MainThreadWorkBreakdownTable rows={rows} reportLabels={reportLabels} />
       </div>
-    </TableCardShell>
+    </TableCard>
   );
 }

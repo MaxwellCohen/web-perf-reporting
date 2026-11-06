@@ -1,5 +1,3 @@
-"use client";
-
 import type { RefObject } from "react";
 import type { ButtonProps } from "@/components/ui/button";
 import { CopyTableMenuButton } from "@/features/page-speed-insights/tanstack-table-v9/CopyTableMenuButton";

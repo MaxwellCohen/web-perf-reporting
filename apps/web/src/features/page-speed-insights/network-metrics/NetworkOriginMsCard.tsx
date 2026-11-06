@@ -89,11 +89,8 @@ export function NetworkOriginMsCard({
   }
 
   return (
-    <TableCard
-      title={title}
-      table={table}
-      className=""
-      tableContainerClassName="max-h-96 overflow-y-auto"
-    />
+    <TableCard title={title}>
+      <TableCard.Table table={table} containerClassName="max-h-96 overflow-y-auto" />
+    </TableCard>
   );
 }

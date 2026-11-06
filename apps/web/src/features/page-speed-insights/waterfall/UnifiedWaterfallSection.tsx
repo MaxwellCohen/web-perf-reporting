@@ -36,7 +36,6 @@ export function UnifiedWaterfallSection() {
               load={active.load}
               events={active.timeline.events}
               axisEndMs={active.timeline.axisEndMs}
-              collapsible={false}
             />
           </FullWidthRow>
         </SectionGrid>

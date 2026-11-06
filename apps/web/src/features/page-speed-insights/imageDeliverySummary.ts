@@ -1,5 +1,4 @@
 import type { AuditResult } from "@/lib/schema";
-import type { CauseAuditEntry } from "@/features/page-speed-insights/metricCauseAudits";
 
 const RESPONSIVE_SIZE =
   /larger than it needs to be \((\d+)x(\d+)\) for its displayed dimensions \((\d+)x(\d+)\)/i;
@@ -103,7 +102,10 @@ function classifyReason(reason: string): {
   return { id: `other:${reason}`, title: reason, description: "" };
 }
 
-function tableItems(audit: AuditResult): unknown[] {
+/** The only slice of an audit result that image delivery reads. */
+export type ImageDeliveryEntry = { audit: Pick<AuditResult, "details">; label: string };
+
+function tableItems(audit: ImageDeliveryEntry["audit"]): unknown[] {
   const details = asRecord(audit.details);
   if (!details) return [];
   const type = details.type;
@@ -135,7 +137,7 @@ function wastedBytesFor(reports: ImageDeliveryReportSize[]): number {
  * Byte savings overlap when one image needs more than one change, so they are not summed.
  * The same URL is merged across reports, keeping the larger savings for each change.
  */
-export function summarizeImageDelivery(entries: CauseAuditEntry["entries"]): ImageDeliverySummary {
+export function summarizeImageDelivery(entries: ImageDeliveryEntry[]): ImageDeliverySummary {
   const images = new Map<string, PendingImage>();
 
   for (const { audit, label } of entries) {

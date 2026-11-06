@@ -1,4 +1,3 @@
-"use client";
 import { TableCaption } from "@/components/ui/table";
 import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 import type { TableColumnHeading, TableItem } from "@/lib/schema";

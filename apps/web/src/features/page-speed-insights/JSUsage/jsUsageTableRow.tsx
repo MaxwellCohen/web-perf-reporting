@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import type { TreeMapNode } from "@/lib/schema";
 import { tanstackTableCellDataProps } from "@/features/page-speed-insights/shared/tanstackTableCellDataProps";
 
-export function JSUsageTableRow({ row, i }: { row: StockRow<TreeMapNode>; i: number }) {
+export function JSUsageTableRow({ row }: { row: StockRow<TreeMapNode> }) {
   const isExpanded = row.getIsExpanded();
   const depth = row.depth + (isExpanded ? 1 : 0);
   const subRows = row?.getParentRow()?.subRows || [];
@@ -23,10 +23,7 @@ export function JSUsageTableRow({ row, i }: { row: StockRow<TreeMapNode>; i: num
           "border-b-[length:--depth] border-muted":
             (depth || isExpanded) && subRows.findIndex((a) => a == row) === subRows.length - 1,
         })}
-        style={{
-          // @ts-expect-error ts is weird
-          "--depth": `${5 * depth}px`,
-        }}
+        style={{ "--depth": `${5 * depth}px` } as React.CSSProperties}
         suppressHydrationWarning
       >
         {row
@@ -36,8 +33,8 @@ export function JSUsageTableRow({ row, i }: { row: StockRow<TreeMapNode>; i: num
             const size = cell.column.getSize();
             return (
               <TableCell
-                key={`${cell.id}_${i}_${depth}`}
-                data-key={`${cell.id}_${i}_${depth}`}
+                key={cell.id}
+                data-key={cell.id}
                 {...tanstackTableCellDataProps(cell, row)}
                 className={cn(
                   "flex min-w-0 flex-row overflow-hidden",

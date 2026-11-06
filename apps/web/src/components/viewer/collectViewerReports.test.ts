@@ -53,7 +53,7 @@ describe("collectViewerReports", () => {
       collectViewerReports([
         { method: "text", jsonInputs: [{ name: "Bad", content: "not json" }] },
       ]),
-    ).rejects.toThrow();
+    ).rejects.toThrow(/JSON/);
   });
 
   it("imports a PSI share URL through the proxy", async () => {

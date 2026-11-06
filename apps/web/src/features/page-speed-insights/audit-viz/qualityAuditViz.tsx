@@ -1,5 +1,3 @@
-"use client";
-
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import { getAuditId } from "@/features/page-speed-insights/lh-categories/table/detailTableData";
 import { AuditDeprecationsViz } from "./AuditDeprecationsViz";

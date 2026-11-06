@@ -18,6 +18,8 @@ describe("formatMs", () => {
   it("formats under 1000 as rounded ms", () => {
     expect(formatMs(49.6)).toBe("50 ms");
     expect(formatMs(999)).toBe("999 ms");
+    expect(formatMs(999.5)).toBe("1.00 s");
+    expect(formatMs(999.4)).toBe("999 ms");
   });
 
   it("formats 1000–9999.9 as seconds with 2 decimals", () => {

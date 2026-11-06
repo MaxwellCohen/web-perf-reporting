@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Route } from "next";
@@ -11,6 +12,7 @@ const NAV_LINKS: { href: Route; label: string }[] = [
   { href: "/historical-crux", label: "Historical" },
   { href: "/page-speed", label: "Insights" },
   { href: "/viewer", label: "Viewer" },
+  { href: "/trace", label: "Trace" },
 ];
 
 function isCurrentSection(pathname: string, href: string) {
@@ -19,6 +21,14 @@ function isCurrentSection(pathname: string, href: string) {
 
 export function TopNav() {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
+  // Close the mobile menu on navigation (adjust state during render, no effect).
+  const [openPath, setOpenPath] = useState(pathname);
+  if (openPath !== pathname) {
+    setOpenPath(pathname);
+    setOpen(false);
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md print:hidden">
@@ -36,7 +46,26 @@ export function TopNav() {
             <span className="font-medium text-muted-foreground"> Reporting</span>
           </span>
         </Link>
-        <ul className="flex shrink-0 items-center gap-0.5 rounded-lg bg-secondary p-1">
+        <button
+          type="button"
+          aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
+          aria-controls="primary-menu"
+          onClick={() => setOpen((v) => !v)}
+          className="rounded-md p-2 text-foreground hover:bg-secondary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:hidden"
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            {open ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
+          </svg>
+        </button>
+        <ul
+          id="primary-menu"
+          className={cn(
+            "w-full flex-col gap-0.5 rounded-lg bg-secondary p-1",
+            open ? "flex" : "hidden",
+            "md:flex md:w-auto md:shrink-0 md:flex-row md:items-center",
+          )}
+        >
           {NAV_LINKS.map((link) => {
             const active = isCurrentSection(pathname, link.href);
             return (
@@ -45,7 +74,7 @@ export function TopNav() {
                   href={link.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "block whitespace-nowrap rounded-md px-2.5 py-1 text-sm font-medium no-underline transition-colors",
+                    "block whitespace-nowrap rounded-md px-2.5 py-2 md:py-1 text-sm font-medium no-underline transition-colors",
                     "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                     active
                       ? "bg-background text-foreground shadow-sm"

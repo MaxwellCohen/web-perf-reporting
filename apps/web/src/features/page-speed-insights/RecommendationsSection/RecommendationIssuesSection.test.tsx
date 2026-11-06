@@ -20,7 +20,7 @@ vi.mock("@/features/page-speed-insights/RecommendationsSection/IssuesFoundTable"
 }));
 
 vi.mock("@/features/page-speed-insights/auditTableConfig", () => ({
-  shouldShowSeparateTablesPerReport: vi.fn(() => false),
+  shouldShowSeparateTablesPerReport: vi.fn<() => boolean>(() => false),
 }));
 
 const baseRec: Recommendation = {

@@ -8,7 +8,7 @@ vi.mock("lucide-react", () => ({
 }));
 
 describe("CopyButton", () => {
-  const writeText = vi.fn();
+  const writeText = vi.fn<() => void>();
 
   beforeAll(() => {
     vi.useFakeTimers();

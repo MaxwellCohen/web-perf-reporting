@@ -1,7 +1,13 @@
 const DEFAULT_WORKER_ORIGIN = "https://web-perf-report-api.to-email-max.workers.dev";
 
 function getWorkerPageSpeedOrigin(): string {
-  return process.env.WORKER_URL ?? DEFAULT_WORKER_ORIGIN;
+  const configured = process.env.WORKER_URL;
+  if (configured) return configured;
+  if (process.env.NODE_ENV !== "production") {
+    // Local/preview builds quietly talking to production data is a footgun: say so.
+    console.warn("WORKER_URL is not set; falling back to the production worker.");
+  }
+  return DEFAULT_WORKER_ORIGIN;
 }
 
 export async function fetchWorkerJobEnvelopeByPublicId(publicId: string): Promise<Response> {

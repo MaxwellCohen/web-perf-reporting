@@ -1,5 +1,3 @@
-"use client";
-
 import type { TableDataItem } from "@/features/page-speed-insights/tsTable/TableDataItem";
 import {
   METRIC_AUDIT_IDS,

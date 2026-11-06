@@ -1,4 +1,5 @@
 import type { ViewerRunState } from "@/components/viewer/ViewerRunSlot";
+import { parseLighthouseViewerGistId } from "@/lib/viewer/lighthouseViewerGist";
 import { parseViewerJsonString } from "@/components/viewer/parseViewerJson";
 
 export type RunValidation =
@@ -31,12 +32,12 @@ export function validateRun(run: ViewerRunState): RunValidation {
   if (run.method === "psi") {
     const value = run.psiUrl.trim();
     if (!value) return { status: "empty" };
+    if (parseLighthouseViewerGistId(value)) {
+      return { status: "valid", message: "Valid Lighthouse Viewer link" };
+    }
     try {
       const url = new URL(value);
-      if (
-        url.hostname === "pagespeed.web.dev" &&
-        url.pathname.startsWith("/analysis/")
-      ) {
+      if (url.hostname === "pagespeed.web.dev" && url.pathname.startsWith("/analysis/")) {
         return { status: "valid", message: "Valid PSI URL" };
       }
     } catch {

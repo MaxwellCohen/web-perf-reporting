@@ -1,5 +1,3 @@
-"use client";
-
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +19,10 @@ const SEVERITY_ORDER: Record<Severity, number> = {
   unknown: 3,
 };
 
-function normalizeSeverity(raw: unknown): { severity: Severity; label: string } {
+function normalizeSeverity(raw: unknown): {
+  severity: Severity;
+  label: string;
+} {
   const label = typeof raw === "string" && raw.trim() ? raw.trim() : "Unknown";
   const lower = label.toLowerCase();
   if (lower.startsWith("high")) return { severity: "high", label };
@@ -38,23 +39,34 @@ function extractFindings(rows: DetailTableItem[]): Finding[] {
   rows.forEach((row, rowIndex) => {
     const reportLabel = row._userLabel || "Report";
     (row.auditResult?.details?.items || []).forEach((item, itemIndex) => {
-      const description =
-        typeof item.description === "string" && item.description.trim()
-          ? item.description.trim()
-          : "";
-      if (!description) return;
-      const directive =
-        typeof item.directive === "string" && item.directive.trim()
-          ? item.directive.trim()
-          : undefined;
-      const { severity, label } = normalizeSeverity(item.severity);
-      findings.push({
-        id: `${rowIndex}-${itemIndex}-${description}`,
-        description,
-        directive,
-        severity,
-        severityLabel: label,
-        reportLabel,
+      // CSP syntax results keep the raw policy (a code object) on the row and the
+      // actual findings in subItems; flatten those so they are not dropped.
+      const entries: Array<Record<string, unknown>> = [
+        item,
+        ...((item.subItems?.items || []) as Array<Record<string, unknown>>).map((sub) => ({
+          ...sub,
+          severity: sub.severity ?? item.severity,
+        })),
+      ];
+      entries.forEach((entry, entryIndex) => {
+        const description =
+          typeof entry.description === "string" && entry.description.trim()
+            ? entry.description.trim()
+            : "";
+        if (!description) return;
+        const directive =
+          typeof entry.directive === "string" && entry.directive.trim()
+            ? entry.directive.trim()
+            : undefined;
+        const { severity, label } = normalizeSeverity(entry.severity);
+        findings.push({
+          id: `${rowIndex}-${itemIndex}-${entryIndex}-${description}`,
+          description,
+          directive,
+          severity,
+          severityLabel: label,
+          reportLabel,
+        });
       });
     });
   });

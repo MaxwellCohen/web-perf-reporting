@@ -1,5 +1,3 @@
-"use client";
-
 import { CWVMetricsComponent } from "@/features/page-speed-insights/CWVMetricsComponent";
 import { SectionStack } from "@/features/page-speed-insights/dashboard-view/SectionStack";
 import { JavaScriptPerformanceComponent } from "@/features/page-speed-insights/javascript-metrics/JavaScriptPerformanceComponent";

@@ -2,10 +2,7 @@
 
 import type { LhJsonFileEntry, LhJsonTextEntry } from "@/components/lh/types";
 import type { ViewerRunMethod } from "@/components/viewer/collectViewerReports";
-import {
-  detectRunInput,
-  validateRun,
-} from "@/components/viewer/viewerRunValidation";
+import { detectRunInput, validateRun } from "@/components/viewer/viewerRunValidation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,9 +20,7 @@ export type ViewerRunState = {
 };
 
 /** Stable IDs for SSR; avoid module counters (they diverge across server/client). */
-export function createEmptyViewerRun(
-  overrides: Partial<ViewerRunState> = {},
-): ViewerRunState {
+export function createEmptyViewerRun(overrides: Partial<ViewerRunState> = {}): ViewerRunState {
   return {
     method: "psi",
     label: "",
@@ -116,15 +111,9 @@ export function ViewerRunSlot({
     <div className="space-y-2 rounded-lg border p-3">
       <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
         <span className="flex items-center gap-2">
-          {title ? (
-            <b className="font-semibold text-foreground">{title}</b>
-          ) : null}
+          {title ? <b className="font-semibold text-foreground">{title}</b> : null}
           {!showLabel ? (
-            <button
-              type="button"
-              className="underline"
-              onClick={() => setShowLabel(true)}
-            >
+            <button type="button" className="underline" onClick={() => setShowLabel(true)}>
               + Add label
             </button>
           ) : null}
@@ -199,11 +188,7 @@ export function ViewerRunSlot({
             />
             <p className="mt-1 text-xs text-muted-foreground">
               Type is detected automatically ·{" "}
-              <button
-                type="button"
-                className="underline"
-                onClick={() => fileRef.current?.click()}
-              >
+              <button type="button" className="underline" onClick={() => fileRef.current?.click()}>
                 Choose file
               </button>
             </p>
@@ -228,9 +213,7 @@ export function ViewerRunSlot({
           role="status"
           className={cn(
             "flex items-center gap-1 text-xs",
-            validation.status === "valid"
-              ? "text-green-600"
-              : "text-destructive",
+            validation.status === "valid" ? "text-green-600" : "text-destructive",
           )}
         >
           {validation.status === "valid" ? (

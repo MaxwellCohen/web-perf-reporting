@@ -14,7 +14,7 @@ const items = [
 ] as InsightsContextItem[];
 
 describe("PageSpeedInsightsCopyButtons", () => {
-  const writeText = vi.fn();
+  const writeText = vi.fn<() => void>();
 
   beforeEach(() => {
     writeText.mockReset().mockResolvedValue(undefined);

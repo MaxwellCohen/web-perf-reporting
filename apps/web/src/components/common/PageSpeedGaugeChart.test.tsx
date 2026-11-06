@@ -10,7 +10,12 @@ vi.mock("recharts", () => ({
     content,
   }: {
     content: (props: {
-      viewBox?: { cx: number; cy: number; innerRadius?: number; outerRadius?: number };
+      viewBox?: {
+        cx: number;
+        cy: number;
+        innerRadius?: number;
+        outerRadius?: number;
+      };
     }) => React.ReactNode;
   }) => {
     const result = content({
@@ -131,6 +136,29 @@ describe("HorizontalGaugeChart", () => {
       <HorizontalGaugeChart metric="Test" data={dataWithOptional as any} />,
     );
     expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
+  });
+});
+
+describe("HorizontalGaugeChart scaling", () => {
+  it("shows CLS boundaries on a 0-1 scale", () => {
+    const cls = {
+      percentile: 5,
+      category: "FAST",
+      distributions: [
+        { min: 0, max: 10, proportion: 0.8 },
+        { min: 10, max: 25, proportion: 0.1 },
+        { min: 25, proportion: 0.1 },
+      ],
+    };
+    const { container } = render(<HorizontalGaugeChart data={cls as any} scale={100} />);
+    expect(container.textContent).toContain("0.1");
+    expect(container.textContent).toContain("0.25");
+  });
+
+  it("shows ms units on boundaries", () => {
+    const { container } = render(<HorizontalGaugeChart data={validMetricData as any} unit="ms" />);
+    expect(container.textContent).toContain("1 s");
+    expect(container.textContent).toContain("2 s");
   });
 });
 
