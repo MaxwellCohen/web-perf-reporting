@@ -6,6 +6,10 @@ import { decodeMeasurement } from "@/lib/stream-timing/share";
 import type { StreamMeasurement } from "@/lib/stream-timing/types";
 import { StreamTimeline } from "./StreamTimeline";
 
+function shellQuote(value: string): string {
+  return /^[\w@%+=:,./-]+$/.test(value) ? value : `'${value.replace(/'/g, `'\\''`)}'`;
+}
+
 const ms = (n: number) => `${Math.round(n)}ms`;
 
 function readHash(): StreamMeasurement | null {
@@ -19,6 +23,8 @@ export default function StreamTimingPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [origin, setOrigin] = useState("");
+  const [cmdCopied, setCmdCopied] = useState(false);
   const [fromLink, setFromLink] = useState(false);
 
   const inflight = useRef<AbortController | null>(null);
@@ -89,6 +95,7 @@ export default function StreamTimingPage() {
       setUrl(fromHash.url);
       setCopied(false);
     };
+    setOrigin(window.location.origin);
     syncFromHash();
     // A ?url= link only prefills the input; measuring needs an explicit click so links can't trigger fetches.
     const q = new URLSearchParams(window.location.search).get("url");
@@ -98,6 +105,7 @@ export default function StreamTimingPage() {
   }, []);
 
   const a = measurement ? analyze(measurement) : null;
+  const runCommand = `curl -s ${origin || "<this site>"}/measure-stream.mjs | node - ${shellQuote(url.trim() || "http://localhost:3000")}`;
 
   return (
     <main className="mx-auto flex max-w-5xl flex-col gap-6 p-4">
@@ -113,19 +121,38 @@ export default function StreamTimingPage() {
           className="flex-1 rounded-md border bg-background px-3 py-2 text-sm"
           placeholder="https://example.com"
           value={url}
-          onChange={(e) => setUrl(e.target.value)}
+          onChange={(e) => {
+            setUrl(e.target.value);
+            setCmdCopied(false);
+          }}
         />
         <button className="rounded-md border px-4 py-2 text-sm font-medium" disabled={loading}>
           {loading ? "Measuring…" : "Measure"}
         </button>
       </form>
       {error && <p className="text-sm text-red-600">{error}</p>}
-      {!measurement && !loading && (
-        <p className="text-sm text-muted-foreground">
-          Enter a public URL, or open a shared link. For localhost run{" "}
-          <code>curl -s {"<this site>"}/measure-stream.mjs | node - http://localhost:3000</code>.
+      <div className="flex flex-col gap-1">
+        <p className="text-xs text-muted-foreground">
+          Or run it from your terminal (needed for localhost). The URL above is added to the end; edit it to change the page.
         </p>
-      )}
+        <div className="flex items-center gap-2">
+          <code className="flex-1 overflow-x-auto whitespace-nowrap rounded-md border bg-muted px-3 py-2 text-xs">
+            {runCommand}
+          </code>
+          <button
+            type="button"
+            className="rounded-md border px-3 py-1 text-xs"
+            onClick={() => {
+              void navigator.clipboard
+                .writeText(runCommand)
+                .then(() => setCmdCopied(true))
+                .catch(() => setError("Could not copy; select the command and copy it manually."));
+            }}
+          >
+            {cmdCopied ? "Copied" : "Copy command"}
+          </button>
+        </div>
+      </div>
       {measurement && a && (
         <>
           {fromLink && (
