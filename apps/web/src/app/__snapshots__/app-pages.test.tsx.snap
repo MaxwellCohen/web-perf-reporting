@@ -128,7 +128,7 @@ exports[`app page coverage smoke tests > renders the home page cards and destina
       Or explore the data yourself
     </h2>
     <div
-      class="grid md:grid-cols-2 lg:grid-cols-5 gap-4"
+      class="grid md:grid-cols-2 lg:grid-cols-3 gap-4"
     >
       <a
         class="inline-flex justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-auto flex-col items-start gap-1 whitespace-normal p-4 text-left no-underline"
@@ -208,6 +208,22 @@ exports[`app page coverage smoke tests > renders the home page cards and destina
           class="text-sm font-normal text-muted-foreground"
         >
           Analyze a Chrome performance trace
+        </span>
+      </a>
+      <a
+        class="inline-flex justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-auto flex-col items-start gap-1 whitespace-normal p-4 text-left no-underline"
+        href="/stream"
+      >
+        <span
+          class="font-semibold"
+        >
+          Streaming timing
+           →
+        </span>
+        <span
+          class="text-sm font-normal text-muted-foreground"
+        >
+          See when streamed HTML chunks arrive and where the server waits
         </span>
       </a>
     </div>

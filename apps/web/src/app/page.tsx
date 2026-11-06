@@ -30,6 +30,11 @@ const tools: { title: string; description: string; url: Route }[] = [
     description: "Analyze a Chrome performance trace",
     url: "/trace",
   },
+  {
+    title: "Streaming timing",
+    description: "See when streamed HTML chunks arrive and where the server waits",
+    url: "/stream",
+  },
 ];
 
 export default function Home() {
@@ -58,7 +63,7 @@ export default function Home() {
         <h2 className="text-center text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-4">
           Or explore the data yourself
         </h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {tools.map((tool) => (
             <Button
               key={tool.url}
