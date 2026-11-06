@@ -8,6 +8,13 @@ npx -y @maxwellcohen/web-perf-report https://example.com --device mobile --forma
 npx -y @maxwellcohen/web-perf-report --file report.json             # analyze an existing Lighthouse/PSI JSON
 ```
 
+```sh
+npx -y @maxwellcohen/web-perf-report stream http://localhost:3000   # when does the streamed HTML actually finish?
+npx -y @maxwellcohen/web-perf-report stream http://localhost:3000 http://localhost:3001   # compare two (A vs B)
+```
+
+`stream` records when each chunk of the page's HTML arrives (works for localhost), then prints TTFB, last byte, the idle gaps where the server is waiting, and a shareable `/stream` link. Pass a second URL to compare A and B (before/after, two builds); the report shows the delta table and a shareable `/stream#r=…&b=…` link. Options: `--format md|json`, `--api <url>`.
+
 Options: `--device mobile|desktop|both`, `--format md|json`, `--file <path>`, `--api <url>` (or env `WEB_PERF_REPORT_API`, default `https://web-perf-report.vercel.app`).
 
 ## MCP server (stdio)
@@ -16,4 +23,4 @@ Options: `--device mobile|desktop|both`, `--format md|json`, `--file <path>`, `-
 { "command": "npx", "args": ["-y", "@maxwellcohen/web-perf-report", "mcp"] }
 ```
 
-Tools: `audit_site` (url, device?) and `analyze_report` (report JSON). Audits take ~30-90s.
+Tools: `audit_site` (url, device?), `analyze_report` (report JSON) and `measure_stream` (url). Audits take ~30-90s; `measure_stream` takes a few seconds.

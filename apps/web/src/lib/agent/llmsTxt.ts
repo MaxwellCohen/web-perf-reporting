@@ -53,6 +53,22 @@ export function buildLlmsTxt(siteUrl: string): string {
 - Run each audit 3 times (re-run the command) and compare medians. Revert changes that fail tests or don't help.
 - End with a before/after table.
 
+## Streaming timing (when does the HTML actually finish?)
+
+Streaming frameworks (Next.js, etc.) send the shell fast, then stream Suspense content as slow data resolves, so total document time can be dominated by one late chunk. This records when each chunk of the HTML arrives and reports the idle "waiting" gaps.
+
+- localhost / dev / preview (measured on this machine; Node 20+; use a production build) with the CLI:
+  npx -y @maxwellcohen/web-perf-report stream http://localhost:3000
+  Compare two (A = first URL, B = second; e.g. before/after a change or two builds on different ports):
+  npx -y @maxwellcohen/web-perf-report stream http://localhost:3000 http://localhost:3001
+  Add \`--format json\` for JSON. It is also the \`measure_stream\` tool (url, compareUrl?) of the CLI's MCP server.
+- Public site (measured from the server, no install):
+  curl -s "${siteUrl}/api/agent/stream?url=https://example.com&format=md"
+  Compare: add \`&compare=https://other.example\`.
+- No Node CLI available: \`curl -s ${siteUrl}/measure-stream.mjs | node - http://localhost:3000\` (single URL). The script only fetches the given URL and POSTs the chunk timings to this site; read it first if you prefer (curl the URL without the pipe).
+
+Output (markdown): TTFB, first chunk, last byte, idle waiting (gaps >= 100ms) and its share of the body span, each gap with the chunk that arrived after it (Suspense completions show as \`$RC(\` scripts or \`<div hidden id="S:\` segments, marked "Suspense" on the page), and a shareable link to ${siteUrl}/stream. With two URLs you also get a delta table (B − A; negative is better) and a one-line verdict. A long gap means a server-side await inside a Suspense boundary: find that boundary's data fetch and speed up or cache it.
+
 ## API
 
 POST ${api}
