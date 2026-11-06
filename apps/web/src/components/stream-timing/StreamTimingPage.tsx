@@ -22,6 +22,18 @@ export default function StreamTimingPage() {
   const [fromLink, setFromLink] = useState(false);
 
   const inflight = useRef<AbortController | null>(null);
+  const pushed = useRef(false);
+
+  const goBack = () => {
+    if (pushed.current) {
+      pushed.current = false;
+      window.history.back();
+      return;
+    }
+    window.history.pushState(null, "", window.location.pathname);
+    setMeasurement(null);
+    setError("");
+  };
 
   const run = useCallback(async (target: string) => {
     inflight.current?.abort();
@@ -45,7 +57,9 @@ export default function StreamTimingPage() {
       setFromLink(false);
       setUrl(body.measurement.url);
       setCopied(false);
-      window.history.replaceState(null, "", body.shareUrl.replace(/^https?:\/\/[^/]+/, ""));
+      // push (not replace) so the browser Back button returns to the previous view
+      window.history.pushState(null, "", body.shareUrl.replace(/^https?:\/\/[^/]+/, ""));
+      pushed.current = true;
     } catch (e) {
       if (controller.signal.aborted) return;
       setError(e instanceof Error ? e.message : "Measurement failed");
@@ -120,6 +134,9 @@ export default function StreamTimingPage() {
             </p>
           )}
           <div className="flex items-center justify-between gap-2">
+            <button className="rounded-md border px-3 py-1 text-xs" onClick={goBack}>
+              ← Back
+            </button>
             <p className="truncate text-sm text-muted-foreground">
               {measurement.finalUrl ?? measurement.url}{fromLink ? "" : ` · measured from ${measurement.measuredFrom}`}
             </p>
