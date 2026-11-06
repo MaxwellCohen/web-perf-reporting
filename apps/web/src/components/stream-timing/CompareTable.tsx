@@ -1,7 +1,8 @@
 import { compareAnalyses, compareVerdict } from "@/lib/stream-timing/compare";
 import type { StreamAnalysis } from "@/lib/stream-timing/types";
 
-const fmt = (n: number, unit: string) => (unit === "ms" ? `${Math.round(n)}ms` : unit === "%" ? `${n}%` : String(n));
+const fmt = (n: number, unit: string) =>
+  unit === "ms" ? `${Math.round(n)}ms` : unit === "%" ? `${n}%` : String(n);
 
 /** A vs B metrics; negative B - A (green) means B is faster / waits less. */
 export function CompareTable({ a, b }: { a: StreamAnalysis; b: StreamAnalysis }) {

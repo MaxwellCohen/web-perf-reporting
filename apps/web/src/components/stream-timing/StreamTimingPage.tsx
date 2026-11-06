@@ -123,7 +123,10 @@ export default function StreamTimingPage() {
 
   const a = measurement ? analyze(measurement) : null;
   const b = measurement2 ? analyze(measurement2) : null;
-  const axisEnd = a && b ? Math.max(a.lastByteMs, b.lastByteMs, measurement?.totalMs ?? 0, measurement2?.totalMs ?? 0) : undefined;
+  const axisEnd =
+    a && b
+      ? Math.max(a.lastByteMs, b.lastByteMs, measurement?.totalMs ?? 0, measurement2?.totalMs ?? 0)
+      : undefined;
   const runCommand = `npx -y @maxwellcohen/web-perf-report stream ${shellQuote(url.trim() || "http://localhost:3000")}${url2.trim() ? ` ${shellQuote(url2.trim())}` : ""}`;
 
   return (
@@ -165,7 +168,8 @@ export default function StreamTimingPage() {
       {error && <p className="text-sm text-red-600">{error}</p>}
       <div className="flex flex-col gap-1">
         <p className="text-xs text-muted-foreground">
-          Or run it from your terminal with the CLI (needed for localhost). The URL(s) above are added to the end; edit them to change the page.
+          Or run it from your terminal with the CLI (needed for localhost). The URL(s) above are
+          added to the end; edit them to change the page.
         </p>
         <div className="flex items-center gap-2">
           <code className="flex-1 overflow-x-auto whitespace-nowrap rounded-md border bg-muted px-3 py-2 text-xs">
@@ -189,7 +193,8 @@ export default function StreamTimingPage() {
         <>
           {fromLink && (
             <p className="text-xs text-muted-foreground">
-              Snapshot from a link: timings are as recorded by whoever created it, not verified by this site.
+              Snapshot from a link: timings are as recorded by whoever created it, not verified by
+              this site.
             </p>
           )}
           <div className="flex items-center justify-between gap-2">
@@ -197,7 +202,8 @@ export default function StreamTimingPage() {
               ← Back
             </button>
             <p className="truncate text-sm text-muted-foreground">
-              {measurement2 ? "Comparison" : (measurement.finalUrl ?? measurement.url)}{fromLink ? "" : ` · measured from ${measurement.measuredFrom}`}
+              {measurement2 ? "Comparison" : (measurement.finalUrl ?? measurement.url)}
+              {fromLink ? "" : ` · measured from ${measurement.measuredFrom}`}
             </p>
             <button
               className="rounded-md border px-3 py-1 text-xs"
