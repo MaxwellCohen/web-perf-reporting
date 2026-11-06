@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { firstPositional } from "../src/argv.js";
+import { dropFirstPositional, firstPositional } from "../src/argv.js";
 import { assertHttpUrl, lighthouseArgs, LIGHTHOUSE_VERSION, npxBinary } from "../src/core.js";
 
 describe("firstPositional", () => {
@@ -11,6 +11,16 @@ describe("firstPositional", () => {
     [["--device=mobile", "--format", "json"], undefined],
   ])("%j -> %s", (argv, want) => {
     expect(firstPositional(argv as string[])).toBe(want);
+  });
+});
+
+describe("dropFirstPositional", () => {
+  it.each([
+    [["stream", "http://x"], ["http://x"]],
+    [["--api", "http://a", "stream", "http://x", "--format", "json"], ["--api", "http://a", "http://x", "--format", "json"]],
+    [["--format", "json"], ["--format", "json"]],
+  ])("%j", (argv, want) => {
+    expect(dropFirstPositional(argv as string[])).toEqual(want);
   });
 });
 

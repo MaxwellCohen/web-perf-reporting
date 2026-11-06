@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 import { readFile } from "node:fs/promises";
 import { defineCommand, runMain } from "citty";
-import { firstPositional } from "./argv.js";
+import { dropFirstPositional, firstPositional } from "./argv.js";
 import { runAudit, type Device, type Format } from "./core.js";
+import { runStream } from "./stream.js";
 
 const mcp = defineCommand({
   meta: { name: "mcp", description: "Start the MCP server (stdio)" },
@@ -12,11 +13,38 @@ const mcp = defineCommand({
   },
 });
 
+const stream = defineCommand({
+  meta: {
+    name: "web-perf-report stream",
+    description:
+      "Measure when each chunk of a page's streamed HTML arrives (works for localhost) and print where the server is waiting, with a shareable link.",
+  },
+  args: {
+    url: { type: "positional", required: true, description: "Page URL, e.g. http://localhost:3000" },
+    format: { type: "string", default: "md", description: "md | json" },
+    api: { type: "string", description: "API base URL (env WEB_PERF_REPORT_API)" },
+  },
+  async run({ args }) {
+    if (!["md", "json"].includes(args.format)) {
+      console.error("Error: --format must be md or json");
+      process.exit(1);
+    }
+    try {
+      const out = await runStream({ url: args.url, format: args.format as Format, apiBase: args.api, onProgress: (m) => console.error(m) });
+      process.stdout.write(out.endsWith("\n") ? out : `${out}\n`);
+    } catch (e) {
+      console.error(`Error: ${e instanceof Error ? e.message : String(e)}`);
+      process.exit(1);
+    }
+  },
+});
+
 const main = defineCommand({
   meta: {
     name: "web-perf-report",
     version: "0.1.0",
-    description: "Run Lighthouse on a URL and print a ranked performance report. Run `web-perf-report mcp` to start the MCP server (stdio).",
+    description:
+      "Run Lighthouse on a URL and print a ranked performance report. `web-perf-report stream <url>` measures streamed-HTML chunk timing; `web-perf-report mcp` starts the MCP server (stdio).",
   },
   args: {
     url: { type: "positional", required: false, description: "URL to audit" },
@@ -50,5 +78,9 @@ const main = defineCommand({
   },
 });
 
-// citty rejects a positional URL when subCommands exist, so route `mcp` by hand.
-void runMain(firstPositional(process.argv.slice(2)) === "mcp" ? mcp : main);
+// citty rejects a positional URL when subCommands exist, so route subcommands by hand.
+const argv = process.argv.slice(2);
+const sub = firstPositional(argv);
+if (sub === "stream") void runMain(stream, { rawArgs: dropFirstPositional(argv) });
+else if (sub === "mcp") void runMain(mcp);
+else void runMain(main);
