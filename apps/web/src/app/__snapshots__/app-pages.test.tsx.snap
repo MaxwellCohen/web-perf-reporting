@@ -246,12 +246,6 @@ exports[`app page coverage smoke tests > renders the page speed layout shell and
 </div>
 `;
 
-exports[`app page coverage smoke tests > renders the page speed lookup form when no URL is present 1`] = `
-<div>
-  Mock URL lookup form
-</div>
-`;
-
 exports[`app page coverage smoke tests > renders the viewer page 1`] = `
 <div
   class="max-w-screen-2xl mx-auto"

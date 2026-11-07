@@ -53,7 +53,10 @@ describe("ViewerPage", () => {
     const input = getByLabelText("PSI URL, JSON, or file");
 
     fireEvent.change(input, { target: { value: "https://example.com/nope" } });
-    expect(getByText("Not a PageSpeed Insights share URL")).toBeTruthy();
+    expect(getByText("Will run PageSpeed Insights")).toBeTruthy();
+
+    fireEvent.change(input, { target: { value: "not a url" } });
+    expect(getByText("Enter a page URL, PSI share URL, or JSON")).toBeTruthy();
 
     fireEvent.change(input, { target: { value: '{\n  "a": ,\n}' } });
     expect(getByText(/Invalid JSON/)).toBeTruthy();

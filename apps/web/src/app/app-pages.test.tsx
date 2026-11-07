@@ -138,47 +138,19 @@ describe("app page coverage smoke tests", () => {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it("renders the page speed lookup form when no URL is present", async () => {
+  it("redirects /page-speed to the viewer when no URL is present", async () => {
     updateUrlMock.mockReturnValue(undefined);
-
-    const { container } = render(await PageSpeedPage({ searchParams: Promise.resolve({}) }));
-
-    expect(container.firstChild).toMatchSnapshot();
-    expect(requestPageSpeedDataMock).not.toHaveBeenCalled();
-    expect(redirectMock).not.toHaveBeenCalled();
+    await PageSpeedPage({ searchParams: Promise.resolve({}) });
+    expect(redirectMock).toHaveBeenCalledWith("/viewer");
   });
 
-  it("requests a report and redirects when the page speed URL resolves", async () => {
+  it("redirects /page-speed?url to the viewer, keeping dashboard params", async () => {
     updateUrlMock.mockReturnValue("https://example.com");
-    requestPageSpeedDataMock.mockResolvedValue("public-123");
-
-    render(
-      await PageSpeedPage({
-        searchParams: Promise.resolve({ url: "https://example.com" }),
-      }),
-    );
-
-    expect(requestPageSpeedDataMock).toHaveBeenCalledWith("https://example.com");
-    expect(redirectMock).toHaveBeenCalledWith("/page-speed/public-123");
-  });
-
-  it("keeps dashboard view params when redirecting to a report", async () => {
-    updateUrlMock.mockReturnValue("https://example.com");
-    requestPageSpeedDataMock.mockResolvedValue("public-123");
-
-    render(
-      await PageSpeedPage({
-        searchParams: Promise.resolve({
-          url: "https://example.com",
-          view: "dashboard",
-          tab: "timeline",
-          labels: ["Mobile"],
-        }),
-      }),
-    );
-
+    await PageSpeedPage({
+      searchParams: Promise.resolve({ url: "https://example.com", view: "dashboard" }),
+    });
     expect(redirectMock).toHaveBeenCalledWith(
-      "/page-speed/public-123?view=dashboard&tab=timeline&labels=Mobile",
+      "/viewer?psi=https%3A%2F%2Fexample.com&view=dashboard",
     );
   });
 });

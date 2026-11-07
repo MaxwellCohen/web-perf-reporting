@@ -1,6 +1,9 @@
 import type { LhJsonFileEntry, LhJsonTextEntry } from "@/components/lh/types";
 import { PageSpeedInsights } from "@/lib/schema";
 import { parseViewerJsonString } from "@/components/viewer/parseViewerJson";
+import { isSiteUrl } from "@/lib/viewer/siteUrl";
+import { requestPageSpeedData } from "@/lib/services/pageSpeedInsights.service";
+import { fetchPageSpeedInsightsByPublicId } from "@/lib/page-speed-insights/pageSpeedInsightsClient";
 import { prefixPsiReportLabels, resolvePsiRunLabels } from "@/lib/viewer/psiCompareLabels";
 
 export type ViewerRunMethod = "psi" | "file" | "text";
@@ -13,6 +16,27 @@ export type ViewerRunInput = {
   jsonInputs?: LhJsonTextEntry[];
 };
 
+async function runSiteReport(
+  url: string,
+): Promise<{ data: PageSpeedInsights[]; labels: string[] }> {
+  const publicId = await requestPageSpeedData(url);
+  if (!publicId) throw new Error("We couldn't start a PageSpeed Insights run. Please try again.");
+  const result = await fetchPageSpeedInsightsByPublicId(publicId);
+  if (result.status === "failed") {
+    throw new Error(result.error || "PageSpeed Insights run failed");
+  }
+  const names = ["Mobile", "Desktop"];
+  const data: PageSpeedInsights[] = [];
+  const labels: string[] = [];
+  result.data.forEach((report, index) => {
+    if (!report) return;
+    data.push(report);
+    labels.push(names[index] ?? `Report ${index + 1}`);
+  });
+  if (!data.length) throw new Error("PageSpeed Insights returned no data");
+  return { data, labels };
+}
+
 async function importPsiShare(
   url: string,
 ): Promise<{ data: PageSpeedInsights[]; labels: string[] }> {
@@ -20,6 +44,7 @@ async function importPsiShare(
   if (!trimmed) {
     throw new Error("Enter a PageSpeed Insights share URL");
   }
+  if (isSiteUrl(trimmed)) return runSiteReport(trimmed);
 
   const response = await fetch("/api/viewer/psi-share", {
     method: "POST",

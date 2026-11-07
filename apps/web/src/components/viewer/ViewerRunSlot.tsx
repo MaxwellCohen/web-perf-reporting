@@ -181,7 +181,7 @@ export function ViewerRunSlot({
               aria-label="PSI URL, JSON, or file"
               rows={2}
               className="resize-none border-0 p-0 font-mono text-sm shadow-none focus-visible:ring-0"
-              placeholder="Paste a PSI URL or JSON, or drop a .json file…"
+              placeholder="Enter a page URL to run PSI, paste a PSI link or JSON, or drop a .json file…"
               value={rawValue(run)}
               onChange={(event) => onChange(withText(event.target.value))}
               onPaste={handlePaste}

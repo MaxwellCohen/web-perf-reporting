@@ -343,7 +343,7 @@ export default function ViewerPage({
         <div className="space-y-1.5">
           <CardTitle>Lighthouse Report Viewer</CardTitle>
           <CardDescription>
-            Drop a file, paste JSON, or paste a PageSpeed Insights link.
+            Enter a page URL to run PageSpeed Insights, or drop a file, paste JSON, or paste a PSI link.
           </CardDescription>
         </div>
         {recent.length ? (
