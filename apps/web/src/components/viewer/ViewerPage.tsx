@@ -358,7 +358,12 @@ export default function ViewerPage({
                 <DropdownMenuItem
                   key={url}
                   className="truncate"
-                  onSelect={() => updateRun(0, { ...runs[0]!, method: "psi", psiUrl: url })}
+                  onSelect={() => {
+                    const next = { ...runs[0]!, method: "psi" as const, psiUrl: url };
+                    updateRun(0, next);
+                    // Load the report right away; compare mode keeps the manual submit.
+                    if (!comparing) void handleSubmit([next]);
+                  }}
                 >
                   {url.replace(/^https?:\/\//, "")}
                 </DropdownMenuItem>
