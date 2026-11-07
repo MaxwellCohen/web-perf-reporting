@@ -64,7 +64,6 @@ import LatestCruxPage from "@/app/latest-crux/page";
 import PageSpeedLayout from "@/app/page-speed/layout";
 import PageSpeedPage from "@/app/page-speed/page";
 import PageSpeedPublicIdPage from "@/app/page-speed/[publicId]/page";
-import ViewerPage from "@/app/viewer/page";
 
 describe("app page coverage smoke tests", () => {
   beforeEach(() => {
@@ -75,12 +74,6 @@ describe("app page coverage smoke tests", () => {
 
   it("renders the home page cards and destination links", () => {
     const { container } = render(<Home />);
-    expect(container.firstChild).toMatchSnapshot();
-  });
-
-  it("renders the viewer page", async () => {
-    const { container } = render(await ViewerPage());
-
     expect(container.firstChild).toMatchSnapshot();
   });
 
@@ -138,19 +131,8 @@ describe("app page coverage smoke tests", () => {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it("redirects /page-speed to the viewer when no URL is present", async () => {
-    updateUrlMock.mockReturnValue(undefined);
-    await PageSpeedPage({ searchParams: Promise.resolve({}) });
-    expect(redirectMock).toHaveBeenCalledWith("/viewer");
-  });
-
-  it("redirects /page-speed?url to the viewer, keeping dashboard params", async () => {
-    updateUrlMock.mockReturnValue("https://example.com");
-    await PageSpeedPage({
-      searchParams: Promise.resolve({ url: "https://example.com", view: "dashboard" }),
-    });
-    expect(redirectMock).toHaveBeenCalledWith(
-      "/viewer?psi=https%3A%2F%2Fexample.com&view=dashboard",
-    );
+  it("renders the page speed page with the viewer input", async () => {
+    const { container } = render(await PageSpeedPage({ searchParams: Promise.resolve({}) }));
+    expect(container.firstChild).toMatchSnapshot();
   });
 });

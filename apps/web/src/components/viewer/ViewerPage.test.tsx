@@ -276,7 +276,7 @@ describe("ViewerPage", () => {
 
     await waitFor(() => {
       expect(container.querySelector('[data-testid="share-url"]')?.textContent).toBe(
-        `${window.location.origin}/viewer?psi=${encodeURIComponent(psi)}`,
+        `${window.location.origin}/page-speed?psi=${encodeURIComponent(psi)}`,
       );
     });
   });

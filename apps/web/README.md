@@ -66,8 +66,7 @@ Open [http://localhost:3000](http://localhost:3000).
 - `/` - overview page
 - `/latest-crux` - current CrUX metrics
 - `/historical-crux` - historical CrUX charts
-- `/page-speed` - PageSpeed Insights lookup flow
-- `/viewer` - Lighthouse report viewer
+- `/page-speed` - PageSpeed Insights: run a URL, import a PSI link, or open Lighthouse JSON (`/viewer` and `/lh` redirect here)
 
 ## Scripts
 

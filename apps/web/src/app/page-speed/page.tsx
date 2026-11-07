@@ -1,20 +1,30 @@
+import ViewerPage from "@/components/viewer/ViewerPage";
+import { toSearchString } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 import { updateURl } from "@/lib/utils";
-import { redirect } from "next/navigation";
 
-export default async function Home({
-  searchParams,
+function firstSearchParam(value: string | string[] | undefined): string {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value[0] ?? "";
+  return "";
+}
+
+export default async function PageSpeedPage({
+  searchParams = Promise.resolve({}),
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const { url: rawUrl, ...rest } = await searchParams;
-  const url = updateURl(Array.isArray(rawUrl) ? rawUrl[0] : rawUrl);
-  const query = new URLSearchParams();
-  if (url) query.set("psi", url);
-  for (const [key, value] of Object.entries(rest)) {
-    for (const v of Array.isArray(value) ? value : value === undefined ? [] : [value]) {
-      query.append(key, v);
-    }
-  }
-  const search = query.toString();
-  redirect(search ? `/viewer?${search}` : "/viewer");
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+} = {}) {
+  const params = await searchParams;
+  const { psi, psi2, psiLabel, psi2Label, url, ...dashboardParams } = params;
+  // `?url=` is the legacy lookup param; treat it as a page URL to measure.
+  const initialPsi = firstSearchParam(psi) || updateURl(firstSearchParam(url));
+
+  return (
+    <ViewerPage
+      initialSearch={toSearchString(dashboardParams)}
+      initialPsi={initialPsi}
+      initialPsi2={firstSearchParam(psi2)}
+      initialPsiLabel={firstSearchParam(psiLabel)}
+      initialPsi2Label={firstSearchParam(psi2Label)}
+    />
+  );
 }
