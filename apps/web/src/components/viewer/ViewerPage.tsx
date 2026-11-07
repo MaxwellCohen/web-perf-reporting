@@ -341,9 +341,9 @@ export default function ViewerPage({
     <Card className="mx-auto w-full max-w-3xl">
       <CardHeader className="flex-row items-start justify-between gap-2 space-y-0">
         <div className="space-y-1.5">
-          <CardTitle>Lighthouse Report Viewer</CardTitle>
+          <CardTitle>Run or open a report</CardTitle>
           <CardDescription>
-            Drop a file, paste JSON, or paste a PageSpeed Insights link.
+            Enter a page URL to run PageSpeed Insights, or drop a file, paste JSON, or paste a PSI link.
           </CardDescription>
         </div>
         {recent.length ? (

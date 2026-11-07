@@ -9,7 +9,7 @@ describe("buildPsiViewerDeepLink", () => {
         "https://web-perf-report.vercel.app",
       ),
     ).toBe(
-      "https://web-perf-report.vercel.app/viewer?psi=https%3A%2F%2Fpagespeed.web.dev%2Fanalysis%2Fhttps-example-com%2Fabc",
+      "https://web-perf-report.vercel.app/page-speed?psi=https%3A%2F%2Fpagespeed.web.dev%2Fanalysis%2Fhttps-example-com%2Fabc",
     );
   });
 
@@ -25,7 +25,7 @@ describe("buildPsiViewerDeepLink", () => {
         },
       ),
     ).toBe(
-      "https://web-perf-report.vercel.app/viewer?psi=https%3A%2F%2Fpagespeed.web.dev%2Fanalysis%2Fhttps-example-com%2Fa&psiLabel=Before&psi2=https%3A%2F%2Fpagespeed.web.dev%2Fanalysis%2Fhttps-example-com%2Fb&psi2Label=After",
+      "https://web-perf-report.vercel.app/page-speed?psi=https%3A%2F%2Fpagespeed.web.dev%2Fanalysis%2Fhttps-example-com%2Fa&psiLabel=Before&psi2=https%3A%2F%2Fpagespeed.web.dev%2Fanalysis%2Fhttps-example-com%2Fb&psi2Label=After",
     );
   });
 });
@@ -34,7 +34,7 @@ describe("buildPsiViewerBookmarklet", () => {
   it("opens the viewer with the current PSI share URL", () => {
     const href = buildPsiViewerBookmarklet();
     expect(href.startsWith("javascript:")).toBe(true);
-    expect(href).toContain("https://web-perf-report.vercel.app/viewer?psi=");
+    expect(href).toContain("https://web-perf-report.vercel.app/page-speed?psi=");
     expect(href).toContain("pagespeed\\.web\\.dev");
     expect(href).toContain("encodeURIComponent(u)");
   });
