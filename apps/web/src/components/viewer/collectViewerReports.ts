@@ -1,6 +1,9 @@
 import type { LhJsonFileEntry, LhJsonTextEntry } from "@/components/lh/types";
 import { PageSpeedInsights } from "@/lib/schema";
 import { parseViewerJsonString } from "@/components/viewer/parseViewerJson";
+import { isSiteUrl } from "@/lib/viewer/siteUrl";
+import { requestPageSpeedData } from "@/lib/services/pageSpeedInsights.service";
+import { fetchPageSpeedInsightsByPublicId } from "@/lib/page-speed-insights/pageSpeedInsightsClient";
 import { prefixPsiReportLabels, resolvePsiRunLabels } from "@/lib/viewer/psiCompareLabels";
 
 export type ViewerRunMethod = "psi" | "file" | "text";
@@ -13,13 +16,33 @@ export type ViewerRunInput = {
   jsonInputs?: LhJsonTextEntry[];
 };
 
-async function importPsiShare(
-  url: string,
-): Promise<{ data: PageSpeedInsights[]; labels: string[] }> {
+type CollectedReports = { data: PageSpeedInsights[]; labels: string[]; publicId?: string };
+
+async function runSiteReport(url: string): Promise<CollectedReports> {
+  const publicId = await requestPageSpeedData(url);
+  if (!publicId) throw new Error("We couldn't start a PageSpeed Insights run. Please try again.");
+  const result = await fetchPageSpeedInsightsByPublicId(publicId);
+  if (result.status === "failed") {
+    throw new Error(result.error || "PageSpeed Insights run failed");
+  }
+  const names = ["Mobile", "Desktop"];
+  const data: PageSpeedInsights[] = [];
+  const labels: string[] = [];
+  result.data.forEach((report, index) => {
+    if (!report) return;
+    data.push(report);
+    labels.push(names[index] ?? `Report ${index + 1}`);
+  });
+  if (!data.length) throw new Error("PageSpeed Insights returned no data");
+  return { data, labels, publicId };
+}
+
+async function importPsiShare(url: string): Promise<CollectedReports> {
   const trimmed = url.trim();
   if (!trimmed) {
     throw new Error("Enter a PageSpeed Insights share URL");
   }
+  if (isSiteUrl(trimmed)) return runSiteReport(trimmed);
 
   const response = await fetch("/api/viewer/psi-share", {
     method: "POST",
@@ -97,9 +120,7 @@ async function collectTextRun(
   return { data, labels };
 }
 
-async function collectOneRun(
-  run: ViewerRunInput,
-): Promise<{ data: PageSpeedInsights[]; labels: string[] }> {
+async function collectOneRun(run: ViewerRunInput): Promise<CollectedReports> {
   if (run.method === "psi") {
     return importPsiShare(run.psiUrl ?? "");
   }
@@ -109,9 +130,8 @@ async function collectOneRun(
   return collectTextRun(run.jsonInputs ?? []);
 }
 
-export async function collectViewerReports(
-  runs: ViewerRunInput[],
-): Promise<{ data: PageSpeedInsights[]; labels: string[] }> {
+/** `publicId` is set only for a single page-URL run, which is saved at `/page-speed/[publicId]`. */
+export async function collectViewerReports(runs: ViewerRunInput[]): Promise<CollectedReports> {
   if (runs.length === 0) {
     throw new Error("Add at least one run");
   }
