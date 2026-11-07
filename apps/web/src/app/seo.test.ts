@@ -31,7 +31,6 @@ describe("SEO metadata routes", () => {
       "http://localhost:3000/latest-crux",
       "http://localhost:3000/historical-crux",
       "http://localhost:3000/page-speed",
-      "http://localhost:3000/viewer",
       "http://localhost:3000/stream",
       "http://localhost:3000/privacy",
       "http://localhost:3000/terms",

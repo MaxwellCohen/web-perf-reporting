@@ -60,4 +60,4 @@ jobs:
       - run: cd dist && sha256sum --check --strict SHA256SUMS
       - run: |
           npm install -g npm@^11.15.0
-          npm publish dist/*.tgz --access public --provenance
+          npm stage publish ./dist/*.tgz --access public --provenance

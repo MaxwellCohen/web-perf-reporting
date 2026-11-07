@@ -12,7 +12,7 @@ export function buildPsiViewerDeepLink(
   origin: string,
   options: PsiViewerDeepLinkOptions = {},
 ): string {
-  const url = new URL("/viewer", origin);
+  const url = new URL("/page-speed", origin);
   url.searchParams.set("psi", psiUrl);
   const label = options.label?.trim();
   if (label) url.searchParams.set("psiLabel", label);
@@ -26,6 +26,6 @@ export function buildPsiViewerDeepLink(
 }
 
 export function buildPsiViewerBookmarklet(): string {
-  const target = `${PRODUCTION_VIEWER_ORIGIN}/viewer?psi=`;
+  const target = `${PRODUCTION_VIEWER_ORIGIN}/page-speed?psi=`;
   return `javascript:(()=>{const u=location.href;if(!/pagespeed\\.web\\.dev\\/analysis\\//.test(u)){alert('Open a PageSpeed Insights report first');return;}location.href=${JSON.stringify(target)}+encodeURIComponent(u);})();`;
 }
