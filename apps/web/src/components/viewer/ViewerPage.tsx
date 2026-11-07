@@ -2,6 +2,7 @@
 import type { PageSpeedInsights } from "@/lib/schema";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -106,22 +107,33 @@ function getRecentSnapshot(): string {
 
 const getServerRecentSnapshot = () => "[]";
 
-function parseRecent(raw: string): string[] {
+type RecentEntry = { url: string; publicId?: string };
+
+function parseRecent(raw: string): RecentEntry[] {
   try {
     const parsed: unknown = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((u): u is string => typeof u === "string") : [];
+    if (!Array.isArray(parsed)) return [];
+    const entries: RecentEntry[] = [];
+    for (const item of parsed) {
+      if (typeof item === "string") entries.push({ url: item });
+      else if (item && typeof item === "object" && typeof (item as RecentEntry).url === "string") {
+        const { url, publicId } = item as RecentEntry;
+        entries.push({ url, publicId: typeof publicId === "string" ? publicId : undefined });
+      }
+    }
+    return entries;
   } catch {
     return [];
   }
 }
 
-function useRecent(): string[] {
+function useRecent(): RecentEntry[] {
   const raw = useSyncExternalStore(subscribeToRecent, getRecentSnapshot, getServerRecentSnapshot);
   return useMemo(() => parseRecent(raw), [raw]);
 }
 
-function rememberPsiUrl(url: string) {
-  const next = [url, ...parseRecent(getRecentSnapshot()).filter((u) => u !== url)].slice(
+function rememberRecent(entry: RecentEntry) {
+  const next = [entry, ...parseRecent(getRecentSnapshot()).filter((e) => e.url !== entry.url)].slice(
     0,
     RECENT_MAX,
   );
@@ -222,6 +234,7 @@ export default function ViewerPage({
     initialRunsFromPsiQuery(initialPsi, initialPsi2, initialPsiLabel, initialPsi2Label),
   );
   const [importedPsi, setImportedPsi] = useState<ImportedPsiShare | null>(null);
+  const router = useRouter();
   const [hash, setHash] = useHash();
   const bookmarkletHref = buildPsiViewerBookmarklet();
   const comparing = runs.length > 1;
@@ -263,6 +276,11 @@ export default function ViewerPage({
         );
         const result = await collectViewerReports(queryRuns.map(toCollectInput));
         if (cancelled) return;
+        if (result.publicId) {
+          rememberRecent({ url: initialPsi.trim(), publicId: result.publicId });
+          router.replace(`/page-speed/${result.publicId}`);
+          return;
+        }
         setImportedPsi(psiShareFromRuns(queryRuns));
         setHash(await encodeViewerHash(result));
       } catch (e) {
@@ -294,10 +312,19 @@ export default function ViewerPage({
     setLoading(true);
     try {
       const result = await collectViewerReports(submitRuns.map(toCollectInput));
-      setImportedPsi(psiShareFromRuns(submitRuns));
       for (const run of submitRuns) {
-        if (run.method === "psi" && run.psiUrl.trim()) rememberPsiUrl(run.psiUrl.trim());
+        if (run.method === "psi" && run.psiUrl.trim()) {
+          rememberRecent({
+            url: run.psiUrl.trim(),
+            publicId: submitRuns.length === 1 ? result.publicId : undefined,
+          });
+        }
       }
+      if (result.publicId) {
+        router.push(`/page-speed/${result.publicId}`);
+        return;
+      }
+      setImportedPsi(psiShareFromRuns(submitRuns));
       setHash(await encodeViewerHash(result));
     } catch (e) {
       console.error("JSON parsing error:", e);
@@ -354,11 +381,15 @@ export default function ViewerPage({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="max-w-sm">
-              {recent.map((url) => (
+              {recent.map(({ url, publicId }) => (
                 <DropdownMenuItem
                   key={url}
                   className="truncate"
                   onSelect={() => {
+                    if (publicId && !comparing) {
+                      router.push(`/page-speed/${publicId}`);
+                      return;
+                    }
                     const next = { ...runs[0]!, method: "psi" as const, psiUrl: url };
                     updateRun(0, next);
                     // Load the report right away; compare mode keeps the manual submit.
