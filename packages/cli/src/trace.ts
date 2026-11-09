@@ -306,6 +306,17 @@ export function resolveTimeRange(
   return { startMs: Math.max(minMs, startMs), endMs: Math.min(maxMs, endMs) };
 }
 
+/** `--cat a,b` matches events whose category list contains any of the requested categories. */
+const parseCategories = (value?: string): string[] | undefined => {
+  const items = value
+    ?.split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+  return items?.length ? items : undefined;
+};
+const matchesCategory = (cat: string | undefined, wanted: string[]) =>
+  wanted.some((category) => cat === category || Boolean(cat?.split(",").includes(category)));
+
 const inBounds = (startMs: number, durationMs: number | undefined, range?: TimeRange) => {
   if (!range) return true;
   return startMs + (durationMs ?? 0) >= range.startMs && startMs <= range.endMs;
@@ -901,7 +912,8 @@ function buildTasks(loaded: LoadedTrace, options: AnalyzeOptions, range?: TimeRa
       endTime: range?.endMs ?? ms(bounds.max),
     });
     for (const node of root.children().values()) {
-      if (node.selfTime <= 0) continue;
+      // Top-down roots (e.g. RunTask) often have no self time; only bottom-up ranks by it.
+      if (mode === "bottom-up" && node.selfTime <= 0) continue;
       const frame = node.event ? frameOf(node.event) : {};
       tasks.push({
         // Nodes aggregate many call sites; use the node's own event time when
@@ -1226,6 +1238,7 @@ function buildShifts(loaded: LoadedTrace, options: AnalyzeOptions, range?: TimeR
 
 function buildEvents(loaded: LoadedTrace, options: AnalyzeOptions, range?: TimeRange): EventsReport {
   const names = options.names?.length ? new Set(options.names) : null;
+  const categories = parseCategories(options.eventCategory);
   const limit = options.limit ?? 50;
   const traceStart = traceBounds(loaded.parsedTrace, loaded.rawEvents).min;
   const events: EventsReport["events"] = [];
@@ -1235,12 +1248,7 @@ function buildEvents(loaded: LoadedTrace, options: AnalyzeOptions, range?: TimeR
     const event = raw as { name?: string; cat?: string; ph?: string; ts?: number; dur?: number; pid?: number; tid?: number };
     if (typeof event.ts !== "number" || !Number.isFinite(event.ts)) continue;
     if (names && !names.has(event.name ?? "")) continue;
-    if (
-      options.eventCategory &&
-      !(event.cat === options.eventCategory || event.cat?.split(",").includes(options.eventCategory))
-    ) {
-      continue;
-    }
+    if (categories && !matchesCategory(event.cat, categories)) continue;
     if (options.phase && event.ph !== options.phase) continue;
     const tsMs = ms(event.ts);
     const durMs = ms(event.dur ?? 0);
@@ -1343,7 +1351,7 @@ export async function analyzeTraceBody(body: unknown, options: AnalyzeOptions = 
 // Multi-file scan
 // ---------------------------------------------------------------------------
 
-function walk(dir: string, out: string[]) {
+function walk(dir: string, out: string[], maxDepth = Infinity) {
   let entries;
   try {
     entries = readdirSync(dir, { withFileTypes: true });
@@ -1352,7 +1360,9 @@ function walk(dir: string, out: string[]) {
   }
   for (const entry of entries) {
     const full = resolve(dir, entry.name);
-    if (entry.isDirectory()) walk(full, out);
+    if (entry.isDirectory()) {
+      if (maxDepth > 0) walk(full, out, maxDepth - 1);
+    }
     else if (entry.isFile() && (entry.name.endsWith(".json") || entry.name.endsWith(".json.gz"))) out.push(full);
   }
 }
@@ -1390,7 +1400,10 @@ export function resolveScanTargets(targets: string[]): string[] {
       const base = absolute.slice(0, wildcard);
       const dir = base.endsWith(sep) ? base : dirname(base);
       const found: string[] = [];
-      walk(dir, found);
+      // Without `**`, a glob can only match as deep as it has path segments.
+      const tail = absolute.slice(dir.length);
+      const maxDepth = tail.includes("**") ? Infinity : tail.split(sep).filter(Boolean).length - 1;
+      walk(dir, found, maxDepth);
       const re = globToRegExp(absolute);
       for (const file of found) if (re.test(file)) files.add(file);
       continue;
@@ -1433,6 +1446,7 @@ export function scanTraces(targets: string[], options: ScanOptions = {}): ScanRe
   }
   const files = resolveScanTargets(targets);
   const namesSet = names?.length ? new Set(names) : null;
+  const categoryList = parseCategories(category);
   const leaves = fields?.map((field) => field.split(".").pop() ?? field);
   const matchedFiles: ScanReport["matchedFiles"] = [];
   const skippedFiles: ScanReport["skippedFiles"] = [];
@@ -1464,7 +1478,7 @@ export function scanTraces(targets: string[], options: ScanOptions = {}): ScanRe
     // Text prefilters are only an optimization once the file is known to parse.
     if (grep && !text.includes(grep)) continue;
     if (names?.length && !names.some((name) => text.includes(name))) continue;
-    if (category && !text.includes(category)) continue;
+    if (categoryList && !categoryList.some((c) => text.includes(c))) continue;
     if (leaves?.length && !leaves.every((leaf) => text.includes(leaf))) continue;
 
     let matchCount = 0;
@@ -1483,7 +1497,7 @@ export function scanTraces(targets: string[], options: ScanOptions = {}): ScanRe
         if (event.ts > 0 && event.ts < fileMinPositiveTs) fileMinPositiveTs = event.ts;
       }
       if (namesSet && !namesSet.has(event.name ?? "")) continue;
-      if (category && !(event.cat === category || event.cat?.split(",").includes(category))) continue;
+      if (categoryList && !matchesCategory(event.cat, categoryList)) continue;
       if (phase && event.ph !== phase) continue;
       if (grep) {
         const hit =
