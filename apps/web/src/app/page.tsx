@@ -17,13 +17,8 @@ const tools: { title: string; description: string; url: Route }[] = [
   },
   {
     title: "PageSpeed Insights",
-    description: "Lab audits and recommendations",
+    description: "Run a URL or open a PSI link or Lighthouse JSON for lab audits and recommendations",
     url: "/page-speed",
-  },
-  {
-    title: "Lighthouse viewer",
-    description: "Inspect reports from your experiments",
-    url: "/viewer",
   },
   {
     title: "Trace timeline",

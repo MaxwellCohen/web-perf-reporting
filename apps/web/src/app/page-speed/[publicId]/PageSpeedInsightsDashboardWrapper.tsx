@@ -1,5 +1,5 @@
 "use client";
-import { useReducer, useState, useTransition } from "react";
+import { useReducer, useState, useSyncExternalStore, useTransition } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { LoadingMessage } from "@/components/common/LoadingMessage";
@@ -21,6 +21,10 @@ const PageSpeedInsightsDashboard = dynamic(
     ),
   { loading: () => <LoadingMessage /> },
 );
+
+const subscribeNoop = () => () => {};
+const getOrigin = () => window.location.origin;
+const getServerOrigin = () => "";
 
 function FailedReport({
   result,
@@ -70,6 +74,7 @@ export function PageSpeedInsightsDashboardContent({
   // Bumping re-renders after the cached load is dropped, so the hook re-polls.
   const [, rerender] = useReducer((n: number) => n + 1, 0);
   const result = usePageSpeedInsightsQueryByPublicId(publicId);
+  const origin = useSyncExternalStore(subscribeNoop, getOrigin, getServerOrigin);
 
   if (result.status === "failed") {
     return (
@@ -87,6 +92,7 @@ export function PageSpeedInsightsDashboardContent({
     <PageSpeedInsightsDashboard
       data={result.data}
       labels={["Mobile", "Desktop"]}
+      shareUrl={origin ? `${origin}/page-speed/${encodeURIComponent(publicId)}` : undefined}
       initialSearch={initialSearch}
     />
   );

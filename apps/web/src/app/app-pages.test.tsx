@@ -64,7 +64,6 @@ import LatestCruxPage from "@/app/latest-crux/page";
 import PageSpeedLayout from "@/app/page-speed/layout";
 import PageSpeedPage from "@/app/page-speed/page";
 import PageSpeedPublicIdPage from "@/app/page-speed/[publicId]/page";
-import ViewerPage from "@/app/viewer/page";
 
 describe("app page coverage smoke tests", () => {
   beforeEach(() => {
@@ -75,12 +74,6 @@ describe("app page coverage smoke tests", () => {
 
   it("renders the home page cards and destination links", () => {
     const { container } = render(<Home />);
-    expect(container.firstChild).toMatchSnapshot();
-  });
-
-  it("renders the viewer page", async () => {
-    const { container } = render(await ViewerPage());
-
     expect(container.firstChild).toMatchSnapshot();
   });
 
@@ -138,47 +131,8 @@ describe("app page coverage smoke tests", () => {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it("renders the page speed lookup form when no URL is present", async () => {
-    updateUrlMock.mockReturnValue(undefined);
-
+  it("renders the page speed page with the viewer input", async () => {
     const { container } = render(await PageSpeedPage({ searchParams: Promise.resolve({}) }));
-
     expect(container.firstChild).toMatchSnapshot();
-    expect(requestPageSpeedDataMock).not.toHaveBeenCalled();
-    expect(redirectMock).not.toHaveBeenCalled();
-  });
-
-  it("requests a report and redirects when the page speed URL resolves", async () => {
-    updateUrlMock.mockReturnValue("https://example.com");
-    requestPageSpeedDataMock.mockResolvedValue("public-123");
-
-    render(
-      await PageSpeedPage({
-        searchParams: Promise.resolve({ url: "https://example.com" }),
-      }),
-    );
-
-    expect(requestPageSpeedDataMock).toHaveBeenCalledWith("https://example.com");
-    expect(redirectMock).toHaveBeenCalledWith("/page-speed/public-123");
-  });
-
-  it("keeps dashboard view params when redirecting to a report", async () => {
-    updateUrlMock.mockReturnValue("https://example.com");
-    requestPageSpeedDataMock.mockResolvedValue("public-123");
-
-    render(
-      await PageSpeedPage({
-        searchParams: Promise.resolve({
-          url: "https://example.com",
-          view: "dashboard",
-          tab: "timeline",
-          labels: ["Mobile"],
-        }),
-      }),
-    );
-
-    expect(redirectMock).toHaveBeenCalledWith(
-      "/page-speed/public-123?view=dashboard&tab=timeline&labels=Mobile",
-    );
   });
 });

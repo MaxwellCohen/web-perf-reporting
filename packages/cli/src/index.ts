@@ -4,6 +4,7 @@ import { defineCommand, runMain } from "citty";
 import { dropFirstPositional, firstPositional } from "./argv.js";
 import { runAudit, type Device, type Format } from "./core.js";
 import { runStream } from "./stream.js";
+import { version } from "./version.js";
 
 const mcp = defineCommand({
   meta: { name: "mcp", description: "Start the MCP server (stdio)" },
@@ -43,7 +44,7 @@ const stream = defineCommand({
 const main = defineCommand({
   meta: {
     name: "web-perf-report",
-    version: "0.1.0",
+    version,
     description:
       "Run Lighthouse on a URL and print a ranked performance report. `web-perf-report trace <file>` analyzes a Chrome trace; `web-perf-report stream <url>` measures streamed-HTML chunk timing; `web-perf-report mcp` starts the MCP server (stdio).",
   },

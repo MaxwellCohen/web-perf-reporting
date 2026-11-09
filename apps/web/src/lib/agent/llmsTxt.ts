@@ -95,7 +95,7 @@ Or POST an existing trace (\`.json\` or \`.json.gz\`, under 4 MB compressed and 
 
 ## Human UI
 
-- [Viewer](${siteUrl}/viewer): upload the same JSON to explore it with charts, film strip, and full tables.
+- [Insights](${siteUrl}/page-speed): enter a URL or upload the same JSON to explore it with charts, film strip, and full tables.
 - [Latest CrUX](${siteUrl}/latest-crux) and [Historical CrUX](${siteUrl}/historical-crux): real-user Core Web Vitals over time.
 `;
 }

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { postReport, runAudit } from "./core.js";
 import { runStream } from "./stream.js";
 import type { AnalyzeOptions, TraceCommand } from "./trace.js";
+import { version } from "./version.js";
 
 const text = (t: string) => ({ content: [{ type: "text" as const, text: t }] });
 const fail = (e: unknown) => ({
@@ -26,7 +27,7 @@ const COMMAND_TRACE_OPTIONS: Record<TraceCommand, string[]> = {
 };
 
 export function createServer(): McpServer {
-  const server = new McpServer({ name: "web-perf-report", version: "0.1.0" });
+  const server = new McpServer({ name: "web-perf-report", version });
 
   server.registerTool(
     "audit_site",

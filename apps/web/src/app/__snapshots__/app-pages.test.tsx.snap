@@ -175,23 +175,7 @@ exports[`app page coverage smoke tests > renders the home page cards and destina
         <span
           class="text-sm font-normal text-muted-foreground"
         >
-          Lab audits and recommendations
-        </span>
-      </a>
-      <a
-        class="inline-flex justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-auto flex-col items-start gap-1 whitespace-normal p-4 text-left no-underline"
-        href="/viewer"
-      >
-        <span
-          class="font-semibold"
-        >
-          Lighthouse viewer
-           →
-        </span>
-        <span
-          class="text-sm font-normal text-muted-foreground"
-        >
-          Inspect reports from your experiments
+          Run a URL or open a PSI link or Lighthouse JSON for lab audits and recommendations
         </span>
       </a>
       <a
@@ -246,18 +230,8 @@ exports[`app page coverage smoke tests > renders the page speed layout shell and
 </div>
 `;
 
-exports[`app page coverage smoke tests > renders the page speed lookup form when no URL is present 1`] = `
+exports[`app page coverage smoke tests > renders the page speed page with the viewer input 1`] = `
 <div>
-  Mock URL lookup form
-</div>
-`;
-
-exports[`app page coverage smoke tests > renders the viewer page 1`] = `
-<div
-  class="max-w-screen-2xl mx-auto"
->
-  <div>
-    Mock viewer page
-  </div>
+  Mock viewer page
 </div>
 `;

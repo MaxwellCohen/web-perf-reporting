@@ -11,7 +11,6 @@ const NAV_LINKS: { href: Route; label: string }[] = [
   { href: "/latest-crux", label: "Latest" },
   { href: "/historical-crux", label: "Historical" },
   { href: "/page-speed", label: "Insights" },
-  { href: "/viewer", label: "Viewer" },
   { href: "/trace", label: "Trace" },
   { href: "/stream", label: "Stream" },
 ];

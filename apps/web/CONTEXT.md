@@ -25,5 +25,4 @@ Pure transforms for histograms, p75 bars, and date range copy live in `src/lib/c
 
 ## Lighthouse viewer
 
-- `/viewer` — single Lighthouse viewer (`ViewerPage`): smart input, compare, share links. Layout via `LighthouseViewerAppShell`.
-- `/lh` — permanent redirect to `/viewer` (query params preserved). See ADR 0002.
+- `/page-speed` — single entry (`ViewerPage`): page URL runs PSI; PSI link/JSON/file opens a report; compare and share links. `/viewer` and `/lh` redirect here. See ADR 0003.
