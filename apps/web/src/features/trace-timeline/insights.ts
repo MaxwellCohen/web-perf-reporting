@@ -94,11 +94,6 @@ function documentRequest(trace: ParsedTrace, origin: number): TraceRequest | und
 }
 
 /**
- * Splits LCP into the same subparts DevTools shows: TTFB, resource load delay,
- * resource load duration and element render delay. Falls back to two subparts
- * for text LCP (no request) or when the trace lacks network detail.
- */
-/**
  * Pick the request that produced this LCP candidate. URLs repeat across
  * navigations and reloads, so prefer the request whose timing matches the
  * candidate's image load window instead of the first URL match.
@@ -125,6 +120,11 @@ function lcpRequestFor(
   return candidates.reduce((best, r) => (distance(r) < distance(best) ? r : best));
 }
 
+/**
+ * Splits LCP into the same subparts DevTools shows: TTFB, resource load delay,
+ * resource load duration and element render delay. Falls back to two subparts
+ * for text LCP (no request) or when the trace lacks network detail.
+ */
 export function buildLcpBreakdown(trace: ParsedTrace, origin = trace.navigation?.time ?? 0): LcpBreakdown | undefined {
   const lcp = trace.lcpCandidates.at(-1);
   if (!lcp) return undefined;

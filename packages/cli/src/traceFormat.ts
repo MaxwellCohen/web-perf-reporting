@@ -106,6 +106,7 @@ function overviewMd(report: OverviewReport): string {
 function insightsMd(report: InsightsReport): string {
   const lines: string[] = ["# Diagnostic Insights", ""];
   if (report.navigationId) lines.push(`- **Navigation ID**: ${code(report.navigationId)}`, "");
+  const headerLines = lines.length;
   if (report.lcpBreakdown) {
     const l = report.lcpBreakdown;
     lines.push("## LCP Breakdown", "");
@@ -163,7 +164,7 @@ function insightsMd(report: InsightsReport): string {
     lines.push("## Warnings", "");
     for (const warning of report.warnings) lines.push(`- ${cell(warning)}`);
   }
-  if (lines.length <= 3) lines.push("No insights found in this trace.");
+  if (lines.length <= headerLines) lines.push("No insights found in this trace.");
   return lines.join("\n").trimEnd();
 }
 
@@ -178,7 +179,7 @@ function tasksMd(report: TasksReport): string {
         formatMs(t.durationMs),
         formatMs(t.selfTimeMs),
         code(t.functionName),
-        code(t.url ? `${t.url}${t.lineNumber !== undefined ? `:${t.lineNumber}` : ""}` : "-"),
+        code(t.url ? `${t.url}${t.lineNumber !== undefined ? `:${t.lineNumber + 1}` : ""}` : "-"),
       ]),
     ),
   );
@@ -202,7 +203,7 @@ function findMd(report: FindReport): string {
       report.calls.map((c) => [
         formatMs(c.timestampMs),
         formatMs(c.durationMs),
-        code(c.url ? `${c.url}${c.lineNumber !== undefined ? `:${c.lineNumber}` : ""}` : "-"),
+        code(c.url ? `${c.url}${c.lineNumber !== undefined ? `:${c.lineNumber + 1}` : ""}` : "-"),
       ]),
     ),
   );

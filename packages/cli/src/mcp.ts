@@ -3,8 +3,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { postReport, runAudit } from "./core.js";
 import { runStream } from "./stream.js";
-import { analyzeTraceBody, analyzeTraceFile, type AnalyzeOptions, type TraceCommand } from "./trace.js";
-import { formatTraceReport } from "./traceFormat.js";
+import type { AnalyzeOptions, TraceCommand } from "./trace.js";
 
 const text = (t: string) => ({ content: [{ type: "text" as const, text: t }] });
 const fail = (e: unknown) => ({
@@ -205,6 +204,9 @@ export function createServer(): McpServer {
           fields: input.fields,
           limit: input.limit,
         };
+        // Loaded lazily: the trace engine is large and only this tool needs it.
+        const { analyzeTraceBody, analyzeTraceFile } = await import("./trace.js");
+        const { formatTraceReport } = await import("./traceFormat.js");
         const report = hasFile
           ? await analyzeTraceFile(input.file as string, options)
           : await analyzeTraceBody(input.trace, options);
