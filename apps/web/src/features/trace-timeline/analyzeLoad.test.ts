@@ -44,4 +44,28 @@ describe("analyzeLoad", () => {
     expect(p).toContain("Long task");
     expect(p).toContain("Re-record a trace");
   });
+  it("counts the same render-blocking requests as the insights panel", () => {
+    const kinds = ["blocking", "in_body_parser_blocking", "potentially_blocking"];
+    const names = ["a-blocking.css", "b-inbody.css", "c-potential.css"];
+    const t = parseTrace({
+      traceEvents: [
+        M(1, 2, "CrRendererMain"),
+        { name: "navigationStart", ph: "R", pid: 1, tid: 2, ts: 1_000_000, args: { frame, data: { isOutermostMainFrame: true, documentLoaderURL: "https://x.test/" } } },
+        { name: "firstPaint", ph: "R", pid: 1, tid: 2, ts: 1_400_000, args: { frame } },
+        ...kinds.flatMap((renderBlocking, i) => {
+          const requestId = `r${i}`;
+          const url = `https://x.test/${names[i]}`;
+          return [
+            { name: "ResourceSendRequest", ph: "I", pid: 1, tid: 2, ts: 1_100_000 + i, args: { data: { requestId, url, resourceType: "Stylesheet", renderBlocking } } },
+            { name: "ResourceFinish", ph: "I", pid: 1, tid: 2, ts: 1_300_000, args: { data: { requestId, encodedDataLength: 1 } } },
+          ];
+        }),
+      ],
+    });
+    const event = analyzeLoad(t).events.find((e) => e.title.startsWith("Render-blocking resources done"));
+    expect(event?.title).toContain("(2)");
+    expect(event?.detail).toContain("a-blocking.css");
+    expect(event?.detail).toContain("b-inbody.css");
+    expect(event?.detail).not.toContain("c-potential.css");
+  });
 });

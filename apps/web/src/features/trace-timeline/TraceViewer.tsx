@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { parseTrace, summarizeTrace, type ParsedTrace } from "./parseTrace";
-import { analyzeLoad } from "./analyzeLoad";
+import { analyzeLoad, type LoadAnalysis } from "./analyzeLoad";
 import { loadTrace } from "./loadTrace";
 import { TraceTimeline } from "./TraceTimeline";
 import { TraceLoadTimeline } from "./TraceLoadTimeline";
@@ -14,13 +14,19 @@ import { CopyButton } from "@/components/ui/copy-button";
 import { buildFixPrompt } from "./fixPrompt";
 import { buildSnapshot, type TraceSnapshot } from "./findings";
 import { FindingsPanel } from "./FindingsPanel";
+import { InsightsPanel } from "./InsightsPanel";
+import { buildInsights, type TraceInsights } from "./insights";
 import { ComparePanel } from "./ComparePanel";
 import { SharedSummary } from "./SharedSummary";
 import { decodeSnapshot, hasShareHash } from "./shareFindings";
 
-function fullSummary(t: ParsedTrace) {
-  const { ttfb, fcp, lcp, cls, blockingMs } = analyzeLoad(t);
-  return { ...summarizeTrace(t), metrics: { ttfb, fcp, lcp, cls, blockingMs } };
+function fullSummary(t: ParsedTrace, load: LoadAnalysis, insights: TraceInsights) {
+  const { ttfb, fcp, lcp, cls, blockingMs } = load;
+  return {
+    ...summarizeTrace(t),
+    metrics: { ttfb, fcp, lcp, cls, blockingMs },
+    insights,
+  };
 }
 
 declare global {
@@ -122,7 +128,12 @@ export function TraceViewer() {
   useEffect(() => {
     const api = {
       load: (input: string | object) => load(input),
-      summary: () => (traceRef.current ? fullSummary(traceRef.current) : null),
+      summary: () => {
+        const current = traceRef.current;
+        if (!current) return null;
+        const load = analyzeLoad(current);
+        return fullSummary(current, load, buildInsights(current, load));
+      },
     };
     window.__trace = api;
     return () => {
@@ -139,10 +150,14 @@ export function TraceViewer() {
     return () => clearTimeout(timer);
   }, [load]);
 
-  const summaryJson = useMemo(() => (trace ? JSON.stringify(fullSummary(trace)) : ""), [trace]);
   const analysis = useMemo(() => (trace ? analyzeLoad(trace) : null), [trace]);
+  const insights = useMemo(() => (trace && analysis ? buildInsights(trace, analysis) : null), [trace, analysis]);
   const snapshot = useMemo(() => (trace && analysis ? buildSnapshot(trace, analysis) : null), [trace, analysis]);
-  const fixPrompt = useMemo(() => (analysis ? buildFixPrompt(analysis) : ""), [analysis]);
+  const summaryJson = useMemo(
+    () => (trace && analysis && insights ? JSON.stringify(fullSummary(trace, analysis, insights)) : ""),
+    [trace, analysis, insights],
+  );
+  const fixPrompt = useMemo(() => (analysis ? buildFixPrompt(analysis, insights ?? undefined) : ""), [analysis, insights]);
 
   const fileInput = (
     <input type="file" accept=".json,.gz" className="hidden" onChange={(e) => void load(e.target.files?.[0])} />
@@ -211,6 +226,7 @@ export function TraceViewer() {
           <script type="application/json" id="trace-summary" dangerouslySetInnerHTML={{ __html: safeJsonForScript(summaryJson) }} />
           <KeyEventsPanel trace={trace} />
           {snapshot && <FindingsPanel snapshot={snapshot} />}
+          {insights && <InsightsPanel insights={insights} />}
           {snapshot && compare && <ComparePanel before={snapshot} after={compare} onClose={() => setCompare(null)} />}
           <TraceLoadTimeline trace={trace} />
           <TraceTimeline trace={trace} />

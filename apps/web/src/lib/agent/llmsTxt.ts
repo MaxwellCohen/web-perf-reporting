@@ -91,7 +91,7 @@ Record a Chrome trace of any URL and get findings back:
 
 \`node scripts/record-trace.mjs <url> --cpu 4 --api ${siteUrl} --format md\`
 
-Or POST an existing trace (.json, under 4 MB) to \`${siteUrl}/api/agent/trace\`. \`?format=md\` returns the fix prompt; the default JSON has \`summary\`, \`metrics\` (ttfb, fcp, lcp, cls, blockingMs), \`analysis\` (key events, phases, scripts, hot functions) and \`brief\`. 400 means the body was not a usable trace. For the interactive timeline, open \`${siteUrl}/trace\`.
+Or POST an existing trace (\`.json\` or \`.json.gz\`, under 4 MB compressed and 24 MB decompressed) to \`${siteUrl}/api/agent/trace\`. \`?format=md\` returns the fix prompt; the default JSON has \`summary\`, \`metrics\` (ttfb, fcp, lcp, cls, blockingMs), \`insights\` (LCP/INP/CLS subparts, render-blocking resources, third parties), \`analysis\` (key events, phases, scripts, hot functions) and \`brief\`. 400 means the body was not a usable trace. For the interactive timeline, open \`${siteUrl}/trace\`.
 
 ## Human UI
 

@@ -1,4 +1,25 @@
-const VALUE_FLAGS = new Set(["--device", "--format", "--file", "--api"]);
+const VALUE_FLAGS = new Set([
+  "--device",
+  "--format",
+  "--file",
+  "--api",
+  "--time-range",
+  "--category",
+  "--navigation",
+  "--nav",
+  "--min-duration",
+  "--tree",
+  "--top",
+  "--function",
+  "--slowest",
+  "--initiator-chain",
+  "--name",
+  "--cat",
+  "--phase",
+  "--fields",
+  "--limit",
+  "--grep",
+]);
 
 /** argv without its first positional (the subcommand name), keeping flags and their values. */
 export function dropFirstPositional(argv: string[]): string[] {
