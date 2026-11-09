@@ -45,7 +45,7 @@ const main = defineCommand({
     name: "web-perf-report",
     version: "0.1.0",
     description:
-      "Run Lighthouse on a URL and print a ranked performance report. `web-perf-report stream <url>` measures streamed-HTML chunk timing; `web-perf-report mcp` starts the MCP server (stdio).",
+      "Run Lighthouse on a URL and print a ranked performance report. `web-perf-report trace <file>` analyzes a Chrome trace; `web-perf-report stream <url>` measures streamed-HTML chunk timing; `web-perf-report mcp` starts the MCP server (stdio).",
   },
   args: {
     url: { type: "positional", required: false, description: "URL to audit" },
@@ -84,4 +84,10 @@ const argv = process.argv.slice(2);
 const sub = firstPositional(argv);
 if (sub === "stream") void runMain(stream, { rawArgs: dropFirstPositional(argv) });
 else if (sub === "mcp") void runMain(mcp);
-else void runMain(main);
+else if (sub === "trace") {
+  const { runTraceCli } = await import("./traceCli.js");
+  runTraceCli(dropFirstPositional(argv)).catch((e: unknown) => {
+    console.error(`Error: ${e instanceof Error ? e.message : String(e)}`);
+    process.exit(1);
+  });
+} else void runMain(main);

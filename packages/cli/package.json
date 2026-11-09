@@ -44,6 +44,8 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",
+    "@paulirish/trace_engine": "0.0.68",
+    "@toon-format/toon": "^4.4.0",
     "citty": "^0.2.2",
     "zod": "^4.6.7"
   },
