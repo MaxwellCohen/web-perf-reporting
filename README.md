@@ -8,7 +8,7 @@ pnpm workspace with a Next.js dashboard, a Void API (Cloudflare Worker), and an 
 | API | [`apps/api`](apps/api) | Void / Cloudflare — see below |
 | CLI + MCP | [`packages/cli`](packages/cli) | npm `@maxwellcohen/web-perf-report` — published by `release.yml` when its version changes |
 
-Features: CrUX latest/history, PageSpeed analysis, Lighthouse viewer (`/viewer`), and streaming-timing reports (`/stream`).
+Features: CrUX latest/history, PageSpeed Insights and Lighthouse reports (`/page-speed`), streamed-HTML timing (`/stream`), Chrome trace analysis (`/trace`), and agent APIs (`/llms.txt`, `/api/agent/*`).
 
 ## Working with coding agents
 
@@ -16,7 +16,6 @@ Features: CrUX latest/history, PageSpeed analysis, Lighthouse viewer (`/viewer`)
 - [`apps/web/CONTEXT.md`](apps/web/CONTEXT.md) — domain glossary.
 - Run `pnpm check` before finishing: typecheck (web, api, cli), lint, and all tests.
 - For agents consuming the product: use the CLI/MCP server in [`packages/cli`](packages/cli) or the site's `/llms.txt`.
-
 
 ## Local development
 
@@ -62,7 +61,7 @@ In the Vercel project for **web-perf-reporting**:
    ```
 
 3. **Build Command** — `pnpm build` (runs in `apps/web`)
-4. **Environment variables** — `WORKER_URL` (Void API, for example `https://web-perf-report-api.<account>.workers.dev`) and `WORKER_API_KEY` (same value as the API worker secret). The Google API key and Turso credentials stay on the API worker.
+4. **Environment variables** — `WORKER_URL` (Void API, for example `https://web-perf-report-api.<account>.workers.dev`) and `WORKER_API_KEY` (same value as the API worker secret). The Google API key stays on the API worker.
 5. **Ignored Build Step** (optional):
 
    ```bash

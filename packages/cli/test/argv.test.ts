@@ -9,6 +9,7 @@ describe("firstPositional", () => {
     [["--device", "mobile", "https://x.com"], "https://x.com"],
     [["https://x.com", "--device", "mobile"], "https://x.com"],
     [["--device=mobile", "--format", "json"], undefined],
+    [["--time-range", "3s,4s", "trace", "f.json"], "trace"],
   ])("%j -> %s", (argv, want) => {
     expect(firstPositional(argv as string[])).toBe(want);
   });

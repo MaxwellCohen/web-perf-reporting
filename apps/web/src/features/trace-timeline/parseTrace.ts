@@ -13,6 +13,7 @@ export type TraceEvent = {
   dur?: number;
   pid: number;
   tid: number;
+  id?: string | number;
   cat?: string;
   args?: Record<string, unknown>;
 };
@@ -32,8 +33,32 @@ export type Track = {
   maxDepth: number;
 };
 
-export type Marker = { name: string; label: string; time: number; detail?: string; size?: number };
+export type Marker = {
+  name: string;
+  label: string;
+  time: number;
+  detail?: string;
+  size?: number;
+  /** LCP candidates only: DOM node, element type and, for images, the loaded URL. */
+  nodeId?: number;
+  type?: string;
+  url?: string;
+  imageLoadStart?: number;
+  imageLoadEnd?: number;
+  imageDiscoveryTime?: number;
+};
 export type LayoutShiftEntry = { time: number; score: number; nodes: string[]; hadInput: boolean };
+/** One user interaction (`EventTiming`), with the INP subparts DevTools shows. Times are ms from trace start. */
+export type InteractionEntry = {
+  type: string;
+  interactionId: number;
+  start: number;
+  duration: number;
+  inputDelay: number;
+  processing: number;
+  presentation: number;
+  target?: string;
+};
 export type ProfileNode = { id: number; parent?: number; fn: string; url: string; line: number };
 /** V8 sampling profile: sample i was taken at times[i] (ms) in node nodeIds[i]; weights[i] is its duration (ms). */
 export type CpuProfile = { times: Float64Array; nodeIds: Int32Array; weights: Float64Array; nodes: Map<number, ProfileNode> };
@@ -46,6 +71,7 @@ export type TraceRequest = {
   priority?: string;
   renderBlocking?: string;
   isLinkPreload?: boolean;
+  frame?: string;
   statusCode?: number;
   mimeType?: string;
   protocol?: string;
@@ -69,6 +95,7 @@ export type ParsedTrace = {
   markers: Marker[];
   screenshots: Screenshot[];
   longTasks: Slice[];
+  interactions: InteractionEntry[];
 };
 
 const TRACK_THREADS = [
@@ -137,7 +164,33 @@ export class TraceBuilder {
   private counts = new Map<string, number>();
   private buffers = new Map<string, Raw[]>();
   private longCandidates: { key: string; ts: number; dur: number }[] = [];
-  private markers: { name: string; pid: number; ts: number; frame?: string; detail?: string; size?: number }[] = [];
+  private markers: {
+    name: string;
+    pid: number;
+    ts: number;
+    frame?: string;
+    detail?: string;
+    size?: number;
+    nodeId?: number;
+    type?: string;
+    imageLoadStart?: number;
+    imageLoadEnd?: number;
+    imageDiscoveryTime?: number;
+  }[] = [];
+  private eventTimingStarts: {
+    id: string;
+    pid: number;
+    frame?: string;
+    ts: number;
+    type: string;
+    interactionId: number;
+    timeStamp: number;
+    processingStart: number;
+    processingEnd: number;
+    target?: string;
+  }[] = [];
+  private eventTimingEnds: { id: string; pid: number; frame?: string; ts: number }[] = [];
+  private imagePaints: { pid: number; nodeId: number; url: string }[] = [];
   private navs: { ts: number; url: string; frame: string }[] = [];
   private shifts: { ts: number; pid: number; score: number; nodes: string[]; hadInput: boolean }[] = [];
   private shots: { ts: number; data: string }[] = [];
@@ -183,20 +236,53 @@ export class TraceBuilder {
       }
       return;
     }
-    if (e.name === "ResourceSendRequest" || e.name === "ResourceReceiveResponse" || e.name === "ResourceFinish") {
+    if (e.name === "ResourceSendRequest" || e.name === "ResourceReceiveResponse" || e.name === "ResourceFinish" || e.name === "PreloadRenderBlockingStatusChange") {
       const d = (e.args?.data ?? {}) as TraceData;
       this.resourceEvents.push({
         name: e.name,
         pid: e.pid,
         ts: e.ts,
-        data: e.name === "ResourceSendRequest"
+        data: e.name === "ResourceSendRequest" || e.name === "PreloadRenderBlockingStatusChange"
           ? d
-          : { requestId: d.requestId, statusCode: d.statusCode, mimeType: d.mimeType, protocol: d.protocol, fromCache: d.fromCache, encodedDataLength: d.encodedDataLength, decodedBodyLength: d.decodedBodyLength, timing: d.timing },
+          : { requestId: d.requestId, statusCode: d.statusCode, mimeType: d.mimeType, protocol: d.protocol, fromCache: d.fromCache, encodedDataLength: d.encodedDataLength, decodedBodyLength: d.decodedBodyLength, finishTime: d.finishTime, timing: d.timing },
       });
     }
     if (e.ts < this.t0) this.t0 = e.ts;
     const end = e.ts + (e.dur ?? 0);
     if (end > this.t1) this.t1 = end;
+
+    if (e.name === "EventTiming") {
+      const d = (e.args?.data ?? {}) as TraceData;
+      const id = String(e.id ?? "");
+      if (e.ph === "b") {
+        const interactionId = Number(d.interactionId);
+        const duration = Number(d.duration);
+        if (interactionId > 0 && duration >= 1 && id) {
+          this.eventTimingStarts.push({
+            id,
+            pid: e.pid,
+            frame: e.args?.frame as string | undefined,
+            ts: e.ts,
+            type: String(d.type ?? "interaction"),
+            interactionId,
+            timeStamp: Number(d.timeStamp),
+            processingStart: Number(d.processingStart),
+            processingEnd: Number(d.processingEnd),
+            target: d.nodeName ? String(d.nodeName) : undefined,
+          });
+        }
+      } else if (e.ph === "e") {
+        this.eventTimingEnds.push({ id, pid: e.pid, frame: e.args?.frame as string | undefined, ts: e.ts });
+      }
+      return;
+    }
+    if (e.name === "LargestImagePaint::Candidate") {
+      const d = (e.args?.data ?? {}) as TraceData;
+      if (d.DOMNodeId != null && d.imageUrl) {
+        this.imagePaints.push({ pid: e.pid, nodeId: Number(d.DOMNodeId), url: String(d.imageUrl) });
+      }
+      return;
+    }
 
     if (e.ph === "X") {
       this.counts.set(key, (this.counts.get(key) ?? 0) + 1);
@@ -219,13 +305,41 @@ export class TraceBuilder {
     } else if (e.name === "LayoutShift") {
       const d = (e.args?.data ?? {}) as TraceData;
       if (d.is_main_frame !== false) {
-        this.shifts.push({ ts: e.ts, pid: e.pid, score: Number(d.score) || 0, hadInput: !!d.had_recent_input, nodes: ((d.impacted_nodes ?? []) as { debug_name?: unknown }[]).map((n) => String(n.debug_name ?? "")).slice(0, 4) });
+        const nodes = ((d.impacted_nodes ?? []) as {
+          node_id?: unknown;
+          debug_name?: unknown;
+          tag_name?: unknown;
+          node_name?: unknown;
+        }[])
+          .map((n) =>
+            String(
+              n.debug_name ??
+                n.tag_name ??
+                n.node_name ??
+                (n.node_id != null ? `Node #${n.node_id}` : ""),
+            ),
+          )
+          .filter(Boolean)
+          .slice(0, 4);
+        this.shifts.push({ ts: e.ts, pid: e.pid, score: Number(d.score) || 0, hadInput: !!d.had_recent_input, nodes });
       }
     }
     if (e.name in MARKERS && (e.ph === "R" || e.ph === "I" || e.ph === "i" || e.ph === "O")) {
       {
         const d = (e.args?.data ?? {}) as TraceData;
-        this.markers.push({ name: e.name, pid: e.pid, ts: e.ts, frame: e.args?.frame as string | undefined, detail: d.nodeName ? `${d.nodeName}${d.type ? ` (${d.type})` : ""}` : undefined, size: d.size });
+        this.markers.push({
+          name: e.name,
+          pid: e.pid,
+          ts: e.ts,
+          frame: e.args?.frame as string | undefined,
+          detail: d.nodeName ? `${d.nodeName}${d.type ? ` (${d.type})` : ""}` : undefined,
+          size: d.size,
+          nodeId: d.nodeId != null ? Number(d.nodeId) : undefined,
+          type: d.type ? String(d.type) : undefined,
+          imageLoadStart: d.imageLoadStart != null ? Number(d.imageLoadStart) : undefined,
+          imageLoadEnd: d.imageLoadEnd != null ? Number(d.imageLoadEnd) : undefined,
+          imageDiscoveryTime: d.imageDiscoveryTime != null ? Number(d.imageDiscoveryTime) : undefined,
+        });
       }
     } else if (e.name === "Screenshot" && typeof e.args?.snapshot === "string") {
       const last = this.shots[this.shots.length - 1];
@@ -255,11 +369,26 @@ export class TraceBuilder {
 
     // Scope everything to the first real top-level navigation (traces often hold several).
     const nav = this.navs.find((n) => n.ts >= t0) ?? this.navs[0];
+    // `LargestImagePaint::Candidate` maps an LCP node id to the image URL that was painted.
+    const imageUrlByNode = new Map<string, string>();
+    for (const p of this.imagePaints) imageUrlByNode.set(`${p.pid}:${p.nodeId}`, p.url);
     const found: Marker[] = [];
     for (const m of this.markers) {
       if (rendererPid && String(m.pid) !== rendererPid) continue;
       if (nav && m.frame && m.frame !== nav.frame) continue;
-      found.push({ name: m.name, label: MARKERS[m.name], time: (m.ts - t0) / 1000, detail: m.detail, size: m.size });
+      found.push({
+        name: m.name,
+        label: MARKERS[m.name],
+        time: (m.ts - t0) / 1000,
+        detail: m.detail,
+        size: m.size,
+        nodeId: m.nodeId,
+        type: m.type,
+        url: m.nodeId != null ? imageUrlByNode.get(`${m.pid}:${m.nodeId}`) : undefined,
+        imageLoadStart: m.imageLoadStart,
+        imageLoadEnd: m.imageLoadEnd,
+        imageDiscoveryTime: m.imageDiscoveryTime,
+      });
     }
     const lcpCandidates = found.filter((m) => m.name === "largestContentfulPaint::Candidate").sort((a, b) => a.time - b.time);
     const layoutShifts = this.shifts
@@ -289,6 +418,7 @@ export class TraceBuilder {
       .map((s) => ({ time: (s.ts - t0) / 1000, data: s.data }))
       .sort((a, b) => a.time - b.time);
     const reqs = new Map<string, TraceRequest>();
+    const preloadBlocking = new Set<string>();
     for (const e of this.resourceEvents) {
       if (rendererPid && String(e.pid) !== rendererPid) continue;
       const d = e.data;
@@ -296,20 +426,42 @@ export class TraceBuilder {
       const ms = (e.ts - t0) / 1000;
       if (!id) continue;
       if (e.name === "ResourceSendRequest") {
-        if (!reqs.has(id)) {
-          reqs.set(id, { url: d.url, resourceType: d.resourceType, priority: d.priority, renderBlocking: d.renderBlocking, isLinkPreload: d.isLinkPreload, start: ms, end: ms });
+        const prev = reqs.get(id);
+        if (!prev) {
+          reqs.set(id, { url: d.url, resourceType: d.resourceType, priority: d.priority, renderBlocking: d.renderBlocking, isLinkPreload: d.isLinkPreload, frame: d.frame, start: ms, end: ms });
+        } else {
+          // Redirects re-send with the same id; like DevTools, the final send
+          // request decides frame, priority and render-blocking status.
+          prev.priority = d.priority ?? prev.priority;
+          prev.frame = d.frame ?? prev.frame;
+          if (!preloadBlocking.has(id)) prev.renderBlocking = d.renderBlocking ?? prev.renderBlocking;
         }
         continue;
       }
       const r = reqs.get(id);
       if (!r) continue;
+      if (e.name === "PreloadRenderBlockingStatusChange") {
+        // A preload can later become render-blocking; the last change wins.
+        if (typeof d.renderBlocking === "string") {
+          r.renderBlocking = d.renderBlocking;
+          preloadBlocking.add(id);
+        }
+        continue;
+      }
+      if (e.name === "ResourceFinish") {
+        // `ResourceFinish.ts` fires after decode; DevTools' network finish (and
+        // the LCP subparts) use `finishTime`, which is seconds on the trace clock.
+        const finish = typeof d.finishTime === "number" && Number.isFinite(d.finishTime) ? d.finishTime : undefined;
+        const finishMs = finish !== undefined ? (finish * 1e6 - t0) / 1000 : ms;
+        r.end = Math.max(r.end, finishMs);
+        r.transferSize = d.encodedDataLength; r.resourceSize = d.decodedBodyLength;
+        continue;
+      }
       r.end = Math.max(r.end, ms);
       if (e.name === "ResourceReceiveResponse") {
         const tm = d.timing as { requestTime?: number; receiveHeadersEnd?: number } | undefined;
         if (tm?.requestTime && tm.receiveHeadersEnd != null) r.headersAt = (tm.requestTime * 1e6 + tm.receiveHeadersEnd * 1000 - t0) / 1000;
         r.statusCode = d.statusCode; r.mimeType = d.mimeType; r.protocol = d.protocol; r.fromCache = d.fromCache;
-      } else {
-        r.transferSize = d.encodedDataLength; r.resourceSize = d.decodedBodyLength;
       }
     }
     let profile: CpuProfile | undefined;
@@ -322,7 +474,55 @@ export class TraceBuilder {
       }
       profile = { times, nodeIds, weights, nodes: this.prof.nodes };
     }
-    return { profile, navigation: nav && { time: (nav.ts - t0) / 1000, url: nav.url, frame: nav.frame }, lcpCandidates, layoutShifts, requests: [...reqs.values()].filter((r) => r.url?.startsWith("http")), duration: (t1 - t0) / 1000, tracks, markers: [...seen.values()], screenshots, longTasks };
+
+    // Pair EventTiming begin/end events (async nestable) into INP interactions.
+    // Scope to the main renderer, the navigated frame and events after the
+    // navigation: a trace can contain several documents/frames.
+    const navStart = nav?.ts ?? -Infinity;
+    const navFrame = nav?.frame;
+    const inScope = (e: { pid: number; frame?: string; ts: number }) =>
+      (!rendererPid || String(e.pid) === rendererPid) &&
+      (!navFrame || !e.frame || e.frame === navFrame) &&
+      e.ts >= navStart;
+    const timingEvents = [
+      ...this.eventTimingStarts
+        .filter(inScope)
+        .map((s) => ({ kind: "b" as const, id: s.id, ts: s.ts, start: s })),
+      ...this.eventTimingEnds
+        .filter(inScope)
+        .map((e) => ({ kind: "e" as const, id: e.id, ts: e.ts, end: e })),
+    ].sort((a, b) => a.ts - b.ts);
+    const openTimings = new Map<string, (typeof this.eventTimingStarts)[number][]>();
+    const interactions: InteractionEntry[] = [];
+    for (const ev of timingEvents) {
+      if (ev.kind === "b") {
+        const list = openTimings.get(ev.id) ?? [];
+        list.push(ev.start);
+        openTimings.set(ev.id, list);
+        continue;
+      }
+      const begin = openTimings.get(ev.id)?.pop();
+      if (!begin) continue;
+      const duration = (ev.end.ts - begin.ts) / 1000;
+      if (!(duration > 0)) continue;
+      // `timeStamp`, `processingStart` and `processingEnd` are ms on the performance timeline;
+      // the trace's own timestamps are µs, so differences are already the durations we want.
+      const inputDelay = Math.max(0, begin.processingStart - begin.timeStamp);
+      const processing = Math.max(0, begin.processingEnd - begin.processingStart);
+      if (!Number.isFinite(inputDelay) || !Number.isFinite(processing)) continue;
+      interactions.push({
+        type: begin.type,
+        interactionId: begin.interactionId,
+        start: (begin.ts - t0) / 1000,
+        duration,
+        inputDelay,
+        processing,
+        presentation: Math.max(0, duration - inputDelay - processing),
+        target: begin.target,
+      });
+    }
+
+    return { profile, navigation: nav && { time: (nav.ts - t0) / 1000, url: nav.url, frame: nav.frame }, lcpCandidates, layoutShifts, requests: [...reqs.values()].filter((r) => r.url?.startsWith("http")), duration: (t1 - t0) / 1000, tracks, markers: [...seen.values()], screenshots, longTasks, interactions };
   }
 }
 
