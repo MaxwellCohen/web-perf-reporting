@@ -559,6 +559,7 @@ export interface ShiftsReport {
     culprits: Array<{ nodeId?: number; tagName?: string; selector?: string; debugName?: string; scoreDelta?: number }>;
     events?: Array<{ timestampMs: number; score: number; hadRecentInput?: boolean }>;
   }>;
+  note?: string;
 }
 
 export interface EventsReport {
@@ -1096,10 +1097,10 @@ function buildNetwork(loaded: LoadedTrace, options: AnalyzeOptions, range?: Time
     if (!inBounds(startMs, durationMs, range)) continue;
     const url = request.args?.data?.url ?? "";
     const requestId = request.args?.data?.requestId;
-    const blocking =
-      request.args?.data?.renderBlocking === "blocking" ||
-      request.args?.data?.renderBlocking === "in_body_parser_blocking" ||
-      (requestId ? blockingIds.has(requestId) : blockingUrls.has(url));
+    // Use the engine's RenderBlocking insight as the single source of truth
+    // (frame, navigation, first-paint and priority rules), so `network`
+    // agrees with `insights` and the web viewer.
+    const blocking = requestId ? blockingIds.has(requestId) : blockingUrls.has(url);
     if (options.renderBlocking && !blocking) continue;
     const synthetic = request.args?.data?.syntheticData;
     processed.push({
@@ -1186,6 +1187,9 @@ interface RawShiftCluster {
   }>;
 }
 
+export const SHIFT_CULPRIT_NOTE =
+  "Culprit scoreDelta is the summed score of the shifts that moved that element. Like DevTools, each shift's full score is credited to every element it moved (Chrome does not split a shift's score per element), so culprit scores can add up to more than the cluster score.";
+
 function buildShifts(loaded: LoadedTrace, options: AnalyzeOptions, range?: TimeRange): ShiftsReport {
   const raw = (loaded.parsedTrace.data.LayoutShifts?.clusters ?? []) as RawShiftCluster[];
   const traceStart = traceBounds(loaded.parsedTrace, loaded.rawEvents).min;
@@ -1233,7 +1237,8 @@ function buildShifts(loaded: LoadedTrace, options: AnalyzeOptions, range?: TimeR
     });
   }
   clusters.sort((a, b) => b.cumulativeScore - a.cumulativeScore);
-  return { command: "shifts", clusters };
+  const note = clusters.some((c) => c.culprits.length) ? SHIFT_CULPRIT_NOTE : undefined;
+  return { command: "shifts", clusters, ...(note ? { note } : {}) };
 }
 
 function buildEvents(loaded: LoadedTrace, options: AnalyzeOptions, range?: TimeRange): EventsReport {

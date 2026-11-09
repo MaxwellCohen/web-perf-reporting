@@ -71,6 +71,7 @@ export type TraceRequest = {
   priority?: string;
   renderBlocking?: string;
   isLinkPreload?: boolean;
+  frame?: string;
   statusCode?: number;
   mimeType?: string;
   protocol?: string;
@@ -235,13 +236,13 @@ export class TraceBuilder {
       }
       return;
     }
-    if (e.name === "ResourceSendRequest" || e.name === "ResourceReceiveResponse" || e.name === "ResourceFinish") {
+    if (e.name === "ResourceSendRequest" || e.name === "ResourceReceiveResponse" || e.name === "ResourceFinish" || e.name === "PreloadRenderBlockingStatusChange") {
       const d = (e.args?.data ?? {}) as TraceData;
       this.resourceEvents.push({
         name: e.name,
         pid: e.pid,
         ts: e.ts,
-        data: e.name === "ResourceSendRequest"
+        data: e.name === "ResourceSendRequest" || e.name === "PreloadRenderBlockingStatusChange"
           ? d
           : { requestId: d.requestId, statusCode: d.statusCode, mimeType: d.mimeType, protocol: d.protocol, fromCache: d.fromCache, encodedDataLength: d.encodedDataLength, decodedBodyLength: d.decodedBodyLength, finishTime: d.finishTime, timing: d.timing },
       });
@@ -417,6 +418,7 @@ export class TraceBuilder {
       .map((s) => ({ time: (s.ts - t0) / 1000, data: s.data }))
       .sort((a, b) => a.time - b.time);
     const reqs = new Map<string, TraceRequest>();
+    const preloadBlocking = new Set<string>();
     for (const e of this.resourceEvents) {
       if (rendererPid && String(e.pid) !== rendererPid) continue;
       const d = e.data;
@@ -424,13 +426,28 @@ export class TraceBuilder {
       const ms = (e.ts - t0) / 1000;
       if (!id) continue;
       if (e.name === "ResourceSendRequest") {
-        if (!reqs.has(id)) {
-          reqs.set(id, { url: d.url, resourceType: d.resourceType, priority: d.priority, renderBlocking: d.renderBlocking, isLinkPreload: d.isLinkPreload, start: ms, end: ms });
+        const prev = reqs.get(id);
+        if (!prev) {
+          reqs.set(id, { url: d.url, resourceType: d.resourceType, priority: d.priority, renderBlocking: d.renderBlocking, isLinkPreload: d.isLinkPreload, frame: d.frame, start: ms, end: ms });
+        } else {
+          // Redirects re-send with the same id; like DevTools, the final send
+          // request decides frame, priority and render-blocking status.
+          prev.priority = d.priority ?? prev.priority;
+          prev.frame = d.frame ?? prev.frame;
+          if (!preloadBlocking.has(id)) prev.renderBlocking = d.renderBlocking ?? prev.renderBlocking;
         }
         continue;
       }
       const r = reqs.get(id);
       if (!r) continue;
+      if (e.name === "PreloadRenderBlockingStatusChange") {
+        // A preload can later become render-blocking; the last change wins.
+        if (typeof d.renderBlocking === "string") {
+          r.renderBlocking = d.renderBlocking;
+          preloadBlocking.add(id);
+        }
+        continue;
+      }
       if (e.name === "ResourceFinish") {
         // `ResourceFinish.ts` fires after decode; DevTools' network finish (and
         // the LCP subparts) use `finishTime`, which is seconds on the trace clock.

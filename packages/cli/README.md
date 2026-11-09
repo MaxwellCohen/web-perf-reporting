@@ -23,7 +23,7 @@ npx -y @maxwellcohen/web-perf-report trace find performance-trace.json --functio
 npx -y @maxwellcohen/web-perf-report trace scan ./traces --grep "EventTiming"
 ```
 
-`trace` analyzes a Chrome Performance panel export (`.json` or `.json.gz`) locally with the same trace engine DevTools uses — no Chrome and no network needed. Commands: `overview` (default), `insights`, `tasks`, `find`, `network`, `interactions`, `shifts`, `events`, `navigations`, and `scan`. Options: `--format md|json|toon`, `--time-range <start,end>` (e.g. `3.5s,4.2s`), plus per-command flags shown in `trace --help`.
+`trace` analyzes a Chrome Performance panel export (`.json` or `.json.gz`) locally with the same trace engine DevTools uses — no Chrome and no network needed. Commands: `overview` (default), `insights`, `tasks`, `find`, `network`, `interactions`, `shifts`, `events`, `navigations`, and `scan`. Options: `--format md|json|toon`, `--time-range <start,end>` (e.g. `3.5s,4.2s`), plus per-command flags shown in `trace --help`. Render-blocking requests (in `insights`, `network`, and the web viewer) follow DevTools' RenderBlocking insight: same frame and navigation, finished before first paint, and `in_body_parser_blocking` only at VeryHigh priority or for High-priority scripts. In `shifts`, each shift's full score is credited to every element it moved, as in DevTools, so culprit scores can add up to more than the cluster score.
 
 Options: `--device mobile|desktop|both`, `--format md|json`, `--file <path>`, `--api <url>` (or env `WEB_PERF_REPORT_API`, default `https://web-perf-report.vercel.app`).
 

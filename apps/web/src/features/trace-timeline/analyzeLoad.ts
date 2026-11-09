@@ -1,4 +1,5 @@
 import { clsScore } from "./cls";
+import { isRenderBlockingRequest } from "./renderBlocking";
 import { categorize, LONG_TASK_MS, type Category, type CpuProfile, type ParsedTrace, type Slice } from "./parseTrace";
 
 export type Tone = "good" | "warn" | "bad" | "info";
@@ -113,12 +114,9 @@ export function analyzeLoad(trace: ParsedTrace): LoadAnalysis {
 
   // Render-blocking resources (same predicate as the insights panel).
   const firstPaint = mark("firstPaint");
-  const blocking = trace.requests.filter(
-    (r) =>
-      r.start >= origin &&
-      (r.renderBlocking === "blocking" || r.renderBlocking === "in_body_parser_blocking") &&
-      (firstPaint == null || r.end <= firstPaint.time + 0.5),
-  );
+  const blocking = firstPaint
+    ? trace.requests.filter((r) => r.start >= origin && isRenderBlockingRequest(r, firstPaint.time, trace.navigation?.frame))
+    : [];
   if (blocking.length) {
     const last = Math.max(...blocking.map((r) => r.end));
     events.push({ time: rel(last), kind: "network", title: `Render-blocking resources done (${blocking.length})`, detail: blocking.slice(0, 4).map((r) => shortUrl(r.url, 40)).join(", ") + (blocking.length > 4 ? "…" : ""), tone: "info" });

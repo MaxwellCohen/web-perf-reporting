@@ -1,5 +1,6 @@
 import type { LoadAnalysis } from "./analyzeLoad";
 import { clsSessionWindows } from "./cls";
+import { isRenderBlockingRequest } from "./renderBlocking";
 import type { InteractionEntry, ParsedTrace, TraceRequest } from "./parseTrace";
 
 export type Rating = "good" | "needs-improvement" | "poor";
@@ -235,16 +236,11 @@ export function buildRenderBlocking(
   trace: ParsedTrace,
   origin = trace.navigation?.time ?? 0,
 ): RenderBlockingResource[] {
-  // Match DevTools: `potentially_blocking` is not render-blocking, and a
-  // request that finishes after first paint did not block first render.
+  // Like DevTools, nothing is reported without a first paint.
   const firstPaint = trace.markers.find((m) => m.name === "firstPaint")?.time;
+  if (firstPaint == null) return [];
   return trace.requests
-    .filter(
-      (r) =>
-        r.start >= origin &&
-        (r.renderBlocking === "blocking" || r.renderBlocking === "in_body_parser_blocking") &&
-        (firstPaint == null || r.end <= firstPaint + 0.5),
-    )
+    .filter((r) => r.start >= origin && isRenderBlockingRequest(r, firstPaint, trace.navigation?.frame))
     .map((r) => ({
       url: r.url,
       startMs: r.start - origin,

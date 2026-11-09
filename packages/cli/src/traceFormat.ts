@@ -273,6 +273,7 @@ function shiftsMd(report: ShiftsReport): string {
       ]),
     ),
   );
+  if (report.note) lines.push("", `> Note: ${report.note}`);
   const withEvents = report.clusters.filter((c) => c.events?.length);
   if (withEvents.length) {
     lines.push("", "## Individual Shifts", "");

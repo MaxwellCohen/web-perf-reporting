@@ -56,7 +56,7 @@ describe("analyzeLoad", () => {
           const requestId = `r${i}`;
           const url = `https://x.test/${names[i]}`;
           return [
-            { name: "ResourceSendRequest", ph: "I", pid: 1, tid: 2, ts: 1_100_000 + i, args: { data: { requestId, url, resourceType: "Stylesheet", renderBlocking } } },
+            { name: "ResourceSendRequest", ph: "I", pid: 1, tid: 2, ts: 1_100_000 + i, args: { data: { requestId, url, resourceType: "Stylesheet", priority: "VeryHigh", renderBlocking } } },
             { name: "ResourceFinish", ph: "I", pid: 1, tid: 2, ts: 1_300_000, args: { data: { requestId, encodedDataLength: 1 } } },
           ];
         }),

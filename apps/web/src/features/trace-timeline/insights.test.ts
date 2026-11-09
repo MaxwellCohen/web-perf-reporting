@@ -43,6 +43,7 @@ function build() {
       resource("ResourceSendRequest", 10, { requestId: "doc", url: "https://x.test/", resourceType: "Document" }),
       resource("ResourceReceiveResponse", 110, { requestId: "doc", statusCode: 200, timing: { requestTime: 1, receiveHeadersEnd: 100 } }),
       resource("ResourceFinish", 120, { requestId: "doc", encodedDataLength: 5000, decodedBodyLength: 9000 }),
+      R("firstPaint", 450, {}),
       // Render-blocking stylesheet: 150 ms → 400 ms.
       resource("ResourceSendRequest", 150, { requestId: "css", url: "https://x.test/a.css", resourceType: "Stylesheet", renderBlocking: "blocking" }),
       resource("ResourceFinish", 400, { requestId: "css", encodedDataLength: 2048 }),
@@ -226,6 +227,44 @@ describe("trace insights", () => {
     });
     const insights = buildInsights(trace, analyzeLoad(trace));
     expect(insights.renderBlocking.map((r) => r.url)).toEqual(["https://x.test/a.css"]);
+  });
+
+  it("applies DevTools' priority, preload and frame rules", () => {
+    const trace = parseTrace({
+      traceEvents: [
+        meta,
+        R("navigationStart", 0, { isOutermostMainFrame: true, documentLoaderURL: "https://x.test/" }),
+        R("firstPaint", 200, {}),
+        // in_body_parser_blocking counts only at VeryHigh, or High for scripts.
+        resource("ResourceSendRequest", 10, { requestId: "a", frame, url: "https://x.test/a.css", resourceType: "Stylesheet", priority: "VeryHigh", renderBlocking: "in_body_parser_blocking" }),
+        resource("ResourceFinish", 100, { requestId: "a" }),
+        resource("ResourceSendRequest", 11, { requestId: "b", frame, url: "https://x.test/b.js", resourceType: "Script", priority: "High", renderBlocking: "in_body_parser_blocking" }),
+        resource("ResourceFinish", 100, { requestId: "b" }),
+        resource("ResourceSendRequest", 12, { requestId: "c", frame, url: "https://x.test/c.css", resourceType: "Stylesheet", priority: "High", renderBlocking: "in_body_parser_blocking" }),
+        resource("ResourceFinish", 100, { requestId: "c" }),
+        // A preload that later becomes render-blocking.
+        resource("ResourceSendRequest", 13, { requestId: "d", frame, url: "https://x.test/d.css", resourceType: "Stylesheet", renderBlocking: "non_blocking" }),
+        resource("PreloadRenderBlockingStatusChange", 14, { requestId: "d", renderBlocking: "blocking" }),
+        resource("ResourceFinish", 100, { requestId: "d" }),
+        // Blocking in a different frame (e.g. an iframe) does not count.
+        resource("ResourceSendRequest", 15, { requestId: "e", frame: "OTHER", url: "https://x.test/e.css", resourceType: "Stylesheet", renderBlocking: "blocking" }),
+        resource("ResourceFinish", 100, { requestId: "e" }),
+      ],
+    });
+    const urls = buildInsights(trace, analyzeLoad(trace)).renderBlocking.map((r) => r.url).sort();
+    expect(urls).toEqual(["https://x.test/a.css", "https://x.test/b.js", "https://x.test/d.css"]);
+  });
+
+  it("reports no render-blocking resources without a first paint", () => {
+    const trace = parseTrace({
+      traceEvents: [
+        meta,
+        R("navigationStart", 0, { isOutermostMainFrame: true, documentLoaderURL: "https://x.test/" }),
+        resource("ResourceSendRequest", 10, { requestId: "a", url: "https://x.test/a.css", resourceType: "Stylesheet", renderBlocking: "blocking" }),
+        resource("ResourceFinish", 100, { requestId: "a" }),
+      ],
+    });
+    expect(buildInsights(trace, analyzeLoad(trace)).renderBlocking).toEqual([]);
   });
 
   it("ignores non-http origins such as chrome-extension in third parties", () => {

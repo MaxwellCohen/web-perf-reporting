@@ -17,7 +17,7 @@ import {
   traceBounds,
 } from "../src/trace.js";
 import { formatTraceReport } from "../src/traceFormat.js";
-import { miniTrace, nav, T } from "./traceFixture.js";
+import { frame, miniTrace, nav, T } from "./traceFixture.js";
 
 let dir = "";
 
@@ -240,6 +240,42 @@ describe("trace reports", () => {
     });
   });
 
+  it("marks render-blocking requests exactly as the RenderBlocking insight does", async () => {
+    const trace = miniTrace();
+    const ev = (name: string, offsetMs: number, data: object, ph = "I") => ({
+      name,
+      ph,
+      pid: 1,
+      tid: 2,
+      ts: T + offsetMs * 1000,
+      cat: ph === "R" ? "loading,rail,devtools.timeline" : "devtools.timeline",
+      args: { frame, data },
+    });
+    trace.traceEvents.push(
+      ev("firstPaint", 800, { navigationId: nav }, "R") as never,
+      // Finishes before first paint: render-blocking.
+      ev("ResourceSendRequest", 130, { requestId: "early", frame, url: "https://x.test/early.css", resourceType: "Stylesheet", priority: "VeryHigh", renderBlocking: "blocking" }) as never,
+      ev("ResourceFinish", 300, { requestId: "early", encodedDataLength: 10, finishTime: T / 1e6 + 0.3 }) as never,
+      // Flagged blocking but finishes after first paint: not render-blocking.
+      ev("ResourceSendRequest", 140, { requestId: "late", frame, url: "https://x.test/late.css", resourceType: "Stylesheet", priority: "VeryHigh", renderBlocking: "blocking" }) as never,
+      ev("ResourceFinish", 1200, { requestId: "late", encodedDataLength: 10, finishTime: T / 1e6 + 1.2 }) as never,
+    );
+    trace.traceEvents.sort((a, b) => (a.ts ?? 0) - (b.ts ?? 0));
+
+    const insights = await analyzeTraceBody(trace, { command: "insights" });
+    if (insights.command !== "insights") throw new Error("wrong report");
+    expect(insights.renderBlocking?.map((r) => r.url)).toEqual(["https://x.test/early.css"]);
+
+    const network = await analyzeTraceBody(trace, { command: "network" });
+    if (network.command !== "network") throw new Error("wrong report");
+    const blocking = Object.fromEntries(network.requests.map((r) => [r.url, r.renderBlocking]));
+    expect(blocking).toMatchObject({ "https://x.test/early.css": true, "https://x.test/late.css": false });
+
+    const only = await analyzeTraceBody(trace, { command: "network", renderBlocking: true });
+    if (only.command !== "network") throw new Error("wrong report");
+    expect(only.requests.map((r) => r.url)).toEqual(["https://x.test/early.css"]);
+  });
+
   it("rejects time ranges for per-navigation commands", async () => {
     await expect(
       analyzeTraceBody(miniTrace(), { command: "insights", timeRange: "0,1s" }),
@@ -288,6 +324,8 @@ describe("trace reports", () => {
     expect(report.clusters[0]).toMatchObject({ cumulativeScore: 0.05 });
     expect(report.clusters[0].culprits[0]).toMatchObject({ nodeId: 5, tagName: "IMG" });
     expect(report.clusters[0].events).toHaveLength(1);
+    expect(report.note).toMatch(/full score is credited to every element/);
+    expect(formatTraceReport(report, "md")).toContain("> Note:");
   });
 
   it("formats markdown, json and toon", async () => {
