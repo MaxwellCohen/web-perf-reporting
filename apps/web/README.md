@@ -1,126 +1,56 @@
-# Web Performance Reporting
+# Web Performance Reporting — web app
 
-Web Performance Reporting is a Next.js app for inspecting site performance with a mix of real-user and lab data. It combines Chrome UX Report (CrUX) views, PageSpeed Insights analysis, and Lighthouse report exploration in one interface.
+Next.js app for inspecting site performance with real-user and lab data. Google API calls, caching, and CrUX history go through the Void API worker ([`apps/api`](../api)); this app calls it with `WORKER_URL` / `WORKER_API_KEY`.
 
-## Features
+## Routes
 
-- Latest CrUX metrics for a URL or origin
-- Historical CrUX trend views
-- PageSpeed Insights analysis with audit details and recommendations
-- Lighthouse report viewer
-- UI and helper tests powered by Vitest and Testing Library
+| Route | Purpose |
+|-------|---------|
+| `/` | overview |
+| `/latest-crux` | current CrUX metrics for a URL or origin |
+| `/historical-crux` | CrUX history charts |
+| `/page-speed` | PageSpeed Insights: run a URL, import a PSI link, or open Lighthouse JSON; saved reports at `/page-speed/[publicId]` (`/viewer` and `/lh` redirect here) |
+| `/stream` | streamed-HTML chunk timing |
+| `/trace` | Chrome trace timeline and insights, parsed in the browser |
+| `/llms.txt` | agent guide to the site and APIs |
+| `/api/agent/report`, `/api/agent/stream`, `/api/agent/trace` | agent APIs (see `/llms.txt`) |
 
-## Tech Stack
+## Stack
 
-- Next.js 16
-- React 19
-- TypeScript
-- Tailwind CSS
-- Drizzle ORM
-- Turso / libSQL
-- Vitest + Testing Library
+Next.js 16 (canary), React 19, TypeScript, Tailwind CSS 4, Vitest + Testing Library, Playwright, PostHog, Sentry.
 
-## Getting Started
+## Getting started
 
-This app lives in a pnpm monorepo. Prefer commands from the [repo root](../../README.md):
-
-```bash
-pnpm install          # at repo root
-pnpm dev:web          # starts this app
-```
-
-Or from `apps/web`:
+From the [repo root](../../README.md):
 
 ```bash
 pnpm install
-pnpm dev
+pnpm dev:web      # http://localhost:3000
 ```
 
-### 1. Create a local env file
+Copy [`.env.example`](.env.example) to `.env` and set:
 
-Create `.env` in `apps/web` (see `.env.example`) with the values your local environment needs:
+| Variable | Notes |
+|----------|-------|
+| `WORKER_URL`, `WORKER_API_KEY` | Void API worker URL and its shared key (required) |
+| `NEXT_PUBLIC_SITE_URL` | canonical URL for metadata, robots, sitemap |
+| `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` | analytics |
+| `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN` | optional; defaults are in `sentry.*.config.ts` |
 
-```bash
-PAGESPEED_INSIGHTS_API=your_google_pagespeed_api_key
-TURSO_CONNECTION_URL=your_turso_database_url
-TURSO_AUTH_TOKEN=your_turso_auth_token
-NEXT_PUBLIC_POSTHOG_KEY=your_posthog_project_key
-NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
-WORKER_URL=https://web-perf-report-api.to-email-max.workers.dev
-WORKER_API_KEY=your_worker_api_key
-# Optional: override the baked-in Sentry DSN (same value used if unset)
-# SENTRY_DSN=https://...@....ingest.us.sentry.io/...
-# NEXT_PUBLIC_SENTRY_DSN=https://...@....ingest.us.sentry.io/...
-```
+## Scripts (run in `apps/web`)
 
-### 3. Run the app
+| Script | Purpose |
+|--------|---------|
+| `pnpm dev` / `build` / `start` | Next.js |
+| `pnpm test` / `test:watch` / `test:coverage` | Vitest (happy-dom, 80% coverage thresholds) |
+| `pnpm test:e2e` | Playwright |
+| `pnpm typecheck` | `tsgo --noEmit` |
+| `pnpm lint` / `lint:fix` | oxlint |
+| `pnpm fmt` / `fmt:check` | oxfmt |
+| `pnpm knip` / `dupes` | unused code / duplication checks |
+| `pnpm db:generate` / `db:migrate` / `db:studio` | Drizzle (legacy Turso schema in `migrations/`; history now lives in the API's D1) |
 
-```bash
-pnpm dev
-```
+## More docs
 
-Open [http://localhost:3000](http://localhost:3000).
-
-## Available Routes
-
-- `/` - overview page
-- `/latest-crux` - current CrUX metrics
-- `/historical-crux` - historical CrUX charts
-- `/page-speed` - PageSpeed Insights: run a URL, import a PSI link, or open Lighthouse JSON (`/viewer` and `/lh` redirect here)
-
-## Scripts
-
-```bash
-pnpm dev
-pnpm build
-pnpm start
-pnpm lint
-pnpm typecheck
-pnpm test
-pnpm test:watch
-pnpm test:coverage
-pnpm prettier
-pnpm db:generate
-pnpm db:migrate
-pnpm db:studio
-```
-
-## Testing
-
-Vitest is configured with:
-
-- `happy-dom` for component and DOM-focused tests
-- alias support for `@/`
-- shared setup in `vitest.setup.ts`
-- coverage reporting through V8
-- global coverage thresholds of 80%
-
-Run the full test suite:
-
-```bash
-pnpm test
-```
-
-Run tests in watch mode:
-
-```bash
-pnpm test:watch
-```
-
-Generate a coverage report:
-
-```bash
-pnpm test:coverage
-```
-
-## Database Notes
-
-The app uses Drizzle with a Turso/libSQL database connection. Migration files live in `migrations/`, and the Drizzle config is defined in `drizzle.config.ts`.
-
-## External Services
-
-- Google PageSpeed Insights API
-- Chrome UX Report data sources
-- Turso / libSQL
-- PostHog
-- Sentry
+- Domain glossary: [`CONTEXT.md`](CONTEXT.md)
+- Architecture: [`docs/architecture-page-speed.md`](docs/architecture-page-speed.md), decisions in [`docs/adr`](docs/adr)

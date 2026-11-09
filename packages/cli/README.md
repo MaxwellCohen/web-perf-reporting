@@ -1,31 +1,68 @@
 # @maxwellcohen/web-perf-report
 
-Runs Lighthouse on a URL and prints a ranked, agent-ready performance report (analysis by the Web Perf Report API). Needs Node 20+ and Chrome.
+Agent-ready web performance CLI and MCP server. Requires Node 20+.
+
+- **Audit**: runs Lighthouse on a URL and prints a ranked report (analysis by the Web Perf Report API). Needs Chrome.
+- **Stream**: measures when each chunk of a page's streamed HTML arrives.
+- **Trace**: analyzes a Chrome Performance panel trace locally with the DevTools trace engine.
+- **MCP**: exposes all three to agents over stdio.
+
+## Audit
 
 ```sh
-npx -y @maxwellcohen/web-perf-report https://example.com            # mobile + desktop, markdown
+npx -y @maxwellcohen/web-perf-report https://example.com                         # mobile + desktop, markdown
 npx -y @maxwellcohen/web-perf-report https://example.com --device mobile --format json
-npx -y @maxwellcohen/web-perf-report --file report.json             # analyze an existing Lighthouse/PSI JSON
+npx -y @maxwellcohen/web-perf-report --file report.json                          # existing Lighthouse/PSI JSON
 ```
+
+| Option | Values |
+|--------|--------|
+| `--device` | `mobile`, `desktop`, `both` (default) |
+| `--format` | `md` (default), `json` |
+| `--file <path>` | analyze an existing Lighthouse/PSI JSON instead of running Lighthouse |
+| `--api <url>` | API base; or env `WEB_PERF_REPORT_API` (default `https://web-perf-report.vercel.app`) |
+
+## Stream
 
 ```sh
-npx -y @maxwellcohen/web-perf-report stream http://localhost:3000   # when does the streamed HTML actually finish?
-npx -y @maxwellcohen/web-perf-report stream http://localhost:3000 http://localhost:3001   # compare two (A vs B)
+npx -y @maxwellcohen/web-perf-report stream http://localhost:3000                         # one page
+npx -y @maxwellcohen/web-perf-report stream http://localhost:3000 http://localhost:3001   # compare A vs B
 ```
 
-`stream` records when each chunk of the page's HTML arrives (works for localhost), then prints TTFB, last byte, the idle gaps where the server is waiting, and a shareable `/stream` link. Pass a second URL to compare A and B (before/after, two builds); the report shows the delta table and a shareable `/stream#r=…&b=…` link. Options: `--format md|json`, `--api <url>`.
+Prints TTFB, last byte, and the idle gaps where the server is waiting, plus a shareable `/stream` link. Works for localhost. With a second URL it adds a delta table and a `/stream#r=…&b=…` comparison link. Options: `--format md|json`, `--api <url>`.
+
+## Trace
 
 ```sh
-npx -y @maxwellcohen/web-perf-report trace performance-trace.json         # CWV + main-thread breakdown
-npx -y @maxwellcohen/web-perf-report trace insights performance-trace.json.gz
-npx -y @maxwellcohen/web-perf-report trace tasks performance-trace.json --tree bottom-up --top 20
-npx -y @maxwellcohen/web-perf-report trace find performance-trace.json --function "render"
-npx -y @maxwellcohen/web-perf-report trace scan ./traces --grep "EventTiming"
+npx -y @maxwellcohen/web-perf-report trace trace.json                  # overview
+npx -y @maxwellcohen/web-perf-report trace insights trace.json.gz
+npx -y @maxwellcohen/web-perf-report trace tasks trace.json --tree bottom-up --top 20
+npx -y @maxwellcohen/web-perf-report trace find trace.json --function render
+npx -y @maxwellcohen/web-perf-report trace scan ./traces --grep EventTiming
 ```
 
-`trace` analyzes a Chrome Performance panel export (`.json` or `.json.gz`) locally with the same trace engine DevTools uses — no Chrome and no network needed. Commands: `overview` (default), `insights`, `tasks`, `find`, `network`, `interactions`, `shifts`, `events`, `navigations`, and `scan`. Options: `--format md|json|toon`, `--time-range <start,end>` (e.g. `3.5s,4.2s`), plus per-command flags shown in `trace --help`. Render-blocking requests (in `insights`, `network`, and the web viewer) follow DevTools' RenderBlocking insight: same frame and navigation, finished before first paint, and `in_body_parser_blocking` only at VeryHigh priority or for High-priority scripts. In `shifts`, each shift's full score is credited to every element it moved, as in DevTools, so culprit scores can add up to more than the cluster score.
+Runs locally on `.json` or `.json.gz` exports — no Chrome or network needed.
 
-Options: `--device mobile|desktop|both`, `--format md|json`, `--file <path>`, `--api <url>` (or env `WEB_PERF_REPORT_API`, default `https://web-perf-report.vercel.app`).
+| Command | Shows |
+|---------|-------|
+| `overview` (default) | Core Web Vitals, main-thread breakdown, warnings |
+| `insights` | LCP / INP / CLS / render-blocking / third-party insights |
+| `tasks` | long main-thread tasks, or a call tree with `--tree bottom-up\|top-down` |
+| `find` | executions of a function (`--function <name>`) |
+| `network` | slowest requests (`--render-blocking`, `--slowest <n>`) |
+| `interactions` | EventTiming interactions and INP subparts |
+| `shifts` | layout-shift clusters and culprits (`--events`) |
+| `events` | raw trace events (`--name`, `--cat a,b`, `--phase`, `--fields`) |
+| `navigations` | navigations and their insight sets |
+| `scan <dir-or-glob>` | search many traces (`--grep <pattern>`) |
+
+Common options: `--format md|json|toon`, `--time-range <start,end>` (ms, or with units like `3.5s,4.2s`), `--absolute-timestamps`. Per-command flags: `trace <command> --help`.
+
+Notes:
+
+- Metric values (LCP, INP, …) are relative to the navigation; task, event, and navigation timestamps are relative to the trace start.
+- Render-blocking follows DevTools' RenderBlocking insight: same frame and navigation, finished before first paint, and `in_body_parser_blocking` only at VeryHigh priority or for High-priority scripts. `insights`, `network`, and the web `/trace` viewer all use this rule.
+- In `shifts`, as in DevTools, each shift's full score is credited to every element it moved, so culprit scores can add up to more than the cluster score.
 
 ## MCP server (stdio)
 
@@ -33,4 +70,9 @@ Options: `--device mobile|desktop|both`, `--format md|json`, `--file <path>`, `-
 { "command": "npx", "args": ["-y", "@maxwellcohen/web-perf-report", "mcp"] }
 ```
 
-Tools: `audit_site` (url, device?), `analyze_report` (report JSON), `measure_stream` (url) and `analyze_trace` (trace JSON or a local `file`, plus an optional drill-down `command`). Audits take ~30-90s; `measure_stream` takes a few seconds; `analyze_trace` is local and fast.
+| Tool | Input | Speed |
+|------|-------|-------|
+| `audit_site` | `url`, `device?` | ~30–90 s |
+| `analyze_report` | Lighthouse/PSI report JSON | fast |
+| `measure_stream` | `url` | a few seconds |
+| `analyze_trace` | `trace` JSON or a local `file`, optional drill-down `command` | local, fast |
