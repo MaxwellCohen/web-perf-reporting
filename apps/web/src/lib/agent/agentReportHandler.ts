@@ -1,4 +1,3 @@
-import { wrapLighthouseResult } from "@/lib/page-speed-insights/wrapLighthouseResult";
 import { readJsonLimited } from "@/lib/agent/readJsonLimited";
 import { buildAgentReport, renderAgentReportMarkdown } from "@/lib/agent/agentReport";
 import type { PageSpeedDashboardItem } from "@/lib/page-speed-insights/types";
@@ -27,7 +26,7 @@ function toPsi(entry: unknown): PageSpeedInsights | null {
   if (!isRecord(entry)) return null;
   if (isRecord(entry.lighthouseResult)) return entry as PageSpeedInsights;
   if (isRecord(entry.audits) && isRecord(entry.categories)) {
-    return wrapLighthouseResult(entry);
+    return { lighthouseResult: entry } as unknown as PageSpeedInsights;
   }
   if (isRecord(entry.item)) return toPsi(entry.item);
   return null;

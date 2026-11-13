@@ -2,10 +2,8 @@ import { describe, expect, it } from "vitest";
 import { act, fireEvent, render, renderHook } from "@testing-library/react";
 import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 import { FullWidthTables } from "@/features/page-speed-insights/tanstack-table-v9/fullWidthTables";
-import {
-  useSimpleTable,
-  type FlatColumnDef,
-} from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
+import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import type { StockAnyColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 
 type Row = { description: string; severity: string };
@@ -24,7 +22,7 @@ const columns = [
     enableSorting: true,
     sortFn: "alphanumeric",
   }),
-] as FlatColumnDef<Row>[];
+] as StockAnyColumnDef<Row>[];
 
 const data: Row[] = [
   { description: "No HSTS header found", severity: "High" },
@@ -34,7 +32,7 @@ const data: Row[] = [
 
 describe("StockDataTable sorting", () => {
   it("reorders rows when sort button is clicked", () => {
-    const { result } = renderHook(() => useSimpleTable({ data, columns }));
+    const { result } = renderHook(() => useStandardTable({ data, columns }));
     const { container, rerender } = render(
       <FullWidthTables>
         <StockDataTable table={result.current} showCopy={false} />

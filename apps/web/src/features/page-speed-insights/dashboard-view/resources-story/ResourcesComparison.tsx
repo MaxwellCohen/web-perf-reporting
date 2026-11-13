@@ -24,7 +24,7 @@ import {
 import type { ResourcesInvestigation } from "@/features/page-speed-insights/dashboard-view/resources-story/resourcesInvestigationModel";
 import { SuspectList } from "@/features/page-speed-insights/dashboard-view/resources-story/SuspectList";
 import { TransferWeightMap } from "@/features/page-speed-insights/dashboard-view/resources-story/TransferWeightMap";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 
 function deltaClass(delta: number | null) {
   if (delta == null || delta === 0) return "text-muted-foreground";

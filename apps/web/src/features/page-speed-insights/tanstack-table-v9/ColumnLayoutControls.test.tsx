@@ -2,16 +2,14 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { ColumnLayoutControls } from "@/features/page-speed-insights/tanstack-table-v9/ColumnLayoutControls";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
-import {
-  useStandardTable,
-  type StandardColumnDef,
-} from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import type { StockAnyColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 
 type Row = { url: string; bytes: number };
 
 function Harness() {
   const columnHelper = createStockColumnHelper<Row>();
-  const columns: StandardColumnDef<Row>[] = [
+  const columns: StockAnyColumnDef<Row>[] = [
     columnHelper.accessor("url", { id: "url", header: "URL" }),
     columnHelper.accessor("bytes", { id: "bytes", header: "Bytes", sortFn: "basic" }),
   ];

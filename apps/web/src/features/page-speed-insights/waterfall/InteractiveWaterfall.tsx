@@ -19,6 +19,9 @@ import {
 import { TickGridOverlay, TimeAxis } from "@/features/page-speed-insights/waterfall/timeAxis";
 import {
   rowCriticalChainMark,
+  LONG_TASK_BAR_COLOR,
+  SHORT_TASK_BAR_COLOR,
+  USER_MEASURE_BAR_COLOR,
   WaterfallBarTrack,
 } from "@/features/page-speed-insights/waterfall/WaterfallBarTrack";
 import { RenderBlockingBadge } from "@/features/page-speed-insights/waterfall/renderBlockingBadge";
@@ -86,10 +89,10 @@ function displayLabel(row: WaterfallRow): string {
 function swatchClass(row: WaterfallRow): string {
   if (row.kind === "task") {
     const hasLong = row.segments?.some((seg) => seg.taskKind === "long");
-    return hasLong ? "bg-rose-500/85" : "bg-amber-400/90 dark:bg-amber-400/80";
+    return hasLong ? LONG_TASK_BAR_COLOR : SHORT_TASK_BAR_COLOR;
   }
   if (row.kind === "user-mark" || row.kind === "user-measure") {
-    return "bg-teal-600/80 dark:bg-teal-400/70";
+    return USER_MEASURE_BAR_COLOR;
   }
   return getNetworkBarColor(row.resourceType);
 }

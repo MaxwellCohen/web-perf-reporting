@@ -52,7 +52,8 @@ describe("usePageSpeedInsightsQueryByPublicId", () => {
     ];
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
-      text: async () => JSON.stringify(mockData),
+      status: 200,
+      json: async () => ({ state: "ready", data: mockData }),
     } as Response);
 
     const { getLatest } = await renderHookProbe("public-123");
@@ -78,17 +79,15 @@ describe("usePageSpeedInsightsQueryByPublicId", () => {
     expect(getLatest()).toEqual({ status: "failed", reason: "error" });
   });
 
-  it("returns failed status with error message from JSON 500 body", async () => {
+  it("returns failed status with error message from a failed state body", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue({
-      ok: false,
-      status: 500,
-      text: async () =>
-        JSON.stringify({
-          status: "failed",
-          reason: "job",
-          error: "Lighthouse could not load the page.",
-          url: "https://example.com/page",
-        }),
+      ok: true,
+      status: 200,
+      json: async () => ({
+        state: "failed",
+        error: "Lighthouse could not load the page.",
+        url: "https://example.com/page",
+      }),
     } as Response);
 
     const { getLatest } = await renderHookProbe("public-3");
@@ -105,8 +104,11 @@ describe("usePageSpeedInsightsQueryByPublicId", () => {
   it("returns failed status when response JSON is invalid", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
-      text: async () => "invalid json",
-    } as Response);
+      status: 200,
+      json: async () => {
+        throw new SyntaxError("invalid json");
+      },
+    } as unknown as Response);
 
     const { getLatest } = await renderHookProbe("public-4");
 
@@ -121,7 +123,8 @@ describe("usePageSpeedInsightsQueryByPublicId", () => {
   it("reuses the same Promise across renders for a publicId", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
-      text: async () => JSON.stringify([]),
+      status: 200,
+      json: async () => ({ state: "ready", data: [] }),
     } as Response);
 
     await renderHookProbe("public-5");

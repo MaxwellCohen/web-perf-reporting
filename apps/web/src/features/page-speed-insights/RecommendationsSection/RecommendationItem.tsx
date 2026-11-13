@@ -13,13 +13,11 @@ import { RecommendationNetworkTree } from "@/features/page-speed-insights/Recomm
 import { RecommendationAuditDetails } from "@/features/page-speed-insights/RecommendationsSection/RecommendationAuditDetails";
 import { getRecommendationAuditId } from "@/features/page-speed-insights/RecommendationsSection/recommendationHelpers";
 import { recommendationMarkdownComponents } from "@/features/page-speed-insights/RecommendationsSection/recommendationMarkdownComponents";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 
 interface RecommendationItemProps {
   rec: Recommendation;
   items: InsightsContextItem[];
-  /** @deprecated Kept for classic callers; priority styling lives in the header. */
-  priorityColors?: Record<string, string>;
   peerMaxSavings?: number;
   /** Row inside a divide-y panel, without its own card chrome. */
   plain?: boolean;

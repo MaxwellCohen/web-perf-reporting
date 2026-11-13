@@ -40,6 +40,8 @@ describe("recommendationProcessing", () => {
       expect(result.priority).toBe("medium");
       expect(result.impact.metric).toBe("First Contentful Paint");
       expect(result.impact.savings).toBe(100);
+      expect(result.category).toBe("Performance");
+      expect(result.actionableSteps.length).toBeGreaterThan(0);
     });
 
     it("treats INP savings as milliseconds", () => {
@@ -92,6 +94,7 @@ describe("recommendationProcessing", () => {
         [{ key: "url", label: "URL" }] as any,
         "Explanation",
         new Map([["Mobile", [{ url: "https://x.com" }] as any]]),
+        "Accessibility",
       );
       expect(result).not.toBeNull();
       expect(result!.tableData).toBeDefined();

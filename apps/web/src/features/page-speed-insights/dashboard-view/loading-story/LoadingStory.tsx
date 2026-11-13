@@ -25,7 +25,7 @@ import {
   FilmstripViewer,
   type FilmstripViewerFrame,
 } from "@/features/page-speed-insights/shared/FilmstripViewer";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import {
   ratingClass,
   momentMeta,

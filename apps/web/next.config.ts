@@ -4,6 +4,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   poweredByHeader: false,
+  transpilePackages: ["@maxwellcohen/stream-core"],
   reactCompiler: true,
   typedRoutes: true,
   typescript: {

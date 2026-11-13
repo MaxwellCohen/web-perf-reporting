@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ListFilter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StringFilterHeader } from "@/features/page-speed-insights/tanstack-table-v9/StringFilterHeader";
-import { RangeFilter } from "@/features/page-speed-insights/tanstack-table-v9/RangeFilter";
+import { RangeFilterInputs } from "@/features/page-speed-insights/JSUsage/jsUsageTableFilters";
 import { ColumnResizer } from "@/features/page-speed-insights/tanstack-table-v9/columnResizer";
 import { renderBoolean } from "@/features/page-speed-insights/lh-categories/renderBoolean";
 import { Label } from "@/components/ui/label";
@@ -143,7 +143,7 @@ function FilterPopover<TData extends RowData>({
   const map: Record<string, () => ReactNode> = {
     includesString: () => <StringFilterHeader column={header.column} name={""} />,
     booleanFilterFn: () => <CheckBoxFilter header={header} />,
-    inNumberRange: () => <RangeFilter column={header.column} />,
+    inNumberRange: () => <RangeFilterInputs column={header.column} />,
   };
   if (!(filterType in map)) {
     return null;

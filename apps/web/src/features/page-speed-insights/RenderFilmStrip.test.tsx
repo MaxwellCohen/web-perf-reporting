@@ -3,52 +3,8 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@xstate/store-react", () => {
-  function createStore(config: {
-    context: unknown;
-    on: { sync: (ctx: unknown, event: unknown) => unknown };
-  }) {
-    let state = config.context;
-    const listeners = new Set<() => void>();
-    return {
-      get: () => ({ context: state }),
-      subscribe: (listener: () => void) => {
-        listeners.add(listener);
-        return () => listeners.delete(listener);
-      },
-      trigger: {
-        sync: (event: unknown) => {
-          state = config.on.sync(state, event);
-          listeners.forEach((l) => l());
-        },
-      },
-    };
-  }
-  return {
-    useStore: (definition: Parameters<typeof createStore>[0]) => {
-      const storeRef = React.useRef<ReturnType<typeof createStore> | undefined>(undefined);
-      if (!storeRef.current) {
-        storeRef.current = createStore(definition);
-      }
-      return storeRef.current;
-    },
-    useSelector: (
-      store: ReturnType<typeof createStore>,
-      selector: (snapshot: { context: unknown }) => unknown,
-    ) =>
-      React.useSyncExternalStore(
-        (listener) => store.subscribe(listener),
-        () => selector(store.get()),
-        () => selector(store.get()),
-      ),
-  };
-});
-
 import { Accordion } from "@/components/ui/accordion";
-import {
-  PageSpeedInsightsStoreProvider,
-  usePageSpeedInsightsStore,
-} from "@/features/page-speed-insights/PageSpeedContext";
+import { PageSpeedInsightsProvider } from "@/features/page-speed-insights/PageSpeedContext";
 import { RenderFilmStrip } from "@/features/page-speed-insights/RenderFilmStrip";
 
 vi.mock("@/components/ui/accordion", () => {
@@ -130,13 +86,12 @@ function TestWrapper({
   data: any[];
   labels: string[];
 }) {
-  const store = usePageSpeedInsightsStore({ data, labels, isLoading: false });
   return (
-    <PageSpeedInsightsStoreProvider store={store}>
+    <PageSpeedInsightsProvider data={data} labels={labels}>
       <Accordion type="single" collapsible>
         {children}
       </Accordion>
-    </PageSpeedInsightsStoreProvider>
+    </PageSpeedInsightsProvider>
   );
 }
 
@@ -204,11 +159,11 @@ describe("RenderFilmStrip", () => {
         },
       },
     ];
-    const { container } = render(
+    render(
       <TestWrapper data={data} labels={["Mobile"]}>
         <RenderFilmStrip />
       </TestWrapper>,
     );
-    expect(container.firstChild).toMatchSnapshot();
+    expect(screen.getByRole("button", { name: "Screenshots" })).toBeInTheDocument();
   });
 });

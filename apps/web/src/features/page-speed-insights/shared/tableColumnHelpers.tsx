@@ -4,7 +4,7 @@ import type {
   StockAnyColumnDef,
   StockColumnDef,
 } from "@/features/page-speed-insights/shared/tanstackStockTypes";
-import type { StockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
+import type { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import {
   RenderBytesValue,
   RenderMSValue,
@@ -20,7 +20,7 @@ import { ResourceUrlCell } from "@/features/page-speed-insights/shared/ResourceU
 
 type ColumnDef<T extends RowData, TValue = unknown> = StockColumnDef<T, TValue>;
 type AnyColumnDef<T extends RowData> = StockAnyColumnDef<T>;
-type ColumnHelper<T extends RowData> = StockColumnHelper<T>;
+type ColumnHelper<T extends RowData> = ReturnType<typeof createStockColumnHelper<T>>;
 
 /** Placeholder for missing numeric / metric values in grouped metric tables */
 const METRIC_TABLE_EMPTY_DISPLAY = "N/A" as const;

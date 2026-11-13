@@ -158,7 +158,9 @@ export function createNumericAggregatedCell(
   columnId: string,
   renderValue: (value: number) => React.ReactNode = (value) => <RenderMSValue value={value} />,
 ) {
-  return function aggregatedCell1<TData extends RowData>(info: AggregatedCellInfo<TData>): React.ReactNode {
+  return function aggregatedCell1<TData extends RowData>(
+    info: AggregatedCellInfo<TData>,
+  ): React.ReactNode {
     const row = info.row;
     const valueLabelPairs = extractValueLabelPairs<number, TData>(row, columnId);
 
@@ -216,7 +218,9 @@ export function createStringAggregatedCell(
   transformValue?: (value: string) => string,
   showAllDevicesLabel: boolean = true,
 ) {
-  return function aggregatedCell2<TData extends RowData>(info: AggregatedCellInfo<TData>): React.ReactNode {
+  return function aggregatedCell2<TData extends RowData>(
+    info: AggregatedCellInfo<TData>,
+  ): React.ReactNode {
     const uniques = getAggregatedValueLabelContext<string, TData>(info, columnId);
     if (!uniques) return "N/A";
 
@@ -251,7 +255,9 @@ export function createStringAggregatedCell(
  * Creates an aggregated cell renderer for percentage values
  */
 export function createPercentageAggregatedCell(columnId: string, precision: number = 2) {
-  return function aggregatedCell3<TData extends RowData>(info: AggregatedCellInfo<TData>): React.ReactNode {
+  return function aggregatedCell3<TData extends RowData>(
+    info: AggregatedCellInfo<TData>,
+  ): React.ReactNode {
     const uniques = getAggregatedValueLabelContext<number, TData>(info, columnId);
     if (!uniques) return "N/A";
 
@@ -280,7 +286,9 @@ export function createPercentageAggregatedCell(columnId: string, precision: numb
  * Creates an aggregated cell renderer for report labels
  */
 export function createReportLabelAggregatedCell(labelColumnId: string = "label") {
-  return function aggregatedCell4<TData extends RowData>(info: AggregatedCellInfo<TData>): React.ReactNode {
+  return function aggregatedCell4<TData extends RowData>(
+    info: AggregatedCellInfo<TData>,
+  ): React.ReactNode {
     const row = info.row;
     const leafRows = row.getLeafRows();
     const values: string[] = leafRows
@@ -298,87 +306,6 @@ export function createReportLabelAggregatedCell(labelColumnId: string = "label")
       <div className="flex flex-col gap-1 max-h-24 overflow-y-auto">
         {uniqueValues.map((v, i) => (
           <span key={i}>{v}</span>
-        ))}
-      </div>
-    );
-  };
-}
-
-/**
- * Aggregated cell for boolean columns in multi-report grouped tables.
- */
-export function createBooleanAggregatedCell<TData extends RowData>(
-  columnId: string,
-  renderBoolean: (value: boolean) => React.ReactNode,
-) {
-  // eslint-disable-next-line react/display-name
-  return (info: AggregatedCellInfo<TData>): React.ReactNode => {
-    const row = info.row;
-    const uniques = valueLabelUniquesOrNull<boolean, TData>(row, columnId);
-    if (!uniques) return "N/A";
-
-    const { valueLabelPairs, uniqueValues, uniqueLabels } = uniques;
-
-    if (uniqueValues.length === 1) {
-      const value = uniqueValues[0];
-      if (uniqueLabels.length > 1) {
-        return (
-          <div className="flex items-center gap-2">
-            {renderBoolean(value)}
-            <span className="text-muted-foreground text-xs">(All Devices)</span>
-          </div>
-        );
-      }
-      return renderBoolean(value);
-    }
-
-    const valueGroups = groupValueLabelPairs(valueLabelPairs);
-
-    return (
-      <div className="flex max-h-24 flex-col gap-1 overflow-y-auto">
-        {Array.from(valueGroups.entries()).map(([value, labels], i) => {
-          const uniqueLabelsForValue = [...new Set(labels)];
-          return (
-            <div key={i} className="flex items-center gap-2">
-              {renderBoolean(value)}
-              {uniqueLabelsForValue.length === 1 && (
-                <span className="text-muted-foreground text-xs">({uniqueLabelsForValue[0]})</span>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-}
-
-/**
- * Aggregated cell that unions unique origin strings from leaf rows.
- */
-export function createOriginsArrayAggregatedCell<TData extends RowData>(
-  originsColumnId: string = "origins",
-) {
-  // eslint-disable-next-line react/display-name
-  return (info: AggregatedCellInfo<TData>): React.ReactNode => {
-    const row = info.row;
-    const leafRows = row.getLeafRows();
-    const allOrigins: string[] = [];
-
-    leafRows.forEach((r: StockRow<TData>) => {
-      const origins = r.getValue(originsColumnId) as string[];
-      if (Array.isArray(origins)) {
-        allOrigins.push(...origins);
-      }
-    });
-
-    if (allOrigins.length === 0) return "N/A";
-
-    const uniqueOrigins = [...new Set(allOrigins)];
-
-    return (
-      <div className="flex max-h-24 flex-col gap-1 overflow-y-auto">
-        {uniqueOrigins.map((origin) => (
-          <div key={origin}>{origin}</div>
         ))}
       </div>
     );

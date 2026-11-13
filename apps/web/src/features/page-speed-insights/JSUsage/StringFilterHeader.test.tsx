@@ -1,5 +1,5 @@
 import type { Column } from "@tanstack/react-table";
-import { fireEvent, render } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { StringFilterHeader } from "@/features/page-speed-insights/tanstack-table-v9/StringFilterHeader";
 
@@ -82,13 +82,16 @@ describe("StringFilterHeader", () => {
   it("renders filter UI with column", () => {
     const column = createColumnMock();
     const { container } = render(<StringFilterHeader column={column as never} name="Name" />);
-    expect(container.firstChild).toMatchSnapshot();
+    expect(screen.getByLabelText("Name Filter")).toHaveAttribute("placeholder", "Search... (3)");
+    expect(screen.getByRole("button", { name: "Clear filter for Name" })).toBeInTheDocument();
+    expect(container.querySelectorAll("datalist option")).toHaveLength(3);
   });
 
   it("renders with filter value", () => {
     const column = createColumnMock({ getFilterValue: () => "test" });
-    const { container } = render(<StringFilterHeader column={column as never} name="Host" />);
-    expect(container.firstChild).toMatchSnapshot();
+    render(<StringFilterHeader column={column as never} name="Host" />);
+    expect(screen.getByLabelText("Host Filter")).toHaveValue("test");
+    expect(screen.getByRole("button", { name: "Clear filter for Host" })).toBeInTheDocument();
   });
 
   it("calls setFilterValue when clear button is clicked", () => {

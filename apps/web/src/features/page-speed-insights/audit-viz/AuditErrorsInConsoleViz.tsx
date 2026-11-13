@@ -1,11 +1,11 @@
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
+import { getHostFromUrl } from "@/lib/urlDisplay";
 import { AuditKpiStrip } from "./AuditKpiStrip";
 import { AuditBarChart } from "./AuditBarChart";
 import {
   Attribution,
   groupAcross,
   hasAnyItems,
-  hostOf,
   plural,
   reportsOf,
   textOf,
@@ -24,7 +24,7 @@ function sourceOf(item: AnyItem): string {
 
 function originOf(item: AnyItem): string {
   const url = urlOf(item.sourceLocation) || urlOf(item.url);
-  return url ? hostOf(url) : "unknown origin";
+  return url ? getHostFromUrl(url, url) : "unknown origin";
 }
 
 export function AuditErrorsInConsoleViz({ rows }: { rows: DetailTableItem[] }) {

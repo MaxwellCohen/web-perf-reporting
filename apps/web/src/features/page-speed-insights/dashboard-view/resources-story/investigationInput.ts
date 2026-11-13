@@ -1,15 +1,49 @@
-import { javascriptStoryFromMetrics } from "@/features/page-speed-insights/dashboard-view/javascript-story/javascriptStoryModel";
-import { networkStoryFromSummaries } from "@/features/page-speed-insights/dashboard-view/network-story/networkStoryModel";
 import type { JSMetrics } from "@/features/page-speed-insights/javascript-metrics/extractJSMetrics";
-import { selectJavaScriptMetrics } from "@/features/page-speed-insights/javascript-metrics/javascriptMetricsSelectors";
+import { extractJSMetrics } from "@/features/page-speed-insights/javascript-metrics/extractJSMetrics";
 import { collectResourceSummaries } from "@/features/page-speed-insights/network-metrics/resourceSummary";
+import { entryAuditItems, finiteOrZero } from "@/features/page-speed-insights/shared/auditItems";
 import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
 import type { TableItem } from "@/lib/schema";
 import { getNumber, getUrlString } from "@/lib/utils";
 import type { InvestigationScript, ResourcesInvestigationInput } from "./investigationTypes";
 
-function finite(value: unknown): number {
-  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+// Same schemes as Lighthouse UrlUtils.NON_NETWORK_SCHEMES; resource-summary skips these requests.
+const NON_NETWORK_SCHEMES = ["blob", "data", "intent", "file", "filesystem", "chrome-extension"];
+
+function isNonNetworkRequest(item: TableItem): boolean {
+  const scheme = (value: unknown) => (typeof value === "string" ? value.split(":")[0] : "");
+  return (
+    NON_NETWORK_SCHEMES.includes(scheme(item.protocol)) ||
+    NON_NETWORK_SCHEMES.includes(scheme(item.url))
+  );
+}
+
+function sumFinite(items: TableItem[], read: (item: TableItem) => unknown): number | null {
+  let saw = false;
+  let sum = 0;
+  for (const item of items) {
+    const value = read(item);
+    if (typeof value !== "number" || !Number.isFinite(value)) continue;
+    saw = true;
+    sum += value;
+  }
+  return saw ? sum : null;
+}
+
+function finiteOrUndefined(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function scriptTransferBytes(metric: JSMetrics): number | null {
+  const resources = metric.jsResources.filter((item) => !isNonNetworkRequest(item));
+  if (!resources.length) return null;
+  return resources.reduce((sum, item) => sum + (+(item.transferSize ?? 0) || 0), 0);
+}
+
+function longTaskMs(metric: JSMetrics): number | null {
+  const totalTaskTime = metric.diagnostics[0]?.totalTaskTime;
+  if (typeof totalTaskTime === "number" && Number.isFinite(totalTaskTime)) return totalTaskTime;
+  return sumFinite(metric.mainThreadTasks, (item) => item.duration);
 }
 
 function scriptsFrom(metric: JSMetrics): InvestigationScript[] {
@@ -25,7 +59,7 @@ function scriptsFrom(metric: JSMetrics): InvestigationScript[] {
   for (const resource of metric.jsResources) {
     const url = getUrlString(resource.url);
     if (!url) continue;
-    slot(url).transferSize += finite(getNumber(resource.transferSize));
+    slot(url).transferSize += finiteOrZero(getNumber(resource.transferSize));
   }
   for (const item of metric.unusedJS) {
     const url = getUrlString(item.url);
@@ -37,17 +71,11 @@ function scriptsFrom(metric: JSMetrics): InvestigationScript[] {
   for (const item of metric.bootupTime) {
     const url = getUrlString(item.url);
     if (!url) continue;
-    const parse = finite(getNumber(item.scriptParseCompile));
-    const scripting = finite(getNumber(item.scripting));
+    const parse = finiteOrZero(getNumber(item.scriptParseCompile));
+    const scripting = finiteOrZero(getNumber(item.scripting));
     slot(url).bootupMs += getNumber(item.total) ?? parse + scripting;
   }
   return [...byUrl.values()];
-}
-
-function networkRequestItems(entry: InsightsContextItem): TableItem[] {
-  const details = entry.item.lighthouseResult?.audits?.["network-requests"]?.details;
-  if (!details || !("items" in details) || !Array.isArray(details.items)) return [];
-  return details.items;
 }
 
 function partyNames(entry: InsightsContextItem): { first: Set<string>; third: Set<string> } {
@@ -70,16 +98,15 @@ function loadTimeFrom(entry: InsightsContextItem): number | null {
 }
 
 export function inputFromEntry(entry: InsightsContextItem): ResourcesInvestigationInput {
-  const summary = collectResourceSummaries([entry])[0];
-  const device = summary ? networkStoryFromSummaries([summary])?.devices[0] : undefined;
-  const { jsMetrics, jsStats } = selectJavaScriptMetrics({ context: { items: [entry] } });
-  const jsReport = javascriptStoryFromMetrics({ jsMetrics, jsStats })?.reports[0];
-  const metric = jsMetrics[0];
+  const tiles = collectResourceSummaries([entry])[0]?.tiles;
+  const total = tiles?.find((tile) => tile.resourceType === "total");
+  const thirdParty = tiles?.find((tile) => tile.resourceType === "third-party");
+  const metric = extractJSMetrics(entry);
   const parties = partyNames(entry);
 
-  const requests = networkRequestItems(entry).flatMap((item) => {
+  const requests = entryAuditItems(entry, "network-requests").flatMap((item) => {
     const url = getUrlString(item.url);
-    const transferSize = finite(getNumber(item.transferSize));
+    const transferSize = finiteOrZero(getNumber(item.transferSize));
     if (!url || transferSize <= 0) return [];
     const entity = typeof item.entity === "string" ? item.entity : undefined;
     const resourceType = typeof item.resourceType === "string" ? item.resourceType : "Other";
@@ -96,15 +123,18 @@ export function inputFromEntry(entry: InsightsContextItem): ResourcesInvestigati
 
   return {
     label: entry.label,
-    totalBytes: device?.totalBytes ?? null,
-    requestCount: device?.requestCount ?? null,
-    thirdPartyBytes: device?.thirdPartyBytes ?? null,
-    scriptBytes: jsReport?.values.transfer ?? null,
-    unusedBytes: jsReport?.values.unused ?? null,
-    mainThreadMs: jsReport?.values.mainThread ?? null,
-    longTaskMs: jsReport?.values.longTasks ?? null,
+    totalBytes: total?.transferSize ?? null,
+    requestCount: total?.requestCount ?? null,
+    thirdPartyBytes: thirdParty?.transferSize ?? null,
+    scriptBytes: scriptTransferBytes(metric),
+    unusedBytes: sumFinite(
+      metric.unusedJS,
+      (item) => finiteOrUndefined(item.wastedBytes) ?? item.unusedBytes,
+    ),
+    mainThreadMs: sumFinite(metric.mainThreadWork, (item) => item.duration),
+    longTaskMs: longTaskMs(metric),
     loadTimeMs: loadTimeFrom(entry),
     requests,
-    scripts: metric ? scriptsFrom(metric) : [],
+    scripts: scriptsFrom(metric),
   };
 }

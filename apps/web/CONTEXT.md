@@ -8,7 +8,7 @@ A stable id returned when starting a PageSpeed worker job from the server action
 
 ## Worker job envelope
 
-JSON the Cloudflare worker returns for a job: `status` plus optional `data` and `url`. Normalization is centralized in `resolveWorkerEnvelope.ts`; HTTP mapping in `workerPagespeedApiAdapter.ts`; worker HTTP in `pageSpeedWorkerClient.ts`.
+JSON the Cloudflare worker returns for a job: `status` plus optional `data` and `url`. Normalization and the API response body (`{ state: pending | failed | ready }`) live in `resolveWorkerEnvelope.ts`; worker HTTP in `pageSpeedWorkerClient.ts`.
 
 ## PSI row
 

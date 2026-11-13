@@ -16,8 +16,6 @@ Web Performance Reporting is a Next.js app for inspecting site performance with 
 - React 19
 - TypeScript
 - Tailwind CSS
-- Drizzle ORM
-- Turso / libSQL
 - Vitest + Testing Library
 
 ## Getting Started
@@ -42,8 +40,6 @@ Create `.env` in `apps/web` (see `.env.example`) with the values your local envi
 
 ```bash
 PAGESPEED_INSIGHTS_API=your_google_pagespeed_api_key
-TURSO_CONNECTION_URL=your_turso_database_url
-TURSO_AUTH_TOKEN=your_turso_auth_token
 NEXT_PUBLIC_POSTHOG_KEY=your_posthog_project_key
 NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
 WORKER_URL=https://web-perf-report-api.to-email-max.workers.dev
@@ -80,9 +76,6 @@ pnpm test
 pnpm test:watch
 pnpm test:coverage
 pnpm prettier
-pnpm db:generate
-pnpm db:migrate
-pnpm db:studio
 ```
 
 ## Testing
@@ -113,14 +106,9 @@ Generate a coverage report:
 pnpm test:coverage
 ```
 
-## Database Notes
-
-The app uses Drizzle with a Turso/libSQL database connection. Migration files live in `migrations/`, and the Drizzle config is defined in `drizzle.config.ts`.
-
 ## External Services
 
 - Google PageSpeed Insights API
 - Chrome UX Report data sources
-- Turso / libSQL
 - PostHog
 - Sentry

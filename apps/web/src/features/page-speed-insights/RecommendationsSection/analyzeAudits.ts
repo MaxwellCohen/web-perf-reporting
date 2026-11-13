@@ -30,11 +30,26 @@ function sortRecommendations(recommendations: Recommendation[]): Recommendation[
   });
 }
 
+function buildAuditCategoryMap(
+  items: Array<{ item: PageSpeedInsights; label: string }>,
+): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const { item } of items) {
+    for (const [categoryId, category] of Object.entries(item.lighthouseResult?.categories ?? {})) {
+      for (const ref of category.auditRefs ?? []) {
+        if (ref.id && !map.has(ref.id)) map.set(ref.id, category.title || categoryId);
+      }
+    }
+  }
+  return map;
+}
+
 export function analyzeAudits(
   items: Array<{ item: PageSpeedInsights; label: string }>,
 ): Recommendation[] {
   const recommendations: Recommendation[] = [];
   const auditDataMap = collectAuditData(items);
+  const categoryByAudit = buildAuditCategoryMap(items);
 
   auditDataMap.forEach((auditEntries, auditId) => {
     // Filter out notApplicable and manual audits from entries
@@ -68,6 +83,7 @@ export function analyzeAudits(
           savings,
           worstScore,
           allItems,
+          categoryByAudit.get(auditId),
         );
         recommendations.push(recommendation);
       });
@@ -92,6 +108,7 @@ export function analyzeAudits(
         tableHeadings,
         explanation,
         itemsByReport,
+        categoryByAudit.get(auditId),
       );
       if (recommendation) {
         recommendations.push(recommendation);
@@ -112,6 +129,7 @@ export function analyzeAudits(
         tableHeadings,
         explanation,
         itemsByReport,
+        categoryByAudit.get(auditId),
       );
       if (recommendation) {
         recommendations.push(recommendation);

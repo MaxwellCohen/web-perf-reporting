@@ -2,10 +2,8 @@ import { createOptionalNumericCell } from "@/features/page-speed-insights/shared
 import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
-import {
-  useSimpleTable,
-  type FlatColumnDef,
-} from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
+import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import type { StockAnyColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import {
   mainThreadWorkDurationHeader,
   type MainThreadWorkTableRow,
@@ -46,9 +44,9 @@ export function MainThreadWorkBreakdownTable({
           createOptionalNumericCell(RenderMSValue, info.getValue() as number | undefined),
       }),
     ),
-  ] as FlatColumnDef<MainThreadWorkTableRow>[];
+  ] as StockAnyColumnDef<MainThreadWorkTableRow>[];
 
-  const table = useSimpleTable({ data: rows, columns });
+  const table = useStandardTable({ data: rows, columns });
 
   return <StockDataTable table={table} />;
 }

@@ -1,8 +1,7 @@
 import type { PageSpeedInsights } from "@/lib/schema";
-import {
-  isInProgressWorkerStatus,
-  toWorkerJobState,
-  type WorkerJobState,
+import type {
+  PageSpeedApiBody,
+  WorkerJobState,
 } from "@/lib/page-speed-insights/resolveWorkerEnvelope";
 
 type PageSpeedInsightsArray = (PageSpeedInsights | null | undefined)[];
@@ -50,18 +49,6 @@ export function getPageSpeedProgress(publicId: string): PageSpeedRunProgress | u
 
 const PAGE_SPEED_GET_BY_PUBLIC_ID = (publicId: string) =>
   `/api/pagespeed/${encodeURIComponent(publicId)}`;
-
-function parsePageSpeedInsightsArrayFromText(text: string): PageSpeedInsightsArray | null {
-  try {
-    const parsed = JSON.parse(text) as unknown;
-    if (Array.isArray(parsed)) {
-      return parsed as PageSpeedInsightsArray;
-    }
-  } catch {
-    return null;
-  }
-  return null;
-}
 
 const PAGE_SPEED_POLL_INTERVAL_MS = 2000;
 const PAGE_SPEED_POLL_TIMEOUT_MS = 180_000;
@@ -126,15 +113,6 @@ async function requestPageSpeedInsights(
   });
 
   if (res.status === 404) {
-    const text = await res.text();
-    try {
-      const body = JSON.parse(text) as { status?: string; url?: string };
-      if (isInProgressWorkerStatus(body.status)) {
-        return { status: "pending", state: toWorkerJobState(body.status), url: body.url };
-      }
-    } catch {
-      // A non-JSON 404 is a missing report.
-    }
     return {
       status: "failed",
       reason: "not_found",
@@ -143,15 +121,6 @@ async function requestPageSpeedInsights(
   }
 
   if (res.status === 500) {
-    const text = await res.text();
-    try {
-      const body = JSON.parse(text) as { status?: string; error?: string; url?: string };
-      if (body.status === "failed") {
-        return { status: "failed", reason: "job", error: body.error, url: body.url };
-      }
-    } catch {
-      // Non-JSON 500 body — generic failed status.
-    }
     return { status: "failed", reason: "error" };
   }
 
@@ -160,61 +129,40 @@ async function requestPageSpeedInsights(
     throw { status: res.status, message };
   }
 
-  const text = await res.text();
-  const data = parsePageSpeedInsightsArrayFromText(text);
-  if (data === null) {
-    return {
-      status: "failed",
-      reason: "error",
-      error: "The PageSpeed Insights response could not be parsed.",
-    };
+  const body = (await res.json().catch(() => null)) as PageSpeedApiBody | null;
+  switch (body?.state) {
+    case "pending":
+      return { status: "pending", state: body.jobState, url: body.url };
+    case "failed":
+      return { status: "failed", reason: "job", error: body.error, url: body.url };
+    case "ready":
+      if (!Array.isArray(body.data)) {
+        return {
+          status: "failed",
+          reason: "error",
+          error: "The PageSpeed Insights response could not be parsed.",
+        };
+      }
+      return { status: "ok", data: body.data as PageSpeedInsightsArray };
+    default:
+      return {
+        status: "failed",
+        reason: "error",
+        error: "The PageSpeed Insights response could not be parsed.",
+      };
   }
-
-  return { status: "ok", data };
 }
 
-type PendingPromise<T> = Promise<T> & {
-  status: "pending";
-};
-
-type FulfilledPromise<T> = Promise<T> & {
-  status: "fulfilled";
-  value: T;
-};
-
-type RejectedPromise<T> = Promise<T> & {
-  status: "rejected";
-  reason: unknown;
-};
-
-type PromiseWithStatus<T> = PendingPromise<T> | FulfilledPromise<T> | RejectedPromise<T>;
-
 /** Module-level cache so `use()` reuses the same Promise across re-renders. */
-const cache = new Map<string, PromiseWithStatus<PageSpeedLoadResult>>();
+const cache = new Map<string, Promise<PageSpeedLoadResult>>();
 
-export function fetchPageSpeedInsightsByPublicId(
-  publicId: string,
-): PromiseWithStatus<PageSpeedLoadResult> {
-  if (!cache.has(publicId)) {
-    const promise = getPageSpeedInsightsByPublicId(
-      publicId,
-    ) as PromiseWithStatus<PageSpeedLoadResult>;
-    promise.status = "pending";
-    promise.then(
-      (value) => {
-        const fulfilled = promise as FulfilledPromise<PageSpeedLoadResult>;
-        fulfilled.status = "fulfilled";
-        fulfilled.value = value;
-      },
-      (reason: unknown) => {
-        const rejected = promise as RejectedPromise<PageSpeedLoadResult>;
-        rejected.status = "rejected";
-        rejected.reason = reason;
-      },
-    );
+export function fetchPageSpeedInsightsByPublicId(publicId: string): Promise<PageSpeedLoadResult> {
+  let promise = cache.get(publicId);
+  if (!promise) {
+    promise = getPageSpeedInsightsByPublicId(publicId);
     cache.set(publicId, promise);
   }
-  return cache.get(publicId)!;
+  return promise;
 }
 
 /** Drops the cached load so the next fetch re-polls the worker (used by Retry). */

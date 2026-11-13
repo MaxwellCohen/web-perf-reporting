@@ -15,14 +15,6 @@ export function hasAnyItems(reports: ReportItems[]): boolean {
   return reports.some((report) => report.items.length > 0);
 }
 
-export function hostOf(url: string): string {
-  try {
-    return new URL(url).host || url;
-  } catch {
-    return url;
-  }
-}
-
 /** Reads a plain string from a string or `{ value | text | snippet }` wrapper. */
 export function textOf(value: unknown): string {
   if (typeof value === "string") return value.trim();

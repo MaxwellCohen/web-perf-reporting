@@ -25,7 +25,7 @@ Agent-facing HTTP surface lives in `apps/web/src/app/api/agent/{report,stream,tr
 | Lint / format (web) | `pnpm lint`, `pnpm --filter web fmt` |
 | Build | `pnpm build:web` / `build:api` / `build:cli` |
 
-Web-only extras: `pnpm --filter web test:e2e` (Playwright), `knip`, `dupes`, `db:generate` (Drizzle migrations in `apps/web/migrations`). API migrations: `pnpm --filter api db:generate`.
+Web-only extras: `pnpm --filter web test:e2e` (Playwright), `knip`. API migrations: `pnpm --filter api db:generate`.
 
 ## Environment
 
@@ -38,6 +38,6 @@ Web-only extras: `pnpm --filter web test:e2e` (Playwright), `knip`, `dupes`, `db
 - Tests are colocated (`*.test.ts[x]`, Vitest). Add/adjust a test with behavior changes; run the affected package's tests before finishing.
 - Web uses oxlint/oxfmt (not eslint/prettier) and `tsgo` for typecheck.
 - CI path-filters per package (`.github/workflows/ci.yml`); markdown-only changes skip CI.
-- Don't hand-edit generated files: `apps/*/migrations/meta`, `pnpm-lock.yaml`, `apps/api/void.lock.json`, `next-env.d.ts`.
+- Don't hand-edit generated files: `apps/api/db/migrations/meta`, `pnpm-lock.yaml`, `apps/api/void.lock.json`, `next-env.d.ts`.
 - Changing the CLI's published behavior: bump `packages/cli/package.json` version (merging to main publishes).
 - Keep PRs small; merge `origin/main` before pushing.

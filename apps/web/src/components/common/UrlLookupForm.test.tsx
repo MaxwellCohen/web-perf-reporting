@@ -1,4 +1,4 @@
-import { fireEvent, render, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import posthog from "posthog-js";
 import { UrlLookupForm } from "@/components/common/UrlLookupForm";
@@ -11,11 +11,12 @@ vi.mock("posthog-js", () => ({
 
 describe("UrlLookupForm", () => {
   it("renders an accessible url input form", () => {
-    const { container } = render(<UrlLookupForm />);
+    render(<UrlLookupForm />);
 
-    const input = container.querySelector<HTMLInputElement>('input[type="url"]');
+    const input = screen.getByLabelText("Enter an url:");
     expect(input).toHaveAttribute("type", "url");
-    expect(container.firstChild).toMatchSnapshot();
+    expect(input).toHaveAttribute("name", "url");
+    expect(screen.getByRole("button", { name: "Submit" })).toBeInTheDocument();
   });
 
   it("captures the submitted URL in analytics", async () => {

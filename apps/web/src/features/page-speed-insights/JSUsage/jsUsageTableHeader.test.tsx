@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
-import { useSimpleTable } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
+import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
 import { JSUsageTableHeader } from "@/features/page-speed-insights/JSUsage/jsUsageTableHeader";
 import type { TreeMapNode } from "@/lib/schema";
 
@@ -41,7 +41,7 @@ const columns = [
 ];
 
 function TableWithHeader() {
-  const table = useSimpleTable({
+  const table = useStandardTable({
     data: [{ name: "https://a.com/x.js", resourceBytes: 1000 }],
     columns: columns as never,
   });
@@ -73,7 +73,7 @@ describe("JSUsageTableHeader", () => {
 
   it("applies self-end class when depth !== 0", () => {
     function HeaderWithDepth() {
-      const table = useSimpleTable({
+      const table = useStandardTable({
         data: [{ name: "x", resourceBytes: 0 }],
         columns: columns as never,
       });

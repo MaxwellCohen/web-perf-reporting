@@ -1,14 +1,6 @@
-export type StreamChunk = {
-  /** Arrival time in ms since the request started (first byte of this chunk, or of a merged burst). */
-  t: number;
-  /** Arrival of the last byte of a merged burst; absent for a single read. */
-  end?: number;
-  bytes: number;
-  /** First characters of the chunk; kept only for notable chunks. */
-  preview?: string;
-  /** Looks like a late streamed-in boundary (React `$RC(`/`$RS(`/`$RX(`/`$RB(` completion scripts or a hidden `S:` segment div). */
-  late?: boolean;
-};
+import type { StreamChunk } from "@maxwellcohen/stream-core";
+
+export type { StreamChunk };
 
 export type StreamMeasurement = {
   url: string;

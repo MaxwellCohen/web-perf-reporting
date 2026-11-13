@@ -14,7 +14,6 @@ describe("dashboardSearch", () => {
 
   it("defaults when the query is empty", () => {
     expect(parseDashboardSearch("")).toMatchObject({
-      view: null,
       tab: "overview",
       labels: [],
       report: [],
@@ -23,7 +22,6 @@ describe("dashboardSearch", () => {
       expanded: [],
       types: [],
       sort: "start",
-      height: "default",
       rows: "expanded",
       blockingOnly: false,
       signals: [],
@@ -39,11 +37,10 @@ describe("dashboardSearch", () => {
 
   it("reads layout, tab, filters, and explicit empty lists", () => {
     const state = parseDashboardSearch(
-      "?view=classic&tab=timeline&labels=Mobile&report=Desktop&category=Performance&priority=high&expand=rec-1&type=script&type=image&sort=duration&height=large&rows=collapsed&blocking=1&q=hero&audit=lcp&open=&groups=performance&tasks=",
+      "?tab=timeline&labels=Mobile&report=Desktop&category=Performance&priority=high&expand=rec-1&type=script&type=image&sort=duration&rows=collapsed&blocking=1&q=hero&audit=lcp&open=&groups=performance&tasks=",
     );
 
     expect(state).toMatchObject({
-      view: "classic",
       tab: "timeline",
       labels: ["Mobile"],
       report: ["Desktop"],
@@ -52,7 +49,6 @@ describe("dashboardSearch", () => {
       expanded: ["rec-1"],
       types: ["script", "image"],
       sort: "duration",
-      height: "large",
       rows: "collapsed",
       blockingOnly: true,
       query: "hero",
@@ -76,11 +72,10 @@ describe("dashboardSearch", () => {
     expect(parseDashboardSearch("?stage=nope").stage).toBe("");
   });
 
-  it("ignores unknown layout and tab values", () => {
-    expect(parseDashboardSearch("?view=compact&tab=nope")).toMatchObject({
-      view: null,
-      tab: "overview",
-    });
+  it("ignores unknown tab values and the retired view param", () => {
+    const state = parseDashboardSearch("?view=classic&tab=nope");
+    expect(state).toMatchObject({ tab: "overview" });
+    expect(state).not.toHaveProperty("view");
   });
 
   it("treats a full label set as no filter", () => {
@@ -95,22 +90,21 @@ describe("dashboardSearch", () => {
     expect(
       redirectSearchString({
         url: "https://example.com",
-        view: "dashboard",
+        view: "classic",
         tab: ["timeline"],
         labels: ["Mobile", "Desktop"],
       }),
-    ).toBe("?view=dashboard&tab=timeline&labels=Mobile&labels=Desktop");
+    ).toBe("?tab=timeline&labels=Mobile&labels=Desktop");
   });
 
   it("updates the address bar without dropping the hash", () => {
     window.history.replaceState(null, "", "/page-speed/report#payload");
 
-    patchDashboardSearch({ view: "classic", tab: "audits" }, "push");
+    patchDashboardSearch({ tab: "audits" }, "push");
 
     expect(window.location.pathname).toBe("/page-speed/report");
     expect(window.location.hash).toBe("#payload");
     expect(parseDashboardSearch(window.location.search)).toMatchObject({
-      view: "classic",
       tab: "audits",
     });
   });

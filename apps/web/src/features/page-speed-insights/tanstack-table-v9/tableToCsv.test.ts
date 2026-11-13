@@ -2,7 +2,6 @@ import { renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { escapeCsvCell } from "@/features/page-speed-insights/tanstack-table-v9/csvCell";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
-import { useSimpleTable } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
 import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
 import { tableToCsv } from "@/features/page-speed-insights/tanstack-table-v9/tableToCsv";
 import { tableToMarkdown } from "@/features/page-speed-insights/tanstack-table-v9/tableToMarkdown";
@@ -36,7 +35,7 @@ describe("tableToCsv", () => {
       { id: "2", name: "Beta", score: 75 },
     ];
 
-    const { result } = renderHook(() => useSimpleTable({ data, columns: columns as never }));
+    const { result } = renderHook(() => useStandardTable({ data, columns: columns as never }));
 
     expect(tableToCsv(result.current as never)).toBe("ID,Name,Score\n1,Alpha,90\n2,Beta,75");
   });
@@ -53,7 +52,7 @@ describe("tableToCsv", () => {
     ];
     const data: Row[] = [{ id: "1", name: "Alpha", score: 90 }];
 
-    const { result } = renderHook(() => useSimpleTable({ data, columns: columns as never }));
+    const { result } = renderHook(() => useStandardTable({ data, columns: columns as never }));
 
     expect(tableToCsv(result.current as never)).toBe("Name\nAlpha");
   });
@@ -99,7 +98,7 @@ describe("tableToMarkdown", () => {
       { id: "2", name: "Beta", score: 75 },
     ];
 
-    const { result } = renderHook(() => useSimpleTable({ data, columns: columns as never }));
+    const { result } = renderHook(() => useStandardTable({ data, columns: columns as never }));
 
     expect(tableToMarkdown(result.current as never)).toBe(
       "| ID | Name | Score |\n| --- | --- | --- |\n| 1 | Alpha | 90 |\n| 2 | Beta | 75 |",

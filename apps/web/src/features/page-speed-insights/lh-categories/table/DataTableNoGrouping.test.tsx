@@ -2,7 +2,7 @@ import React from "react";
 
 import { fireEvent, render } from "@testing-library/react";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
-import { type FlatColumnDef } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
+import type { StockAnyColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Accordion } from "@/components/ui/accordion";
 import { DataTableNoGrouping } from "@/features/page-speed-insights/lh-categories/table/DataTableNoGrouping";
@@ -114,7 +114,7 @@ const columnHelper = createColumnHelper<Row>();
 const columns = [
   columnHelper.accessor("id", { header: "ID" }),
   columnHelper.accessor("name", { header: "Name" }),
-] as FlatColumnDef<Row>[];
+] as StockAnyColumnDef<Row>[];
 
 function wrapInAccordion(children: React.ReactNode) {
   return (
