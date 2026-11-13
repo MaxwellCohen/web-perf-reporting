@@ -3,6 +3,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { postReport, runAudit } from "./core.js";
 import { runStream } from "./stream.js";
+import { version } from "./version.js";
 
 const text = (t: string) => ({ content: [{ type: "text" as const, text: t }] });
 const fail = (e: unknown) => ({
@@ -11,7 +12,7 @@ const fail = (e: unknown) => ({
 });
 
 export function createServer(): McpServer {
-  const server = new McpServer({ name: "web-perf-report", version: "0.1.0" });
+  const server = new McpServer({ name: "web-perf-report", version });
 
   server.registerTool(
     "audit_site",

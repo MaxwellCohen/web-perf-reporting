@@ -1,11 +1,21 @@
 # Web perf reporting (monorepo)
 
-pnpm workspace containing the Next.js dashboard and the Void API (Cloudflare worker).
+pnpm workspace with a Next.js dashboard, a Void API (Cloudflare Worker), and an agent-ready CLI/MCP server.
 
 | Package | Path | Deploy |
 |---------|------|--------|
 | Web | [`apps/web`](apps/web) | [Vercel](https://vercel.com) — root directory `apps/web` |
 | API | [`apps/api`](apps/api) | Void / Cloudflare — see below |
+| CLI + MCP | [`packages/cli`](packages/cli) | npm `@maxwellcohen/web-perf-report` — published by `release.yml` when its version changes |
+
+Features: CrUX latest/history, PageSpeed analysis, Lighthouse viewer (`/viewer`), and streaming-timing reports (`/stream`).
+
+## Working with coding agents
+
+- [`AGENTS.md`](AGENTS.md) (also loaded by Claude Code via `CLAUDE.md`) — layout, commands, conventions.
+- [`apps/web/CONTEXT.md`](apps/web/CONTEXT.md) — domain glossary.
+- Run `pnpm check` before finishing: typecheck (web, api, cli), lint, and all tests.
+- For agents consuming the product: use the CLI/MCP server in [`packages/cli`](packages/cli) or the site's `/llms.txt`.
 
 
 ## Local development
@@ -18,7 +28,17 @@ pnpm dev:web      # Next.js at http://localhost:3000
 pnpm dev:api
 ```
 
-Other root scripts: `pnpm test`, `pnpm typecheck`, `pnpm build:web`.
+Other root scripts:
+
+| Script | Purpose |
+|--------|---------|
+| `pnpm check` | typecheck (web, api, cli) + lint + all tests |
+| `pnpm test` | Vitest for web, api, and cli |
+| `pnpm typecheck` / `typecheck:api` / `typecheck:cli` | per-package type checks |
+| `pnpm lint` | oxlint (web) |
+| `pnpm build:web` / `build:api` / `build:cli` | production builds |
+
+Node 24 and pnpm 10 (see `packageManager`). CI path-filters by package: [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
 ### Environment
 
@@ -26,6 +46,7 @@ Other root scripts: `pnpm test`, `pnpm typecheck`, `pnpm build:web`.
 |-----|----------|-------------------|
 | `apps/web` | `.env` (see [`.env.example`](apps/web/.env.example)) | `WORKER_URL`, `WORKER_API_KEY`, `NEXT_PUBLIC_POSTHOG_*` |
 | `apps/api` | Cloudflare secrets (`void secret put`) | `PAGESPEED_INSIGHTS_API`, `WORKER_API_KEY` |
+| `packages/cli` | env `WEB_PERF_REPORT_API` (optional) | none |
 
 If you still have `.env` at the repo root from before the monorepo move, copy it to `apps/web/.env`.
 
@@ -67,3 +88,5 @@ void deploy --platform cloudflare
 ## App docs
 
 - Web app details: [`apps/web/README.md`](apps/web/README.md)
+- CLI and MCP server: [`packages/cli/README.md`](packages/cli/README.md)
+- Architecture: [`apps/web/docs/architecture-page-speed.md`](apps/web/docs/architecture-page-speed.md)

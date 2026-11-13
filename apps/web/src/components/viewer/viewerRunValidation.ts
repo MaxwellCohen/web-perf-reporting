@@ -1,5 +1,6 @@
 import type { ViewerRunState } from "@/components/viewer/ViewerRunSlot";
 import { parseLighthouseViewerGistId } from "@/lib/viewer/lighthouseViewerGist";
+import { isSiteUrl } from "@/lib/viewer/siteUrl";
 import { parseViewerJsonString } from "@/components/viewer/parseViewerJson";
 
 export type RunValidation =
@@ -43,7 +44,8 @@ export function validateRun(run: ViewerRunState): RunValidation {
     } catch {
       // fall through
     }
-    return { status: "invalid", message: "Not a PageSpeed Insights share URL" };
+    if (isSiteUrl(value)) return { status: "valid", message: "Will run PageSpeed Insights" };
+    return { status: "invalid", message: "Enter a page URL, PSI share URL, or JSON" };
   }
   const content = run.jsonInputs[0]?.content ?? "";
   if (!content.trim()) return { status: "empty" };

@@ -2,6 +2,16 @@ import { act, fireEvent, render, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const routerMock = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => routerMock }));
+
+vi.mock("@/lib/services/pageSpeedInsights.service", () => ({
+  requestPageSpeedData: async () => "pid-1",
+}));
+vi.mock("@/lib/page-speed-insights/pageSpeedInsightsClient", () => ({
+  fetchPageSpeedInsightsByPublicId: async () => ({ status: "ok", data: [{}, {}] }),
+}));
+
 vi.mock("@/features/page-speed-insights/pageSpeedInsightsDashboard", () => ({
   PageSpeedInsightsDashboard: ({
     data,
@@ -53,7 +63,10 @@ describe("ViewerPage", () => {
     const input = getByLabelText("PSI URL, JSON, or file");
 
     fireEvent.change(input, { target: { value: "https://example.com/nope" } });
-    expect(getByText("Not a PageSpeed Insights share URL")).toBeTruthy();
+    expect(getByText("Will run PageSpeed Insights")).toBeTruthy();
+
+    fireEvent.change(input, { target: { value: "not a url" } });
+    expect(getByText("Enter a page URL, PSI share URL, or JSON")).toBeTruthy();
 
     fireEvent.change(input, { target: { value: '{\n  "a": ,\n}' } });
     expect(getByText(/Invalid JSON/)).toBeTruthy();
@@ -273,7 +286,7 @@ describe("ViewerPage", () => {
 
     await waitFor(() => {
       expect(container.querySelector('[data-testid="share-url"]')?.textContent).toBe(
-        `${window.location.origin}/viewer?psi=${encodeURIComponent(psi)}`,
+        `${window.location.origin}/page-speed?psi=${encodeURIComponent(psi)}`,
       );
     });
   });
@@ -295,5 +308,13 @@ describe("ViewerPage", () => {
       expect(container.querySelector('[data-testid="dashboard"]')).toBeTruthy();
     });
     expect(container.querySelector('[data-testid="share-url"]')).toBeNull();
+  });
+
+  it("opens the saved report when a page URL run returns a publicId", async () => {
+    const { getByLabelText } = render(<ViewerPage />);
+    fireEvent.paste(getByLabelText("PSI URL, JSON, or file"), {
+      clipboardData: { getData: () => "https://example.com" },
+    });
+    await waitFor(() => expect(routerMock.push).toHaveBeenCalledWith("/page-speed/pid-1"));
   });
 });

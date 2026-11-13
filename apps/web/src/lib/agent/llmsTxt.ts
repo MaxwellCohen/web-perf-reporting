@@ -95,7 +95,7 @@ Or POST an existing trace (.json, under 4 MB) to \`${siteUrl}/api/agent/trace\`.
 
 ## Human UI
 
-- [Viewer](${siteUrl}/viewer): upload the same JSON to explore it with charts, film strip, and full tables.
+- [Insights](${siteUrl}/page-speed): enter a URL or upload the same JSON to explore it with charts, film strip, and full tables.
 - [Latest CrUX](${siteUrl}/latest-crux) and [Historical CrUX](${siteUrl}/historical-crux): real-user Core Web Vitals over time.
 `;
 }

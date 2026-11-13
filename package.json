@@ -9,7 +9,11 @@
     "build:api": "pnpm --filter api build",
     "test": "pnpm --filter web test && pnpm --filter api test && pnpm --filter @maxwellcohen/web-perf-report test",
     "build:cli": "pnpm --filter @maxwellcohen/web-perf-report build",
-    "typecheck": "pnpm --filter web typecheck"
+    "typecheck": "pnpm --filter web typecheck",
+    "typecheck:api": "pnpm --filter api check",
+    "typecheck:cli": "pnpm --filter @maxwellcohen/web-perf-report exec tsc --noEmit",
+    "lint": "pnpm --filter web lint",
+    "check": "pnpm typecheck && pnpm typecheck:api && pnpm typecheck:cli && pnpm lint && pnpm test"
   },
   "pnpm": {
     "overrides": {
