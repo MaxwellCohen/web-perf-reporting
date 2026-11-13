@@ -15,10 +15,8 @@ import {
 } from "@/features/page-speed-insights/shared/tableColumnHelpers";
 import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
-import {
-  useStandardTable,
-  type StandardColumnDef,
-} from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import type { StockAnyColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import {
   resourcesTableFromLoad,
@@ -30,12 +28,12 @@ const PAGE_SIZE = 25;
 const columnHelper = createStockColumnHelper<ResourceTableRow>();
 
 function withNumericSort(
-  column: StandardColumnDef<ResourceTableRow>,
-): StandardColumnDef<ResourceTableRow> {
+  column: StockAnyColumnDef<ResourceTableRow>,
+): StockAnyColumnDef<ResourceTableRow> {
   return { ...column, sortFn: "basic" };
 }
 
-const columns: StandardColumnDef<ResourceTableRow>[] = [
+const columns: StockAnyColumnDef<ResourceTableRow>[] = [
   createURLColumn(columnHelper, { maxWidthClass: "max-w-80", size: 280 }),
   columnHelper.accessor("resourceType", {
     id: "resourceType",

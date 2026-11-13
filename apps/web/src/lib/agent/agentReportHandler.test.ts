@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import exampleReport from "@/features/page-speed-insights/example-report.json";
+import exampleReport from "../../../test-fixtures/example-report.json";
 import { handleAgentReportRequest, handleAgentReportUsage } from "@/lib/agent/agentReportHandler";
 
 const psi = (exampleReport as unknown as { item: { lighthouseResult: unknown } }[])[0].item;

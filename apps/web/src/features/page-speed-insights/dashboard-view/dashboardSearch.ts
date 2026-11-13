@@ -1,14 +1,13 @@
 /**
  * Shareable PSI dashboard state lives in the query string.
  *
- * view=dashboard|classic
  * tab=timeline|loading|resources|weight|recommendations|audits (overview is the default)
  * legacy tab=network|javascript open Resources
  * stage=arrived|scripts|unused|main-thread  suspect= — Resources investigation deep link
  * labels, category, priority, expand, type, groups — repeatable; omitted means "all" or "none"
  * report — timeline/waterfall/page-weight report label(s); repeatable, up to 2 for side-by-side compare
  * tasks — timeline task filters; omitted means all on; `tasks=` means all off
- * sort=start|end|duration|size  height=default|large|xl|full  rows=expanded|collapsed
+ * sort=start|end|duration|size  rows=expanded|collapsed
  * blocking=1 — waterfall shows blocking items only
  * signal — waterfall row signals (critical chain, queue, long tasks, …); omitted means no signal filter
  * q=  audit=
@@ -35,14 +34,10 @@ export type DashboardTab = (typeof DASHBOARD_TABS)[number];
 const DASHBOARD_SORTS = ["start", "end", "duration", "size"] as const;
 type DashboardSort = (typeof DASHBOARD_SORTS)[number];
 
-const DASHBOARD_HEIGHTS = ["default", "large", "xl", "full"] as const;
-type DashboardHeight = (typeof DASHBOARD_HEIGHTS)[number];
-
 const DASHBOARD_ROW_DENSITIES = ["expanded", "collapsed"] as const;
 export type DashboardRowDensity = (typeof DASHBOARD_ROW_DENSITIES)[number];
 
 const DASHBOARD_SEARCH_KEYS = [
-  "view",
   "tab",
   "labels",
   "report",
@@ -51,7 +46,6 @@ const DASHBOARD_SEARCH_KEYS = [
   "expand",
   "type",
   "sort",
-  "height",
   "rows",
   "blocking",
   "signal",
@@ -66,10 +60,7 @@ const DASHBOARD_SEARCH_KEYS = [
 
 const DASHBOARD_SEARCH_EVENT = "dashboard-search";
 
-export type DashboardViewMode = "dashboard" | "classic";
-
 export type DashboardSearchState = {
-  view: DashboardViewMode | null;
   tab: DashboardTab;
   labels: string[];
   /** Selected timeline/waterfall report labels (0–2). Empty → UI picks a default. */
@@ -79,7 +70,6 @@ export type DashboardSearchState = {
   expanded: string[];
   types: string[];
   sort: DashboardSort;
-  height: DashboardHeight;
   rows: DashboardRowDensity;
   /** Waterfall: only render-blocking / main-thread task rows. */
   blockingOnly: boolean;
@@ -97,7 +87,6 @@ export type DashboardSearchState = {
 };
 
 export type DashboardSearchPatch = {
-  view?: DashboardViewMode | null;
   tab?: DashboardTab | null;
   labels?: string[] | null;
   report?: string[] | null;
@@ -106,7 +95,6 @@ export type DashboardSearchPatch = {
   expanded?: string[] | null;
   types?: string[] | null;
   sort?: DashboardSort | null;
-  height?: DashboardHeight | null;
   rows?: DashboardRowDensity | null;
   blockingOnly?: boolean | null;
   /** null or [] clears the waterfall signal filter. */
@@ -124,20 +112,12 @@ export type DashboardSearchPatch = {
 
 type SearchRecord = { [key: string]: string | string[] | undefined };
 
-export function isDashboardViewMode(value: unknown): value is DashboardViewMode {
-  return value === "dashboard" || value === "classic";
-}
-
 export function isDashboardTab(value: unknown): value is DashboardTab {
   return typeof value === "string" && (DASHBOARD_TABS as readonly string[]).includes(value);
 }
 
 function isSort(value: string | null): value is DashboardSort {
   return value != null && (DASHBOARD_SORTS as readonly string[]).includes(value);
-}
-
-function isHeight(value: string | null): value is DashboardHeight {
-  return value != null && (DASHBOARD_HEIGHTS as readonly string[]).includes(value);
 }
 
 function isRowDensity(value: string | null): value is DashboardRowDensity {
@@ -167,14 +147,11 @@ function readStage(stage: string | null): ResourceStageId | "" {
 
 export function parseDashboardSearch(search: string): DashboardSearchState {
   const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
-  const view = params.get("view");
   const tab = params.get("tab");
   const sort = params.get("sort");
-  const height = params.get("height");
   const rows = params.get("rows");
 
   return {
-    view: isDashboardViewMode(view) ? view : null,
     tab: readTab(tab),
     labels: readList(params, "labels"),
     report: readList(params, "report"),
@@ -183,7 +160,6 @@ export function parseDashboardSearch(search: string): DashboardSearchState {
     expanded: readList(params, "expand"),
     types: readList(params, "type"),
     sort: isSort(sort) ? sort : "start",
-    height: isHeight(height) ? height : "default",
     rows: isRowDensity(rows) ? rows : "expanded",
     blockingOnly: params.get("blocking") === "1",
     signals: readList(params, "signal"),
@@ -224,7 +200,6 @@ function applyDashboardSearchPatch(
 ): URLSearchParams {
   const next = new URLSearchParams(current);
 
-  if (patch.view !== undefined) writeText(next, "view", patch.view);
   if (patch.tab !== undefined)
     writeText(next, "tab", patch.tab && patch.tab !== "overview" ? patch.tab : null);
   if (patch.labels !== undefined) writeList(next, "labels", patch.labels, "delete");
@@ -235,9 +210,6 @@ function applyDashboardSearchPatch(
   if (patch.types !== undefined) writeList(next, "type", patch.types, "delete");
   if (patch.sort !== undefined)
     writeText(next, "sort", patch.sort && patch.sort !== "start" ? patch.sort : null);
-  if (patch.height !== undefined) {
-    writeText(next, "height", patch.height && patch.height !== "default" ? patch.height : null);
-  }
   if (patch.rows !== undefined) {
     writeText(next, "rows", patch.rows && patch.rows !== "expanded" ? patch.rows : null);
   }

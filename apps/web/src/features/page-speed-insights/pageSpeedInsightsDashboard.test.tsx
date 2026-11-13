@@ -1,16 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const {
-  selectPageSpeedIsLoadingToken,
-  selectPageSpeedItemsToken,
-  selectPageSpeedReportTitleToken,
-  selectPageSpeedUserLabelsToken,
-  selectPageSpeedUserLabelFilterToken,
-} = vi.hoisted(() => ({
-  selectPageSpeedIsLoadingToken: Symbol("selectPageSpeedIsLoading"),
-  selectPageSpeedItemsToken: Symbol("selectPageSpeedItems"),
-  selectPageSpeedReportTitleToken: Symbol("selectPageSpeedReportTitle"),
+const { selectPageSpeedUserLabelsToken, selectPageSpeedUserLabelFilterToken } = vi.hoisted(() => ({
   selectPageSpeedUserLabelsToken: Symbol("selectPageSpeedUserLabels"),
   selectPageSpeedUserLabelFilterToken: Symbol("selectPageSpeedUserLabelFilter"),
 }));
@@ -19,7 +10,6 @@ const resetColumnFiltersMock = vi.fn<() => void>();
 const resetUserLabelFilterMock = vi.fn<() => void>();
 
 let dashboardState = {
-  isLoading: false,
   items: [] as Array<{ label: string; item: Record<string, unknown> }>,
   reportTitle: "Report title",
 };
@@ -27,25 +17,10 @@ let dashboardState = {
 let tableRows = [{ id: "row-1" }, { id: "row-2" }];
 
 vi.mock("@/features/page-speed-insights/PageSpeedContext", () => ({
-  PageSpeedInsightsStoreProvider: ({ children }: { children: React.ReactNode; store: unknown }) => (
-    <>{children}</>
-  ),
-  selectPageSpeedIsLoading: selectPageSpeedIsLoadingToken,
-  selectPageSpeedItems: selectPageSpeedItemsToken,
-  selectPageSpeedReportTitle: selectPageSpeedReportTitleToken,
-  usePageSpeedInsightsStore: () => ({
-    id: "store",
-    trigger: {
-      resetUserLabelFilter: resetUserLabelFilterMock,
-      setUserLabelFilter: vi.fn<() => void>(),
-    },
-  }),
-  useRequiredPageSpeedInsightsStore: () => ({
-    id: "store",
-    trigger: {
-      resetUserLabelFilter: resetUserLabelFilterMock,
-      setUserLabelFilter: vi.fn<() => void>(),
-    },
+  PageSpeedInsightsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  usePageSpeedUserLabelFilterActions: () => ({
+    resetUserLabelFilter: resetUserLabelFilterMock,
+    setUserLabelFilter: vi.fn<() => void>(),
   }),
   usePageSpeedItems: () => dashboardState.items,
   usePageSpeedReportTitle: () => dashboardState.reportTitle,
@@ -58,53 +33,12 @@ vi.mock("@/features/page-speed-insights/PageSpeedContext", () => ({
   selectPageSpeedUserLabelFilter: selectPageSpeedUserLabelFilterToken,
 }));
 
-vi.mock("@xstate/store-react", () => ({
-  useSelector: (_store: unknown, selector: symbol) => {
-    if (selector === selectPageSpeedIsLoadingToken) {
-      return dashboardState.isLoading;
-    }
-    if (selector === selectPageSpeedItemsToken) {
-      return dashboardState.items;
-    }
-    if (selector === selectPageSpeedReportTitleToken) {
-      return dashboardState.reportTitle;
-    }
-    return undefined;
-  },
-}));
-
 vi.mock("@/components/common/LoadingMessage", () => ({
   LoadingMessage: () => <div>Mock loading message</div>,
 }));
 
-vi.mock("@/features/page-speed-insights/loading-experience/LoadingExperience", () => ({
-  LoadingExperience: ({ title }: { title: string }) => <div>Loading experience: {title}</div>,
-}));
-
-vi.mock("@/features/page-speed-insights/lh-categories/table/EntitiesTable", () => ({
-  EntitiesTable: () => <div>Entities table</div>,
-  EntitiesTableCard: () => <div>Entities table card</div>,
-  useEntitiesTableData: () => ({ data: [], columns: [], hasEntities: false }),
-}));
-
-vi.mock("@/features/page-speed-insights/CWVMetricsComponent", () => ({
-  CWVMetricsComponent: () => <div>CWV metrics</div>,
-}));
-
-vi.mock("@/features/page-speed-insights/RenderFilmStrip", () => ({
-  RenderFilmStrip: () => <div>Film strip</div>,
-}));
-
 vi.mock("@/features/page-speed-insights/page-load-timeline/PageLoadTimeline", () => ({
   PageLoadTimeline: () => <div>Page load timeline</div>,
-}));
-
-vi.mock("@/features/page-speed-insights/script-treemap/ScriptTreemapSection", () => ({
-  ScriptTreemapSection: () => <div>Script treemap section</div>,
-}));
-
-vi.mock("@/features/page-speed-insights/network-metrics/LoadTimelineSection", () => ({
-  LoadTimelineSection: () => <div>Load timeline section</div>,
 }));
 
 vi.mock("@/features/page-speed-insights/dashboard-view/OverviewTabPanel", () => ({
@@ -125,22 +59,6 @@ vi.mock(
     RecommendationsStory: () => <div>Recommendations story</div>,
   }),
 );
-
-vi.mock("@/features/page-speed-insights/network-metrics/NetworkResourcesSection", () => ({
-  NetworkResourcesSection: () => <div>Network resources section</div>,
-}));
-
-vi.mock("@/features/page-speed-insights/waterfall/UnifiedWaterfallSection", () => ({
-  UnifiedWaterfallSection: () => <div>Unified waterfall section</div>,
-}));
-
-vi.mock("@/features/page-speed-insights/javascript-metrics/JavaScriptPerformanceComponent", () => ({
-  JavaScriptPerformanceComponent: () => <div>JavaScript metrics</div>,
-}));
-
-vi.mock("@/features/page-speed-insights/RecommendationsSection/RecommendationsSection", () => ({
-  RecommendationsSection: () => <div>Recommendations section</div>,
-}));
 
 vi.mock("@/features/page-speed-insights/tanstack-table-v9/StringFilterHeader", () => ({
   StringFilterHeader: ({ name }: { name: string }) => <div>String filter: {name}</div>,
@@ -171,7 +89,6 @@ import { PageSpeedInsightsDashboard } from "@/features/page-speed-insights/pageS
 describe("pageSpeedInsightsDashboard", () => {
   beforeEach(() => {
     dashboardState = {
-      isLoading: false,
       items: [],
       reportTitle: "Loaded report",
     };
@@ -185,15 +102,11 @@ describe("pageSpeedInsightsDashboard", () => {
     fireEvent.mouseDown(screen.getByRole("tab", { name }));
   }
 
-  it("defaults to the dashboard view with the overview tab", async () => {
+  it("opens on the overview tab", async () => {
     render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
 
-    expect(screen.getByRole("tab", { name: /dashboard/i })).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
+    expect(screen.getByRole("tab", { name: "Overview" })).toHaveAttribute("aria-selected", "true");
     expect(await screen.findByText("Overview story")).toBeInTheDocument();
-    expect(screen.queryByText("Film strip")).not.toBeInTheDocument();
     expect(screen.queryByText("Category row: row-1")).not.toBeInTheDocument();
   });
 
@@ -245,59 +158,25 @@ describe("pageSpeedInsightsDashboard", () => {
     expect(overview).toHaveTextContent("4.1 s");
   });
 
-  it("remembers the classic view choice", () => {
-    const { unmount } = render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
-    selectTab(/classic/i);
-    unmount();
-    window.history.replaceState(null, "", "/");
-
-    render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
-    expect(screen.getByRole("tab", { name: /classic/i })).toHaveAttribute("aria-selected", "true");
-    expect(screen.queryByRole("region", { name: "Score overview" })).not.toBeInTheDocument();
-  });
-
-  it("opens the dashboard tab named in the URL ahead of the saved layout", async () => {
-    window.localStorage.setItem("page-speed-insights:view-mode", "classic");
-    window.history.replaceState(null, "", "/page-speed/report?tab=timeline");
-
-    render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
-
-    expect(screen.getByRole("tab", { name: /dashboard/i })).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
-    expect(await screen.findByText("Page load timeline")).toBeInTheDocument();
-  });
-
   it("writes the selected tab into the URL", async () => {
     render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
-    selectTab(/dashboard/i);
     selectTab("Resources");
 
     expect(new URLSearchParams(window.location.search).get("tab")).toBe("resources");
-    expect(new URLSearchParams(window.location.search).get("view")).toBe("dashboard");
     expect(await screen.findByText("Resources story")).toBeInTheDocument();
   });
 
-  it("renders report title and mocked sections in the classic view", async () => {
+  it("renders the report title and label filter", () => {
     render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
-    selectTab(/classic/i);
 
     expect(screen.getByRole("heading", { level: 2, name: "Loaded report" })).toBeInTheDocument();
     expect(screen.getByText("User label filter")).toBeInTheDocument();
-    expect(await screen.findByText("Film strip")).toBeInTheDocument();
-    expect(screen.getByText("Script treemap section")).toBeInTheDocument();
-    expect(screen.getByText("Load timeline section")).toBeInTheDocument();
-    expect(screen.getByText("Unified waterfall section")).toBeInTheDocument();
-    expect(screen.getByText("Network resources section")).toBeInTheDocument();
-    expect(screen.getByText("CWV metrics")).toBeInTheDocument();
-    expect(screen.getByText("Category row: row-1")).toBeInTheDocument();
   });
 
   it("calls resetColumnFilters when Reset filters is clicked", async () => {
     dashboardState.items = [{ label: "test", item: {} }];
     render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
-    selectTab(/classic/i);
+    selectTab("Audits");
 
     fireEvent.click(await screen.findByRole("button", { name: /reset filters/i }));
 

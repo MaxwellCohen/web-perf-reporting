@@ -19,9 +19,9 @@ describe("app/global-error", () => {
   it("reports the error to sentry and renders the Next error page", () => {
     const error = new Error("Boom");
 
-    const { container } = render(<GlobalError error={error} />);
+    render(<GlobalError error={error} />);
 
     expect(captureException).toHaveBeenCalledWith(error);
-    expect(container.firstChild).toMatchSnapshot();
+    expect(screen.getByText("Next error status: 0")).toBeInTheDocument();
   });
 });

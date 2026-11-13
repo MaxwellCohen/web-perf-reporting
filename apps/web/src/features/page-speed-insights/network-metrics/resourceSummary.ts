@@ -1,7 +1,8 @@
+import { finiteOrZero } from "@/features/page-speed-insights/shared/auditItems";
 import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
 import type { ItemValue, TableItem } from "@/lib/schema";
 
-export type ResourceSummaryTile = {
+type ResourceSummaryTile = {
   resourceType: string;
   label: string;
   requestCount: number;
@@ -17,17 +18,13 @@ function textValue(value: ItemValue | undefined): string {
   return typeof value === "string" ? value : "";
 }
 
-function numberValue(value: ItemValue | undefined): number {
-  return typeof value === "number" && Number.isFinite(value) ? value : 0;
-}
-
 function toTile(row: TableItem): ResourceSummaryTile | null {
   const resourceType = textValue(row.resourceType);
   const label = textValue(row.label) || resourceType;
   if (!label) return null;
 
-  const requestCount = numberValue(row.requestCount);
-  const transferSize = numberValue(row.transferSize);
+  const requestCount = finiteOrZero(row.requestCount);
+  const transferSize = finiteOrZero(row.transferSize);
   if (requestCount === 0 && transferSize === 0) return null;
 
   return { resourceType, label, requestCount, transferSize };

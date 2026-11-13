@@ -2,7 +2,6 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useMemo, useRef } from "react";
-import {} from "@/features/page-speed-insights/PageSpeedContext";
 import {
   LOAD_MOMENTS,
   frameIndexAt,
@@ -13,7 +12,7 @@ import {
 import type { Rating } from "@/features/page-speed-insights/page-load-timeline/types";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
 import { LCP_PHASE_COLORS } from "@/features/page-speed-insights/shared/lcpPhaseColors";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 
 type RatingValue = Rating;
 

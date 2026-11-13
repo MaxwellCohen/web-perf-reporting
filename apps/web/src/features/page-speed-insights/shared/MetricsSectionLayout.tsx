@@ -12,26 +12,3 @@ export function SectionGrid({ children, className }: { children: ReactNode; clas
 export function FullWidthRow({ children, className }: { children: ReactNode; className?: string }) {
   return <div className={cn(fullWidthClassName, "min-w-0", className)}>{children}</div>;
 }
-
-export function ChartTableStack({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return <div className={cn("min-w-0 space-y-6", className)}>{children}</div>;
-}
-
-export function TwoColumnRow({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <div
-      className={cn(
-        "grid w-full grid-cols-1 gap-4 md:col-span-2 md:grid-cols-2 lg:col-span-3",
-        className,
-      )}
-    >
-      {children}
-    </div>
-  );
-}

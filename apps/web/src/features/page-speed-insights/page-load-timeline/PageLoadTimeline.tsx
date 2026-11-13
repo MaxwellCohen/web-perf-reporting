@@ -16,7 +16,6 @@ import {
   type TaskFilterId,
 } from "./filterTimelineMoments";
 import { momentIdPrefixFromLabel } from "./MomentRow";
-import { ModelCheck } from "./ModelCheck";
 import { TaskFilters } from "./TaskFilters";
 import { TimelineLegend } from "./TimelineLegend";
 import { TimelinePane, TimelinePaneLabel, timelineDisplayName } from "./TimelinePane";
@@ -170,9 +169,6 @@ export function PageLoadTimeline() {
                 <TimelinePane key={entry.label} name={name}>
                   <TimelinePaneLabel>{name}</TimelinePaneLabel>
                   <VerticalTimeline key={name} axisEndMs={entry.timeline.axisEndMs}>
-                    {entry.timeline.modelCheck?.length ? (
-                      <ModelCheck metrics={entry.timeline.modelCheck} />
-                    ) : null}
                     <CollapsibleUnifiedWaterfall
                       load={entry.bundle.load}
                       events={entry.timeline.events}
@@ -205,9 +201,6 @@ export function PageLoadTimeline() {
             key={timelineDisplayName(panes[0].timeline)}
             axisEndMs={panes[0].timeline.axisEndMs}
           >
-            {panes[0].timeline.modelCheck?.length ? (
-              <ModelCheck metrics={panes[0].timeline.modelCheck} />
-            ) : null}
             <TimelineLegend
               simulationLabel={panes[0].timeline.simulationLabel}
               timesNote={panes[0].timeline.timesNote}

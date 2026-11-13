@@ -1,5 +1,5 @@
+import { entryAuditItems } from "@/features/page-speed-insights/shared/auditItems";
 import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
-import type { TableItem } from "@/lib/schema";
 import { getNumber, getUrlString } from "@/lib/utils";
 
 const TYPE_ORDER = [
@@ -94,15 +94,9 @@ function urlKey(url: string): string {
   }
 }
 
-function tableItems(entry: InsightsContextItem, auditId: string): TableItem[] {
-  const details = entry.item.lighthouseResult?.audits?.[auditId]?.details;
-  if (!details || !("items" in details) || !Array.isArray(details.items)) return [];
-  return details.items as TableItem[];
-}
-
 function urlsFrom(entry: InsightsContextItem): PageWeightUrl[] {
   const byKey = new Map<string, PageWeightUrl>();
-  for (const item of tableItems(entry, "network-requests")) {
+  for (const item of entryAuditItems(entry, "network-requests")) {
     const url = getUrlString(item.url);
     const transferSize = finite(item.transferSize);
     if (!url || transferSize <= 0) continue;
@@ -149,7 +143,7 @@ function sortTypes(types: PageWeightType[]): PageWeightType[] {
 
 function pageWeightReportFromEntry(entry: InsightsContextItem): PageWeightReport | null {
   const urls = urlsFrom(entry);
-  const summary = tableItems(entry, "resource-summary");
+  const summary = entryAuditItems(entry, "resource-summary");
   const rowFor = (type: string) =>
     summary.find((row) => String(row.resourceType ?? "").toLowerCase() === type);
 

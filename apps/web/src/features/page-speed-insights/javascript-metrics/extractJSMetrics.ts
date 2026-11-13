@@ -6,8 +6,6 @@ export type JSMetrics = {
   bootupTime: TableItem[];
   mainThreadWork: TableItem[];
   unusedJS: TableItem[];
-  unminifiedJS: TableItem[];
-  legacyJS: TableItem[];
   diagnostics: TableItem[];
   mainThreadTasks: TableItem[];
   jsResources: TableItem[];
@@ -51,8 +49,6 @@ export function extractJSMetrics({ item, label }: InsightsContextItem): JSMetric
       bootupTime: [],
       mainThreadWork: [],
       unusedJS: [],
-      unminifiedJS: [],
-      legacyJS: [],
       diagnostics: [],
       mainThreadTasks: [],
       jsResources: [],
@@ -63,8 +59,6 @@ export function extractJSMetrics({ item, label }: InsightsContextItem): JSMetric
   const bootupTimeDetails = getAuditDetails(audits, "bootup-time");
   const mainThreadWorkDetails = getAuditDetails(audits, "mainthread-work-breakdown");
   const unusedJSDetails = getAuditDetails(audits, "unused-javascript");
-  const unminifiedJSDetails = getAuditDetails(audits, "unminified-javascript");
-  const legacyJSDetails = getAuditDetails(audits, "legacy-javascript-insight");
   const diagnosticsDetails = getAuditDetails(audits, "diagnostics");
   const mainThreadTasksDetails = getAuditDetails(audits, "main-thread-tasks");
   const networkRequestsDetails = getAuditDetails(audits, "network-requests");
@@ -77,8 +71,6 @@ export function extractJSMetrics({ item, label }: InsightsContextItem): JSMetric
     bootupTime: bootupTimeDetails?.items || [],
     mainThreadWork: mainThreadWorkDetails?.items || [],
     unusedJS: unusedJSDetails?.items || [],
-    unminifiedJS: unminifiedJSDetails?.items || [],
-    legacyJS: legacyJSDetails?.items || [],
     diagnostics: diagnosticsDetails?.items || [],
     mainThreadTasks: mainThreadTasksDetails?.items || [],
     jsResources,

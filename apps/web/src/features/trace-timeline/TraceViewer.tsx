@@ -8,7 +8,7 @@ import { TraceTimeline } from "./TraceTimeline";
 import { TraceLoadTimeline } from "./TraceLoadTimeline";
 import { KeyEventsPanel, FixPrompt } from "./KeyEventsPanel";
 import { GitCompare, UploadCloud } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
 import { buildFixPrompt } from "./fixPrompt";
@@ -35,7 +35,10 @@ const getServerOrigin = () => "";
 
 /** Escape characters that could close the <script> tag or break JS parsers. */
 function safeJsonForScript(json: string): string {
-  return json.replace(/</g, "\\u003c").replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
+  return json
+    .replace(/</g, "\\u003c")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
 }
 
 function AgentPrompt() {
@@ -51,7 +54,9 @@ Then report, from the summary (times are ms since navigation start; undefined = 
 - The 3 biggest problems, each tied to evidence (a long task, slice or the LCP element) and a likely cause`;
   return (
     <div className="mx-auto flex max-w-3xl items-start gap-2 rounded-lg border bg-muted/50 p-3 text-left">
-      <pre className="max-h-[350px] flex-1 overflow-y-auto whitespace-pre-wrap font-mono text-sm">{prompt}</pre>
+      <pre className="max-h-[350px] flex-1 overflow-y-auto whitespace-pre-wrap font-mono text-sm">
+        {prompt}
+      </pre>
       <CopyButton text={prompt} aria-label="Copy agent prompt" />
     </div>
   );
@@ -141,11 +146,19 @@ export function TraceViewer() {
 
   const summaryJson = useMemo(() => (trace ? JSON.stringify(fullSummary(trace)) : ""), [trace]);
   const analysis = useMemo(() => (trace ? analyzeLoad(trace) : null), [trace]);
-  const snapshot = useMemo(() => (trace && analysis ? buildSnapshot(trace, analysis) : null), [trace, analysis]);
+  const snapshot = useMemo(
+    () => (trace && analysis ? buildSnapshot(trace, analysis) : null),
+    [trace, analysis],
+  );
   const fixPrompt = useMemo(() => (analysis ? buildFixPrompt(analysis) : ""), [analysis]);
 
   const fileInput = (
-    <input type="file" accept=".json,.gz" className="hidden" onChange={(e) => void load(e.target.files?.[0])} />
+    <input
+      type="file"
+      accept=".json,.gz"
+      className="hidden"
+      onChange={(e) => void load(e.target.files?.[0])}
+    />
   );
   const parsing = busy ? `Parsing… ${Math.round(progress * 100)}%` : null;
 
@@ -153,23 +166,34 @@ export function TraceViewer() {
     <main
       className={cn("container mx-auto px-4", trace ? "py-6" : "py-12")}
       onDragOver={(e) => e.preventDefault()}
-      onDrop={(e) => { e.preventDefault(); setDragging(false); void load(e.dataTransfer.files[0]); }}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDragging(false);
+        void load(e.dataTransfer.files[0]);
+      }}
     >
       {trace ? (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed px-4 py-3">
           <h1 className="text-2xl font-bold tracking-tight">Trace timeline</h1>
           <div className="flex flex-wrap gap-2">
-            <label className={cn(buttonVariants({ variant: "outline", size: "sm" }), "cursor-pointer")}>
+            <label
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }), "cursor-pointer")}
+            >
               <GitCompare className="size-4" aria-hidden />
               Compare with another trace
               <input
                 type="file"
                 accept=".json,.gz"
                 className="hidden"
-                onChange={(e) => { void loadCompare(e.target.files?.[0]); e.target.value = ""; }}
+                onChange={(e) => {
+                  void loadCompare(e.target.files?.[0]);
+                  e.target.value = "";
+                }}
               />
             </label>
-            <label className={cn(buttonVariants({ variant: "outline", size: "sm" }), "cursor-pointer")}>
+            <label
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }), "cursor-pointer")}
+            >
               <UploadCloud className="size-4" aria-hidden />
               {parsing ?? "Load another trace"}
               {fileInput}
@@ -179,7 +203,9 @@ export function TraceViewer() {
       ) : (
         <>
           <section className="mb-8 text-center">
-            <h1 className="mb-4 text-4xl font-extrabold tracking-tight md:text-5xl">Trace timeline</h1>
+            <h1 className="mb-4 text-4xl font-extrabold tracking-tight md:text-5xl">
+              Trace timeline
+            </h1>
             <p className="mx-auto mb-8 max-w-2xl text-xl text-muted-foreground">
               Drop a Chrome DevTools performance profile (.json or .json.gz). Parsed locally in your
               browser. Scroll to zoom, drag to pan, click a lane label to collapse it.
@@ -192,26 +218,42 @@ export function TraceViewer() {
               dragging && "border-primary bg-muted/50",
             )}
             onDragEnter={() => setDragging(true)}
-            onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragging(false); }}
+            onDragLeave={(e) => {
+              if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragging(false);
+            }}
           >
             <UploadCloud className="size-8 text-muted-foreground" aria-hidden />
-            <span className="text-lg font-semibold">
-              {parsing ?? "Drop a trace file here"}
+            <span className="text-lg font-semibold">{parsing ?? "Drop a trace file here"}</span>
+            <span className="text-sm text-muted-foreground">
+              .json or .json.gz from Chrome DevTools · stays in your browser
             </span>
-            <span className="text-sm text-muted-foreground">.json or .json.gz from Chrome DevTools · stays in your browser</span>
-            {!busy && <span className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-2")}>Choose file</span>}
+            {!busy && (
+              <span className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-2")}>
+                Choose file
+              </span>
+            )}
             {fileInput}
           </label>
         </>
       )}
       {!trace && shared && <SharedSummary snapshot={shared} />}
-      {error && <p role="alert" className="mb-4 text-sm text-red-600">{error}</p>}
+      {error && (
+        <p role="alert" className="mb-4 text-sm text-red-600">
+          {error}
+        </p>
+      )}
       {trace && (
         <>
-          <script type="application/json" id="trace-summary" dangerouslySetInnerHTML={{ __html: safeJsonForScript(summaryJson) }} />
+          <script
+            type="application/json"
+            id="trace-summary"
+            dangerouslySetInnerHTML={{ __html: safeJsonForScript(summaryJson) }}
+          />
           <KeyEventsPanel trace={trace} />
           {snapshot && <FindingsPanel snapshot={snapshot} />}
-          {snapshot && compare && <ComparePanel before={snapshot} after={compare} onClose={() => setCompare(null)} />}
+          {snapshot && compare && (
+            <ComparePanel before={snapshot} after={compare} onClose={() => setCompare(null)} />
+          )}
           <TraceLoadTimeline trace={trace} />
           <TraceTimeline trace={trace} />
           <FixPrompt text={fixPrompt} />

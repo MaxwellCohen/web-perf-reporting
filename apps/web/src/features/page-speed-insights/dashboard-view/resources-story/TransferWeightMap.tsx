@@ -4,7 +4,7 @@ import { getNetworkBarColor } from "@/features/page-speed-insights/shared/networ
 import { formatBytes } from "@/features/page-speed-insights/shared/format";
 import type { WeightNode } from "@/features/page-speed-insights/dashboard-view/resources-story/resourcesInvestigationModel";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 
 type TypeGroup = {
   resourceType: string;

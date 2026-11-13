@@ -1,4 +1,4 @@
-import { act, fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { CopyButton } from "@/components/ui/copy-button";
 
@@ -34,7 +34,8 @@ describe("CopyButton", () => {
         Copy URL
       </CopyButton>,
     );
-    expect(container.firstChild).toMatchSnapshot();
+    expect(screen.getByRole("button")).toHaveTextContent("Copy URL");
+    expect(screen.getByTestId("copy")).toBeInTheDocument();
 
     const button = container.querySelector("button");
     fireEvent.click(button!);

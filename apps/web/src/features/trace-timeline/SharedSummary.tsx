@@ -1,9 +1,9 @@
 import { Alert } from "@/components/ui/alert";
+import { formatMs } from "@/features/page-speed-insights/shared/format";
 import type { TraceSnapshot } from "./findings";
 import { FindingsPanel } from "./FindingsPanel";
 
-const ms = (v?: number) =>
-  v == null ? "—" : v >= 1000 ? `${(v / 1000).toFixed(2)} s` : `${Math.round(v)} ms`;
+const ms = (v?: number) => (v == null ? "—" : formatMs(v));
 
 /** Read-only view of a `#r=` share link. */
 export function SharedSummary({ snapshot }: { snapshot: TraceSnapshot }) {

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link2 } from "lucide-react";
 import { CopyButton } from "@/components/ui/copy-button";
+import { formatMs } from "@/features/page-speed-insights/shared/format";
 import {
   Table,
   TableBody,
@@ -11,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { shortUrl } from "./analyzeLoad";
 import {
   FINDING_CATEGORIES,
@@ -34,11 +35,10 @@ const CAT_COLOR: Record<FindingCategory, string> = {
   gc: "bg-[#e8743b]",
   other: "bg-[#8a94a3]",
 };
-const ms = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(2)} s` : `${Math.round(v)} ms`);
 
 export function CategoryBar({ categoryMs }: { categoryMs: TraceSnapshot["categoryMs"] }) {
   const total = FINDING_CATEGORIES.reduce((a, c) => a + categoryMs[c], 0);
-  const label = FINDING_CATEGORIES.map((c) => `${c} ${ms(categoryMs[c])}`).join(", ");
+  const label = FINDING_CATEGORIES.map((c) => `${c} ${formatMs(categoryMs[c])}`).join(", ");
   return (
     <div>
       <div
@@ -52,7 +52,7 @@ export function CategoryBar({ categoryMs }: { categoryMs: TraceSnapshot["categor
               key={c}
               className={CAT_COLOR[c]}
               style={{ width: `${(categoryMs[c] / total) * 100}%` }}
-              title={`${c}: ${ms(categoryMs[c])}`}
+              title={`${c}: ${formatMs(categoryMs[c])}`}
             />
           ))}
       </div>
@@ -60,7 +60,7 @@ export function CategoryBar({ categoryMs }: { categoryMs: TraceSnapshot["categor
         {FINDING_CATEGORIES.map((c) => (
           <li key={c} className="flex items-center gap-1">
             <i className={cn("inline-block size-2.5 rounded-sm", CAT_COLOR[c])} aria-hidden />
-            {c} <span className="tabular-nums">{ms(categoryMs[c])}</span>
+            {c} <span className="tabular-nums">{formatMs(categoryMs[c])}</span>
           </li>
         ))}
       </ul>
@@ -152,10 +152,10 @@ export function FindingsPanel({
                   <TableCell className="max-w-md truncate" title={s.url}>
                     {shortUrl(s.url, 80)}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">{ms(s.ms)}</TableCell>
+                  <TableCell className="text-right tabular-nums">{formatMs(s.ms)}</TableCell>
                   <TableCell className="text-right tabular-nums">{s.count}</TableCell>
                   <TableCell className="text-right tabular-nums">
-                    {s.blockingMs ? ms(s.blockingMs) : "—"}
+                    {s.blockingMs ? formatMs(s.blockingMs) : "—"}
                   </TableCell>
                 </TableRow>
               ))}
@@ -170,7 +170,9 @@ export function FindingsPanel({
           <ul className="space-y-1 text-sm">
             {snapshot.layoutShifts.map((s, i) => (
               <li key={i} className="flex gap-3">
-                <span className="w-20 tabular-nums text-muted-foreground">{ms(s.timeMs)}</span>
+                <span className="w-20 tabular-nums text-muted-foreground">
+                  {formatMs(s.timeMs)}
+                </span>
                 <span className="w-16 font-medium tabular-nums">{s.score.toFixed(4)}</span>
                 <span className="truncate text-muted-foreground">{s.nodes.join(" · ") || "—"}</span>
               </li>

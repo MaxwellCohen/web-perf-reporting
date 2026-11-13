@@ -10,7 +10,6 @@ import {
 import { formatMs } from "@/features/page-speed-insights/shared/format";
 import {
   buildKeyedChartConfig,
-  formatAxisMs,
   horizontalBarChartClassName,
   mutedBarCursor,
   stackBarRadius,
@@ -69,7 +68,7 @@ export function LCPBreakdownChart({
           tickLine={false}
           axisLine={false}
           tickMargin={8}
-          tickFormatter={formatAxisMs}
+          tickFormatter={formatMs}
         />
         <YAxis
           type="category"
@@ -116,7 +115,7 @@ export function LCPBreakdownChart({
                 position="right"
                 className="fill-muted-foreground font-mono text-[10px] tabular-nums"
                 formatter={(value) =>
-                  typeof value === "number" && value > 0 ? formatAxisMs(value) : ""
+                  typeof value === "number" && value > 0 ? formatMs(value) : ""
                 }
               />
             ) : null}

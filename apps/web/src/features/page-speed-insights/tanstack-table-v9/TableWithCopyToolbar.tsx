@@ -1,6 +1,6 @@
-import type { ReactNode, RefObject } from "react";
+import { useRef, type ReactNode, type RefObject } from "react";
 import { CopyHtmlTableButton } from "@/features/page-speed-insights/tanstack-table-v9/CopyHtmlTableButton";
-import { WithCopyToolbar } from "@/features/page-speed-insights/tanstack-table-v9/WithCopyToolbar";
+import { cn } from "@/lib/utils";
 
 type TableWithCopyToolbarProps = {
   children: (props: { tableRef: RefObject<HTMLTableElement | null> }) => ReactNode;
@@ -8,12 +8,14 @@ type TableWithCopyToolbarProps = {
 };
 
 export function TableWithCopyToolbar({ children, className }: TableWithCopyToolbarProps) {
+  const tableRef = useRef<HTMLTableElement | null>(null);
+
   return (
-    <WithCopyToolbar<HTMLTableElement>
-      className={className}
-      renderButton={(tableRef) => <CopyHtmlTableButton tableRef={tableRef} />}
-    >
-      {(tableRef) => children({ tableRef })}
-    </WithCopyToolbar>
+    <div className={cn("w-full", className)}>
+      <div className="mb-2 flex justify-end">
+        <CopyHtmlTableButton tableRef={tableRef} />
+      </div>
+      {children({ tableRef })}
+    </div>
   );
 }

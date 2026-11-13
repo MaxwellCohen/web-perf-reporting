@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { NoResultsRow } from "@/features/page-speed-insights/JSUsage/NoResultsRow";
 
@@ -31,7 +31,7 @@ vi.mock("@/components/ui/table", () => ({
 
 describe("NoResultsRow", () => {
   it("renders the no-results cell", () => {
-    const { container } = render(
+    render(
       <table>
         <tbody>
           <NoResultsRow />
@@ -39,6 +39,6 @@ describe("NoResultsRow", () => {
       </table>,
     );
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(screen.getByRole("cell", { name: "No results." })).toBeInTheDocument();
   });
 });

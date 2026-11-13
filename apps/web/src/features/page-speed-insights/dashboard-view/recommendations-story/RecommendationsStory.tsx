@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { patchDashboardSearch } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 import {
   formatRecommendationSavings,
+  getQuickWinRecommendations,
   recommendationsStoryFrom,
   type LargestSaving,
 } from "@/features/page-speed-insights/dashboard-view/recommendations-story/recommendationsStoryModel";
@@ -17,10 +18,9 @@ import {
   RecommendationGroup,
   useRecommendationFilters,
 } from "@/features/page-speed-insights/RecommendationsSection/RecommendationGroup";
-import { getQuickWinRecommendations } from "@/features/page-speed-insights/RecommendationsSection/RecommendationsSummary";
 import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
 import { FullWidthTables } from "@/features/page-speed-insights/tanstack-table-v9/fullWidthTables";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 
 const PRIORITY_LABEL: Record<Recommendation["priority"], string> = {
   high: "High",

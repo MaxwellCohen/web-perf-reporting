@@ -54,6 +54,24 @@ describe("analyzeAudits", () => {
     expect(result[0].actionableSteps.length).toBeGreaterThanOrEqual(0);
   });
 
+  it("uses the Lighthouse category that lists the audit", () => {
+    const item = createItem({
+      "heading-order": {
+        id: "heading-order",
+        title: "Heading order",
+        score: 0,
+        scoreDisplayMode: "binary",
+        description: "Headings should follow a logical order for assistive technology users.",
+      },
+    });
+    (item.item as any).lighthouseResult.categories = {
+      accessibility: { title: "Accessibility", auditRefs: [{ id: "heading-order" }] },
+    };
+    const result = analyzeAudits([item as any]);
+    expect(result[0].category).toBe("Accessibility");
+    expect(result[0].actionableSteps.length).toBeGreaterThan(0);
+  });
+
   it("skips the baseline inventory", () => {
     const items = [
       createItem({

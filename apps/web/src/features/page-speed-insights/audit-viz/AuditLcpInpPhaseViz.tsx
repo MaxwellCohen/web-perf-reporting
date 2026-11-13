@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/chart";
 import {
   buildKeyedChartConfig,
-  formatAxisMs,
   horizontalBarChartClassName,
   mutedBarCursor,
   stackBarRadius,
@@ -174,7 +173,7 @@ export function AuditInpPhaseViz({ rows }: { rows: DetailTableItem[] }) {
           barCategoryGap="28%"
         >
           <CartesianGrid horizontal={false} strokeDasharray="3 3" className="stroke-border/40" />
-          <XAxis type="number" tickLine={false} axisLine={false} tickFormatter={formatAxisMs} />
+          <XAxis type="number" tickLine={false} axisLine={false} tickFormatter={formatMs} />
           <YAxis
             type="category"
             dataKey="report"

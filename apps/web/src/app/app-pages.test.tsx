@@ -74,76 +74,93 @@ describe("app page coverage smoke tests", () => {
   });
 
   it("renders the home page cards and destination links", () => {
-    const { container } = render(<Home />);
-    expect(container.firstChild).toMatchSnapshot();
+    render(<Home />);
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Let your agent make your site fast" }),
+    ).toBeInTheDocument();
   });
 
   it("renders the viewer page", async () => {
-    const { container } = render(await ViewerPage());
+    render(await ViewerPage());
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(screen.getByText("Mock viewer page")).toBeInTheDocument();
   });
 
   it("renders the page speed layout shell and nested content", async () => {
-    const { container } = render(
+    render(
       await PageSpeedLayout({
         children: <div>Nested page speed content</div>,
       }),
     );
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Page Speed Insights" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Nested page speed content")).toBeInTheDocument();
   });
 
   it("passes the public id to the dashboard wrapper page", async () => {
-    const { container } = render(
+    render(
       await PageSpeedPublicIdPage({
         params: Promise.resolve({ publicId: "abc123" }),
       }),
     );
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(screen.getByText("Dashboard wrapper for abc123")).toBeInTheDocument();
   });
 
   it("renders latest crux lookup when there is no normalized url", async () => {
     updateUrlMock.mockReturnValue(undefined);
 
-    const { container } = render(await LatestCruxPage({ searchParams: Promise.resolve({}) }));
+    render(await LatestCruxPage({ searchParams: Promise.resolve({}) }));
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Latest Crux Report" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Mock URL lookup form")).toBeInTheDocument();
   });
 
   it("renders latest crux results when a normalized url exists", async () => {
     updateUrlMock.mockReturnValue("https://example.com");
 
-    const { container } = render(
+    render(
       await LatestCruxPage({
         searchParams: Promise.resolve({ url: "https://example.com" }),
       }),
     );
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Latest Crux Report for https://example.com" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Current performance for https://example.com")).toBeInTheDocument();
   });
 
   it("renders historical crux lookup or dashboard from the normalized url", async () => {
     updateUrlMock.mockReturnValueOnce(undefined).mockReturnValueOnce("https://example.com");
 
     render(await HistoricalCruxPage({ searchParams: Promise.resolve({}) }));
-    const { container } = render(
+    render(
       await HistoricalCruxPage({
         searchParams: Promise.resolve({ url: "https://example.com" }),
       }),
     );
 
     expect(screen.getAllByText("Mock URL lookup form")).toHaveLength(1);
-    expect(container.firstChild).toMatchSnapshot();
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: "Historical CrUX reports for https://example.com",
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Historical charts for https://example.com")).toBeInTheDocument();
   });
 
   it("renders the page speed lookup form when no URL is present", async () => {
     updateUrlMock.mockReturnValue(undefined);
 
-    const { container } = render(await PageSpeedPage({ searchParams: Promise.resolve({}) }));
+    render(await PageSpeedPage({ searchParams: Promise.resolve({}) }));
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(screen.getByText("Mock URL lookup form")).toBeInTheDocument();
     expect(requestPageSpeedDataMock).not.toHaveBeenCalled();
     expect(redirectMock).not.toHaveBeenCalled();
   });
@@ -170,15 +187,12 @@ describe("app page coverage smoke tests", () => {
       await PageSpeedPage({
         searchParams: Promise.resolve({
           url: "https://example.com",
-          view: "dashboard",
           tab: "timeline",
           labels: ["Mobile"],
         }),
       }),
     );
 
-    expect(redirectMock).toHaveBeenCalledWith(
-      "/page-speed/public-123?view=dashboard&tab=timeline&labels=Mobile",
-    );
+    expect(redirectMock).toHaveBeenCalledWith("/page-speed/public-123?tab=timeline&labels=Mobile");
   });
 });

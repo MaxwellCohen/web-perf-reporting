@@ -34,7 +34,7 @@ vi.mock("@/features/page-speed-insights/network-metrics/LCPBreakdownChart", () =
   LCPBreakdownChart: () => <div data-testid="lcp-chart">lcp</div>,
 }));
 
-import { AuditTableViz } from "./AuditTableViz";
+import { AUDIT_VIZ_REGISTRY, AuditTableViz } from "./AuditTableViz";
 
 function row(id: string, items: Array<Record<string, unknown>>): DetailTableItem {
   return {
@@ -214,5 +214,71 @@ describe("AuditTableViz", () => {
     expect(container.textContent).toContain("Unsized image element");
     expect(container.textContent).toContain("Web font");
     expect(container.textContent).toContain("cdn.example.com");
+  });
+
+  it.each([
+    ["duplicated-javascript-insight", "BytesSavingsViz"],
+    ["legacy-javascript-insight", "BytesSavingsViz"],
+    ["unminified-css", "BytesSavingsViz"],
+    ["unminified-javascript", "BytesSavingsViz"],
+    ["unused-css-rules", "BytesSavingsViz"],
+    ["total-byte-weight", "TotalByteWeightViz"],
+    ["unused-javascript", "UnusedJavascriptViz"],
+    ["third-parties-insight", "ThirdPartiesViz"],
+    ["third-parties-details", "ThirdPartiesViz"],
+    ["image-delivery-insight", "ImageDeliveryViz"],
+    ["lcp-breakdown-insight", "AuditLcpPhaseViz"],
+    ["inp-breakdown-insight", "AuditInpPhaseViz"],
+    ["bootup-time", "BootupTimeViz"],
+    ["long-tasks", "LongTasksViz"],
+    ["main-thread-tasks", "MainThreadTasksViz"],
+    ["user-timings", "UserTimingsViz"],
+    ["redirects", "AuditRedirectChain"],
+    ["cls-culprits-insight", "AuditClsCulpritsViz"],
+    ["layout-shifts", "AuditClsCulpritsViz"],
+    ["dom-size-insight", "DomSizeViz"],
+    ["network-rtt", "NetworkRttViz"],
+    ["network-server-latency", "NetworkServerLatencyViz"],
+    ["resource-summary", "AuditResourceSummaryViz"],
+    ["network-requests", "AuditNetworkWaterfallViz"],
+    ["has-hsts", "AuditSeverityFindingsViz"],
+    ["csp-xss", "AuditSeverityFindingsViz"],
+    ["origin-isolation", "AuditSeverityFindingsViz"],
+    ["clickjacking-mitigation", "AuditSeverityFindingsViz"],
+    ["trusted-types-xss", "AuditSeverityFindingsViz"],
+    ["valid-source-maps", "AuditSourceMapsViz"],
+    ["server-response-time", "AuditServerResponseTimeViz"],
+    ["viewport-insight", "AuditViewportViz"],
+    ["unsized-images", "AuditImageIssuesViz"],
+    ["non-composited-animations", "AuditImageIssuesViz"],
+    ["image-size-responsive", "AuditImageIssuesViz"],
+    ["image-aspect-ratio", "AuditImageIssuesViz"],
+    ["errors-in-console", "AuditErrorsInConsoleViz"],
+    ["third-party-cookies", "AuditThirdPartyCookiesViz"],
+    ["inspector-issues", "AuditInspectorIssuesViz"],
+    ["deprecations", "AuditDeprecationsViz"],
+    ["js-libraries", "AuditJsLibrariesViz"],
+    ["link-text", "AuditLinkTextViz"],
+    ["crawlable-anchors", "AuditSeoProblemsViz"],
+    ["hreflang", "AuditSeoProblemsViz"],
+    ["canonical", "AuditSeoProblemsViz"],
+    ["robots-txt", "AuditSeoProblemsViz"],
+    ["is-crawlable", "AuditSeoProblemsViz"],
+  ])("registry resolves %s to %s", (id, name) => {
+    expect(AUDIT_VIZ_REGISTRY.get(id)?.Viz.name).toBe(name);
+  });
+
+  it("falls back to node findings by predicate and renders nothing for unknown ids", () => {
+    const node = {
+      node: { type: "node", snippet: "<img>", selector: "img", nodeLabel: "x", explanation: "" },
+    };
+    expect(AUDIT_VIZ_REGISTRY.has("image-alt")).toBe(false);
+    expect(
+      render(<AuditTableViz rows={[row("image-alt", [node])]} />).container.textContent,
+    ).toContain("Failing elements");
+    expect(
+      render(<AuditTableViz rows={[row("something", [{ a: 1 }])]} />).container.firstChild,
+    ).toBeNull();
+    expect(AUDIT_VIZ_REGISTRY.has("cache-insight")).toBe(false);
   });
 });

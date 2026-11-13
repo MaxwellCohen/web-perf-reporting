@@ -28,8 +28,8 @@ vi.mock("@/features/page-speed-insights/lh-categories/table/NetworkWaterfallCell
   NetworkWaterfallCell: () => <span data-testid="waterfall" />,
 }));
 
-vi.mock("@/features/page-speed-insights/tanstack-table-v9/useSimpleTable", () => ({
-  useSimpleTable: ({ data }: { data: TableItem[]; columns: unknown[] }) => ({
+vi.mock("@/features/page-speed-insights/tanstack-table-v9/useStandardTable", () => ({
+  useStandardTable: ({ data }: { data: TableItem[]; columns: unknown[] }) => ({
     getHeaderGroups: () => [{ id: "1", headers: [] }],
     getRowModel: () => ({ rows: data.map((item, i) => ({ id: String(i), original: item })) }),
   }),

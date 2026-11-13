@@ -1,67 +1,17 @@
-import * as React from "react";
 import type { ReactNode } from "react";
 import { render } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
-  PageSpeedInsightsStoreProvider,
+  PageSpeedInsightsProvider,
   useFullPageScreenshots,
-  usePageSpeedInsightsStore,
   usePageSpeedItems,
   usePageSpeedReportTitle,
-  usePageSpeedSelector,
-  useRequiredPageSpeedInsightsStore,
+  usePageSpeedUserLabelFilterActions,
 } from "@/features/page-speed-insights/PageSpeedContext";
-
-vi.mock("@xstate/store-react", () => {
-  function createStore(config: {
-    context: unknown;
-    on: Record<string, (ctx: unknown, event?: unknown) => unknown>;
-  }) {
-    let state = config.context;
-    const listeners = new Set<() => void>();
-    const trigger = Object.fromEntries(
-      Object.entries(config.on).map(([eventType, handler]) => [
-        eventType,
-        (event?: unknown) => {
-          state = handler(state, event);
-          listeners.forEach((l) => l());
-        },
-      ]),
-    );
-
-    return {
-      get: () => ({ context: state }),
-      subscribe: (listener: () => void) => {
-        listeners.add(listener);
-        return () => listeners.delete(listener);
-      },
-      trigger,
-    };
-  }
-  return {
-    useStore: (definition: Parameters<typeof createStore>[0]) => {
-      const storeRef = React.useRef<ReturnType<typeof createStore> | undefined>(undefined);
-      if (!storeRef.current) {
-        storeRef.current = createStore(definition);
-      }
-      return storeRef.current;
-    },
-    useSelector: (
-      store: ReturnType<typeof createStore>,
-      selector: (snapshot: { context: unknown }) => unknown,
-    ) =>
-      React.useSyncExternalStore(
-        (listener) => store.subscribe(listener),
-        () => selector(store.get()),
-        () => selector(store.get()),
-      ),
-  };
-});
 
 type ProviderProps = {
   data?: any[];
   labels: string[];
-  isLoading: boolean;
   children: ReactNode;
 };
 
@@ -84,28 +34,24 @@ function createLighthouseResult(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function TestProvider({ data, labels, isLoading, children }: ProviderProps) {
-  const store = usePageSpeedInsightsStore({
-    data,
-    labels,
-    isLoading,
-  });
-
-  return <PageSpeedInsightsStoreProvider store={store}>{children}</PageSpeedInsightsStoreProvider>;
+function TestProvider({ data, labels, children }: ProviderProps) {
+  return (
+    <PageSpeedInsightsProvider data={data} labels={labels}>
+      {children}
+    </PageSpeedInsightsProvider>
+  );
 }
 
 function StoreConsumer() {
   const items = usePageSpeedItems();
   const reportTitle = usePageSpeedReportTitle();
   const fullPageScreenshots = useFullPageScreenshots();
-  const isLoading = usePageSpeedSelector((snapshot) => snapshot.context.isLoading);
 
   return (
     <>
       <div data-testid="item-count">{items.length}</div>
       <div data-testid="report-title">{reportTitle}</div>
       <div data-testid="screenshot-labels">{Object.keys(fullPageScreenshots).join(",")}</div>
-      <div data-testid="loading-state">{String(isLoading)}</div>
     </>
   );
 }
@@ -126,7 +72,6 @@ describe("PageSpeedContext", () => {
           },
         ]}
         labels={["Mobile run"]}
-        isLoading={false}
       >
         <StoreConsumer />
       </TestProvider>,
@@ -141,7 +86,6 @@ describe("PageSpeedContext", () => {
     expect(container.querySelector('[data-testid="screenshot-labels"]')).toHaveTextContent(
       "Mobile run",
     );
-    expect(container.querySelector('[data-testid="loading-state"]')).toHaveTextContent("false");
   });
 
   it("updates consumers when provider input changes", () => {
@@ -154,7 +98,6 @@ describe("PageSpeedContext", () => {
           },
         ]}
         labels={["Mobile run"]}
-        isLoading={true}
       >
         <StoreConsumer />
       </TestProvider>,
@@ -175,7 +118,6 @@ describe("PageSpeedContext", () => {
           },
         ]}
         labels={["Desktop run"]}
-        isLoading={false}
       >
         <StoreConsumer />
       </TestProvider>,
@@ -190,16 +132,15 @@ describe("PageSpeedContext", () => {
     expect(container.querySelector('[data-testid="screenshot-labels"]')).toHaveTextContent(
       "Desktop run",
     );
-    expect(container.querySelector('[data-testid="loading-state"]')).toHaveTextContent("false");
   });
 
   it("throws when selectors are used outside the provider", () => {
     expect(() => render(<OutsideProviderConsumer />)).toThrow(
-      "PageSpeed insights store is unavailable outside the dashboard provider.",
+      "PageSpeed insights context is unavailable outside the dashboard provider.",
     );
   });
 
-  it("filters store items when user label filter changes", () => {
+  it("filters items when user label filter changes", () => {
     const data = [
       {
         lighthouseResult: createLighthouseResult({
@@ -217,7 +158,7 @@ describe("PageSpeedContext", () => {
     ];
 
     function FilterConsumer() {
-      const store = useRequiredPageSpeedInsightsStore();
+      const { setUserLabelFilter } = usePageSpeedUserLabelFilterActions();
       const items = usePageSpeedItems();
       const reportTitle = usePageSpeedReportTitle();
 
@@ -225,10 +166,7 @@ describe("PageSpeedContext", () => {
         <>
           <div data-testid="item-labels">{items.map((item) => item.label).join(",")}</div>
           <div data-testid="filtered-report-title">{reportTitle}</div>
-          <button
-            type="button"
-            onClick={() => store.trigger.setUserLabelFilter({ labels: ["Mobile"] })}
-          >
+          <button type="button" onClick={() => setUserLabelFilter(["Mobile"])}>
             Filter mobile
           </button>
         </>
@@ -236,7 +174,7 @@ describe("PageSpeedContext", () => {
     }
 
     const { container, getByRole } = render(
-      <TestProvider data={data} labels={["Mobile", "Desktop"]} isLoading={false}>
+      <TestProvider data={data} labels={["Mobile", "Desktop"]}>
         <FilterConsumer />
       </TestProvider>,
     );

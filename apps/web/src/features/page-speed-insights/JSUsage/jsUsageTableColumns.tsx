@@ -8,7 +8,7 @@ import type { TreeMapNode } from "@/lib/schema";
 import type { TableFeatures } from "@tanstack/table-core";
 import { constructAggregationFn, type RowData } from "@tanstack/react-table";
 import { ExpandRow, ExpandAll, RenderBytesCell } from "./jsUsageTableParts";
-import { getHostnameFromUrl } from "@/lib/urlDisplay";
+import { getHostFromUrl } from "@/lib/urlDisplay";
 
 declare module "@tanstack/table-core" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -17,7 +17,7 @@ declare module "@tanstack/table-core" {
   }
 }
 
-const getHostName = (row: TreeMapNode) => getHostnameFromUrl(row.name);
+const getHostName = (row: TreeMapNode) => getHostFromUrl(row.name);
 
 const columnHelper = createColumnHelper<TreeMapNode>();
 
@@ -60,11 +60,7 @@ const makeSortableStringColumn = (column: keyof TreeMapNode & string) => {
     cell: (info) => {
       let value: unknown = info.getValue();
       if (Array.isArray(value)) {
-        try {
-          value = new URL(String(value[0])).host;
-        } catch {
-          value = "Unknown";
-        }
+        value = getHostFromUrl(String(value[0]));
       }
       return (
         <div className="min-w-0 max-w-full overflow-hidden" title={String(value)}>
