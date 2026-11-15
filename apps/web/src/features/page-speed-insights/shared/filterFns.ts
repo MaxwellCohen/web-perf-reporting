@@ -1,4 +1,8 @@
 import type { FilterFn, RowData, TableFeatures } from "@tanstack/react-table";
+import {
+  itemValueNumber,
+  itemValueText,
+} from "@/features/page-speed-insights/shared/itemValueText";
 
 type AppFilterFn = FilterFn<TableFeatures, RowData>;
 
@@ -15,7 +19,7 @@ export const booleanFilterFn: AppFilterFn = (row, columnId, filterValue, _addMet
  * Standard filter function for string-based filtering (case-insensitive)
  */
 const includesStringFilter: AppFilterFn = (row, columnId, filterValue, _addMeta) => {
-  const cellValue = String(row.getValue(columnId) || "").toLowerCase();
+  const cellValue = itemValueText(row.getValue(columnId)).toLowerCase();
   const filter = String(filterValue || "").toLowerCase();
   return cellValue.includes(filter);
 };
@@ -24,7 +28,8 @@ const includesStringFilter: AppFilterFn = (row, columnId, filterValue, _addMeta)
  * Standard filter function for numeric range filtering
  */
 const inNumberRangeFilter: AppFilterFn = (row, columnId, filterValue, _addMeta) => {
-  const cellValue = Number(row.getValue(columnId)) || 0;
+  const raw = row.getValue(columnId);
+  const cellValue = itemValueNumber(raw) ?? (Number(raw) || 0);
   const [min, max]: [number, number] = filterValue || [0, Infinity];
   return cellValue >= min && cellValue <= max;
 };
