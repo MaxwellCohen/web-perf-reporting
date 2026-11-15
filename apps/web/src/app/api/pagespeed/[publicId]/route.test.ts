@@ -26,7 +26,7 @@ describe("app/api/pagespeed/[publicId] route", () => {
     });
 
     expect(response.status).toBe(200);
-    await expect(response.text()).resolves.toBe(JSON.stringify({ ok: true }));
+    await expect(response.json()).resolves.toEqual({ state: "ready", data: { ok: true } });
   });
 
   it("returns worker status when fetch is not ok", async () => {
@@ -56,10 +56,10 @@ describe("app/api/pagespeed/[publicId] route", () => {
     });
 
     expect(response.status).toBe(404);
-    await expect(response.text()).resolves.toBe("Data is not yet ready no data!!");
+    await expect(response.json()).resolves.toMatchObject({ state: "failed" });
   });
 
-  it("returns 500 JSON with worker error when status is failed", async () => {
+  it("returns failed state with worker error when status is failed", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -73,15 +73,15 @@ describe("app/api/pagespeed/[publicId] route", () => {
       params: Promise.resolve({ publicId: "abc123" }),
     });
 
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
-      status: "failed",
+      state: "failed",
       error: "Lighthouse could not load the page.",
       url: "https://example.com/page",
     });
   });
 
-  it("returns a not-ready response when the worker is still processing", async () => {
+  it("returns a pending state when the worker is still processing", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
       json: async () => ({ status: "pending" }),
@@ -91,24 +91,8 @@ describe("app/api/pagespeed/[publicId] route", () => {
       params: Promise.resolve({ publicId: "abc123" }),
     });
 
-    expect(response.status).toBe(404);
-    await expect(response.text()).resolves.toBe(JSON.stringify({ status: "pending" }));
-  });
-
-  it("returns 200 with full data when completed but no data.data", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue({
-      ok: true,
-      json: async () => ({ status: "completed", meta: "info" }),
-    } as Response);
-
-    const response = await GET({} as any, {
-      params: Promise.resolve({ publicId: "abc123" }),
-    });
-
     expect(response.status).toBe(200);
-    await expect(response.text()).resolves.toBe(
-      JSON.stringify({ status: "completed", meta: "info" }),
-    );
+    await expect(response.json()).resolves.toEqual({ state: "pending", jobState: "queued" });
   });
 
   it("returns 500 on unexpected error", async () => {

@@ -2,8 +2,9 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 
-const report = JSON.stringify(
-  (
+const report = JSON.stringify({
+  state: "ready",
+  data: (
     JSON.parse(
       readFileSync(
         path.join(process.cwd(), "src/features/page-speed-insights/example-report.json"),
@@ -11,7 +12,7 @@ const report = JSON.stringify(
       ),
     ) as { item: unknown }[]
   ).map((entry) => entry.item),
-);
+});
 const PUBLIC_ID = "e2e-public-id";
 
 // The worker is called server-side by the Next route handler, so mock at the
