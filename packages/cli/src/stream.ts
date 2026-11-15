@@ -1,22 +1,14 @@
 import type { Format } from "./core.js";
 import { assertHttpUrl, DEFAULT_API } from "./core.js";
+import { appendChunk, GAP_THRESHOLD_MS, isLateChunk, LATE_TAIL_CHARS, makePreview } from "@maxwellcohen/stream-core";
+import type { StreamChunk } from "@maxwellcohen/stream-core";
 
 const MAX_BYTES = 5_000_000;
 const MAX_REDIRECTS = 5;
 const TIMEOUT_MS = 30_000;
-const COALESCE_MS = 5;
 const MAX_LIVE_CHUNKS = 20_000;
-// Keep in sync with LATE_MARKER_SOURCE / LATE_TAIL_CHARS in apps/web/src/lib/stream-timing/analyze.ts.
-const LATE_MARKER = String.raw`\$R[CSXB]\(|<div hidden id="S:`;
-const LATE_TAIL_CHARS = 17;
 
-interface Chunk {
-  t: number;
-  end?: number;
-  bytes: number;
-  preview?: string;
-  late?: true;
-}
+type Chunk = StreamChunk;
 
 export interface StreamMeasurement {
   url: string;
@@ -34,15 +26,7 @@ export interface StreamMeasurement {
   contentEncoding?: string;
 }
 
-function isLate(tail: string, text: string): boolean {
-  const re = new RegExp(LATE_MARKER, "g");
-  const all = tail + text;
-  for (let m = re.exec(all); m; m = re.exec(all)) if (m.index + m[0].length > tail.length) return true;
-  return false;
-}
-
 const endOf = (c: Chunk) => c.end ?? c.t;
-const preview = (text: string) => text.replace(/\s+/g, " ").trim().slice(0, 80);
 
 /** Fetch a page (localhost works) and record when each chunk of the body arrives. */
 export async function measureStream(rawUrl: string): Promise<StreamMeasurement> {
@@ -87,16 +71,12 @@ export async function measureStream(rawUrl: string): Promise<StreamMeasurement> 
     if (r.done) break;
     const t = performance.now() - t0;
     const text = textual ? decoder.decode(r.value, { stream: true }) : "";
-    const late = isLate(tail, text);
-    const head = chunks[chunks.length - 1];
-    if (head && (t - endOf(head) < COALESCE_MS || (chunks.length >= MAX_LIVE_CHUNKS && t - endOf(head) < 100))) {
-      head.bytes += r.value.byteLength;
-      head.end = t;
-      if (late && !head.late) head.preview = preview(text);
-      if (late) head.late = true;
-    } else {
-      chunks.push({ t, bytes: r.value.byteLength, preview: textual ? preview(text) : undefined, late: late || undefined });
-    }
+    const late = isLateChunk(text, tail);
+    appendChunk(
+      chunks,
+      { t, bytes: r.value.byteLength, preview: textual ? makePreview(text) : undefined, late: late || undefined },
+      chunks.length >= MAX_LIVE_CHUNKS ? GAP_THRESHOLD_MS - 0.001 : undefined,
+    );
     tail = (tail + text).slice(-LATE_TAIL_CHARS);
     total += r.value.byteLength;
     if (total > MAX_BYTES) {
@@ -108,7 +88,7 @@ export async function measureStream(rawUrl: string): Promise<StreamMeasurement> 
   // Keep previews only where they matter (first, late, after a gap) so the upload stays small.
   chunks.forEach((c, i) => {
     const prev = chunks[i - 1];
-    if (i > 0 && !c.late && !(prev && c.t - endOf(prev) >= 100)) delete c.preview;
+    if (i > 0 && !c.late && !(prev && c.t - endOf(prev) >= GAP_THRESHOLD_MS)) delete c.preview;
   });
   const last = chunks[chunks.length - 1];
   return {
