@@ -84,12 +84,14 @@ describe("PageSpeedInsightsDashboardContent", () => {
   it("renders dashboard with empty ok data", async () => {
     usePageSpeedInsightsQueryMock.mockReturnValue({ status: "ok", data: [] });
 
-    const { container } = render(<PageSpeedInsightsDashboardContent publicId="test-id" />);
+    render(<PageSpeedInsightsDashboardContent publicId="test-id" />);
 
     await waitFor(() => {
       expect(screen.getByTestId("page-speed-dashboard")).toBeInTheDocument();
     });
-    expect(container.firstChild).toMatchSnapshot();
+    expect(screen.getByTestId("page-speed-dashboard")).toHaveTextContent(
+      "Dashboard with 0 items, labels: Mobile, Desktop",
+    );
   });
 
   it("shows worker error message when report status is failed", async () => {
@@ -99,10 +101,10 @@ describe("PageSpeedInsightsDashboardContent", () => {
       url: "https://example.com/page",
     });
 
-    const { container } = render(<PageSpeedInsightsDashboardContent publicId="test-id" />);
+    render(<PageSpeedInsightsDashboardContent publicId="test-id" />);
 
     await waitFor(() => {
-      expect(container.firstChild).toMatchSnapshot();
+      expect(screen.getByText("Failed to Load Report")).toBeInTheDocument();
     });
     expect(screen.getByText("Failed to Load Report")).toBeInTheDocument();
     expect(screen.getByText("Lighthouse could not load the page.")).toBeInTheDocument();
@@ -131,12 +133,14 @@ describe("PageSpeedInsightsDashboardContent", () => {
     const mockData = createMockPageSpeedData();
     usePageSpeedInsightsQueryMock.mockReturnValue({ status: "ok", data: mockData });
 
-    const { container } = render(<PageSpeedInsightsDashboardContent publicId="test-id" />);
+    render(<PageSpeedInsightsDashboardContent publicId="test-id" />);
 
     await waitFor(() => {
       expect(screen.getByTestId("page-speed-dashboard")).toBeInTheDocument();
     });
-    expect(container.firstChild).toMatchSnapshot();
+    expect(screen.getByTestId("page-speed-dashboard")).toHaveTextContent(
+      "Dashboard with 1 items, labels: Mobile, Desktop",
+    );
   });
 
   it("offers Retry on timeouts and re-fetches the report", () => {

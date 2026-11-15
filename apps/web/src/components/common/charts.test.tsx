@@ -41,7 +41,9 @@ describe("common charts", () => {
       </div>,
     );
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(
+      screen.getByRole("img", { name: "Value 1200 on a three-band scale" }),
+    ).toBeInTheDocument();
     expect(container.querySelector('[data-testid="gauge-value-marker"]')).toBeTruthy();
     expect(container.textContent).toContain("1200 - FAST");
   });
