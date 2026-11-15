@@ -21,8 +21,8 @@ vi.mock("next/navigation", () => ({
   redirect: (path: string) => redirectMock(path),
 }));
 
-vi.mock("@/lib/utils", () => ({
-  cn: (...classes: unknown[]) => classes.filter(Boolean).join(" "),
+vi.mock("@/lib/utils", async () => ({
+  cn: (await vi.importActual<typeof import("@/lib/utils")>("@/lib/utils")).cn,
   updateURl: (value: string | undefined) => updateUrlMock(value),
   normalizedCruxUrlFromSearchParams: async (
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>,

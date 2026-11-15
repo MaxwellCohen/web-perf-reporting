@@ -5,7 +5,7 @@ import type {
   ActionHint,
   ResourceSuspect,
 } from "@/features/page-speed-insights/dashboard-view/resources-story/resourcesInvestigationModel";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 
 const ACTION_LABEL: Record<ActionHint, string> = {
   "remove-unused": "Look at code that never ran",

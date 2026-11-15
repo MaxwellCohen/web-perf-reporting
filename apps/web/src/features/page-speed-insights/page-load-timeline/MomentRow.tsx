@@ -1,5 +1,5 @@
 import { formatMs } from "@/features/page-speed-insights/shared/format";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { Moment } from "./Moment";
 import type { MarkerKind, Rating, TimelineEvent } from "./types";
 

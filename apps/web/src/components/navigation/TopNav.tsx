@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Route } from "next";
 
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 
 const NAV_LINKS: { href: Route; label: string }[] = [
   { href: "/latest-crux", label: "Latest" },

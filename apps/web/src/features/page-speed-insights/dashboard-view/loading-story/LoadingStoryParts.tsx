@@ -13,7 +13,7 @@ import {
 import type { Rating } from "@/features/page-speed-insights/page-load-timeline/types";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
 import { LCP_PHASE_COLORS } from "@/features/page-speed-insights/shared/lcpPhaseColors";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 
 type RatingValue = Rating;
 

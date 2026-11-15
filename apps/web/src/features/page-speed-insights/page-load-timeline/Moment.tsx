@@ -4,7 +4,7 @@ import { createContext, use, type ReactNode } from "react";
 import { RenderNodeImage } from "@/features/page-speed-insights/lh-categories/table/RenderNode";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
 import { RenderBlockingBadge } from "@/features/page-speed-insights/waterfall/renderBlockingBadge";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { LcpBreakdown, MomentScreenshot } from "./MomentMedia";
 import { MomentNotes } from "./MomentNotes";
 import { MomentRequests } from "./MomentRequests";

@@ -13,7 +13,7 @@ import { RecommendationNetworkTree } from "@/features/page-speed-insights/Recomm
 import { RecommendationAuditDetails } from "@/features/page-speed-insights/RecommendationsSection/RecommendationAuditDetails";
 import { getRecommendationAuditId } from "@/features/page-speed-insights/RecommendationsSection/recommendationHelpers";
 import { recommendationMarkdownComponents } from "@/features/page-speed-insights/RecommendationsSection/recommendationMarkdownComponents";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 
 interface RecommendationItemProps {
   rec: Recommendation;
