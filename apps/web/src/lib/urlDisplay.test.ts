@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getHostnameFromUrl, parseUrlForDisplay } from "@/lib/urlDisplay";
+import { getHostFromUrl, parseUrlForDisplay } from "@/lib/urlDisplay";
 
 describe("parseUrlForDisplay", () => {
   it("returns parsed URL for valid URL with path", () => {
@@ -32,16 +32,16 @@ describe("parseUrlForDisplay", () => {
   });
 });
 
-describe("getHostnameFromUrl", () => {
+describe("getHostFromUrl", () => {
   it("returns hostname for valid URL", () => {
-    expect(getHostnameFromUrl("https://example.com/page")).toBe("example.com");
+    expect(getHostFromUrl("https://example.com/page")).toBe("example.com");
   });
 
   it("returns fallback for invalid URL", () => {
-    expect(getHostnameFromUrl("invalid")).toBe("Unknown");
+    expect(getHostFromUrl("invalid")).toBe("Unknown");
   });
 
   it("returns custom fallback when provided", () => {
-    expect(getHostnameFromUrl("invalid", "Custom")).toBe("Custom");
+    expect(getHostFromUrl("invalid", "Custom")).toBe("Custom");
   });
 });

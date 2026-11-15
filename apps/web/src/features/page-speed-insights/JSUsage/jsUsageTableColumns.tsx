@@ -8,7 +8,7 @@ import type { TreeMapNode } from "@/lib/schema";
 import type { TableFeatures } from "@tanstack/table-core";
 import { constructAggregationFn, type RowData } from "@tanstack/react-table";
 import { ExpandRow, ExpandAll, RenderBytesCell } from "./jsUsageTableParts";
-import { getHostnameFromUrl } from "@/lib/urlDisplay";
+import { getHostFromUrl } from "@/lib/urlDisplay";
 
 declare module "@tanstack/table-core" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -17,7 +17,7 @@ declare module "@tanstack/table-core" {
   }
 }
 
-const getHostName = (row: TreeMapNode) => getHostnameFromUrl(row.name);
+const getHostName = (row: TreeMapNode) => getHostFromUrl(row.name);
 
 const columnHelper = createColumnHelper<TreeMapNode>();
 
