@@ -7,10 +7,6 @@ vi.mock("next/font/google", () => ({
   Geist_Mono: () => ({ variable: "font-geist-mono" }),
 }));
 
-vi.mock("@/app/providers", () => ({
-  QueryProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-
 vi.mock("@/app/PostHogProvider", () => ({
   PostHogProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
