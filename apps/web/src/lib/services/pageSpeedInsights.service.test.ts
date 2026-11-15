@@ -1,40 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const captureExceptionMock = vi.fn<(error: unknown) => void>();
-const executeMock = vi.fn<() => Promise<unknown>>();
-const whereMock = vi.fn<() => { execute: typeof executeMock }>(() => ({ execute: executeMock }));
-const deleteMock = vi.fn<(arg: unknown) => { where: typeof whereMock }>(() => ({
-  where: whereMock,
-}));
-const findFirstMock = vi.fn<(opts: unknown) => unknown>();
 
 vi.mock("@sentry/nextjs", () => ({
   captureException: (error: unknown) => captureExceptionMock(error),
-}));
-
-vi.mock("@/db/schema", () => ({
-  PageSpeedInsightsTable: {
-    url: "url",
-    status: "status",
-    date: "date",
-  },
-}));
-
-vi.mock("@/db", () => ({
-  db: {
-    query: {
-      PageSpeedInsightsTable: {
-        findFirst: (opts: unknown) => findFirstMock(opts),
-      },
-    },
-    delete: (arg: unknown) => deleteMock(arg),
-  },
-}));
-
-vi.mock("drizzle-orm", () => ({
-  and: (...args: unknown[]) => ({ type: "and", args }),
-  eq: (...args: unknown[]) => ({ type: "eq", args }),
-  gt: (...args: unknown[]) => ({ type: "gt", args }),
 }));
 
 import { requestPageSpeedData } from "@/lib/services/pageSpeedInsights.service";
@@ -42,9 +11,6 @@ import { requestPageSpeedData } from "@/lib/services/pageSpeedInsights.service";
 describe("pageSpeedInsights.service", () => {
   beforeEach(() => {
     captureExceptionMock.mockReset();
-    executeMock.mockReset();
-    whereMock.mockClear();
-    deleteMock.mockClear();
     vi.restoreAllMocks();
   });
 
