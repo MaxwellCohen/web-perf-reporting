@@ -67,12 +67,14 @@ describe("page-speed [publicId] page", () => {
       params: Promise.resolve({ publicId: "report-xyz-123" }),
     });
 
-    const { container } = render(component);
+    render(component);
 
     await waitFor(() => {
       expect(screen.getByTestId("page-speed-dashboard")).toBeInTheDocument();
     });
-    expect(container.firstChild).toMatchSnapshot();
+    expect(screen.getByTestId("page-speed-dashboard")).toHaveTextContent(
+      "Dashboard with 1 items, labels: Mobile, Desktop",
+    );
     expect(usePageSpeedInsightsQueryMock).toHaveBeenCalledWith("report-xyz-123");
   });
 });

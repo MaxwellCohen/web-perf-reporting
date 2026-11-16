@@ -31,7 +31,7 @@ vi.mock("@/components/ui/label", () => ({
 
 describe("OptionsSelector", () => {
   it("renders the title label and passes props through to ChartSelector", () => {
-    const { container } = render(
+    render(
       <OptionsSelector
         id="metric-selector"
         title="Metric"
@@ -40,7 +40,8 @@ describe("OptionsSelector", () => {
       />,
     );
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(screen.getByText("Metric")).toBeInTheDocument();
+    expect(screen.getByTestId("chart-selector")).toBeInTheDocument();
     expect(chartSelectorSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         id: "metric-selector",

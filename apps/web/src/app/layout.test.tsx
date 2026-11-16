@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { suppressConsoleError } from "@/test-utils";
 
@@ -30,7 +30,7 @@ describe("app/layout", () => {
   });
 
   it("renders the shared layout shell around the page content", () => {
-    const { container } = render(
+    render(
       <RootLayout>
         <div>Page content</div>
       </RootLayout>,
@@ -38,7 +38,10 @@ describe("app/layout", () => {
 
     expect(document.documentElement).toHaveAttribute("lang", "en");
     expect(document.documentElement).toHaveClass("dark");
-    expect(container.firstChild).toMatchSnapshot();
+    expect(screen.getByText("Mock top nav")).toBeInTheDocument();
+    expect(screen.getByRole("main")).toHaveTextContent("Page content");
+    expect(screen.getByRole("link", { name: "Privacy" })).toHaveAttribute("href", "/privacy");
+    expect(screen.getByRole("link", { name: "Terms" })).toHaveAttribute("href", "/terms");
     expect(document.body).toHaveClass("font-geist-sans", "font-geist-mono", "antialiased");
   });
 });
