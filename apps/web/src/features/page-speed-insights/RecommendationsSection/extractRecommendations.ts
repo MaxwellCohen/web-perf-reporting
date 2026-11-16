@@ -1,3 +1,4 @@
+import { getHostFromUrl } from "@/lib/urlDisplay";
 import {
   formatBytesOptional,
   formatMsOptional,
@@ -17,18 +18,6 @@ function getResourceName(url: string): string {
     return url.length > 50 ? url.substring(0, 50) + "..." : url;
   } catch {
     return url.length > 50 ? url.substring(0, 50) + "..." : url;
-  }
-}
-
-function getHost(url: string | undefined): string {
-  if (!url || url.startsWith("data:") || url.startsWith("#")) return "";
-  try {
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      return new URL(url).host;
-    }
-    return "";
-  } catch {
-    return "";
   }
 }
 
@@ -103,7 +92,7 @@ export function extractSpecificRecommendations(
 
   const topResources = Array.from(resourceMap.entries()).map(([resourceName, item]) => {
     const url = item.url;
-    const host = getHost(url);
+    const host = getHostFromUrl(url ?? "", "");
     // Create markdown link if URL exists
     const resourceLink = url ? `[${resourceName}](${url})` : resourceName;
 

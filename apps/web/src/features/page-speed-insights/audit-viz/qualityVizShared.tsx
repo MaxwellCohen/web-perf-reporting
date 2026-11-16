@@ -1,5 +1,6 @@
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import type { OpportunityItem, TableItem } from "@/lib/schema";
+import { getHostFromUrl } from "@/lib/urlDisplay";
 
 export type AnyItem = TableItem | OpportunityItem;
 export type ReportItems = { label: string; items: AnyItem[] };
@@ -16,11 +17,7 @@ export function hasAnyItems(reports: ReportItems[]): boolean {
 }
 
 export function hostOf(url: string): string {
-  try {
-    return new URL(url).host || url;
-  } catch {
-    return url;
-  }
+  return getHostFromUrl(url, url);
 }
 
 /** Reads a plain string from a string or `{ value | text | snippet }` wrapper. */

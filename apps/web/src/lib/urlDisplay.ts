@@ -23,9 +23,13 @@ export function parseUrlForDisplay(urlString: string): ParsedUrlDisplay | null {
 }
 
 /**
- * Extract hostname from a URL string. Returns fallback if parsing fails.
+ * Host of a URL (hostname plus any non-default port). Returns fallback when the
+ * string is not a URL or has no host (data:, file:, fragments).
  */
-export function getHostnameFromUrl(urlString: string, fallback = "Unknown"): string {
-  const parsed = parseUrlForDisplay(urlString);
-  return parsed?.hostname ?? fallback;
+export function getHostFromUrl(urlString: string, fallback = "Unknown"): string {
+  try {
+    return new URL(urlString).host || fallback;
+  } catch {
+    return fallback;
+  }
 }
