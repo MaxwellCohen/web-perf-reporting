@@ -1,6 +1,7 @@
 import http from "node:http";
 import https from "node:https";
-import { appendChunk, isLateChunk, LATE_TAIL_CHARS, makePreview, normalizeMeasurement } from "./analyze";
+import { appendChunk, isLateChunk, LATE_TAIL_CHARS, makePreview } from "@maxwellcohen/stream-core";
+import { normalizeMeasurement } from "./analyze";
 import type { StreamChunk, StreamMeasurement } from "./types";
 import { assertPublicHttpUrl, guardedLookup } from "./urlGuard";
 

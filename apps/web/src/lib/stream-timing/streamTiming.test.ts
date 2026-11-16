@@ -1,10 +1,11 @@
+import { isLateChunk, LATE_MARKER_SOURCE } from "@maxwellcohen/stream-core";
 import { describe, expect, it } from "vitest";
 import { analyze, normalizeMeasurement } from "./analyze";
 import { decodeMeasurement, encodeMeasurement } from "./share";
 import type { StreamMeasurement } from "./types";
 import { StreamUrlError, assertPublicHttpUrl, isPrivateIp } from "./urlGuard";
 import { parseMeasurement } from "./validate";
-import { isLateChunk, LATE_MARKER_SOURCE, renderStreamMarkdown, sanitizeText } from "./analyze";
+import { renderStreamMarkdown, sanitizeText } from "./analyze";
 import { clientKey } from "./rateLimit";
 import { compareAnalyses, compareVerdict, renderCompareMarkdown } from "./compare";
 import { shareCompareUrlFor } from "./share";

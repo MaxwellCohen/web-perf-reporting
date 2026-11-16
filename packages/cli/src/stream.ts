@@ -1,7 +1,13 @@
 import type { Format } from "./core.js";
 import { assertHttpUrl, DEFAULT_API } from "./core.js";
-import { appendChunk, GAP_THRESHOLD_MS, isLateChunk, LATE_TAIL_CHARS, makePreview } from "@maxwellcohen/stream-core";
-import type { StreamChunk } from "@maxwellcohen/stream-core";
+import {
+  appendChunk,
+  GAP_THRESHOLD_MS,
+  isLateChunk,
+  LATE_TAIL_CHARS,
+  makePreview,
+  type StreamChunk,
+} from "@maxwellcohen/stream-core";
 
 const MAX_BYTES = 5_000_000;
 const MAX_REDIRECTS = 5;

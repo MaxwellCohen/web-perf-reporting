@@ -2,22 +2,9 @@ import {
   appendChunk,
   COALESCE_MS,
   GAP_THRESHOLD_MS,
-  isLateChunk,
-  LATE_MARKER_SOURCE,
-  LATE_TAIL_CHARS,
-  makePreview,
   PREVIEW_CHARS,
 } from "@maxwellcohen/stream-core";
 import type { StreamAnalysis, StreamChunk, StreamGap, StreamMeasurement } from "./types";
-
-export {
-  appendChunk,
-  GAP_THRESHOLD_MS,
-  isLateChunk,
-  LATE_MARKER_SOURCE,
-  LATE_TAIL_CHARS,
-  makePreview,
-};
 
 /** Soft cap: merging never crosses a reportable gap, so long runs with many >=100ms gaps may exceed it (~300 max). */
 const MAX_CHUNKS = 200;
@@ -26,11 +13,13 @@ const MAX_FIELD = 2048;
 
 /** Remove characters that could break out of markdown code spans or inject lines. */
 export function sanitizeText(text: string, max = 200): string {
-  return text
-    // eslint-disable-next-line no-control-regex
-    .replace(/[`\u0000-\u001f\u007f\u2028\u2029]+/g, " ")
-    .trim()
-    .slice(0, max);
+  return (
+    text
+      // eslint-disable-next-line no-control-regex
+      .replace(/[`\u0000-\u001f\u007f\u2028\u2029]+/g, " ")
+      .trim()
+      .slice(0, max)
+  );
 }
 
 const clip = (v: string | undefined) => (v === undefined ? v : v.slice(0, MAX_FIELD));
