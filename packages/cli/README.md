@@ -74,5 +74,5 @@ Notes:
 |------|-------|-------|
 | `audit_site` | `url`, `device?` | ~30–90 s |
 | `analyze_report` | Lighthouse/PSI report JSON | fast |
-| `measure_stream` | `url` | a few seconds |
+| `measure_stream` | `url`, `compareUrl?` | a few seconds |
 | `analyze_trace` | `trace` JSON or a local `file`, optional drill-down `command` | local, fast |

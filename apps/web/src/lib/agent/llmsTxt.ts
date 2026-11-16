@@ -93,6 +93,8 @@ Record a Chrome trace of any URL and get findings back:
 
 Or POST an existing trace (\`.json\` or \`.json.gz\`, under 4 MB compressed and 24 MB decompressed) to \`${siteUrl}/api/agent/trace\`. \`?format=md\` returns the fix prompt; the default JSON has \`summary\`, \`metrics\` (ttfb, fcp, lcp, cls, blockingMs), \`insights\` (LCP/INP/CLS subparts, render-blocking resources, third parties), \`analysis\` (key events, phases, scripts, hot functions) and \`brief\`. 400 means the body was not a usable trace. For the interactive timeline, open \`${siteUrl}/trace\`.
 
+For a trace over that limit, or to drill into long tasks, call trees, network requests, interactions and layout shifts, analyze the file locally: \`npx -y @maxwellcohen/web-perf-report trace <file>\` (commands and flags: \`trace --help\`). The CLI's MCP server exposes the same analysis as the \`analyze_trace\` tool.
+
 ## Human UI
 
 - [Insights](${siteUrl}/page-speed): enter a URL or upload the same JSON to explore it with charts, film strip, and full tables.
