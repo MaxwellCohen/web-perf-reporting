@@ -11,9 +11,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatBytes, formatMs } from "@/features/page-speed-insights/shared/format";
-import { cn } from "@/lib/cn";
+import { LCP_PHASE_COLORS } from "@/features/page-speed-insights/shared/lcpPhaseColors";
+import { cn } from "@/lib/utils";
 import { shortUrl } from "./analyzeLoad";
-import type { Rating, TraceInsights } from "./insights";
+import type { LcpSubpart, Rating, TraceInsights } from "./insights";
 
 const RATING: Record<Rating, string> = {
   good: "bg-green-500/15 text-green-700 dark:text-green-300",
@@ -21,8 +22,14 @@ const RATING: Record<Rating, string> = {
   poor: "bg-red-500/15 text-red-700 dark:text-red-300",
 };
 
-const LCP_COLORS = ["bg-[#2f7fd6]", "bg-[#e6a700]", "bg-[#2f9e5e]", "bg-[#8e5bd6]"];
-const INP_COLORS = ["bg-[#2f7fd6]", "bg-[#e6a700]", "bg-[#8e5bd6]"];
+/** Same colour per subpart as the PageSpeed LCP breakdown; none of them is a rating hue. */
+const LCP_COLORS: Record<LcpSubpart["key"], string> = {
+  ttfb: LCP_PHASE_COLORS.timeToFirstByte,
+  loadDelay: LCP_PHASE_COLORS.resourceLoadDelay,
+  loadDuration: LCP_PHASE_COLORS.resourceLoadDuration,
+  renderDelay: LCP_PHASE_COLORS.elementRenderDelay,
+};
+const INP_COLORS = ["bg-sky-500", "bg-violet-500", "bg-fuchsia-500"];
 
 /** Trace URLs are untrusted; only link to real web resources. */
 const isHttpUrl = (url: string) => /^https?:\/\//i.test(url);
@@ -100,12 +107,16 @@ export function InsightsPanel({ insights }: { insights: TraceInsights }) {
 
       {lcp && (
         <Section title="LCP breakdown" value={formatMs(lcp.timeMs)}>
-          <StackedBar segments={lcp.subparts} colors={LCP_COLORS} label="LCP subparts" />
+          <StackedBar
+            segments={lcp.subparts}
+            colors={lcp.subparts.map((s) => LCP_COLORS[s.key])}
+            label="LCP subparts"
+          />
           <div className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
-            {lcp.subparts.map((s, i) => (
+            {lcp.subparts.map((s) => (
               <div key={s.key} className="rounded-md border p-2">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <i className={cn("inline-block size-2.5 rounded-sm", LCP_COLORS[i % LCP_COLORS.length])} aria-hidden />
+                  <i className={cn("inline-block size-2.5 rounded-sm", LCP_COLORS[s.key])} aria-hidden />
                   {s.label}
                 </div>
                 <div className="mt-1 font-mono text-base tabular-nums">{formatMs(s.ms)}</div>
