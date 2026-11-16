@@ -143,7 +143,12 @@ function FilterPopover<TData extends RowData>({
   const map: Record<string, () => ReactNode> = {
     includesString: () => <StringFilterHeader column={header.column} name={""} />,
     booleanFilterFn: () => <CheckBoxFilter header={header} />,
-    inNumberRange: () => <RangeFilterInputs column={header.column} />,
+    // Re-render on filter changes so the inputs and Reset reflect the live filter value.
+    inNumberRange: () => (
+      <Subscribe source={header.getContext().table.atoms.columnFilters}>
+        {() => <RangeFilterInputs column={header.column} />}
+      </Subscribe>
+    ),
   };
   if (!(filterType in map)) {
     return null;

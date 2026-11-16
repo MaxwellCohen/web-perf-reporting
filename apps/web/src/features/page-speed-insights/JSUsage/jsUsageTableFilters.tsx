@@ -129,6 +129,9 @@ type RangeFilterColumn = {
 };
 
 export function RangeFilterInputs({ column }: { column: RangeFilterColumn }) {
+  // `column` is a stable object whose filter value changes underneath it; memoizing reads
+  // of it would freeze the inputs and the Reset button at their first values.
+  "use no memo";
   const id = useId();
   const [minValue, maxValue] = (column.getFacetedMinMaxValues() as [number, number]) ?? [0, 100];
   const [fMin, fMax] = (column.getFilterValue() as [number, number]) ?? [minValue, maxValue];
@@ -159,6 +162,10 @@ export function RangeFilterInputs({ column }: { column: RangeFilterColumn }) {
 
   const handleMinChange = (value: string) => {
     setLocalMin(value);
+    if (value.trim() === "") {
+      updateFilter(minValue, fMax);
+      return;
+    }
     const parsed = Number(value);
     if (Number.isNaN(parsed)) {
       return;
@@ -168,6 +175,10 @@ export function RangeFilterInputs({ column }: { column: RangeFilterColumn }) {
 
   const handleMaxChange = (value: string) => {
     setLocalMax(value);
+    if (value.trim() === "") {
+      updateFilter(fMin, maxValue);
+      return;
+    }
     const parsed = Number(value);
     if (Number.isNaN(parsed)) {
       return;

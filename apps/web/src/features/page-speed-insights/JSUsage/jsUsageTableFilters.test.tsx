@@ -66,5 +66,20 @@ describe("jsUsageTableFilters", () => {
 
       vi.useRealTimers();
     });
+
+    it("treats an emptied max field as no upper bound instead of zero", async () => {
+      vi.useFakeTimers();
+      const { getByLabelText, getByTestId } = render(<RangeFilterWrapper />);
+
+      fireEvent.change(getByLabelText("Max"), { target: { value: "60" } });
+      await vi.advanceTimersByTimeAsync(300);
+      expect(getByTestId("filter-value").textContent).toBe("[50,60]");
+
+      fireEvent.change(getByLabelText("Max"), { target: { value: "" } });
+      await vi.advanceTimersByTimeAsync(300);
+      expect(getByTestId("filter-value").textContent).toBe("[50,100]");
+
+      vi.useRealTimers();
+    });
   });
 });

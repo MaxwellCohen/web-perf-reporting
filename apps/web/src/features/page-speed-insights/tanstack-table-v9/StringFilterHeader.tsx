@@ -3,6 +3,7 @@ import { useId } from "react";
 import { Label } from "@/components/ui/label";
 import { DebouncedInput } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { itemValueText } from "@/features/page-speed-insights/shared/itemValueText";
 
 const MAX_DATALIST_OPTIONS = 5000;
 
@@ -25,7 +26,9 @@ export function StringFilterHeader({
   const id = useId();
   const uniqueValues = column?.getFacetedUniqueValues();
   const sortedUniqueValues = uniqueValues
-    ? Array.from(uniqueValues.keys(), String).sort().slice(0, MAX_DATALIST_OPTIONS)
+    ? Array.from(new Set(Array.from(uniqueValues.keys(), itemValueText)))
+        .sort()
+        .slice(0, MAX_DATALIST_OPTIONS)
     : [];
 
   if (!column) {

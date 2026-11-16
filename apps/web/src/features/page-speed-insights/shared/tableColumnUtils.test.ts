@@ -19,6 +19,7 @@ describe("tableColumnUtils", () => {
       enableResizing: true,
       filterFn: "inNumberRange",
       enableSorting: true,
+      sortFn: expect.any(Function),
       enableColumnFilter: true,
       meta: {
         heading: {
