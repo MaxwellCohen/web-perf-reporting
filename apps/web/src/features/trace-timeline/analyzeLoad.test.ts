@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { analyzeLoad, hotFunctions } from "./analyzeLoad";
 import { buildFixPrompt } from "./fixPrompt";
+import { buildInsights } from "./insights";
 import { parseTrace } from "./parseTrace";
 
 const M = (pid: number, tid: number, name: string) => ({ name: "thread_name", ph: "M", pid, tid, ts: 0, args: { name } });
@@ -44,6 +45,36 @@ describe("analyzeLoad", () => {
     expect(p).toContain("Long task");
     expect(p).toContain("Re-record a trace");
   });
+  it("does not report third-party CPU time as zero when the trace has no CPU profile", () => {
+    const withThirdParty = (profile: boolean) => {
+      const t = parseTrace({
+        traceEvents: [
+          M(1, 2, "CrRendererMain"),
+          { name: "navigationStart", ph: "R", pid: 1, tid: 2, ts: 1_000_000, args: { frame, data: { isOutermostMainFrame: true, documentLoaderURL: "https://x.test/" } } },
+          { name: "ResourceSendRequest", ph: "I", pid: 1, tid: 2, ts: 1_100_000, args: { data: { requestId: "tp", url: "https://cdn.test/tag.js", resourceType: "Script" } } },
+          { name: "ResourceFinish", ph: "I", pid: 1, tid: 2, ts: 1_200_000, args: { data: { requestId: "tp", encodedDataLength: 4096 } } },
+          ...(profile
+            ? [
+                { name: "Profile", ph: "P", pid: 1, tid: 2, ts: 1_000_000, args: { data: { startTime: 1_000_000 } } },
+                { name: "ProfileChunk", ph: "P", pid: 1, tid: 2, ts: 1_500_000, args: { data: { cpuProfile: { nodes: [{ id: 1, callFrame: { functionName: "(root)" } }, { id: 2, parent: 1, callFrame: { functionName: "tag", url: "https://cdn.test/tag.js", lineNumber: 1 } }], samples: [2, 2] }, timeDeltas: [150_000, 20_000] } } },
+              ]
+            : []),
+        ],
+      });
+      const load = analyzeLoad(t);
+      return buildFixPrompt(load, buildInsights(t, load));
+    };
+
+    const without = withThirdParty(false);
+    expect(without).toContain("## Third parties (by transfer size)");
+    expect(without).toContain("https://cdn.test 4 KB · 1 requests");
+    expect(without).not.toContain("CPU");
+
+    const withProfile = withThirdParty(true);
+    expect(withProfile).toContain("## Third parties (by main-thread time)");
+    expect(withProfile).toContain("https://cdn.test 20 ms CPU · 4 KB · 1 requests");
+  });
+
   it("counts the same render-blocking requests as the insights panel", () => {
     const kinds = ["blocking", "in_body_parser_blocking", "potentially_blocking"];
     const names = ["a-blocking.css", "b-inbody.css", "c-potential.css"];

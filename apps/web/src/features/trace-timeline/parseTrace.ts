@@ -254,6 +254,8 @@ export class TraceBuilder {
     if (e.name === "EventTiming") {
       const d = (e.args?.data ?? {}) as TraceData;
       const id = String(e.id ?? "");
+      // Chrome moved the frame from `args.frame` to `args.data.frame` in 2022.
+      const frame = (e.args?.frame ?? d.frame) as string | undefined;
       if (e.ph === "b") {
         const interactionId = Number(d.interactionId);
         const duration = Number(d.duration);
@@ -261,7 +263,7 @@ export class TraceBuilder {
           this.eventTimingStarts.push({
             id,
             pid: e.pid,
-            frame: e.args?.frame as string | undefined,
+            frame,
             ts: e.ts,
             type: String(d.type ?? "interaction"),
             interactionId,
@@ -272,7 +274,7 @@ export class TraceBuilder {
           });
         }
       } else if (e.ph === "e") {
-        this.eventTimingEnds.push({ id, pid: e.pid, frame: e.args?.frame as string | undefined, ts: e.ts });
+        this.eventTimingEnds.push({ id, pid: e.pid, frame, ts: e.ts });
       }
       return;
     }
@@ -451,7 +453,8 @@ export class TraceBuilder {
       if (e.name === "ResourceFinish") {
         // `ResourceFinish.ts` fires after decode; DevTools' network finish (and
         // the LCP subparts) use `finishTime`, which is seconds on the trace clock.
-        const finish = typeof d.finishTime === "number" && Number.isFinite(d.finishTime) ? d.finishTime : undefined;
+        // Chrome writes 0 (or omits it) when it has no network finish time, e.g. cache hits.
+        const finish = typeof d.finishTime === "number" && d.finishTime > 0 && Number.isFinite(d.finishTime) ? d.finishTime : undefined;
         const finishMs = finish !== undefined ? (finish * 1e6 - t0) / 1000 : ms;
         r.end = Math.max(r.end, finishMs);
         r.transferSize = d.encodedDataLength; r.resourceSize = d.decodedBodyLength;
@@ -459,8 +462,10 @@ export class TraceBuilder {
       }
       r.end = Math.max(r.end, ms);
       if (e.name === "ResourceReceiveResponse") {
-        const tm = d.timing as { requestTime?: number; receiveHeadersEnd?: number } | undefined;
-        if (tm?.requestTime && tm.receiveHeadersEnd != null) r.headersAt = (tm.requestTime * 1e6 + tm.receiveHeadersEnd * 1000 - t0) / 1000;
+        const tm = d.timing as { requestTime?: number; receiveHeadersStart?: number; receiveHeadersEnd?: number } | undefined;
+        // First byte, like DevTools: the start of the headers when Chrome records it (-1 means it did not).
+        const firstByte = tm?.receiveHeadersStart != null && tm.receiveHeadersStart >= 0 ? tm.receiveHeadersStart : tm?.receiveHeadersEnd;
+        if (tm?.requestTime && firstByte != null) r.headersAt = (tm.requestTime * 1e6 + firstByte * 1000 - t0) / 1000;
         r.statusCode = d.statusCode; r.mimeType = d.mimeType; r.protocol = d.protocol; r.fromCache = d.fromCache;
       }
     }

@@ -27,7 +27,7 @@ export type ClsCluster = {
   nodes: string[];
 };
 
-export type InteractionBreakdown = {
+type InteractionBreakdown = {
   type: string;
   target?: string;
   interactionId: number;
@@ -47,7 +47,7 @@ export type InpInsight = {
   interactions: InteractionBreakdown[];
 };
 
-export type RenderBlockingResource = {
+type RenderBlockingResource = {
   url: string;
   startMs: number;
   endMs: number;
@@ -56,7 +56,7 @@ export type RenderBlockingResource = {
   type?: string;
 };
 
-export type ThirdParty = {
+type ThirdParty = {
   origin: string;
   requests: number;
   transferBytes: number;
@@ -147,16 +147,20 @@ export function buildLcpBreakdown(trace: ParsedTrace, origin = trace.navigation?
     // Prefer the matched network request: DevTools' own LCP breakdown uses the
     // request's synthetic finish time, not the candidate's imageLoad* fields.
     const request = lcpRequestFor(trace, lcp, origin);
-    if (request) {
-      const start = request.start - origin;
-      const end = request.end - origin;
+    const load = request
+      ? { start: request.start - origin, end: request.end - origin }
+      : lcp.type === "image" && lcp.imageLoadStart != null && lcp.imageLoadEnd != null
+        ? { start: lcp.imageLoadStart, end: lcp.imageLoadEnd }
+        : undefined;
+    if (load) {
+      // Clamp the load window into [TTFB, LCP] so the subparts always sum to
+      // the LCP total, even for a preload sent before the first byte or an
+      // image that keeps loading after it was painted.
+      const start = Math.min(Math.max(load.start, ttfbMs), lcpMs);
+      const end = Math.min(Math.max(load.end, start), lcpMs);
       add("loadDelay", "Resource load delay", start - ttfbMs);
       add("loadDuration", "Resource load duration", end - start);
       add("renderDelay", "Element render delay", lcpMs - end);
-    } else if (lcp.type === "image" && lcp.imageLoadStart != null && lcp.imageLoadEnd != null) {
-      add("loadDelay", "Resource load delay", lcp.imageLoadStart - ttfbMs);
-      add("loadDuration", "Resource load duration", lcp.imageLoadEnd - lcp.imageLoadStart);
-      add("renderDelay", "Element render delay", lcpMs - lcp.imageLoadEnd);
     } else {
       add("renderDelay", "Element render delay", lcpMs - ttfbMs);
     }
@@ -232,7 +236,7 @@ export function buildInp(trace: ParsedTrace, origin = trace.navigation?.time ?? 
   };
 }
 
-export function buildRenderBlocking(
+function buildRenderBlocking(
   trace: ParsedTrace,
   origin = trace.navigation?.time ?? 0,
 ): RenderBlockingResource[] {
@@ -254,7 +258,7 @@ export function buildRenderBlocking(
 }
 
 /** Requests and CPU time per third-party origin (anything not the document's origin). */
-export function buildThirdParties(
+function buildThirdParties(
   trace: ParsedTrace,
   load: Pick<LoadAnalysis, "lcp">,
   origin = trace.navigation?.time ?? 0,

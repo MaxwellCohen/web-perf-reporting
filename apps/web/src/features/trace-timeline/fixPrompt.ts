@@ -60,11 +60,14 @@ export function buildFixPrompt(a: LoadAnalysis, insights?: TraceInsights): strin
     );
   }
   if (insights?.thirdParties.length) {
+    // CPU time comes from the trace's CPU profile; without one it is unknown, not zero.
+    const hasCpu = insights.thirdParties.some((t) => t.mainThreadMs > 0);
     lines.push("");
-    lines.push("## Third parties (by main-thread time)");
+    lines.push(`## Third parties (by ${hasCpu ? "main-thread time" : "transfer size"})`);
     lines.push("```text");
     for (const t of insights.thirdParties.slice(0, 5)) {
-      lines.push(`${clean(t.origin, 80)} ${ms(t.mainThreadMs)} CPU · ${Math.round(t.transferBytes / 1024)} KB · ${t.requests} requests`);
+      const cpu = hasCpu ? `${ms(t.mainThreadMs)} CPU · ` : "";
+      lines.push(`${clean(t.origin, 80)} ${cpu}${Math.round(t.transferBytes / 1024)} KB · ${t.requests} requests`);
     }
     lines.push("```");
   }

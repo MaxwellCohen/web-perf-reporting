@@ -22,7 +22,8 @@ describe("parseTrace", () => {
   it("pairs EventTiming per frame and after the navigation", () => {
     const T0 = 1_000_000;
     const at = (ms: number) => T0 + ms * 1000;
-    const timing = (id: string, frame: string, type: string, interactionId: number, ms: number) => [
+    // Chrome wrote the frame in `args.frame` until 2022 and in `args.data.frame` since.
+    const timing = (id: string, frame: string, type: string, interactionId: number, ms: number, legacy = false) => [
       {
         name: "EventTiming",
         ph: "b",
@@ -31,8 +32,9 @@ describe("parseTrace", () => {
         tid: 2,
         ts: at(ms),
         args: {
-          frame,
+          ...(legacy ? { frame } : {}),
           data: {
+            ...(legacy ? {} : { frame }),
             type,
             interactionId,
             timeStamp: at(ms) / 1000,
@@ -43,7 +45,7 @@ describe("parseTrace", () => {
           },
         },
       },
-      { name: "EventTiming", ph: "e", id, pid: 1, tid: 2, ts: at(ms + 200), args: { frame } },
+      { name: "EventTiming", ph: "e", id, pid: 1, tid: 2, ts: at(ms + 200), args: legacy ? { frame } : { data: {} } },
     ];
     const t = parseTrace({
       traceEvents: [
@@ -59,10 +61,12 @@ describe("parseTrace", () => {
         // Before the navigation, and on another frame: both are ignored.
         ...timing("before", "F1", "click", 9, -50),
         ...timing("other-frame", "F2", "click", 2, 100),
+        ...timing("other-frame-legacy", "F2", "click", 3, 100, true),
         ...timing("nav-frame", "F1", "pointerdown", 1, 100),
+        ...timing("nav-frame-legacy", "F1", "keydown", 4, 400, true),
       ],
     });
-    expect(t.interactions).toHaveLength(1);
+    expect(t.interactions.map((i) => i.interactionId)).toEqual([1, 4]);
     expect(t.interactions[0]).toMatchObject({ type: "pointerdown", interactionId: 1, target: "BUTTON" });
   });
 
@@ -91,6 +95,67 @@ describe("parseTrace", () => {
     });
     // t0 is the first timed event (the send at 300 ms), so finishTime is 50 ms.
     expect(t.requests[0].end).toBeCloseTo(50);
+  });
+
+  it("falls back to the ResourceFinish ts when Chrome has no network finish time", () => {
+    const T0 = 1_000_000;
+    const finish = (requestId: string, data: object) => ({
+      name: "ResourceFinish",
+      ph: "I",
+      pid: 1,
+      tid: 2,
+      ts: T0 + 200_000,
+      args: { data: { requestId, ...data } },
+    });
+    const t = parseTrace({
+      traceEvents: [
+        meta(1, 2, "CrRendererMain"),
+        ...["zero", "missing"].map((requestId) => ({
+          name: "ResourceSendRequest",
+          ph: "I",
+          pid: 1,
+          tid: 2,
+          ts: T0,
+          args: { data: { requestId, url: `https://x.test/${requestId}.js`, resourceType: "Script" } },
+        })),
+        // Chrome writes finishTime 0 (or leaves it out) for e.g. memory-cache hits.
+        finish("zero", { finishTime: 0 }),
+        finish("missing", {}),
+      ],
+    });
+    expect(t.requests.map((r) => r.end)).toEqual([200, 200]);
+  });
+
+  it("times the first byte from receiveHeadersStart, like DevTools", () => {
+    const T0 = 1_000_000;
+    const response = (requestId: string, timing: object) => [
+      {
+        name: "ResourceSendRequest",
+        ph: "I",
+        pid: 1,
+        tid: 2,
+        ts: T0,
+        args: { data: { requestId, url: `https://x.test/${requestId}`, resourceType: "Document" } },
+      },
+      {
+        name: "ResourceReceiveResponse",
+        ph: "I",
+        pid: 1,
+        tid: 2,
+        ts: T0 + 130_000,
+        args: { data: { requestId, statusCode: 200, timing: { requestTime: T0 / 1e6, ...timing } } },
+      },
+    ];
+    const t = parseTrace({
+      traceEvents: [
+        meta(1, 2, "CrRendererMain"),
+        ...response("modern", { receiveHeadersStart: 100, receiveHeadersEnd: 120 }),
+        // Older Chrome has no start; -1 means "not recorded".
+        ...response("older", { receiveHeadersEnd: 120 }),
+        ...response("unknown", { receiveHeadersStart: -1, receiveHeadersEnd: 120 }),
+      ],
+    });
+    expect(t.requests.map((r) => r.headersAt)).toEqual([100, 120, 120]);
   });
 
   it("maps LCP candidate nodes to the painted image URL", () => {

@@ -176,6 +176,35 @@ describe("trace insights", () => {
     expect(parts).toEqual({ ttfb: 100, loadDelay: 200, loadDuration: 100, renderDelay: 300 });
   });
 
+  it("keeps the LCP subparts summing to the total when the image load window is out of range", () => {
+    const lcpWithImage = (sendMs: number, finishMs: number) =>
+      parseTrace({
+        traceEvents: [
+          meta,
+          R("navigationStart", 0, { isOutermostMainFrame: true, documentLoaderURL: "https://x.test/" }),
+          resource("ResourceSendRequest", 10, { requestId: "doc", url: "https://x.test/", resourceType: "Document" }),
+          resource("ResourceReceiveResponse", 110, { requestId: "doc", statusCode: 200, timing: { requestTime: 1, receiveHeadersEnd: 100 } }),
+          resource("ResourceSendRequest", sendMs, { requestId: "img", url: "https://cdn.test/a.png", resourceType: "Image" }),
+          resource("ResourceFinish", finishMs, { requestId: "img", finishTime: T0 / 1e6 + finishMs / 1000 }),
+          R("largestContentfulPaint::Candidate", 700, { nodeName: "IMG", type: "image", size: 100, nodeId: 5 }),
+          R("LargestImagePaint::Candidate", 700, { DOMNodeId: 5, imageUrl: "https://cdn.test/a.png" }),
+        ],
+      });
+    const parts = (sendMs: number, finishMs: number) =>
+      Object.fromEntries((buildLcpBreakdown(lcpWithImage(sendMs, finishMs))?.subparts ?? []).map((s) => [s.key, Math.round(s.ms)]));
+    const total = (p: Record<string, number>) => Object.values(p).reduce((sum, ms) => sum + ms, 0);
+
+    // An early-hints preload is sent before the document's first byte (100 ms).
+    const preload = parts(40, 300);
+    expect(preload).toEqual({ ttfb: 100, loadDuration: 200, renderDelay: 400 });
+    expect(total(preload)).toBe(700);
+
+    // A progressive image is painted (700 ms) before its last byte arrives.
+    const progressive = parts(300, 900);
+    expect(progressive).toEqual({ ttfb: 100, loadDelay: 200, loadDuration: 400 });
+    expect(total(progressive)).toBe(700);
+  });
+
   it("groups shifts into 1 s / 5 s session windows and reports the worst window", () => {
     const cls = buildClsClusters(build());
     expect(cls.clusters).toHaveLength(2);
