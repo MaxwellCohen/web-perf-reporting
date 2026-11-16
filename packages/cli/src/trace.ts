@@ -51,7 +51,6 @@ export interface LoadedTrace {
   rawEvents: unknown[];
   // The engine's parsed data is intentionally untyped here: its public types are
   // huge and vary between engine versions.
-  // biome-ignore lint/suspicious/noExplicitAny: version-tolerant engine data
   parsedTrace: any;
   file?: string;
 }
@@ -348,7 +347,6 @@ interface RawThreadEntry {
   name: string;
   ts: number;
   dur?: number;
-  // biome-ignore lint/suspicious/noExplicitAny: raw trace event payloads
   args?: { data?: Record<string, any> };
 }
 interface RawThread {
@@ -416,15 +414,20 @@ function insightEntry(parsedTrace: LoadedTrace["parsedTrace"], navigationId?: st
     }
     return null;
   }
+  // Default to the first navigation. A trace that starts well before the page
+  // load also has a leading "NO_NAVIGATION" set for that idle period, which
+  // has no LCP, render-blocking or third-party data.
+  let first: { id: string; model: RawInsightModel } | null = null;
   for (const [key, value] of insights) {
-    return { id: key, model: (value.model ?? value) as RawInsightModel };
+    const entry = { id: key, model: (value.model ?? value) as RawInsightModel };
+    if (value.navigation) return entry;
+    first ??= entry;
   }
-  return null;
+  return first;
 }
 
 function frameOf(entry: RawThreadEntry): { functionName?: string; url?: string; lineNumber?: number; columnNumber?: number } {
   try {
-    // biome-ignore lint/suspicious/noExplicitAny: engine helper accepts raw events
     const frame = traceEngine.Extras.TraceTree.eventStackFrame(entry as any);
     return frame ?? {};
   } catch {
@@ -474,10 +477,11 @@ export interface InsightsReport {
   navigationId?: string;
   lcpBreakdown?: {
     totalLcpMs: number;
-    ttfbMs: number;
-    loadDelayMs: number;
-    loadDurationMs: number;
-    renderDelayMs: number;
+    /** Subparts are absent when the engine could not split the LCP (e.g. no document request). */
+    ttfbMs?: number;
+    loadDelayMs?: number;
+    loadDurationMs?: number;
+    renderDelayMs?: number;
     element?: string;
     url?: string;
   };
@@ -632,9 +636,17 @@ function buildOverview(loaded: LoadedTrace, range?: TimeRange): OverviewReport {
   const minMs = range ? range.startMs : ms(bounds.min);
   const maxMs = range ? range.endMs : ms(bounds.max);
 
-  const mainNavs = (data.Meta.mainFrameNavigations ?? []) as Array<{ ts: number }>;
-  const allNavs = [...(data.Meta.navigationsByNavigationId?.values() ?? [])] as Array<{ ts: number }>;
+  type RawNavigation = { ts: number; args?: { data?: { navigationId?: string; documentLoaderURL?: string } } };
+  const mainNavs = (data.Meta.mainFrameNavigations ?? []) as RawNavigation[];
+  const allNavs = [...(data.Meta.navigationsByNavigationId?.values() ?? [])] as RawNavigation[];
   const firstNav = mainNavs[0] ?? allNavs[0];
+  // The metrics below belong to the first main-frame navigation, so report its
+  // URL; `Meta.mainFrameURL` is the page that was open when tracing started.
+  const mainNav = mainNavs[0]?.args?.data;
+  const navigationUrl =
+    (mainNav?.navigationId
+      ? (data.Meta.finalDisplayUrlByNavigationId as Map<string, string> | undefined)?.get(mainNav.navigationId)
+      : undefined) || mainNav?.documentLoaderURL;
 
   const frameMetrics = data.PageLoadMetrics?.metricScoresByFrameId?.get(data.Meta.mainFrameId);
   const navMetrics = frameMetrics ? [...frameMetrics.values()][0] : undefined;
@@ -759,7 +771,7 @@ function buildOverview(loaded: LoadedTrace, range?: TimeRange): OverviewReport {
   return {
     command: "overview",
     file: loaded.file,
-    url: data.Meta.mainFrameURL ?? null,
+    url: navigationUrl || data.Meta.mainFrameURL || null,
     bounds: {
       minMs: round(minMs - traceStartMs),
       maxMs: round(maxMs - traceStartMs),
@@ -788,8 +800,10 @@ function buildInsights(loaded: LoadedTrace, options: AnalyzeOptions): InsightsRe
   const include = (category: string) => !options.category || options.category === category;
   const allowFallback = !options.navigationId;
 
-  if (include("lcp") && model?.LCPBreakdown) {
-    const l = model.LCPBreakdown;
+  // The model exists even without an LCP (it then only carries warnings).
+  const l = include("lcp") ? model?.LCPBreakdown : undefined;
+  if (l && (l.lcpMs !== undefined || l.subparts)) {
+    // A text LCP has no resource, so its two load subparts are 0.
     const range = (key: string) => round(ms(l.subparts?.[key]?.range ?? 0));
     const ttfbMs = range("ttfb");
     const loadDelayMs = range("loadDelay");
@@ -799,19 +813,13 @@ function buildInsights(loaded: LoadedTrace, options: AnalyzeOptions): InsightsRe
       // `lcpTs` is a trace timestamp, not a duration: never fall back to it.
       // Without `lcpMs`, the subparts are the only navigation-relative total.
       totalLcpMs: round(l.lcpMs ?? ttfbMs + loadDelayMs + loadDurationMs + renderDelayMs),
-      ttfbMs,
-      loadDelayMs,
-      loadDurationMs,
-      renderDelayMs,
+      ...(l.subparts ? { ttfbMs, loadDelayMs, loadDurationMs, renderDelayMs } : {}),
       element: l.lcpEvent?.args?.data?.nodeName,
       url: l.lcpRequest?.args?.data?.url,
     };
-    if (result.lcpBreakdown.renderDelayMs > 1000) {
-      warnings.push(`High LCP element render delay: ${result.lcpBreakdown.renderDelayMs}ms.`);
-    }
-    if (result.lcpBreakdown.loadDelayMs > 1000) {
-      warnings.push(`High LCP resource load delay: ${result.lcpBreakdown.loadDelayMs}ms.`);
-    }
+    if (!l.subparts) warnings.push("LCP could not be split into subparts (no document request in the trace).");
+    if (renderDelayMs > 1000) warnings.push(`High LCP element render delay: ${renderDelayMs}ms.`);
+    if (loadDelayMs > 1000) warnings.push(`High LCP resource load delay: ${loadDelayMs}ms.`);
   }
 
   if (include("inp")) {
@@ -879,11 +887,13 @@ function buildInsights(loaded: LoadedTrace, options: AnalyzeOptions): InsightsRe
       (summary) => summary.entity?.name !== firstParty,
     );
     if (summaries.length) {
-      result.thirdParties = summaries.map((s) => ({
-        entityName: s.entity?.name ?? "Unknown",
-        mainThreadTimeMs: round(s.mainThreadTime ?? 0),
-        transferSizeBytes: Math.max(0, s.transferSize ?? 0),
-      }));
+      result.thirdParties = summaries
+        .map((s) => ({
+          entityName: s.entity?.name ?? "Unknown",
+          mainThreadTimeMs: round(s.mainThreadTime ?? 0),
+          transferSizeBytes: Math.max(0, s.transferSize ?? 0),
+        }))
+        .sort((a, b) => b.mainThreadTimeMs - a.mainThreadTimeMs || b.transferSizeBytes - a.transferSizeBytes);
     }
   }
 
@@ -943,7 +953,6 @@ function buildTasks(loaded: LoadedTrace, options: AnalyzeOptions, range?: TimeRa
     if (durationMs < minDuration || !inBounds(startMs, durationMs, range)) continue;
     const isTop =
       entry.name === "RunTask" ||
-      // biome-ignore lint/suspicious/noExplicitAny: engine helper accepts raw events
       traceEngine.Helpers.Trace.isTopLevelEvent(entry as any);
     if (!isTop) continue;
 
@@ -1061,7 +1070,6 @@ function buildNetwork(loaded: LoadedTrace, options: AnalyzeOptions, range?: Time
         seen.add(current);
         const initiator = traceEngine.Extras.Initiators.getNetworkInitiator(
           data,
-          // biome-ignore lint/suspicious/noExplicitAny: engine helper accepts raw events
           current as any,
         ) as typeof target | undefined;
         chain.push({
@@ -1366,9 +1374,12 @@ function walk(dir: string, out: string[], maxDepth = Infinity) {
   for (const entry of entries) {
     const full = resolve(dir, entry.name);
     if (entry.isDirectory()) {
-      if (maxDepth > 0) walk(full, out, maxDepth - 1);
+      // Never crawl dependencies or dot-directories (.git, .next, …) for traces.
+      const skipped = entry.name === "node_modules" || entry.name.startsWith(".");
+      if (maxDepth > 0 && !skipped) walk(full, out, maxDepth - 1);
+    } else if (entry.isFile() && (entry.name.endsWith(".json") || entry.name.endsWith(".json.gz"))) {
+      out.push(full);
     }
-    else if (entry.isFile() && (entry.name.endsWith(".json") || entry.name.endsWith(".json.gz"))) out.push(full);
   }
 }
 

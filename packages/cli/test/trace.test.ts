@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
@@ -192,6 +192,72 @@ describe("trace reports", () => {
       loadDurationMs: 300,
       renderDelayMs: 400,
     });
+  });
+
+  it("reports the navigation, not the idle period before it, when tracing started early", async () => {
+    const trace = miniTrace();
+    // Recording started 6 s before the page load, so the engine adds a leading
+    // "NO_NAVIGATION" insight set for that period.
+    const started = trace.traceEvents.find((e) => e.name === "TracingStartedInBrowser");
+    if (!started) throw new Error("fixture has no TracingStartedInBrowser");
+    started.ts = T - 6_000_000;
+
+    const navigations = await analyzeTraceBody(trace, { command: "navigations" });
+    if (navigations.command !== "navigations") throw new Error("wrong report");
+    expect(navigations.insightSetIds[0]).toBe("NO_NAVIGATION");
+    expect(navigations.insightSetIds).toHaveLength(2);
+
+    const insights = await analyzeTraceBody(trace, { command: "insights" });
+    if (insights.command !== "insights") throw new Error("wrong report");
+    expect(insights.lcpBreakdown).toMatchObject({ totalLcpMs: 2500, element: "IMG" });
+
+    const overview = await analyzeTraceBody(trace, { command: "overview" });
+    if (overview.command !== "overview") throw new Error("wrong report");
+    expect(overview.url).toBe("https://x.test/");
+    expect(overview.coreWebVitals.lcp).toMatchObject({ valueMs: 2500, element: "IMG" });
+
+    // The idle period is still reachable by ID, and has no LCP to break down.
+    const idle = await analyzeTraceBody(trace, { command: "insights", navigationId: "NO_NAVIGATION" });
+    if (idle.command !== "insights") throw new Error("wrong report");
+    expect(idle.lcpBreakdown).toBeUndefined();
+    expect(formatTraceReport(idle, "md")).not.toContain("LCP Breakdown");
+  });
+
+  it("omits LCP subparts the engine could not compute and ranks third parties by CPU", () => {
+    const report = buildReport(
+      {
+        rawEvents: [],
+        parsedTrace: {
+          data: { Meta: { traceBounds: { min: 0, max: 1_000_000 } } },
+          insights: new Map([
+            [
+              "NAVIGATION_0",
+              {
+                model: {
+                  // No document request in the trace: an LCP time but no subparts.
+                  LCPBreakdown: { lcpMs: 1800 },
+                  ThirdParties: {
+                    entitySummaries: [
+                      { entity: { name: "big-but-idle.test" }, mainThreadTime: 0, transferSize: 9000 },
+                      { entity: { name: "light.test" }, mainThreadTime: 1, transferSize: 900 },
+                      { entity: { name: "heavy.test" }, mainThreadTime: 40, transferSize: 10 },
+                    ],
+                  },
+                },
+              },
+            ],
+          ]),
+        },
+      },
+      { command: "insights" },
+    );
+    if (report.command !== "insights") throw new Error("wrong report");
+    expect(report.lcpBreakdown?.totalLcpMs).toBe(1800);
+    expect(report.lcpBreakdown).not.toHaveProperty("ttfbMs");
+    const md = formatTraceReport(report, "md");
+    expect(md).toContain("**Total LCP**: `1800ms`");
+    expect(md).not.toContain("TTFB");
+    expect(report.thirdParties?.map((t) => t.entityName)).toEqual(["heavy.test", "light.test", "big-but-idle.test"]);
   });
 
   it("rejects an unknown navigation or insight set", async () => {
@@ -398,6 +464,23 @@ describe("trace scan", () => {
     expect(gzipped.totalFilesMatched).toBe(1);
     expect(gzipped.matchedFiles[0].file).toContain("mini.json.gz");
     expect(gzipped.matchedFiles[0].firstEventTsMs).toBe(2100);
+  });
+
+  it("does not crawl node_modules or dot-directories", async () => {
+    const root = await mkdtemp(join(tmpdir(), "web-perf-trace-walk-"));
+    try {
+      const body = JSON.stringify(miniTrace());
+      await writeFile(join(root, "mini.json"), body);
+      for (const skipped of ["node_modules/pkg", ".cache"]) {
+        await mkdir(join(root, skipped), { recursive: true });
+        await writeFile(join(root, skipped, "mini.json"), body);
+      }
+      const report = scanTraces([root], { names: ["EventTiming"] });
+      expect(report.totalFilesScanned).toBe(1);
+      expect(report.matchedFiles.map((f) => f.file).join()).not.toMatch(/node_modules|\.cache/);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
   });
 
   it("requires a filter", () => {

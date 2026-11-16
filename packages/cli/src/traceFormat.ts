@@ -111,10 +111,15 @@ function insightsMd(report: InsightsReport): string {
     const l = report.lcpBreakdown;
     lines.push("## LCP Breakdown", "");
     lines.push(`- **Total LCP**: ${code(formatMs(l.totalLcpMs))}`);
-    lines.push(`- **TTFB**: ${code(formatMs(l.ttfbMs))}`);
-    lines.push(`- **Resource Load Delay**: ${code(formatMs(l.loadDelayMs))}`);
-    lines.push(`- **Resource Load Duration**: ${code(formatMs(l.loadDurationMs))}`);
-    lines.push(`- **Element Render Delay**: ${code(formatMs(l.renderDelayMs))}`);
+    const subparts: Array<[label: string, value: number | undefined]> = [
+      ["TTFB", l.ttfbMs],
+      ["Resource Load Delay", l.loadDelayMs],
+      ["Resource Load Duration", l.loadDurationMs],
+      ["Element Render Delay", l.renderDelayMs],
+    ];
+    for (const [label, value] of subparts) {
+      if (value !== undefined) lines.push(`- **${label}**: ${code(formatMs(value))}`);
+    }
     if (l.element) lines.push(`- **Element**: ${code(l.element)}`);
     if (l.url) lines.push(`- **Resource URL**: ${code(l.url)}`);
     lines.push("");
