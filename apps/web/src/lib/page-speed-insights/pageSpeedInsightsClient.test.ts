@@ -5,19 +5,14 @@ import {
   pollProgressFraction,
   resetPageSpeedInsightsByPublicId,
 } from "@/lib/page-speed-insights/pageSpeedInsightsClient";
-import { toWorkerJobState } from "@/lib/page-speed-insights/resolveWorkerEnvelope";
 
 const json = (status: number, body: unknown) =>
-  ({ ok: status < 400, status, text: async () => JSON.stringify(body) }) as Response;
-
-describe("toWorkerJobState", () => {
-  it("maps pending/queued to queued and everything else to running", () => {
-    expect(toWorkerJobState("pending")).toBe("queued");
-    expect(toWorkerJobState("QUEUED")).toBe("queued");
-    expect(toWorkerJobState("processing")).toBe("running");
-    expect(toWorkerJobState(undefined)).toBe("running");
-  });
-});
+  ({
+    ok: status < 400,
+    status,
+    text: async () => JSON.stringify(body),
+    json: async () => body,
+  }) as Response;
 
 describe("pollProgressFraction", () => {
   it("grows with polls and is capped below 1", () => {
@@ -39,9 +34,13 @@ describe("fetchPageSpeedInsightsByPublicId", () => {
 
   it("publishes job state while polling, then clears it and resolves", async () => {
     vi.spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce(json(404, { status: "pending", url: "https://a.test" }))
-      .mockResolvedValueOnce(json(404, { status: "processing", url: "https://a.test" }))
-      .mockResolvedValueOnce(json(200, []));
+      .mockResolvedValueOnce(
+        json(200, { state: "pending", jobState: "queued", url: "https://a.test" }),
+      )
+      .mockResolvedValueOnce(
+        json(200, { state: "pending", jobState: "running", url: "https://a.test" }),
+      )
+      .mockResolvedValueOnce(json(200, { state: "ready", data: [] }));
 
     const promise = fetchPageSpeedInsightsByPublicId("prog-1");
     await vi.advanceTimersByTimeAsync(0);
@@ -61,13 +60,13 @@ describe("fetchPageSpeedInsightsByPublicId", () => {
   it("fails with a timeout reason when the job never finishes, and retry re-fetches", async () => {
     const fetchMock = vi
       .spyOn(globalThis, "fetch")
-      .mockResolvedValue(json(404, { status: "pending" }));
+      .mockResolvedValue(json(200, { state: "pending", jobState: "queued" }));
 
     const promise = fetchPageSpeedInsightsByPublicId("timeout-1");
     await vi.advanceTimersByTimeAsync(200_000);
     await expect(promise).resolves.toMatchObject({ status: "failed", reason: "timeout" });
 
-    fetchMock.mockResolvedValue(json(200, []));
+    fetchMock.mockResolvedValue(json(200, { state: "ready", data: [] }));
     resetPageSpeedInsightsByPublicId("timeout-1");
     const retried = fetchPageSpeedInsightsByPublicId("timeout-1");
     expect(retried).not.toBe(promise);
@@ -87,21 +86,30 @@ describe("fetchPageSpeedInsightsByPublicId", () => {
     vi.spyOn(globalThis, "fetch")
       .mockRejectedValueOnce(new Error("blip"))
       .mockRejectedValueOnce(new Error("blip"))
-      .mockResolvedValueOnce(json(200, []));
+      .mockResolvedValueOnce(json(200, { state: "ready", data: [] }));
 
     const promise = fetchPageSpeedInsightsByPublicId("err-3");
     await vi.advanceTimersByTimeAsync(10_000);
     await expect(promise).resolves.toEqual({ status: "ok", data: [] });
   });
 
-  it("treats a queued 404 as still running", async () => {
-    vi.spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce(json(404, { status: "queued" }))
-      .mockResolvedValueOnce(json(200, []));
+  it("maps a failed state to a job failure with its message and url", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      json(200, { state: "failed", error: "boom", url: "https://a.test" }),
+    );
+    await expect(fetchPageSpeedInsightsByPublicId("job-1")).resolves.toEqual({
+      status: "failed",
+      reason: "job",
+      error: "boom",
+      url: "https://a.test",
+    });
+  });
 
-    const promise = fetchPageSpeedInsightsByPublicId("queued-1");
-    await vi.advanceTimersByTimeAsync(2000);
-    await expect(promise).resolves.toEqual({ status: "ok", data: [] });
+  it("maps a 404 to not_found", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(json(404, { state: "failed", error: "x" }));
+    await expect(fetchPageSpeedInsightsByPublicId("nf-1")).resolves.toMatchObject({
+      reason: "not_found",
+    });
   });
 
   it("returns an error reason for non-ok, non-404/500 responses", async () => {

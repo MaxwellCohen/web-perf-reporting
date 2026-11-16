@@ -1,79 +1,57 @@
 export type WorkerJobEnvelope = { status: string; url?: string; data?: unknown };
 
-export type ResolvedWorkerEnvelope =
-  | { kind: "missing" }
-  | { kind: "pending"; envelope: WorkerJobEnvelope }
-  | { kind: "failed"; error: string; url?: string }
-  | { kind: "ready"; body: string }
-  | { kind: "ready_envelope"; envelope: WorkerJobEnvelope };
-
-function getTestUrlFromEnvelope(data: WorkerJobEnvelope): string | undefined {
-  if (typeof data.url === "string" && data.url.length > 0) {
-    return data.url;
-  }
-  return undefined;
-}
-
-function getFailureMessageFromEnvelope(data: WorkerJobEnvelope): string {
-  const payload = data.data;
-  if (
-    payload &&
-    typeof payload === "object" &&
-    "error" in payload &&
-    typeof (payload as { error: unknown }).error === "string"
-  ) {
-    return (payload as { error: string }).error;
-  }
-  if (typeof payload === "string" && payload.length > 0) {
-    return payload;
-  }
-  return "The PageSpeed Insights report could not be generated.";
-}
-
-/** Single resolver for worker job envelope → pending | failed | ready. */
-export function resolveWorkerEnvelope(
-  data: WorkerJobEnvelope | null | undefined,
-): ResolvedWorkerEnvelope {
-  if (!data) {
-    return { kind: "missing" };
-  }
-
-  const status = data.status.toLowerCase();
-  if (status === "failed") {
-    const url = getTestUrlFromEnvelope(data);
-    return {
-      kind: "failed",
-      error: getFailureMessageFromEnvelope(data),
-      ...(url ? { url } : {}),
-    };
-  }
-
-  if (status !== "completed") {
-    return { kind: "pending", envelope: data };
-  }
-
-  if (typeof data.data === "string" && data.data.length > 0) {
-    return { kind: "ready", body: data.data };
-  }
-
-  if (data.data !== undefined && data.data !== null) {
-    return { kind: "ready", body: JSON.stringify(data.data) };
-  }
-
-  return { kind: "ready_envelope", envelope: data };
-}
-
 export type WorkerJobState = "queued" | "running";
 
-const QUEUED_STATUSES = new Set(["pending", "queued"]);
-const IN_PROGRESS_STATUSES = new Set([...QUEUED_STATUSES, "processing"]);
+/** Body of GET `/api/pagespeed/:publicId`. */
+export type PageSpeedApiBody =
+  | { state: "pending"; jobState: WorkerJobState; url?: string }
+  | { state: "failed"; error: string; url?: string }
+  | { state: "ready"; data?: unknown };
 
-/** True for non-terminal worker statuses (queued or running). */
-export function isInProgressWorkerStatus(status: string | undefined): boolean {
-  return IN_PROGRESS_STATUSES.has((status ?? "").toLowerCase());
+const NOT_FOUND_ERROR = "The PageSpeed Insights report could not be found.";
+const FAILED_ERROR = "The PageSpeed Insights report could not be generated.";
+const QUEUED_STATUSES = new Set(["pending", "queued"]);
+
+function nonEmptyUrl(data: WorkerJobEnvelope): { url?: string } {
+  return typeof data.url === "string" && data.url.length > 0 ? { url: data.url } : {};
 }
 
-/** Maps a non-terminal worker status string to a user-facing job state. */
-export function toWorkerJobState(status: string | undefined): WorkerJobState {
-  return QUEUED_STATUSES.has((status ?? "").toLowerCase()) ? "queued" : "running";
+function failureMessage(payload: unknown): string {
+  if (payload && typeof payload === "object" && "error" in payload) {
+    const error = (payload as { error: unknown }).error;
+    if (typeof error === "string") return error;
+  }
+  return typeof payload === "string" && payload.length > 0 ? payload : FAILED_ERROR;
+}
+
+function parseData(payload: unknown): unknown {
+  if (typeof payload !== "string") return payload;
+  try {
+    return JSON.parse(payload);
+  } catch {
+    return undefined;
+  }
+}
+
+/** Maps a worker job envelope to the API body; a missing envelope is an unknown report (404). */
+export function toPageSpeedApiResponse(data: WorkerJobEnvelope | null | undefined): Response {
+  if (!data) {
+    return Response.json({ state: "failed", error: NOT_FOUND_ERROR } satisfies PageSpeedApiBody, {
+      status: 404,
+    });
+  }
+  const status = data.status.toLowerCase();
+  let body: PageSpeedApiBody;
+  if (status === "failed") {
+    body = { state: "failed", error: failureMessage(data.data), ...nonEmptyUrl(data) };
+  } else if (status !== "completed") {
+    body = {
+      state: "pending",
+      jobState: QUEUED_STATUSES.has(status) ? "queued" : "running",
+      ...nonEmptyUrl(data),
+    };
+  } else {
+    body = { state: "ready", data: parseData(data.data) };
+  }
+  return Response.json(body);
 }
