@@ -115,13 +115,6 @@ export function timelineToMarkdown(timeline: PageLoadTimeline): string {
   if (timeline.simulationLabel) {
     header.push(`Times include simulated ${timeline.simulationLabel}`);
     if (timeline.timesNote) header.push(timeline.timesNote);
-    if (timeline.modelCheck?.length) {
-      const checks = timeline.modelCheck.map((metric) => {
-        const percent = Math.round(metric.error * 100);
-        return `${metric.label} ${percent > 0 ? "+" : ""}${percent}% (replay ${formatMs(metric.modelMs)}, Lighthouse ${formatMs(metric.lighthouseMs)})`;
-      });
-      header.push(`Model check vs Lighthouse: ${checks.join("; ")}`);
-    }
   }
 
   if (timeline.events.length === 0) {
