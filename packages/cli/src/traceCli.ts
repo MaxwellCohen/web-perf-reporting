@@ -1,3 +1,4 @@
+import { TRACE_VALUE_FLAGS } from "./argv.js";
 import {
   analyzeTraceFile,
   parseTimeRange,
@@ -9,25 +10,7 @@ import {
 } from "./trace.js";
 import { formatTraceReport, type OutputFormat } from "./traceFormat.js";
 
-const VALUE_FLAGS = new Set([
-  "--format",
-  "--time-range",
-  "--category",
-  "--navigation",
-  "--nav",
-  "--min-duration",
-  "--tree",
-  "--top",
-  "--function",
-  "--slowest",
-  "--initiator-chain",
-  "--name",
-  "--cat",
-  "--phase",
-  "--fields",
-  "--limit",
-  "--grep",
-]);
+const VALUE_FLAGS = new Set(["--format", ...TRACE_VALUE_FLAGS]);
 const BOOLEAN_FLAGS = new Set(["--absolute-timestamps", "--render-blocking", "--events", "--help", "-h"]);
 
 const USAGE = `Usage:
@@ -185,7 +168,7 @@ function parseArgs(argv: string[]): ParsedArgs {
     if (arg.startsWith("-")) {
       if (VALUE_FLAGS.has(arg)) {
         const value = argv[i + 1];
-        if (value === undefined || (value.startsWith("--") && !/^-\d/.test(value))) {
+        if (value === undefined || value.startsWith("--")) {
           throw new Error(`${arg} needs a value`);
         }
         values.set(arg, value);

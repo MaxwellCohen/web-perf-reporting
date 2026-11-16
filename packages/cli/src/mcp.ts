@@ -155,7 +155,10 @@ export function createServer(): McpServer {
           .describe("For command 'network': show the initiator chain for a request URL or request ID"),
         includeEvents: z.boolean().optional().describe("For command 'shifts': include individual shift events"),
         eventNames: z.array(z.string()).optional().describe("For command 'events': exact event names"),
-        eventCategory: z.string().optional().describe("For command 'events': exact category"),
+        eventCategory: z
+          .string()
+          .optional()
+          .describe("For command 'events': category, or a comma-separated list (matches any)"),
         phase: z.string().optional().describe("For command 'events': event phase, e.g. X, I, b, e"),
         fields: z.array(z.string()).optional().describe("Dot-notation event fields to project, e.g. args.data.url"),
         limit: z.number().int().positive().optional().describe("Maximum rows for find/events (default 50)"),
