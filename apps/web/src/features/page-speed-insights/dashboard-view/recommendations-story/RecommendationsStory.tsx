@@ -20,7 +20,7 @@ import {
 import { getQuickWinRecommendations } from "@/features/page-speed-insights/RecommendationsSection/RecommendationsSummary";
 import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
 import { FullWidthTables } from "@/features/page-speed-insights/tanstack-table-v9/fullWidthTables";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 
 const PRIORITY_LABEL: Record<Recommendation["priority"], string> = {
   high: "High",

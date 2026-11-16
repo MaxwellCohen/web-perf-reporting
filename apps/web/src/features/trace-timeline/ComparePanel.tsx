@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { shortUrl } from "./analyzeLoad";
 import { diffFindings, type Delta } from "./diffFindings";
 import type { TraceSnapshot } from "./findings";

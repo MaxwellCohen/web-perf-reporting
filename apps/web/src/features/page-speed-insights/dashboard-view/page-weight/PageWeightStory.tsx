@@ -25,7 +25,7 @@ import { CompareReportPicker } from "@/features/page-speed-insights/shared/Compa
 import { resolveCompareSelection } from "@/features/page-speed-insights/shared/compareSelection";
 import { formatBytes, shortUrl } from "@/features/page-speed-insights/shared/format";
 import { getNetworkBarColor } from "@/features/page-speed-insights/shared/networkResourceColors";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 
 const URL_LIMIT = 25;
 
