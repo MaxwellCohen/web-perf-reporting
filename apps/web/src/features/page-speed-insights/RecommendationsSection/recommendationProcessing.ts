@@ -163,6 +163,15 @@ function buildActionableStepsFromMap(stepsMap: Map<string, Set<string>>): Action
   }));
 }
 
+/**
+ * First sentence of a Lighthouse description (markdown). A sentence ends at
+ * punctuation followed by whitespace, so the dots in a link URL do not end it.
+ */
+function firstSentence(description: string): string {
+  const end = description.search(/[.!?](?=\s|$)/);
+  return end === -1 ? description : description.slice(0, end + 1);
+}
+
 function getDefaultActionableSteps(
   audit: AuditEntry["audit"],
   explanation: string | undefined,
@@ -172,7 +181,7 @@ function getDefaultActionableSteps(
     return [{ step: explanation, reports: allReportsLabel }];
   }
   if (audit.description) {
-    return [{ step: audit.description.split(".")[0] + ".", reports: allReportsLabel }];
+    return [{ step: firstSentence(audit.description), reports: allReportsLabel }];
   }
   return [
     {
