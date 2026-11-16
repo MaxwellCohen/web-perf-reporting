@@ -3,8 +3,9 @@ import path from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const report = JSON.stringify(
-  (
+const report = JSON.stringify({
+  state: "ready",
+  data: (
     JSON.parse(
       readFileSync(
         path.join(process.cwd(), "src/features/page-speed-insights/example-report.json"),
@@ -12,7 +13,7 @@ const report = JSON.stringify(
       ),
     ) as { item: unknown }[]
   ).map((entry) => entry.item),
-);
+});
 
 // Pre-existing violations tracked for follow-up; remove entries as they are fixed.
 const KNOWN: Record<string, string[]> = {

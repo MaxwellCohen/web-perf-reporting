@@ -1,4 +1,5 @@
 import type { TableColumnHeading, ItemValueType } from "@/lib/schema";
+import { compareItemValues } from "@/features/page-speed-insights/shared/itemValueText";
 
 /**
  * Determines the appropriate filter function based on value type
@@ -51,6 +52,8 @@ function getColumnSize(
   return 150;
 }
 
+type SortableRow = { getValue: (columnId: string) => unknown };
+
 /**
  * Creates a column definition from a TableColumnHeading
  */
@@ -64,6 +67,7 @@ export function createColumnFromHeading(heading: TableColumnHeading): {
   enableResizing: boolean;
   filterFn?: "includesString" | "inNumberRange";
   enableSorting: boolean;
+  sortFn: (rowA: SortableRow, rowB: SortableRow, columnId: string) => number;
   enableColumnFilter: boolean;
   meta: {
     heading: {
@@ -87,6 +91,8 @@ export function createColumnFromHeading(heading: TableColumnHeading): {
     enableResizing: true,
     ...(filterFn && { filterFn }),
     enableSorting: true,
+    sortFn: (rowA, rowB, columnId) =>
+      compareItemValues(rowA.getValue(columnId), rowB.getValue(columnId)),
     enableColumnFilter: true,
     meta: {
       heading: {

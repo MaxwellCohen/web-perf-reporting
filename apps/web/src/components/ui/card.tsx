@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 
 function forwardCardDiv(displayName: string, defaultClass: string) {
   const Comp = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(

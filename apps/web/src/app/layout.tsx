@@ -6,7 +6,6 @@ import "./globals.css";
 
 import { PostHogAnalytics } from "@/app/PostHogAnalytics";
 import { PostHogProvider } from "@/app/PostHogProvider";
-import { QueryProvider } from "@/app/providers";
 import { TopNav } from "@/components/navigation/TopNav";
 import { getSiteUrl } from "@/lib/siteUrl";
 
@@ -46,25 +45,23 @@ export default function RootLayout({
       >
         <PostHogProvider>
           <PostHogAnalytics />
-          <QueryProvider>
-            <div>
-              <TopNav />
-              <main className="mx-auto min-h-screen w-full p-4">
-                <ViewTransition>{children}</ViewTransition>
-              </main>
-              <footer className="w-full text-center print:hidden">
-                Made by Maxwell Cohen, with data from Google crux report.
-                {" · "}
-                <Link href="/privacy" className="underline">
-                  Privacy
-                </Link>
-                {" · "}
-                <Link href="/terms" className="underline">
-                  Terms
-                </Link>
-              </footer>
-            </div>
-          </QueryProvider>
+          <div>
+            <TopNav />
+            <main className="mx-auto min-h-screen w-full p-4">
+              <ViewTransition>{children}</ViewTransition>
+            </main>
+            <footer className="w-full text-center print:hidden">
+              Made by Maxwell Cohen, with data from Google crux report.
+              {" · "}
+              <Link href="/privacy" className="underline">
+                Privacy
+              </Link>
+              {" · "}
+              <Link href="/terms" className="underline">
+                Terms
+              </Link>
+            </footer>
+          </div>
         </PostHogProvider>
       </body>
     </html>

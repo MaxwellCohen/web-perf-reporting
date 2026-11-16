@@ -2,7 +2,7 @@
 
 import type { ResourceStageId } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 import type { FlowStage } from "@/features/page-speed-insights/dashboard-view/resources-story/resourcesInvestigationModel";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 
 const STAGE_CLASS: Record<ResourceStageId, string> = {
   arrived: "bg-foreground text-background",

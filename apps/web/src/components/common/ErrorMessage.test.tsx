@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
 
@@ -61,29 +61,34 @@ describe("ErrorMessage", () => {
   });
 
   it("renders children when there is no error", () => {
-    const { container } = render(
+    render(
       <ErrorMessage>
         <p>ok</p>
       </ErrorMessage>,
     );
-    expect(container.firstChild).toMatchSnapshot();
+    expect(screen.getByText("ok")).toBeInTheDocument();
   });
 
   it("renders the default error state and recovery actions when a child throws", () => {
-    const { container } = render(
+    render(
       <ErrorMessage>
         <ThrowingChild message="Failed to load PageSpeed Insights report." />
       </ErrorMessage>,
     );
-    expect(container.firstChild).toMatchSnapshot();
+    expect(screen.getByText("Failed to Load Report")).toBeInTheDocument();
+    expect(screen.getByText(/couldn't load the PageSpeed Insights data/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Try Again" })).toHaveAttribute("href", "/page-speed");
+    expect(screen.getByRole("link", { name: "Go to Homepage" })).toHaveAttribute("href", "/");
   });
 
   it("renders custom copy when a child throws", () => {
-    const { container } = render(
+    render(
       <ErrorMessage title="Custom Error" description="A more specific message.">
         <ThrowingChild message="Something went wrong." />
       </ErrorMessage>,
     );
-    expect(container.firstChild).toMatchSnapshot();
+    expect(screen.getByText("Custom Error")).toBeInTheDocument();
+    expect(screen.getByText("A more specific message.")).toBeInTheDocument();
+    expect(screen.queryByText("Failed to Load Report")).not.toBeInTheDocument();
   });
 });

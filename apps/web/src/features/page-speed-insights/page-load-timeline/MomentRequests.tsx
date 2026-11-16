@@ -18,7 +18,7 @@ import {
   waterfallRowFromTimelineBar,
   type WaterfallRowKind,
 } from "@/features/page-speed-insights/waterfall/waterfallData";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { UNATTRIBUTED_LABEL, UnattributedLabel } from "./UnattributedLabel";
 import type { TimelineTable, TimelineWaterfallBar } from "./types";
 

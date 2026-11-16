@@ -6,7 +6,7 @@ import { useDashboardSearchState } from "@/features/page-speed-insights/dashboar
 import type { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
 import { RecommendationItem } from "@/features/page-speed-insights/RecommendationsSection/RecommendationItem";
 import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 
 function setExpanded(next: string[]) {
   patchDashboardSearch({ expanded: next.length ? next : null });

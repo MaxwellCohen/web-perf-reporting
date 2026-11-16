@@ -8,7 +8,7 @@ import { TraceTimeline } from "./TraceTimeline";
 import { TraceLoadTimeline } from "./TraceLoadTimeline";
 import { KeyEventsPanel, FixPrompt } from "./KeyEventsPanel";
 import { GitCompare, UploadCloud } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
 import { buildFixPrompt } from "./fixPrompt";

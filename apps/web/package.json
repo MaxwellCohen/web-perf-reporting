@@ -16,11 +16,7 @@
     "lint:fix": "oxlint --fix",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
-    "dupes": "fallow dupes",
-    "knip": "knip",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "knip": "knip"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",

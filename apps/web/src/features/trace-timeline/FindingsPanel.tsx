@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { shortUrl } from "./analyzeLoad";
 import {
   FINDING_CATEGORIES,

@@ -1,4 +1,4 @@
-import { fireEvent, render } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { suppressConsoleError } from "@/test-utils";
 
@@ -249,7 +249,7 @@ describe("latest crux performance components", () => {
   });
 
   it("renders the current performance card and chart variants", () => {
-    const { container, rerender } = render(
+    const { rerender } = render(
       <CurrentPerformanceChartContext.Provider value="Histogram">
         <CurrentPerformanceCard
           title="Largest Contentful Paint (LCP)"
@@ -257,7 +257,10 @@ describe("latest crux performance components", () => {
         />
       </CurrentPerformanceChartContext.Provider>,
     );
-    expect(container.firstChild).toMatchSnapshot("histogram");
+    expect(screen.getByText("Largest Contentful Paint (LCP)")).toBeInTheDocument();
+    expect(screen.getByText(/P75 is/)).toHaveTextContent("P75 is 900");
+    expect(screen.getByText("Good: 0 to 1000")).toBeInTheDocument();
+    expect(screen.getByText("Poor: 2000 and above")).toBeInTheDocument();
 
     rerender(
       <CurrentPerformanceChartContext.Provider value="Gauge Chart">
@@ -267,17 +270,22 @@ describe("latest crux performance components", () => {
         />
       </CurrentPerformanceChartContext.Provider>,
     );
-    expect(container.firstChild).toMatchSnapshot("gauge");
+    expect(screen.getByText("Largest Contentful Paint (LCP)")).toBeInTheDocument();
+    expect(screen.getByText(/P75 is/)).toHaveTextContent("P75 is 900");
+    expect(screen.getByText("Good: 0 to 1000")).toBeInTheDocument();
+    expect(screen.getByText("Poor: 2000 and above")).toBeInTheDocument();
   });
 
   it("renders the radial and stacked chart helpers", () => {
-    const { container } = render(
+    render(
       <div>
         <RadialChart histogramData={histogramData as any} />
         <PerformanceStackedBarChart histogramData={histogramData as any} />
       </div>,
     );
-    expect(container.firstChild).toMatchSnapshot();
+    expect(screen.getByText("Radial bar: good_density")).toBeInTheDocument();
+    expect(screen.getByText("Bar: good_density")).toBeInTheDocument();
+    expect(screen.getByText("Bar: poor_density")).toBeInTheDocument();
   });
 
   it("renders the dashboard and derived metric cards from the report map", () => {
@@ -293,7 +301,7 @@ describe("latest crux performance components", () => {
       round_trip_time: [histogramData],
     });
 
-    const { container } = render(
+    render(
       <CurrentPerformanceDashboard
         reportMap={{
           originAll: report as any,
@@ -307,6 +315,9 @@ describe("latest crux performance components", () => {
         }}
       />,
     );
-    expect(container.firstChild).toMatchSnapshot();
+    expect(
+      screen.getByRole("heading", { level: 2, name: /Latest Performance Report for/ }),
+    ).toHaveTextContent("2024-1-1 - 2024-1-31");
+    expect(screen.getByText("Largest Contentful Paint (LCP)")).toBeInTheDocument();
   });
 });

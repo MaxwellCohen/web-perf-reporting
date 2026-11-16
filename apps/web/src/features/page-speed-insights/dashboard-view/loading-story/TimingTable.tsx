@@ -11,7 +11,7 @@ import {
 import type {} from "@/features/page-speed-insights/page-load-timeline/types";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
 import {} from "@/features/page-speed-insights/shared/lcpPhaseColors";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { ratingClass } from "./LoadingStoryParts";
 
 export function TimingTable({

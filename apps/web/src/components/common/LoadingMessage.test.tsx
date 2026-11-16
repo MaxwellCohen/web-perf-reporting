@@ -1,4 +1,4 @@
-import { act, render } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LoadingMessage } from "@/components/common/LoadingMessage";
 
@@ -12,36 +12,45 @@ describe("LoadingMessage", () => {
   });
 
   it("renders immediately with the first analysis stage", () => {
-    const { container } = render(<LoadingMessage />);
+    render(<LoadingMessage />);
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(
+      screen.getByRole("status", { name: "Generating PageSpeed Insights report" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Launching lab tests…")).toBeInTheDocument();
+    expect(screen.getByText("0:00")).toBeInTheDocument();
+    expect(screen.getAllByRole("listitem")).toHaveLength(5);
+    expect(screen.getByText("running")).toBeInTheDocument();
   });
 
   it("increments elapsed time and advances analysis stages over time", () => {
-    const { container } = render(<LoadingMessage />);
+    render(<LoadingMessage />);
 
     act(() => {
       vi.advanceTimersByTime(1000);
     });
-    expect(container.firstChild).toMatchSnapshot("after 1s");
+    expect(screen.getByText("0:01")).toBeInTheDocument();
+    expect(screen.getByText("Launching lab tests…")).toBeInTheDocument();
 
     act(() => {
       vi.advanceTimersByTime(5000);
     });
-    expect(container.firstChild).toMatchSnapshot("after 6s");
+    expect(screen.getByText("0:06")).toBeInTheDocument();
+    expect(screen.getByText("Measuring Core Web Vitals…")).toBeInTheDocument();
 
     act(() => {
       vi.advanceTimersByTime(5000);
     });
-    expect(container.firstChild).toMatchSnapshot("after 11s");
+    expect(screen.getByText("0:11")).toBeInTheDocument();
+    expect(screen.getByText("Auditing resources & network…")).toBeInTheDocument();
   });
 
   it("renders the CrUX lookup variant", () => {
-    const { container } = render(<LoadingMessage variant="crux" />);
+    render(<LoadingMessage variant="crux" />);
 
-    expect(container.firstChild).toMatchSnapshot();
-    expect(container.textContent).toContain("Looking up CrUX data");
-    expect(container.textContent).toContain("Querying Chrome UX Report");
-    expect(container.textContent).not.toContain("Launching lab tests");
+    expect(screen.getByText("Looking up CrUX data")).toBeInTheDocument();
+    expect(screen.getAllByText(/Querying Chrome UX Report/).length).toBeGreaterThan(0);
+    expect(screen.getByText("looking up")).toBeInTheDocument();
+    expect(screen.queryByText(/Launching lab tests/)).not.toBeInTheDocument();
   });
 });

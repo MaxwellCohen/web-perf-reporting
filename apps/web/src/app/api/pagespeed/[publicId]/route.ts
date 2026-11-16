@@ -1,7 +1,9 @@
 import { type NextRequest } from "next/server";
 import { fetchWorkerJobEnvelopeByPublicId } from "@/lib/page-speed-insights/pageSpeedWorkerClient";
-import type { WorkerJobEnvelope } from "@/lib/page-speed-insights/resolveWorkerEnvelope";
-import { getWorkerEnvelopeToResponse } from "@/lib/page-speed-insights/workerPagespeedApiAdapter";
+import {
+  toPageSpeedApiResponse,
+  type WorkerJobEnvelope,
+} from "@/lib/page-speed-insights/resolveWorkerEnvelope";
 
 export async function GET(
   _request: NextRequest,
@@ -21,7 +23,7 @@ export async function GET(
     }
 
     const data = (await req.json()) as WorkerJobEnvelope | null;
-    return getWorkerEnvelopeToResponse(data);
+    return toPageSpeedApiResponse(data);
   } catch (error) {
     console.error("Error fetching PageSpeed Insights data:", error);
     return new Response("Internal server error", { status: 500 });
