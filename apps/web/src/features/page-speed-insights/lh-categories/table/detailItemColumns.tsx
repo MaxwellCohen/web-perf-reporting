@@ -9,6 +9,7 @@ import {
   isNumberColumn,
 } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
+import { compareItemValues } from "@/features/page-speed-insights/shared/itemValueText";
 import { NetworkWaterfallCell } from "@/features/page-speed-insights/lh-categories/table/NetworkWaterfallCell";
 import {
   getNetworkRequestsTimeRange,
@@ -72,7 +73,7 @@ function buildBaseColumns(
           id: columnId,
           header: headerLabel,
           enableSorting: canSort(heading.valueType),
-          sortFn: "alphanumeric",
+          sortFn: (rowA, rowB, id) => compareItemValues(rowA.getValue(id), rowB.getValue(id)),
           enableColumnFilter: canGroup(heading.valueType) || isNumberColumn(heading.valueType),
           filterFn: canGroup(heading.valueType)
             ? "includesString"
