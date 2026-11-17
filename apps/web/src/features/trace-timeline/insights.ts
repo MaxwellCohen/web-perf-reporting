@@ -126,7 +126,10 @@ function lcpRequestFor(
  * resource load duration and element render delay. Falls back to two subparts
  * for text LCP (no request) or when the trace lacks network detail.
  */
-export function buildLcpBreakdown(trace: ParsedTrace, origin = trace.navigation?.time ?? 0): LcpBreakdown | undefined {
+export function buildLcpBreakdown(
+  trace: ParsedTrace,
+  origin = trace.navigation?.time ?? 0,
+): LcpBreakdown | undefined {
   const lcp = trace.lcpCandidates.at(-1);
   if (!lcp) return undefined;
   const lcpMs = lcp.time - origin;
@@ -214,12 +217,16 @@ function toBreakdown(interaction: InteractionEntry, origin: number): Interaction
  * `interactionId`. Chrome keeps at most 10 interactions, so the index is
  * `min(9, floor(count / 50))` — i.e. the longest one for typical traces.
  */
-export function buildInp(trace: ParsedTrace, origin = trace.navigation?.time ?? 0): InpInsight | undefined {
+export function buildInp(
+  trace: ParsedTrace,
+  origin = trace.navigation?.time ?? 0,
+): InpInsight | undefined {
   const longestById = new Map<number, InteractionEntry>();
   for (const interaction of trace.interactions) {
     if (interaction.start < origin) continue;
     const current = longestById.get(interaction.interactionId);
-    if (!current || interaction.duration > current.duration) longestById.set(interaction.interactionId, interaction);
+    if (!current || interaction.duration > current.duration)
+      longestById.set(interaction.interactionId, interaction);
   }
   const interactions = [...longestById.values()]
     .map((i) => toBreakdown(i, origin))
@@ -244,7 +251,9 @@ function buildRenderBlocking(
   const firstPaint = trace.markers.find((m) => m.name === "firstPaint")?.time;
   if (firstPaint == null) return [];
   return trace.requests
-    .filter((r) => r.start >= origin && isRenderBlockingRequest(r, firstPaint, trace.navigation?.frame))
+    .filter(
+      (r) => r.start >= origin && isRenderBlockingRequest(r, firstPaint, trace.navigation?.frame),
+    )
     .map((r) => ({
       url: r.url,
       startMs: r.start - origin,

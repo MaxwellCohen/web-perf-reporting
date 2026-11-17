@@ -36,7 +36,9 @@ const isHttpUrl = (url: string) => /^https?:\/\//i.test(url);
 
 function RatingPill({ rating }: { rating: Rating }) {
   return (
-    <span className={cn("rounded px-1.5 py-0.5 text-[11px] font-semibold uppercase", RATING[rating])}>
+    <span
+      className={cn("rounded px-1.5 py-0.5 text-[11px] font-semibold uppercase", RATING[rating])}
+    >
       {rating.replace("-", " ")}
     </span>
   );
@@ -98,7 +100,8 @@ function Section({
 
 export function InsightsPanel({ insights }: { insights: TraceInsights }) {
   const { lcp, inp, cls, renderBlocking, thirdParties } = insights;
-  const hasAnything = lcp || inp || cls.clusters.length || renderBlocking.length || thirdParties.length;
+  const hasAnything =
+    lcp || inp || cls.clusters.length || renderBlocking.length || thirdParties.length;
   if (!hasAnything) return null;
 
   return (
@@ -116,7 +119,10 @@ export function InsightsPanel({ insights }: { insights: TraceInsights }) {
             {lcp.subparts.map((s) => (
               <div key={s.key} className="rounded-md border p-2">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <i className={cn("inline-block size-2.5 rounded-sm", LCP_COLORS[s.key])} aria-hidden />
+                  <i
+                    className={cn("inline-block size-2.5 rounded-sm", LCP_COLORS[s.key])}
+                    aria-hidden
+                  />
                   {s.label}
                 </div>
                 <div className="mt-1 font-mono text-base tabular-nums">{formatMs(s.ms)}</div>
@@ -162,10 +168,15 @@ export function InsightsPanel({ insights }: { insights: TraceInsights }) {
             ].map(([label, ms], i) => (
               <div key={label as string} className="rounded-md border p-2">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <i className={cn("inline-block size-2.5 rounded-sm", INP_COLORS[i])} aria-hidden />
+                  <i
+                    className={cn("inline-block size-2.5 rounded-sm", INP_COLORS[i])}
+                    aria-hidden
+                  />
                   {label}
                 </div>
-                <div className="mt-1 font-mono text-base tabular-nums">{formatMs(ms as number)}</div>
+                <div className="mt-1 font-mono text-base tabular-nums">
+                  {formatMs(ms as number)}
+                </div>
               </div>
             ))}
           </div>
@@ -194,10 +205,18 @@ export function InsightsPanel({ insights }: { insights: TraceInsights }) {
                       {i.target ? ` · ${i.target}` : ""}
                     </TableCell>
                     <TableCell className="text-right tabular-nums">{formatMs(i.startMs)}</TableCell>
-                    <TableCell className="text-right tabular-nums">{formatMs(i.durationMs)}</TableCell>
-                    <TableCell className="text-right tabular-nums">{formatMs(i.inputDelayMs)}</TableCell>
-                    <TableCell className="text-right tabular-nums">{formatMs(i.processingMs)}</TableCell>
-                    <TableCell className="text-right tabular-nums">{formatMs(i.presentationMs)}</TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {formatMs(i.durationMs)}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {formatMs(i.inputDelayMs)}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {formatMs(i.processingMs)}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {formatMs(i.presentationMs)}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -221,7 +240,10 @@ export function InsightsPanel({ insights }: { insights: TraceInsights }) {
                   </span>
                 </div>
                 {cluster.nodes.length > 0 && (
-                  <p className="mt-1 truncate text-muted-foreground" title={cluster.nodes.join(" · ")}>
+                  <p
+                    className="mt-1 truncate text-muted-foreground"
+                    title={cluster.nodes.join(" · ")}
+                  >
                     {cluster.nodes.slice(0, 3).join(" · ")}
                   </p>
                 )}
@@ -249,7 +271,9 @@ export function InsightsPanel({ insights }: { insights: TraceInsights }) {
                     {shortUrl(r.url, 80)}
                   </TableCell>
                   <TableCell className="text-muted-foreground">{r.type ?? "—"}</TableCell>
-                  <TableCell className="text-right tabular-nums">{formatMs(r.durationMs)}</TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {formatMs(r.durationMs)}
+                  </TableCell>
                   <TableCell className="text-right tabular-nums">
                     {r.transferBytes != null ? formatBytes(r.transferBytes) : "—"}
                   </TableCell>
@@ -278,7 +302,9 @@ export function InsightsPanel({ insights }: { insights: TraceInsights }) {
                     {t.origin}
                   </TableCell>
                   <TableCell className="text-right tabular-nums">{t.requests}</TableCell>
-                  <TableCell className="text-right tabular-nums">{formatBytes(t.transferBytes)}</TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {formatBytes(t.transferBytes)}
+                  </TableCell>
                   <TableCell className="text-right tabular-nums">
                     {t.mainThreadMs > 0 ? formatMs(t.mainThreadMs) : "—"}
                   </TableCell>

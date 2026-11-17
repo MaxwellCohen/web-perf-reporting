@@ -37,7 +37,11 @@ export function clsSessionWindows<T extends ClsShiftInput>(shifts: T[]): T[][] {
 /** CLS is the worst session window's score, not the sum of every shift. */
 export function clsScore(shifts: ClsShiftInput[]): number {
   return clsSessionWindows(shifts).reduce(
-    (max, window) => Math.max(max, window.reduce((sum, shift) => sum + shift.score, 0)),
+    (max, window) =>
+      Math.max(
+        max,
+        window.reduce((sum, shift) => sum + shift.score, 0),
+      ),
     0,
   );
 }
