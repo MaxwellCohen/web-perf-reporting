@@ -191,7 +191,7 @@ export class TraceBuilder {
   }[] = [];
   private eventTimingEnds: { id: string; pid: number; frame?: string; ts: number }[] = [];
   private imagePaints: { pid: number; nodeId: number; url: string }[] = [];
-  private navs: { ts: number; url: string; frame: string }[] = [];
+  private navs: { ts: number; pid: number; url: string; frame: string }[] = [];
   private shifts: { ts: number; pid: number; score: number; nodes: string[]; hadInput: boolean }[] = [];
   private shots: { ts: number; data: string }[] = [];
   private shotGap = 0;
@@ -303,7 +303,7 @@ export class TraceBuilder {
     }
     if (e.name === "navigationStart") {
       const d = (e.args?.data ?? {}) as TraceData;
-      if (d.isOutermostMainFrame && d.documentLoaderURL) this.navs.push({ ts: e.ts, url: d.documentLoaderURL, frame: String(e.args?.frame ?? "") });
+      if (d.isOutermostMainFrame && d.documentLoaderURL) this.navs.push({ ts: e.ts, pid: e.pid, url: d.documentLoaderURL, frame: String(e.args?.frame ?? "") });
     } else if (e.name === "LayoutShift") {
       const d = (e.args?.data ?? {}) as TraceData;
       if (d.is_main_frame !== false) {
@@ -370,7 +370,9 @@ export class TraceBuilder {
     const rendererPid = rendererKey?.split(":")[0];
 
     // Scope everything to the first real top-level navigation (traces often hold several).
-    const nav = this.navs.find((n) => n.ts >= t0) ?? this.navs[0];
+    // Prefer one in the chosen renderer: after a cross-site navigation that is the
+    // new page's process, and the old page's navigation has none of its events.
+    const nav = this.navs.find((n) => String(n.pid) === rendererPid) ?? this.navs.find((n) => n.ts >= t0) ?? this.navs[0];
     // `LargestImagePaint::Candidate` maps an LCP node id to the image URL that was painted.
     const imageUrlByNode = new Map<string, string>();
     for (const p of this.imagePaints) imageUrlByNode.set(`${p.pid}:${p.nodeId}`, p.url);

@@ -14,6 +14,7 @@ export type LcpSubpart = {
 export type LcpBreakdown = {
   /** LCP relative to navigation start. */
   timeMs: number;
+  rating: Rating;
   element?: string;
   url?: string;
   subparts: LcpSubpart[];
@@ -83,6 +84,19 @@ const originOf = (url: string): string | undefined => {
   } catch {
     return undefined;
   }
+};
+
+/**
+ * Registrable domain of an http(s) origin, approximated without the public
+ * suffix list: the last two host labels, or three under a country TLD with a
+ * short second level (co.uk, com.au). IP addresses are their own site.
+ */
+const siteOf = (origin: string): string => {
+  const host = new URL(origin).hostname;
+  const labels = host.split(".");
+  if (labels.length <= 2 || /^[\d.]+$/.test(host)) return host;
+  const [second, tld] = labels.slice(-2);
+  return labels.slice(tld.length === 2 && second.length <= 3 ? -3 : -2).join(".");
 };
 
 const nonNegative = (value: number) => (Number.isFinite(value) ? Math.max(0, value) : 0);
@@ -171,7 +185,13 @@ export function buildLcpBreakdown(
     add("renderDelay", "Element render delay", lcpMs);
   }
 
-  return { timeMs: lcpMs, element: lcp.detail, url: lcp.url, subparts };
+  return {
+    timeMs: lcpMs,
+    rating: rate(lcpMs, 2500, 4000),
+    element: lcp.detail,
+    url: lcp.url,
+    subparts,
+  };
 }
 
 /** Groups layout shifts into CLS session windows (1 s gap, 5 s cap). */
@@ -225,8 +245,13 @@ export function buildInp(
   for (const interaction of trace.interactions) {
     if (interaction.start < origin) continue;
     const current = longestById.get(interaction.interactionId);
-    if (!current || interaction.duration > current.duration)
-      longestById.set(interaction.interactionId, interaction);
+    // Like DevTools, equally long events (pointerdown and click of one tap)
+    // are settled by the one that spent longer in handlers.
+    const longer =
+      !current ||
+      interaction.duration > current.duration ||
+      (interaction.duration === current.duration && interaction.processing > current.processing);
+    if (longer) longestById.set(interaction.interactionId, interaction);
   }
   const interactions = [...longestById.values()]
     .map((i) => toBreakdown(i, origin))
@@ -266,13 +291,17 @@ function buildRenderBlocking(
     .slice(0, 50);
 }
 
-/** Requests and CPU time per third-party origin (anything not the document's origin). */
+/** Requests and CPU time per third-party origin: any origin outside the document's own site. */
 function buildThirdParties(
   trace: ParsedTrace,
   load: Pick<LoadAnalysis, "lcp">,
   origin = trace.navigation?.time ?? 0,
 ): ThirdParty[] {
   const documentOrigin = originOf(trace.navigation?.url ?? "");
+  const documentSite = documentOrigin && siteOf(documentOrigin);
+  // The page's own subdomains (static.example.com for www.example.com) are first party.
+  const isThirdParty = (candidate: string | undefined): candidate is string =>
+    candidate !== undefined && siteOf(candidate) !== documentSite;
   const byOrigin = new Map<string, ThirdParty>();
   const entry = (origin: string) => {
     const found = byOrigin.get(origin);
@@ -287,7 +316,7 @@ function buildThirdParties(
     // parties of the page under analysis.
     if (request.start < origin) continue;
     const requestOrigin = originOf(request.url);
-    if (!requestOrigin || requestOrigin === documentOrigin) continue;
+    if (!isThirdParty(requestOrigin)) continue;
     const party = entry(requestOrigin);
     party.requests += 1;
     party.transferBytes += Math.max(0, request.transferSize ?? request.resourceSize ?? 0);
@@ -304,7 +333,7 @@ function buildThirdParties(
       if (time < origin || time > end) continue;
       const node = profile.nodes.get(profile.nodeIds[i]);
       const nodeOrigin = node?.url ? originOf(node.url) : undefined;
-      if (!nodeOrigin || nodeOrigin === documentOrigin) continue;
+      if (!isThirdParty(nodeOrigin)) continue;
       entry(nodeOrigin).mainThreadMs += Math.max(0, profile.weights[i]);
     }
   }

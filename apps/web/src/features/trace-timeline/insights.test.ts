@@ -573,4 +573,131 @@ describe("trace insights", () => {
     });
     expect(buildInsights(trace, analyzeLoad(trace)).thirdParties).toEqual([]);
   });
+
+  const navTrace = (navUrl: string, requests: string[]) =>
+    parseTrace({
+      traceEvents: [
+        meta,
+        R("navigationStart", 0, { isOutermostMainFrame: true, documentLoaderURL: navUrl }),
+        ...requests.flatMap((url, i) => [
+          resource("ResourceSendRequest", 10 + i, {
+            requestId: `r${i}`,
+            url,
+            resourceType: "Script",
+          }),
+          resource("ResourceFinish", 100 + i, { requestId: `r${i}`, encodedDataLength: 1000 }),
+        ]),
+        X("RunTask", 0, 100),
+      ],
+    });
+
+  it("treats the page's own subdomains as first party", () => {
+    const origins = (trace: ReturnType<typeof navTrace>) =>
+      buildInsights(trace, analyzeLoad(trace)).thirdParties.map((t) => t.origin);
+    expect(
+      origins(
+        navTrace("https://www.example.co.uk/", [
+          "https://static.example.co.uk/app.js",
+          "https://cdn.other.com/tag.js",
+        ]),
+      ),
+    ).toEqual(["https://cdn.other.com"]);
+    expect(
+      origins(
+        navTrace("https://www.example.com/", [
+          "https://assets.example.com/x.js",
+          "https://example.org/y.js",
+        ]),
+      ),
+    ).toEqual(["https://example.org"]);
+  });
+
+  const eventTiming = (id: string, startMs: number, durMs: number, data: object) => [
+    {
+      name: "EventTiming",
+      ph: "b",
+      id,
+      pid: 1,
+      tid: 2,
+      ts: at(startMs),
+      args: { data: { duration: 8, nodeName: "BUTTON", ...data } },
+    },
+    { name: "EventTiming", ph: "e", id, pid: 1, tid: 2, ts: at(startMs + durMs) },
+  ];
+  const withInteractions = (events: object[]) =>
+    parseTrace({
+      traceEvents: [
+        meta,
+        R("navigationStart", 0, {
+          isOutermostMainFrame: true,
+          documentLoaderURL: "https://x.test/",
+        }),
+        ...events,
+        X("RunTask", 0, 100),
+      ],
+    });
+
+  it("settles equally long events of one interaction by processing time", () => {
+    const trace = withInteractions([
+      ...eventTiming("e1", 1000, 250, {
+        type: "pointerdown",
+        interactionId: 5,
+        timeStamp: 2000,
+        processingStart: 2010,
+        processingEnd: 2010,
+      }),
+      ...eventTiming("e2", 1000, 250, {
+        type: "click",
+        interactionId: 5,
+        timeStamp: 2000,
+        processingStart: 2010,
+        processingEnd: 2190,
+      }),
+    ]);
+    const longest = buildInp(trace)?.longest;
+    expect(longest?.type).toBe("click");
+    expect(longest?.processingMs).toBe(180);
+  });
+
+  it("reports the 98th percentile once there are 50 or more interactions", () => {
+    const events = Array.from({ length: 60 }, (_, i) =>
+      eventTiming(`e${i}`, 1000 + i * 1000, 100 + i, {
+        type: "click",
+        interactionId: i + 1,
+        timeStamp: 2000 + i * 1000,
+        processingStart: 2000 + i * 1000,
+        processingEnd: 2000 + i * 1000,
+      }),
+    ).flat();
+    const inp = buildInp(withInteractions(events));
+    expect(inp?.count).toBe(60);
+    expect(inp?.interactions).toHaveLength(10);
+    expect(inp?.valueMs).toBe(100 + 58);
+  });
+
+  it("caps a CLS session window at 5 s and ignores shifts after input", () => {
+    const shift = (ms: number, score: number, recentInput = false) =>
+      R("LayoutShift", ms, {
+        score,
+        had_recent_input: recentInput,
+        is_main_frame: true,
+        impacted_nodes: [],
+      });
+    const trace = parseTrace({
+      traceEvents: [
+        meta,
+        R("navigationStart", 0, {
+          isOutermostMainFrame: true,
+          documentLoaderURL: "https://x.test/",
+        }),
+        ...Array.from({ length: 8 }, (_, i) => shift(i * 800, 0.01)),
+        shift(2000, 0.5, true),
+        X("RunTask", 0, 100),
+      ],
+    });
+    const cls = buildClsClusters(trace);
+    expect(cls.clusters).toHaveLength(2);
+    expect(cls.clusters.every((c) => c.score < 0.5)).toBe(true);
+    expect(cls.score).toBeCloseTo(0.07, 5);
+  });
 });

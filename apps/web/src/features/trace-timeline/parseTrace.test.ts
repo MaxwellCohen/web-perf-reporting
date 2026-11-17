@@ -183,6 +183,48 @@ describe("parseTrace", () => {
     expect(t.lcpCandidates[0].url).toBe("https://cdn.test/a.png");
   });
 
+  it("analyses the navigation in the busiest renderer", () => {
+    const nav = (pid: number, tid: number, frame: string, ms: number, url: string) => ({
+      name: "navigationStart",
+      ph: "R",
+      pid,
+      tid,
+      ts: 1_000_000 + ms * 1000,
+      args: { frame, data: { isOutermostMainFrame: true, documentLoaderURL: url } },
+    });
+    const task = (pid: number, tid: number, ms: number) => ({
+      name: "FunctionCall",
+      ph: "X",
+      pid,
+      tid,
+      ts: 1_000_000 + ms * 1000,
+      dur: 10_000,
+    });
+    const t = parseTrace({
+      traceEvents: [
+        meta(1, 2, "CrRendererMain"),
+        meta(2, 3, "CrRendererMain"),
+        nav(1, 2, "FA", 0, "https://old.test/"),
+        task(1, 2, 10),
+        nav(2, 3, "FB", 5000, "https://new.test/"),
+        task(2, 3, 5010),
+        task(2, 3, 5030),
+        task(2, 3, 5050),
+        task(2, 3, 5070),
+        {
+          name: "firstContentfulPaint",
+          ph: "R",
+          pid: 2,
+          tid: 3,
+          ts: 1_000_000 + 5400 * 1000,
+          args: { frame: "FB" },
+        },
+      ],
+    });
+    expect(t.navigation?.url).toBe("https://new.test/");
+    expect(t.markers.some((m) => m.label === "FCP")).toBe(true);
+  });
+
   it("rejects non-traces", () => {
     expect(() => parseTrace({})).toThrow(/missing traceEvents/);
   });

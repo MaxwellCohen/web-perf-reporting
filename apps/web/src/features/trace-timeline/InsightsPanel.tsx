@@ -88,7 +88,7 @@ function Section({
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex flex-wrap items-center gap-2">
-          {title}
+          <h3>{title}</h3>
           {value && <span className="font-mono text-base tabular-nums">{value}</span>}
           {rating && <RatingPill rating={rating} />}
         </CardTitle>
@@ -109,7 +109,7 @@ export function InsightsPanel({ insights }: { insights: TraceInsights }) {
       <h2 className="text-lg font-bold">Insights</h2>
 
       {lcp && (
-        <Section title="LCP breakdown" value={formatMs(lcp.timeMs)}>
+        <Section title="LCP breakdown" value={formatMs(lcp.timeMs)} rating={lcp.rating}>
           <StackedBar
             segments={lcp.subparts}
             colors={lcp.subparts.map((s) => LCP_COLORS[s.key])}
