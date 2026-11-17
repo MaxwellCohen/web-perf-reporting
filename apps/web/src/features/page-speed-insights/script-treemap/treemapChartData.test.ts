@@ -1,29 +1,8 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
-  buildTreemapChartNodes,
-  copyTreemapNodeName,
   getTreemapDisplayLabel,
   getTreemapLabel,
-  getTreemapNodeColor,
 } from "@/features/page-speed-insights/script-treemap/treemapChartData";
-
-describe("getTreemapNodeColor", () => {
-  it("returns gray when unused bytes are not reported", () => {
-    expect(getTreemapNodeColor(1000)).toBe("hsl(220 10% 68%)");
-  });
-
-  it("returns green for low unused percentage", () => {
-    expect(getTreemapNodeColor(1000, 100)).toBe("hsl(142 45% 62%)");
-  });
-
-  it("returns yellow for moderate unused percentage", () => {
-    expect(getTreemapNodeColor(1000, 300)).toBe("hsl(43 85% 62%)");
-  });
-
-  it("returns red for high unused percentage", () => {
-    expect(getTreemapNodeColor(1000, 950)).toBe("hsl(0 70% 68%)");
-  });
-});
 
 describe("getTreemapDisplayLabel", () => {
   it("returns short inline names unchanged", () => {
@@ -91,105 +70,5 @@ describe("getTreemapLabel", () => {
   it("truncates long non-url strings from the end", () => {
     const label = getTreemapLabel("abcdefghijklmnopqrstuvwxyz", 10);
     expect(label).toBe("abcdefghi…");
-  });
-});
-
-describe("buildTreemapChartNodes", () => {
-  it("maps resource bytes to size and preserves hierarchy", () => {
-    const nodes = buildTreemapChartNodes([
-      {
-        name: "https://example.com",
-        resourceBytes: 1000,
-        children: [
-          {
-            name: "script.js",
-            resourceBytes: 400,
-            unusedBytes: 200,
-          },
-        ],
-      },
-    ]);
-
-    expect(nodes).toEqual([
-      {
-        id: "treemap-0",
-        name: "treemap-0",
-        fullName: "https://example.com",
-        size: 1000,
-        resourceBytes: 1000,
-        unusedBytes: undefined,
-        children: [
-          {
-            id: "treemap-0-0",
-            name: "treemap-0-0",
-            fullName: "script.js",
-            size: 400,
-            resourceBytes: 400,
-            unusedBytes: 200,
-            children: undefined,
-          },
-        ],
-      },
-    ]);
-  });
-
-  it("assigns unique names for duplicate script labels", () => {
-    const nodes = buildTreemapChartNodes([
-      {
-        name: "https://example.com",
-        resourceBytes: 1000,
-        children: [
-          {
-            name: "(inline) self.__next_f.p…",
-            resourceBytes: 100,
-          },
-          {
-            name: "(inline) self.__next_f.p…",
-            resourceBytes: 200,
-          },
-        ],
-      },
-    ]);
-
-    const childNames = nodes[0]?.children?.map((child) => child.name) ?? [];
-    expect(new Set(childNames).size).toBe(childNames.length);
-    expect(nodes[0]?.children?.map((child) => child.fullName)).toEqual([
-      "(inline) self.__next_f.p…",
-      "(inline) self.__next_f.p…",
-    ]);
-  });
-});
-
-describe("copyTreemapNodeName", () => {
-  it("returns false for empty names", async () => {
-    await expect(copyTreemapNodeName("")).resolves.toBe(false);
-  });
-
-  it("writes the node name to the clipboard", async () => {
-    const writeText = vi.fn<() => void>().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, "clipboard", {
-      configurable: true,
-      value: { writeText },
-    });
-
-    await expect(copyTreemapNodeName("https://example.com/script.js")).resolves.toBe(true);
-    expect(writeText).toHaveBeenCalledWith("https://example.com/script.js");
-  });
-
-  it("returns false when clipboard write fails", async () => {
-    Object.defineProperty(navigator, "clipboard", {
-      configurable: true,
-      value: {
-        writeText: vi.fn<() => void>().mockRejectedValue(new Error("denied")),
-      },
-    });
-
-    await expect(copyTreemapNodeName("https://example.com/script.js")).resolves.toBe(false);
-  });
-});
-
-describe("getTreemapNodeColor zero size", () => {
-  it("returns gray when resourceBytes is 0", () => {
-    expect(getTreemapNodeColor(0, 5)).toBe(getTreemapNodeColor(100));
   });
 });

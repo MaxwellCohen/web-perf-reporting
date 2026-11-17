@@ -1,7 +1,7 @@
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
-import { useSimpleTable } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
+import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
 import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 
 vi.mock("@/features/page-speed-insights/tanstack-table-v9/StockDataTable", () => ({
@@ -30,7 +30,7 @@ function TableCardWithTable({
   const columnHelper = createColumnHelper<{ id: string }>();
   const columns = [columnHelper.accessor("id", { header: "ID" })];
   const data = Array.from({ length: rowCount }, (_, i) => ({ id: `row-${i}` }));
-  const table = useSimpleTable({ data, columns: columns as never });
+  const table = useStandardTable({ data, columns: columns as never });
   return (
     <TableCard title="Test Table">
       <TableCard.Table table={table as never} />

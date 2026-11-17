@@ -1,9 +1,7 @@
 import { renderHook, act } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import {
-  useStandardTable,
-  type StandardColumnDef,
-} from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import type { StockAnyColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 
 type Row = { name: string; flag: boolean };
@@ -11,7 +9,7 @@ type Row = { name: string; flag: boolean };
 describe("useStandardTable boolean filter", () => {
   it("filters rows when boolean column filter changes", () => {
     const columnHelper = createStockColumnHelper<Row>();
-    const columns: StandardColumnDef<Row>[] = [
+    const columns: StockAnyColumnDef<Row>[] = [
       columnHelper.accessor("name", { id: "name", header: "Name" }),
       columnHelper.accessor("flag", {
         id: "flag",
@@ -42,7 +40,7 @@ describe("useStandardTable boolean filter", () => {
 
   it("filters rows when using CheckBoxFilter-style updater (uncheck false)", () => {
     const columnHelper = createStockColumnHelper<Row>();
-    const columns: StandardColumnDef<Row>[] = [
+    const columns: StockAnyColumnDef<Row>[] = [
       columnHelper.accessor("name", { id: "name", header: "Name" }),
       columnHelper.accessor("flag", {
         id: "flag",
@@ -77,7 +75,7 @@ describe("useStandardTable boolean filter", () => {
 
   it("filters grouped rows when boolean filter is applied", () => {
     const columnHelper = createStockColumnHelper<Row>();
-    const columns: StandardColumnDef<Row>[] = [
+    const columns: StockAnyColumnDef<Row>[] = [
       columnHelper.accessor("name", { id: "name", header: "Name", enableGrouping: true }),
       columnHelper.accessor("flag", {
         id: "flag",

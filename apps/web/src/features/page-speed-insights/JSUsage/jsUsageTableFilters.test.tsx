@@ -2,7 +2,7 @@ import { fireEvent, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { StockRow } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { createStockColumnHelper as createColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
-import { useSimpleTable } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
+import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
 import { RangeFilterInputs as RangeFilter } from "@/features/page-speed-insights/JSUsage/jsUsageTableFilters";
 
 vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", () => ({
@@ -33,7 +33,7 @@ describe("jsUsageTableFilters", () => {
           filterFn: "inNumberRange",
         }),
       ];
-      const table = useSimpleTable({ data, columns: cols as never });
+      const table = useStandardTable({ data, columns: cols as never });
       const col = table.getColumn("value");
       if (!col) return null;
       return (

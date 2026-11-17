@@ -44,7 +44,9 @@ describe("ScoreDisplay", () => {
       displayValue: "1.2 s",
     };
     const { container } = render(<ScoreDisplay audit={audit} />);
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container.firstChild).toHaveAttribute("data-status", "pass");
+    expect(container).toHaveTextContent("Pass 90");
+    expect(container).toHaveTextContent("1.2 s");
   });
 
   it("renders numeric score without displayValue", () => {
@@ -55,7 +57,8 @@ describe("ScoreDisplay", () => {
       scoreDisplayMode: "numeric" as const,
     };
     const { container } = render(<ScoreDisplay audit={audit} />);
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container.firstChild).toHaveAttribute("data-status", "average");
+    expect(container).toHaveTextContent("Average 85");
   });
 
   it("renders binary passed", () => {
@@ -66,7 +69,8 @@ describe("ScoreDisplay", () => {
       scoreDisplayMode: "binary" as const,
     };
     const { container } = render(<ScoreDisplay audit={audit} />);
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container.firstChild).toHaveAttribute("data-status", "pass");
+    expect(container).toHaveTextContent("Pass");
   });
 
   it("renders binary failed", () => {
@@ -77,7 +81,8 @@ describe("ScoreDisplay", () => {
       scoreDisplayMode: "binary" as const,
     };
     const { container } = render(<ScoreDisplay audit={audit} />);
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container.firstChild).toHaveAttribute("data-status", "fail");
+    expect(container).toHaveTextContent("Fail");
   });
 
   it("renders device label when provided", () => {
@@ -88,7 +93,8 @@ describe("ScoreDisplay", () => {
       scoreDisplayMode: "binary" as const,
     };
     const { container } = render(<ScoreDisplay audit={audit} device="Mobile" />);
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container.firstChild).toHaveAttribute("data-status", "pass");
+    expect(container).toHaveTextContent("Mobile:");
   });
 
   it("renders manual mode", () => {
@@ -99,7 +105,8 @@ describe("ScoreDisplay", () => {
       scoreDisplayMode: "manual" as const,
     };
     const { container } = render(<ScoreDisplay audit={audit} />);
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container.firstChild).toHaveAttribute("data-status", "manual");
+    expect(container).toHaveTextContent("Manual");
   });
 
   it("returns null for informative mode", () => {
@@ -121,7 +128,8 @@ describe("ScoreDisplay", () => {
       scoreDisplayMode: "notApplicable" as const,
     };
     const { container } = render(<ScoreDisplay audit={audit} />);
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container.firstChild).toHaveAttribute("data-status", "notApplicable");
+    expect(container).toHaveTextContent("N/A");
   });
 
   it("renders error mode with errorMessage", () => {
@@ -133,7 +141,8 @@ describe("ScoreDisplay", () => {
       errorMessage: "Audit failed to run",
     };
     const { container } = render(<ScoreDisplay audit={audit} />);
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container.firstChild).toHaveAttribute("data-status", "error");
+    expect(container).toHaveTextContent("Audit failed to run");
   });
 
   it("renders metricSavings fallback with displayValue", () => {
@@ -145,7 +154,10 @@ describe("ScoreDisplay", () => {
       displayValue: "150 ms",
     };
     const { container } = render(<ScoreDisplay audit={audit} device="Mobile" />);
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container.firstChild).toHaveAttribute("data-status", "average");
+    expect(container).toHaveTextContent("Mobile:");
+    expect(container).toHaveTextContent("Average");
+    expect(container).toHaveTextContent("150 ms");
   });
 
   it("renders metricSavings fallback without displayValue", () => {
@@ -156,7 +168,8 @@ describe("ScoreDisplay", () => {
       scoreDisplayMode: "metricSavings" as const,
     };
     const { container } = render(<ScoreDisplay audit={audit} />);
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container.firstChild).toHaveAttribute("data-status", "average");
+    expect(container).toHaveTextContent("Average");
   });
 
   it("renders metricSavings fallback with device but no displayValue", () => {
@@ -167,7 +180,8 @@ describe("ScoreDisplay", () => {
       scoreDisplayMode: "metricSavings" as const,
     };
     const { container } = render(<ScoreDisplay audit={audit} device="Desktop" />);
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container.firstChild).toHaveAttribute("data-status", "average");
+    expect(container).toHaveTextContent("Desktop:");
   });
 });
 

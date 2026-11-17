@@ -11,11 +11,6 @@ vi.mock("@/components/ui/button", () => ({
   ),
 }));
 
-/** Normalize radix IDs to radix-_r_0_ for stable snapshots regardless of test order */
-function normalizeRadixIds(html: string) {
-  return html.replace(/radix-_r_\d+_/g, "radix-_r_0_");
-}
-
 describe("Timeline", () => {
   it("returns null when timeline is undefined", () => {
     const { container } = render(<Timeline />);
@@ -43,9 +38,8 @@ describe("Timeline", () => {
       ],
       scale: 1,
     };
-    const { container } = render(<Timeline timeline={timeline} device="Mobile" />);
-    const html = (container.firstChild as HTMLElement)?.outerHTML ?? "";
-    expect(normalizeRadixIds(html)).toMatchSnapshot();
+    render(<Timeline timeline={timeline} device="Mobile" />);
+    expect(screen.getByRole("heading", { level: 3 })).toHaveTextContent("Mobile - Timeline");
   });
 
   it("renders timeline without device label", () => {
@@ -54,9 +48,9 @@ describe("Timeline", () => {
       items: [{ data: "data:image/png;base64,a", timestamp: 0, timing: 50 }],
       scale: 1,
     };
-    const { container } = render(<Timeline timeline={timeline} />);
-    const html = (container.firstChild as HTMLElement)?.outerHTML ?? "";
-    expect(normalizeRadixIds(html)).toMatchSnapshot();
+    render(<Timeline timeline={timeline} />);
+    expect(screen.getByRole("heading", { level: 3 })).toHaveTextContent("Timeline");
+    expect(screen.getByRole("heading", { level: 3 })).not.toHaveTextContent("Mobile");
   });
 
   it("renders thumbnail buttons for each timeline item", () => {
@@ -68,9 +62,14 @@ describe("Timeline", () => {
       ],
       scale: 1,
     };
-    const { container } = render(<Timeline timeline={timeline} />);
-    const html = (container.firstChild as HTMLElement)?.outerHTML ?? "";
-    expect(normalizeRadixIds(html)).toMatchSnapshot();
+    render(<Timeline timeline={timeline} />);
+    expect(screen.getAllByRole("button")).toHaveLength(2);
+    expect(screen.getByLabelText("Open full-screen view at 100 ms")).toBeInTheDocument();
+    expect(screen.getByLabelText("Open full-screen view at 200 ms")).toBeInTheDocument();
+    expect(screen.getByAltText("timeline image at 200")).toHaveAttribute(
+      "src",
+      "data:image/png;base64,b",
+    );
   });
 
   it("labels frames with key paint timings", () => {

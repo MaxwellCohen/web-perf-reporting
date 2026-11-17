@@ -14,10 +14,8 @@ import {
   formatReportTableTitle,
   splitReportLabel,
 } from "@/features/page-speed-insights/shared/reportLabels";
-import {
-  useSimpleTable,
-  type FlatColumnDef,
-} from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
+import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import type { StockAnyColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import {
   flattenDetailItems,
   getAuditId,
@@ -171,9 +169,9 @@ function ReportTable({
     auditId,
     timeRange,
   });
-  const table = useSimpleTable({
+  const table = useStandardTable({
     data,
-    columns: reportColumns as FlatColumnDef<TableItem | OpportunityItem>[],
+    columns: reportColumns as StockAnyColumnDef<TableItem | OpportunityItem>[],
   });
 
   return <TableCard.Table table={table} />;

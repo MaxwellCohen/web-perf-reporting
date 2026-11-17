@@ -7,10 +7,7 @@ const report = JSON.stringify({
   state: "ready",
   data: (
     JSON.parse(
-      readFileSync(
-        path.join(process.cwd(), "src/features/page-speed-insights/example-report.json"),
-        "utf8",
-      ),
+      readFileSync(path.join(process.cwd(), "test-fixtures/example-report.json"), "utf8"),
     ) as { item: unknown }[]
   ).map((entry) => entry.item),
 });

@@ -1,11 +1,11 @@
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
+import { getHostFromUrl } from "@/lib/urlDisplay";
 import { AuditKpiStrip } from "./AuditKpiStrip";
 import {
   Attribution,
   Chip,
   groupAcross,
   hasAnyItems,
-  hostOf,
   plural,
   reportsOf,
   textOf,
@@ -21,7 +21,7 @@ export function AuditThirdPartyCookiesViz({ rows }: { rows: DetailTableItem[] })
     reports,
     (item) => {
       const url = urlOf(item.url);
-      return url ? hostOf(url) : "unknown origin";
+      return url ? getHostFromUrl(url, url) : "unknown origin";
     },
     () => new Set<string>(),
     (names, item) => {
@@ -39,7 +39,9 @@ export function AuditThirdPartyCookiesViz({ rows }: { rows: DetailTableItem[] })
             { label: "Cookies", value: report.items.length, format: "count" },
             {
               label: "Origins",
-              value: new Set(report.items.map((item) => hostOf(urlOf(item.url) || "unknown"))).size,
+              value: new Set(
+                report.items.map((item) => getHostFromUrl(urlOf(item.url) || "unknown", "unknown")),
+              ).size,
               format: "count",
             },
           ],

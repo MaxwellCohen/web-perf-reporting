@@ -60,11 +60,7 @@ const makeSortableStringColumn = (column: keyof TreeMapNode & string) => {
     cell: (info) => {
       let value: unknown = info.getValue();
       if (Array.isArray(value)) {
-        try {
-          value = new URL(String(value[0])).host;
-        } catch {
-          value = "Unknown";
-        }
+        value = getHostFromUrl(String(value[0]));
       }
       return (
         <div className="min-w-0 max-w-full overflow-hidden" title={String(value)}>

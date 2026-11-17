@@ -1,11 +1,11 @@
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
+import { getHostFromUrl } from "@/lib/urlDisplay";
 import { shortUrl } from "@/features/page-speed-insights/shared/format";
 import { AuditBarChart } from "./AuditBarChart";
 import {
   Attribution,
   groupAcross,
   hasAnyItems,
-  hostOf,
   plural,
   reportsOf,
   subItemsOf,
@@ -57,8 +57,8 @@ export function AuditInspectorIssuesViz({ rows }: { rows: DetailTableItem[] }) {
             <ul className="space-y-0.5">
               {[...type.data].slice(0, 6).map((url) => (
                 <li key={url} className="truncate text-xs text-muted-foreground" title={url}>
-                  <span className="font-medium text-foreground">{hostOf(url)}</span>{" "}
-                  {shortUrl(url).replace(hostOf(url), "")}
+                  <span className="font-medium text-foreground">{getHostFromUrl(url, url)}</span>{" "}
+                  {shortUrl(url).replace(getHostFromUrl(url, url), "")}
                 </li>
               ))}
               {type.data.size > 6 ? (

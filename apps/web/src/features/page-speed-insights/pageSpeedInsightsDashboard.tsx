@@ -1,22 +1,17 @@
 "use client";
-import dynamic from "next/dynamic";
 import { useLayoutEffect, type ReactNode } from "react";
-import { LayoutDashboard, List } from "lucide-react";
 import {
-  PageSpeedInsightsStoreProvider,
+  PageSpeedInsightsProvider,
   selectPageSpeedUserLabelFilter,
   selectPageSpeedUserLabels,
-  usePageSpeedInsightsStore,
   usePageSpeedItems,
   usePageSpeedReportTitle,
   usePageSpeedSelector,
-  useRequiredPageSpeedInsightsStore,
+  usePageSpeedUserLabelFilterActions,
 } from "@/features/page-speed-insights/PageSpeedContext";
 import { NullablePageSpeedInsights } from "@/lib/schema";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserLabelFilter } from "@/features/page-speed-insights/UserLabelFilter";
 import { PageSpeedInsightsCopyButtons } from "@/features/page-speed-insights/PageSpeedInsightsCopyButtons";
-import { DashboardPanelFallback } from "@/features/page-speed-insights/dashboard-view/DashboardPanelFallback";
 import {
   narrowLabelFilter,
   sameStringList,
@@ -26,41 +21,9 @@ import {
   useDashboardSearchState,
 } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
 import { PageSpeedDashboardView } from "@/features/page-speed-insights/dashboard-view/PageSpeedDashboardView";
-import {
-  isDashboardViewMode,
-  useDashboardViewMode,
-} from "@/features/page-speed-insights/dashboard-view/useDashboardViewMode";
-
-const ClassicView = dynamic(() => import("./ClassicView").then((mod) => mod.ClassicView), {
-  loading: () => <DashboardPanelFallback label="classic layout" />,
-});
-
-function ViewModeToggle() {
-  const [viewMode, setViewMode] = useDashboardViewMode();
-
-  return (
-    <Tabs
-      value={viewMode}
-      onValueChange={(value) => {
-        if (isDashboardViewMode(value)) setViewMode(value);
-      }}
-    >
-      <TabsList aria-label="Report layout">
-        <TabsTrigger value="dashboard" className="gap-1.5">
-          <LayoutDashboard className="size-4" aria-hidden />
-          Dashboard
-        </TabsTrigger>
-        <TabsTrigger value="classic" className="gap-1.5">
-          <List className="size-4" aria-hidden />
-          Classic
-        </TabsTrigger>
-      </TabsList>
-    </Tabs>
-  );
-}
 
 function useSyncUserLabelFilterFromUrl() {
-  const store = useRequiredPageSpeedInsightsStore();
+  const { setUserLabelFilter } = usePageSpeedUserLabelFilterActions();
   const available = usePageSpeedSelector(selectPageSpeedUserLabels);
   const current = usePageSpeedSelector(selectPageSpeedUserLabelFilter);
   const urlLabels = useDashboardSearchState().labels;
@@ -70,8 +33,8 @@ function useSyncUserLabelFilterFromUrl() {
     const next = narrowLabelFilter(urlLabels, available);
     const applied = narrowLabelFilter(current, available);
     if (sameStringList(next, applied)) return;
-    store.trigger.setUserLabelFilter({ labels: next ?? available });
-  }, [available, current, urlLabels, store]);
+    setUserLabelFilter(next ?? available);
+  }, [available, current, urlLabels, setUserLabelFilter]);
 }
 
 function PageSpeedInsightsDashboardContent({
@@ -83,7 +46,6 @@ function PageSpeedInsightsDashboardContent({
 }) {
   const items = usePageSpeedItems();
   const reportTitle = usePageSpeedReportTitle();
-  const [viewMode] = useDashboardViewMode();
   useSyncUserLabelFilterFromUrl();
 
   return (
@@ -101,14 +63,13 @@ function PageSpeedInsightsDashboardContent({
         >
           {reportTitle}
         </h2>
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <ViewModeToggle />
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <div className="shrink-0">
             <UserLabelFilter />
           </div>
         </div>
       </div>
-      {viewMode === "dashboard" ? <PageSpeedDashboardView /> : <ClassicView />}
+      <PageSpeedDashboardView />
     </>
   );
 }
@@ -127,18 +88,11 @@ export function PageSpeedInsightsDashboard({
   shareUrl?: string;
   headerStart?: ReactNode;
 }) {
-  const dataForStore: NullablePageSpeedInsights[] = Array.isArray(data) ? data : [];
-  const store = usePageSpeedInsightsStore({
-    data: dataForStore,
-    labels,
-    isLoading: false,
-  });
-
   return (
     <DashboardSearchProvider initialSearch={initialSearch}>
-      <PageSpeedInsightsStoreProvider store={store}>
+      <PageSpeedInsightsProvider data={Array.isArray(data) ? data : undefined} labels={labels}>
         <PageSpeedInsightsDashboardContent shareUrl={shareUrl} headerStart={headerStart} />
-      </PageSpeedInsightsStoreProvider>
+      </PageSpeedInsightsProvider>
     </DashboardSearchProvider>
   );
 }

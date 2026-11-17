@@ -1,59 +1,28 @@
 "use client";
 
-import { createContext, type ReactNode, useContext, useEffect } from "react";
-import { useSelector, useStore } from "@xstate/store-react";
+import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from "react";
 import {
-  applyUserLabelFilterToState,
-  buildPageSpeedInsightsStoreState,
   deriveFilteredDashboardState,
-  type PageSpeedInsightsStoreInput,
-  type PageSpeedInsightsStoreState,
+  getDashboardItems,
+  normalizeUserLabelFilter,
+  type PageSpeedInsightsState,
 } from "@/features/page-speed-insights/pageSpeedDashboardHelpers";
-
-function createPageSpeedInsightsStoreConfig(input: PageSpeedInsightsStoreInput) {
-  return {
-    context: buildPageSpeedInsightsStoreState(input),
-    on: {
-      sync: (
-        context: PageSpeedInsightsStoreState,
-        event: PageSpeedInsightsStoreInput,
-      ): PageSpeedInsightsStoreState => {
-        const next = buildPageSpeedInsightsStoreState(event);
-
-        return {
-          ...next,
-          userLabelFilter: context.userLabelFilter,
-          ...deriveFilteredDashboardState(next.allItems, context.userLabelFilter),
-        };
-      },
-      setUserLabelFilter: (
-        context: PageSpeedInsightsStoreState,
-        event: { labels: string[] },
-      ): PageSpeedInsightsStoreState => applyUserLabelFilterToState(context, event.labels),
-      resetUserLabelFilter: (context: PageSpeedInsightsStoreState): PageSpeedInsightsStoreState =>
-        applyUserLabelFilterToState(context, context.labels),
-    },
-  };
-}
+import type { NullablePageSpeedInsights } from "@/lib/schema";
 
 export type { InsightsContextItem } from "@/lib/page-speed-insights/types";
-export type { PageSpeedInsightsStoreInput } from "@/features/page-speed-insights/pageSpeedDashboardHelpers";
 
-export function usePageSpeedInsightsStore(input: PageSpeedInsightsStoreInput) {
-  const { data, isLoading, labels } = input;
-  const store = useStore(createPageSpeedInsightsStoreConfig({ data, isLoading, labels }));
+/** Selector input shape: `{ context }` so selectors also accept `{ context: { items } }` stubs. */
+export type PageSpeedInsightsSnapshot = { context: PageSpeedInsightsState };
 
-  useEffect(() => {
-    store.trigger.sync({ data, isLoading, labels });
-  }, [data, isLoading, labels, store]);
+type PageSpeedInsightsContextValue = {
+  snapshot: PageSpeedInsightsSnapshot;
+  setUserLabelFilter: (labels: string[]) => void;
+  resetUserLabelFilter: () => void;
+};
 
-  return store;
-}
+const PageSpeedInsightsContext = createContext<PageSpeedInsightsContextValue | null>(null);
 
-type PageSpeedInsightsStore = ReturnType<typeof usePageSpeedInsightsStore>;
-export type PageSpeedInsightsSnapshot = ReturnType<PageSpeedInsightsStore["getSnapshot"]>;
-
-const PageSpeedInsightsStoreContext = createContext<PageSpeedInsightsStore | null>(null);
+const EMPTY_DATA: NullablePageSpeedInsights[] = [];
 
 const selectPageSpeedItems = (snapshot: PageSpeedInsightsSnapshot) => snapshot.context.items;
 
@@ -69,33 +38,62 @@ export const selectPageSpeedUserLabelFilter = (snapshot: PageSpeedInsightsSnapsh
 const selectPageSpeedFullPageScreenshots = (snapshot: PageSpeedInsightsSnapshot) =>
   snapshot.context.fullPageScreenshots;
 
-export function PageSpeedInsightsStoreProvider({
-  store,
+export function PageSpeedInsightsProvider({
+  data = EMPTY_DATA,
+  labels,
   children,
 }: {
-  store: PageSpeedInsightsStore;
+  data?: NullablePageSpeedInsights[];
+  labels: string[];
   children: ReactNode;
 }) {
+  const [userLabelFilter, setFilter] = useState<string[] | null>(null);
+  const allItems = useMemo(() => getDashboardItems(data, labels), [data, labels]);
+  const derived = useMemo(
+    () => deriveFilteredDashboardState(allItems, userLabelFilter),
+    [allItems, userLabelFilter],
+  );
+  const setUserLabelFilter = useCallback(
+    (selected: string[]) => setFilter(normalizeUserLabelFilter(labels, selected)),
+    [labels],
+  );
+  const resetUserLabelFilter = useCallback(() => setFilter(null), []);
+
+  const value = useMemo<PageSpeedInsightsContextValue>(
+    () => ({
+      snapshot: { context: { data, labels, allItems, userLabelFilter, ...derived } },
+      setUserLabelFilter,
+      resetUserLabelFilter,
+    }),
+    [data, labels, allItems, userLabelFilter, derived, setUserLabelFilter, resetUserLabelFilter],
+  );
+
   return (
-    <PageSpeedInsightsStoreContext.Provider value={store}>
-      {children}
-    </PageSpeedInsightsStoreContext.Provider>
+    <PageSpeedInsightsContext.Provider value={value}>{children}</PageSpeedInsightsContext.Provider>
   );
 }
 
-export function useRequiredPageSpeedInsightsStore() {
-  const store = useContext(PageSpeedInsightsStoreContext);
+function useRequiredPageSpeedInsightsContext() {
+  const value = useContext(PageSpeedInsightsContext);
 
-  if (!store) {
-    throw new Error("PageSpeed insights store is unavailable outside the dashboard provider.");
+  if (!value) {
+    throw new Error("PageSpeed insights context is unavailable outside the dashboard provider.");
   }
 
-  return store;
+  return value;
+}
+
+export function usePageSpeedUserLabelFilterActions() {
+  const { setUserLabelFilter, resetUserLabelFilter } = useRequiredPageSpeedInsightsContext();
+  return useMemo(
+    () => ({ setUserLabelFilter, resetUserLabelFilter }),
+    [setUserLabelFilter, resetUserLabelFilter],
+  );
 }
 
 export function usePageSpeedSelector<T>(selector: (snapshot: PageSpeedInsightsSnapshot) => T) {
-  const store = useRequiredPageSpeedInsightsStore();
-  return useSelector(store, selector);
+  const { snapshot } = useRequiredPageSpeedInsightsContext();
+  return useMemo(() => selector(snapshot), [selector, snapshot]);
 }
 
 export function usePageSpeedItems() {

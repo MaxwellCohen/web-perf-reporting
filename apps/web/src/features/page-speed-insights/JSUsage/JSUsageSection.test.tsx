@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { JSUsageAccordion } from "@/features/page-speed-insights/JSUsage/JSUsageSection";
 
@@ -14,24 +14,16 @@ const mockTreeData = {
   ],
 };
 
-vi.mock("@/features/page-speed-insights/script-treemap/useScriptTreemapItems", () => ({
-  useScriptTreemapItems: vi.fn<() => unknown[]>(() => []),
-}));
-
 vi.mock("@/features/page-speed-insights/JSUsage/JSUsageTable", () => ({
   JSUsageTableWithControls: ({ data }: { data: unknown[] }) => (
     <div data-testid="js-usage-table">Table rows: {data.length}</div>
   ),
 }));
 
-import { useScriptTreemapItems } from "@/features/page-speed-insights/script-treemap/useScriptTreemapItems";
-
 describe("JSUsageAccordion", () => {
   it("renders accordion with table", () => {
-    const { container } = render(
-      <JSUsageAccordion treeData={mockTreeData as any} label="Desktop" />,
-    );
-    expect(container.querySelector('[data-testid="js-usage-table"]')).toBeTruthy();
-    expect(container.firstChild).toMatchSnapshot();
+    render(<JSUsageAccordion treeData={mockTreeData as any} label="Desktop" />);
+    expect(screen.getByTestId("js-usage-table")).toHaveTextContent("Table rows: 1");
+    expect(screen.getByText(/JS Usage Table\s*for Desktop/)).toBeInTheDocument();
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import exampleReport from "@/features/page-speed-insights/example-report.json";
+import exampleReport from "../../../test-fixtures/example-report.json";
 import { buildAgentReport, renderAgentReportMarkdown } from "@/lib/agent/agentReport";
 import type { PageSpeedDashboardItem } from "@/lib/page-speed-insights/types";
 

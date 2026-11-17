@@ -1,3 +1,4 @@
+import { auditItems, finiteOrZero } from "@/features/page-speed-insights/shared/auditItems";
 import { reconcileLcpAudits } from "@/features/page-speed-insights/shared/reconcileLcpSubparts";
 // Framework-agnostic optimization prompt, built from the report data that is available.
 // Playbook adapted from https://sarthakmishra.com/blog/optimizing-tanstack-start
@@ -58,15 +59,6 @@ function hasFailingItems(audit: AuditResult | undefined): audit is AuditResult {
   return isFailing(audit) && !isEmptyResult(audit);
 }
 
-function items(audit: AuditResult | undefined): TableItem[] {
-  const details = audit?.details as { items?: unknown } | undefined;
-  return Array.isArray(details?.items) ? (details.items as TableItem[]) : [];
-}
-
-function num(value: unknown): number {
-  return typeof value === "number" && Number.isFinite(value) ? value : 0;
-}
-
 function str(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
@@ -103,7 +95,7 @@ function topRows(
   for (const { audits } of reports) {
     const audit = audits[auditId];
     if (!hasFailingItems(audit)) continue;
-    for (const item of items(audit)) {
+    for (const item of auditItems(audit)) {
       const text = describe(item);
       if (!text) continue;
       const key = str(item.url) ?? str(item.entity) ?? text;
@@ -178,7 +170,7 @@ function lcpArea(reports: Report[]): SpeedUpFocusArea | null {
   let isImage = false;
 
   for (const { label, audits } of reports) {
-    for (const entry of items(reconcileLcpAudits(audits)["lcp-breakdown-insight"])) {
+    for (const entry of auditItems(reconcileLcpAudits(audits)["lcp-breakdown-insight"])) {
       const entryRecord = entry as Record<string, unknown>;
       if (entryRecord.type === "node") {
         const snippet = str(entryRecord.snippet) ?? "";
@@ -197,7 +189,7 @@ function lcpArea(reports: Report[]): SpeedUpFocusArea | null {
         const subparts = rows
           .map(
             (row) =>
-              `${str(row.label) ?? str(row.subpart) ?? "Unknown subpart"} ${formatMs(num(row.duration))}`,
+              `${str(row.label) ?? str(row.subpart) ?? "Unknown subpart"} ${formatMs(finiteOrZero(row.duration))}`,
           )
           .join(", ");
         if (subparts) evidence.push(withLabel(`LCP breakdown: ${subparts}`, label, multi));
@@ -225,15 +217,15 @@ function renderBlockingArea(reports: Report[]): SpeedUpFocusArea | null {
   const evidence = urlRows(
     reports,
     "render-blocking-insight",
-    (item) => num(item.wastedMs) || num(item.totalBytes),
+    (item) => finiteOrZero(item.wastedMs) || finiteOrZero(item.totalBytes),
     (url, item) =>
-      `${url} (${formatBytes(num(item.totalBytes))}, blocks ~${formatMs(num(item.wastedMs))})`,
+      `${url} (${formatBytes(finiteOrZero(item.totalBytes))}, blocks ~${formatMs(finiteOrZero(item.wastedMs))})`,
   );
   const cssRows = urlRows(
     reports,
     "unused-css-rules",
-    (item) => num(item.wastedBytes),
-    (url, item) => `Unused CSS: ${url} (${formatBytes(num(item.wastedBytes))} unused)`,
+    (item) => finiteOrZero(item.wastedBytes),
+    (url, item) => `Unused CSS: ${url} (${formatBytes(finiteOrZero(item.wastedBytes))} unused)`,
   );
   if (evidence.length === 0 && cssRows.length === 0) return null;
   return {
@@ -253,20 +245,20 @@ function javascriptArea(reports: Report[]): SpeedUpFocusArea | null {
   const unused = urlRows(
     reports,
     "unused-javascript",
-    (item) => num(item.wastedBytes),
-    (url, item) => `Unused JS: ${url} (${formatBytes(num(item.wastedBytes))} unused)`,
+    (item) => finiteOrZero(item.wastedBytes),
+    (url, item) => `Unused JS: ${url} (${formatBytes(finiteOrZero(item.wastedBytes))} unused)`,
   );
   const bootup = urlRows(
     reports,
     "bootup-time",
-    (item) => num(item.total),
-    (url, item) => `Execution time: ${url} (${formatMs(num(item.total))})`,
+    (item) => finiteOrZero(item.total),
+    (url, item) => `Execution time: ${url} (${formatMs(finiteOrZero(item.total))})`,
   );
   const legacy = urlRows(
     reports,
     "legacy-javascript-insight",
-    (item) => num(item.wastedBytes),
-    (url, item) => `Legacy polyfills: ${url} (${formatBytes(num(item.wastedBytes))})`,
+    (item) => finiteOrZero(item.wastedBytes),
+    (url, item) => `Legacy polyfills: ${url} (${formatBytes(finiteOrZero(item.wastedBytes))})`,
   );
   const evidence = [
     ...(tbtPoor ? auditSummaries(reports, ["total-blocking-time"]) : []),
@@ -303,13 +295,13 @@ function thirdPartyArea(reports: Report[]): SpeedUpFocusArea | null {
   for (const { audits } of reports) {
     const audit = audits["third-parties-insight"];
     if (!isApplicable(audit)) continue;
-    for (const item of items(audit)) {
+    for (const item of auditItems(audit)) {
       const entity =
         str(item.entity) ??
         (item.entity && typeof item.entity === "object"
           ? str((item.entity as { text?: unknown }).text)
           : null);
-      const time = num(item.mainThreadTime);
+      const time = finiteOrZero(item.mainThreadTime);
       if (entity && time >= 50) best.set(entity, Math.max(best.get(entity) ?? 0, time));
     }
   }
@@ -334,8 +326,8 @@ function fontArea(reports: Report[]): SpeedUpFocusArea | null {
   const evidence = urlRows(
     reports,
     "font-display-insight",
-    (item) => num(item.wastedMs),
-    (url, item) => `${url} (est. ${formatMs(num(item.wastedMs))})`,
+    (item) => finiteOrZero(item.wastedMs),
+    (url, item) => `${url} (est. ${formatMs(finiteOrZero(item.wastedMs))})`,
   );
   if (evidence.length === 0) return null;
   return {
@@ -354,8 +346,8 @@ function imageArea(reports: Report[]): SpeedUpFocusArea | null {
   const delivery = urlRows(
     reports,
     "image-delivery-insight",
-    (item) => num(item.wastedBytes),
-    (url, item) => `${url} (${formatBytes(num(item.wastedBytes))} could be saved)`,
+    (item) => finiteOrZero(item.wastedBytes),
+    (url, item) => `${url} (${formatBytes(finiteOrZero(item.wastedBytes))} could be saved)`,
   );
   const unsized = auditSummaries(reports, ["unsized-images", "offscreen-images"]);
   const evidence = [...delivery, ...unsized];
@@ -394,9 +386,9 @@ function cachingArea(reports: Report[]): SpeedUpFocusArea | null {
   const evidence = urlRows(
     reports,
     "cache-insight",
-    (item) => num(item.wastedBytes),
+    (item) => finiteOrZero(item.wastedBytes),
     (url, item) =>
-      `${url} (cache ${num(item.cacheLifetimeMs) ? formatDurationMs(num(item.cacheLifetimeMs)) : "none"}, ${formatBytes(num(item.totalBytes))})`,
+      `${url} (cache ${finiteOrZero(item.cacheLifetimeMs) ? formatDurationMs(finiteOrZero(item.cacheLifetimeMs)) : "none"}, ${formatBytes(finiteOrZero(item.totalBytes))})`,
   );
   if (evidence.length === 0) return null;
   return {
@@ -485,7 +477,7 @@ function reportContext(dashboardItem: PageSpeedDashboardItem): string[] {
     return [`${name} ${formatFieldValue(key, metric.percentile)}${category}`];
   });
 
-  const libraries = items(audits["js-libraries"])
+  const libraries = auditItems(audits["js-libraries"])
     .map((row) => [str(row.name), str(row.version)].filter(Boolean).join(" "))
     .filter(Boolean);
 

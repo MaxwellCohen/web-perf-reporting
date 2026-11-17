@@ -7,12 +7,6 @@ import type {
 import type { PageSpeedDashboardItem, InsightsContextItem } from "@/lib/page-speed-insights/types";
 import { toTitleCase } from "@/features/page-speed-insights/toTitleCase";
 import { compareReportLabels } from "@/features/page-speed-insights/shared/reportLabels";
-import {
-  mapItemsToNetworkMetrics,
-  mapNetworkMetricsToStats,
-  type NetworkMetricSeries,
-  type NetworkRequestStatsRow,
-} from "@/features/page-speed-insights/network-metrics/useNetworkMetricsData";
 
 function normalizePageSpeedItem(item: NullablePageSpeedInsights): PageSpeedInsights | null {
   if (item?.lighthouseResult) {
@@ -82,21 +76,12 @@ export function getFullPageScreenshotMap(
   );
 }
 
-export type PageSpeedInsightsStoreInput = {
-  data?: NullablePageSpeedInsights[];
-  labels: string[];
-  isLoading: boolean;
-};
-
-export type PageSpeedInsightsStoreState = {
+export type PageSpeedInsightsState = {
   data: NullablePageSpeedInsights[];
   labels: string[];
-  isLoading: boolean;
   allItems: InsightsContextItem[];
   items: InsightsContextItem[];
   userLabelFilter: string[] | null;
-  networkMetricSeries: NetworkMetricSeries[];
-  networkRequestStats: NetworkRequestStatsRow[];
   reportTitle: string;
   fullPageScreenshots: Record<string, FullPageScreenshot | undefined | null>;
 };
@@ -117,52 +102,21 @@ export function deriveFilteredDashboardState(
   userLabelFilter: string[] | null,
 ) {
   const items = filterItemsByUserLabel(allItems, userLabelFilter);
-  const networkMetricSeries = mapItemsToNetworkMetrics(items);
-  const networkRequestStats = mapNetworkMetricsToStats(networkMetricSeries);
 
   return {
     items,
-    networkMetricSeries,
-    networkRequestStats,
     fullPageScreenshots: getFullPageScreenshotMap(items),
     reportTitle: getDashboardTitle(items),
   };
 }
 
-function normalizeUserLabelFilter(labels: string[], selectedLabels: string[]): string[] | null {
+export function normalizeUserLabelFilter(
+  labels: string[],
+  selectedLabels: string[],
+): string[] | null {
   if (selectedLabels.length === 0 || selectedLabels.length === labels.length) {
     return null;
   }
 
   return selectedLabels;
-}
-
-export function buildPageSpeedInsightsStoreState({
-  data = [],
-  labels,
-  isLoading,
-}: PageSpeedInsightsStoreInput): PageSpeedInsightsStoreState {
-  const allItems = getDashboardItems(data, labels);
-
-  return {
-    data,
-    labels,
-    isLoading,
-    allItems,
-    userLabelFilter: null,
-    ...deriveFilteredDashboardState(allItems, null),
-  };
-}
-
-export function applyUserLabelFilterToState(
-  state: PageSpeedInsightsStoreState,
-  selectedLabels: string[],
-): PageSpeedInsightsStoreState {
-  const userLabelFilter = normalizeUserLabelFilter(state.labels, selectedLabels);
-
-  return {
-    ...state,
-    userLabelFilter,
-    ...deriveFilteredDashboardState(state.allItems, userLabelFilter),
-  };
 }

@@ -8,7 +8,6 @@ import { formatMs } from "@/features/page-speed-insights/shared/format";
 import {
   CHART_SERIES_COLORS,
   barEndRadius,
-  formatAxisMs,
   horizontalBarChartClassName,
   mutedBarCursor,
 } from "@/features/page-speed-insights/shared/horizontalBarChart";
@@ -29,7 +28,10 @@ const MARKER_NAMES: Record<string, string> = {
 /** Even sample of screenshots so the strip matches the CWV viewer's density. */
 function sampleFrames(shots: ParsedTrace["screenshots"]) {
   if (shots.length <= MAX_FRAMES) return shots;
-  return Array.from({ length: MAX_FRAMES }, (_, i) => shots[Math.round((i * (shots.length - 1)) / (MAX_FRAMES - 1))]);
+  return Array.from(
+    { length: MAX_FRAMES },
+    (_, i) => shots[Math.round((i * (shots.length - 1)) / (MAX_FRAMES - 1))],
+  );
 }
 
 export function TraceLoadTimeline({ trace }: { trace: ParsedTrace }) {
@@ -57,7 +59,8 @@ export function TraceLoadTimeline({ trace }: { trace: ParsedTrace }) {
           <CardHeader className="pb-3">
             <CardTitle>Page Load Timeline</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Key navigation and paint timings from the trace ({trace.longTasks.length} long tasks ≥ 50 ms).
+              Key navigation and paint timings from the trace ({trace.longTasks.length} long tasks ≥
+              50 ms).
             </p>
           </CardHeader>
           <CardContent>
@@ -66,13 +69,57 @@ export function TraceLoadTimeline({ trace }: { trace: ParsedTrace }) {
               className={horizontalBarChartClassName}
               style={{ height: `${rows.length * 44 + 64}px` }}
             >
-              <BarChart accessibilityLayer data={rows} layout="vertical" margin={{ left: 8, right: 48, top: 4, bottom: 4 }} barCategoryGap="22%">
-                <CartesianGrid horizontal={false} strokeDasharray="3 3" className="stroke-border/40" />
-                <XAxis type="number" tickLine={false} axisLine={false} tickMargin={8} tickFormatter={formatAxisMs} />
-                <YAxis type="category" dataKey="event" tickLine={false} axisLine={false} tickMargin={10} width={140} interval={0} tick={{ fontSize: 12 }} />
-                <ChartTooltip cursor={mutedBarCursor} content={<ChartTooltipContent indicator="dot" formatter={(v) => [formatMs(Number(v)), "Time"]} />} />
-                <Bar dataKey="time" fill={CHART_SERIES_COLORS[0]} radius={barEndRadius} barSize={20} isAnimationActive={false}>
-                  <LabelList dataKey="time" position="right" className="fill-muted-foreground font-mono text-[10px] tabular-nums" formatter={(v: unknown) => (typeof v === "number" && v > 0 ? formatAxisMs(v) : "")} />
+              <BarChart
+                accessibilityLayer
+                data={rows}
+                layout="vertical"
+                margin={{ left: 8, right: 48, top: 4, bottom: 4 }}
+                barCategoryGap="22%"
+              >
+                <CartesianGrid
+                  horizontal={false}
+                  strokeDasharray="3 3"
+                  className="stroke-border/40"
+                />
+                <XAxis
+                  type="number"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  tickFormatter={formatMs}
+                />
+                <YAxis
+                  type="category"
+                  dataKey="event"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={10}
+                  width={140}
+                  interval={0}
+                  tick={{ fontSize: 12 }}
+                />
+                <ChartTooltip
+                  cursor={mutedBarCursor}
+                  content={
+                    <ChartTooltipContent
+                      indicator="dot"
+                      formatter={(v) => [formatMs(Number(v)), "Time"]}
+                    />
+                  }
+                />
+                <Bar
+                  dataKey="time"
+                  fill={CHART_SERIES_COLORS[0]}
+                  radius={barEndRadius}
+                  barSize={20}
+                  isAnimationActive={false}
+                >
+                  <LabelList
+                    dataKey="time"
+                    position="right"
+                    className="fill-muted-foreground font-mono text-[10px] tabular-nums"
+                    formatter={(v: unknown) => (typeof v === "number" && v > 0 ? formatMs(v) : "")}
+                  />
                 </Bar>
               </BarChart>
             </ChartContainer>

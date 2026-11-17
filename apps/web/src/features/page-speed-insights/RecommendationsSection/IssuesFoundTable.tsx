@@ -1,10 +1,8 @@
 import { TableCaption } from "@/components/ui/table";
 import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 import type { TableColumnHeading, TableItem } from "@/lib/schema";
-import {
-  useSimpleTable,
-  type FlatColumnDef,
-} from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
+import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import type { StockAnyColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { createColumnFromHeading } from "@/features/page-speed-insights/shared/tableColumnUtils";
 import { IssuesFoundTableCell } from "@/features/page-speed-insights/RecommendationsSection/IssuesFoundTableCell";
 import { NetworkWaterfallCell } from "@/features/page-speed-insights/lh-categories/table/NetworkWaterfallCell";
@@ -96,7 +94,7 @@ export function IssuesFoundTable({ headings, items, device }: IssuesFoundTablePr
         ? NETWORK_REQUESTS_COLUMN_SIZES[key]
         : base.size;
 
-    const columnDef: FlatColumnDef<TableItem> = {
+    const columnDef: StockAnyColumnDef<TableItem> = {
       ...base,
       header: label,
       size: initialSize,
@@ -126,7 +124,7 @@ export function IssuesFoundTable({ headings, items, device }: IssuesFoundTablePr
     return columnDef;
   });
   if (isNetworkRequests && timeRange) {
-    const waterfallColumn: FlatColumnDef<TableItem> = {
+    const waterfallColumn: StockAnyColumnDef<TableItem> = {
       id: "waterfall",
       accessorKey: "url",
       header: "Waterfall",
@@ -162,7 +160,7 @@ export function IssuesFoundTable({ headings, items, device }: IssuesFoundTablePr
   }
   const columns = baseColumns;
 
-  const table = useSimpleTable({
+  const table = useStandardTable({
     data: deduplicatedItems,
     columns,
   });

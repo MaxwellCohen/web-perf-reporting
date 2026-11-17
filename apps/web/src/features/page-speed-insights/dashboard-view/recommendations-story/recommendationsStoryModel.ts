@@ -139,3 +139,13 @@ export function recommendationsStoryFrom(
     }),
   };
 }
+
+export function getQuickWinRecommendations(
+  recommendations: Recommendation[],
+  limit = 5,
+): Recommendation[] {
+  return recommendations
+    .filter((rec) => rec.priority === "high" && (rec.impact.savings ?? 0) > 0)
+    .sort((a, b) => (b.impact.savings ?? 0) - (a.impact.savings ?? 0))
+    .slice(0, limit);
+}

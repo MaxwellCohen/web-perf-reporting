@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { formatMs } from "@/features/page-speed-insights/shared/format";
 import { analyzeLoad, fnLabel, shortUrl, type KeyEvent, type Tone } from "./analyzeLoad";
 import { buildEventPrompt } from "./eventPrompt";
 import type { ParsedTrace } from "./parseTrace";
@@ -31,7 +32,7 @@ const CAT_COLOR: Record<string, string> = {
   other: "bg-[#8a94a3]",
 };
 
-const ms = (v?: number) => (v == null ? "—" : v >= 1000 ? `${(v / 1000).toFixed(2)} s` : `${Math.round(v)} ms`);
+const ms = (v?: number) => (v == null ? "—" : formatMs(v));
 
 function Stat({ label, value, tone }: { label: string; value: string; tone?: Tone }) {
   return (
@@ -53,12 +54,22 @@ export function FixPrompt({ text }: { text: string }) {
         <span>Fix prompt — paste into your coding agent</span>
         <button
           className="rounded border px-2 py-0.5"
-          onClick={() => void navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); })}
+          onClick={() =>
+            void navigator.clipboard.writeText(text).then(() => {
+              setCopied(true);
+              setTimeout(() => setCopied(false), 1500);
+            })
+          }
         >
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
-      <textarea readOnly rows={10} value={text} className="w-full rounded border bg-transparent p-2 font-mono text-xs" />
+      <textarea
+        readOnly
+        rows={10}
+        value={text}
+        className="w-full rounded border bg-transparent p-2 font-mono text-xs"
+      />
     </div>
   );
 }
@@ -80,7 +91,11 @@ export function KeyEventsPanel({ trace }: { trace: ParsedTrace }) {
     <section className="mb-6 space-y-4" aria-label="What happened during page load">
       <div>
         <h2 className="text-lg font-bold">What happened during load</h2>
-        {a.navUrl && <p className="truncate text-xs text-muted-foreground">{a.navUrl} · times are ms since navigation start</p>}
+        {a.navUrl && (
+          <p className="truncate text-xs text-muted-foreground">
+            {a.navUrl} · times are ms since navigation start
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
@@ -88,7 +103,11 @@ export function KeyEventsPanel({ trace }: { trace: ParsedTrace }) {
         <Stat label="FCP" value={ms(a.fcp)} tone={rating(a.fcp, 1800, 3000)} />
         <Stat label="LCP" value={ms(a.lcp)} tone={rating(a.lcp, 2500, 4000)} />
         <Stat label="CLS" value={a.cls.toFixed(3)} tone={rating(a.cls, 0.1, 0.25)} />
-        <Stat label="Blocking time after FCP" value={ms(a.blockingMs)} tone={rating(a.blockingMs, 200, 600)} />
+        <Stat
+          label="Blocking time after FCP"
+          value={ms(a.blockingMs)}
+          tone={rating(a.blockingMs, 200, 600)}
+        />
       </div>
 
       {a.phases.length > 0 && (
@@ -98,7 +117,10 @@ export function KeyEventsPanel({ trace }: { trace: ParsedTrace }) {
               <div
                 key={p.label}
                 className="flex flex-col justify-center overflow-hidden border-r px-2 last:border-r-0"
-                style={{ width: `${((p.end - p.start) / total) * 100}%`, background: `hsl(${210 + i * 25} 40% 30% / 0.35)` }}
+                style={{
+                  width: `${((p.end - p.start) / total) * 100}%`,
+                  background: `hsl(${210 + i * 25} 40% 30% / 0.35)`,
+                }}
                 title={`${p.label}: ${ms(p.start)} → ${ms(p.end)}`}
               >
                 <span className="truncate font-medium">{p.label}</span>
@@ -117,7 +139,12 @@ export function KeyEventsPanel({ trace }: { trace: ParsedTrace }) {
                   </div>
                   <div className="flex h-2 overflow-hidden rounded bg-muted">
                     {Object.entries(p.byCategory).map(([c, v]) => (
-                      <i key={c} className={CAT_COLOR[c]} style={{ width: `${((v ?? 0) / (p.end - p.start)) * 100}%` }} title={`${c}: ${ms(v)}`} />
+                      <i
+                        key={c}
+                        className={CAT_COLOR[c]}
+                        style={{ width: `${((v ?? 0) / (p.end - p.start)) * 100}%` }}
+                        title={`${c}: ${ms(v)}`}
+                      />
                     ))}
                   </div>
                 </div>
@@ -128,7 +155,10 @@ export function KeyEventsPanel({ trace }: { trace: ParsedTrace }) {
       )}
 
       <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
-        <ol className="relative max-h-[28rem] overflow-auto rounded-md border p-3" aria-label="Key events">
+        <ol
+          className="relative max-h-[28rem] overflow-auto rounded-md border p-3"
+          aria-label="Key events"
+        >
           {a.events.map((e, i) => (
             <li key={i} className="group">
               <button
@@ -138,12 +168,18 @@ export function KeyEventsPanel({ trace }: { trace: ParsedTrace }) {
                 aria-label={`Copy agent prompt for: ${e.title}`}
                 className="flex w-full gap-3 rounded py-1.5 pr-2 text-left text-sm hover:bg-muted/60 focus-visible:bg-muted/60"
               >
-                <span className="w-16 shrink-0 text-right font-mono text-xs tabular-nums text-muted-foreground">{ms(e.time)}</span>
+                <span className="w-16 shrink-0 text-right font-mono text-xs tabular-nums text-muted-foreground">
+                  {ms(e.time)}
+                </span>
                 <i className={`mt-1.5 size-2.5 shrink-0 rounded-full ${TONE[e.tone]}`} />
                 <span className="min-w-0 flex-1">
-                  <span className="mr-2 rounded bg-muted px-1 text-[10px] font-medium text-muted-foreground">{KIND_LABEL[e.kind]}</span>
+                  <span className="mr-2 rounded bg-muted px-1 text-[10px] font-medium text-muted-foreground">
+                    {KIND_LABEL[e.kind]}
+                  </span>
                   {e.title}
-                  {e.detail && <span className="block truncate text-xs text-muted-foreground">{e.detail}</span>}
+                  {e.detail && (
+                    <span className="block truncate text-xs text-muted-foreground">{e.detail}</span>
+                  )}
                 </span>
                 <span
                   className={`shrink-0 self-center text-[11px] ${copiedIdx === i ? "text-green-500" : "text-muted-foreground opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"}`}
@@ -160,11 +196,17 @@ export function KeyEventsPanel({ trace }: { trace: ParsedTrace }) {
             <tbody>
               {a.scripts.map((s) => (
                 <tr key={s.url} className="border-t">
-                  <td className="truncate py-1 pr-2" title={s.url}>{shortUrl(s.url, 60)}</td>
+                  <td className="truncate py-1 pr-2" title={s.url}>
+                    {shortUrl(s.url, 60)}
+                  </td>
                   <td className="w-16 py-1 text-right font-mono tabular-nums">{ms(s.ms)}</td>
                 </tr>
               ))}
-              {a.scripts.length === 0 && <tr><td className="text-muted-foreground">No attributed scripts</td></tr>}
+              {a.scripts.length === 0 && (
+                <tr>
+                  <td className="text-muted-foreground">No attributed scripts</td>
+                </tr>
+              )}
             </tbody>
           </table>
           {a.hotFunctions.length > 0 && (
@@ -174,7 +216,9 @@ export function KeyEventsPanel({ trace }: { trace: ParsedTrace }) {
                 <tbody>
                   {a.hotFunctions.map((h) => (
                     <tr key={`${h.fn}${h.url}${h.line}`} className="border-t">
-                      <td className="truncate py-1 pr-2" title={`${h.fn} ${h.url}:${h.line + 1}`}>{fnLabel(h)}</td>
+                      <td className="truncate py-1 pr-2" title={`${h.fn} ${h.url}:${h.line + 1}`}>
+                        {fnLabel(h)}
+                      </td>
                       <td className="w-16 py-1 text-right font-mono tabular-nums">{ms(h.ms)}</td>
                     </tr>
                   ))}

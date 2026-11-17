@@ -1,8 +1,6 @@
 import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
-import {
-  useSimpleTable,
-  type FlatColumnDef,
-} from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
+import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import type { StockAnyColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import { createOptionalNumericCell } from "@/features/page-speed-insights/shared/tableColumnHelpers";
 import { RenderMSValue } from "@/features/page-speed-insights/lh-categories/table/RenderTableValue";
@@ -40,9 +38,9 @@ export function LCPBreakdownTable({ tableRows, reportLabels }: Props) {
           createOptionalNumericCell(RenderMSValue, info.getValue() as number | undefined),
       }),
     ),
-  ] as FlatColumnDef<LCPBreakdownTableRow>[];
+  ] as StockAnyColumnDef<LCPBreakdownTableRow>[];
 
-  const table = useSimpleTable({ data: tableRows, columns });
+  const table = useStandardTable({ data: tableRows, columns });
 
   return <StockDataTable table={table} />;
 }

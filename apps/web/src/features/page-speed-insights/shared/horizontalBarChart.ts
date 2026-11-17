@@ -15,8 +15,6 @@ export const mutedBarCursor = { fill: "hsl(var(--muted))", opacity: 0.35 };
 
 export const barEndRadius: [number, number, number, number] = [0, 6, 6, 0];
 
-export { formatMs as formatAxisMs } from "@/features/page-speed-insights/shared/format";
-
 export function horizontalBarChartHeight(
   rowCount: number,
   {

@@ -2,10 +2,8 @@ import { describe, expect, it } from "vitest";
 import { act, render, renderHook } from "@testing-library/react";
 import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
 import { FullWidthTables } from "@/features/page-speed-insights/tanstack-table-v9/fullWidthTables";
-import {
-  useSimpleTable,
-  type FlatColumnDef,
-} from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
+import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import type { StockAnyColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 
 type Row = { name: string; value: number };
@@ -26,7 +24,7 @@ const columns = [
     size: 120,
     minSize: 60,
   }),
-] as FlatColumnDef<Row>[];
+] as StockAnyColumnDef<Row>[];
 
 const data: Row[] = [
   { name: "alpha", value: 1 },
@@ -35,7 +33,7 @@ const data: Row[] = [
 
 describe("StockDataTable column resize", () => {
   it("sizes the table to the sum of column sizes", () => {
-    const { result } = renderHook(() => useSimpleTable({ data, columns }));
+    const { result } = renderHook(() => useStandardTable({ data, columns }));
     const { container } = render(<StockDataTable table={result.current} showCopy={false} />);
 
     const table = container.querySelector("table");
@@ -44,7 +42,7 @@ describe("StockDataTable column resize", () => {
   });
 
   it("updates only the resized column width", () => {
-    const { result } = renderHook(() => useSimpleTable({ data, columns }));
+    const { result } = renderHook(() => useStandardTable({ data, columns }));
     const { container, rerender } = render(
       <StockDataTable table={result.current} showCopy={false} />,
     );
@@ -74,7 +72,7 @@ describe("StockDataTable column resize", () => {
   });
 
   it("updates table width when a column is resized", () => {
-    const { result } = renderHook(() => useSimpleTable({ data, columns }));
+    const { result } = renderHook(() => useStandardTable({ data, columns }));
     const { container, rerender } = render(
       <StockDataTable table={result.current} showCopy={false} />,
     );
@@ -94,7 +92,7 @@ describe("StockDataTable column resize", () => {
   });
 
   it("stretches overview tables to the container and lets columns grow", () => {
-    const { result } = renderHook(() => useSimpleTable({ data, columns }));
+    const { result } = renderHook(() => useStandardTable({ data, columns }));
     const { container } = render(
       <FullWidthTables>
         <StockDataTable table={result.current} showCopy={false} />
@@ -113,7 +111,7 @@ describe("StockDataTable column resize", () => {
   });
 
   it("renders a column resize handle on resizable headers", () => {
-    const { result } = renderHook(() => useSimpleTable({ data, columns }));
+    const { result } = renderHook(() => useStandardTable({ data, columns }));
     const { container } = render(<StockDataTable table={result.current} showCopy={false} />);
 
     const resizers = container.querySelectorAll(".cursor-col-resize");

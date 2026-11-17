@@ -2,7 +2,6 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useMemo, useRef } from "react";
-import {} from "@/features/page-speed-insights/PageSpeedContext";
 import {
   LOAD_MOMENTS,
   frameIndexAt,

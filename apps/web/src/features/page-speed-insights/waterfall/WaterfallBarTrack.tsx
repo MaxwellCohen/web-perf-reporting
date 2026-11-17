@@ -25,9 +25,9 @@ import { cn } from "@/lib/utils";
 
 const BAR_HEIGHT = 8;
 
-const SHORT_TASK_BAR_COLOR = "bg-amber-400/90 dark:bg-amber-400/80";
-const LONG_TASK_BAR_COLOR = "bg-rose-500/85";
-const USER_MEASURE_BAR_COLOR = "bg-teal-600/80 dark:bg-teal-400/70";
+export const SHORT_TASK_BAR_COLOR = "bg-amber-400/90 dark:bg-amber-400/80";
+export const LONG_TASK_BAR_COLOR = "bg-rose-500/85";
+export const USER_MEASURE_BAR_COLOR = "bg-teal-600/80 dark:bg-teal-400/70";
 const USER_MARK_DOT_COLOR = "bg-teal-700 dark:bg-teal-300";
 
 function segmentBarColor(row: WaterfallRow, segment: WaterfallSegment): string {

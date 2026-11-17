@@ -1,4 +1,4 @@
-import { fireEvent, render } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("lucide-react", () => ({
@@ -43,22 +43,30 @@ const defaultProps = {
 
 describe("FilterControls", () => {
   it("renders default state", () => {
-    const { container } = render(<FilterControls {...defaultProps} />);
-    expect(container.firstChild).toMatchSnapshot();
+    render(<FilterControls {...defaultProps} />);
+    expect(screen.getByRole("button", { name: "Expand All" })).toBeInTheDocument();
+    expect(screen.getByText(/Showing\s*5\s*of\s*10\s*recommendations/)).toBeInTheDocument();
+    expect(screen.getAllByRole("checkbox")).toHaveLength(5);
+    expect(screen.queryByRole("button", { name: "Reset Filters" })).not.toBeInTheDocument();
   });
 
   it("renders Collapse All when all expanded", () => {
-    const { container } = render(
-      <FilterControls {...defaultProps} expandedCount={5} totalFiltered={5} />,
-    );
-    expect(container.firstChild).toMatchSnapshot();
+    render(<FilterControls {...defaultProps} expandedCount={5} totalFiltered={5} />);
+    expect(screen.getByRole("button", { name: "Collapse All" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Expand All" })).not.toBeInTheDocument();
   });
 
   it("renders Reset Filters when any filter is selected", () => {
-    const { container } = render(
-      <FilterControls {...defaultProps} selectedCategories={["Performance"]} />,
+    render(<FilterControls {...defaultProps} selectedCategories={["Performance"]} />);
+    expect(screen.getByRole("button", { name: "Reset Filters" })).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Performance" })).toHaveAttribute(
+      "aria-checked",
+      "true",
     );
-    expect(container.firstChild).toMatchSnapshot();
+    expect(screen.getByRole("checkbox", { name: "Accessibility" })).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
   });
 
   it("calls onToggleAll when toggle button is clicked", () => {

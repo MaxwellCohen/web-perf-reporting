@@ -10,14 +10,13 @@ import {
 import {
   barEndRadius,
   buildKeyedChartConfig,
-  formatAxisMs,
   horizontalBarChartClassName,
   horizontalBarChartHeight,
   mutedBarCursor,
   truncateLabel,
   yAxisWidthForLabels,
 } from "@/features/page-speed-insights/shared/horizontalBarChart";
-import { formatBytes } from "@/features/page-speed-insights/shared/format";
+import { formatBytes, formatMs } from "@/features/page-speed-insights/shared/format";
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
 
 type SegmentPoint = {
@@ -51,7 +50,7 @@ export function AuditStackedBarChart({
 }) {
   if (!points.length) return null;
 
-  const formatValue = unit === "bytes" ? formatBytes : formatAxisMs;
+  const formatValue = unit === "bytes" ? formatBytes : formatMs;
   const reportLabels = [...new Set(points.map((point) => point.label))];
   const comparing = reportLabels.length > 1;
 

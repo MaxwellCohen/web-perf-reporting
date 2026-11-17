@@ -387,7 +387,7 @@ function WaterfallControls({
   );
 }
 
-/** Always-expanded waterfall with its filters (hosts like ClassicView already collapse it). */
+/** Always-expanded waterfall with its filters. */
 export function UnifiedWaterfall(props: UnifiedWaterfallProps) {
   const model = useUnifiedWaterfallModel(props);
 

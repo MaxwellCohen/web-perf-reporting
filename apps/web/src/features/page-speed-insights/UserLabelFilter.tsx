@@ -11,14 +11,14 @@ import {
   selectPageSpeedUserLabelFilter,
   selectPageSpeedUserLabels,
   usePageSpeedSelector,
-  useRequiredPageSpeedInsightsStore,
+  usePageSpeedUserLabelFilterActions,
 } from "@/features/page-speed-insights/PageSpeedContext";
 import { patchDashboardSearch } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 import { compareReportLabels } from "@/features/page-speed-insights/shared/reportLabels";
 import { ChevronDown } from "lucide-react";
 
 export function UserLabelFilter() {
-  const store = useRequiredPageSpeedInsightsStore();
+  const { setUserLabelFilter } = usePageSpeedUserLabelFilterActions();
   const labels = usePageSpeedSelector(selectPageSpeedUserLabels);
   const userLabelFilter = usePageSpeedSelector(selectPageSpeedUserLabelFilter);
 
@@ -50,7 +50,7 @@ export function UserLabelFilter() {
                 ? [...new Set([...activeFilter, label])]
                 : activeFilter.filter((value) => value !== label);
               const selected = next.length === 0 ? sortedLabels : next;
-              store.trigger.setUserLabelFilter({ labels: selected });
+              setUserLabelFilter(selected);
               patchDashboardSearch({
                 labels: selected.length === sortedLabels.length ? null : [...selected].sort(),
               });

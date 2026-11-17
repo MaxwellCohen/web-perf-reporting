@@ -1,16 +1,11 @@
 "use client";
-/* eslint-disable @next/next/no-img-element */
 
-import {} from "react";
-import {} from "@/features/page-speed-insights/PageSpeedContext";
 import {
   type LoadingStory,
   type StoryMomentId,
   type TimingRow,
 } from "@/features/page-speed-insights/dashboard-view/loading-story/loadingStoryModel";
-import type {} from "@/features/page-speed-insights/page-load-timeline/types";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
-import {} from "@/features/page-speed-insights/shared/lcpPhaseColors";
 import { cn } from "@/lib/utils";
 import { ratingClass } from "./LoadingStoryParts";
 

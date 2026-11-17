@@ -5,11 +5,15 @@ import { MainThreadWorkBreakdownTable } from "@/features/page-speed-insights/jav
 import { buildMainThreadWorkTableFromDetailRows } from "@/features/page-speed-insights/javascript-metrics/mainThreadWorkTable";
 import { LCPBreakdownTable } from "@/features/page-speed-insights/network-metrics/LCPBreakdownTable";
 import { buildLcpBreakdownTableFromDetailRows } from "@/features/page-speed-insights/network-metrics/lcpBreakdownSelectors";
-import { DetailTableWith1ReportAndNoSubitem } from "@/features/page-speed-insights/lh-categories/table/DetailTableWith1ReportAndNoSubitem";
+import { DataTableNoGrouping } from "@/features/page-speed-insights/lh-categories/table/DataTableNoGrouping";
+import { createDetailItemColumns } from "@/features/page-speed-insights/lh-categories/table/detailItemColumns";
+import type { StockAnyColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
+import type { OpportunityItem, TableItem } from "@/lib/schema";
 import { DetailTableSeparatePerReport } from "@/features/page-speed-insights/lh-categories/table/DetailTableSeparatePerReport";
 import { DetailTableWithSubitems } from "@/features/page-speed-insights/lh-categories/table/DetailTableWithSubitems";
 import { DetailTableFull } from "@/features/page-speed-insights/lh-categories/table/DetailTableFull";
 import {
+  flattenDetailItems,
   getAuditId,
   hasDetailItems,
   hasDetailSubitems,
@@ -80,7 +84,15 @@ export function DetailTable({ rows, title }: { rows: DetailTableItem[]; title: s
   let table: ReactElement | null = null;
   if (!showUserLabel) {
     if (!hasSubitems) {
-      table = <DetailTableWith1ReportAndNoSubitem rows={rows} title={title} />;
+      const data = flattenDetailItems(rows);
+      const columns = createDetailItemColumns({ rows, deviceLabel: rows[0]?._userLabel || "" });
+      table = data.length ? (
+        <DataTableNoGrouping
+          data={data}
+          columns={columns as StockAnyColumnDef<TableItem | OpportunityItem>[]}
+          title={title}
+        />
+      ) : null;
     } else {
       table = <DetailTableWithSubitems rows={rows} title={title} />;
     }

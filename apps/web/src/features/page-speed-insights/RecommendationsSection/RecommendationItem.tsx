@@ -18,8 +18,6 @@ import { cn } from "@/lib/utils";
 interface RecommendationItemProps {
   rec: Recommendation;
   items: InsightsContextItem[];
-  /** @deprecated Kept for classic callers; priority styling lives in the header. */
-  priorityColors?: Record<string, string>;
   peerMaxSavings?: number;
   /** Row inside a divide-y panel, without its own card chrome. */
   plain?: boolean;

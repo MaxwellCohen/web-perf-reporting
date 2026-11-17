@@ -2,7 +2,7 @@
 import { useLayoutEffect, useState } from "react";
 import {
   usePageSpeedItems,
-  useRequiredPageSpeedInsightsStore,
+  usePageSpeedUserLabelFilterActions,
 } from "@/features/page-speed-insights/PageSpeedContext";
 import { patchDashboardSearch } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
@@ -12,7 +12,7 @@ import { StringFilterHeader } from "@/features/page-speed-insights/tanstack-tabl
 import { Accordion } from "@/components/ui/accordion";
 
 export function LighthouseAuditsPanel() {
-  const store = useRequiredPageSpeedInsightsStore();
+  const { resetUserLabelFilter } = usePageSpeedUserLabelFilterActions();
   const items = usePageSpeedItems();
   const table = useLHTable(items);
   const { audit, groups } = useDashboardSearchState();
@@ -58,7 +58,7 @@ export function LighthouseAuditsPanel() {
               className="w-full sm:w-auto"
               onClick={() => {
                 table.resetColumnFilters();
-                store.trigger.resetUserLabelFilter();
+                resetUserLabelFilter();
                 patchDashboardSearch({ labels: null, audit: null });
               }}
             >

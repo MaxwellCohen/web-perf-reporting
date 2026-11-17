@@ -1,8 +1,6 @@
 import { StockDataTable } from "@/features/page-speed-insights/tanstack-table-v9/StockDataTable";
-import {
-  useSimpleTable,
-  type FlatColumnDef,
-} from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
+import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import type { StockAnyColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import {
   createBytesColumn,
@@ -83,9 +81,9 @@ export function ResourcesTable({ items }: ResourcesTableProps) {
       ...positive,
       ...NUMERIC_SIZES.total,
     }),
-  ] as FlatColumnDef<ResourceTableRow>[];
+  ] as StockAnyColumnDef<ResourceTableRow>[];
 
-  const table = useSimpleTable({ data, columns });
+  const table = useStandardTable({ data, columns });
 
   return (
     <div className="w-full overflow-x-auto">

@@ -4,7 +4,6 @@ import {
   createNumericAggregatedCell,
   createStringAggregatedCell,
   createBytesAggregatedCell,
-  createReportLabelAggregatedCell,
 } from "./aggregatedCellHelpers";
 
 vi.mock("@/features/page-speed-insights/lh-categories/table/RenderTableValue", () => ({
@@ -63,22 +62,6 @@ describe("aggregatedCellHelpers", () => {
     it("returns cell renderer", () => {
       const cell = createBytesAggregatedCell("bytes");
       expect(typeof cell).toBe("function");
-    });
-  });
-
-  describe("createReportLabelAggregatedCell", () => {
-    it("returns N/A when no values", () => {
-      const row = createMockRow([{ columnValues: { label: undefined } }]) as any;
-      const cell = createReportLabelAggregatedCell("label");
-      const result = cell({ row } as any);
-      expect(result).toBe("N/A");
-    });
-
-    it("renders single unique value", () => {
-      const row = createMockRow([{ columnValues: { label: "Mobile" }, label: "Mobile" }]) as any;
-      const cell = createReportLabelAggregatedCell("label");
-      const { container } = render(<>{cell({ row } as any)}</>);
-      expect(container.textContent).toContain("Mobile");
     });
   });
 });

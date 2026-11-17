@@ -12,18 +12,6 @@ vi.mock("@/features/page-speed-insights/waterfall/UnifiedWaterfall", () => ({
   UnifiedWaterfall: () => <div>Waterfall exhibit</div>,
 }));
 
-vi.mock("@/features/page-speed-insights/javascript-metrics/BootupTimeChartCard", () => ({
-  BootupTimeChartCard: () => <div>Bootup exhibit</div>,
-}));
-
-vi.mock("@/features/page-speed-insights/javascript-metrics/MainThreadWorkChartCard", () => ({
-  MainThreadWorkChartCard: () => <div>Main thread exhibit</div>,
-}));
-
-vi.mock("@/features/page-speed-insights/script-treemap/ScriptTreemapChartCard", () => ({
-  ScriptTreemapChartCard: () => <div>Script treemap exhibit</div>,
-}));
-
 vi.mock("@/features/page-speed-insights/page-load-timeline/buildPageLoadTimeline", () => ({
   buildPageLoadTimelineBundle: () => ({
     load: {

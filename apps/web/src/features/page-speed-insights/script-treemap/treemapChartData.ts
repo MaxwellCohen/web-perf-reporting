@@ -1,39 +1,4 @@
-import type { TreeMapNode } from "@/lib/schema";
-
-export type TreemapChartNode = {
-  id: string;
-  /** Unique value used by Recharts for React keys. */
-  name: string;
-  /** Original script URL or inline label from Lighthouse. */
-  fullName: string;
-  size: number;
-  resourceBytes: number;
-  unusedBytes?: number;
-  children?: TreemapChartNode[];
-};
-
-const GRAY_COLOR = "hsl(220 10% 68%)";
-const GREEN_COLOR = "hsl(142 45% 62%)";
-const YELLOW_COLOR = "hsl(43 85% 62%)";
-const RED_COLOR = "hsl(0 70% 68%)";
-
-export function getTreemapNodeColor(resourceBytes: number, unusedBytes?: number): string {
-  if (!unusedBytes || !resourceBytes) {
-    return GRAY_COLOR;
-  }
-
-  const percent = (unusedBytes / resourceBytes) * 100;
-
-  if (percent > 90) {
-    return RED_COLOR;
-  }
-  if (percent > 25) {
-    return YELLOW_COLOR;
-  }
-  return GREEN_COLOR;
-}
-
-export type TreemapDisplayLabel = {
+type TreemapDisplayLabel = {
   primary: string;
   secondary?: string;
 };
@@ -188,37 +153,4 @@ export function getTreemapLabel(name: string, maxLength = 28): string {
 
   const combined = `${primary} · ${secondary}`;
   return combined.length <= maxLength ? combined : primary;
-}
-
-export function buildTreemapChartNodes(
-  nodes: TreeMapNode[],
-  parentId = "treemap",
-): TreemapChartNode[] {
-  return nodes.map((node, index) => {
-    const id = `${parentId}-${index}`;
-    const children = node.children?.length ? buildTreemapChartNodes(node.children, id) : undefined;
-
-    return {
-      id,
-      name: id,
-      fullName: node.name,
-      size: node.resourceBytes,
-      resourceBytes: node.resourceBytes,
-      unusedBytes: node.unusedBytes,
-      children,
-    };
-  });
-}
-
-export async function copyTreemapNodeName(name: string): Promise<boolean> {
-  if (!name) {
-    return false;
-  }
-
-  try {
-    await navigator.clipboard.writeText(name);
-    return true;
-  } catch {
-    return false;
-  }
 }

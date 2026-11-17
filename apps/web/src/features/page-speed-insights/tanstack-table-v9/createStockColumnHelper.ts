@@ -8,7 +8,3 @@ export function createStockColumnHelper<
 >() {
   return createColumnHelper<TFeatures, TData>();
 }
-
-export type StockColumnHelper<TData extends RowData> = ReturnType<
-  typeof createStockColumnHelper<TData>
->;

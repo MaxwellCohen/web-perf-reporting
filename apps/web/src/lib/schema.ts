@@ -1,159 +1,112 @@
-import { z } from "zod";
-
 type DeviceType = "Desktop" | "Mobile";
-const coerceNumber = z.coerce.number().default(0).catch(NaN);
 
-const hasType = (v: unknown, type: string) =>
-  typeof v === "object" && v !== null && (v as { type?: unknown }).type === type;
+interface CruxHistogramItemBins {
+  start: number;
+  end: number;
+  density: number;
+}
 
-const cruxHistogramItemSchema = z.object({
-  start: coerceNumber,
-  end: coerceNumber,
-  density: coerceNumber,
-});
+type CruxHistogram = [
+  CruxHistogramItemBins,
+  CruxHistogramItemBins,
+  Omit<CruxHistogramItemBins, "end">,
+];
 
-const cruxHistogramSchema = z.tuple([
-  cruxHistogramItemSchema,
-  cruxHistogramItemSchema,
-  cruxHistogramItemSchema.omit({ end: true }),
-]);
+export type CruxDate = {
+  year: number;
+  month: number;
+  day: number;
+};
 
-const cruxDateSchema = z.object({
-  year: coerceNumber,
-  month: coerceNumber,
-  day: coerceNumber,
-});
+type CruxHistogramItem = {
+  histogram: CruxHistogram;
+  percentiles: { p75: number };
+};
+type CruxP75Item = Omit<CruxHistogramItem, "histogram"> | undefined;
 
-export type CruxDate = z.infer<typeof cruxDateSchema>;
+export type CruxReport = {
+  record: {
+    key: {
+      formFactor?: string;
+      origin?: string;
+      url?: string;
+    };
+    metrics: {
+      largest_contentful_paint_resource_type?: {
+        fractions: { image: number; text: number };
+      };
+      navigation_types?: {
+        fractions: {
+          navigate: number;
+          navigate_cache: number;
+          reload: number;
+          restore: number;
+          back_forward: number;
+          back_forward_cache: number;
+          prerender: number;
+        };
+      };
+      cumulative_layout_shift?: CruxHistogramItem;
+      experimental_time_to_first_byte?: CruxHistogramItem;
+      interaction_to_next_paint?: CruxHistogramItem;
+      largest_contentful_paint?: CruxHistogramItem;
+      round_trip_time?: CruxHistogramItem;
+      first_contentful_paint?: CruxHistogramItem;
+      form_factors?: {
+        fractions: { desktop: number; phone: number; tablet: number };
+      };
+      largest_contentful_paint_image_resource_load_duration?: CruxP75Item;
+      largest_contentful_paint_image_element_render_delay?: CruxP75Item;
+      largest_contentful_paint_image_resource_load_delay?: CruxP75Item;
+      largest_contentful_paint_image_time_to_first_byte?: CruxP75Item;
+      // Experimental: CWVs that include soft (SPA route) navigations as well as full page loads.
+      experimental_largest_contentful_paint_with_softnavs?: CruxHistogramItem;
+      experimental_interaction_to_next_paint_with_softnavs?: CruxHistogramItem;
+      experimental_cumulative_layout_shift_with_softnavs?: CruxHistogramItem;
+      // Experimental ad metrics: p75 only, no thresholds.
+      experimental_ad_count?: CruxP75Item;
+      experimental_ad_density?: CruxP75Item;
+      experimental_ad_cpu?: CruxP75Item;
+      experimental_ad_kilobytes?: CruxP75Item;
+    };
+    collectionPeriod: {
+      firstDate: CruxDate;
+      lastDate: CruxDate;
+    };
+  };
+  urlNormalizationDetails?: {
+    originalUrl?: string;
+    normalizedUrl?: string;
+  };
+};
 
-const cruxPercentileSchema = z.object({
-  p75: coerceNumber,
-});
+export type UserPageLoadMetricV5 = {
+  percentile: number;
+  distributions: Array<{
+    min: number;
+    max: number;
+    proportion: number;
+  }>;
+  category: string;
+};
 
-const CruxHistogramItem = z.object({
-  histogram: cruxHistogramSchema,
-  percentiles: cruxPercentileSchema,
-});
-const CruxP75Item = CruxHistogramItem.omit({ histogram: true }).optional();
+type PageSpeedApiLoadingExperienceV5 = {
+  metrics: {
+    CUMULATIVE_LAYOUT_SHIFT_SCORE: UserPageLoadMetricV5;
+    EXPERIMENTAL_TIME_TO_FIRST_BYTE: UserPageLoadMetricV5;
+    FIRST_CONTENTFUL_PAINT_MS: UserPageLoadMetricV5;
+    INTERACTION_TO_NEXT_PAINT: UserPageLoadMetricV5;
+    LARGEST_CONTENTFUL_PAINT_MS: UserPageLoadMetricV5;
+  };
+  overall_category: string;
+};
 
-const urlSchema = z.string().url();
-
-const urlNormalizationDetails = z
-  .object({
-    originalUrl: urlSchema,
-    normalizedUrl: urlSchema,
-  })
-  .partial()
-  .optional();
-
-const keySchema = z
-  .object({
-    formFactor: z.string().optional(),
-    origin: z.string().optional(),
-    url: z.string().optional(),
-  })
-  .partial();
-
-const FormFactorFractionsSchema = z.object({
-  desktop: coerceNumber,
-  phone: coerceNumber,
-  tablet: coerceNumber,
-});
-
-const cruxReportSchema = z.object({
-  record: z.object({
-    key: keySchema,
-    metrics: z
-      .object({
-        largest_contentful_paint_resource_type: z.object({
-          fractions: z.object({ image: coerceNumber, text: coerceNumber }),
-        }),
-        navigation_types: z
-          .object({
-            fractions: z.object({
-              navigate: z.number(),
-              navigate_cache: z.number(),
-              reload: z.number(),
-              restore: z.number(),
-              back_forward: z.number(),
-              back_forward_cache: z.number(),
-              prerender: z.number(),
-            }),
-          })
-          .optional(),
-        cumulative_layout_shift: CruxHistogramItem,
-        experimental_time_to_first_byte: CruxHistogramItem,
-        interaction_to_next_paint: CruxHistogramItem,
-        largest_contentful_paint: CruxHistogramItem,
-        round_trip_time: CruxHistogramItem,
-        first_contentful_paint: CruxHistogramItem,
-        form_factors: z
-          .object({
-            fractions: FormFactorFractionsSchema,
-          })
-          .optional(),
-        largest_contentful_paint_image_resource_load_duration: CruxP75Item,
-        largest_contentful_paint_image_element_render_delay: CruxP75Item,
-        largest_contentful_paint_image_resource_load_delay: CruxP75Item,
-        largest_contentful_paint_image_time_to_first_byte: CruxP75Item,
-        // Experimental: CWVs that include soft (SPA route) navigations as well as full page loads.
-        experimental_largest_contentful_paint_with_softnavs: CruxHistogramItem.optional(),
-        experimental_interaction_to_next_paint_with_softnavs: CruxHistogramItem.optional(),
-        experimental_cumulative_layout_shift_with_softnavs: CruxHistogramItem.optional(),
-        // Experimental ad metrics: p75 only, no thresholds.
-        experimental_ad_count: CruxP75Item,
-        experimental_ad_density: CruxP75Item,
-        experimental_ad_cpu: CruxP75Item,
-        experimental_ad_kilobytes: CruxP75Item,
-      })
-      .partial(),
-    collectionPeriod: z.object({
-      firstDate: cruxDateSchema,
-      lastDate: cruxDateSchema,
-    }),
-  }),
-  urlNormalizationDetails,
-});
-
-export type CruxReport = z.infer<typeof cruxReportSchema>;
-
-const UserPageLoadMetricV5schema = z.object({
-  percentile: z.number(),
-  distributions: z.array(
-    z.object({
-      min: z.number(),
-      max: z.number().optional().default(0),
-      proportion: z.number(),
-    }),
-  ),
-  category: z.string(),
-});
-
-export type UserPageLoadMetricV5 = z.infer<typeof UserPageLoadMetricV5schema>;
-
-const PageSpeedApiLoadingExperienceV5schema = z.object({
-  metrics: z.object({
-    CUMULATIVE_LAYOUT_SHIFT_SCORE: UserPageLoadMetricV5schema,
-    EXPERIMENTAL_TIME_TO_FIRST_BYTE: UserPageLoadMetricV5schema,
-    FIRST_CONTENTFUL_PAINT_MS: UserPageLoadMetricV5schema,
-    INTERACTION_TO_NEXT_PAINT: UserPageLoadMetricV5schema,
-    LARGEST_CONTENTFUL_PAINT_MS: UserPageLoadMetricV5schema,
-  }),
-  overall_category: z.string(),
-});
-
-const artifactsSchema = z.record(z.string(), z.any()).optional();
-
-const auditRefSchema = z
-  .object({
-    id: z.string(),
-    weight: z.number(),
-    group: z.string().optional(),
-    acronym: z.string().optional(),
-  })
-  .partial();
-
-export type AuditRef = z.infer<typeof auditRefSchema>;
+export type AuditRef = {
+  id?: string;
+  weight?: number;
+  group?: string;
+  acronym?: string;
+};
 
 export type DebugData = {
   type: "debugdata";
@@ -165,32 +118,26 @@ export type DebugData = {
   [p: string]: any;
 };
 
-const DebugDataSchema = z.custom<DebugData>((v) => hasType(v, "debugdata"));
+export type Rect = {
+  width: number;
+  height: number;
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+};
 
-const RectSchema = z.object({
-  width: z.number(),
-  height: z.number(),
-  top: z.number(),
-  right: z.number(),
-  bottom: z.number(),
-  left: z.number(),
-});
-
-export type Rect = z.infer<typeof RectSchema>;
-
-const NodeValueSchema = z.object({
-  type: z.literal("node").or(z.literal("text")),
-  lhId: z.string().optional(),
-  path: z.string().optional(),
-  selector: z.string().optional(),
-  boundingRect: RectSchema.optional(),
-  nodeLabel: z.string().optional(),
-  explanation: z.string().optional(),
-  snippet: z.string().optional(),
-  value: z.string().optional(),
-});
-
-export type NodeValue = z.infer<typeof NodeValueSchema>;
+export type NodeValue = {
+  type: "node" | "text";
+  lhId?: string;
+  path?: string;
+  selector?: string;
+  boundingRect?: Rect;
+  nodeLabel?: string;
+  explanation?: string;
+  snippet?: string;
+  value?: string;
+};
 
 /** A table item for rows that are nested within a top-level TableItem (row). */
 interface TableSubItems {
@@ -217,8 +164,6 @@ export interface AuditDetailTable extends BaseDetails {
   skipSumming?: Array<string>;
 }
 
-const AuditDetailTableSchema = z.custom<AuditDetailTable>((v) => hasType(v, "table"));
-
 export interface TreeMapNode {
   /** Could be a url, a path component from a source map, or an arbitrary string. */
   name: string;
@@ -233,29 +178,21 @@ export interface TreeMapData extends BaseDetails {
   nodes: TreeMapNode[];
 }
 
-const TreeMapDataSchema = z.custom<TreeMapData>((v) => hasType(v, "treemap-data"));
+export type AuditDetailList = {
+  type: "list";
+  items: Array<AuditDetailTable | DebugData>;
+  debugData?: DebugData;
+};
 
-const AuditDetailListSchema = z.object({
-  type: z.literal("list"),
-  items: z.array(AuditDetailTableSchema.or(DebugDataSchema)),
-  debugData: DebugDataSchema.optional(),
-});
-
-export type AuditDetailList = z.infer<typeof AuditDetailListSchema>;
-
-const AuditDetailFilmstripSchema = z.object({
-  type: z.literal("filmstrip"),
-  items: z.array(
-    z.object({
-      timing: coerceNumber,
-      timestamp: coerceNumber,
-      data: z.string(),
-    }),
-  ),
-  scale: coerceNumber,
-});
-
-export type AuditDetailFilmstrip = z.infer<typeof AuditDetailFilmstripSchema>;
+export type AuditDetailFilmstrip = {
+  type: "filmstrip";
+  items: Array<{
+    timing: number;
+    timestamp: number;
+    data: string;
+  }>;
+  scale: number;
+};
 
 export interface OpportunityItem extends TableItem {
   url: string;
@@ -289,10 +226,6 @@ export interface AuditDetailOpportunity extends BaseDetails {
   overallSavingsBytes?: number;
 }
 
-const AuditDetailOpportunitySchema = z.custom<AuditDetailOpportunity>((v) =>
-  hasType(v, "opportunity"),
-);
-
 interface BaseDetails {
   /** Additional information, usually used for including debug or meta information in the LHR */
   debugData?: DebugData;
@@ -321,122 +254,98 @@ type SimpleCriticalRequestNode = {
   };
 };
 
-const AuditDetailScreenshotSchema = z.object({
-  type: z.literal("screenshot"),
-  timing: coerceNumber,
-  timestamp: coerceNumber,
-  data: z.string(),
-  debugData: DebugDataSchema.optional(),
-});
+type AuditDetailScreenshot = {
+  type: "screenshot";
+  timing: number;
+  timestamp: number;
+  data: string;
+  debugData?: DebugData;
+};
 
 /** String enum of possible types of values found within table items. */
-const ItemValueTypeSchema = z.union([
-  z.literal("bytes"),
-  z.literal("ms"),
-  z.literal("url"),
-  z.literal("code"),
-  z.literal("link"),
-  z.literal("node"),
-  z.literal("source-location"),
-  z.literal("numeric"),
-  z.literal("text"),
-  z.literal("thumbnail"),
-  z.literal("timespanMs"),
-  z.literal("multi"), // not sure what this is
-  z.literal("baseline-status"),
-]);
+export type ItemValueType =
+  | "bytes"
+  | "ms"
+  | "url"
+  | "code"
+  | "link"
+  | "node"
+  | "source-location"
+  | "numeric"
+  | "text"
+  | "thumbnail"
+  | "timespanMs"
+  | "multi" // not sure what this is
+  | "baseline-status";
 
-/** String enum of possible types of values found within table items. */
-export type ItemValueType = z.infer<typeof ItemValueTypeSchema>;
+export type SourceLocationValue = {
+  type: "source-location";
+  url: string;
+  urlProvider: "network" | "comment";
+  line: number;
+  column: number;
+  original?: {
+    file: string;
+    line: number;
+    column: number;
+  };
+};
 
-const SourceLocationValueSchema = z.object({
-  type: z.literal("source-location"),
-  url: z.string(),
-  urlProvider: z.enum(["network", "comment"]),
-  line: z.number(),
-  column: z.number(),
-  original: z
-    .object({
-      file: z.string(),
-      line: z.number(),
-      column: z.number(),
-    })
-    .optional(),
-});
+export type LinkValue = {
+  type: "link";
+  text: string;
+  url: string;
+};
 
-export type SourceLocationValue = z.infer<typeof SourceLocationValueSchema>;
+export type UrlValue = {
+  type: "url";
+  value: string;
+};
 
-const LinkValueSchema = z.object({
-  type: z.literal("link"),
-  text: z.string(),
-  url: z.string(),
-});
+type IcuMessage = {
+  i18nId: string;
+  values?: Record<string, string | number>;
+  formattedDefault: string;
+};
 
-export type LinkValue = z.infer<typeof LinkValueSchema>;
+export type CodeValue = {
+  type: "code";
+  value: IcuMessage | string;
+};
 
-const UrlValueSchema = z.object({
-  type: z.literal("url"),
-  value: z.string(),
-});
+export type NumericValue = {
+  type: "numeric";
+  value: number;
+  granularity?: number;
+};
 
-export type UrlValue = z.infer<typeof UrlValueSchema>;
+export type TextValue = {
+  type: "text";
+  value: string;
+};
 
-const IcuMessageSchema = z.object({
-  i18nId: z.string(),
-  values: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
-  formattedDefault: z.string(),
-});
-
-type IcuMessage = z.infer<typeof IcuMessageSchema>;
-
-const CodeValueSchema = z.object({
-  type: z.literal("code"),
-  value: z.union([IcuMessageSchema, z.string()]),
-});
-
-export type CodeValue = z.infer<typeof CodeValueSchema>;
-
-const NumericValueSchema = z.object({
-  type: z.literal("numeric"),
-  value: z.number(),
-  granularity: z.number().optional(),
-});
-
-export type NumericValue = z.infer<typeof NumericValueSchema>;
-
-const TextValueSchema = z.object({
-  type: z.literal("text"),
-  value: z.string(),
-});
-
-export type TextValue = z.infer<typeof TextValueSchema>;
-
-const BaselineStatusValueSchema = z.object({
-  type: z.literal("baseline-status"),
-  status: z.string(),
-  displayString: z.union([IcuMessageSchema, z.string()]),
-});
-
-export type BaselineStatusValue = z.infer<typeof BaselineStatusValueSchema>;
+export type BaselineStatusValue = {
+  type: "baseline-status";
+  status: string;
+  displayString: IcuMessage | string;
+};
 
 /** Possible types of values found within table items. */
-const ItemValueSchema = z.union([
-  z.string(),
-  z.number(),
-  z.boolean(),
-  DebugDataSchema,
-  NodeValueSchema,
-  SourceLocationValueSchema,
-  LinkValueSchema,
-  UrlValueSchema,
-  CodeValueSchema,
-  NumericValueSchema,
-  IcuMessageSchema,
-  TextValueSchema,
-  BaselineStatusValueSchema,
-]);
-
-export type ItemValue = z.infer<typeof ItemValueSchema> | TableSubItems;
+export type ItemValue =
+  | string
+  | number
+  | boolean
+  | DebugData
+  | NodeValue
+  | SourceLocationValue
+  | LinkValue
+  | UrlValue
+  | CodeValue
+  | NumericValue
+  | IcuMessage
+  | TextValue
+  | BaselineStatusValue
+  | TableSubItems;
 
 export interface TableColumnHeading {
   /**
@@ -477,196 +386,155 @@ export type TableItem = {
   [key: string]: ItemValue | undefined;
 };
 
-const AuditDetailChecklistSchema = z.object({
-  type: z.literal("checklist"),
-  items: z.record(
-    z.string(),
-    z.object({
-      value: z.boolean(),
-      label: z.string(),
-    }),
-  ),
-  debugData: DebugDataSchema.optional(),
-});
+export type AuditDetailChecklist = {
+  type: "checklist";
+  items: Record<string, { value: boolean; label: string }>;
+  debugData?: DebugData;
+};
 
-export type AuditDetailChecklist = z.infer<typeof AuditDetailChecklistSchema>;
-
-const AuditDetailCriticalRequestChainSchema = z.custom<CriticalRequestChain>((v) =>
-  hasType(v, "criticalrequestchain"),
-);
-
-const AuditResultSchema = z.object({
-  description: z.string().optional(),
-  details: AuditDetailTableSchema.or(AuditDetailFilmstripSchema)
-    .or(AuditDetailOpportunitySchema)
-    .or(AuditDetailChecklistSchema)
-    .or(AuditDetailListSchema)
-    .or(TreeMapDataSchema)
-    .or(AuditDetailCriticalRequestChainSchema)
-    .or(AuditDetailScreenshotSchema)
-    .or(DebugDataSchema)
-    .optional(),
-  errorMessage: z.string().optional(),
-  explanation: z.string().optional(),
-  id: z.string(),
-  numericValue: z.number().optional(),
+export type AuditResult = {
+  description?: string;
+  details?:
+    | AuditDetailTable
+    | AuditDetailFilmstrip
+    | AuditDetailOpportunity
+    | AuditDetailChecklist
+    | AuditDetailList
+    | TreeMapData
+    | CriticalRequestChain
+    | AuditDetailScreenshot
+    | DebugData;
+  errorMessage?: string;
+  explanation?: string;
+  id: string;
+  numericValue?: number;
   // sore is 0 to 1 where 0-.49 is bad and .50-.89 is needs improvement and .90-1 is good
-  score: z.number().nullable(),
-  scoreDisplayMode: z
-    .literal("numeric")
-    .or(z.literal("binary"))
-    .or(z.literal("metricSavings"))
-    .or(z.literal("manual"))
-    .or(z.literal("informative"))
-    .or(z.literal("notApplicable"))
-    .or(z.literal("error")),
-  title: z.string(),
-  warnings: z.array(z.any()).optional(),
-  numericUnit: z.string().optional(),
-  displayValue: z.string().optional(),
-  metricSavings: z.record(z.string(), z.number()).optional(),
-});
+  score: number | null;
+  scoreDisplayMode:
+    | "numeric"
+    | "binary"
+    | "metricSavings"
+    | "manual"
+    | "informative"
+    | "notApplicable"
+    | "error";
+  title: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  warnings?: any[];
+  numericUnit?: string;
+  displayValue?: string;
+  metricSavings?: Record<string, number>;
+};
 
-export type AuditResult = z.infer<typeof AuditResultSchema>;
-const auditResultsRecordSchema = z.record(z.string(), AuditResultSchema);
+export type AuditResultsRecord = Record<string, AuditResult>;
 
-export type AuditResultsRecord = z.infer<typeof auditResultsRecordSchema>;
+export type CategoryResult = {
+  auditRefs?: AuditRef[];
+  description?: string;
+  id?: string;
+  title?: string;
+  manualDescription?: string;
+  score?: number;
+};
 
-const categoryResultSchema = z
-  .object({
-    auditRefs: z.array(auditRefSchema),
-    description: z.string().optional(),
-    id: z.string().optional(),
-    title: z.string().optional(),
-    manualDescription: z.string().optional(),
-    score: z.number(),
-  })
-  .partial();
+export type FullPageScreenshot = {
+  nodes: Record<
+    string,
+    {
+      bottom: number;
+      height: number;
+      left: number;
+      right: number;
+      top: number;
+      width: number;
+    }
+  >;
+  screenshot: {
+    data: string;
+    height: number;
+    width: number;
+  };
+};
 
-export type CategoryResult = z.infer<typeof categoryResultSchema>;
+type LighthouseResultV5 = {
+  finalDisplayedUrl?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  artifacts?: Record<string, any>;
+  categories?: Record<string, CategoryResult>;
+  categoryGroups?: Record<
+    string,
+    {
+      auditRefs?: AuditRef[];
+      description?: string;
+      id?: string;
+      title?: string;
+      manualDescription?: string;
+    }
+  >;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  configSettings?: Record<string, any>;
+  environment?: {
+    benchmarkIndex?: number;
+    cpuThreads?: number;
+    hostUserAgent?: string;
+    networkUserAgent?: string;
+    userAgent?: string;
+  };
+  fetchTime?: string;
+  finalUrl?: string;
+  generatedTime?: string;
+  lighthouseVersion?: string;
+  requestedUrl?: string;
+  runWarnings?: string[];
+  fullPageScreenshot?: FullPageScreenshot;
+  entities?: Array<
+    | {
+        name: string;
+        isFirstParty: boolean;
+        isUnrecognized: boolean;
+        origins: string[];
+      }
+    | undefined
+  >;
+  runtimeError?: {
+    message: string;
+    stack?: string;
+  };
+  timing?: {
+    entries?: Array<{
+      name?: string;
+      startTime?: number;
+      duration?: number;
+    }>;
+  };
+  userAgent?: string;
+  audits?: AuditResultsRecord;
+};
 
-const configSettingsSchema = z.record(z.string(), z.any());
-
-const environmentSchema = z
-  .object({
-    benchmarkIndex: z.number(),
-    cpuThreads: z.number(),
-    hostUserAgent: z.string(),
-    networkUserAgent: z.string(),
-    userAgent: z.string(),
-  })
-  .partial();
-
-const categorySchema = z
-  .object({
-    auditRefs: z.array(auditRefSchema),
-    description: z.string(),
-    id: z.string(),
-    title: z.string(),
-    manualDescription: z.string().optional(),
-  })
-  .partial();
-
-const entitiesSchema = z.array(
-  z
-    .object({
-      name: z.string(),
-      isFirstParty: z.boolean(),
-      isUnrecognized: z.boolean(),
-      origins: z.array(z.string()),
-    })
-    .optional(),
-);
-
-const FullPageScreenshotSchema = z.object({
-  nodes: z.record(
-    z.string(),
-    z.object({
-      bottom: coerceNumber,
-      height: coerceNumber,
-      left: coerceNumber,
-      right: coerceNumber,
-      top: coerceNumber,
-      width: coerceNumber,
-    }),
-  ),
-  screenshot: z.object({
-    data: z.string(),
-    height: z.number(),
-    width: z.number(),
-  }),
-});
-
-export type FullPageScreenshot = z.infer<typeof FullPageScreenshotSchema>;
-
-const lighthouseResultV5Schema = z
-  .object({
-    finalDisplayedUrl: urlSchema,
-    artifacts: artifactsSchema,
-    categories: z.record(z.string(), categoryResultSchema.partial()),
-    categoryGroups: z.record(z.string(), categorySchema).optional(),
-    configSettings: configSettingsSchema,
-    environment: environmentSchema,
-    fetchTime: z.string(),
-    finalUrl: z.string(),
-    generatedTime: z.string(),
-    lighthouseVersion: z.string(),
-    requestedUrl: z.string(),
-    runWarnings: z.array(z.string()),
-    fullPageScreenshot: FullPageScreenshotSchema,
-    entities: entitiesSchema,
-    runtimeError: z
-      .object({
-        message: z.string(),
-        stack: z.string().optional(),
-      })
-      .optional(),
-    timing: z.object({
-      entries: z
-        .array(
-          z
-            .object({
-              name: z.string().optional(),
-              startTime: z.number().optional(),
-              duration: z.number(),
-            })
-            .partial(),
-        )
-        .optional(),
-    }),
-    userAgent: z.string(),
-    audits: auditResultsRecordSchema,
-  })
-  .partial();
-
-const pageSpeedInsightsSchema = z.object({
-  kind: z.string(),
-  captchaResult: z.string(),
-  id: z.string(),
-  loadingExperience: PageSpeedApiLoadingExperienceV5schema,
-  originLoadingExperience: PageSpeedApiLoadingExperienceV5schema,
-  analysisUTCTimestamp: z.string(),
-  lighthouseResult: lighthouseResultV5Schema,
-  status: z.string().optional(),
-  version: z.object({ major: z.string(), minor: z.string() }).optional(),
-});
-
-export type PageSpeedInsights = z.infer<typeof pageSpeedInsightsSchema>;
+export type PageSpeedInsights = {
+  kind: string;
+  captchaResult: string;
+  id: string;
+  loadingExperience: PageSpeedApiLoadingExperienceV5;
+  originLoadingExperience: PageSpeedApiLoadingExperienceV5;
+  analysisUTCTimestamp: string;
+  lighthouseResult: LighthouseResultV5;
+  status?: string;
+  version?: { major: string; minor: string };
+};
 export type NullablePageSpeedInsights = PageSpeedInsights | null | undefined;
 
-const cruxHistoryItemSchema = z.object({
-  url: z.string(),
-  origin: z.enum(["url", "origin"]),
-  formFactor: z.string(),
-  start_date: z.string(),
-  end_date: z.string(),
-  metric_name: z.string(),
-  P75: z.coerce.number().default(0),
-  good_max: z.coerce.number().default(0),
-  ni_max: z.coerce.number().default(0),
-  good_density: z.coerce.number().default(0),
-  ni_density: z.coerce.number().default(0),
-  poor_density: z.coerce.number().default(0),
-});
-
-export type CruxHistoryItem = z.infer<typeof cruxHistoryItemSchema>;
+export type CruxHistoryItem = {
+  url: string;
+  origin: "url" | "origin";
+  formFactor: string;
+  start_date: string;
+  end_date: string;
+  metric_name: string;
+  P75: number;
+  good_max: number;
+  ni_max: number;
+  good_density: number;
+  ni_density: number;
+  poor_density: number;
+};

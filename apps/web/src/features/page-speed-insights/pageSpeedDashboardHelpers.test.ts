@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import type { NullablePageSpeedInsights } from "@/lib/schema";
 import type { PageSpeedDashboardItem } from "@/lib/page-speed-insights/types";
 import {
-  applyUserLabelFilterToState,
   deriveFilteredDashboardState,
   filterItemsByUserLabel,
   getDashboardItems,
   getDashboardTitle,
   getFullPageScreenshotMap,
+  normalizeUserLabelFilter,
 } from "@/features/page-speed-insights/pageSpeedDashboardHelpers";
 
 function createLighthouseResult(overrides: Record<string, unknown> = {}) {
@@ -201,7 +201,7 @@ describe("pageSpeedDashboardHelpers", () => {
     expect(filterItemsByUserLabel(items, [])).toEqual(items);
   });
 
-  it("derives filtered store fields from all items", () => {
+  it("derives filtered fields from all items", () => {
     const allItems = [
       asDashboardItem({ label: "Mobile", item: {} }),
       asDashboardItem({ label: "Desktop", item: {} }),
@@ -210,57 +210,14 @@ describe("pageSpeedDashboardHelpers", () => {
     const filtered = deriveFilteredDashboardState(allItems, ["Mobile"]);
 
     expect(filtered.items).toEqual([allItems[0]]);
-    expect(filtered.networkMetricSeries).toHaveLength(1);
     expect(Object.keys(filtered.fullPageScreenshots)).toEqual(["Mobile"]);
   });
 
-  it("updates store items when user label filter is applied", () => {
-    const allItems = [
-      asDashboardItem({ label: "Mobile", item: {} }),
-      asDashboardItem({ label: "Desktop", item: {} }),
-    ];
-    const baseState = {
-      data: [],
-      labels: ["Mobile", "Desktop"],
-      isLoading: false,
-      allItems,
-      items: allItems,
-      userLabelFilter: null,
-      networkMetricSeries: [],
-      networkRequestStats: [],
-      reportTitle: "Report",
-      fullPageScreenshots: {},
-    };
+  it("normalizes user label selections", () => {
+    const labels = ["Mobile", "Desktop"];
 
-    const nextState = applyUserLabelFilterToState(baseState, ["Desktop"]);
-
-    expect(nextState.userLabelFilter).toEqual(["Desktop"]);
-    expect(nextState.items).toEqual([allItems[1]]);
-    expect(nextState.allItems).toEqual(allItems);
-    expect(nextState.reportTitle).toBe(getDashboardTitle([allItems[1]]));
-  });
-
-  it("shows all items when user label filter is cleared", () => {
-    const allItems = [
-      asDashboardItem({ label: "Mobile", item: {} }),
-      asDashboardItem({ label: "Desktop", item: {} }),
-    ];
-    const baseState = {
-      data: [],
-      labels: ["Mobile", "Desktop"],
-      isLoading: false,
-      allItems,
-      items: [allItems[0]],
-      userLabelFilter: ["Mobile"],
-      networkMetricSeries: [],
-      networkRequestStats: [],
-      reportTitle: "Report",
-      fullPageScreenshots: {},
-    };
-
-    const nextState = applyUserLabelFilterToState(baseState, []);
-
-    expect(nextState.userLabelFilter).toBeNull();
-    expect(nextState.items).toEqual(allItems);
+    expect(normalizeUserLabelFilter(labels, ["Desktop"])).toEqual(["Desktop"]);
+    expect(normalizeUserLabelFilter(labels, [])).toBeNull();
+    expect(normalizeUserLabelFilter(labels, ["Mobile", "Desktop"])).toBeNull();
   });
 });

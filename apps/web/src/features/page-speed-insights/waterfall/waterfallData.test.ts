@@ -10,7 +10,7 @@ import {
   getWaterfallResourceTypes,
   getWaterfallTimeRange,
   sortWaterfallRows,
-} from "@/features/page-speed-insights/network-metrics/networkWaterfallData";
+} from "@/features/page-speed-insights/waterfall/waterfallData";
 
 function makeLoad(overrides: Partial<CombinedLoad> = {}): CombinedLoad {
   return {

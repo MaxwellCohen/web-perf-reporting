@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { flexRender } from "@tanstack/react-table";
-import { useSimpleTable } from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
+import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
 import { columns } from "@/features/page-speed-insights/JSUsage/jsUsageTableColumns";
 import type { TreeMapNode } from "@/lib/schema";
 
@@ -37,7 +37,7 @@ const mockData: TreeMapNode[] = [
 ];
 
 function TableWithNameHeader() {
-  const table = useSimpleTable({ data: mockData, columns: columns as never });
+  const table = useStandardTable({ data: mockData, columns: columns as never });
   const headerGroup = table.getHeaderGroups()[0];
   const header = headerGroup.headers.find((h) => h.column.id === "name");
   if (!header) return null;
@@ -45,7 +45,7 @@ function TableWithNameHeader() {
 }
 
 function CellRenderer({ data, columnId }: { data: TreeMapNode[]; columnId: string }) {
-  const table = useSimpleTable({ data, columns: columns as never });
+  const table = useStandardTable({ data, columns: columns as never });
   const row = table.getRowModel().rows[0];
   const cell = row.getVisibleCells().find((c) => c.column.id === columnId);
   if (!cell?.column.columnDef.cell) return null;

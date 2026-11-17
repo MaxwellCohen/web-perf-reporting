@@ -1,10 +1,8 @@
 "use client";
 import { DetailTableSection } from "@/features/page-speed-insights/lh-categories/table/DetailTableSection";
 import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
-import {
-  useSimpleTable,
-  type FlatColumnDef,
-} from "@/features/page-speed-insights/tanstack-table-v9/useSimpleTable";
+import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
+import type { StockAnyColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
 import type { RowData } from "@tanstack/react-table";
 
 export function DataTableNoGrouping<T extends RowData>({
@@ -13,10 +11,10 @@ export function DataTableNoGrouping<T extends RowData>({
   title,
 }: {
   data: T[];
-  columns: FlatColumnDef<T>[];
+  columns: StockAnyColumnDef<T>[];
   title: string;
 }) {
-  const table = useSimpleTable({ data, columns });
+  const table = useStandardTable({ data, columns });
 
   return (
     <DetailTableSection title={title}>

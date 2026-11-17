@@ -4,7 +4,7 @@ import type {
   StockAnyColumnDef,
   StockColumnDef,
 } from "@/features/page-speed-insights/shared/tanstackStockTypes";
-import type { StockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
+import type { createStockColumnHelper } from "@/features/page-speed-insights/tanstack-table-v9/createStockColumnHelper";
 import {
   RenderBytesValue,
   RenderMSValue,
@@ -13,14 +13,13 @@ import {
   createBytesAggregatedCell,
   createNumericAggregatedCell,
   createPercentageAggregatedCell,
-  createReportLabelAggregatedCell,
   createStringAggregatedCell,
 } from "@/features/page-speed-insights/shared/aggregatedCellHelpers";
 import { ResourceUrlCell } from "@/features/page-speed-insights/shared/ResourceUrlCell";
 
 type ColumnDef<T extends RowData, TValue = unknown> = StockColumnDef<T, TValue>;
 type AnyColumnDef<T extends RowData> = StockAnyColumnDef<T>;
-type ColumnHelper<T extends RowData> = StockColumnHelper<T>;
+type ColumnHelper<T extends RowData> = ReturnType<typeof createStockColumnHelper<T>>;
 
 /** Placeholder for missing numeric / metric values in grouped metric tables */
 const METRIC_TABLE_EMPTY_DISPLAY = "N/A" as const;
@@ -72,43 +71,6 @@ function createBaseNumericColumn<T extends RowData>(
     ...(sizeOptions?.size !== undefined ? { size: sizeOptions.size } : {}),
     ...(sizeOptions?.minSize !== undefined ? { minSize: sizeOptions.minSize } : {}),
     ...(sizeOptions?.maxSize !== undefined ? { maxSize: sizeOptions.maxSize } : {}),
-  });
-}
-
-export type TruncatedTextColumnOptions<T> = {
-  accessor: keyof T;
-  id: string;
-  header: string;
-  maxWidthClass?: string;
-  enableGrouping?: boolean;
-};
-
-/**
- * Text column with truncation + title tooltip; string aggregation for grouped rows.
- */
-export function createTruncatedTextColumn<T extends RowData>(
-  columnHelper: ColumnHelper<T>,
-  options: TruncatedTextColumnOptions<T>,
-): AnyColumnDef<T> {
-  const { accessor, id, header, maxWidthClass = "max-w-75", enableGrouping = true } = options;
-
-  return columnHelper.accessor((row) => row[accessor], {
-    id,
-    header,
-    enableSorting: true,
-    enableGrouping,
-    enableResizing: true,
-    filterFn: "includesString",
-    aggregationFn: "unique",
-    cell: (info) => {
-      const raw = info.getValue() as string;
-      return (
-        <div className={`${maxWidthClass} truncate`} title={raw}>
-          {raw}
-        </div>
-      );
-    },
-    aggregatedCell: createStringAggregatedCell(id, undefined, false),
   });
 }
 
@@ -290,21 +252,4 @@ export function createPercentageColumn<T extends RowData>(
     createPercentageAggregatedCell(id, precision),
     options,
   );
-}
-
-/**
- * Standard report label column definition
- */
-export function createReportColumn<T extends { label: string } & RowData>(
-  columnHelper: ColumnHelper<T>,
-): AnyColumnDef<T> {
-  return columnHelper.accessor((row) => row.label, {
-    id: "label",
-    header: "Report",
-    enableSorting: true,
-    enableResizing: true,
-    filterFn: "includesString",
-    aggregationFn: "unique",
-    aggregatedCell: createReportLabelAggregatedCell("label"),
-  });
 }
