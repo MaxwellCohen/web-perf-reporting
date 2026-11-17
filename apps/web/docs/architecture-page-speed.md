@@ -7,7 +7,7 @@ How the saved-report flow is wired.
 1. **Start** (`src/components/viewer/collectViewerReports.ts`) — Viewer input submits a page URL → `requestPageSpeedData` server action → worker returns `publicId`.
 2. **Load** (`src/features/page-speed-insights/data/usePageSpeedInsightsQuery.ts`) — React Query calls `getPageSpeedInsightsByPublicId` in `pageSpeedInsightsClient.ts` → GET `/api/pagespeed/:publicId`.
 3. **Worker seam** — Route handler fetches the worker envelope → `toPageSpeedApiResponse` in `resolveWorkerEnvelope.ts`, which returns `{ state: "pending" | "failed" | "ready", ... }` (404 only for an unknown id). HTTP to the worker lives in `pageSpeedWorkerClient.ts`.
-4. **UI** — `PageSpeedInsightsDashboardContent` branches on `PageSpeedLoadResult` (`ok` → dashboard, `failed` → `ReportErrorCard`). Dashboard state is built in `pageSpeedDashboardHelpers.ts` and held in `PageSpeedContext.tsx` (XState).
+4. **UI** — `PageSpeedInsightsDashboardContent` branches on `PageSpeedLoadResult` (`ok` → dashboard, `failed` → `ReportErrorCard`). Dashboard state is built in `pageSpeedDashboardHelpers.ts` and held in `PageSpeedContext.tsx` (a React context).
 
 ## Other ingress
 
@@ -15,4 +15,4 @@ How the saved-report flow is wired.
 
 ## Domain types
 
-Labeled PSI rows (`InsightsContextItem`, `PageSpeedDashboardItem`) live in `src/lib/page-speed-insights/types.ts`. Zod schema: `src/lib/schema.ts`.
+Labeled PSI rows (`InsightsContextItem`, `PageSpeedDashboardItem`) live in `src/lib/page-speed-insights/types.ts`. Report types: `src/lib/schema.ts`.
