@@ -281,33 +281,3 @@ export function createPercentageAggregatedCell(columnId: string, precision: numb
     ));
   };
 }
-
-/**
- * Creates an aggregated cell renderer for report labels
- */
-export function createReportLabelAggregatedCell(labelColumnId: string = "label") {
-  return function aggregatedCell4<TData extends RowData>(
-    info: AggregatedCellInfo<TData>,
-  ): React.ReactNode {
-    const row = info.row;
-    const leafRows = row.getLeafRows();
-    const values: string[] = leafRows
-      .map((r) => r.getValue(labelColumnId))
-      .filter((v): v is string => typeof v === "string");
-
-    if (values.length === 0) return "N/A";
-
-    const uniqueValues: string[] = Array.from(new Set(values));
-    if (uniqueValues.length === 1) {
-      return <span>{uniqueValues[0]}</span>;
-    }
-
-    return (
-      <div className="flex flex-col gap-1 max-h-24 overflow-y-auto">
-        {uniqueValues.map((v, i) => (
-          <span key={i}>{v}</span>
-        ))}
-      </div>
-    );
-  };
-}

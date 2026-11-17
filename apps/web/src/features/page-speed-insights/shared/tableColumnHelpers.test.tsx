@@ -6,8 +6,6 @@ import {
   createBytesColumn,
   createMSColumn,
   createPercentageColumn,
-  createReportColumn,
-  createTruncatedTextColumn,
   createURLColumn,
   metricTableEmptyDisplay,
   createOptionalNumericCell,
@@ -25,7 +23,6 @@ vi.mock("@/features/page-speed-insights/shared/ResourceUrlCell", () => ({
 vi.mock("@/features/page-speed-insights/shared/aggregatedCellHelpers", () => ({
   createBytesAggregatedCell: () => () => null,
   createStringAggregatedCell: () => () => null,
-  createReportLabelAggregatedCell: () => () => null,
   createNumericAggregatedCell: () => () => null,
   createPercentageAggregatedCell: () => () => null,
 }));
@@ -81,36 +78,6 @@ describe("tableColumnHelpers", () => {
       const cell = (col.cell as Function)({ getValue: () => 1024 } as any);
       const { container } = render(<>{cell}</>);
       expect(container.textContent).toContain("1024");
-    });
-  });
-
-  describe("createReportColumn", () => {
-    it("returns column with label accessor", () => {
-      const helper = createStockColumnHelper<Row>();
-      const col = createReportColumn(helper);
-      expect(col.id).toBe("label");
-      expect(col.header).toBe("Report");
-    });
-  });
-
-  describe("createTruncatedTextColumn", () => {
-    it("renders truncated div with title", () => {
-      type OriginRow = { label: string; origin: string };
-      const helper = createStockColumnHelper<OriginRow>();
-      const col = createTruncatedTextColumn(helper, {
-        accessor: "origin",
-        id: "origin",
-        header: "Origin",
-        maxWidthClass: "max-w-50",
-      });
-      expect(col.id).toBe("origin");
-      const cell = (col.cell as (a: { getValue: () => string }) => unknown)({
-        getValue: () => "example.com",
-      });
-      const { container } = render(<>{cell}</>);
-      const el = container.firstChild as HTMLElement;
-      expect(el).toHaveClass("truncate", "max-w-50");
-      expect(el).toHaveAttribute("title", "example.com");
     });
   });
 
