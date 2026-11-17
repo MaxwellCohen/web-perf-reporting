@@ -56,7 +56,7 @@ Runs locally on `.json` or `.json.gz` exports — no Chrome or network needed.
 | `navigations` | navigations and their insight sets |
 | `scan <dir-or-glob>` | search many traces (`--grep <pattern>`) |
 
-Common options: `--format md|json|toon`, `--time-range <start,end>` (ms, or with units like `3.5s,4.2s`), `--absolute-timestamps`. Per-command flags: `trace <command> --help`.
+`--format md|json|toon` applies to every command. `--time-range <start,end>` (ms, or with units like `3.5s,4.2s`) and `--absolute-timestamps` apply to the event-window commands (`overview`, `tasks`, `find`, `network`, `interactions`, `shifts`, `events`). Per-command flags: `trace <command> --help`.
 
 Notes:
 

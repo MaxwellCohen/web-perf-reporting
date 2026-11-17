@@ -31,7 +31,7 @@ Commands:
 Options:
   --format md|json|toon     Output format (default: md)
   --time-range <a,b>        Window in ms, or with units ("3.5s,4.2s")
-  --absolute-timestamps     Treat --time-range values as raw trace timestamps
+  --absolute-timestamps     --time-range is on the trace clock (ms; add "us" for raw timestamps)
   -h, --help                Show this help (or "trace <command> --help")
 
 Files may be .json or .json.gz.`;
@@ -258,7 +258,7 @@ function helpFor(command?: TraceCommand | "scan"): string {
   lines.push("  --format md|json|toon             Output format (default: md)");
   if (command !== "insights" && command !== "navigations" && command !== "scan") {
     lines.push('  --time-range <a,b>                Window in ms, or with units ("3.5s,4.2s")');
-    lines.push("  --absolute-timestamps             Treat --time-range values as raw trace timestamps");
+    lines.push("  --absolute-timestamps             --time-range is on the trace clock (ms; add \"us\" for raw timestamps)");
   }
   lines.push("  -h, --help                        Show this help");
   lines.push("", "Files may be .json or .json.gz.");

@@ -109,6 +109,11 @@ export function parseTraceJson(text: string): unknown[] {
 // A gzipped trace is usually a few MB; cap the decompressed size so a crafted
 // or corrupt archive cannot exhaust memory in the CLI or the MCP server.
 const MAX_DECOMPRESSED_BYTES = 256 * 1024 * 1024;
+// Node cannot hold a file over ~512 MB as one string, and fails only after
+// reading all of it; reject oversized files up front.
+const MAX_TRACE_FILE_BYTES = 512 * 1024 * 1024;
+const oversizedMessage = (bytes: number) =>
+  `Trace file is ${Math.round(bytes / 1024 / 1024)} MB; the limit is ${MAX_TRACE_FILE_BYTES / 1024 / 1024} MB.`;
 
 function decompress(buffer: Buffer): string {
   if (!isGzipBuffer(buffer)) return buffer.toString("utf8");
@@ -179,6 +184,7 @@ export async function loadTraceFile(filePath: string): Promise<LoadedTrace> {
       `'${filePath}' is a directory. Pass a single trace file, or search a directory with: trace scan "${filePath}"`,
     );
   }
+  if (stats.size > MAX_TRACE_FILE_BYTES) throw new Error(oversizedMessage(stats.size));
   const loaded = await parseEvents(parseTraceJson(decompress(readFileSync(absolute))));
   return { ...loaded, file: absolute };
 }
@@ -332,16 +338,15 @@ const round = (value: number, decimals = 2) => {
 const ms = (microseconds: number) => (Number.isFinite(microseconds) ? round(microseconds / 1000) : 0);
 const rate = (value: number, good: number, poor: number): Rating =>
   value <= good ? "good" : value <= poor ? "needs-improvement" : "poor";
-/** PageLoadMetrics classifies as "ok" | "needs-improvement" | "poor". */
+/** PageLoadMetrics classifies as "good" | "ok" | "bad" | "unclassified". */
 const classification = (value?: string, fallback?: Rating): Rating =>
-  value === "poor" ? "poor" : value === "needs-improvement" ? "needs-improvement" : fallback ?? "good";
-const originOf = (url: string): string | undefined => {
-  try {
-    return new URL(url).origin;
-  } catch {
-    return undefined;
-  }
-};
+  value === "bad"
+    ? "poor"
+    : value === "ok"
+      ? "needs-improvement"
+      : value === "good"
+        ? "good"
+        : fallback ?? "good";
 
 interface RawThreadEntry {
   name: string;
@@ -385,14 +390,18 @@ interface RawInsightModel {
 function mainRendererThread(parsedTrace: LoadedTrace["parsedTrace"]): RawThread | null {
   const processes = parsedTrace?.data?.Renderer?.processes as Map<number, RawProcess> | undefined;
   if (!processes) return null;
+  // After a cross-site navigation the old page's near-idle renderer can come
+  // first, so prefer the busiest candidate.
   const pick = (mainFrameOnly: boolean) => {
+    let best: RawThread | null = null;
     for (const proc of processes.values()) {
       if (mainFrameOnly && !proc.isOnMainFrame) continue;
       for (const thread of proc.threads?.values() ?? []) {
-        if (thread.name === "CrRendererMain" && thread.entries?.length) return thread;
+        if (thread.name !== "CrRendererMain" || !thread.entries?.length) continue;
+        if (!best || thread.entries.length > best.entries.length) best = thread;
       }
     }
-    return null;
+    return best;
   };
   return pick(true) ?? pick(false);
 }
@@ -435,10 +444,33 @@ function frameOf(entry: RawThreadEntry): { functionName?: string; url?: string; 
   }
 }
 
+const MAX_FIELD_STRING_CHARS = 500;
+const MAX_FIELD_JSON_CHARS = 2000;
+
+/** Keeps `--fields` projections from putting megabytes (e.g. screenshot args) into a report. */
+function clipFieldValue(value: unknown): unknown {
+  if (typeof value === "string") {
+    return value.length > MAX_FIELD_STRING_CHARS
+      ? `${value.slice(0, MAX_FIELD_STRING_CHARS)}… (+${value.length - MAX_FIELD_STRING_CHARS} chars)`
+      : value;
+  }
+  if (value === null || typeof value !== "object") return value;
+  let json: string | undefined;
+  try {
+    json = JSON.stringify(value);
+  } catch {
+    return value;
+  }
+  return json !== undefined && json.length > MAX_FIELD_JSON_CHARS
+    ? `${json.slice(0, MAX_FIELD_JSON_CHARS)}… (+${json.length - MAX_FIELD_JSON_CHARS} chars)`
+    : value;
+}
+
 function getProperty(obj: unknown, path: string): unknown {
   let current: unknown = obj;
   for (const part of path.split(".")) {
     if (current === null || current === undefined || typeof current !== "object") return undefined;
+    if (!Object.hasOwn(current, part)) return undefined;
     current = (current as Record<string, unknown>)[part];
   }
   return current;
@@ -460,6 +492,8 @@ export interface OverviewReport {
     cls: { value: number; rating: Rating; worstCluster?: number } | null;
     inp: { valueMs: number; rating: Rating; interactionType?: string } | null;
   };
+  /** Set when --time-range was given; relative to trace start. Scopes only `mainThreadBreakdown`. */
+  timeRange?: { startMs: number; endMs: number };
   mainThreadBreakdown: {
     scriptingMs: number;
     layoutMs: number;
@@ -637,18 +671,18 @@ function buildOverview(loaded: LoadedTrace, range?: TimeRange): OverviewReport {
   const maxMs = range ? range.endMs : ms(bounds.max);
 
   type RawNavigation = { ts: number; args?: { data?: { navigationId?: string; documentLoaderURL?: string } } };
-  const mainNavs = (data.Meta.mainFrameNavigations ?? []) as RawNavigation[];
-  const allNavs = [...(data.Meta.navigationsByNavigationId?.values() ?? [])] as RawNavigation[];
+  const mainNavs = (data.Meta?.mainFrameNavigations ?? []) as RawNavigation[];
+  const allNavs = [...(data.Meta?.navigationsByNavigationId?.values() ?? [])] as RawNavigation[];
   const firstNav = mainNavs[0] ?? allNavs[0];
   // The metrics below belong to the first main-frame navigation, so report its
   // URL; `Meta.mainFrameURL` is the page that was open when tracing started.
   const mainNav = mainNavs[0]?.args?.data;
   const navigationUrl =
     (mainNav?.navigationId
-      ? (data.Meta.finalDisplayUrlByNavigationId as Map<string, string> | undefined)?.get(mainNav.navigationId)
+      ? (data.Meta?.finalDisplayUrlByNavigationId as Map<string, string> | undefined)?.get(mainNav.navigationId)
       : undefined) || mainNav?.documentLoaderURL;
 
-  const frameMetrics = data.PageLoadMetrics?.metricScoresByFrameId?.get(data.Meta.mainFrameId);
+  const frameMetrics = data.PageLoadMetrics?.metricScoresByFrameId?.get(data.Meta?.mainFrameId);
   const navMetrics = frameMetrics ? [...frameMetrics.values()][0] : undefined;
 
   let fcp: OverviewReport["coreWebVitals"]["fcp"] = null;
@@ -676,14 +710,18 @@ function buildOverview(loaded: LoadedTrace, range?: TimeRange): OverviewReport {
     }
   }
 
+  // Prefer the selected insight set's clusters so CLS describes the same
+  // navigation as FCP/LCP; otherwise fall back to the whole trace.
   const layoutShifts = data.LayoutShifts;
+  const insightClusters = insight?.model.CLSCulprits?.clusters;
   let cls: OverviewReport["coreWebVitals"]["cls"] = null;
-  if (layoutShifts) {
-    const score = layoutShifts.sessionMaxScore ?? 0;
-    const worst = layoutShifts.clusters?.reduce(
+  if (insightClusters || layoutShifts) {
+    const clusters = insightClusters ?? (layoutShifts?.clusters as RawShiftCluster[] | undefined);
+    const worst = clusters?.reduce(
       (max: number, cluster: RawShiftCluster) => Math.max(max, cluster.clusterCumulativeScore ?? 0),
       0,
     );
+    const score = insightClusters ? worst ?? 0 : layoutShifts?.sessionMaxScore ?? 0;
     cls = {
       value: round(score, 4),
       rating: rate(score, 0.1, 0.25),
@@ -771,7 +809,7 @@ function buildOverview(loaded: LoadedTrace, range?: TimeRange): OverviewReport {
   return {
     command: "overview",
     file: loaded.file,
-    url: navigationUrl || data.Meta.mainFrameURL || null,
+    url: navigationUrl || data.Meta?.mainFrameURL || null,
     bounds: {
       minMs: round(minMs - traceStartMs),
       maxMs: round(maxMs - traceStartMs),
@@ -780,6 +818,9 @@ function buildOverview(loaded: LoadedTrace, range?: TimeRange): OverviewReport {
     navigationStartMs: firstNav ? round(ms(firstNav.ts) - traceStartMs) : null,
     coreWebVitals: { fcp, lcp, cls, inp },
     mainThreadBreakdown: breakdown,
+    ...(range
+      ? { timeRange: { startMs: round(minMs - traceStartMs), endMs: round(maxMs - traceStartMs) } }
+      : {}),
     warnings,
   };
 }
@@ -949,8 +990,7 @@ function buildTasks(loaded: LoadedTrace, options: AnalyzeOptions, range?: TimeRa
   for (const entry of thread.entries) {
     if (!entry.dur) continue;
     const durationMs = ms(entry.dur);
-    const startMs = ms(entry.ts);
-    if (durationMs < minDuration || !inBounds(startMs, durationMs, range)) continue;
+    if (durationMs < minDuration || !inBounds(entry.ts / 1000, entry.dur / 1000, range)) continue;
     const isTop =
       entry.name === "RunTask" ||
       traceEngine.Helpers.Trace.isTopLevelEvent(entry as any);
@@ -1011,10 +1051,9 @@ function buildFind(loaded: LoadedTrace, options: AnalyzeOptions, range?: TimeRan
   const lower = query.toLowerCase();
   const calls: FindReport["calls"] = [];
   for (const entry of thread.entries) {
-    const startMs = ms(entry.ts);
     const durationMs = ms(entry.dur ?? 0);
     // Zero-duration samples are bookkeeping events, not calls worth reporting.
-    if (durationMs <= 0 || !inBounds(startMs, durationMs, range)) continue;
+    if (durationMs <= 0 || !inBounds(entry.ts / 1000, (entry.dur ?? 0) / 1000, range)) continue;
     const frame = frameOf(entry);
     const name = (frame.functionName ?? entry.name ?? "").toLowerCase();
     if (!name.includes(lower)) continue;
@@ -1100,9 +1139,8 @@ function buildNetwork(loaded: LoadedTrace, options: AnalyzeOptions, range?: Time
   const slowest = options.slowest ?? 20;
   const processed: NetworkReport["requests"] = [];
   for (const request of requests) {
-    const startMs = ms(request.ts);
     const durationMs = ms(request.dur ?? 0);
-    if (!inBounds(startMs, durationMs, range)) continue;
+    if (!inBounds(request.ts / 1000, (request.dur ?? 0) / 1000, range)) continue;
     const url = request.args?.data?.url ?? "";
     const requestId = request.args?.data?.requestId;
     // Use the engine's RenderBlocking insight as the single source of truth
@@ -1154,9 +1192,8 @@ function buildInteractions(loaded: LoadedTrace, range?: TimeRange): Interactions
   for (const event of raw) {
     // A synthetic event without a timestamp has no place on the timeline.
     if (typeof event.ts !== "number" || !Number.isFinite(event.ts)) continue;
-    const startMs = ms(event.ts);
     const durationMs = ms(event.dur ?? 0);
-    if (!inBounds(startMs, durationMs, range)) continue;
+    if (!inBounds(event.ts / 1000, (event.dur ?? 0) / 1000, range)) continue;
     interactions.push({
       eventType: event.type ?? event.name ?? "interaction",
       startTimeMs: round(ms(event.ts - traceStart)),
@@ -1205,9 +1242,9 @@ function buildShifts(loaded: LoadedTrace, options: AnalyzeOptions, range?: TimeR
   for (const cluster of raw) {
     const clusterStart = cluster.clusterWindow?.min ?? cluster.ts;
     if (typeof clusterStart !== "number" || !Number.isFinite(clusterStart)) continue;
-    const startMs = ms(clusterStart);
-    const durationMs = ms(cluster.clusterWindow?.range ?? cluster.dur ?? 0);
-    if (!inBounds(startMs, durationMs, range)) continue;
+    const rawDuration = cluster.clusterWindow?.range ?? cluster.dur ?? 0;
+    const durationMs = ms(rawDuration);
+    if (!inBounds(clusterStart / 1000, rawDuration / 1000, range)) continue;
     const culprits = new Map<string, NonNullable<ShiftsReport["clusters"][number]["culprits"]>[number]>();
     const events: NonNullable<ShiftsReport["clusters"][number]["events"]> = [];
     for (const event of cluster.events ?? []) {
@@ -1263,9 +1300,8 @@ function buildEvents(loaded: LoadedTrace, options: AnalyzeOptions, range?: TimeR
     if (names && !names.has(event.name ?? "")) continue;
     if (categories && !matchesCategory(event.cat, categories)) continue;
     if (options.phase && event.ph !== options.phase) continue;
-    const tsMs = ms(event.ts);
     const durMs = ms(event.dur ?? 0);
-    if (!inBounds(tsMs, durMs, range)) continue;
+    if (!inBounds(event.ts / 1000, (event.dur ?? 0) / 1000, range)) continue;
     totalMatched++;
     if (events.length >= limit) continue;
     const item: EventsReport["events"][number] = {
@@ -1278,7 +1314,7 @@ function buildEvents(loaded: LoadedTrace, options: AnalyzeOptions, range?: TimeR
       tid: event.tid,
     };
     if (options.fields?.length) {
-      item.selectedFields = Object.fromEntries(options.fields.map((field) => [field, getProperty(raw, field)]));
+      item.selectedFields = Object.fromEntries(options.fields.map((field) => [field, clipFieldValue(getProperty(raw, field))]));
     }
     events.push(item);
   }
@@ -1410,9 +1446,9 @@ function globToRegExp(pattern: string): RegExp {
 export function resolveScanTargets(targets: string[]): string[] {
   const files = new Set<string>();
   for (const target of targets) {
-    if (/[*?[\]]/.test(target)) {
+    if (/[*?]/.test(target)) {
       const absolute = resolve(target);
-      const wildcard = absolute.search(/[*?[\]]/);
+      const wildcard = absolute.search(/[*?]/);
       const base = absolute.slice(0, wildcard);
       const dir = base.endsWith(sep) ? base : dirname(base);
       const found: string[] = [];
@@ -1471,6 +1507,8 @@ export function scanTraces(targets: string[], options: ScanOptions = {}): ScanRe
   for (const file of files) {
     let text: string;
     try {
+      const size = statSync(file).size;
+      if (size > MAX_TRACE_FILE_BYTES) throw new Error(oversizedMessage(size));
       text = decompress(readFileSync(file));
     } catch (err) {
       skippedFiles.push({

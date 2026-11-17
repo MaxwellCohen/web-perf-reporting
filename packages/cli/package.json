@@ -1,7 +1,7 @@
 {
   "name": "@maxwellcohen/web-perf-report",
   "version": "0.3.0",
-  "description": "Run Lighthouse on a URL and get a ranked, agent-ready performance report. CLI and local MCP server.",
+  "description": "Agent-ready web performance CLI and MCP server: Lighthouse audits, streamed-HTML timing and Chrome trace analysis.",
   "license": "MIT",
   "author": "Maxwell Cohen",
   "type": "module",

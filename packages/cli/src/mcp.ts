@@ -128,7 +128,7 @@ export function createServer(): McpServer {
         absoluteTimestamps: z
           .boolean()
           .optional()
-          .describe("Treat timeRange values as raw trace timestamps instead of relative to trace start"),
+          .describe("timeRange is on the trace clock (ms; add \"us\" for raw timestamps) instead of relative to trace start"),
         category: z
           .enum(["lcp", "inp", "cls", "render-blocking", "third-parties"])
           .optional()
