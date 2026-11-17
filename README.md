@@ -66,7 +66,7 @@ In the Vercel project for **web-perf-reporting**:
 5. **Ignored Build Step** (optional):
 
    ```bash
-   git diff HEAD^ HEAD --quiet -- apps/web pnpm-lock.yaml pnpm-workspace.yaml package.json
+   git diff HEAD^ HEAD --quiet -- apps/web packages/stream-core pnpm-lock.yaml pnpm-workspace.yaml package.json
    ```
 
 ## Void API (`apps/api`)

@@ -48,6 +48,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@maxwellcohen/stream-core": "workspace:*",
     "@types/node": "^26.6.5",
     "publint": "^0.3.25",
     "tsdown": "^0.23.4",

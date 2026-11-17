@@ -1,3 +1,4 @@
+import { PREVIEW_CHARS } from "@maxwellcohen/stream-core";
 import { normalizeMeasurement } from "./analyze";
 import type { StreamChunk, StreamMeasurement } from "./types";
 
@@ -20,7 +21,7 @@ export function parseMeasurement(input: unknown): StreamMeasurement | null {
       t: c.t,
       ...(num(c.end) && c.end > c.t ? { end: c.end } : {}),
       bytes: c.bytes,
-      ...(typeof c.preview === "string" ? { preview: c.preview.slice(0, 80) } : {}),
+      ...(typeof c.preview === "string" ? { preview: c.preview.slice(0, PREVIEW_CHARS) } : {}),
       ...(c.late === true ? { late: true } : {}),
     });
   }

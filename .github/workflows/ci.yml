@@ -40,9 +40,9 @@ jobs:
         with:
           filters: |
             shared: &shared ["package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", ".github/workflows/ci.yml"]
-            web: [*shared, "apps/web/**"]
+            web: [*shared, "apps/web/**", "packages/stream-core/**"]
             api: [*shared, "apps/api/**"]
-            cli: [*shared, "packages/cli/**"]
+            cli: [*shared, "packages/cli/**", "packages/stream-core/**"]
   test:
     needs: changes
     runs-on: ubuntu-latest
@@ -55,6 +55,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - if: needs.changes.outputs.web == 'true'
         run: pnpm typecheck
+      - if: needs.changes.outputs.cli == 'true'
+        run: pnpm typecheck:cli
       - if: needs.changes.outputs.cli == 'true'
         run: pnpm build:cli
       - if: needs.changes.outputs.web == 'true'

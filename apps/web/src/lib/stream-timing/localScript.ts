@@ -1,4 +1,10 @@
-import { LATE_MARKER_SOURCE, LATE_TAIL_CHARS } from "./analyze";
+import {
+  COALESCE_MS,
+  GAP_THRESHOLD_MS,
+  LATE_MARKER_SOURCE,
+  LATE_TAIL_CHARS,
+  PREVIEW_CHARS,
+} from "@maxwellcohen/stream-core";
 
 /** Dependency-free Node script for measuring localhost; served at /measure-stream.mjs. Runs under `node -` (CommonJS stdin) on Node 18+. */
 export const buildLocalScript = (siteUrl: string) => String.raw`#!/usr/bin/env node
@@ -58,13 +64,13 @@ export const buildLocalScript = (siteUrl: string) => String.raw`#!/usr/bin/env n
     const text = textual ? dec.decode(r.value, { stream: true }) : "";
     const isLate = late(tail, text);
     const head = chunks[chunks.length - 1];
-    if (head && (t - (head.end === undefined ? head.t : head.end) < 5 || (chunks.length >= 20000 && t - (head.end === undefined ? head.t : head.end) < 100))) {
+    if (head && (t - (head.end === undefined ? head.t : head.end) < ${COALESCE_MS} || (chunks.length >= 20000 && t - (head.end === undefined ? head.t : head.end) < ${GAP_THRESHOLD_MS}))) {
       head.bytes += r.value.byteLength;
       head.end = t;
-      if (isLate && !head.late) head.preview = text.replace(/\s+/g, " ").trim().slice(0, 80);
+      if (isLate && !head.late) head.preview = text.replace(/\s+/g, " ").trim().slice(0, ${PREVIEW_CHARS});
       head.late = head.late || isLate || undefined;
     } else {
-      chunks.push({ t: t, bytes: r.value.byteLength, preview: text.replace(/\s+/g, " ").trim().slice(0, 80), late: isLate || undefined });
+      chunks.push({ t: t, bytes: r.value.byteLength, preview: text.replace(/\s+/g, " ").trim().slice(0, ${PREVIEW_CHARS}), late: isLate || undefined });
     }
     tail = (tail + text).slice(-${LATE_TAIL_CHARS});
     total += r.value.byteLength;
@@ -73,7 +79,7 @@ export const buildLocalScript = (siteUrl: string) => String.raw`#!/usr/bin/env n
   // Keep previews only where they matter (first, late, after a gap) so the upload stays small.
   chunks.forEach((c, i) => {
     const prev = chunks[i - 1];
-    const afterGap = prev && c.t - (prev.end === undefined ? prev.t : prev.end) >= 100;
+    const afterGap = prev && c.t - (prev.end === undefined ? prev.t : prev.end) >= ${GAP_THRESHOLD_MS};
     if (i > 0 && !c.late && !afterGap) delete c.preview;
   });
   const last = chunks[chunks.length - 1];

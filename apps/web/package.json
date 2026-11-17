@@ -52,6 +52,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
+    "@maxwellcohen/stream-core": "workspace:*",
     "@playwright/test": "^1.64.1",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/postcss": "^4.3.3",
