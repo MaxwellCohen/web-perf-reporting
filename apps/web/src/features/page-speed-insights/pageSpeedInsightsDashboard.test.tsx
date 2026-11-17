@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { selectPageSpeedUserLabelsToken, selectPageSpeedUserLabelFilterToken } = vi.hoisted(() => ({
@@ -88,6 +89,8 @@ import { PageSpeedInsightsDashboard } from "@/features/page-speed-insights/pageS
 
 describe("pageSpeedInsightsDashboard", () => {
   beforeEach(() => {
+    // Tests below put a query string in the URL; start each one clean.
+    window.history.replaceState(null, "", "/");
     dashboardState = {
       items: [],
       reportTitle: "Loaded report",
@@ -182,5 +185,56 @@ describe("pageSpeedInsightsDashboard", () => {
 
     expect(resetColumnFiltersMock).toHaveBeenCalledTimes(1);
     expect(resetUserLabelFilterMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("lists the seven tabs in order", () => {
+    render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
+
+    expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
+      "Overview",
+      "Timeline",
+      "Loading",
+      "Resources",
+      "Page Weight",
+      "Recommendations",
+      "Audits",
+    ]);
+  });
+
+  // The client reads the live URL; initialSearch only seeds the server render.
+  function renderWithUrl(search: string) {
+    window.history.replaceState(null, "", `/${search}`);
+    return render(<PageSpeedInsightsDashboard data={[]} labels={[]} initialSearch={search} />);
+  }
+
+  it.each([
+    ["?tab=weight", "Page Weight"],
+    ["?tab=network", "Resources"],
+    ["?tab=javascript", "Resources"],
+    ["?tab=audits", "Audits"],
+  ])("selects the tab named by %s", (search, tabName) => {
+    renderWithUrl(search);
+
+    expect(screen.getByRole("tab", { name: tabName })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: "Overview" })).toHaveAttribute("aria-selected", "false");
+  });
+
+  it("selects the tab from initialSearch on the server render", () => {
+    const html = renderToString(
+      <PageSpeedInsightsDashboard data={[]} labels={[]} initialSearch="?tab=weight" />,
+    );
+    const tab = (name: string) =>
+      new RegExp(`<button[^>]*aria-selected="(true|false)"[^>]*>${name}</button>`).exec(html)?.[1];
+
+    expect(tab("Page Weight")).toBe("true");
+    expect(tab("Overview")).toBe("false");
+  });
+
+  it("ignores the removed view and height query parameters", async () => {
+    renderWithUrl("?view=classic&height=xl");
+
+    expect(screen.getByRole("tab", { name: "Overview" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("heading", { level: 2, name: "Loaded report" })).toBeInTheDocument();
+    expect(await screen.findByText("Overview story")).toBeInTheDocument();
   });
 });

@@ -30,6 +30,8 @@ function sortRecommendations(recommendations: Recommendation[]): Recommendation[
   });
 }
 
+// An audit that several categories list (e.g. document-title in Accessibility and SEO) gets the
+// first category that lists it; an audit no category lists falls back to "Performance" at the call site.
 function buildAuditCategoryMap(
   items: Array<{ item: PageSpeedInsights; label: string }>,
 ): Map<string, string> {

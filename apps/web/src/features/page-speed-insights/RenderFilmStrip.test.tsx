@@ -1,6 +1,6 @@
 import React from "react";
 
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Accordion } from "@/components/ui/accordion";
@@ -54,28 +54,28 @@ vi.mock("@/components/ui/accordion", () => {
   return { Accordion: AccordionRoot, AccordionItem, AccordionTrigger, AccordionContent };
 });
 
-vi.mock("@/features/page-speed-insights/Timeline", () => ({
-  Timeline: ({
-    device,
-    timeline,
-    markers,
-  }: {
-    device?: string;
-    timeline?: { items?: Array<{ timing: number }> };
-    markers?: Array<{ label: string; timeMs: number }>;
-  }) => (
-    <div
-      data-timeline
-      data-device={device}
-      data-timings={timeline?.items?.map((item) => item.timing).join(",") ?? ""}
-      data-markers={
-        markers?.map((marker) => `${marker.label}:${Math.round(marker.timeMs)}`).join(",") ?? ""
-      }
-    >
-      {device ?? "Timeline"}
-    </div>
-  ),
-}));
+vi.mock("@/features/page-speed-insights/Timeline", async () => {
+  const actual = await vi.importActual<typeof import("@/features/page-speed-insights/Timeline")>(
+    "@/features/page-speed-insights/Timeline",
+  );
+  return {
+    Timeline: (props: React.ComponentProps<typeof actual.Timeline>) => {
+      const { device, timeline, markers } = props;
+      return (
+        <div
+          data-timeline
+          data-device={device}
+          data-timings={timeline?.items?.map((item) => item.timing).join(",") ?? ""}
+          data-markers={
+            markers?.map((marker) => `${marker.label}:${Math.round(marker.timeMs)}`).join(",") ?? ""
+          }
+        >
+          <actual.Timeline {...props} />
+        </div>
+      );
+    },
+  };
+});
 
 function TestWrapper({
   children,
@@ -165,5 +165,97 @@ describe("RenderFilmStrip", () => {
       </TestWrapper>,
     );
     expect(screen.getByRole("button", { name: "Screenshots" })).toBeInTheDocument();
+  });
+
+  function filmstripReport(frames: Array<{ data: string; timing: number }>, extraAudits = {}) {
+    return {
+      lighthouseResult: {
+        audits: {
+          "screenshot-thumbnails": {
+            details: {
+              type: "filmstrip",
+              items: frames.map((frame) => ({ ...frame, timestamp: frame.timing })),
+            },
+          },
+          ...extraAudits,
+        },
+      },
+    };
+  }
+
+  it("shows one image and timing per frame once the accordion is opened", () => {
+    const data = [
+      filmstripReport(
+        [
+          { data: "data:image/png;base64,a", timing: 100 },
+          { data: "data:image/png;base64,b", timing: 500 },
+          { data: "data:image/png;base64,c", timing: 1200 },
+        ],
+        { "first-contentful-paint": { numericValue: 450 } },
+      ),
+    ];
+    render(
+      <TestWrapper data={data} labels={["Mobile"]}>
+        <RenderFilmStrip />
+      </TestWrapper>,
+    );
+
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Screenshots" }));
+
+    expect(
+      screen.getByRole("heading", { level: 3, name: "Mobile - Timeline" }),
+    ).toBeInTheDocument();
+    const images = screen.getAllByRole("img");
+    expect(images.map((image) => image.getAttribute("alt"))).toEqual([
+      "timeline image at 100",
+      "timeline image at 500",
+      "timeline image at 1200",
+    ]);
+    expect(images.map((image) => image.getAttribute("src"))).toEqual([
+      "data:image/png;base64,a",
+      "data:image/png;base64,b",
+      "data:image/png;base64,c",
+    ]);
+    expect(screen.getByText("100 ms")).toBeInTheDocument();
+    expect(screen.getByText("500 ms")).toBeInTheDocument();
+    expect(screen.getByText("1200 ms")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Open full-screen view at 500 ms" }),
+    ).toBeInTheDocument();
+    // The FCP marker (450 ms) lands on the first frame at or after it.
+    expect(screen.getByRole("button", { name: /at 500 ms/ })).toHaveTextContent("FCP");
+  });
+
+  it("renders one timeline per report", () => {
+    const data = [
+      filmstripReport([{ data: "data:image/png;base64,a", timing: 100 }]),
+      filmstripReport([{ data: "data:image/png;base64,z", timing: 300 }]),
+    ];
+    render(
+      <TestWrapper data={data} labels={["Mobile", "Desktop"]}>
+        <RenderFilmStrip />
+      </TestWrapper>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Screenshots" }));
+
+    expect(screen.getAllByRole("heading", { level: 3 }).map((h) => h.textContent)).toEqual([
+      "Mobile -  Timeline",
+      "Desktop -  Timeline",
+    ]);
+    expect(screen.getAllByRole("img")).toHaveLength(2);
+  });
+
+  it("renders nothing when the filmstrip audit has no frames", () => {
+    const data = [filmstripReport([])];
+    const { container } = render(
+      <TestWrapper data={data} labels={["Mobile"]}>
+        <RenderFilmStrip />
+      </TestWrapper>,
+    );
+
+    expect(screen.queryByRole("button", { name: "Screenshots" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    expect(container).toHaveTextContent("");
   });
 });

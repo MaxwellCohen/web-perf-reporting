@@ -72,6 +72,28 @@ describe("analyzeAudits", () => {
     expect(result[0].actionableSteps.length).toBeGreaterThan(0);
   });
 
+  it("uses the first category that lists an audit, and Performance for an unlisted one", () => {
+    const failing = (id: string, title: string) => ({
+      id,
+      title,
+      score: 0,
+      scoreDisplayMode: "binary",
+      description: `${title} needs attention.`,
+    });
+    const item = createItem({
+      "document-title": failing("document-title", "Document title"),
+      "unlisted-audit": failing("unlisted-audit", "Unlisted audit"),
+    });
+    (item.item as any).lighthouseResult.categories = {
+      accessibility: { title: "Accessibility", auditRefs: [{ id: "document-title" }] },
+      seo: { title: "SEO", auditRefs: [{ id: "document-title" }] },
+    };
+    const result = analyzeAudits([item as any]);
+    const categoryOf = (id: string) => result.find((r) => r.id === `${id}-failed`)?.category;
+    expect(categoryOf("document-title")).toBe("Accessibility");
+    expect(categoryOf("unlisted-audit")).toBe("Performance");
+  });
+
   it("skips the baseline inventory", () => {
     const items = [
       createItem({
