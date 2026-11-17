@@ -15,7 +15,7 @@ export function buildLlmsTxt(siteUrl: string): string {
 
    Options: \`--device mobile|desktop|both\`, \`--format md|json\`, \`--file report.json\` (analyze an existing Lighthouse/PSI JSON). Lighthouse runs locally, so localhost and dev/preview servers work. Audit a production build (e.g. \`next build && next start\`), not a dev server.
 
-   MCP: to give your agent \`audit_site\` and \`analyze_report\` tools, add this stdio server config: \`{"command":"npx","args":["-y","@maxwellcohen/web-perf-report","mcp"]}\`
+   MCP: to give your agent \`audit_site\`, \`analyze_report\`, \`measure_stream\` and \`analyze_trace\` tools, add this stdio server config: \`{"command":"npx","args":["-y","@maxwellcohen/web-perf-report","mcp"]}\`
 
 2. Alternative / manual: run Lighthouse yourself and POST the JSON.
 
