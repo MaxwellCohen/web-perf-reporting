@@ -151,7 +151,7 @@ export function renderStreamMarkdown(m: StreamMeasurement, a: StreamAnalysis, sh
     lines.push("## Waiting gaps", "");
     for (const g of a.gaps) {
       lines.push(
-        `- ${ms(g.fromMs)} -> ${ms(g.toMs)}: waited ${ms(g.durationMs)}${g.next ? `, then received \`${sanitizeText(g.next, 80)}\`` : ""}`,
+        `- ${ms(g.fromMs)} -> ${ms(g.toMs)}: waited ${ms(g.durationMs)}${g.next ? `, then received \`${sanitizeText(g.next, PREVIEW_CHARS)}\`` : ""}`,
       );
     }
     lines.push(

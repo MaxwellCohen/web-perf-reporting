@@ -77,7 +77,7 @@ export async function measureStream(rawUrl: string): Promise<StreamMeasurement> 
     if (r.done) break;
     const t = performance.now() - t0;
     const text = textual ? decoder.decode(r.value, { stream: true }) : "";
-    const late = isLateChunk(text, tail);
+    const late = textual && isLateChunk(text, tail);
     appendChunk(
       chunks,
       { t, bytes: r.value.byteLength, preview: textual ? makePreview(text) : undefined, late: late || undefined },

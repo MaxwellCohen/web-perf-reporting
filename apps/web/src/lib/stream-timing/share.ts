@@ -1,3 +1,4 @@
+import { PREVIEW_CHARS } from "@maxwellcohen/stream-core";
 import type { StreamMeasurement } from "./types";
 import { parseMeasurement } from "./validate";
 
@@ -29,7 +30,7 @@ function compact(m: StreamMeasurement, previews: "all" | "late" | "none"): Compa
     r: m.redirects, tr: m.truncated ? 1 : undefined, co: m.coalesced ? 1 : undefined,
     c: m.chunks.map((k) => {
       const keep = previews === "all" || (previews === "late" && k.late);
-      return [k.t, k.bytes, k.end ?? 0, k.late ? 1 : 0, keep ? (k.preview ?? "").slice(0, previews === "late" ? 40 : 80) : ""];
+      return [k.t, k.bytes, k.end ?? 0, k.late ? 1 : 0, keep ? (k.preview ?? "").slice(0, previews === "late" ? 40 : PREVIEW_CHARS) : ""];
     }),
   };
 }

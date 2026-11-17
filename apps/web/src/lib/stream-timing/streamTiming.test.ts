@@ -211,6 +211,19 @@ describe("stream timing", () => {
     expect(m.chunks[0].preview).toContain("$RC");
   });
 
+  it("gives a merged burst the first non-empty preview", () => {
+    // A whitespace-only first read has an empty preview; the shell arrives 2 ms later.
+    const m = normalizeMeasurement({
+      ...base,
+      chunks: [
+        { t: 10, bytes: 1, preview: "" },
+        { t: 12, bytes: 50, preview: "<html>" },
+      ],
+    });
+    expect(m.chunks).toHaveLength(1);
+    expect(m.chunks[0].preview).toBe("<html>");
+  });
+
   it("wraps the URL in a code span so link markdown cannot inject", () => {
     const m = normalizeMeasurement({ ...base, url: "https://e.com/](http://x)#" });
     expect(renderStreamMarkdown(m, analyze(m)).split("\n")[0]).toMatch(

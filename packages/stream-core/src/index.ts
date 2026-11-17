@@ -37,7 +37,8 @@ export function appendChunk(chunks: StreamChunk[], c: StreamChunk, cutoff = COAL
     head.end = Math.max(head.end ?? head.t, c.end ?? c.t);
     // A late (Suspense) chunk's content wins the preview so the gap hint points at the right content.
     if (c.late && !head.late && c.preview) head.preview = c.preview;
-    else head.preview ??= c.preview;
+    // An empty preview (a whitespace-only read) counts as none.
+    else head.preview ||= c.preview;
     head.late = head.late || c.late;
   } else {
     chunks.push({ ...c });
