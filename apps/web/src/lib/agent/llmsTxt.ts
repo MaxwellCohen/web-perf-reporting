@@ -15,7 +15,7 @@ export function buildLlmsTxt(siteUrl: string): string {
 
    Options: \`--device mobile|desktop|both\`, \`--format md|json\`, \`--file report.json\` (analyze an existing Lighthouse/PSI JSON). Lighthouse runs locally, so localhost and dev/preview servers work. Audit a production build (e.g. \`next build && next start\`), not a dev server.
 
-   MCP: to give your agent \`audit_site\` and \`analyze_report\` tools, add this stdio server config: \`{"command":"npx","args":["-y","@maxwellcohen/web-perf-report","mcp"]}\`
+   MCP: to give your agent \`audit_site\`, \`analyze_report\`, \`measure_stream\` and \`analyze_trace\` tools, add this stdio server config: \`{"command":"npx","args":["-y","@maxwellcohen/web-perf-report","mcp"]}\`
 
 2. Alternative / manual: run Lighthouse yourself and POST the JSON.
 
@@ -91,7 +91,9 @@ Record a Chrome trace of any URL and get findings back:
 
 \`node scripts/record-trace.mjs <url> --cpu 4 --api ${siteUrl} --format md\`
 
-Or POST an existing trace (.json, under 4 MB) to \`${siteUrl}/api/agent/trace\`. \`?format=md\` returns the fix prompt; the default JSON has \`summary\`, \`metrics\` (ttfb, fcp, lcp, cls, blockingMs), \`analysis\` (key events, phases, scripts, hot functions) and \`brief\`. 400 means the body was not a usable trace. For the interactive timeline, open \`${siteUrl}/trace\`.
+Or POST an existing trace (\`.json\` or \`.json.gz\`, under 4 MB compressed and 24 MB decompressed) to \`${siteUrl}/api/agent/trace\`. \`?format=md\` returns the fix prompt; the default JSON has \`summary\`, \`metrics\` (ttfb, fcp, lcp, cls, blockingMs), \`insights\` (LCP/INP/CLS subparts, render-blocking resources, third parties), \`analysis\` (key events, phases, scripts, hot functions) and \`brief\`. 400 means the body was not a usable trace. For the interactive timeline, open \`${siteUrl}/trace\`.
+
+For a trace over that limit, or to drill into long tasks, call trees, network requests, interactions and layout shifts, analyze the file locally: \`npx -y @maxwellcohen/web-perf-report trace <file>\` (commands and flags: \`trace --help\`). The CLI's MCP server exposes the same analysis as the \`analyze_trace\` tool.
 
 ## Human UI
 

@@ -1,4 +1,24 @@
-const VALUE_FLAGS = new Set(["--device", "--format", "--file", "--api"]);
+/** Value-taking flags of `trace`. Listed here, not in traceCli.ts, so routing never loads the trace engine. */
+export const TRACE_VALUE_FLAGS = [
+  "--time-range",
+  "--category",
+  "--navigation",
+  "--nav",
+  "--min-duration",
+  "--tree",
+  "--top",
+  "--function",
+  "--slowest",
+  "--initiator-chain",
+  "--name",
+  "--cat",
+  "--phase",
+  "--fields",
+  "--limit",
+  "--grep",
+];
+
+const VALUE_FLAGS = new Set(["--device", "--format", "--file", "--api", ...TRACE_VALUE_FLAGS]);
 
 /** argv without its first positional (the subcommand name), keeping flags and their values. */
 export function dropFirstPositional(argv: string[]): string[] {
