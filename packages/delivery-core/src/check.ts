@@ -3,6 +3,8 @@ import { fetchWireBody, closePool, GOOGLEBOT_SMARTPHONE_UA, type Conn, type Wire
 
 const MAX_REDIRECTS = 5;
 const CONCURRENCY = 4;
+// Don't start a fetch that could only time out at once; report it as not checked instead.
+const MIN_FETCH_MS = 50;
 
 export type DeliveryReport = {
   url: string;
@@ -88,7 +90,7 @@ export async function checkDelivery(url: string, o: DeliveryOptions = {}): Promi
     const worker = async () => {
       for (let t = next++; t < tasks.length; t = next++) {
         const u = tasks[t];
-        if (Date.now() >= deadlineAt) continue;
+        if (deadlineAt - Date.now() < MIN_FETCH_MS) continue;
         try {
           const { result } = await fetchWireBody(u, base);
           const prev = results.get(u);
