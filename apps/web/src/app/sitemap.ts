@@ -8,6 +8,7 @@ const PUBLIC_ROUTES = [
   "/historical-crux",
   "/page-speed",
   "/stream",
+  "/delivery",
   "/privacy",
   "/terms",
 ] as const;

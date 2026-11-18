@@ -13,6 +13,7 @@ const NAV_LINKS: { href: Route; label: string }[] = [
   { href: "/page-speed", label: "Insights" },
   { href: "/trace", label: "Trace" },
   { href: "/stream", label: "Stream" },
+  { href: "/delivery", label: "Delivery" },
 ];
 
 function isCurrentSection(pathname: string, href: string) {
