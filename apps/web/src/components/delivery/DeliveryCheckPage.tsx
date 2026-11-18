@@ -154,10 +154,10 @@ export default function DeliveryCheckPage() {
       >
         <div className="flex items-start gap-2">
           <textarea
-            className="flex-1 rounded-md border bg-background px-3 py-2 font-mono text-sm"
+            className="min-h-64 flex-1 resize-y rounded-md border bg-background px-3 py-2 font-mono text-sm"
             placeholder={"https://example.com\nhttps://example.com/category"}
             aria-label="URLs to check, one per line"
-            rows={Math.min(8, Math.max(1, input.split("\n").length))}
+            rows={Math.min(20, Math.max(10, input.split("\n").length))}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
