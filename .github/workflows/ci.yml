@@ -40,7 +40,7 @@ jobs:
         with:
           filters: |
             shared: &shared ["package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", ".github/workflows/ci.yml"]
-            web: [*shared, "apps/web/**", "packages/stream-core/**"]
+            web: [*shared, "apps/web/**", "packages/stream-core/**", "packages/delivery-core/**"]
             api: [*shared, "apps/api/**"]
             cli: [*shared, "packages/cli/**", "packages/stream-core/**"]
   test:

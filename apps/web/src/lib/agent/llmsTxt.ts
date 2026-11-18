@@ -69,6 +69,15 @@ Streaming frameworks (Next.js, etc.) send the shell fast, then stream Suspense c
 
 Output (markdown): TTFB, first chunk, last byte, idle waiting (gaps >= 100ms) and its share of the body span, each gap with the chunk that arrived after it (Suspense completions show as \`$RC(\` scripts or \`<div hidden id="S:\` segments, marked "Suspense" on the page), and a shareable link to ${siteUrl}/stream. With two URLs you also get a delta table (B − A; negative is better) and a one-line verdict. A long gap means a server-side await inside a Suspense boundary: find that boundary's data fetch and speed up or cache it.
 
+## Delivery check (ghost errors: 200 OK but an incomplete body)
+
+A server log can say 200 while the client (Googlebot, a browser) received a truncated response: HTTP/2 RST_STREAM mid-body, an early socket close, or a proxy read timeout. This fetches the page and its scripts/styles like a crawler (Googlebot smartphone UA by default), compares bytes received with content-length, checks compressed streams and JavaScript parse completeness, and reports DNS/TCP/TLS/TTFB timings plus a ready-to-paste engineering ticket per ghost.
+
+- Public sites only (measured from the server, max 10 assets, runs <= 3; optional \`&ua=chrome\`, \`&slowRead=1\`):
+  curl -s "${siteUrl}/api/agent/delivery?url=https://example.com&format=md"
+
+Measured from one machine, not from Google's renderer: a ghost there may not reproduce elsewhere.
+
 ## API
 
 POST ${api}

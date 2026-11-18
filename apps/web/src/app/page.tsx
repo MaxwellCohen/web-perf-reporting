@@ -30,6 +30,11 @@ const tools: { title: string; description: string; url: Route }[] = [
     description: "See when streamed HTML chunks arrive and where the server waits",
     url: "/stream",
   },
+  {
+    title: "Delivery check",
+    description: "Catch ghost errors: 200 OK responses whose body arrives incomplete",
+    url: "/delivery",
+  },
 ];
 
 export default function Home() {
