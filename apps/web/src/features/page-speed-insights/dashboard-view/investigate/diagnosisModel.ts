@@ -4,6 +4,12 @@ import {
 } from "@/features/page-speed-insights/mainThreadTaskSummary";
 import type { CwvMetricAcronym } from "@/features/page-speed-insights/metricCauseAudits";
 import { summarizeReport } from "@/features/page-speed-insights/dashboard-view/reportScoreSummary";
+import {
+  isUsable,
+  num,
+  str,
+  tableItems,
+} from "@/features/page-speed-insights/dashboard-view/investigate/auditTable";
 import { fieldP75 } from "@/features/page-speed-insights/dashboard-view/investigate/fieldP75";
 import {
   formFactorOf,
@@ -14,7 +20,7 @@ import type { AuditResult, AuditResultsRecord, PageSpeedInsights, TableItem } fr
 
 export type PartStatus = "good" | "ni" | "poor";
 
-type Evidence = { k: string; v: string };
+export type Evidence = { k: string; v: string };
 
 export type Cause = {
   id: string;
@@ -56,7 +62,7 @@ export type Diagnosis = {
 const SCRIPTS_SHOWN = 6;
 const TOP_ROWS = 3;
 
-const FIXES: Record<string, string> = {
+export const FIXES: Record<string, string> = {
   "document-latency-insight":
     "Cut server response time: cache the HTML at the edge/CDN, trim backend work before the first byte, remove redirects, and enable text compression.",
   "lcp-discovery-insight":
@@ -73,6 +79,14 @@ const FIXES: Record<string, string> = {
     "Break long main-thread tasks into smaller chunks (yield with scheduler.yield or setTimeout) and defer non-urgent work.",
   "unused-javascript":
     "Remove or code-split JavaScript that is not used on this page; load the rest on demand.",
+  "legacy-javascript-insight":
+    "Stop shipping transpiled polyfills for modern browsers: target current browsers in your build config.",
+  "network-dependency-tree-insight":
+    "Shorten the critical request chain: preload or preconnect key resources, inline small critical files, and avoid requests that only start after another finishes.",
+  "dom-size-insight":
+    "Reduce DOM size: render long lists lazily or virtualized, and remove wrapper elements you do not need.",
+  "cache-insight":
+    "Serve static assets with long-lived Cache-Control headers (and hashed file names) so repeat visits skip the network.",
   "legacy-javascript":
     "Stop shipping transpiled polyfills for modern browsers: target current browsers in your build config.",
   "third-parties-insight":
@@ -104,27 +118,6 @@ const NO_CAUSE = (id: string): Cause => ({
   auditId: "",
   timelineLink: false,
 });
-
-function num(value: unknown): number | null {
-  return typeof value === "number" && Number.isFinite(value) ? value : null;
-}
-
-function str(value: unknown): string | null {
-  return typeof value === "string" && value ? value : null;
-}
-
-function tableItems(audit: AuditResult | undefined): TableItem[] {
-  const details = audit?.details;
-  return details && "items" in details && Array.isArray(details.items)
-    ? (details.items as TableItem[])
-    : [];
-}
-
-function isUsable(audit: AuditResult | undefined): audit is AuditResult {
-  return (
-    !!audit && audit.scoreDisplayMode !== "notApplicable" && audit.scoreDisplayMode !== "manual"
-  );
-}
 
 function statusFor(share: number): PartStatus {
   return share >= 0.4 ? "poor" : share >= 0.15 ? "ni" : "good";
@@ -174,7 +167,7 @@ function rowEvidence(row: TableItem): Evidence[] {
   return [...(url ? [{ k: "URL", v: url }] : []), ...rowFacts(row)];
 }
 
-function auditEvidence(audit: AuditResult): Evidence[] {
+export function auditEvidence(audit: AuditResult): Evidence[] {
   const details = audit.details;
   if (details && "type" in details && details.type === "checklist") {
     const server = num(
