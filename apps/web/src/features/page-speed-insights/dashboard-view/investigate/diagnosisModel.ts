@@ -56,7 +56,7 @@ export type Diagnosis = {
 const SCRIPTS_SHOWN = 6;
 const TOP_ROWS = 3;
 
-const FIXES: Record<string, string> = {
+export const FIXES: Record<string, string> = {
   "document-latency-insight":
     "Cut server response time: cache the HTML at the edge/CDN, trim backend work before the first byte, remove redirects, and enable text compression.",
   "lcp-discovery-insight":
