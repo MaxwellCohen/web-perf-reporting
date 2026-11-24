@@ -187,11 +187,12 @@ describe("pageSpeedInsightsDashboard", () => {
     expect(resetUserLabelFilterMock).toHaveBeenCalledTimes(1);
   });
 
-  it("lists the seven tabs in order", () => {
+  it("lists the eight tabs in order", () => {
     render(<PageSpeedInsightsDashboard data={[]} labels={[]} />);
 
     expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
       "Overview",
+      "Diagnose",
       "Timeline",
       "Loading",
       "Resources",

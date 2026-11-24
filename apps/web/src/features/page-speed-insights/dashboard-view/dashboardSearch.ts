@@ -1,7 +1,7 @@
 /**
  * Shareable PSI dashboard state lives in the query string.
  *
- * tab=timeline|loading|resources|weight|recommendations|audits (overview is the default)
+ * tab=diagnose|timeline|loading|resources|weight|recommendations|audits (overview is the default)
  * legacy tab=network|javascript open Resources
  * stage=arrived|scripts|unused|main-thread  suspect= — Resources investigation deep link
  * labels, category, priority, expand, type, groups — repeatable; omitted means "all" or "none"
@@ -16,6 +16,7 @@
 
 const DASHBOARD_TABS = [
   "overview",
+  "diagnose",
   "timeline",
   "loading",
   "resources",
