@@ -1,3 +1,4 @@
+import { ReportColumns } from "@/features/page-speed-insights/shared/ReportColumns";
 import { Timeline } from "@/features/page-speed-insights/Timeline";
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
 import { AccordionContent, AccordionItem } from "@/components/ui/accordion";
@@ -188,7 +189,9 @@ export function RenderFilmStrip() {
   return (
     <AccordionItem value={"Screenshots"}>
       <AccordionSectionTitleTrigger>Screenshots</AccordionSectionTitleTrigger>
-      <AccordionContent>{timeLines}</AccordionContent>
+      <AccordionContent>
+        <ReportColumns className="px-4">{timeLines}</ReportColumns>
+      </AccordionContent>
     </AccordionItem>
   );
 }

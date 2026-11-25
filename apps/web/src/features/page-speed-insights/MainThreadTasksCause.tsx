@@ -1,3 +1,4 @@
+import { ReportColumn, ReportColumns } from "@/features/page-speed-insights/shared/ReportColumns";
 import {
   Table,
   TableBody,
@@ -164,16 +165,15 @@ export function MainThreadTasksCause({
         interactive, so this total can be higher than the TBT score. Lighthouse ties its longest
         tasks to the script that was running. That is the script URL, not the original source file.
       </p>
-      {reports.map(({ label, summary, scripts }) => (
-        <section key={label} className="space-y-3">
-          {showLabels ? (
-            <h5 className="text-sm font-semibold text-muted-foreground">{label}</h5>
-          ) : null}
-          <TaskSummaryStats summary={summary} />
-          <ScriptBlockingTable rows={scripts} />
-          <LongTaskTable summary={summary} />
-        </section>
-      ))}
+      <ReportColumns>
+        {reports.map(({ label, summary, scripts }) => (
+          <ReportColumn key={label} label={label} showLabel={showLabels} className="space-y-3">
+            <TaskSummaryStats summary={summary} />
+            <ScriptBlockingTable rows={scripts} />
+            <LongTaskTable summary={summary} />
+          </ReportColumn>
+        ))}
+      </ReportColumns>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { ReportColumns } from "@/features/page-speed-insights/shared/ReportColumns";
 import { Timeline } from "@/features/page-speed-insights/Timeline";
 import {
   AuditDetailFilmstrip,
@@ -33,7 +34,7 @@ export function RenderDetails({ items }: { items: TableDataItem[] }) {
   switch (detailType) {
     case "filmstrip":
       return (
-        <>
+        <ReportColumns>
           {details.map((ad, i) => (
             <Timeline
               key={`${i}_${labels[i]}`}
@@ -41,7 +42,7 @@ export function RenderDetails({ items }: { items: TableDataItem[] }) {
               device={labels[i]}
             />
           ))}
-        </>
+        </ReportColumns>
       );
     case "list":
       return <RenderList rows={items} />;
@@ -52,13 +53,12 @@ export function RenderDetails({ items }: { items: TableDataItem[] }) {
       return <DetailTable rows={items.filter(isDetailTableItem)} title={title} />;
     case "criticalrequestchain":
       return (
-        <div>
-          Critical Request Chain
-          <RenderCriticalChainData
-            desktopDetails={details[1] as CriticalRequestChain}
-            mobileDetails={details[2] as CriticalRequestChain}
-          />
-        </div>
+        <RenderCriticalChainData
+          reports={details.map((detail, i) => ({
+            label: labels[i] || "Report",
+            details: detail as CriticalRequestChain,
+          }))}
+        />
       );
     // Internal-only details, not for rendering.
     case "screenshot":
@@ -66,13 +66,17 @@ export function RenderDetails({ items }: { items: TableDataItem[] }) {
     case "debugdata":
       return <RenderDebugData items={items} />;
     case "treemap-data":
-      return items.map((r, i) => (
-        <JSUsageAccordion
-          key={`${r.auditResult.id}_${i}`}
-          treeData={r.auditResult?.details as TreeMapData}
-          label={r._userLabel}
-        />
-      ));
+      return (
+        <ReportColumns className="col-span-1 lg:col-span-full">
+          {items.map((r, i) => (
+            <JSUsageAccordion
+              key={`${r.auditResult.id}_${i}`}
+              treeData={r.auditResult?.details as TreeMapData}
+              label={r._userLabel}
+            />
+          ))}
+        </ReportColumns>
+      );
 
     default:
       return null;

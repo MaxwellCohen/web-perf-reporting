@@ -39,7 +39,7 @@ export function CompareRunsCard<T extends { label: string }>({
               return (
                 <div key={pair.formFactor} className="min-w-0 space-y-2">
                   <p className="text-sm font-semibold">{pair.formFactor}</p>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                     {runItems.map((item) => (
                       <Fragment key={compareKey(item)}>{renderItem(item, true)}</Fragment>
                     ))}

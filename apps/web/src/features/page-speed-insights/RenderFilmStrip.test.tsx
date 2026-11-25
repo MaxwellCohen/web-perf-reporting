@@ -203,9 +203,7 @@ describe("RenderFilmStrip", () => {
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Screenshots" }));
 
-    expect(
-      screen.getByRole("heading", { level: 3, name: "Mobile - Timeline" }),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("report-heading")).toHaveTextContent("Mobile");
     const images = screen.getAllByRole("img");
     expect(images.map((image) => image.getAttribute("alt"))).toEqual([
       "timeline image at 100",
@@ -239,9 +237,9 @@ describe("RenderFilmStrip", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Screenshots" }));
 
-    expect(screen.getAllByRole("heading", { level: 3 }).map((h) => h.textContent)).toEqual([
-      "Mobile -  Timeline",
-      "Desktop -  Timeline",
+    expect(screen.getAllByTestId("report-heading").map((h) => h.textContent)).toEqual([
+      "Mobile",
+      "Desktop",
     ]);
     expect(screen.getAllByRole("img")).toHaveLength(2);
   });

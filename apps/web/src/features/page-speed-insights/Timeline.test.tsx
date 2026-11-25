@@ -39,7 +39,7 @@ describe("Timeline", () => {
       scale: 1,
     };
     render(<Timeline timeline={timeline} device="Mobile" />);
-    expect(screen.getByRole("heading", { level: 3 })).toHaveTextContent("Mobile - Timeline");
+    expect(screen.getByTestId("report-heading")).toHaveTextContent("Mobile");
   });
 
   it("renders timeline without device label", () => {
@@ -49,8 +49,7 @@ describe("Timeline", () => {
       scale: 1,
     };
     render(<Timeline timeline={timeline} />);
-    expect(screen.getByRole("heading", { level: 3 })).toHaveTextContent("Timeline");
-    expect(screen.getByRole("heading", { level: 3 })).not.toHaveTextContent("Mobile");
+    expect(screen.queryByTestId("report-heading")).not.toBeInTheDocument();
   });
 
   it("renders thumbnail buttons for each timeline item", () => {

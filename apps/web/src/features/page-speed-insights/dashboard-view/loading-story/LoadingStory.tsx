@@ -201,7 +201,7 @@ function LoadingStoryView({
       <div
         className={cn(
           "grid gap-px border-t bg-border",
-          story.devices.length > 1 && "md:grid-cols-2",
+          story.devices.length > 1 && "lg:grid-cols-2",
         )}
       >
         {story.devices.map((device) => (

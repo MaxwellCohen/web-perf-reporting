@@ -1,3 +1,4 @@
+import { ReportColumn, ReportColumns } from "@/features/page-speed-insights/shared/ReportColumns";
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import { shortUrl } from "@/features/page-speed-insights/shared/format";
 import { getUrlString } from "@/lib/utils";
@@ -75,38 +76,39 @@ export function AuditImageIssuesViz({
           metrics: [{ label: kpiLabel, value: rowItems(row).length, format: "count" as const }],
         }))}
       />
-      {rows.map((row, index) => {
-        const items = rowItems(row).slice(0, LIST_LIMIT);
-        if (!items.length) return null;
-        const label = reportLabel(row, index);
-        return (
-          <div key={`${label}-${index}`} className="space-y-1">
-            {multi ? <p className="text-xs font-medium text-muted-foreground">{label}</p> : null}
-            <ul className="divide-y overflow-hidden rounded-md border text-sm">
-              {items.map((item, i) => {
-                const description = imageIssueDescription(auditId, item);
-                return (
-                  <li key={i} className="px-2.5 py-1.5">
-                    <p className="truncate" title={itemName(item)}>
-                      {itemName(item)}
-                    </p>
-                    {description ? (
-                      <p className="truncate text-xs text-muted-foreground" title={description}>
-                        {description}
+      <ReportColumns count={rows.filter((row) => rowItems(row).length > 0).length}>
+        {rows.map((row, index) => {
+          const items = rowItems(row).slice(0, LIST_LIMIT);
+          if (!items.length) return null;
+          const label = reportLabel(row, index);
+          return (
+            <ReportColumn key={`${label}-${index}`} label={label} showLabel={multi}>
+              <ul className="divide-y overflow-hidden rounded-md border text-sm">
+                {items.map((item, i) => {
+                  const description = imageIssueDescription(auditId, item);
+                  return (
+                    <li key={i} className="px-2.5 py-1.5">
+                      <p className="truncate" title={itemName(item)}>
+                        {itemName(item)}
                       </p>
-                    ) : null}
-                  </li>
-                );
-              })}
-            </ul>
-            {rowItems(row).length > LIST_LIMIT ? (
-              <p className="text-xs text-muted-foreground">
-                +{rowItems(row).length - LIST_LIMIT} more
-              </p>
-            ) : null}
-          </div>
-        );
-      })}
+                      {description ? (
+                        <p className="truncate text-xs text-muted-foreground" title={description}>
+                          {description}
+                        </p>
+                      ) : null}
+                    </li>
+                  );
+                })}
+              </ul>
+              {rowItems(row).length > LIST_LIMIT ? (
+                <p className="text-xs text-muted-foreground">
+                  +{rowItems(row).length - LIST_LIMIT} more
+                </p>
+              ) : null}
+            </ReportColumn>
+          );
+        })}
+      </ReportColumns>
     </div>
   );
 }

@@ -4,14 +4,11 @@ import { useState } from "react";
 import { useFullPageScreenshots } from "@/features/page-speed-insights/PageSpeedContext";
 import { RenderJSONDetails } from "@/features/page-speed-insights/RenderJSONDetails";
 import type { NodeValue } from "@/lib/schema";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+  FULLSCREEN_DIALOG_CLASS,
+  FullscreenImage,
+} from "@/features/page-speed-insights/shared/ZoomableImage";
 import { ElementScreenshotRenderer } from "@/features/page-speed-insights/lh-categories/table/ElementScreenshotRenderer";
 
 /**
@@ -142,7 +139,7 @@ export function RenderNodeImage({
     return (
       <Dialog>
         <DialogTrigger>
-          <div className="flex cursor-pointer items-center justify-center overflow-hidden rounded border border-border transition-transform hover:scale-110 hover:shadow-md">
+          <div className="flex cursor-zoom-in items-center justify-center overflow-hidden rounded border border-border transition-transform hover:scale-110 hover:shadow-md">
             <img
               src={screenshot.data}
               alt="Screenshot"
@@ -157,30 +154,15 @@ export function RenderNodeImage({
             />
           </div>
         </DialogTrigger>
-        <DialogContent className="h-full w-screen max-w-none justify-center md:w-[74vw]">
-          <DialogTitle>Screenshot</DialogTitle>
-          <div className="flex items-center justify-center">
-            {imageError ? (
-              <div className="flex items-center justify-center p-8 text-muted-foreground">
-                <span>Image unavailable</span>
-              </div>
-            ) : (
-              <img
-                src={screenshot.data}
-                alt="Full screenshot"
-                onError={() => setImageError(true)}
-                style={{
-                  maxWidth: "100%",
-                  height: "auto",
-                }}
-              />
-            )}
-          </div>
-          <DialogClose asChild>
-            <Button className="w-17" autoFocus>
-              close
-            </Button>
-          </DialogClose>
+        <DialogContent className={FULLSCREEN_DIALOG_CLASS}>
+          <DialogTitle className="pr-8 text-base sm:text-lg">Screenshot</DialogTitle>
+          {imageError ? (
+            <div className="flex flex-1 items-center justify-center p-8 text-muted-foreground">
+              <span>Image unavailable</span>
+            </div>
+          ) : (
+            <FullscreenImage src={screenshot.data} alt="Full screenshot" />
+          )}
         </DialogContent>
       </Dialog>
     );

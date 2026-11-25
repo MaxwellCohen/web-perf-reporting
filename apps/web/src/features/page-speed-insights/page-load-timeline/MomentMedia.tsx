@@ -2,14 +2,12 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  FULLSCREEN_DIALOG_CLASS,
+  FullscreenImage,
+  ZOOM_TRIGGER_CLASS,
+} from "@/features/page-speed-insights/shared/ZoomableImage";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
 import { WaterfallBarTrack } from "@/features/page-speed-insights/waterfall/WaterfallBarTrack";
 import { waterfallRowFromLcpSegments } from "@/features/page-speed-insights/waterfall/waterfallData";
@@ -21,7 +19,7 @@ export function MomentScreenshot({ timing, data }: { timing: number; data: strin
       <DialogTrigger asChild>
         <button
           type="button"
-          className="shrink-0 overflow-hidden rounded-md border bg-background shadow-sm transition hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className={`shrink-0 overflow-hidden rounded-md border bg-background shadow-sm hover:scale-[1.02] ${ZOOM_TRIGGER_CLASS}`}
         >
           <img
             src={data}
@@ -35,16 +33,11 @@ export function MomentScreenshot({ timing, data }: { timing: number; data: strin
           </span>
         </button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl">
-        <DialogTitle>Screenshot at {formatMs(timing)}</DialogTitle>
-        <img
-          src={data}
-          alt={`Page at ${formatMs(timing)}`}
-          className="max-h-[70vh] w-full object-contain"
-        />
-        <DialogClose asChild>
-          <Button type="button">Close</Button>
-        </DialogClose>
+      <DialogContent className={FULLSCREEN_DIALOG_CLASS}>
+        <DialogTitle className="pr-8 text-base sm:text-lg">
+          Screenshot at {formatMs(timing)}
+        </DialogTitle>
+        <FullscreenImage src={data} alt={`Page at ${formatMs(timing)}`} />
       </DialogContent>
     </Dialog>
   );

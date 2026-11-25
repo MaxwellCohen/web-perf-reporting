@@ -1,3 +1,4 @@
+import { ReportColumn, ReportColumns } from "@/features/page-speed-insights/shared/ReportColumns";
 import { formatMs, shortUrl } from "@/features/page-speed-insights/shared/format";
 import { itemLabel, itemNumeric } from "./auditItemValues";
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
@@ -57,7 +58,7 @@ function GanttAxis({ minStart, range }: { minStart: number; range: number }) {
             <span
               key={index}
               className={cn(
-                "absolute top-0 border-l border-border pt-1 pl-1 font-mono text-[11px] leading-none tabular-nums text-muted-foreground",
+                "absolute top-0 border-l border-border pt-1 pl-1 font-mono text-[11px] leading-none whitespace-nowrap tabular-nums text-muted-foreground",
                 isLast && "-translate-x-full border-r border-l-0 pr-1 pl-0",
                 // A narrow track only has room for the start, middle and end.
                 !isFirst && !isLast && index % 2 === 1 && "hidden sm:block",
@@ -114,45 +115,45 @@ export function AuditGanttStrip({
         Each bar shows when the task ran and how long it took. The number on the right is its
         duration.
       </p>
-      {groups.map((group) => {
-        const minStart = Math.min(...group.items.map((item) => item.start));
-        const maxEnd = Math.max(...group.items.map((item) => item.end), minStart + 1);
-        const range = Math.max(maxEnd - minStart, 1);
+      <ReportColumns>
+        {groups.map((group) => {
+          const minStart = Math.min(...group.items.map((item) => item.start));
+          const maxEnd = Math.max(...group.items.map((item) => item.end), minStart + 1);
+          const range = Math.max(maxEnd - minStart, 1);
 
-        return (
-          <div key={group.reportLabel} className="space-y-2">
-            {multi ? (
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {group.reportLabel}
-              </p>
-            ) : null}
-            <ul className="space-y-1.5">
-              {group.items.map((item) => {
-                const left = ((item.start - minStart) / range) * 100;
-                const width = Math.max((item.duration / range) * 100, 0.4);
-                return (
-                  <li key={`${group.reportLabel}-${item.id}-${item.label}`} className={GANTT_GRID}>
-                    <p className="truncate text-xs" title={item.label}>
-                      {item.label.startsWith("http") ? shortUrl(item.label) : item.label}
-                    </p>
-                    <div className="relative h-3 overflow-hidden rounded-full bg-muted">
-                      <div
-                        className={cn("absolute inset-y-0 rounded-full", barClassName)}
-                        style={{ left: `${left}%`, width: `${width}%` }}
-                        title={`${formatMs(item.start)} → ${formatMs(item.end)} (${formatMs(item.duration)})`}
-                      />
-                    </div>
-                    <p className="text-right font-mono text-[11px] tabular-nums text-muted-foreground">
-                      {formatMs(item.duration)}
-                    </p>
-                  </li>
-                );
-              })}
-            </ul>
-            <GanttAxis minStart={minStart} range={range} />
-          </div>
-        );
-      })}
+          return (
+            <ReportColumn key={group.reportLabel} label={group.reportLabel} showLabel={multi}>
+              <ul className="space-y-1.5">
+                {group.items.map((item) => {
+                  const left = ((item.start - minStart) / range) * 100;
+                  const width = Math.max((item.duration / range) * 100, 0.4);
+                  return (
+                    <li
+                      key={`${group.reportLabel}-${item.id}-${item.label}`}
+                      className={GANTT_GRID}
+                    >
+                      <p className="truncate text-xs" title={item.label}>
+                        {item.label.startsWith("http") ? shortUrl(item.label) : item.label}
+                      </p>
+                      <div className="relative h-3 overflow-hidden rounded-full bg-muted">
+                        <div
+                          className={cn("absolute inset-y-0 rounded-full", barClassName)}
+                          style={{ left: `${left}%`, width: `${width}%` }}
+                          title={`${formatMs(item.start)} → ${formatMs(item.end)} (${formatMs(item.duration)})`}
+                        />
+                      </div>
+                      <p className="text-right font-mono text-[11px] tabular-nums text-muted-foreground">
+                        {formatMs(item.duration)}
+                      </p>
+                    </li>
+                  );
+                })}
+              </ul>
+              <GanttAxis minStart={minStart} range={range} />
+            </ReportColumn>
+          );
+        })}
+      </ReportColumns>
     </div>
   );
 }
@@ -175,42 +176,43 @@ export function AuditRedirectChain({ rows }: { rows: DetailTableItem[] }) {
   return (
     <div className="w-full min-w-0 space-y-3">
       <p className="text-sm font-medium text-muted-foreground">Redirect chain</p>
-      {groups.map((group) => {
-        const max = Math.max(...group.items.map((item) => item.wastedMs), 1);
-        return (
-          <div key={group.reportLabel} className="space-y-2">
-            {groups.length > 1 ? (
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {group.reportLabel}
-              </p>
-            ) : null}
-            <ol className="space-y-2">
-              {group.items.map((item, index) => (
-                <li
-                  key={`${group.reportLabel}-${item.id}`}
-                  className="grid grid-cols-[1.5rem_minmax(0,1fr)_auto] items-center gap-2"
-                >
-                  <span className="text-xs text-muted-foreground">{index + 1}.</span>
-                  <div className="min-w-0 space-y-1">
-                    <p className="truncate text-xs" title={item.label}>
-                      {item.label}
-                    </p>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                      <div
-                        className="h-full rounded-full bg-amber-500/80"
-                        style={{ width: `${Math.max((item.wastedMs / max) * 100, 4)}%` }}
-                      />
+      <ReportColumns>
+        {groups.map((group) => {
+          const max = Math.max(...group.items.map((item) => item.wastedMs), 1);
+          return (
+            <ReportColumn
+              key={group.reportLabel}
+              label={group.reportLabel}
+              showLabel={groups.length > 1}
+            >
+              <ol className="space-y-2">
+                {group.items.map((item, index) => (
+                  <li
+                    key={`${group.reportLabel}-${item.id}`}
+                    className="grid grid-cols-[1.5rem_minmax(0,1fr)_auto] items-center gap-2"
+                  >
+                    <span className="text-xs text-muted-foreground">{index + 1}.</span>
+                    <div className="min-w-0 space-y-1">
+                      <p className="truncate text-xs" title={item.label}>
+                        {item.label}
+                      </p>
+                      <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                        <div
+                          className="h-full rounded-full bg-amber-500/80"
+                          style={{ width: `${Math.max((item.wastedMs / max) * 100, 4)}%` }}
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <p className="font-mono text-[11px] tabular-nums text-muted-foreground">
-                    {formatMs(item.wastedMs)}
-                  </p>
-                </li>
-              ))}
-            </ol>
-          </div>
-        );
-      })}
+                    <p className="font-mono text-[11px] tabular-nums text-muted-foreground">
+                      {formatMs(item.wastedMs)}
+                    </p>
+                  </li>
+                ))}
+              </ol>
+            </ReportColumn>
+          );
+        })}
+      </ReportColumns>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { ReportColumn, ReportColumns } from "@/features/page-speed-insights/shared/ReportColumns";
 import { InteractiveWaterfall } from "@/features/page-speed-insights/waterfall/InteractiveWaterfall";
 import {
   buildWaterfallRows,
@@ -27,21 +28,22 @@ export function AuditNetworkWaterfallViz({ rows }: { rows: DetailTableItem[] }) 
   return (
     <div className="w-full min-w-0 space-y-4">
       <p className="text-sm font-medium text-muted-foreground">Request waterfall</p>
-      {groups.map((group) => (
-        <div key={group.reportLabel} className="w-full min-w-0 space-y-2">
-          {groups.length > 1 ? (
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              {group.reportLabel}
-            </p>
-          ) : null}
-          <InteractiveWaterfall
-            rows={group.waterfallRows}
-            timeRange={group.timeRange!}
-            heightSize="default"
-            emptyMessage="No network timing data"
-          />
-        </div>
-      ))}
+      <ReportColumns>
+        {groups.map((group) => (
+          <ReportColumn
+            key={group.reportLabel}
+            label={group.reportLabel}
+            showLabel={groups.length > 1}
+          >
+            <InteractiveWaterfall
+              rows={group.waterfallRows}
+              timeRange={group.timeRange!}
+              heightSize="default"
+              emptyMessage="No network timing data"
+            />
+          </ReportColumn>
+        ))}
+      </ReportColumns>
     </div>
   );
 }

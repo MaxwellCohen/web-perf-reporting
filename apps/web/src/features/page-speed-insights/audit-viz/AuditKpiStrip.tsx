@@ -1,3 +1,4 @@
+import { ReportColumn, ReportColumns } from "@/features/page-speed-insights/shared/ReportColumns";
 import { formatBytes, formatMs } from "@/features/page-speed-insights/shared/format";
 import { cn } from "@/lib/utils";
 
@@ -37,18 +38,14 @@ export function AuditKpiStrip({
   const multi = nonempty.length > 1;
 
   return (
-    <div className="w-full min-w-0 space-y-3">
+    <ReportColumns>
       {nonempty.map((group) => (
-        <div key={group.reportLabel} className="space-y-2">
-          {multi ? (
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              {group.reportLabel}
-            </p>
-          ) : null}
+        <ReportColumn key={group.reportLabel} label={group.reportLabel} showLabel={multi}>
           <div
             className={cn(
               "grid gap-2",
-              group.metrics.length >= 5
+              // Five across only fits when one report has the full width.
+              group.metrics.length >= 5 && !multi
                 ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
                 : "grid-cols-2 sm:grid-cols-3",
             )}
@@ -65,8 +62,8 @@ export function AuditKpiStrip({
               </div>
             ))}
           </div>
-        </div>
+        </ReportColumn>
       ))}
-    </div>
+    </ReportColumns>
   );
 }

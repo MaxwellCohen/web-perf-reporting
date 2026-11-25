@@ -1,3 +1,4 @@
+import { ReportColumn, ReportColumns } from "@/features/page-speed-insights/shared/ReportColumns";
 import type { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import { shortUrl } from "@/features/page-speed-insights/shared/format";
 import { compareReportLabels } from "@/features/page-speed-insights/shared/reportLabels";
@@ -462,19 +463,14 @@ export function AuditClsCulpritsViz({ rows }: { rows: DetailTableItem[] }) {
       ) : null}
 
       {multiReport ? (
-        <div className="grid gap-3 lg:grid-cols-2">
+        <ReportColumns>
           {reportLabels.map((reportLabel) => (
-            <section
-              key={reportLabel}
-              className="space-y-3 rounded-lg border border-border/80 bg-muted/10 p-3"
-              aria-label={`${reportLabel} layout shift culprits`}
-            >
-              <h3 className="text-sm font-semibold tracking-wide text-foreground">{reportLabel}</h3>
+            <ReportColumn key={reportLabel} label={reportLabel} className="space-y-3">
               <ReportSummary reportLabel={reportLabel} summary={summaryByLabel.get(reportLabel)} />
               <ShiftList shifts={shiftsByLabel.get(reportLabel) ?? []} />
-            </section>
+            </ReportColumn>
           ))}
-        </div>
+        </ReportColumns>
       ) : (
         <section className="space-y-3">
           <ReportSummary reportLabel={reportLabels[0] || "Report"} summary={summaries[0]} />
