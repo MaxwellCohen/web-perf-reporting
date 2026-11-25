@@ -1,7 +1,5 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
-
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
@@ -10,6 +8,7 @@ import { buildFixPrompt } from "@/features/page-speed-insights/dashboard-view/in
 import { formFactorOf } from "@/features/page-speed-insights/dashboard-view/investigate/metricScoring";
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
+import { ZoomableImage } from "@/features/page-speed-insights/shared/ZoomableImage";
 import { LCP_PHASE_COLORS } from "@/features/page-speed-insights/shared/lcpPhaseColors";
 import { getNetworkBarColor } from "@/features/page-speed-insights/shared/networkResourceColors";
 import { LONG_TASK_BAR_COLOR } from "@/features/page-speed-insights/waterfall/WaterfallBarTrack";
@@ -117,14 +116,19 @@ function Filmstrip({ view }: { view: ExplainView }) {
       <span className={cn(NAME_COL, "pt-1 text-xs text-muted-foreground")}>Filmstrip</span>
       <div className="relative h-16 min-w-0 flex-1">
         {frames.map((frame) => (
-          <img
+          <div
             key={frame.timeMs}
-            src={frame.data}
-            alt={`Page at ${formatMs(frame.timeMs)}`}
-            className="absolute top-0 h-14 w-auto rounded-sm border"
+            className="absolute top-0"
             style={{ left: `${(frame.timeMs / view.axisEndMs) * 100}%` }}
-            loading="lazy"
-          />
+          >
+            <ZoomableImage
+              src={frame.data}
+              alt={`Page at ${formatMs(frame.timeMs)}`}
+              title={`Screenshot at ${formatMs(frame.timeMs)}`}
+              className="block rounded-sm border"
+              imageClassName="h-14 w-auto rounded-sm"
+            />
+          </div>
         ))}
       </div>
     </div>

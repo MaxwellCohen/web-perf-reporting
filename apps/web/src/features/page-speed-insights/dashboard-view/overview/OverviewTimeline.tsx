@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { AccordionContent, AccordionItem } from "@/components/ui/accordion";
 import { AccordionSectionTitleTrigger } from "@/components/ui/accordion-section-title-trigger";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,12 @@ import {
 } from "@/features/page-speed-insights/dashboard-view/overview/overviewTimelineModel";
 import { ratingFillClass } from "@/features/page-speed-insights/dashboard-view/overview/overviewTone";
 import { collectTimelineSources } from "@/features/page-speed-insights/page-load-timeline/collectTimelineSources";
+import {
+  FilmstripViewer,
+  type FilmstripViewerFrame,
+} from "@/features/page-speed-insights/shared/FilmstripViewer";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
+import { ZOOM_TRIGGER_CLASS } from "@/features/page-speed-insights/shared/ZoomableImage";
 import { LCP_PHASE_COLORS } from "@/features/page-speed-insights/shared/lcpPhaseColors";
 import type { InsightsContextItem } from "@/lib/page-speed-insights/types";
 import { cn } from "@/lib/utils";
@@ -134,6 +139,15 @@ function Axis({ timeline }: { timeline: TimelineModel }) {
 }
 
 function ScreenshotRow({ timeline, label }: { timeline: TimelineModel; label: string }) {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  // The viewer steps through painted frames only; empty slots have nothing to enlarge.
+  const painted = timeline.frames.filter(({ frame }) => frame);
+  const viewerFrames: FilmstripViewerFrame[] = painted.map(({ timeMs, frame }) => ({
+    timeMs,
+    labels: [],
+    panes: [{ label, src: frame!.data }],
+  }));
+
   return (
     <div className={ROW_CLASS}>
       <div className={LABEL_CLASS}>Screenshots</div>
@@ -145,19 +159,34 @@ function ScreenshotRow({ timeline, label }: { timeline: TimelineModel; label: st
             title={`On screen at ${formatMs(timeMs)}`}
           >
             {frame ? (
-              <img
-                alt={`${label} at ${formatMs(timeMs)}`}
-                src={frame.data}
-                loading="lazy"
-                decoding="async"
-                className="size-full object-cover object-top"
-              />
+              <button
+                type="button"
+                aria-haspopup="dialog"
+                aria-label={`Open full screen: ${label} at ${formatMs(timeMs)}`}
+                onClick={() => setOpenIndex(painted.findIndex((entry) => entry.timeMs === timeMs))}
+                className={cn("block size-full", ZOOM_TRIGGER_CLASS)}
+              >
+                <img
+                  alt={`${label} at ${formatMs(timeMs)}`}
+                  src={frame.data}
+                  loading="lazy"
+                  decoding="async"
+                  className="size-full object-cover object-top"
+                />
+              </button>
             ) : (
               <span className="sr-only">Nothing painted at {formatMs(timeMs)}</span>
             )}
           </li>
         ))}
       </ol>
+      <FilmstripViewer
+        title={`${label} screenshots`}
+        frames={viewerFrames}
+        index={openIndex}
+        onIndexChange={setOpenIndex}
+        onClose={() => setOpenIndex(null)}
+      />
     </div>
   );
 }
