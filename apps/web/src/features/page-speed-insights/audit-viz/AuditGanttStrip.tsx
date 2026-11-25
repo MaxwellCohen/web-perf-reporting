@@ -39,6 +39,41 @@ function rowsFromItems(
     .slice(0, opts.limit);
 }
 
+/** Label, track and duration columns, shared by the bar rows and the axis so they line up. */
+const GANTT_GRID = "grid grid-cols-[minmax(0,11rem)_minmax(0,1fr)_3.5rem] items-center gap-2";
+const TICK_COUNT = 5;
+
+/** Time scale under a group's bars: evenly spaced ticks from the first task start to the last task end. */
+function GanttAxis({ minStart, range }: { minStart: number; range: number }) {
+  return (
+    <div className={GANTT_GRID} data-testid="gantt-axis">
+      <p className="text-[11px] text-muted-foreground">Time since page load started</p>
+      <div className="relative h-5 border-t border-border">
+        {Array.from({ length: TICK_COUNT }, (_, index) => {
+          const fraction = index / (TICK_COUNT - 1);
+          const isFirst = index === 0;
+          const isLast = index === TICK_COUNT - 1;
+          return (
+            <span
+              key={index}
+              className={cn(
+                "absolute top-0 border-l border-border pt-1 pl-1 font-mono text-[11px] leading-none tabular-nums text-muted-foreground",
+                isLast && "-translate-x-full border-r border-l-0 pr-1 pl-0",
+                // A narrow track only has room for the start, middle and end.
+                !isFirst && !isLast && index % 2 === 1 && "hidden sm:block",
+              )}
+              style={{ left: `${fraction * 100}%` }}
+            >
+              {formatMs(minStart + fraction * range)}
+            </span>
+          );
+        })}
+      </div>
+      <span />
+    </div>
+  );
+}
+
 export function AuditGanttStrip({
   rows,
   labelKeys = ["name", "url"],
@@ -75,6 +110,10 @@ export function AuditGanttStrip({
   return (
     <div className="w-full min-w-0 space-y-4">
       {title ? <p className="text-sm font-medium text-muted-foreground">{title}</p> : null}
+      <p className="text-xs text-muted-foreground">
+        Each bar shows when the task ran and how long it took. The number on the right is its
+        duration.
+      </p>
       {groups.map((group) => {
         const minStart = Math.min(...group.items.map((item) => item.start));
         const maxEnd = Math.max(...group.items.map((item) => item.end), minStart + 1);
@@ -92,10 +131,7 @@ export function AuditGanttStrip({
                 const left = ((item.start - minStart) / range) * 100;
                 const width = Math.max((item.duration / range) * 100, 0.4);
                 return (
-                  <li
-                    key={`${group.reportLabel}-${item.id}-${item.label}`}
-                    className="grid grid-cols-[minmax(0,11rem)_minmax(0,1fr)_auto] items-center gap-2"
-                  >
+                  <li key={`${group.reportLabel}-${item.id}-${item.label}`} className={GANTT_GRID}>
                     <p className="truncate text-xs" title={item.label}>
                       {item.label.startsWith("http") ? shortUrl(item.label) : item.label}
                     </p>
@@ -106,13 +142,14 @@ export function AuditGanttStrip({
                         title={`${formatMs(item.start)} → ${formatMs(item.end)} (${formatMs(item.duration)})`}
                       />
                     </div>
-                    <p className="font-mono text-[11px] tabular-nums text-muted-foreground">
+                    <p className="text-right font-mono text-[11px] tabular-nums text-muted-foreground">
                       {formatMs(item.duration)}
                     </p>
                   </li>
                 );
               })}
             </ul>
+            <GanttAxis minStart={minStart} range={range} />
           </div>
         );
       })}
