@@ -13,10 +13,8 @@ vi.mock("@/components/common/PageSpeedGaugeChart", () => ({
 }));
 
 vi.mock("@/features/page-speed-insights/lh-categories/table/RenderNode", () => ({
-  NodeComponent: ({ item, device }: { item: { nodeLabel?: string }; device: string }) => (
-    <div data-testid="lcp-node">
-      {device}: {item.nodeLabel}
-    </div>
+  RenderNodeImage: ({ device }: { device: string }) => (
+    <div data-testid="lcp-node-image">{device}</div>
   ),
 }));
 
