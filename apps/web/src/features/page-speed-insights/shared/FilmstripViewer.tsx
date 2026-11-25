@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
+import { FULLSCREEN_DIALOG_CLASS } from "@/features/page-speed-insights/shared/ZoomableImage";
 import { cn } from "@/lib/utils";
 
 type FilmstripViewerPane = {
@@ -107,10 +108,7 @@ export function FilmstripViewer({
         onClose();
       }}
     >
-      <DialogContent
-        className="flex h-[95dvh] w-[96vw] max-w-[96vw] flex-col gap-3 p-3 sm:p-5"
-        onKeyDown={handleKeyDown}
-      >
+      <DialogContent className={FULLSCREEN_DIALOG_CLASS} onKeyDown={handleKeyDown}>
         {frame ? (
           <>
             <header className="flex flex-wrap items-baseline gap-x-3 gap-y-1 pr-8">
@@ -164,7 +162,7 @@ export function FilmstripViewer({
                         <img
                           src={pane.src}
                           alt={`${pane.label ?? title} at ${formatMs(frame.timeMs)}`}
-                          className="max-h-full max-w-full object-contain shadow-sm"
+                          className="size-full object-contain"
                           decoding="async"
                         />
                       ) : (

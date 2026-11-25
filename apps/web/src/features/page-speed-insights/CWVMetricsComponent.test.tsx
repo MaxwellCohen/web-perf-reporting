@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 let pageSpeedItems: unknown[] = [];
@@ -34,6 +34,7 @@ vi.mock("@/features/page-speed-insights/MetricCauseCard", () => ({
 
 vi.mock("lucide-react", () => ({
   ChevronDown: () => <span data-testid="chevron" />,
+  X: () => <span data-testid="close-icon" />,
 }));
 
 vi.mock("@/components/ui/accordion", () => {
@@ -520,6 +521,7 @@ describe("CWVMetricsComponent", () => {
 
     expect(screenshot?.textContent).toContain("Screenshot at FCP");
     expect(image).toHaveAttribute("src", "data:image/jpeg;base64,paint");
+    expect(screen.queryByRole("dialog")).toBeNull();
     await waitFor(() => {
       expect(
         section?.querySelector('[data-testid="cause-render-blocking-insight"]'),

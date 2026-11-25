@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { FcpScreenshotCard } from "@/features/page-speed-insights/FcpScreenshotCard";
 
@@ -35,5 +35,15 @@ describe("FcpScreenshotCard", () => {
 
     expect(screen.getByText("Mobile")).toBeInTheDocument();
     expect(screen.getByText("Desktop")).toBeInTheDocument();
+  });
+
+  it("opens the screenshot full screen on click", () => {
+    render(<FcpScreenshotCard screenshots={[shot]} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Open full screen: Mobile/ }));
+
+    const dialog = screen.getByRole("dialog");
+    expect(dialog).toHaveTextContent("Mobile at First Contentful Paint · frame at 1.25 s");
+    expect(dialog.querySelector("img")).toHaveAttribute("src", shot.data);
   });
 });

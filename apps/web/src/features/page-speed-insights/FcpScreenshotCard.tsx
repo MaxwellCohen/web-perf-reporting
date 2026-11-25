@@ -1,7 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
-
 import { CompareRunsCard } from "@/features/page-speed-insights/shared/CompareRunsCard";
 import { formatMs } from "@/features/page-speed-insights/shared/format";
+import { ZoomableImage } from "@/features/page-speed-insights/shared/ZoomableImage";
 import type { FcpScreenshot } from "@/features/page-speed-insights/fcpScreenshot";
 
 /** A frame this close to FCP is treated as the frame at FCP. */
@@ -24,12 +23,12 @@ function ScreenshotFigure({ shot, showLabel }: { shot: FcpScreenshot; showLabel:
 
   return (
     <figure className="flex min-w-0 items-start gap-4 rounded-lg border bg-muted/40 p-3">
-      <img
-        alt={`${shot.label} at First Contentful Paint, ${formatMs(shot.timing)}`}
+      <ZoomableImage
         src={shot.data}
-        loading="lazy"
-        decoding="async"
-        className="h-auto w-[45%] shrink-0 rounded-md border sm:h-56 sm:w-auto sm:max-w-[55%]"
+        alt={`${shot.label} at First Contentful Paint, ${formatMs(shot.timing)}`}
+        title={`${shot.label} at First Contentful Paint · frame at ${formatMs(shot.timing)}`}
+        className="w-[45%] shrink-0 rounded-md border sm:w-auto sm:max-w-[55%]"
+        imageClassName="h-auto w-full rounded-md sm:h-56 sm:w-auto"
       />
       <figcaption className="flex min-w-0 flex-col gap-3">
         {showLabel ? <span className="text-sm font-semibold">{shot.label}</span> : null}

@@ -1,13 +1,7 @@
 "use client";
 import { useState, useSyncExternalStore } from "react";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { FULLSCREEN_DIALOG_CLASS } from "@/features/page-speed-insights/shared/ZoomableImage";
 import {
   RenderThumbnails,
   type ElementScreenshotRendererProps,
@@ -33,7 +27,7 @@ export function ElementScreenshotRenderer({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <div className="flex cursor-pointer items-center justify-center hover:scale-110 hover:shadow-md">
+        <div className="flex cursor-zoom-in items-center justify-center hover:scale-110 hover:shadow-md">
           {isClient ? (
             <RenderThumbnails
               maxThumbnailSize={maxThumbnailSize}
@@ -43,27 +37,23 @@ export function ElementScreenshotRenderer({
           ) : null}
         </div>
       </DialogTrigger>
-      <DialogContent
-        ref={setDialogEl}
-        className="h-full w-screen max-w-none justify-center md:w-[74vw]"
-      >
-        <DialogTitle>screenshot</DialogTitle>
-        {isClient ? (
-          <RenderThumbnails
-            maxThumbnailSize={{
-              width: dialogEl?.clientWidth || 500,
-              height: dialogEl?.clientHeight || 500,
-            }}
-            screenshot={screenshot}
-            elementRects={elementRects}
-          />
-        ) : null}
-
-        <DialogClose asChild>
-          <Button className="w-17" autoFocus>
-            close
-          </Button>
-        </DialogClose>
+      <DialogContent className={FULLSCREEN_DIALOG_CLASS}>
+        <DialogTitle className="pr-8 text-base sm:text-lg">Screenshot</DialogTitle>
+        <div
+          ref={setDialogEl}
+          className="flex min-h-0 flex-1 items-center justify-center overflow-hidden"
+        >
+          {isClient ? (
+            <RenderThumbnails
+              maxThumbnailSize={{
+                width: dialogEl?.clientWidth || 500,
+                height: dialogEl?.clientHeight || 500,
+              }}
+              screenshot={screenshot}
+              elementRects={elementRects}
+            />
+          ) : null}
+        </div>
       </DialogContent>
     </Dialog>
   );
