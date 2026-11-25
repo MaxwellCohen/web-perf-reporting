@@ -8,6 +8,8 @@ import {
   recommendationsStoryFrom,
   type LargestSaving,
 } from "@/features/page-speed-insights/dashboard-view/recommendations-story/recommendationsStoryModel";
+import { ImpactRanking } from "@/features/page-speed-insights/dashboard-view/recommendations-story/ImpactRanking";
+import { useDashboardSearchState } from "@/features/page-speed-insights/dashboard-view/useDashboardSearch";
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
 import {
   analyzeAudits,
@@ -19,6 +21,8 @@ import {
   useRecommendationFilters,
 } from "@/features/page-speed-insights/RecommendationsSection/RecommendationGroup";
 import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
+import { CompareReportPicker } from "@/features/page-speed-insights/shared/CompareReportPicker";
+import { resolveCompareSelection } from "@/features/page-speed-insights/shared/compareSelection";
 import { FullWidthTables } from "@/features/page-speed-insights/tanstack-table-v9/fullWidthTables";
 import { cn } from "@/lib/utils";
 
@@ -85,6 +89,10 @@ function FixNextList({
 
 export function RecommendationsStory() {
   const items = usePageSpeedItems();
+  const { report: urlReports } = useDashboardSearchState();
+  const labels = items.map((entry) => entry.label);
+  const selectedLabels = resolveCompareSelection(urlReports, labels);
+  const primary = items.find((entry) => entry.label === selectedLabels[0]);
   const { recommendations, story } = useMemo(() => {
     const nextRecommendations = analyzeAudits(items).filter(hasDetails);
     return {
@@ -121,50 +129,54 @@ export function RecommendationsStory() {
 
   return (
     <FullWidthTables>
-      <section aria-label="Recommendations" className="overflow-hidden rounded-xl border bg-card">
-        <div className="space-y-6 p-4 sm:p-6">
-          <header className="max-w-3xl animate-in fade-in slide-in-from-bottom-1 duration-500">
-            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-              What to fix
-            </p>
-            <p className="mt-2 font-mono text-4xl font-semibold tabular-nums tracking-tight">
-              {story.lead.magnitude}
-            </p>
-            <p className="mt-2 text-lg leading-snug">{story.lead.sentence}</p>
-          </header>
-          <FixNextList items={story.largest} expanded={expandedItems} onSelect={openLargest} />
-        </div>
-        <div className="space-y-6 border-t p-4 sm:p-6">
-          <FilterControls
-            categories={f.categories}
-            priorities={f.priorities}
-            selectedCategories={selectedCategories}
-            selectedPriorities={selectedPriorities}
-            onCategoriesChange={f.onCategoriesChange}
-            onPrioritiesChange={f.onPrioritiesChange}
-            filteredCount={f.filtered.length}
-            totalCount={recommendations.length}
-            onToggleAll={f.toggleAll}
-            expandedCount={expandedItems.length}
-            totalFiltered={f.filtered.length}
-          />
-          <RecommendationGroup
-            title="Quick wins"
-            recs={f.filteredQuickWins}
-            items={items}
-            expandedItems={expandedItems}
-          />
-          {f.groups.map(({ category, recs }) => (
+      <div className="space-y-6">
+        <CompareReportPicker labels={labels} selected={selectedLabels} />
+        {primary ? <ImpactRanking key={primary.label} item={primary.item} /> : null}
+        <section aria-label="Recommendations" className="overflow-hidden rounded-xl border bg-card">
+          <div className="space-y-6 p-4 sm:p-6">
+            <header className="max-w-3xl animate-in fade-in slide-in-from-bottom-1 duration-500">
+              <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                What to fix
+              </p>
+              <p className="mt-2 font-mono text-4xl font-semibold tabular-nums tracking-tight">
+                {story.lead.magnitude}
+              </p>
+              <p className="mt-2 text-lg leading-snug">{story.lead.sentence}</p>
+            </header>
+            <FixNextList items={story.largest} expanded={expandedItems} onSelect={openLargest} />
+          </div>
+          <div className="space-y-6 border-t p-4 sm:p-6">
+            <FilterControls
+              categories={f.categories}
+              priorities={f.priorities}
+              selectedCategories={selectedCategories}
+              selectedPriorities={selectedPriorities}
+              onCategoriesChange={f.onCategoriesChange}
+              onPrioritiesChange={f.onPrioritiesChange}
+              filteredCount={f.filtered.length}
+              totalCount={recommendations.length}
+              onToggleAll={f.toggleAll}
+              expandedCount={expandedItems.length}
+              totalFiltered={f.filtered.length}
+            />
             <RecommendationGroup
-              key={category}
-              title={category}
-              recs={recs}
+              title="Quick wins"
+              recs={f.filteredQuickWins}
               items={items}
               expandedItems={expandedItems}
             />
-          ))}
-        </div>
-      </section>
+            {f.groups.map(({ category, recs }) => (
+              <RecommendationGroup
+                key={category}
+                title={category}
+                recs={recs}
+                items={items}
+                expandedItems={expandedItems}
+              />
+            ))}
+          </div>
+        </section>
+      </div>
     </FullWidthTables>
   );
 }

@@ -9,6 +9,7 @@ let searchState = {
   categories: [] as string[],
   priorities: [] as string[],
   expanded: [] as string[],
+  report: [] as string[],
 };
 const patchDashboardSearch = vi.fn<(patch: Record<string, unknown>) => void>();
 
@@ -75,12 +76,12 @@ describe("RecommendationsStory", () => {
   afterEach(() => {
     items = [];
     mockRecommendations = [];
-    searchState = { categories: [], priorities: [], expanded: [] };
+    searchState = { categories: [], priorities: [], expanded: [], report: [] };
     patchDashboardSearch.mockClear();
   });
 
   it("renders lead magnitude and fix-next list", () => {
-    items = [{} as InsightsContextItem];
+    items = [{ label: "Mobile", item: {} } as InsightsContextItem];
     mockRecommendations = sampleRecommendations();
     const { container } = render(<RecommendationsStory />);
 
@@ -93,7 +94,7 @@ describe("RecommendationsStory", () => {
   });
 
   it("expands a fix-next recommendation", () => {
-    items = [{} as InsightsContextItem];
+    items = [{ label: "Mobile", item: {} } as InsightsContextItem];
     mockRecommendations = sampleRecommendations();
     const { container } = render(<RecommendationsStory />);
     const first = container.querySelector('[aria-label="Fix next"] button');
@@ -106,7 +107,7 @@ describe("RecommendationsStory", () => {
   });
 
   it("shows empty copy when there are no recommendations", () => {
-    items = [{} as InsightsContextItem];
+    items = [{ label: "Mobile", item: {} } as InsightsContextItem];
     mockRecommendations = [];
     const { container } = render(<RecommendationsStory />);
     expect(container.textContent).toContain("This report has no recommendations.");
