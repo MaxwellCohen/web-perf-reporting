@@ -1,4 +1,5 @@
 "use client";
+import { ReportHeading } from "@/features/page-speed-insights/shared/ReportColumns";
 /* eslint-disable @next/next/no-img-element */
 import { AuditDetailFilmstrip } from "@/lib/schema";
 import { useState } from "react";
@@ -38,8 +39,8 @@ export function Timeline({ timeline, device, markers = [] }: TimelineProps) {
   if (!timeline?.items?.length) return null;
 
   return (
-    <div className="px-4">
-      <h3 className="text-lg font-bold">{device ? `${device} - ` : ""} Timeline</h3>
+    <div className="min-w-0">
+      {device ? <ReportHeading>{device}</ReportHeading> : null}
       <div className="mt-3 flex flex-row gap-2 align-top overflow-x-auto pb-2">
         {timeline.items.map((item, i) => (
           <div className="shrink-0" key={`${i}-${item.timestamp}`}>

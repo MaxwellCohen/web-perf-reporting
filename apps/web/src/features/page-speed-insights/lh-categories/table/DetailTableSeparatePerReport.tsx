@@ -1,5 +1,7 @@
 "use client";
+import { ReportColumns, ReportHeading } from "@/features/page-speed-insights/shared/ReportColumns";
 import { OpportunityItem, TableItem } from "@/lib/schema";
+import { cn } from "@/lib/utils";
 import { DetailTableItem } from "@/features/page-speed-insights/lh-categories/table/detailTableShared";
 import {
   Accordion,
@@ -12,7 +14,6 @@ import { TableCard } from "@/features/page-speed-insights/shared/TableCard";
 import {
   compareReportLabels,
   formatReportTableTitle,
-  splitReportLabel,
 } from "@/features/page-speed-insights/shared/reportLabels";
 import { useStandardTable } from "@/features/page-speed-insights/tanstack-table-v9/useStandardTable";
 import type { StockAnyColumnDef } from "@/features/page-speed-insights/shared/tanstackStockTypes";
@@ -61,27 +62,13 @@ function ReportTableHeading({
   reportLabel: string;
   itemCount: number;
 }) {
-  const { run, device } = splitReportLabel(reportLabel);
   return (
-    <div
-      className="flex flex-wrap items-center gap-2 text-left"
-      title={formatReportTableTitle(title, reportLabel, itemCount)}
-    >
-      {run ? <LabelChip name="Run" value={run} /> : null}
-      <LabelChip name="Device" value={device} />
-      <span className="text-sm text-muted-foreground">
+    <ReportHeading className="text-left">
+      <span title={formatReportTableTitle(title, reportLabel, itemCount)}>{reportLabel}</span>
+      <span className="ml-2 font-normal tracking-normal normal-case">
         {itemCount} {itemCount === 1 ? "item" : "items"}
       </span>
-    </div>
-  );
-}
-
-function LabelChip({ name, value }: { name: string; value: string }) {
-  return (
-    <span className="inline-flex items-center gap-1 rounded-md border bg-muted/30 px-2 py-0.5 text-sm">
-      <span className="text-muted-foreground">{name}</span>
-      <span className="font-semibold">{value}</span>
-    </span>
+    </ReportHeading>
   );
 }
 
@@ -104,12 +91,10 @@ export function DetailTableSeparatePerReport({
 
   if (embedded) {
     return (
-      <div className="space-y-4">
+      <ReportColumns>
         {sortedReports.map(({ reportLabel, reportRows, data }) => (
-          <div key={reportLabel}>
-            <h5 className="mb-2">
-              <ReportTableHeading title={title} reportLabel={reportLabel} itemCount={data.length} />
-            </h5>
+          <div key={reportLabel} className="min-w-0 space-y-2">
+            <ReportTableHeading title={title} reportLabel={reportLabel} itemCount={data.length} />
             <ReportTable
               reportLabel={reportLabel}
               data={data}
@@ -118,7 +103,7 @@ export function DetailTableSeparatePerReport({
             />
           </div>
         ))}
-      </div>
+      </ReportColumns>
     );
   }
 
@@ -129,10 +114,21 @@ export function DetailTableSeparatePerReport({
     .map(({ reportLabel }) => accordionValue(reportLabel));
 
   return (
-    <Accordion type="multiple" defaultValue={openByDefault} className="w-full">
+    <Accordion
+      type="multiple"
+      defaultValue={openByDefault}
+      className={cn(
+        "grid w-full grid-cols-1 items-start gap-x-4",
+        sortedReports.length > 1 && "lg:grid-cols-2",
+      )}
+    >
       {sortedReports.map(({ reportLabel, reportRows, data }) => {
         return (
-          <AccordionItem key={accordionValue(reportLabel)} value={accordionValue(reportLabel)}>
+          <AccordionItem
+            key={accordionValue(reportLabel)}
+            value={accordionValue(reportLabel)}
+            className="min-w-0"
+          >
             <AccordionTrigger>
               <ReportTableHeading title={title} reportLabel={reportLabel} itemCount={data.length} />
             </AccordionTrigger>

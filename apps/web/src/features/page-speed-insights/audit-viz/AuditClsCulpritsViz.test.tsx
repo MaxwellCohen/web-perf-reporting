@@ -149,8 +149,8 @@ describe("AuditClsCulpritsViz", () => {
       />,
     );
 
-    const mobileSection = container.querySelector('[aria-label="Mobile layout shift culprits"]');
-    const desktopSection = container.querySelector('[aria-label="Desktop layout shift culprits"]');
+    const mobileSection = container.querySelector('[aria-label="Mobile"]');
+    const desktopSection = container.querySelector('[aria-label="Desktop"]');
     expect(mobileSection).not.toBeNull();
     expect(desktopSection).not.toBeNull();
     expect(mobileSection?.textContent).toContain("Mobile hero");

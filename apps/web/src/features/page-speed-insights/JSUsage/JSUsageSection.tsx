@@ -10,7 +10,7 @@ export function JSUsageAccordion({ treeData, label }: { treeData: TreeMapData; l
   const nodes = treeData.nodes.map(flattenTreeMapNode);
 
   return (
-    <Details className="col-span-1 w-full min-w-0 lg:col-span-full">
+    <Details className="w-full min-w-0">
       <summary className=" flex flex-col gap-2">
         <div className={accordionSectionTitleClassName}>
           {`JS Usage Table`}

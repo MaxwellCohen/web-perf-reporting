@@ -1,3 +1,8 @@
+import {
+  ReportColumn,
+  ReportColumns,
+  ReportHeading,
+} from "@/features/page-speed-insights/shared/ReportColumns";
 import { useIsEmbeddedDetails } from "@/features/page-speed-insights/lh-categories/EmbeddedDetails";
 import { usePageSpeedItems } from "@/features/page-speed-insights/PageSpeedContext";
 import { AccordionItem, AccordionContent } from "@/components/ui/accordion";
@@ -26,12 +31,14 @@ export function RenderNetworkDependencyTree() {
     return <NetworkDependencyTreeSection key={label} tree={tree} label={label} />;
   });
 
-  if (embedded) return <div className="space-y-4">{sections}</div>;
+  if (embedded) return <ReportColumns>{sections}</ReportColumns>;
 
   return (
     <AccordionItem value={"networkDependencyTree"}>
       <AccordionSectionTitleTrigger>Network Dependency Tree</AccordionSectionTitleTrigger>
-      <AccordionContent>{sections}</AccordionContent>
+      <AccordionContent>
+        <ReportColumns>{sections}</ReportColumns>
+      </AccordionContent>
     </AccordionItem>
   );
 }
@@ -55,20 +62,19 @@ function NetworkDependencyTreeSection({ tree, label }: { tree: NetworkTreeValue;
 
   if (embedded) {
     return (
-      <div className="space-y-2">
-        <div className="text-sm font-medium">
-          Network dependency tree for {label}
-          {tree.longestChain ? ` · longest chain ${formatMs(tree.longestChain.duration)}` : ""}
-        </div>
+      <ReportColumn
+        label={label}
+        meta={tree.longestChain ? `longest chain ${formatMs(tree.longestChain.duration)}` : null}
+      >
         {treeView}
-      </div>
+      </ReportColumn>
     );
   }
 
   return (
-    <Details className="flex flex-col gap-2 print:border-0">
+    <Details className="flex min-w-0 flex-col gap-2 print:border-0">
       <summary className="flex flex-col gap-2">
-        <div className="text-lg font-bold">Network Dependency Tree for {label}</div>
+        <ReportHeading>{label}</ReportHeading>
         {tree.longestChain && (
           <div className="text-sm">
             Longest Chain Duration: {formatMs(tree.longestChain.duration)}

@@ -35,7 +35,9 @@ describe("RenderCriticalChainData", () => {
         },
       },
     };
-    const { container } = render(<RenderCriticalChainData mobileDetails={mobileDetails as any} />);
+    const { container } = render(
+      <RenderCriticalChainData reports={[{ label: "Mobile", details: mobileDetails as any }]} />,
+    );
     expect(container.textContent).toContain("Critical Request Chains");
     expect(container.textContent).toContain("Mobile");
     expect(container.querySelector('[data-testid="tree-view"]')).toBeTruthy();
@@ -56,7 +58,7 @@ describe("RenderCriticalChainData", () => {
       },
     };
     const { container } = render(
-      <RenderCriticalChainData desktopDetails={desktopDetails as any} />,
+      <RenderCriticalChainData reports={[{ label: "Desktop", details: desktopDetails as any }]} />,
     );
     expect(container.textContent).toContain("Desktop");
   });
@@ -72,17 +74,18 @@ describe("RenderCriticalChainData", () => {
     };
     const { container } = render(
       <RenderCriticalChainData
-        mobileDetails={mobileDetails as any}
-        desktopDetails={desktopDetails as any}
+        reports={[
+          { label: "Mobile", details: mobileDetails as any },
+          { label: "Desktop", details: desktopDetails as any },
+        ]}
       />,
     );
     expect(container.textContent).toContain("Mobile");
     expect(container.textContent).toContain("Desktop");
   });
 
-  it("renders nothing for chains when neither has chains", () => {
-    const { container } = render(<RenderCriticalChainData />);
-    expect(container.textContent).toContain("Critical Request Chains");
-    expect(container.querySelector("details")).toBeTruthy();
+  it("renders nothing when no report has chains", () => {
+    const { container } = render(<RenderCriticalChainData reports={[{ label: "Mobile" }]} />);
+    expect(container.firstChild).toBeNull();
   });
 });

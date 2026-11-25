@@ -1,3 +1,4 @@
+import { ReportColumn, ReportColumns } from "@/features/page-speed-insights/shared/ReportColumns";
 import { IssuesFoundTable } from "@/features/page-speed-insights/RecommendationsSection/IssuesFoundTable";
 import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
 import { shouldShowSeparateTablesPerReport } from "@/features/page-speed-insights/auditTableConfig";
@@ -32,31 +33,27 @@ export function RecommendationIssuesSection({
       {shouldShowSeparateTables &&
       recommendation.tableData.itemsByReport &&
       recommendation.tableData.itemsByReport.size > 0 ? (
-        <div className="space-y-4">
+        <ReportColumns>
           {Array.from(recommendation.tableData.itemsByReport.entries())
             .sort(([labelA], [labelB]) => compareReportLabels(labelA, labelB))
             .map(([reportLabel, reportItems]) => (
-              <div key={reportLabel}>
-                <h5 className="mb-2 text-xs font-semibold text-muted-foreground">{reportLabel}</h5>
+              <ReportColumn key={reportLabel} label={reportLabel}>
                 <IssuesFoundTable
                   headings={recommendation.tableData!.headings}
                   items={reportItems}
                   device={reportLabel}
                 />
-              </div>
+              </ReportColumn>
             ))}
-        </div>
+        </ReportColumns>
       ) : (
-        <div>
-          <h5 className="mb-2 text-xs font-semibold text-muted-foreground">
-            {getCombinedReportLabel(reportLabels)}
-          </h5>
+        <ReportColumn label={getCombinedReportLabel(reportLabels)}>
           <IssuesFoundTable
             headings={recommendation.tableData.headings}
             items={recommendation.tableData.items}
             device={reportLabels[0] ?? getCombinedReportLabel(reportLabels)}
           />
-        </div>
+        </ReportColumn>
       )}
     </div>
   );

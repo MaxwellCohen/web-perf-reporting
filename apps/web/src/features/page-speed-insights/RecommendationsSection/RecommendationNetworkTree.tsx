@@ -1,3 +1,4 @@
+import { ReportColumns, ReportHeading } from "@/features/page-speed-insights/shared/ReportColumns";
 import { TreeView } from "@/components/ui/tree-view";
 import { Details } from "@/components/ui/accordion";
 import type { Recommendation } from "@/features/page-speed-insights/RecommendationsSection/types";
@@ -33,32 +34,38 @@ export function RecommendationNetworkTree({
   return (
     <div className="mt-4">
       <h4 className="mb-2 text-sm font-semibold">Network Dependency Tree:</h4>
-      {networkTrees.map(({ tree, label }) => {
-        if (!tree || Object.keys(tree.chains).length === 0) {
-          return null;
+      <ReportColumns
+        count={
+          networkTrees.filter(({ tree }) => tree && Object.keys(tree.chains).length > 0).length
         }
+      >
+        {networkTrees.map(({ tree, label }) => {
+          if (!tree || Object.keys(tree.chains).length === 0) {
+            return null;
+          }
 
-        const treeData = networkTreeToTreeData(tree.chains, true);
+          const treeData = networkTreeToTreeData(tree.chains, true);
 
-        return (
-          <Details key={label} className="mb-4 flex flex-col gap-2 rounded-lg border p-4">
-            <summary className="flex cursor-pointer flex-col gap-2">
-              <div className="text-sm font-semibold">{label}</div>
-              {tree.longestChain ? (
-                <div className="text-xs text-muted-foreground">
-                  Longest Chain Duration: {formatMs(tree.longestChain.duration)}
+          return (
+            <Details key={label} className="flex min-w-0 flex-col gap-2 rounded-lg border p-4">
+              <summary className="flex cursor-pointer flex-col gap-2">
+                <ReportHeading>{label}</ReportHeading>
+                {tree.longestChain ? (
+                  <div className="text-xs text-muted-foreground">
+                    Longest Chain Duration: {formatMs(tree.longestChain.duration)}
+                  </div>
+                ) : null}
+              </summary>
+              <div className="lh-crc mt-2 w-full overflow-x-auto">
+                <div className="lh-crc-initial-nav mb-1 font-mono text-[11px] tracking-[0.14em] text-muted-foreground uppercase">
+                  Initial Navigation
                 </div>
-              ) : null}
-            </summary>
-            <div className="lh-crc mt-2 w-full overflow-x-auto">
-              <div className="lh-crc-initial-nav mb-1 font-mono text-[11px] tracking-[0.14em] text-muted-foreground uppercase">
-                Initial Navigation
+                <TreeView data={treeData} expandAll />
               </div>
-              <TreeView data={treeData} expandAll />
-            </div>
-          </Details>
-        );
-      })}
+            </Details>
+          );
+        })}
+      </ReportColumns>
     </div>
   );
 }
