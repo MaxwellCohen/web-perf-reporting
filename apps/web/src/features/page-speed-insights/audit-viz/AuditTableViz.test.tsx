@@ -109,6 +109,19 @@ describe("AuditTableViz", () => {
     expect(container.firstChild).toBeNull();
   });
 
+  it("renders no chart for bootup-time (table only)", () => {
+    const { container } = render(
+      <AuditTableViz
+        rows={[
+          row("bootup-time", [
+            { url: "https://example.com/app.js", scripting: 120, scriptParseCompile: 30 },
+          ]),
+        ]}
+      />,
+    );
+    expect(container.firstChild).toBeNull();
+  });
+
   it("renders no chart for cache-insight (table only)", () => {
     const { container } = render(
       <AuditTableViz
@@ -229,7 +242,6 @@ describe("AuditTableViz", () => {
     ["image-delivery-insight", "ImageDeliveryViz"],
     ["lcp-breakdown-insight", "AuditLcpPhaseViz"],
     ["inp-breakdown-insight", "AuditInpPhaseViz"],
-    ["bootup-time", "BootupTimeViz"],
     ["long-tasks", "LongTasksViz"],
     ["main-thread-tasks", "MainThreadTasksViz"],
     ["user-timings", "UserTimingsViz"],
