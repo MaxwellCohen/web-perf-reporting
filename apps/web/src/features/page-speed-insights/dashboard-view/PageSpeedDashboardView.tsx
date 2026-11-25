@@ -23,6 +23,19 @@ const TABS = [
     }),
   },
   {
+    value: "diagnose",
+    label: "Diagnose",
+    Panel: dynamic(
+      () =>
+        import("@/features/page-speed-insights/dashboard-view/investigate/DiagnoseTabPanel").then(
+          (m) => m.DiagnoseTabPanel,
+        ),
+      {
+        loading: () => <DashboardPanelFallback label="diagnosis" />,
+      },
+    ),
+  },
+  {
     value: "timeline",
     label: "Timeline",
     Panel: dynamic(
