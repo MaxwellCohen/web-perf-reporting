@@ -1,3 +1,4 @@
+import type { SyntheticEvent } from "react";
 import ReactMarkdown from "react-markdown";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { EmbeddedDetails } from "@/features/page-speed-insights/lh-categories/EmbeddedDetails";
@@ -72,6 +73,8 @@ export function MetricCauseCard({
   sources = [],
   peerMaxSavings = 0,
   plain = false,
+  open,
+  onOpenChange,
 }: {
   cause: CauseAuditEntry;
   acronym: CwvMetricAcronym;
@@ -80,6 +83,9 @@ export function MetricCauseCard({
   peerMaxSavings?: number;
   /** Row inside the related-audits panel, without its own card chrome. */
   plain?: boolean;
+  /** Controlled open state; leave out to let the card manage its own. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const isMainThreadTasks = cause.auditId === "main-thread-tasks";
   const title = isMainThreadTasks ? "Main-thread tasks" : cause.title;
@@ -115,9 +121,16 @@ export function MetricCauseCard({
   const summaryClassName =
     "cursor-pointer list-none marker:content-none [&::-webkit-details-marker]:hidden";
 
+  const detailsProps = {
+    open,
+    onToggle: (event: SyntheticEvent<HTMLDetailsElement>) => {
+      if (event.currentTarget.open !== open) onOpenChange?.(event.currentTarget.open);
+    },
+  };
+
   if (plain) {
     return (
-      <details className="group px-4 py-4">
+      <details className="group px-4 py-4" {...detailsProps}>
         <summary className={summaryClassName}>{header}</summary>
         <div className="pt-3">{body}</div>
       </details>
@@ -126,7 +139,7 @@ export function MetricCauseCard({
 
   return (
     <Card className="md:col-span-2 lg:col-span-3 shadow-none">
-      <details className="group">
+      <details className="group" {...detailsProps}>
         <summary className={cn(summaryClassName, "space-y-0 p-4")}>{header}</summary>
         <CardContent className="p-4 pt-0">{body}</CardContent>
       </details>

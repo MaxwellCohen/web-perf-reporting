@@ -9,10 +9,6 @@ import { HorizontalScoreChart } from "@/components/common/PageSpeedGaugeChart";
 import { Card, CardTitle } from "@/components/ui/card";
 import { ScoreDisplay } from "@/features/page-speed-insights/ScoreDisplay";
 import { DashboardPanelFallback } from "@/features/page-speed-insights/dashboard-view/DashboardPanelFallback";
-import {
-  type InsightsContextItem,
-  usePageSpeedItems,
-} from "@/features/page-speed-insights/PageSpeedContext";
 import { CHART_SERIES_COLORS } from "@/features/page-speed-insights/shared/horizontalBarChart";
 import {
   FullWidthRow,
@@ -30,12 +26,21 @@ import { collectLcpElements } from "@/features/page-speed-insights/lcpElement";
 import {
   collectCauseAuditsForMetric,
   METRIC_AUDIT_IDS,
-  METRIC_AUDIT_TO_ACRONYM,
   type CauseAuditEntry,
+  type CwvMetricAcronym,
   type MetricAuditId,
   type MetricAuditSource,
 } from "@/features/page-speed-insights/metricCauseAudits";
+import {
+  causeKey,
+  metricSectionId,
+  metricSectionKey,
+  type OverviewMetric,
+} from "@/features/page-speed-insights/dashboard-view/overview/overviewModel";
+import { useOverviewOpen } from "@/features/page-speed-insights/dashboard-view/overview/overviewOpen";
+import { useOverviewModel } from "@/features/page-speed-insights/dashboard-view/overview/useOverviewModel";
 import type { AuditResultsRecord } from "@/lib/schema";
+import { cn } from "@/lib/utils";
 
 const MetricCauseCard = dynamic(
   () => import("@/features/page-speed-insights/MetricCauseCard").then((mod) => mod.MetricCauseCard),
@@ -53,28 +58,6 @@ type MetricSnapshot = {
   description?: string;
   auditItems: MetricAuditEntry[];
 };
-
-type MetricAuditInsight = InsightsContextItem & {
-  item: InsightsContextItem["item"] & {
-    lighthouseResult: {
-      audits: AuditResultsRecord;
-      categoryGroups: NonNullable<
-        InsightsContextItem["item"]["lighthouseResult"]["categoryGroups"]
-      >;
-    };
-  };
-};
-
-function hasMetricAudits(insight: InsightsContextItem): insight is MetricAuditInsight {
-  return !!insight.item.lighthouseResult?.audits && !!insight.item.lighthouseResult?.categoryGroups;
-}
-
-function collectMetricSources(items: InsightsContextItem[]): MetricAuditSource[] {
-  return items.filter(hasMetricAudits).map(({ item, label }) => ({
-    audits: item.lighthouseResult.audits,
-    label,
-  }));
-}
 
 function readMetricSnapshot(auditId: MetricAuditId, sources: MetricAuditSource[]): MetricSnapshot {
   const auditItems: MetricAuditEntry[] = sources.flatMap(({ audits, label }) => {
@@ -307,113 +290,146 @@ function CauseAuditPanel({
   sources,
 }: {
   causes: CauseAuditEntry[];
-  acronym: (typeof METRIC_AUDIT_TO_ACRONYM)[MetricAuditId];
+  acronym: CwvMetricAcronym;
   sources: MetricAuditSource[];
 }) {
+  const open = useOverviewOpen();
   if (!causes.length) return null;
 
   const peakSavings = causes.reduce((max, cause) => Math.max(max, cause.maxSavings), 0);
-  const ordered = [...causes].sort((a, b) => b.maxSavings - a.maxSavings);
 
   return (
     <div className="divide-y overflow-hidden rounded-xl border bg-card md:col-span-2 lg:col-span-3">
-      {ordered.map((cause) => (
-        <MetricCauseCard
-          key={cause.auditId}
-          cause={cause}
-          acronym={acronym}
-          sources={sources}
-          peerMaxSavings={peakSavings}
-          plain
-        />
-      ))}
+      {causes.map((cause) => {
+        const key = causeKey(cause.auditId);
+        return (
+          <div
+            key={cause.auditId}
+            id={key}
+            className={cn(
+              "scroll-mt-20",
+              open?.highlighted === key && "ring-2 ring-foreground ring-inset",
+            )}
+          >
+            <MetricCauseCard
+              cause={cause}
+              acronym={acronym}
+              sources={sources}
+              peerMaxSavings={peakSavings}
+              plain
+              // Outside the Overview the card keeps its own open state.
+              open={open?.isOpen(key)}
+              onOpenChange={open ? (next) => open.setOpen(key, next) : undefined}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }
 
-function MetricCauseSection({
-  auditId,
-  sources,
-  hasContext = false,
-  children,
+/** Causes this metric shares with an earlier one: a link to the full card, not a second copy. */
+function SharedCauseLinks({
+  refs,
+  metrics,
 }: {
-  auditId: MetricAuditId;
-  sources: MetricAuditSource[];
-  /** Unique context (FCP frame, LCP element) exists even when there are no cause audits. */
-  hasContext?: boolean;
-  children?: ReactNode;
+  refs: OverviewMetric["refs"];
+  metrics: OverviewMetric[];
 }) {
-  const causes = collectCauseAuditsForMetric(auditId, sources);
-  const { title, auditItems } = readMetricSnapshot(auditId, sources);
-  if (!causes.length && !hasContext) {
-    return null;
-  }
-
-  const acronym = METRIC_AUDIT_TO_ACRONYM[auditId];
+  const open = useOverviewOpen();
+  if (!refs.length) return null;
 
   return (
-    <AccordionItem value={`cwv-cause-${auditId}`} className="print:border-0">
+    <ul className="flex flex-col gap-2 md:col-span-2 lg:col-span-3">
+      {refs.map(({ cause, home }) => {
+        const homeAcronym = metrics.find((metric) => metric.metricId === home)?.acronym;
+        const text = (
+          <>
+            <span className="font-semibold">{cause.title}</span>
+            <span className="text-muted-foreground"> · detailed under {homeAcronym}</span>
+          </>
+        );
+        const className = "block min-h-11 w-full rounded-lg border border-dashed px-4 py-2.5";
+        return (
+          <li key={cause.auditId} className="text-sm">
+            {open ? (
+              <button
+                type="button"
+                className={cn(className, "text-left hover:bg-muted")}
+                onClick={() =>
+                  open.reveal(
+                    [metricSectionKey(home), causeKey(cause.auditId)],
+                    causeKey(cause.auditId),
+                  )
+                }
+              >
+                {text}
+              </button>
+            ) : (
+              <div className={className}>{text}</div>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function MetricCauseSection({
+  metric,
+  metrics,
+  sources,
+  children,
+}: {
+  metric: OverviewMetric;
+  metrics: OverviewMetric[];
+  sources: MetricAuditSource[];
+  /** Context unique to the metric: the FCP frame, the LCP element. */
+  children?: ReactNode;
+}) {
+  const { metricId, causes } = metric;
+  const { title, auditItems } = readMetricSnapshot(metricId, sources);
+  if (!metric.hasSection) return null;
+
+  return (
+    <AccordionItem
+      id={metricSectionId(metricId)}
+      value={metricSectionKey(metricId)}
+      className="scroll-mt-20 print:border-0"
+    >
       <AccordionSectionTitleTrigger>
         <MetricSectionTriggerLabel title={title} auditItems={auditItems} />
       </AccordionSectionTitleTrigger>
       <AccordionContent>
         <SectionGrid>
           <MetricContextStrip
-            auditId={auditId}
+            auditId={metricId}
             auditItems={auditItems}
             causes={causes}
             sources={sources}
           />
           {children}
-          <CauseAuditPanel causes={causes} acronym={acronym} sources={sources} />
+          <CauseAuditPanel causes={metric.own} acronym={metric.acronym} sources={sources} />
+          <SharedCauseLinks refs={metric.refs} metrics={metrics} />
         </SectionGrid>
       </AccordionContent>
     </AccordionItem>
   );
 }
 
-function FirstContentfulPaintSection({ sources }: { sources: MetricAuditSource[] }) {
-  const screenshots = collectFcpScreenshots(sources);
-
-  return (
-    <MetricCauseSection
-      auditId="first-contentful-paint"
-      sources={sources}
-      hasContext={screenshots.length > 0}
-    >
-      <FcpScreenshotCard screenshots={screenshots} />
-    </MetricCauseSection>
-  );
+function metricContext(metricId: MetricAuditId, sources: MetricAuditSource[]): ReactNode {
+  if (metricId === "first-contentful-paint") {
+    return <FcpScreenshotCard screenshots={collectFcpScreenshots(sources)} />;
+  }
+  if (metricId === "largest-contentful-paint") {
+    return <LcpElementSummary elements={collectLcpElements(sources)} />;
+  }
+  return null;
 }
 
-function LargestContentfulPaintSection({ sources }: { sources: MetricAuditSource[] }) {
-  const elements = collectLcpElements(sources);
-
-  return (
-    <MetricCauseSection
-      auditId="largest-contentful-paint"
-      sources={sources}
-      hasContext={elements.length > 0}
-    >
-      <LcpElementSummary elements={elements} />
-    </MetricCauseSection>
-  );
-}
-
-function TotalBlockingTimeSection({ sources }: { sources: MetricAuditSource[] }) {
-  return <MetricCauseSection auditId="total-blocking-time" sources={sources} />;
-}
-
-function CumulativeLayoutShiftSection({ sources }: { sources: MetricAuditSource[] }) {
-  return <MetricCauseSection auditId="cumulative-layout-shift" sources={sources} />;
-}
-
-function SpeedIndexSection({ sources }: { sources: MetricAuditSource[] }) {
-  return <MetricCauseSection auditId="speed-index" sources={sources} />;
-}
-
+/** The causes behind each metric, then the Core Web Vitals summary cards. */
 export function CWVMetricsComponent() {
-  const sources = collectMetricSources(usePageSpeedItems());
+  const { sources, model } = useOverviewModel();
 
   if (!sources.length) {
     return null;
@@ -421,12 +437,17 @@ export function CWVMetricsComponent() {
 
   return (
     <>
+      {model.metrics.map((metric) => (
+        <MetricCauseSection
+          key={metric.metricId}
+          metric={metric}
+          metrics={model.metrics}
+          sources={sources}
+        >
+          {metricContext(metric.metricId, sources)}
+        </MetricCauseSection>
+      ))}
       <CwvMetricsSummary sources={sources} />
-      <FirstContentfulPaintSection sources={sources} />
-      <LargestContentfulPaintSection sources={sources} />
-      <TotalBlockingTimeSection sources={sources} />
-      <CumulativeLayoutShiftSection sources={sources} />
-      <SpeedIndexSection sources={sources} />
     </>
   );
 }
