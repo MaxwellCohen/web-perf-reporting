@@ -15,6 +15,7 @@ import {
   resolveTaskFilterSelection,
   type TaskFilterId,
 } from "./filterTimelineMoments";
+import { ExplainMetric } from "./ExplainMetric";
 import { momentIdPrefixFromLabel } from "./MomentRow";
 import { TaskFilters } from "./TaskFilters";
 import { TimelineLegend } from "./TimelineLegend";
@@ -97,6 +98,9 @@ export function PageLoadTimeline() {
 
   return (
     <div className="flex flex-col gap-4" data-testid="page-load-timeline">
+      <ExplainMetric
+        entries={panes.map((entry) => ({ label: entry.label, load: entry.bundle.load }))}
+      />
       <div
         ref={stickyHeaderRef}
         className="sticky top-0 z-30 -mx-1 flex flex-col gap-2 border-b border-border/80 bg-background/95 px-1 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-background/85"
