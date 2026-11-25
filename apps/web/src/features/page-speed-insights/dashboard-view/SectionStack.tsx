@@ -11,6 +11,11 @@ function sameMembers(left: string[], right: string[]) {
   return right.every((value) => values.has(value));
 }
 
+/** Store the open sections in the URL, leaving it clean while they match the tab default. */
+export function writeOpenSections(next: string[], defaultOpen: string[]) {
+  patchDashboardSearch({ open: sameMembers(next, defaultOpen) ? null : next });
+}
+
 export function SectionStack({
   defaultOpen,
   children,
@@ -25,9 +30,7 @@ export function SectionStack({
     <Accordion
       type="multiple"
       value={value}
-      onValueChange={(next) => {
-        patchDashboardSearch({ open: sameMembers(next, defaultOpen) ? null : next });
-      }}
+      onValueChange={(next) => writeOpenSections(next, defaultOpen)}
     >
       {children}
     </Accordion>

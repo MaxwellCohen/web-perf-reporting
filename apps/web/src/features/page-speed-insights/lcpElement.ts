@@ -4,6 +4,8 @@ import type { MetricAuditSource } from "@/features/page-speed-insights/metricCau
 export type LcpElement = {
   label: string;
   node: NodeValue;
+  /** Largest Contentful Paint, ms from navigation start. */
+  lcpMs?: number;
 };
 
 function isLcpNode(value: unknown): value is NodeValue {
@@ -25,7 +27,12 @@ export function collectLcpElements(sources: MetricAuditSource[]): LcpElement[] {
 
     for (const item of items) {
       if (isLcpNode(item)) {
-        elements.push({ label, node: item });
+        const lcpMs = audits["largest-contentful-paint"]?.numericValue;
+        elements.push({
+          label,
+          node: item,
+          ...(lcpMs != null && Number.isFinite(lcpMs) ? { lcpMs } : {}),
+        });
       }
     }
   }

@@ -152,30 +152,7 @@ function ImageDeliveryViz({ rows }: VizProps) {
   );
 }
 
-// mainthread-work-breakdown is table-only (MainThreadWorkBreakdownTable in DetailTable).
-function BootupTimeViz({ rows }: VizProps) {
-  const points = extractStackedSegmentPoints(rows, {
-    labelKeys: ["url"],
-    segments: [
-      { key: "scripting", valueKeys: ["scripting"] },
-      { key: "scriptParseCompile", valueKeys: ["scriptParseCompile"] },
-    ],
-    limit: 12,
-  });
-  return (
-    <AuditStackedBarChart
-      points={points}
-      segmentOrder={["scripting", "scriptParseCompile"]}
-      segmentLabels={{
-        scripting: "Scripting",
-        scriptParseCompile: "Parse / compile",
-      }}
-      unit="ms"
-      title="JavaScript bootup time"
-    />
-  );
-}
-
+// mainthread-work-breakdown and bootup-time are table-only (their tables carry the numbers).
 function LongTasksViz({ rows }: VizProps) {
   return (
     <AuditGanttStrip
@@ -265,7 +242,6 @@ register(["third-parties-insight", "third-parties-details"], ThirdPartiesViz, "m
 register(["image-delivery-insight"], ImageDeliveryViz, "");
 register(["lcp-breakdown-insight"], AuditLcpPhaseViz);
 register(["inp-breakdown-insight"], AuditInpPhaseViz);
-register(["bootup-time"], BootupTimeViz);
 register(["long-tasks"], LongTasksViz);
 register(["main-thread-tasks"], MainThreadTasksViz);
 register(["user-timings"], UserTimingsViz);
