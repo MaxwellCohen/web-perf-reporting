@@ -5,6 +5,7 @@ import {
   patchDashboardSearch,
   type ResourceStageId,
 } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
+import { CulpritMatrix } from "@/features/page-speed-insights/dashboard-view/resources-story/CulpritMatrix";
 import { PayloadFlow } from "@/features/page-speed-insights/dashboard-view/resources-story/PayloadFlow";
 import { ResourcesComparisonBrief } from "@/features/page-speed-insights/dashboard-view/resources-story/ResourcesComparison";
 import { compareResourcesInvestigations } from "@/features/page-speed-insights/dashboard-view/resources-story/resourcesComparisonModel";
@@ -156,28 +157,42 @@ export function ResourcesStory() {
     focusEvidence();
   }
 
+  const otherEntry = other ? items.find((item) => item.label === other.label) : undefined;
+  const matrix = entry?.item ? (
+    <CulpritMatrix
+      item={entry.item}
+      compare={otherEntry?.item ? { label: otherEntry.label, item: otherEntry.item } : undefined}
+    />
+  ) : null;
+
   if (other) {
     return (
-      <ResourcesComparisonBrief
-        comparison={compareResourcesInvestigations(active, other)}
-        picker={picker}
-        stage={stage}
-        suspectUrl={search.suspect || null}
-        onSelectStage={selectStage}
-        onSelectSuspect={selectSuspect}
-      />
+      <div className="space-y-6">
+        <ResourcesComparisonBrief
+          comparison={compareResourcesInvestigations(active, other)}
+          picker={picker}
+          stage={stage}
+          suspectUrl={search.suspect || null}
+          onSelectStage={selectStage}
+          onSelectSuspect={selectSuspect}
+        />
+        {matrix}
+      </div>
     );
   }
 
   return (
-    <ResourcesInvestigationBrief
-      picker={picker}
-      active={active}
-      stage={stage}
-      suspectUrl={search.suspect || null}
-      entry={entry}
-      onSelectStage={selectStage}
-      onSelectSuspect={selectSuspect}
-    />
+    <div className="space-y-6">
+      <ResourcesInvestigationBrief
+        picker={picker}
+        active={active}
+        stage={stage}
+        suspectUrl={search.suspect || null}
+        entry={entry}
+        onSelectStage={selectStage}
+        onSelectSuspect={selectSuspect}
+      />
+      {matrix}
+    </div>
   );
 }

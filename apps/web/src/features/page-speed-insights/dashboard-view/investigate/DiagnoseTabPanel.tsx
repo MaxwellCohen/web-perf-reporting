@@ -13,6 +13,7 @@ import {
   type Part,
   type PartStatus,
 } from "@/features/page-speed-insights/dashboard-view/investigate/diagnosisModel";
+import { TriageView } from "@/features/page-speed-insights/dashboard-view/investigate/TriageView";
 import { buildFixPrompt } from "@/features/page-speed-insights/dashboard-view/investigate/fixPrompt";
 import { patchDashboardSearch } from "@/features/page-speed-insights/dashboard-view/dashboardSearch";
 import { scoreToneColor } from "@/features/page-speed-insights/dashboard-view/reportScoreSummary";
@@ -247,6 +248,7 @@ export function DiagnoseTabPanel() {
 
   const [metricChoice, setMetricChoice] = useState<string>();
   const [partChoice, setPartChoice] = useState<string>();
+  const [view, setView] = useState<"metric" | "cause">("metric");
 
   if (!diagnosis?.metrics.length) {
     return (
@@ -262,40 +264,63 @@ export function DiagnoseTabPanel() {
   return (
     <section aria-label="Diagnose" className="space-y-4 rounded-xl border bg-card p-4 sm:p-6">
       <CompareReportPicker labels={labels} selected={[first, second].filter(Boolean)} />
-      <nav aria-label="Drill-down" className="text-sm text-muted-foreground">
-        Why is it slow? › <span className="text-foreground">{metric.acronym}</span>
-        {part ? (
-          <>
-            {" › "}
-            <span className="text-foreground">{part.label}</span>
-            {` › ${part.causes.length} ${part.causes.length === 1 ? "cause" : "causes"}`}
-          </>
-        ) : null}
-      </nav>
-      <div className="grid gap-6 lg:grid-cols-3">
-        <MetricColumn
-          metrics={diagnosis.metrics}
-          compare={
-            secondDiagnosis && second ? { label: second, diagnosis: secondDiagnosis } : undefined
-          }
-          selected={metric.acronym}
-          onSelect={(acronym) => {
-            setMetricChoice(acronym);
-            setPartChoice(undefined);
-          }}
-        />
-        <PartColumn metric={metric} selected={part?.id} onSelect={setPartChoice} />
-        <div className="space-y-2">
-          <ColumnHeading>Why, with evidence</ColumnHeading>
-          {part ? (
-            part.causes.map((cause) => (
-              <CauseCard key={cause.id} cause={cause} diagnosis={diagnosis} metric={metric} />
-            ))
-          ) : (
-            <p className="text-sm text-muted-foreground">Pick a part to see its causes.</p>
-          )}
-        </div>
+      <div role="group" aria-label="Diagnose view" className="flex gap-2">
+        {(["metric", "cause"] as const).map((v) => (
+          <Button
+            key={v}
+            type="button"
+            size="sm"
+            variant="outline"
+            aria-pressed={view === v}
+            className={cn(view === v && "border-foreground bg-accent")}
+            onClick={() => setView(v)}
+          >
+            {v === "metric" ? "By metric" : "By cause"}
+          </Button>
+        ))}
       </div>
+      {view === "cause" && primary ? (
+        <TriageView primary={primary} secondary={secondary} />
+      ) : (
+        <>
+          <nav aria-label="Drill-down" className="text-sm text-muted-foreground">
+            Why is it slow? › <span className="text-foreground">{metric.acronym}</span>
+            {part ? (
+              <>
+                {" › "}
+                <span className="text-foreground">{part.label}</span>
+                {` › ${part.causes.length} ${part.causes.length === 1 ? "cause" : "causes"}`}
+              </>
+            ) : null}
+          </nav>
+          <div className="grid gap-6 lg:grid-cols-3">
+            <MetricColumn
+              metrics={diagnosis.metrics}
+              compare={
+                secondDiagnosis && second
+                  ? { label: second, diagnosis: secondDiagnosis }
+                  : undefined
+              }
+              selected={metric.acronym}
+              onSelect={(acronym) => {
+                setMetricChoice(acronym);
+                setPartChoice(undefined);
+              }}
+            />
+            <PartColumn metric={metric} selected={part?.id} onSelect={setPartChoice} />
+            <div className="space-y-2">
+              <ColumnHeading>Why, with evidence</ColumnHeading>
+              {part ? (
+                part.causes.map((cause) => (
+                  <CauseCard key={cause.id} cause={cause} diagnosis={diagnosis} metric={metric} />
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">Pick a part to see its causes.</p>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </section>
   );
 }
